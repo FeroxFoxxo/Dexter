@@ -27,8 +27,8 @@ steps:
   displayName: Restoring Dependencies
   inputs:
     command: 'restore'
+    arguments: '/p:PublishSingleFile=true /p:PublishTrimmed=true'
     feedsToUse: 'select'
-    custom: '/p:PublishSingleFile=true /p:PublishTrimmed=true'
     vstsFeed: 'my-vsts-feed'
 
 - task: DotNetCoreCLI@2
@@ -36,7 +36,6 @@ steps:
   inputs:
     command: 'build'
     projects: '**/*.csproj'
-    custom: '/p:PublishSingleFile=true /p:PublishTrimmed=true'
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
@@ -45,7 +44,6 @@ steps:
     command: publish
     publishWebProjects: False
     arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-    custom: '/p:PublishSingleFile=true /p:PublishTrimmed=true'
     zipAfterPublish: false
 
 - task: PublishBuildArtifacts@1

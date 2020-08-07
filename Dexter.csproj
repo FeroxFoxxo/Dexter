@@ -9,6 +9,9 @@
     <Description>Dexter is USFurries' Bot. Made with love &lt;3</Description>
     <Copyright>© Copyright 2020 USFurries</Copyright>
     <Platforms>AnyCPU;x64</Platforms>
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishTrimmed>true</PublishTrimmed>
+    <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -43,7 +43,7 @@ steps:
     command: publish
     publishWebProjects: False
     arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-    zipAfterPublish: True
+    zipAfterPublish: false
 
 - task: PublishBuildArtifacts@1
   displayName: Send Artifact

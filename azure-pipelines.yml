@@ -26,7 +26,6 @@ steps:
   inputs:
     command: publish
     publishWebProjects: False
-    arguments: '-c Release -r win10-x64 -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true --output $(Build.ArtifactStagingDirectory)'
     zipAfterPublish: False
 
 - task: PublishBuildArtifacts@1

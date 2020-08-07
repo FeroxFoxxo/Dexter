@@ -28,6 +28,7 @@ steps:
   inputs:
     command: 'restore'
     feedsToUse: 'select'
+    custom: '/p:PublishSingleFile=true /p:PublishTrimmed=true'
     vstsFeed: 'my-vsts-feed'
 
 - task: DotNetCoreCLI@2

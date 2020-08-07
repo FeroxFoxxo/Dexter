@@ -5,3 +5,7 @@
 [![GPLv3](https://img.shields.io/badge/License-GNU&nbsp;GPL&nbsp;Version&nbsp;3-blue.svg?style=flat&logo=gnu)](https://github.com/Frostrix/Dexter/blob/master/LICENSE)
 
 💙 **Dexter** is a bot for use in the server [**USFurries**](https://discord.gg/USFurries). Visit the website [**here**](https://us-furries.com).
+
+**Built With:**
+- [.NET 5](https://dotnet.microsoft.com/download/dotnet/5.0)
+- [Discord.NET] (https://github.com/discord-net/Discord.Net)

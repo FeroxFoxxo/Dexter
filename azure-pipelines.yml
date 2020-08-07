@@ -35,8 +35,7 @@ steps:
   inputs:
     command: 'build'
     projects: '**/*.csproj'
-    includesymbols: true
-    includesource: true
+    custom: '/p:PublishSingleFile=true /p:PublishTrimmed=true'
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2

@@ -27,7 +27,7 @@ steps:
   displayName: Publish
   inputs:
     command: publish
-    projects: '**/*.csproj'
+    projects: '**/Dexter.csproj'
     publishWebProjects: False
     arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory) p:PublishSingleFile=true -p:SelfContained=false'
     zipAfterPublish: false

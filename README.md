@@ -7,5 +7,5 @@
 💙 **Dexter** is a bot for use in the server [**USFurries**](https://discord.gg/USFurries). Visit the website [**here**](https://us-furries.com).
 
 **Built With:**
-- [.NET 5](https://dotnet.microsoft.com/download/dotnet/5.0)
-- [Discord.NET] (https://github.com/discord-net/Discord.Net)
+- [.NET 5.0](https://dotnet.microsoft.com/download/dotnet/5.0)
+- [Discord.NET](https://github.com/discord-net/Discord.Net)

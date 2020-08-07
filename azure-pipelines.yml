@@ -28,7 +28,7 @@ steps:
   inputs:
     command: publish
     publishWebProjects: False
-    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory) --self-contained -r linux-x64'
+    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory) --self-contained -r win10-x64'
     zipAfterPublish: false
 
 - task: PublishBuildArtifacts@1

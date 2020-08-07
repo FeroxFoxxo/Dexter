@@ -2,7 +2,7 @@ trigger:
 - master
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'ubuntu-latest'
 
 variables:
   solution: '**/*.sln'
@@ -13,7 +13,7 @@ steps:
 - task: UseDotNet@2
   inputs:
     version: '5.0.x'
-    includePreviewVersions: true # Required for preview versions
+    includePreviewVersions: true
 
 - task: UseDotNet@2
   inputs:

@@ -4,4 +4,4 @@
 [![All Contributors](https://img.shields.io/badge/All_Contributors-1-default.svg?style=flat&logo=github)](https://github.com/Frostrix/Dexter)&nbsp;
 [![GPLv3](https://img.shields.io/badge/License-GNU&nbsp;GPL&nbsp;Version&nbsp;3-blue.svg?style=flat&logo=gnu)](https://github.com/Frostrix/Dexter/blob/master/LICENSE)
 
-💙 **Dexter** is a bot for use in the server [**USFurries**](https://discord.gg/USFurries).
+💙 **Dexter** is a bot for use in the server [**USFurries**](https://discord.gg/USFurries). [**Visit Website**](https://us-furries.com)

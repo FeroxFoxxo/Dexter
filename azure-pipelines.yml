@@ -24,18 +24,11 @@ steps:
     packageType: runtime
 
 - task: DotNetCoreCLI@2
-  displayName: Build
-  inputs:
-    command: 'build'
-    projects: '**/*.csproj'
-    arguments: '--configuration $(BuildConfiguration)'
-
-- task: DotNetCoreCLI@2
   displayName: Publish
   inputs:
     command: publish
     publishWebProjects: False
-    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory) p:PublishSingleFile=true -p:SelfContained=false'
+    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory) p:PublishSingleFile=true'
     zipAfterPublish: false
 
 - task: PublishBuildArtifacts@1

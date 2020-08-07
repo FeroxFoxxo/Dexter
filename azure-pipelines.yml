@@ -35,6 +35,8 @@ steps:
   inputs:
     command: 'build'
     projects: '**/*.csproj'
+    includesymbols: true
+    includesource: true
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2

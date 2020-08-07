@@ -11,15 +11,9 @@ steps:
 - task: UseDotNet@2
   displayName: 'Install .NET Core SDK'
   inputs:
-    version: 5.0.x
+    version: 5.x.x
     performMultiLevelLookup: true
     includePreviewVersions: true
-
-- task: UseDotNet@2
-  displayName: 'Install .NET Runtime'
-  inputs:
-    version: '3.0.x'
-    packageType: runtime
 
 - task: DotNetCoreCLI@2
   displayName: Publish
@@ -27,6 +21,7 @@ steps:
     command: publish
     publishWebProjects: False
     zipAfterPublish: False
+    arguments: '--output $(Build.ArtifactStagingDirectory)'
 
 - task: PublishBuildArtifacts@1
   displayName: Send Artifact

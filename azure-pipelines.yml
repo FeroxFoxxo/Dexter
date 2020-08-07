@@ -6,8 +6,6 @@ pool:
 
 variables:
   solution: '**/*.sln'
-  buildPlatform: 'x64'
-  buildConfiguration: 'Release'
 
 steps:
 - task: UseDotNet@2
@@ -28,8 +26,8 @@ steps:
   inputs:
     command: publish
     publishWebProjects: False
-    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory) --self-contained -r win10-x64'
-    zipAfterPublish: false
+    arguments: '-c Release -r win10-x64 -p:PublishSingleFile=true'
+    zipAfterPublish: False
 
 - task: PublishBuildArtifacts@1
   displayName: Send Artifact

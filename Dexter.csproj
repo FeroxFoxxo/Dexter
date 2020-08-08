@@ -14,4 +14,7 @@
     <Description>Dexter is USFurries' Bot. Made with love &lt;3</Description>
     <Copyright>© Copyright 2020 USFurries</Copyright>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="2.2.0" />
+  </ItemGroup>
 </Project>

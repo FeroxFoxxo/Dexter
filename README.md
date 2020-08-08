@@ -9,3 +9,6 @@
 **Built With:**
 - [.NET 5.0](https://dotnet.microsoft.com/download/dotnet/5.0)
 - [Discord.NET](https://github.com/discord-net/Discord.Net)
+
+**License:**
+- This project is licensed under the GNU GPL Version 3 License - see the [LICENSE](https://github.com/Frostrix/Dexter/blob/master/LICENSE) file for details.

@@ -1,5 +1,4 @@
 ﻿using Dexter.ConsoleApp;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,7 +6,7 @@ namespace Dexter.Core {
     public class DexterBot {
         private CancellationTokenSource _tokenSource;
 
-        public DexterDiscord DexterDiscord;
+        public DexterDiscord DexterDiscord { get; }
 
         private string _Token;
 
@@ -15,7 +14,13 @@ namespace Dexter.Core {
             private get => _Token;
             set {
                 _Token = value;
-                Stop(true);
+
+                if (!(_tokenSource is null)) {
+                    DexterDiscord.Disconnected();
+                    _tokenSource.Cancel();
+                    _tokenSource.Dispose();
+                    _tokenSource = null;
+                }
             }
         }
 
@@ -23,24 +28,26 @@ namespace Dexter.Core {
             DexterDiscord = new DexterDiscord();
         }
 
-        public async Task StartAsync(bool Silent) {
-            if (!Silent)
-                Console.WriteLine(" Starting Dexter...");
+        public async Task StartAsync() {
+            ConsoleLogger.Log(Configuration.START_DEXTER);
 
             _tokenSource = new CancellationTokenSource();
             await DexterDiscord.RunAsync(_Token, _tokenSource.Token);
         }
 
-        public void Stop(bool Silent) {
+        public void Stop() {
             if (_tokenSource is null)
                 return;
+
+            ConsoleLogger.Log(Configuration.STOP_DEXTER);
+
+            DexterDiscord.Disconnected();
 
             _tokenSource.Cancel();
             _tokenSource.Dispose();
             _tokenSource = null;
 
-            if (!Silent)
-                Console.Write(Configuration.PRESS_KEY);
+            ConsoleLogger.Log(Configuration.STOPPED_DEXTER);
         }
     }
 }

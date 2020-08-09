@@ -1,5 +1,5 @@
 ﻿using Dexter.Core;
-using Dexter.Core.Enums;
+using Discord;
 using System;
 using System.Threading.Tasks;
 
@@ -15,8 +15,16 @@ namespace Dexter.ConsoleApp {
             Dexter.DexterDiscord.ConnectionChanged += OnConnectionStateChanged;
 
             if (arguments.Length > 0) {
-                Dexter.Token = arguments[arguments.Length - 1];
-                _ = Dexter.StartAsync(true);
+                Dexter.Token = arguments[^1];
+
+                DrawState();
+
+                for (int _ = 0; _ < 6; _++)
+                    Console.WriteLine();
+
+                _ = Dexter.StartAsync();
+
+                _ = Console.ReadKey(true);
             }
 
             await HandleInput();
@@ -27,12 +35,10 @@ namespace Dexter.ConsoleApp {
                 DrawMenu();
                 DrawState();
 
-                bool success = int.TryParse(Console.ReadLine(), out int choice);
-
-                Console.WriteLine();
+                bool success = int.TryParse(Console.ReadKey().KeyChar.ToString(), out int choice);
 
                 if (!success)
-                    Console.WriteLine(Configuration.NOT_A_NUMBER);
+                    Console.Write(Configuration.NOT_A_NUMBER);
 
                 switch (choice) {
                     case 1:
@@ -40,36 +46,31 @@ namespace Dexter.ConsoleApp {
                         Console.Write(Configuration.ENTER_TOKEN);
                         token = Console.ReadLine();
 
-                        Console.WriteLine();
-
-                        Console.WriteLine(Configuration.IS_TOKEN_CORRECT + token);
+                        Console.Write(Configuration.IS_TOKEN_CORRECT + token);
                         Console.Write(Configuration.YES_NO_PROMPT);
 
                         if (Console.ReadKey().Key == ConsoleKey.Y) {
                             Dexter.Token = token;
-                            Console.WriteLine(Configuration.CORRECT_TOKEN);
+                            Console.Write(Configuration.CORRECT_TOKEN);
                         } else
-                            Console.WriteLine(Configuration.FAILED_TOKEN);
-
-                        Console.Write(Configuration.PRESS_KEY);
+                            Console.Write(Configuration.FAILED_TOKEN);
 
                         break;
                     case 2:
-                        if (Dexter.DexterDiscord.ConnectionState == ConnectionState.CONNECTED)
-                            Dexter.Stop(false);
-                        else if (Dexter.DexterDiscord.ConnectionState == ConnectionState.DISCONNECTED)
-                            _ = Dexter.StartAsync(false);
+                        if (Dexter.DexterDiscord.ConnectionState == ConnectionState.Connected)
+                            Dexter.Stop();
+                        else if (Dexter.DexterDiscord.ConnectionState == ConnectionState.Disconnected)
+                            _ = Dexter.StartAsync();
                         break;
                     case 3:
                         Environment.Exit(0);
                         break;
                     default:
-                        Console.WriteLine(Configuration.INVALID_CHOICE);
-                        Console.Write(Configuration.PRESS_KEY);
+                        Console.Write(Configuration.INVALID_CHOICE);
                         break;
                 }
 
-                _ = Console.ReadKey(true);
+                Console.ReadKey(true);
             }
         }
 
@@ -79,7 +80,7 @@ namespace Dexter.ConsoleApp {
             for(int _ = 0; _ < 8; _++)
                 Console.WriteLine();
 
-            Console.WriteLine(Configuration.MENU_OPTIONS);
+            Console.Write(Configuration.MENU_OPTIONS);
 
             Console.Write(Configuration.ENTER_NUMBER);
         }
@@ -92,13 +93,14 @@ namespace Dexter.ConsoleApp {
 
             Console.ForegroundColor = Dexter.DexterDiscord.ConnectionState switch
             {
-                ConnectionState.DISCONNECTED => ConsoleColor.Red,
-                ConnectionState.CONNECTING => ConsoleColor.Yellow,
-                ConnectionState.CONNECTED => ConsoleColor.Green,
+                ConnectionState.Disconnected => ConsoleColor.Red,
+                ConnectionState.Disconnecting => ConsoleColor.DarkRed,
+                ConnectionState.Connecting => ConsoleColor.Yellow,
+                ConnectionState.Connected => ConsoleColor.Green,
                 _ => ConsoleColor.Blue,
             };
 
-            Console.WriteLine(Configuration.HEADER);
+            Console.Write(Configuration.HEADER);
             Console.ResetColor();
 
             Console.SetCursorPosition(previousCursorLeft, previousCursorTop);

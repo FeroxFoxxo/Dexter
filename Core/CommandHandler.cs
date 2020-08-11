@@ -9,14 +9,16 @@ using System.Threading.Tasks;
 namespace Dexter.Core {
     public class CommandHandler {
         private readonly DexterDiscord Discord;
-        private readonly CommandService CommandService;
         private readonly IServiceProvider Services;
+        private readonly CommandService CommandService;
 
         public CommandHandler(DexterDiscord _Discord) {
             Discord = _Discord;
             CommandService = new CommandService();
 
             ServiceCollection Collection = new ServiceCollection();
+
+            Collection.AddSingleton(Collection);
 
             Assembly.GetExecutingAssembly()
                 .GetTypes()

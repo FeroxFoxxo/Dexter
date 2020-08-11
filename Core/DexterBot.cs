@@ -14,13 +14,7 @@ namespace Dexter.Core {
             private get => _Token;
             set {
                 _Token = value;
-
-                if (!(_tokenSource is null)) {
-                    DexterDiscord.Disconnected();
-                    _tokenSource.Cancel();
-                    _tokenSource.Dispose();
-                    _tokenSource = null;
-                }
+                DisposeToken();
             }
         }
 
@@ -32,22 +26,26 @@ namespace Dexter.Core {
             ConsoleLogger.Log(Configuration.START_DEXTER);
 
             _tokenSource = new CancellationTokenSource();
+
             await DexterDiscord.RunAsync(_Token, _tokenSource.Token);
         }
 
         public void Stop() {
+            ConsoleLogger.Log(Configuration.STOP_DEXTER);
+
+            DisposeToken();
+
+            ConsoleLogger.Log(Configuration.STOPPED_DEXTER);
+        }
+
+        private void DisposeToken() {
             if (_tokenSource is null)
                 return;
 
-            ConsoleLogger.Log(Configuration.STOP_DEXTER);
-
             DexterDiscord.Disconnected();
-
             _tokenSource.Cancel();
             _tokenSource.Dispose();
             _tokenSource = null;
-
-            ConsoleLogger.Log(Configuration.STOPPED_DEXTER);
         }
     }
 }

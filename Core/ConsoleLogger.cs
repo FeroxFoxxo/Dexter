@@ -5,11 +5,10 @@ using System.Threading.Tasks;
 namespace Dexter.Core {
     public static class ConsoleLogger {
         public static Task LogDiscord(LogMessage evt) {
-            if (evt.Severity == LogSeverity.Critical) {
+            if (evt.Severity == LogSeverity.Critical)
                 LogError(evt.Message);
-            } else {
+            else
                 Log(evt.Message);
-            }
 
             return Task.CompletedTask;
         }

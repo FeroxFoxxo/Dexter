@@ -13,9 +13,11 @@
     <Company>USFurries</Company>
     <Description>Dexter is USFurries' Bot. Made with love &lt;3</Description>
     <Copyright>© Copyright 2020 USFurries</Copyright>
+    <ApplicationIcon>DexLove.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="2.2.0" />
+    <PackageReference Include="Humanizer" Version="2.8.26" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.6" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.6" />
   </ItemGroup>

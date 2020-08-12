@@ -51,18 +51,18 @@ namespace Dexter.Commands {
 
         [Command("help")]
         [Summary("Displays detailed information about a command.")]
-        public async Task HelpCommand(string command) {
-            var result = Service.Search(Context, command);
+        public async Task HelpCommand(string Command) {
+            SearchResult result = Service.Search(Context, Command);
 
             if (!result.IsSuccess) {
-                await ReplyAsync("Sorry, I couldn't find a command like **" + command + "**.");
+                await ReplyAsync("Sorry, I couldn't find a command like **" + Command + "**.");
                 return;
             }
 
             List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>();
 
-            foreach (var match in result.Commands) {
-                var cmd = match.Command;
+            foreach (CommandMatch match in result.Commands) {
+                CommandInfo cmd = match.Command;
 
                 string cmdDescription = "Parameters: " + string.Join(", ", cmd.Parameters.Select(p => p.Name));
 
@@ -82,7 +82,7 @@ namespace Dexter.Commands {
             }
 
             await BuildEmbed()
-                .WithTitle("Here are some commands like **" + command + "**")
+                .WithTitle("Here are some commands like **" + Command + "**")
                 .WithFields(fields.ToArray())
                 .SendEmbed(Context.Channel);
         }

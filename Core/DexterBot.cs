@@ -23,7 +23,7 @@ namespace Dexter.Core {
         }
 
         public async Task StartAsync() {
-            ConsoleLogger.Log(Configuration.START_DEXTER);
+            ConsoleLogger.Log("Starting Dexter. Please wait...");
 
             _tokenSource = new CancellationTokenSource();
 
@@ -31,11 +31,11 @@ namespace Dexter.Core {
         }
 
         public void Stop() {
-            ConsoleLogger.Log(Configuration.STOP_DEXTER);
+            ConsoleLogger.Log("Stopping Dexter. Please wait...");
 
             DisposeToken();
 
-            ConsoleLogger.Log(Configuration.STOPPED_DEXTER);
+            ConsoleLogger.Log("Dexter has halted successfully!");
         }
 
         private void DisposeToken() {

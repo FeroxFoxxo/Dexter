@@ -65,7 +65,7 @@ namespace Dexter.Core {
         private Task ClientOnReady() {
             Client.SetGameAsync("Use ~mail to anonymously message the staff team!", type: ActivityType.CustomStatus);
 
-            ConsoleLogger.Log(Configuration.STARTED_DEXTER);
+            ConsoleLogger.Log("Dexter has started successfully!");
             ConnectionState = ConnectionState.Connected;
 
             return Task.CompletedTask;

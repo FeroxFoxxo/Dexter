@@ -1,9 +1,12 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Dexter.Core {
@@ -18,8 +21,6 @@ namespace Dexter.Core {
 
             ServiceCollection Collection = new ServiceCollection();
 
-            Collection.AddSingleton(Collection);
-
             Assembly.GetExecutingAssembly()
                 .GetTypes()
                 .Where(x => typeof(ModuleBase<SocketCommandContext>).IsAssignableFrom(x))
@@ -31,6 +32,8 @@ namespace Dexter.Core {
 
         public async Task InitializeAsync() {
             Discord.Client.MessageReceived += HandleCommandAsync;
+            CommandService.CommandExecuted += OnCommandExecutedAsync;
+
             _ = await CommandService.AddModulesAsync(Assembly.GetExecutingAssembly(), Services);
         }
 
@@ -42,15 +45,71 @@ namespace Dexter.Core {
 
             if ((msg.HasMentionPrefix(Discord.Client.CurrentUser, ref argPos) || msg.HasCharPrefix('~', ref argPos)) && !msg.Author.IsBot) {
                 var context = new SocketCommandContext(Discord.Client, msg);
-                await TryRunAsBotCommand(context, argPos).ConfigureAwait(false);
+                await CommandService.ExecuteAsync(context, argPos, Services);
             }
         }
 
-        private async Task TryRunAsBotCommand(SocketCommandContext context, int argPos) {
-            var result = await CommandService.ExecuteAsync(context, argPos, Services);
+        private async Task OnCommandExecutedAsync(Optional<CommandInfo> Command, ICommandContext Context, IResult Result) {
+            if (Result.IsSuccess)
+                return;
 
-            if (!result.IsSuccess)
-                ConsoleLogger.Log($"Command execution failed. Reason: {result.ErrorReason}.");
+            switch (Result.Error) {
+                case CommandError.BadArgCount:
+                    List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>();
+
+                    SearchResult SearchResult = CommandService.Search(Context, Command.Value.Name);
+
+                    foreach (var match in SearchResult.Commands) {
+                        var cmd = match.Command;
+
+                        string cmdDescription = "Parameters: " + string.Join(", ", cmd.Parameters.Select(p => p.Name));
+
+                        if (cmd.Parameters.Count > 0)
+                            cmdDescription = "Parameters: " + string.Join(", ", cmd.Parameters.Select(p => p.Name));
+                        else
+                            cmdDescription = "No parameters";
+
+                        if (!string.IsNullOrEmpty(cmd.Summary))
+                            cmdDescription += "\nSummary: " + cmd.Summary;
+
+                        fields.Add(new EmbedFieldBuilder {
+                            Name = string.Join(", ", cmd.Aliases),
+                            Value = cmdDescription,
+                            IsInline = false
+                        });
+                    }
+
+                    await Module.BuildEmbed()
+                        .WithTitle("You've entered an invalid amount of parameters for this command!")
+                        .WithDescription("Here are some options of parameters you can have for the **" + Command.Value.Name + "** command:")
+                        .WithFields(fields.ToArray())
+                        .SendEmbed(Context.Channel);
+                    break;
+                case CommandError.UnmetPrecondition:
+                    await Module.BuildEmbed()
+                        .WithTitle("Access Denied")
+                        .WithDescription("Hiya! It seems like you don't have access to this command. Please check that you have the role required to run this command!")
+                        .SendEmbed(Context.Channel);
+                    break;
+                case CommandError.UnknownCommand:
+                    await Module.BuildEmbed()
+                        .WithTitle("Unknown Command")
+                        .WithDescription("Oopsies! It seems as if the command " + Command.Value.Name + " doesn't exist!")
+                        .SendEmbed(Context.Channel);
+                    break;
+                default:
+                    if (Result is ExecuteResult executeResult)
+                        await Module.BuildEmbed()
+                         .WithTitle(Regex.Replace(executeResult.Exception.GetType().Name, @"(?<!^)(?=[A-Z])", " "))
+                         .WithDescription(executeResult.Exception.Message)
+                         .SendEmbed(Context.Channel);
+                    else
+                        await Module.BuildEmbed()
+                         .WithTitle(Regex.Replace(Result.Error.GetType().Name, @"(?<!^)(?=[A-Z])", " "))
+                         .WithDescription(Result.ErrorReason)
+                         .SendEmbed(Context.Channel);
+                    break;
+            }
         }
     }
 }

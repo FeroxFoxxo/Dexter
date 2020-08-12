@@ -8,7 +8,7 @@ namespace Dexter.ConsoleApp {
         private static DexterBot Dexter;
 
         private static async Task Main(string[] arguments) {
-            Console.Title = Configuration.BOT_NAME;
+            Console.Title = "Dexter";
 
             Dexter = new DexterBot();
 
@@ -38,22 +38,22 @@ namespace Dexter.ConsoleApp {
                 bool success = int.TryParse(Console.ReadKey().KeyChar.ToString(), out int choice);
 
                 if (!success)
-                    Console.Write(Configuration.NOT_A_NUMBER);
+                    Console.Write("\n\n Please enter a valid number. Don't type in the [ and ] characters. Just the number. ");
 
                 switch (choice) {
                     case 1:
                         string token;
-                        Console.Write(Configuration.ENTER_TOKEN);
+                        Console.Write("\n\n Please enter your Discord bot's token: ");
                         token = Console.ReadLine();
 
-                        Console.Write(Configuration.IS_TOKEN_CORRECT + token);
-                        Console.Write(Configuration.YES_NO_PROMPT);
+                        Console.Write("\n You entered the following token: " + token);
+                        Console.Write("\n Is this token correct? [Y] or [N] ");
 
                         if (Console.ReadKey().Key == ConsoleKey.Y) {
                             Dexter.Token = token;
-                            Console.Write(Configuration.CORRECT_TOKEN);
+                            Console.Write("\n\n Applied token! ");
                         } else
-                            Console.Write(Configuration.FAILED_TOKEN);
+                            Console.Write("\n\n Failed to apply token! Incorrect token given. ");
 
                         break;
                     case 2:
@@ -66,7 +66,7 @@ namespace Dexter.ConsoleApp {
                         Environment.Exit(0);
                         break;
                     default:
-                        Console.Write(Configuration.INVALID_CHOICE);
+                        Console.Write("\n Your choice was not recognized as an option in the menu. Please try again. ");
                         break;
                 }
 
@@ -80,9 +80,13 @@ namespace Dexter.ConsoleApp {
             for(int _ = 0; _ < 8; _++)
                 Console.WriteLine();
 
-            Console.Write(Configuration.MENU_OPTIONS);
+            Console.Write(
+                " [1] Edit Bot Token\n" +
+                " [2] Start/Stop Dexter\n" +
+                " [3] Exit Dexter"
+            );
 
-            Console.Write(Configuration.ENTER_NUMBER);
+            Console.Write("\n\n Please select an action by typing its number: ");
         }
 
         public static void DrawState() {
@@ -91,8 +95,7 @@ namespace Dexter.ConsoleApp {
 
             Console.SetCursorPosition(0, 0);
 
-            Console.ForegroundColor = Dexter.DexterDiscord.ConnectionState switch
-            {
+            Console.ForegroundColor = Dexter.DexterDiscord.ConnectionState switch {
                 ConnectionState.Disconnected => ConsoleColor.Red,
                 ConnectionState.Disconnecting => ConsoleColor.DarkRed,
                 ConnectionState.Connecting => ConsoleColor.Yellow,
@@ -100,7 +103,14 @@ namespace Dexter.ConsoleApp {
                 _ => ConsoleColor.Blue,
             };
 
-            Console.Write(Configuration.HEADER);
+            Console.Write("\n" +
+                " ██████╗ ███████╗██╗  ██╗████████╗███████╗██████╗ \n" +
+                " ██╔══██╗██╔════╝╚██╗██╔╝╚══██╔══╝██╔════╝██╔══██╗\n" +
+                " ██║  ██║█████╗   ╚███╔╝    ██║   █████╗  ██████╔╝\n" +
+                " ██║  ██║██╔══╝   ██╔██╗    ██║   ██╔══╝  ██╔══██╗\n" +
+                " ██████╔╝███████╗██╔╝ ██╗   ██║   ███████╗██║  ██║\n" +
+                " ╚═════╝ ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝"
+            );
             Console.ResetColor();
 
             Console.SetCursorPosition(previousCursorLeft, previousCursorTop);

@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace Dexter.Core {
     public class CommandHandler {
-        private readonly DexterDiscord Discord;
+        private readonly DiscordBot Discord;
 
         private IServiceProvider Services;
         private CommandService CommandService;
 
-        public CommandHandler(DexterDiscord _Discord) {
+        public CommandHandler(DiscordBot _Discord) {
             Discord = _Discord;
         }
 

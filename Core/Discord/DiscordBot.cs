@@ -1,11 +1,13 @@
-﻿using Discord;
+﻿using Dexter.ConsoleApp;
+using Dexter.Core.Configuration;
+using Discord;
 using Discord.WebSocket;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dexter.Core {
-    public class DexterDiscord {
+    public class DiscordBot {
 
         private readonly CommandHandler CommandHandler;
 
@@ -14,16 +16,6 @@ namespace Dexter.Core {
         private CancellationTokenSource CancellationToken;
 
         public DiscordSocketClient Client { get; private set; }
-
-        private string _Token;
-
-        public string Token {
-            private get => _Token;
-            set {
-                _Token = value;
-                DisposeToken();
-            }
-        }
 
         private ConnectionState _ConnectionState;
 
@@ -34,21 +26,36 @@ namespace Dexter.Core {
                 ConnectionChanged?.Invoke(this, EventArgs.Empty);
             }
         }
+
+        private string _Token;
+
+        public string Token {
+            private get => _Token;
+            set {
+                _Token = value;
+
+                if (CancellationToken is null)
+                    return;
+
+                if (ConnectionState != ConnectionState.Disconnected)
+                    ConnectionState = ConnectionState.Disconnecting;
+
+                CancellationToken.Cancel();
+                CancellationToken.Dispose();
+                CancellationToken = null;
+            }
+        }
         
-        public DexterDiscord() {
+        public DiscordBot() {
             ConnectionState = ConnectionState.Disconnected;
             CommandHandler = new CommandHandler(this);
         }
 
         public async Task StartAsync() {
-            ConsoleLogger.Log("Starting Dexter. Please wait...");
+            ConsoleLogger.Log("Starting " + JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Bot_Name") + ". Please wait...");
 
             CancellationToken = new CancellationTokenSource();
-
-            await RunAsync(Token, CancellationToken.Token);
-        }
-
-        public async Task RunAsync(string Token, CancellationToken CancellationToken) {
+            
             ConnectionState = ConnectionState.Connecting;
 
             try {
@@ -70,7 +77,7 @@ namespace Dexter.Core {
 
                 await Client.StartAsync();
 
-                await Task.Delay(-1, CancellationToken);
+                await Task.Delay(-1, CancellationToken.Token);
             } catch (Exception Exception) {
                 ConsoleLogger.LogError(Exception.Message + "\n" + Exception.StackTrace);
             } finally {
@@ -81,21 +88,15 @@ namespace Dexter.Core {
         private Task ClientOnReady() {
             Client.SetGameAsync("Use ~mail to anonymously message the staff team!", type: ActivityType.CustomStatus);
 
-            ConsoleLogger.Log("Dexter has started successfully!");
+            ConsoleLogger.Log(JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Bot_Name") + " has started successfully!");
             ConnectionState = ConnectionState.Connected;
 
             return Task.CompletedTask;
         }
 
         public void StopAsync() {
-            ConsoleLogger.Log("Stopping Dexter. Please wait...");
+            ConsoleLogger.Log("Stopping " + JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Bot_Name") + ". Please wait...");
 
-            DisposeToken();
-
-            ConsoleLogger.Log("Dexter has halted successfully!");
-        }
-
-        private void DisposeToken() {
             if (CancellationToken is null)
                 return;
 
@@ -105,6 +106,8 @@ namespace Dexter.Core {
             CancellationToken.Cancel();
             CancellationToken.Dispose();
             CancellationToken = null;
+
+            ConsoleLogger.Log(JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Bot_Name") + " has halted successfully!");
         }
     }
 }

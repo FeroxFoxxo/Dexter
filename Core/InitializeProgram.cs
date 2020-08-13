@@ -1,18 +1,16 @@
 ﻿using Dexter.Core;
+using Dexter.Core.Configuration;
 using Discord;
 using System;
 using System.Threading.Tasks;
 
 namespace Dexter.ConsoleApp {
     public class InitializeProgram {
-        public static void Main(string[] Arguments) {
-            string Token = string.Empty;
-
-            if (Arguments.Length > 0)
-                Token = Arguments[^1];
+        public static void Main() {
+            JSONConfigurator.LoadConfigurations();
 
             try {
-                new InitializeProgram(Token);
+                new InitializeProgram();
             } catch (Exception Exception) {
                 ConsoleLogger.LogError(Exception.StackTrace);
             }
@@ -22,17 +20,17 @@ namespace Dexter.ConsoleApp {
             _ = Console.ReadKey(true);
         }
 
-        private readonly DexterDiscord Dexter;
+        private readonly DiscordBot Dexter;
 
-        private InitializeProgram(string Token) {
-            Console.Title = "Dexter";
+        private InitializeProgram() {
+            Console.Title = (string) JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Bot_Name");
 
-            Dexter = new DexterDiscord();
+            Dexter = new DiscordBot();
 
             Dexter.ConnectionChanged += OnConnectionStateChanged;
 
-            if (!string.IsNullOrEmpty(Token)) {
-                Dexter.Token = Token;
+            if (!string.IsNullOrEmpty((string) JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Token"))) {
+                Dexter.Token = (string) JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Token");
 
                 DrawState();
 
@@ -91,7 +89,7 @@ namespace Dexter.ConsoleApp {
             }
         }
 
-        public void DrawMenu() {
+        private void DrawMenu() {
             Console.Clear();
 
             for(int _ = 0; _ < 8; _++)
@@ -99,14 +97,14 @@ namespace Dexter.ConsoleApp {
 
             Console.Write(
                 " [1] Edit Bot Token\n" +
-                " [2] Start/Stop Dexter\n" +
+                " [2] Start/Stop " + JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Bot_Name") + "\n" +
                 " [3] Exit Dexter"
             );
 
             Console.Write("\n\n Please select an action by typing its number: ");
         }
 
-        public void DrawState() {
+        private void DrawState() {
             int PreviousCursorLeft = Console.CursorLeft;
             int PreviousCursorTop = Console.CursorTop;
 

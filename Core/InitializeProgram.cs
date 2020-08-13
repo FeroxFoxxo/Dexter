@@ -4,18 +4,35 @@ using System;
 using System.Threading.Tasks;
 
 namespace Dexter.ConsoleApp {
-    internal static class Initialization {
-        private static DexterBot Dexter;
+    public class InitializeProgram {
+        public static void Main(string[] Arguments) {
+            string Token = string.Empty;
 
-        private static async Task Main(string[] arguments) {
+            if (Arguments.Length > 0)
+                Token = Arguments[^1];
+
+            try {
+                new InitializeProgram(Token);
+            } catch (Exception Exception) {
+                ConsoleLogger.LogError(Exception.StackTrace);
+            }
+
+            Console.WriteLine("\n\n Please press any key to continue...");
+
+            _ = Console.ReadKey(true);
+        }
+
+        private readonly DexterDiscord Dexter;
+
+        private InitializeProgram(string Token) {
             Console.Title = "Dexter";
 
-            Dexter = new DexterBot();
+            Dexter = new DexterDiscord();
 
-            Dexter.DexterDiscord.ConnectionChanged += OnConnectionStateChanged;
+            Dexter.ConnectionChanged += OnConnectionStateChanged;
 
-            if (arguments.Length > 0) {
-                Dexter.Token = arguments[^1];
+            if (!string.IsNullOrEmpty(Token)) {
+                Dexter.Token = Token;
 
                 DrawState();
 
@@ -27,39 +44,39 @@ namespace Dexter.ConsoleApp {
                 _ = Console.ReadKey(true);
             }
 
-            await HandleInput();
+            HandleInput();
         }
 
-        private static Task HandleInput() {
+        private Task HandleInput() {
             while (true) {
                 DrawMenu();
                 DrawState();
 
-                bool success = int.TryParse(Console.ReadKey().KeyChar.ToString(), out int choice);
+                bool Success = int.TryParse(Console.ReadKey().KeyChar.ToString(), out int choice);
 
-                if (!success)
+                if (!Success)
                     Console.Write("\n\n Please enter a valid number. Don't type in the [ and ] characters. Just the number. ");
 
                 switch (choice) {
                     case 1:
-                        string token;
+                        string Token;
                         Console.Write("\n\n Please enter your Discord bot's token: ");
-                        token = Console.ReadLine();
+                        Token = Console.ReadLine();
 
-                        Console.Write("\n You entered the following token: " + token);
+                        Console.Write("\n You entered the following token: " + Token);
                         Console.Write("\n Is this token correct? [Y] or [N] ");
 
                         if (Console.ReadKey().Key == ConsoleKey.Y) {
-                            Dexter.Token = token;
+                            Dexter.Token = Token;
                             Console.Write("\n\n Applied token! ");
                         } else
                             Console.Write("\n\n Failed to apply token! Incorrect token given. ");
 
                         break;
                     case 2:
-                        if (Dexter.DexterDiscord.ConnectionState == ConnectionState.Connected)
-                            Dexter.Stop();
-                        else if (Dexter.DexterDiscord.ConnectionState == ConnectionState.Disconnected)
+                        if (Dexter.ConnectionState == ConnectionState.Connected)
+                            Dexter.StopAsync();
+                        else if (Dexter.ConnectionState == ConnectionState.Disconnected)
                             _ = Dexter.StartAsync();
                         break;
                     case 3:
@@ -74,7 +91,7 @@ namespace Dexter.ConsoleApp {
             }
         }
 
-        public static void DrawMenu() {
+        public void DrawMenu() {
             Console.Clear();
 
             for(int _ = 0; _ < 8; _++)
@@ -89,13 +106,13 @@ namespace Dexter.ConsoleApp {
             Console.Write("\n\n Please select an action by typing its number: ");
         }
 
-        public static void DrawState() {
-            int previousCursorLeft = Console.CursorLeft;
-            int previousCursorTop = Console.CursorTop;
+        public void DrawState() {
+            int PreviousCursorLeft = Console.CursorLeft;
+            int PreviousCursorTop = Console.CursorTop;
 
             Console.SetCursorPosition(0, 0);
 
-            Console.ForegroundColor = Dexter.DexterDiscord.ConnectionState switch {
+            Console.ForegroundColor = Dexter.ConnectionState switch {
                 ConnectionState.Disconnected => ConsoleColor.Red,
                 ConnectionState.Disconnecting => ConsoleColor.DarkRed,
                 ConnectionState.Connecting => ConsoleColor.Yellow,
@@ -111,11 +128,12 @@ namespace Dexter.ConsoleApp {
                 " ██████╔╝███████╗██╔╝ ██╗   ██║   ███████╗██║  ██║\n" +
                 " ╚═════╝ ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝"
             );
+
             Console.ResetColor();
 
-            Console.SetCursorPosition(previousCursorLeft, previousCursorTop);
+            Console.SetCursorPosition(PreviousCursorLeft, PreviousCursorTop);
         }
 
-        private static void OnConnectionStateChanged(object Sender, EventArgs E) => DrawState();
+        private void OnConnectionStateChanged(object Sender, EventArgs E) => DrawState();
     }
 }

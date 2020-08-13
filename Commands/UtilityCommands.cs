@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
-    public class UtilityCommands : Module {
+    public class UtilityCommands : AbstractModule {
         private readonly CommandService Service;
 
         public UtilityCommands(CommandService _Service) {
@@ -20,70 +20,73 @@ namespace Dexter.Commands {
         [Command("help")]
         [Summary("Displays all avaliable commands.")]
         public async Task HelpCommand() {
-            List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>();
+            List<EmbedFieldBuilder> Fields = new List<EmbedFieldBuilder>();
 
-            foreach (ModuleInfo module in Service.Modules) {
-                List<string> description = new List<string>();
+            foreach (ModuleInfo Module in Service.Modules) {
+                List<string> Description = new List<string>();
 
-                foreach (CommandInfo cmd in module.Commands) {
-                    PreconditionResult result = await cmd.CheckPreconditionsAsync(Context);
+                foreach (CommandInfo CommandInfo in Module.Commands) {
+                    PreconditionResult Result = await CommandInfo.CheckPreconditionsAsync(Context);
 
-                    if (description.Contains("~" + cmd.Aliases.First()))
+                    if (Description.Contains("~" + CommandInfo.Aliases.First()))
                         continue;
 
-                    if (result.IsSuccess)
-                        description.Add("~" + cmd.Aliases.First());
+                    if (Result.IsSuccess)
+                        Description.Add("~" + CommandInfo.Aliases.First());
                 }
 
-                if (description.Count != 0)
-                    fields.Add(new EmbedFieldBuilder {
-                        Name = Regex.Replace(module.Name, "[a-z][A-Z]", m => m.Value[0] + " " + m.Value[1]),
-                        Value = string.Join("\n", description.ToArray())
+                if (Description.Count != 0)
+                    Fields.Add(new EmbedFieldBuilder {
+                        Name = Regex.Replace(Module.Name, "[a-z][A-Z]", m => m.Value[0] + " " + m.Value[1]),
+                        Value = string.Join("\n", Description.ToArray())
                     });
             }
 
             await BuildEmbed()
                 .WithTitle("Hiya, I'm Dexter~! Here's a list of modules and commands you can use!")
                 .WithDescription("Use ~help [commandName] to show information about a command!")
-                .WithFields(fields.ToArray())
+                .WithFields(Fields.ToArray())
                 .SendEmbed(Context.Channel);
         }
 
         [Command("help")]
         [Summary("Displays detailed information about a command.")]
         public async Task HelpCommand(string Command) {
-            SearchResult result = Service.Search(Context, Command);
+            SearchResult Result = Service.Search(Context, Command);
 
-            if (!result.IsSuccess) {
-                await ReplyAsync("Sorry, I couldn't find a command like **" + Command + "**.");
+            if (!Result.IsSuccess) {
+                await BuildEmbed()
+                    .WithTitle("Unknown Command")
+                    .WithDescription("Sorry, I couldn't find a command like **" + Command + "**.")
+                    .SendEmbed(Context.Channel);
                 return;
             }
 
-            List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>();
+            List<EmbedFieldBuilder> Fields = new List<EmbedFieldBuilder>();
 
-            foreach (CommandMatch match in result.Commands) {
-                CommandInfo cmd = match.Command;
+            foreach (CommandMatch Match in Result.Commands) {
+                CommandInfo CommandInfo = Match.Command;
 
-                string cmdDescription = "Parameters: " + string.Join(", ", cmd.Parameters.Select(p => p.Name));
+                string CommandDescription = "Parameters: " + string.Join(", ", CommandInfo.Parameters.Select(p => p.Name));
 
-                if (cmd.Parameters.Count > 0)
-                    cmdDescription = "Parameters: " + string.Join(", ", cmd.Parameters.Select(p => p.Name));
+                if (CommandInfo.Parameters.Count > 0)
+                    CommandDescription = "Parameters: " + string.Join(", ", CommandInfo.Parameters.Select(p => p.Name));
                 else
-                    cmdDescription = "No parameters";
+                    CommandDescription = "No parameters";
 
-                if (!string.IsNullOrEmpty(cmd.Summary))
-                    cmdDescription += "\nSummary: " + cmd.Summary;
+                if (!string.IsNullOrEmpty(CommandInfo.Summary))
+                    CommandDescription += "\nSummary: " + CommandInfo.Summary;
 
-                fields.Add(new EmbedFieldBuilder {
-                    Name = string.Join(", ", cmd.Aliases),
-                    Value = cmdDescription,
+                Fields.Add(new EmbedFieldBuilder {
+                    Name = string.Join(", ", CommandInfo.Aliases),
+                    Value = CommandDescription,
                     IsInline = false
                 });
             }
 
             await BuildEmbed()
                 .WithTitle("Here are some commands like **" + Command + "**")
-                .WithFields(fields.ToArray())
+                .WithFields(Fields.ToArray())
                 .SendEmbed(Context.Channel);
         }
 
@@ -99,10 +102,9 @@ namespace Dexter.Commands {
         [Command("uptime")]
         [Summary("Displays the amount of time Dexter has been running for!")]
         public async Task UptimeCommand() {
-            TimeSpan uptime = DateTime.Now - Process.GetCurrentProcess().StartTime;
             await BuildEmbed()
                 .WithTitle("Uptime")
-                .WithDescription("I've been runnin' for **" + uptime.Humanize() + "**! *yawns*")
+                .WithDescription("I've been runnin' for **" + (DateTime.Now - Process.GetCurrentProcess().StartTime).Humanize() + "**~!\n*yawns*")
                 .SendEmbed(Context.Channel);
         }
     }

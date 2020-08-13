@@ -5,14 +5,14 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands.Services {
-    public class FunCommands : Module {
+    public class FunCommands : AbstractModule {
         [Command("8ball")]
-        public async Task EightBallCommand([Remainder] string message) {
-            message = Regex.Replace(message.ToLower(), "/[^a-zA-Z ]/g", "");
+        public async Task EightBallCommand([Remainder] string Message) {
+            Message = Regex.Replace(Message.ToLower(), "/[^a-zA-Z ]/g", "");
 
-            string result = new Random().Next(4) == 3 ? "uncertain" : new Random(message.GetHashCode()).Next(2) == 0 ? "yes" : "no";
+            string Result = new Random().Next(4) == 3 ? "uncertain" : new Random(Message.GetHashCode()).Next(2) == 0 ? "yes" : "no";
 
-            await ReplyAsync("My answer is " + result);
+            await ReplyAsync("My answer is " + Result);
         }
     }
 }

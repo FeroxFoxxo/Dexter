@@ -3,29 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30330.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dexter", "Dexter.csproj", "{A96BCC5E-6364-4585-B951-26235205B3C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dexter", "Dexter.csproj", "{EC546701-C9F2-4D73-BF6C-2B7B9ECF8425}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
-		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A96BCC5E-6364-4585-B951-26235205B3C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A96BCC5E-6364-4585-B951-26235205B3C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A96BCC5E-6364-4585-B951-26235205B3C1}.Debug|x64.ActiveCfg = Debug|x64
-		{A96BCC5E-6364-4585-B951-26235205B3C1}.Debug|x64.Build.0 = Debug|x64
-		{A96BCC5E-6364-4585-B951-26235205B3C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A96BCC5E-6364-4585-B951-26235205B3C1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A96BCC5E-6364-4585-B951-26235205B3C1}.Release|x64.ActiveCfg = Release|Any CPU
-		{A96BCC5E-6364-4585-B951-26235205B3C1}.Release|x64.Build.0 = Release|Any CPU
+		{EC546701-C9F2-4D73-BF6C-2B7B9ECF8425}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC546701-C9F2-4D73-BF6C-2B7B9ECF8425}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC546701-C9F2-4D73-BF6C-2B7B9ECF8425}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC546701-C9F2-4D73-BF6C-2B7B9ECF8425}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {415B9B8D-B2BB-455B-B903-7F7606B75C49}
+		SolutionGuid = {E18A1FCF-17AB-4CA4-B3F5-21F19D53E670}
 	EndGlobalSection
 EndGlobal

@@ -1,26 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration>Release</Configuration>
-    <Platform>Any CPU</Platform>
-    <TargetFrameworks>net5.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Dexter</RootNamespace>
-    <AssemblyName>Dexter</AssemblyName>
-    <PublishReadyToRun>True</PublishReadyToRun>
-    <PublishTrimmed>True</PublishTrimmed>
-    <Authors>Frostrix</Authors>
-    <Company>USFurries</Company>
-    <Description>Dexter is USFurries' Bot. Made with love &lt;3</Description>
-    <Copyright>© Copyright 2020 USFurries</Copyright>
-    <ApplicationIcon>DexLove.ico</ApplicationIcon>
-    <LangVersion>8.0</LangVersion>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Figgle" Version="0.3.0" />
     <PackageReference Include="Discord.Net" Version="2.2.0" />
+    <PackageReference Include="Figgle" Version="0.3.0" />
     <PackageReference Include="Humanizer" Version="2.8.26" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.6" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.6" />
-    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0-preview.7.20364.11" />
   </ItemGroup>
+
 </Project>

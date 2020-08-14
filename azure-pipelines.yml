@@ -5,31 +5,53 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+- name: BuildConfiguration
+  value: Release
+- name: BuildPlatform
+  value: x64
+- name: AppPackageLocation
+  value: $(Build.ArtifactStagingDirectory)/applicationpackage
 
 steps:
-- task: NuGetToolInstaller@0
-
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
-
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-
-- task: VSTest@2
-  inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish artifacts'
-  inputs:
-    PathtoPublish: $(build.artifactstagingdirectory)
-    ArtifactName: 'PublishBuildArtifacts'
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore Packages'
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
+        feedsToUse: 'select'
+        vstsFeed: 'PRIVATE_FEED_GUID'
+        includeNuGetOrg: false
+    - task: NuGetCommand@2
+      displayName: Restore packages
+      inputs:
+        command: 'restore'
+        restoreSolution: '**/*.sfproj'
+        feedsToUse: 'select'
+        vstsFeed: 'PRIVATE_FEED_GUID'
+        includeNuGetOrg: false
+        restoreDirectory: packages
+    - task: VSBuild@1
+      displayName: 'Build solution (release)'
+      enabled: false
+      inputs:
+        solution: '**\*.sln'
+        vsVersion: latest
+        platform: '$(BuildPlatform)'
+        configuration: $(BuildConfiguration)
+        clean: true
+    - task: VSBuild@1
+      displayName: 'Build solution for Service Fabric'
+      inputs:
+        solution: '**\*.sfproj'
+        vsVersion: latest
+        msbuildArgs: '/t:Package /p:PackageLocation=$(AppPackageLocation)'
+        platform: '$(BuildPlatform)'
+        configuration: $(BuildConfiguration)
+    - task: ServiceFabricUpdateManifests@2
+      displayName: 'Update Service Fabric Manifest Versions'
+      inputs:
+        applicationPackagePath: '$(AppPackageLocation)'
+        versionSuffix: '$(Build.BuildNumber)'
+        versionBehavior: Replace
+        updateOnlyChanged: true
+        pkgArtifactName: drop

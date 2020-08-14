@@ -25,7 +25,7 @@ steps:
       displayName: Restore packages
       inputs:
         command: 'restore'
-        restoreSolution: '**/*.sfproj'
+        restoreSolution: '**/*.csproj'
         feedsToUse: 'select'
         vstsFeed: 'PRIVATE_FEED_GUID'
         includeNuGetOrg: false
@@ -42,7 +42,7 @@ steps:
     - task: VSBuild@1
       displayName: 'Build solution for Service Fabric'
       inputs:
-        solution: '**\*.sfproj'
+        solution: '**\*.csproj'
         vsVersion: latest
         msbuildArgs: '/t:Package /p:PackageLocation=$(AppPackageLocation)'
         platform: '$(BuildPlatform)'

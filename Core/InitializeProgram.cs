@@ -1,43 +1,44 @@
 ﻿using Dexter.Core;
 using Dexter.Core.Configuration;
 using Discord;
+using Figgle;
 using System;
 using System.Threading.Tasks;
 
 namespace Dexter.ConsoleApp {
     public class InitializeProgram {
         public static void Main() {
-            JSONConfigurator.LoadConfigurations();
+            JSONConfig.LoadConfig();
 
             try {
                 new InitializeProgram();
             } catch (Exception Exception) {
-                ConsoleLogger.LogError(Exception.StackTrace);
+                Console.WriteLine("\n " + Exception.ToString());
             }
 
-            Console.WriteLine("\n\n Please press any key to continue...");
+            Console.WriteLine("\n Please press any key to continue...");
 
             _ = Console.ReadKey(true);
         }
 
-        private readonly DiscordBot Dexter;
+        private readonly DiscordBot DiscordBot;
 
         private InitializeProgram() {
-            Console.Title = (string) JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Bot_Name");
+            Console.Title = (string) JSONConfig.Get(typeof(BotConfiguration), "Bot_Name");
 
-            Dexter = new DiscordBot();
+            DiscordBot = new DiscordBot();
 
-            Dexter.ConnectionChanged += OnConnectionStateChanged;
+            DiscordBot.ConnectionChanged += OnConnectionStateChanged;
 
-            if (!string.IsNullOrEmpty((string) JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Token"))) {
-                Dexter.Token = (string) JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Token");
+            if (!string.IsNullOrEmpty((string) JSONConfig.Get(typeof(BotConfiguration), "Token"))) {
+                DiscordBot.Token = (string) JSONConfig.Get(typeof(BotConfiguration), "Token");
 
                 DrawState();
 
                 for (int _ = 0; _ < 6; _++)
                     Console.WriteLine();
 
-                _ = Dexter.StartAsync();
+                _ = DiscordBot.StartAsync();
 
                 _ = Console.ReadKey(true);
             }
@@ -65,17 +66,17 @@ namespace Dexter.ConsoleApp {
                         Console.Write("\n Is this token correct? [Y] or [N] ");
 
                         if (Console.ReadKey().Key == ConsoleKey.Y) {
-                            Dexter.Token = Token;
+                            DiscordBot.Token = Token;
                             Console.Write("\n\n Applied token! ");
                         } else
                             Console.Write("\n\n Failed to apply token! Incorrect token given. ");
 
                         break;
                     case 2:
-                        if (Dexter.ConnectionState == ConnectionState.Connected)
-                            Dexter.StopAsync();
-                        else if (Dexter.ConnectionState == ConnectionState.Disconnected)
-                            _ = Dexter.StartAsync();
+                        if (DiscordBot.ConnectionState == ConnectionState.Connected)
+                            DiscordBot.StopAsync();
+                        else if (DiscordBot.ConnectionState == ConnectionState.Disconnected)
+                            _ = DiscordBot.StartAsync();
                         break;
                     case 3:
                         Environment.Exit(0);
@@ -97,8 +98,8 @@ namespace Dexter.ConsoleApp {
 
             Console.Write(
                 " [1] Edit Bot Token\n" +
-                " [2] Start/Stop " + JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Bot_Name") + "\n" +
-                " [3] Exit Dexter"
+                " [2] Start/Stop " + JSONConfig.Get(typeof(BotConfiguration), "Bot_Name") + "\n" +
+                " [3] Exit " + JSONConfig.Get(typeof(BotConfiguration), "Bot_Name")
             );
 
             Console.Write("\n\n Please select an action by typing its number: ");
@@ -110,7 +111,7 @@ namespace Dexter.ConsoleApp {
 
             Console.SetCursorPosition(0, 0);
 
-            Console.ForegroundColor = Dexter.ConnectionState switch {
+            Console.ForegroundColor = DiscordBot.ConnectionState switch {
                 ConnectionState.Disconnected => ConsoleColor.Red,
                 ConnectionState.Disconnecting => ConsoleColor.DarkRed,
                 ConnectionState.Connecting => ConsoleColor.Yellow,
@@ -118,14 +119,7 @@ namespace Dexter.ConsoleApp {
                 _ => ConsoleColor.Blue,
             };
 
-            Console.Write("\n" +
-                " ██████╗ ███████╗██╗  ██╗████████╗███████╗██████╗ \n" +
-                " ██╔══██╗██╔════╝╚██╗██╔╝╚══██╔══╝██╔════╝██╔══██╗\n" +
-                " ██║  ██║█████╗   ╚███╔╝    ██║   █████╗  ██████╔╝\n" +
-                " ██║  ██║██╔══╝   ██╔██╗    ██║   ██╔══╝  ██╔══██╗\n" +
-                " ██████╔╝███████╗██╔╝ ██╗   ██║   ███████╗██║  ██║\n" +
-                " ╚═════╝ ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝"
-            );
+            Console.Write("\n" + FiggleFonts.Shadow.Render((string) JSONConfig.Get(typeof(BotConfiguration), "Bot_Name")));
 
             Console.ResetColor();
 

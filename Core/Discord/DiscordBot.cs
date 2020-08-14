@@ -1,5 +1,4 @@
-﻿using Dexter.ConsoleApp;
-using Dexter.Core.Configuration;
+﻿using Dexter.Core.Configuration;
 using Discord;
 using Discord.WebSocket;
 using System;
@@ -52,7 +51,7 @@ namespace Dexter.Core {
         }
 
         public async Task StartAsync() {
-            ConsoleLogger.Log("Starting " + JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Bot_Name") + ". Please wait...");
+            ConsoleLogger.Log("Starting " + JSONConfig.Get(typeof(BotConfiguration), "Bot_Name") + ". Please wait...");
 
             CancellationToken = new CancellationTokenSource();
             
@@ -88,14 +87,14 @@ namespace Dexter.Core {
         private Task ClientOnReady() {
             Client.SetGameAsync("Use ~mail to anonymously message the staff team!", type: ActivityType.CustomStatus);
 
-            ConsoleLogger.Log(JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Bot_Name") + " has started successfully!");
+            ConsoleLogger.Log(JSONConfig.Get(typeof(BotConfiguration), "Bot_Name") + " has started successfully!");
             ConnectionState = ConnectionState.Connected;
 
             return Task.CompletedTask;
         }
 
         public void StopAsync() {
-            ConsoleLogger.Log("Stopping " + JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Bot_Name") + ". Please wait...");
+            ConsoleLogger.Log("Stopping " + JSONConfig.Get(typeof(BotConfiguration), "Bot_Name") + ". Please wait...");
 
             if (CancellationToken is null)
                 return;
@@ -107,7 +106,7 @@ namespace Dexter.Core {
             CancellationToken.Dispose();
             CancellationToken = null;
 
-            ConsoleLogger.Log(JSONConfigurator.GetConfiguration(typeof(BotConfiguration), "Bot_Name") + " has halted successfully!");
+            ConsoleLogger.Log(JSONConfig.Get(typeof(BotConfiguration), "Bot_Name") + " has halted successfully!");
         }
     }
 }

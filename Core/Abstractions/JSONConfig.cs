@@ -6,20 +6,20 @@ using System.Reflection;
 using System.Text.Json;
 
 namespace Dexter.Core.Configuration {
-    public static class JSONConfigurator {
+    public static class JSONConfig {
         private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions {
             WriteIndented = true
         };
 
         private static readonly Dictionary<Type, object> Configurations = new Dictionary<Type, object>();
 
-        public static void LoadConfigurations() {
+        public static void LoadConfig() {
             foreach (Type ConfigurationFile in Assembly.GetExecutingAssembly().GetTypes().Where(x => typeof(AbstractConfiguration).IsAssignableFrom(x)))
                 if (ConfigurationFile != typeof(AbstractConfiguration))
-                    LoadConfiguration(ConfigurationFile);
+                    LoadConfig(ConfigurationFile);
         }
 
-        private static void LoadConfiguration(Type ConfigurationFile) {
+        private static void LoadConfig(Type ConfigurationFile) {
             if (!File.Exists(ConfigurationFile.Name + ".json")) {
                 object Abstract = Activator.CreateInstance(ConfigurationFile);
                 File.WriteAllText(ConfigurationFile.Name + ".json", JsonSerializer.Serialize(Abstract, _jsonOptions));
@@ -30,7 +30,7 @@ namespace Dexter.Core.Configuration {
             }
         }
 
-        public static object GetConfiguration(Type ConfigurationClass, string Field) {
+        public static object Get(Type ConfigurationClass, string Field) {
             Field = "<" + Field + ">k__BackingField";
 
             if (!Configurations.ContainsKey(ConfigurationClass)) {

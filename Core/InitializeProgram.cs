@@ -119,7 +119,7 @@ namespace Dexter.ConsoleApp {
                 _ => ConsoleColor.Blue,
             };
 
-            Console.Write("\n" + FiggleFonts.Shadow.Render((string) JSONConfig.Get(typeof(BotConfiguration), "Bot_Name")));
+            Console.Write("\n" + FiggleFonts.Standard.Render((string) JSONConfig.Get(typeof(BotConfiguration), "Bot_Name")));
 
             Console.ResetColor();
 

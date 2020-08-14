@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using Dexter.Core.Configuration;
+using Discord;
 using Discord.Commands;
 using System;
 
@@ -6,6 +7,6 @@ namespace Dexter.Core {
     public class AbstractModule : ModuleBase<SocketCommandContext> {
         public static EmbedBuilder BuildEmbed() => new EmbedBuilder()
             .WithColor(Color.Blue)
-            .WithThumbnailUrl("https://us-furries.com/Dexter/Dex" + (new Random().Next(2) == 0 ? "Love" : "Annoyed") + ".png");
+            .WithThumbnailUrl(((string[])JSONConfig.Get(typeof(BotConfiguration), "ThumbnailURLs")) [ new Random().Next(((string[]) JSONConfig.Get(typeof(BotConfiguration), "ThumbnailURLs")).Length - 1) ]);
     }
 }

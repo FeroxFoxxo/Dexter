@@ -6,25 +6,24 @@ pool:
 
 variables:
   solution: '**/*.sln'
+  buildPlatform: 'x64'
+  buildConfiguration: 'Release'
 
 steps:
-- task: UseDotNet@2
-  displayName: 'Install .NET Core SDK'
-  inputs:
-    version: 5.0.x
-    performMultiLevelLookup: true
-    includePreviewVersions: true
+- task: NuGetToolInstaller@1
 
-- task: DotNetCoreCLI@2
-  displayName: Publish
+- task: NuGetCommand@2
   inputs:
-    command: publish
-    publishWebProjects: False
-    zipAfterPublish: False
-    arguments: '--output $(Build.ArtifactStagingDirectory)'
+    restoreSolution: '$(solution)'
 
-- task: PublishBuildArtifacts@1
-  displayName: Send Artifact
+- task: VSBuild@1
   inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
-    artifactName: 'Dexter'
+    solution: '$(solution)'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: VSTest@2
+  inputs:
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'

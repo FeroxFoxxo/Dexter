@@ -1,12 +1,11 @@
 ﻿using Dexter.Core.Configuration;
 using Discord;
 using Discord.Commands;
-using System;
 
 namespace Dexter.Core {
     public class AbstractModule : ModuleBase<SocketCommandContext> {
-        public static EmbedBuilder BuildEmbed(int ThumbnailURL) => new EmbedBuilder()
+        public static EmbedBuilder BuildEmbed(Thumbnails thumbnails) => new EmbedBuilder()
             .WithColor(Color.Blue)
-            .WithThumbnailUrl(((string[])JSONConfig.Get(typeof(BotConfiguration), "ThumbnailURLs")) [ ThumbnailURL ]);
+            .WithThumbnailUrl(thumbnails == Thumbnails.Null ? "" : ((string[])JSONConfig.Get(typeof(BotConfiguration), "ThumbnailURLs")) [(int) thumbnails]);
     }
 }

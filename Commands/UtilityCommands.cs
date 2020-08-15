@@ -42,7 +42,7 @@ namespace Dexter.Commands {
                     });
             }
 
-            await BuildEmbed()
+            await BuildEmbed(1)
                 .WithTitle("Hiya, I'm Dexter~! Here's a list of modules and commands you can use!")
                 .WithDescription("Use ~help [commandName] to show information about a command!")
                 .WithFields(Fields.ToArray())
@@ -55,7 +55,7 @@ namespace Dexter.Commands {
             SearchResult Result = Service.Search(Context, Command);
 
             if (!Result.IsSuccess) {
-                await BuildEmbed()
+                await BuildEmbed(0)
                     .WithTitle("Unknown Command")
                     .WithDescription("Sorry, I couldn't find a command like **" + Command + "**.")
                     .SendEmbed(Context.Channel);
@@ -84,8 +84,8 @@ namespace Dexter.Commands {
                 });
             }
 
-            await BuildEmbed()
-                .WithTitle("Here are some commands like **" + Command + "**")
+            await BuildEmbed(1)
+                .WithTitle("Here are some commands like **" + Command + "**!")
                 .WithFields(Fields.ToArray())
                 .SendEmbed(Context.Channel);
         }
@@ -93,7 +93,7 @@ namespace Dexter.Commands {
         [Command("ping")]
         [Summary("Displays the latency between Dexter and Discord.")]
         public async Task PingCommand() {
-            await BuildEmbed()
+            await BuildEmbed(1)
                 .WithTitle("Gateway Ping")
                 .WithDescription("**" + Context.Client.Latency + "ms**")
                 .SendEmbed(Context.Channel);
@@ -102,7 +102,7 @@ namespace Dexter.Commands {
         [Command("uptime")]
         [Summary("Displays the amount of time Dexter has been running for!")]
         public async Task UptimeCommand() {
-            await BuildEmbed()
+            await BuildEmbed(1)
                 .WithTitle("Uptime")
                 .WithDescription("I've been runnin' for **" + (DateTime.Now - Process.GetCurrentProcess().StartTime).Humanize() + "**~!\n*yawns*")
                 .SendEmbed(Context.Channel);

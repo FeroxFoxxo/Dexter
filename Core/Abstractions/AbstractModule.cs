@@ -5,8 +5,8 @@ using System;
 
 namespace Dexter.Core {
     public class AbstractModule : ModuleBase<SocketCommandContext> {
-        public static EmbedBuilder BuildEmbed() => new EmbedBuilder()
+        public static EmbedBuilder BuildEmbed(int ThumbnailURL) => new EmbedBuilder()
             .WithColor(Color.Blue)
-            .WithThumbnailUrl(((string[])JSONConfig.Get(typeof(BotConfiguration), "ThumbnailURLs")) [ new Random().Next(((string[]) JSONConfig.Get(typeof(BotConfiguration), "ThumbnailURLs")).Length - 1) ]);
+            .WithThumbnailUrl(((string[])JSONConfig.Get(typeof(BotConfiguration), "ThumbnailURLs")) [ ThumbnailURL ]);
     }
 }

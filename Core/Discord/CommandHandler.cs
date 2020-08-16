@@ -1,4 +1,4 @@
-﻿using Dexter.Core.Configuration;
+﻿using Dexter.Core.Enums;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -80,34 +80,32 @@ namespace Dexter.Core {
                         });
                     }
 
-                    await AbstractModule.BuildEmbed(Thumbnails.Annoyed)
+                    await AbstractModule.BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("You've entered an invalid amount of parameters for this command!")
                         .WithDescription("Here are some options of parameters you can have for the command **" + Command.Value.Name + "**.")
                         .WithFields(Fields.ToArray())
                         .SendEmbed(Context.Channel);
                     break;
                 case CommandError.UnmetPrecondition:
-                    string preconditionsRequired = string.Empty;
-                    Command.Value.Preconditions.ToList().ForEach(precondition => preconditionsRequired += precondition.ToString().Split('.')[^1].Replace("Require", "").ToLower() + ", ");
-                    await AbstractModule.BuildEmbed(Thumbnails.Annoyed)
+                    await AbstractModule.BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Access Denied")
-                        .WithDescription("Hiya! It seems like you don't have access to this command. Please check that you have the " + preconditionsRequired[0..^2] + " role, as is required to run this command.")
+                        .WithDescription("Hiya! It seems like you don't have access to this command. Please check that you have the required roles to run this command.")
                         .SendEmbed(Context.Channel);
                     break;
                 case CommandError.UnknownCommand:
-                    await AbstractModule.BuildEmbed(Thumbnails.Annoyed)
+                    await AbstractModule.BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Unknown Command")
                         .WithDescription("Oopsies! It seems as if the command **" + Context.Message.Content.Split(' ')[0] + "** doesn't exist!")
                         .SendEmbed(Context.Channel);
                     break;
                 default:
                     if (Result is ExecuteResult executeResult)
-                        await AbstractModule.BuildEmbed(Thumbnails.Annoyed)
+                        await AbstractModule.BuildEmbed(EmojiEnum.Annoyed)
                          .WithTitle(Regex.Replace(executeResult.Exception.GetType().Name, @"(?<!^)(?=[A-Z])", " "))
                          .WithDescription(executeResult.Exception.Message)
                          .SendEmbed(Context.Channel);
                     else
-                        await AbstractModule.BuildEmbed(Thumbnails.Annoyed)
+                        await AbstractModule.BuildEmbed(EmojiEnum.Annoyed)
                          .WithTitle(Regex.Replace(Result.Error.GetType().Name, @"(?<!^)(?=[A-Z])", " "))
                          .WithDescription(Result.ErrorReason)
                          .SendEmbed(Context.Channel);

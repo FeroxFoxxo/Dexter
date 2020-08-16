@@ -1,5 +1,5 @@
 ﻿using Dexter.Core;
-using Dexter.Core.Configuration;
+using Dexter.Core.Enums;
 using Discord;
 using Discord.Commands;
 using Humanizer;
@@ -44,7 +44,7 @@ namespace Dexter.Commands {
                     });
             }
 
-            await BuildEmbed(Thumbnails.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Hiya, I'm Dexter~! Here's a list of modules and commands you can use!")
                 .WithDescription("Use ~help [commandName] to show information about a command!")
                 .WithFields(Fields.ToArray())
@@ -57,7 +57,7 @@ namespace Dexter.Commands {
             SearchResult Result = Service.Search(Context, Command);
 
             if (!Result.IsSuccess) {
-                await BuildEmbed(Thumbnails.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unknown Command")
                     .WithDescription("Sorry, I couldn't find a command like **" + Command + "**.")
                     .SendEmbed(Context.Channel);
@@ -86,7 +86,7 @@ namespace Dexter.Commands {
                 });
             }
 
-            await BuildEmbed(Thumbnails.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Here are some commands like **" + Command + "**!")
                 .WithFields(Fields.ToArray())
                 .SendEmbed(Context.Channel);
@@ -95,7 +95,7 @@ namespace Dexter.Commands {
         [Command("ping")]
         [Summary("Displays the latency between Dexter and Discord.")]
         public async Task PingCommand() {
-            await BuildEmbed(Thumbnails.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Gateway Ping")
                 .WithDescription("**" + Context.Client.Latency + "ms**")
                 .SendEmbed(Context.Channel);
@@ -104,7 +104,7 @@ namespace Dexter.Commands {
         [Command("uptime")]
         [Summary("Displays the amount of time Dexter has been running for!")]
         public async Task UptimeCommand() {
-            await BuildEmbed(Thumbnails.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Uptime")
                 .WithDescription("I've been runnin' for **" + (DateTime.Now - Process.GetCurrentProcess().StartTime).Humanize() + "**~!\n*yawns*")
                 .SendEmbed(Context.Channel);
@@ -115,9 +115,10 @@ namespace Dexter.Commands {
         [Summary("Gets the profile of the user mentioned or yours.")]
         public async Task ProfileCommand([Optional] IGuildUser User) {
             if (User == null)
-                User = (IGuildUser) Context.User;
-            await BuildEmbed(Thumbnails.Null)
-                .WithTitle("User Profile For " + Context.Message.Author)
+                User = (IGuildUser)Context.User;
+
+            await BuildEmbed(EmojiEnum.Unknown)
+                .WithTitle("User Profile For " + User.Username + "#" + User.Discriminator)
                 .WithThumbnailUrl(User.GetAvatarUrl())
                 .AddField("Username", User.Username)
                 .AddField(!string.IsNullOrEmpty(User.Nickname), "Nickname", User.Nickname)
@@ -125,6 +126,39 @@ namespace Dexter.Commands {
                 .AddField(User.JoinedAt.HasValue, "Joined", User.JoinedAt?.ToString("dd/MM/yyyy HH:mm:ss") + " (" + User.JoinedAt.Humanize() + ")")
                 .AddField("Status", User.Status)
                 .SendEmbed(Context.Channel);
+        }
+
+        [Command("avatar")]
+        [Summary("Gets the avatar of a user mentioned or yours.")]
+        public async Task AvatarCommand([Optional] IGuildUser User) {
+            if (User == null)
+                User = (IGuildUser)Context.User;
+
+            await BuildEmbed(EmojiEnum.Unknown)
+                .WithImageUrl(User.GetAvatarUrl(ImageFormat.Png, 1024))
+                .WithUrl(User.GetAvatarUrl(ImageFormat.Png, 1024))
+                .WithAuthor(User)
+                .WithTitle("Get Avatar URL")
+                .SendEmbed(Context.Channel);
+        }
+
+        [Command("emote")]
+        [Alias("emoji")]
+        [Summary("Gets the full image of an emote.")]
+        public async Task EmojiCommand([Optional] string Emoji) {
+            if (Emote.TryParse(Emoji, out var Emojis))
+                await BuildEmbed(EmojiEnum.Unknown)
+                    .WithImageUrl(Emojis.Url)
+                    .WithUrl(Emojis.Url)
+                    .WithAuthor(Emojis.Name)
+                    .WithTitle("Get Emoji URL")
+                    .SendEmbed(Context.Channel);
+            else
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Unknown Emoji")
+                    .WithDescription("An invalid emote was specified! Please make sure that what you have sent is a valid emote. " +
+                    "Please make sure this is a **custom emote** aswell and does not fall under the unicode specification.")
+                    .SendEmbed(Context.Channel);
         }
     }
 }

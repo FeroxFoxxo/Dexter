@@ -8,10 +8,4 @@
 
         public string[] ThumbnailURLs { get; set; }
     }
-
-    public enum Thumbnails {
-        Annoyed,
-        Love,
-        Null
-    }
 }

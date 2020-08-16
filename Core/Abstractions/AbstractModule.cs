@@ -1,11 +1,12 @@
-﻿using Dexter.Core.Configuration;
+﻿using Dexter.Core.Enums;
+using Dexter.Core.Configuration;
 using Discord;
 using Discord.Commands;
 
 namespace Dexter.Core {
     public class AbstractModule : ModuleBase<SocketCommandContext> {
-        public static EmbedBuilder BuildEmbed(Thumbnails thumbnails) => new EmbedBuilder()
+        public static EmbedBuilder BuildEmbed(EmojiEnum thumbnails) => new EmbedBuilder()
             .WithColor(Color.Blue)
-            .WithThumbnailUrl(thumbnails == Thumbnails.Null ? "" : ((string[])JSONConfig.Get(typeof(BotConfiguration), "ThumbnailURLs")) [(int) thumbnails]);
+            .WithThumbnailUrl(((string[])JSONConfig.Get(typeof(BotConfiguration), "ThumbnailURLs")) [(int) thumbnails]);
     }
 }

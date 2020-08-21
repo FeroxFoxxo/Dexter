@@ -7,49 +7,62 @@ using System.Threading.Tasks;
 
 namespace Dexter.ConsoleApp {
     public class InitializeProgram {
-        public static void Main() {
-            JSONConfig.LoadConfig();
-
-            try {
-                new InitializeProgram();
-            } catch (Exception Exception) {
-                Console.WriteLine("\n " + Exception.ToString());
-            }
-
-            Console.WriteLine("\n Please press any key to continue...");
-
-            _ = Console.ReadKey(true);
-        }
 
         private readonly DiscordBot DiscordBot;
 
+        private readonly JSONConfig JSONConfig;
+
+        private ConsoleColor State;
+
+        public static async Task Main() {
+            await new InitializeProgram().InitializeBot();
+        }
+
         private InitializeProgram() {
+            JSONConfig = new JSONConfig();
+
+            JSONConfig.LoadConfig();
+
             Console.Title = (string) JSONConfig.Get(typeof(BotConfiguration), "Bot_Name");
 
-            DiscordBot = new DiscordBot();
+            DiscordBot = new DiscordBot(JSONConfig);
 
-            DiscordBot.ConnectionChanged += OnConnectionStateChanged;
+            State = ConsoleColor.Red;
+        }
 
-            if (!string.IsNullOrEmpty((string) JSONConfig.Get(typeof(BotConfiguration), "Token"))) {
-                DiscordBot.Token = (string) JSONConfig.Get(typeof(BotConfiguration), "Token");
+        public async Task InitializeBot() {
+            DiscordBot.Client.Connected += Client_Connected;
+            DiscordBot.Client.Disconnected += Client_Disconnected;
 
-                DrawState();
+            await DrawState();
+
+            if (!string.IsNullOrEmpty((string)JSONConfig.Get(typeof(BotConfiguration), "Token"))) {
+                DiscordBot.Token = (string)JSONConfig.Get(typeof(BotConfiguration), "Token");
 
                 for (int _ = 0; _ < 6; _++)
                     Console.WriteLine();
 
-                _ = DiscordBot.StartAsync();
+                await DiscordBot.StartAsync();
 
-                _ = Console.ReadKey(true);
+                _ = Console.ReadKey();
             }
 
-            HandleInput();
+            await HandleInput();
         }
 
-        private Task HandleInput() {
+        private Task Client_Disconnected(Exception arg) {
+            State = ConsoleColor.Red;
+            return DrawState();
+        }
+
+        private Task Client_Connected() {
+            State = ConsoleColor.Green;
+            return DrawState();
+        }
+
+        private async Task HandleInput() {
             while (true) {
-                DrawMenu();
-                DrawState();
+                await DrawMenu();
 
                 bool Success = int.TryParse(Console.ReadKey().KeyChar.ToString(), out int choice);
 
@@ -65,18 +78,15 @@ namespace Dexter.ConsoleApp {
                         Console.Write("\n You entered the following token: " + Token);
                         Console.Write("\n Is this token correct? [Y] or [N] ");
 
-                        if (Console.ReadKey().Key == ConsoleKey.Y) {
+                        if (Console.ReadKey().Key == ConsoleKey.Y)
                             DiscordBot.Token = Token;
-                            Console.Write("\n\n Applied token! ");
-                        } else
-                            Console.Write("\n\n Failed to apply token! Incorrect token given. ");
 
                         break;
                     case 2:
-                        if (DiscordBot.ConnectionState == ConnectionState.Connected)
-                            DiscordBot.StopAsync();
-                        else if (DiscordBot.ConnectionState == ConnectionState.Disconnected)
-                            _ = DiscordBot.StartAsync();
+                        if (DiscordBot.Client.ConnectionState == ConnectionState.Connected)
+                            await DiscordBot.StopAsync();
+                        else if (DiscordBot.Client.ConnectionState == ConnectionState.Disconnected)
+                            await DiscordBot.StartAsync();
                         break;
                     case 3:
                         Environment.Exit(0);
@@ -90,8 +100,10 @@ namespace Dexter.ConsoleApp {
             }
         }
 
-        private void DrawMenu() {
+        private async Task DrawMenu() {
             Console.Clear();
+
+            await DrawState();
 
             for(int _ = 0; _ < 8; _++)
                 Console.WriteLine();
@@ -105,27 +117,21 @@ namespace Dexter.ConsoleApp {
             Console.Write("\n\n Please select an action by typing its number: ");
         }
 
-        private void DrawState() {
+        private Task DrawState() {
             int PreviousCursorLeft = Console.CursorLeft;
             int PreviousCursorTop = Console.CursorTop;
 
             Console.SetCursorPosition(0, 0);
 
-            Console.ForegroundColor = DiscordBot.ConnectionState switch {
-                ConnectionState.Disconnected => ConsoleColor.Red,
-                ConnectionState.Disconnecting => ConsoleColor.DarkRed,
-                ConnectionState.Connecting => ConsoleColor.Yellow,
-                ConnectionState.Connected => ConsoleColor.Green,
-                _ => ConsoleColor.Blue,
-            };
+            Console.ForegroundColor = State;
 
             Console.Write("\n" + FiggleFonts.Standard.Render((string) JSONConfig.Get(typeof(BotConfiguration), "Bot_Name")));
 
             Console.ResetColor();
 
             Console.SetCursorPosition(PreviousCursorLeft, PreviousCursorTop);
-        }
 
-        private void OnConnectionStateChanged(object Sender, EventArgs E) => DrawState();
+            return Task.CompletedTask;
+        }
     }
 }

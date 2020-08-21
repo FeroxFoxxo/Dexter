@@ -10,21 +10,11 @@ namespace Dexter.Core {
 
         private readonly CommandHandler CommandHandler;
 
-        public event EventHandler ConnectionChanged;
-
         private CancellationTokenSource CancellationToken;
 
         public DiscordSocketClient Client { get; private set; }
 
-        private ConnectionState _ConnectionState;
-
-        public ConnectionState ConnectionState {
-            get => _ConnectionState;
-            set {
-                _ConnectionState = value;
-                ConnectionChanged?.Invoke(this, EventArgs.Empty);
-            }
-        }
+        private readonly JSONConfig JSONConfig;
 
         private string _Token;
 
@@ -32,81 +22,41 @@ namespace Dexter.Core {
             private get => _Token;
             set {
                 _Token = value;
-
-                if (CancellationToken is null)
-                    return;
-
-                if (ConnectionState != ConnectionState.Disconnected)
-                    ConnectionState = ConnectionState.Disconnecting;
-
-                CancellationToken.Cancel();
-                CancellationToken.Dispose();
-                CancellationToken = null;
+                _ = Client.StopAsync();
             }
         }
         
-        public DiscordBot() {
-            ConnectionState = ConnectionState.Disconnected;
-            CommandHandler = new CommandHandler(this);
+        public DiscordBot(JSONConfig _JSONConfig) {
+            JSONConfig = _JSONConfig;
+            CommandHandler = new CommandHandler(this, JSONConfig);
+            Client = new DiscordSocketClient();
+
+            Client.Log += ConsoleLogger.LogDiscord;
+            Client.Ready += ClientOnReady;
+            Client.MessageReceived += CommandHandler.HandleCommandAsync;
         }
 
         public async Task StartAsync() {
-            ConsoleLogger.Log("Starting " + JSONConfig.Get(typeof(BotConfiguration), "Bot_Name") + ". Please wait...");
-
-            CancellationToken = new CancellationTokenSource();
-            
-            ConnectionState = ConnectionState.Connecting;
-
             try {
                 if (string.IsNullOrWhiteSpace(Token))
                     throw new ArgumentNullException(nameof(Token));
 
-                Client = new DiscordSocketClient(
-                    new DiscordSocketConfig {
-                        LogLevel = LogSeverity.Info,
-                    }
-                );
-
                 await Client.LoginAsync(TokenType.Bot, Token);
-
-                Client.Log += ConsoleLogger.LogDiscord;
-                Client.Ready += ClientOnReady;
-
-                await CommandHandler.InitializeAsync();
-
                 await Client.StartAsync();
-
-                await Task.Delay(-1, CancellationToken.Token);
             } catch (Exception Exception) {
                 ConsoleLogger.LogError(Exception.Message + "\n" + Exception.StackTrace);
-            } finally {
-                ConnectionState = ConnectionState.Disconnected;
+                await Client.StopAsync();
             }
         }
 
         private Task ClientOnReady() {
             Client.SetGameAsync("Use ~mail to anonymously message the staff team!", type: ActivityType.CustomStatus);
 
-            ConsoleLogger.Log(JSONConfig.Get(typeof(BotConfiguration), "Bot_Name") + " has started successfully!");
-            ConnectionState = ConnectionState.Connected;
-
             return Task.CompletedTask;
         }
 
-        public void StopAsync() {
-            ConsoleLogger.Log("Stopping " + JSONConfig.Get(typeof(BotConfiguration), "Bot_Name") + ". Please wait...");
-
-            if (CancellationToken is null)
-                return;
-
-            if (ConnectionState != ConnectionState.Disconnected)
-                ConnectionState = ConnectionState.Disconnecting;
-
-            CancellationToken.Cancel();
-            CancellationToken.Dispose();
-            CancellationToken = null;
-
-            ConsoleLogger.Log(JSONConfig.Get(typeof(BotConfiguration), "Bot_Name") + " has halted successfully!");
+        public async Task StopAsync() {
+            await Client.StopAsync();
         }
     }
 }

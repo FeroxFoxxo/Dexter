@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 
 namespace Dexter.Commands {
     public class FunCommands : AbstractModule {
+        public FunCommands(JSONConfig _JSONConfig) : base(_JSONConfig) {}
+
         [Command("nuzzle")]
         [Summary("Nuzzles a mentioned user or yourself.")]
         public async Task NuzzleCommand([Optional] IGuildUser User) {
@@ -20,7 +22,7 @@ namespace Dexter.Commands {
         }
 
         [Command("say")]
-        [Summary("Dexter now has a voice! Use the ~say command so speak *through* him!")]
+        [Summary("I now have a voice! Use the ~say command so speak *through* me!")]
         [RequireModerator]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task SayCommand([Remainder] string Message) {
@@ -87,7 +89,7 @@ namespace Dexter.Commands {
 
             await BuildEmbed(EmojiEnum.Sign)
                 .WithAuthor(Context.Message.Author)
-                .WithTitle("Dexter Asks")
+                .WithTitle(JSONConfig.Get(typeof(BotConfiguration), "Bot_Name") + " Asks")
                 .WithDescription(WYR.Value)
                 .WithFooter("Would You Rather Written by " + WYR.Key)
                 .SendEmbed(Context.Channel);

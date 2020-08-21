@@ -4,8 +4,14 @@ using Discord;
 using Discord.Commands;
 
 namespace Dexter.Core {
-    public class AbstractModule : ModuleBase<SocketCommandContext> {
-        public static EmbedBuilder BuildEmbed(EmojiEnum thumbnails) => new EmbedBuilder()
+    public abstract class AbstractModule : ModuleBase<SocketCommandContext> {
+        protected JSONConfig JSONConfig;
+
+        protected AbstractModule(JSONConfig _JSONConfig) {
+            JSONConfig = _JSONConfig;
+        }
+
+        public EmbedBuilder BuildEmbed(EmojiEnum thumbnails) => new EmbedBuilder()
             .WithColor(Color.Blue)
             .WithThumbnailUrl(((string[])JSONConfig.Get(typeof(BotConfiguration), "ThumbnailURLs")) [(int) thumbnails]);
     }

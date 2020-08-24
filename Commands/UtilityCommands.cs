@@ -1,4 +1,4 @@
-﻿using Dexter.Core;
+﻿using Dexter.Core.Abstractions;
 using Dexter.Core.Configuration;
 using Dexter.Core.Enums;
 using Discord;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Dexter.Commands {
     public class UtilityCommands : AbstractModule {
-        public UtilityCommands(JSONConfig _JSONConfig) : base(_JSONConfig) {}
+        public UtilityCommands(BotConfiguration _BotConfiguration) : base(_BotConfiguration) {}
 
         [Command("ping")]
         [Summary("Displays the latency between both Discord and I.")]

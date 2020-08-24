@@ -1,4 +1,5 @@
 ﻿using Dexter.Core;
+using Dexter.Core.Abstractions;
 using Dexter.Core.Configuration;
 using Dexter.Core.Enums;
 using Discord;
@@ -12,10 +13,8 @@ namespace Dexter.Commands {
     public class HelpCommands : AbstractModule {
         private readonly CommandService Service;
 
-        public HelpCommands(CommandService _Service, JSONConfig _JSONConfig) : base(_JSONConfig) {
+        public HelpCommands(CommandService _Service, BotConfiguration _BotConfiguration) : base(_BotConfiguration) {
             Service = _Service;
-            Service.CommandExecuted += SendCommandError;
-            JSONConfig = _JSONConfig;
         }
 
         [Command("help")]
@@ -44,7 +43,7 @@ namespace Dexter.Commands {
             }
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle("Hiya, I'm " + JSONConfig.Get(typeof(BotConfiguration), "Bot_Name") + "~! Here's a list of modules and commands you can use!")
+                .WithTitle("Hiya, I'm " + BotConfiguration.Bot_Name + "~! Here's a list of modules and commands you can use!")
                 .WithDescription("Use ~help [commandName] to show information about a command!")
                 .WithFields(Fields.ToArray())
                 .SendEmbed(Context.Channel);

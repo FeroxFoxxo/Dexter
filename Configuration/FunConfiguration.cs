@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Dexter.Core.Abstractions;
+using System.Collections.Generic;
 
 namespace Dexter.Core.Configuration {
     public class FunConfiguration : AbstractConfiguration {

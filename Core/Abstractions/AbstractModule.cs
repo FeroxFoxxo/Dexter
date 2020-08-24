@@ -3,16 +3,16 @@ using Dexter.Core.Configuration;
 using Discord;
 using Discord.Commands;
 
-namespace Dexter.Core {
+namespace Dexter.Core.Abstractions {
     public abstract class AbstractModule : ModuleBase<SocketCommandContext> {
-        protected JSONConfig JSONConfig;
+        protected BotConfiguration BotConfiguration;
 
-        protected AbstractModule(JSONConfig _JSONConfig) {
-            JSONConfig = _JSONConfig;
+        protected AbstractModule(BotConfiguration _BotConfiguration) {
+            BotConfiguration = _BotConfiguration;
         }
 
         public EmbedBuilder BuildEmbed(EmojiEnum thumbnails) => new EmbedBuilder()
             .WithColor(Color.Blue)
-            .WithThumbnailUrl(((string[])JSONConfig.Get(typeof(BotConfiguration), "ThumbnailURLs")) [(int) thumbnails]);
+            .WithThumbnailUrl(BotConfiguration.ThumbnailURLs[(int) thumbnails]);
     }
 }

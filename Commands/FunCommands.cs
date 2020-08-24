@@ -1,4 +1,5 @@
 ﻿using Dexter.Core;
+using Dexter.Core.Abstractions;
 using Dexter.Core.Configuration;
 using Dexter.Core.Enums;
 using Discord;
@@ -10,7 +11,11 @@ using System.Threading.Tasks;
 
 namespace Dexter.Commands {
     public class FunCommands : AbstractModule {
-        public FunCommands(JSONConfig _JSONConfig) : base(_JSONConfig) {}
+        private readonly FunConfiguration FunConfiguration;
+
+        public FunCommands(BotConfiguration _BotConfiguration, FunConfiguration _FunConfiguration) : base(_BotConfiguration) {
+            FunConfiguration = _FunConfiguration;
+        }
 
         [Command("nuzzle")]
         [Summary("Nuzzles a mentioned user or yourself.")]
@@ -23,7 +28,6 @@ namespace Dexter.Commands {
 
         [Command("say")]
         [Summary("I now have a voice! Use the ~say command so speak *through* me!")]
-        [RequireModerator]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task SayCommand([Remainder] string Message) {
             await Context.Message.DeleteAsync();
@@ -42,7 +46,7 @@ namespace Dexter.Commands {
                 (Percentage > 100 ? "***over 9000!***" : "**" + Percentage + "%**") + ". " +
                 (User.Id == Context.Message.Author.Id ? "You're" : User.Id == Context.Client.CurrentUser.Id ? "I'm" : "They're") + " **" +
                 (Percentage < 33 ? "heterosexual" : Percentage < 66 ? "bisexual" : "homosexual") + "**! " +
-                Emote.Parse(((Dictionary<string, string>)JSONConfig.Get(typeof(FunConfiguration), "EmojiIDs"))[Percentage < 33 ? "annoyed" : Percentage < 66 ? "wut" : "love"]));
+                Emote.Parse(FunConfiguration.EmojiIDs[Percentage < 33 ? "annoyed" : Percentage < 66 ? "wut" : "love"]));
         }
 
         [Command("8ball")]
@@ -50,9 +54,9 @@ namespace Dexter.Commands {
         public async Task EightBallCommand([Remainder] string Message) {
             string Result = new Random().Next(4) == 3 ? "uncertain" : new Random(Message.GetHashCode()).Next(2) == 0 ? "yes" : "no";
 
-            string[] Responces = ((Dictionary<string, string[]>) JSONConfig.Get(typeof(FunConfiguration), "EightBall"))[Result];
+            string[] Responces = FunConfiguration.EightBall[Result];
 
-            Emote emoji = Emote.Parse(((Dictionary<string, string>) JSONConfig.Get(typeof(FunConfiguration), "EmojiIDs"))[((Dictionary<string, string>) JSONConfig.Get(typeof(FunConfiguration), "EightBallEmoji"))[Result]]);
+            Emote emoji = Emote.Parse(FunConfiguration.EmojiIDs[FunConfiguration.EightBallEmoji[Result]]);
 
             await Context.Channel.SendMessageAsync(Responces[new Random().Next(Responces.Length)] + ", **" + Context.Message.Author + "** " + emoji);
         }
@@ -62,7 +66,7 @@ namespace Dexter.Commands {
         public async Task TopicCommand() {
             List<KeyValuePair<string, string>> Topics = new List<KeyValuePair<string, string>>();
 
-            foreach (KeyValuePair<string, string[]> PairsOfTopics in (Dictionary<string, string[]>) JSONConfig.Get(typeof(FunConfiguration), "Topic"))
+            foreach (KeyValuePair<string, string[]> PairsOfTopics in FunConfiguration.Topic)
                 foreach (string PairedTopic in PairsOfTopics.Value)
                     Topics.Add(new KeyValuePair<string, string>(PairsOfTopics.Key, PairedTopic));
 
@@ -70,18 +74,18 @@ namespace Dexter.Commands {
 
             await BuildEmbed(EmojiEnum.Sign)
                 .WithAuthor(Context.Message.Author)
-                .WithTitle("Dexter Asks")
+                .WithTitle(BotConfiguration.Bot_Name + " Asks")
                 .WithDescription(Topic.Value)
                 .WithFooter("Topic Written by " + Topic.Key)
                 .SendEmbed(Context.Channel);
         }
 
         [Command("wyr")]
-        [Summary("A topic command comparing two different choices from which a discussion can be made from.")]
+        [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from.")]
         public async Task WYRCommand() {
             List<KeyValuePair<string, string>> WYRS = new List<KeyValuePair<string, string>>();
 
-            foreach (KeyValuePair<string, string[]> PairsOfWYRS in (Dictionary<string, string[]>)JSONConfig.Get(typeof(FunConfiguration), "WouldYouRather"))
+            foreach (KeyValuePair<string, string[]> PairsOfWYRS in FunConfiguration.WouldYouRather)
                 foreach (string PairedWYR in PairsOfWYRS.Value)
                     WYRS.Add(new KeyValuePair<string, string>(PairsOfWYRS.Key, PairedWYR));
 
@@ -89,7 +93,7 @@ namespace Dexter.Commands {
 
             await BuildEmbed(EmojiEnum.Sign)
                 .WithAuthor(Context.Message.Author)
-                .WithTitle(JSONConfig.Get(typeof(BotConfiguration), "Bot_Name") + " Asks")
+                .WithTitle(BotConfiguration.Bot_Name + " Asks")
                 .WithDescription(WYR.Value)
                 .WithFooter("Would You Rather Written by " + WYR.Key)
                 .SendEmbed(Context.Channel);

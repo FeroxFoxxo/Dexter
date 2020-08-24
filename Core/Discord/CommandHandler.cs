@@ -1,48 +1,41 @@
-﻿using Dexter.Core.Configuration;
+﻿using Dexter.Core.Abstractions;
+using Dexter.Core.Configuration;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Dexter.Core {
-    public class CommandHandler {
-        private readonly DiscordBot Discord;
+    public class CommandHandler : AbstractInitializer {
+        private readonly DiscordSocketClient Client;
 
         private readonly IServiceProvider Services;
 
         private readonly CommandService CommandService;
 
-        private readonly JSONConfig JSONConfig;
+        private readonly BotConfiguration BotConfiguration;
 
-        public CommandHandler(DiscordBot _Discord, JSONConfig _JSONConfig) {
-            Discord = _Discord;
-            JSONConfig = _JSONConfig;
-            CommandService = new CommandService();
+        public CommandHandler(DiscordSocketClient _Client, CommandService _CommandService, BotConfiguration _BotConfiguration, IServiceProvider _Services) {
+            Client = _Client;
+            BotConfiguration = _BotConfiguration;
+            CommandService = _CommandService;
+            Services = _Services;
+        }
 
-            ServiceCollection Collection = new ServiceCollection();
-
-            Collection.AddSingleton(JSONConfig);
-
-            Services = Collection.BuildServiceProvider();
-
-            Assembly.GetExecutingAssembly()
-                .GetTypes()
-                .Where(x => typeof(AbstractModule).IsAssignableFrom(x) && !x.IsAbstract)
-                .ToList()
-                .ForEach((x) => CommandService.AddModuleAsync(x, Services));
+        public override void AddDelegates() {
+            Client.MessageReceived += HandleCommandAsync;
         }
 
         public async Task HandleCommandAsync(SocketMessage SocketMessage) {
-            if (!(SocketMessage is SocketUserMessage Message))
-                return;
+            if (!(SocketMessage is SocketUserMessage Message)) return;
 
             int ArgumentPosition = 0;
+            if (!(Message.HasStringPrefix(BotConfiguration.Prefix, ref ArgumentPosition) ||
+                Message.HasMentionPrefix(Client.CurrentUser, ref ArgumentPosition)) ||
+                Message.Author.IsBot)
+                return;
 
-            if ((Message.HasMentionPrefix(Discord.Client.CurrentUser, ref ArgumentPosition) || Message.HasCharPrefix('~', ref ArgumentPosition)) && !Message.Author.IsBot)
-                await CommandService.ExecuteAsync(new SocketCommandContext(Discord.Client, Message), ArgumentPosition, Services);
+            await CommandService.ExecuteAsync(new SocketCommandContext(Client, Message), ArgumentPosition, Services);
         }
     }
 }

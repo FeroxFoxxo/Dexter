@@ -4,6 +4,7 @@ using Discord;
 using Discord.WebSocket;
 using Figgle;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -15,9 +16,12 @@ namespace Dexter.Core.Frontend {
 
         private readonly BotConfiguration BotConfiguration;
 
-        public FrontendConsole(DiscordSocketClient _Client, BotConfiguration _BotConfiguration) {
+        private readonly IServiceProvider Services;
+
+        public FrontendConsole(DiscordSocketClient _Client, BotConfiguration _BotConfiguration, IServiceProvider _Services) {
             Client = _Client;
             BotConfiguration = _BotConfiguration;
+            Services = _Services;
         }
 
         public override void AddDelegates() {
@@ -26,17 +30,20 @@ namespace Dexter.Core.Frontend {
         }
 
         public async Task RunAsync() {
-            Console.Title = BotConfiguration.Bot_Name;
-
             await DrawState();
 
             if (!string.IsNullOrEmpty(BotConfiguration.Token)) {
                 for (int _ = 0; _ < 6; _++)
                     await Console.Out.WriteLineAsync();
 
-                await Client.LoginAsync(TokenType.Bot, BotConfiguration.Token);
+                try {
+                    await Client.LoginAsync(TokenType.Bot, BotConfiguration.Token);
 
-                await Client.StartAsync();
+                    await Client.StartAsync();
+                } catch (Exception Exception) {
+                    Console.WriteLine($"\n {Exception.Message}");
+                    Console.Write("\n Please press any key to continue... ");
+                }
 
                 Console.ReadKey(true);
             }
@@ -53,73 +60,121 @@ namespace Dexter.Core.Frontend {
                 for (int _ = 0; _ < 6; _++)
                     await Console.Out.WriteLineAsync();
 
-                await Console.Out.WriteLineAsync($"\n [1] Edit Configuration");
-                await Console.Out.WriteLineAsync($" [2] Start/Stop {BotConfiguration.Bot_Name}");
-                await Console.Out.WriteLineAsync($" [3] Exit {BotConfiguration.Bot_Name}");
+                if (GetOptionMenu(new string[3] {"Edit Configuration", $"Start/Stop {BotConfiguration.Bot_Name}", $"Exit {BotConfiguration.Bot_Name}"}, "Menu", out int Choice)) {
+                    if (Choice == 1) {
+                        List<Type> Configurations = new List<Type>();
+                        List<string> ConfigurationNames = new List<string>();
 
-                await Console.Out.WriteAsync("\n Please select an action by typing its number: ");
+                        Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(AbstractConfiguration)) && !Type.IsAbstract).ToList().ForEach(Configuration => {
+                            bool HasWritableFields = false;
 
-                bool Success = int.TryParse(Console.ReadKey().KeyChar.ToString(), out int Choice);
+                            Configuration.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).ToList().ForEach(Field => {
+                                try {
+                                    _ = (string)Convert.ChangeType(Field.GetValue(Services.GetService(Configuration)), typeof(string));
+                                    HasWritableFields = true;
+                                } catch (Exception) { }
+                            });
 
-                await Console.Out.WriteLineAsync();
+                            if (HasWritableFields) {
+                                Configurations.Add(Configuration);
+                                ConfigurationNames.Add(Configuration.Name);
+                            }
+                        });
 
-                if (!Success)
-                    await Console.Out.WriteLineAsync("\n Please enter a valid number. Don't type in the [ and ] characters. Just the number. ");
+                        if (GetOptionMenu(ConfigurationNames.ToArray(), "Configuration", out int ConfigChoice)) {
+                            Type Configuration = Configurations[ConfigChoice - 1];
+                            await Console.Out.WriteLineAsync($"\n You've chosen to edit {Configuration.Name}. ");
 
-                switch (Choice) {
-                    case 1:
-                        Type[] ConfigurationFiles = Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(AbstractConfiguration)) && !Type.IsAbstract).ToArray();
+                            List<string> FieldNames = new List<string>();
+                            List<FieldInfo> Fields = new List<FieldInfo>();
 
-                        await Console.Out.WriteLineAsync("\n Configuration Files:");
+                            Configuration.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).ToList().ForEach(Field => {
+                                try {
+                                    string Value = (string)Convert.ChangeType(Field.GetValue(Services.GetService(Configuration)), typeof(string));
+                                    FieldNames.Add($"{Field.FieldType.Name} {Field.Name[1..^16]} = {Value}");
+                                    Fields.Add(Field);
+                                } catch (Exception) { }
+                            });
 
-                        for (int i = 0; i < ConfigurationFiles.Length; i++)
-                            await Console.Out.WriteLineAsync($"     {i + 1}. {ConfigurationFiles[i].Name}");
+                            if (GetOptionMenu(FieldNames.ToArray(), "Field", out int FieldChoice)) {
+                                string FieldName = Fields[FieldChoice - 1].Name[1..^16];
 
-                        await Console.Out.WriteAsync("\n Please select the number of which configuration you wish to edit: ");
+                                await Console.Out.WriteAsync($"\n What do you wish to set {FieldName} to? ");
 
-                        bool SuccessConfig = int.TryParse(Console.ReadKey().KeyChar.ToString(), out int ConfigChoice);
+                                string Value = Console.ReadLine();
 
-                        await Console.Out.WriteLineAsync();
+                                await Console.Out.WriteLineAsync($"\n You've entered the following field for {FieldName}: {Value}");
+                                await Console.Out.WriteAsync(" Are you sure you wish to wish to apply this property? [Y] or [N] ");
 
-                        if (!SuccessConfig)
-                            await Console.Out.WriteLineAsync("\n Please enter a valid number. Don't type in the [ and ] characters. Just the number. ");
+                                ConsoleKey Key = Console.ReadKey().Key;
 
-                        if (ConfigurationFiles.Length >= ConfigChoice && ConfigChoice > 0) {
-                            await Console.Out.WriteLineAsync($"\n You've chosen to edit {ConfigurationFiles[ConfigChoice].Name}. ");
-                        } else
-                            await Console.Out.WriteLineAsync("\n Your choice was not recognized as an option in the menu. Please try again. ");
+                                await Console.Out.WriteLineAsync();
 
-                        break;
-                    case 2:
+                                if (Key == ConsoleKey.Y) {
+                                    Fields[FieldChoice - 1].SetValue(Services.GetService(Configuration), Convert.ChangeType(Value, Fields[FieldChoice - 1].FieldType));
+                                    await Console.Out.WriteAsync($"\n Successfully set {FieldName} to {Value}.");
+                                } else
+                                    await Console.Out.WriteAsync($"\n Failed to apply {FieldName}! Incorrect {FieldName} given.");
+                            }
+                        }
+                    } else if (Choice == 2) {
                         try {
                             if (Client.ConnectionState == ConnectionState.Connected)
                                 await Client.StopAsync();
-                            else if (Client.ConnectionState == ConnectionState.Disconnected)
+                            else if (Client.ConnectionState == ConnectionState.Disconnected) {
+                                await Client.LoginAsync(TokenType.Bot, BotConfiguration.Token);
                                 await Client.StartAsync();
-                        } catch (Exception) {}
-                        break;
-                    case 3:
+                            }
+                        } catch (Exception Exception) {
+                            Console.WriteLine($"\n {Exception.Message}");
+                            Console.Write("\n Please press any key to continue... ");
+                        }
+                    } else {
                         Environment.Exit(0);
                         break;
-                    default:
-                        await Console.Out.WriteLineAsync("\n Your choice was not recognized as an option in the menu. Please try again. ");
-                        break;
+                    }
                 }
 
                 Console.ReadKey(true);
             }
         }
 
+        private bool GetOptionMenu(object[] Possibilities, string Name, out int ReturnedChoice) {
+            Console.WriteLine($"\n {Name}s:");
+
+            for (int i = 0; i < Possibilities.Length; i++)
+                Console.WriteLine($"    {i + 1}. {Possibilities[i]}");
+
+            Console.Write($"\n Please select a {Name.ToLower()} by typing its number: ");
+
+            bool Success = int.TryParse(Console.ReadKey().KeyChar.ToString(), out int Choice);
+
+            ReturnedChoice = Choice;
+
+            Console.WriteLine();
+
+            if (!Success)
+                Console.WriteLine("\n Please enter a valid number. Don't type in the [ and ] characters. Just the number. ");
+
+            if (Possibilities.Length >= Choice && Choice > 0)
+                return true;
+
+            Console.WriteLine("\n Your choice was not recognized as an option in the menu. Please try again. ");
+            return false;
+        }
+
         private async Task DrawState() {
+            Console.Title = BotConfiguration.Bot_Name;
+
             int PreviousCursorLeft = Console.CursorLeft;
             int PreviousCursorTop = Console.CursorTop;
 
             Console.SetCursorPosition(0, 0);
 
             Console.ForegroundColor = Client.ConnectionState switch {
-                ConnectionState.Disconnected => ConsoleColor.Red,
                 ConnectionState.Connected => ConsoleColor.Green,
-                _ => ConsoleColor.Blue,
+                ConnectionState.Disconnected => ConsoleColor.Red,
+                _ => ConsoleColor.Red,
             };
 
             await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(BotConfiguration.Bot_Name));

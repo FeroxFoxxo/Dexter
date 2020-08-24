@@ -1,5 +1,4 @@
-﻿using Dexter.Core;
-using Dexter.Core.Abstractions;
+﻿using Dexter.Core.Abstractions;
 using Dexter.Core.Configuration;
 using Dexter.Core.Enums;
 using Discord;
@@ -23,7 +22,7 @@ namespace Dexter.Commands {
             if (User == null)
                 User = (IGuildUser)Context.User;
 
-            await Context.Channel.SendMessageAsync("*nuzzles " + User.Mention + " floofily*");
+            await Context.Channel.SendMessageAsync($"*nuzzles {User.Mention} floofily*");
         }
 
         [Command("say")]
@@ -42,11 +41,9 @@ namespace Dexter.Commands {
 
             int Percentage = new Random((User.Id / new DateTime(1970, 1, 1).Subtract(DateTime.Now).TotalDays).ToString().GetHashCode()).Next(102);
 
-            await Context.Channel.SendMessageAsync("**" + User.Username + "'s** level of gay is " + 
-                (Percentage > 100 ? "***over 9000!***" : "**" + Percentage + "%**") + ". " +
-                (User.Id == Context.Message.Author.Id ? "You're" : User.Id == Context.Client.CurrentUser.Id ? "I'm" : "They're") + " **" +
-                (Percentage < 33 ? "heterosexual" : Percentage < 66 ? "bisexual" : "homosexual") + "**! " +
-                Emote.Parse(FunConfiguration.EmojiIDs[Percentage < 33 ? "annoyed" : Percentage < 66 ? "wut" : "love"]));
+            await Context.Channel.SendMessageAsync($"**{User.Username}'s** level of gay is {(Percentage > 100 ? "***over 9000!***" : $"**{Percentage}%**")}. "
+                + $"{(User.Id == Context.Message.Author.Id ? "You're" : User.Id == Context.Client.CurrentUser.Id ? "I'm" : "They're")} **{(Percentage < 33 ? "heterosexual" : Percentage < 66 ? "bisexual" : "homosexual")}**! "
+                + Emote.Parse(FunConfiguration.EmojiIDs[Percentage < 33 ? "annoyed" : Percentage < 66 ? "wut" : "love"]));
         }
 
         [Command("8ball")]
@@ -58,44 +55,35 @@ namespace Dexter.Commands {
 
             Emote emoji = Emote.Parse(FunConfiguration.EmojiIDs[FunConfiguration.EightBallEmoji[Result]]);
 
-            await Context.Channel.SendMessageAsync(Responces[new Random().Next(Responces.Length)] + ", **" + Context.Message.Author + "** " + emoji);
+            await Context.Channel.SendMessageAsync($"{Responces[new Random().Next(Responces.Length)]}, **{Context.Message.Author}** {emoji}");
         }
 
         [Command("topic")]
-        [Summary("A topic starter command. Perfect for when chat has died.")]
+        [Summary("A topic starter command - perfect for when chat has died!")]
         public async Task TopicCommand() {
-            List<KeyValuePair<string, string>> Topics = new List<KeyValuePair<string, string>>();
-
-            foreach (KeyValuePair<string, string[]> PairsOfTopics in FunConfiguration.Topic)
-                foreach (string PairedTopic in PairsOfTopics.Value)
-                    Topics.Add(new KeyValuePair<string, string>(PairsOfTopics.Key, PairedTopic));
-
-            KeyValuePair<string, string> Topic = Topics[new Random().Next(Topics.Count)];
-
-            await BuildEmbed(EmojiEnum.Sign)
-                .WithAuthor(Context.Message.Author)
-                .WithTitle(BotConfiguration.Bot_Name + " Asks")
-                .WithDescription(Topic.Value)
-                .WithFooter("Topic Written by " + Topic.Key)
-                .SendEmbed(Context.Channel);
+            await Question("Topic", FunConfiguration.Topic);
         }
 
         [Command("wyr")]
         [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from.")]
         public async Task WYRCommand() {
-            List<KeyValuePair<string, string>> WYRS = new List<KeyValuePair<string, string>>();
+            await Question("Would-You-Rather", FunConfiguration.WouldYouRather);
+        }
 
-            foreach (KeyValuePair<string, string[]> PairsOfWYRS in FunConfiguration.WouldYouRather)
-                foreach (string PairedWYR in PairsOfWYRS.Value)
-                    WYRS.Add(new KeyValuePair<string, string>(PairsOfWYRS.Key, PairedWYR));
+        public async Task Question(string Type, Dictionary<string, string[]> Dictionary) {
+            List<KeyValuePair<string, string>> NameQuestionDictionary = new List<KeyValuePair<string, string>>();
 
-            KeyValuePair<string, string> WYR = WYRS[new Random().Next(WYRS.Count)];
+            foreach (KeyValuePair<string, string[]> PairsOfQuestions in FunConfiguration.WouldYouRather)
+                foreach (string PairedWYR in PairsOfQuestions.Value)
+                    NameQuestionDictionary.Add(new KeyValuePair<string, string>(PairsOfQuestions.Key, PairedWYR));
+
+            KeyValuePair<string, string> Question = NameQuestionDictionary[new Random().Next(NameQuestionDictionary.Count)];
 
             await BuildEmbed(EmojiEnum.Sign)
                 .WithAuthor(Context.Message.Author)
-                .WithTitle(BotConfiguration.Bot_Name + " Asks")
-                .WithDescription(WYR.Value)
-                .WithFooter("Would You Rather Written by " + WYR.Key)
+                .WithTitle($"{BotConfiguration.Bot_Name} Asks")
+                .WithDescription(Question.Value)
+                .WithFooter($"{Type} Written by {Question.Key}")
                 .SendEmbed(Context.Channel);
         }
     }

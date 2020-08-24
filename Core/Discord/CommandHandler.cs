@@ -3,6 +3,8 @@ using Dexter.Core.Configuration;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Dexter.Core {
@@ -24,6 +26,7 @@ namespace Dexter.Core {
 
         public override void AddDelegates() {
             Client.MessageReceived += HandleCommandAsync;
+            CommandService.AddModulesAsync(Assembly.GetExecutingAssembly(), Services);
         }
 
         public async Task HandleCommandAsync(SocketMessage SocketMessage) {

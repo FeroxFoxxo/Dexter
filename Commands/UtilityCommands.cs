@@ -18,7 +18,7 @@ namespace Dexter.Commands {
         public async Task PingCommand() {
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Gateway Ping")
-                .WithDescription("**" + Context.Client.Latency + "ms**")
+                .WithDescription($"**{Context.Client.Latency}ms**")
                 .SendEmbed(Context.Channel);
         }
 
@@ -27,7 +27,7 @@ namespace Dexter.Commands {
         public async Task UptimeCommand() {
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Uptime")
-                .WithDescription("I've been runnin' for **" + (DateTime.Now - Process.GetCurrentProcess().StartTime).Humanize() + "**~!\n*yawns*")
+                .WithDescription($"I've been runnin' for **{(DateTime.Now - Process.GetCurrentProcess().StartTime).Humanize()}**~!\n*yawns*")
                 .SendEmbed(Context.Channel);
         }
 
@@ -39,12 +39,12 @@ namespace Dexter.Commands {
                 User = (IGuildUser)Context.User;
 
             await BuildEmbed(EmojiEnum.Unknown)
-                .WithTitle("User Profile For " + User.Username + "#" + User.Discriminator)
+                .WithTitle($"User Profile For {User.Username}#{User.Discriminator}")
                 .WithThumbnailUrl(User.GetAvatarUrl())
                 .AddField("Username", User.Username)
                 .AddField(!string.IsNullOrEmpty(User.Nickname), "Nickname", User.Nickname)
-                .AddField("Created", User.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss") + " (" + User.CreatedAt.Humanize() + ")")
-                .AddField(User.JoinedAt.HasValue, "Joined", User.JoinedAt?.ToString("dd/MM/yyyy HH:mm:ss") + " (" + User.JoinedAt.Humanize() + ")")
+                .AddField("Created", $"{User.CreatedAt:dd/MM/yyyy HH:mm:ss} ({User.CreatedAt.Humanize()})")
+                .AddField(User.JoinedAt.HasValue, "Joined", $"{(DateTimeOffset) User.JoinedAt:dd/MM/yyyy HH:mm:ss)} ({User.JoinedAt.Humanize()})")
                 .AddField("Status", User.Status)
                 .SendEmbed(Context.Channel);
         }
@@ -77,8 +77,7 @@ namespace Dexter.Commands {
             else
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unknown Emoji")
-                    .WithDescription("An invalid emote was specified! Please make sure that what you have sent is a valid emote. " +
-                    "Please make sure this is a **custom emote** aswell and does not fall under the unicode specification.")
+                    .WithDescription("An invalid emote was specified! Please make sure that what you have sent is a valid emote. Please make sure this is a **custom emote** aswell and does not fall under the unicode specification.")
                     .SendEmbed(Context.Channel);
         }
     }

@@ -1,5 +1,4 @@
-﻿using Dexter.Core;
-using Dexter.Core.Abstractions;
+﻿using Dexter.Core.Abstractions;
 using Dexter.Core.Configuration;
 using Dexter.Core.Enums;
 using Discord;
@@ -28,11 +27,10 @@ namespace Dexter.Commands {
                 foreach (CommandInfo CommandInfo in Module.Commands) {
                     PreconditionResult Result = await CommandInfo.CheckPreconditionsAsync(Context);
 
-                    if (Description.Contains("~" + CommandInfo.Aliases.First()))
+                    if (Description.Contains($"~{CommandInfo.Aliases.First()}"))
                         continue;
-
-                    if (Result.IsSuccess)
-                        Description.Add("~" + CommandInfo.Aliases.First());
+                    else if (Result.IsSuccess)
+                        Description.Add($"~{CommandInfo.Aliases.First()}");
                 }
 
                 if (Description.Count != 0)
@@ -43,7 +41,7 @@ namespace Dexter.Commands {
             }
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle("Hiya, I'm " + BotConfiguration.Bot_Name + "~! Here's a list of modules and commands you can use!")
+                .WithTitle($"Hiya, I'm {BotConfiguration.Bot_Name}~! Here's a list of modules and commands you can use!")
                 .WithDescription("Use ~help [commandName] to show information about a command!")
                 .WithFields(Fields.ToArray())
                 .SendEmbed(Context.Channel);
@@ -57,13 +55,13 @@ namespace Dexter.Commands {
             if (!Result.IsSuccess) {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unknown Command")
-                    .WithDescription("Sorry, I couldn't find a command like **" + Command + "**.")
+                    .WithDescription($"Sorry, I couldn't find a command like **{Command}**.")
                     .SendEmbed(Context.Channel);
                 return;
             }
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle("Here are some commands like **" + Command + "**!")
+                .WithTitle($"Here are some commands like **{Command}**!")
                 .WithFields(GetParametersForCommand(Command))
                 .SendEmbed(Context.Channel);
         }
@@ -76,7 +74,7 @@ namespace Dexter.Commands {
                 case CommandError.BadArgCount:
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("You've entered an invalid amount of parameters for this command!")
-                        .WithDescription("Here are some options of parameters you can have for the command **" + Command.Value.Name + "**.")
+                        .WithDescription($"Here are some options of parameters you can have for the command **{Command.Value.Name}**.")
                         .WithFields(GetParametersForCommand(Command.Value.Name))
                         .SendEmbed(Context.Channel);
                     break;
@@ -89,7 +87,7 @@ namespace Dexter.Commands {
                 case CommandError.UnknownCommand:
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Unknown Command")
-                        .WithDescription("Oopsies! It seems as if the command **" + Context.Message.Content.Split(' ')[0] + "** doesn't exist!")
+                        .WithDescription($"Oopsies! It seems as if the command **{Context.Message.Content.Split(' ')[0]}** doesn't exist!")
                         .SendEmbed(Context.Channel);
                     break;
                 default:
@@ -114,15 +112,15 @@ namespace Dexter.Commands {
             foreach (CommandMatch Match in Result.Commands) {
                 CommandInfo CommandInfo = Match.Command;
 
-                string CommandDescription = "Parameters: " + string.Join(", ", CommandInfo.Parameters.Select(p => p.Name));
+                string CommandDescription = $"Parameters: {string.Join(", ", CommandInfo.Parameters.Select(p => p.Name))}";
 
                 if (CommandInfo.Parameters.Count > 0)
-                    CommandDescription = "Parameters: " + string.Join(", ", CommandInfo.Parameters.Select(p => p.Name));
+                    CommandDescription = $"Parameters: {string.Join(", ", CommandInfo.Parameters.Select(p => p.Name))}";
                 else
                     CommandDescription = "No parameters";
 
                 if (!string.IsNullOrEmpty(CommandInfo.Summary))
-                    CommandDescription += "\nSummary: " + CommandInfo.Summary;
+                    CommandDescription += $"\nSummary: {CommandInfo.Summary}";
 
                 Fields.Add(new EmbedFieldBuilder {
                     Name = string.Join(", ", CommandInfo.Aliases),

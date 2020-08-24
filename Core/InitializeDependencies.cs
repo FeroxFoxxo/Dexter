@@ -20,18 +20,20 @@ namespace Dexter.Core {
             ServiceCollection.AddSingleton<CommandService>();
 
             Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(AbstractConfiguration)) && !Type.IsAbstract).ToList().ForEach(Type => {
-                if (!File.Exists(Type.Name + ".json")) {
-                    File.WriteAllText(Type.Name + ".json", JsonSerializer.Serialize(Activator.CreateInstance(Type), new JsonSerializerOptions() { WriteIndented = true }));
+                if (!File.Exists($"{Type.Name}.json")) {
+                    File.WriteAllText($"{Type.Name}.json", JsonSerializer.Serialize(Activator.CreateInstance(Type), new JsonSerializerOptions() { WriteIndented = true }));
                     ServiceCollection.AddSingleton(Type);
                 } else
-                    ServiceCollection.AddSingleton(Type, JsonSerializer.Deserialize(File.ReadAllText(Type.Name + ".json"), Type, new JsonSerializerOptions() { WriteIndented = true }));
+                    ServiceCollection.AddSingleton(Type, JsonSerializer.Deserialize(File.ReadAllText($"{Type.Name}.json"), Type, new JsonSerializerOptions() { WriteIndented = true }));
             });
 
-            Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsSubclassOf(typeof(AbstractInitializer)) && !t.IsAbstract).ToList().ForEach(x => ServiceCollection.AddSingleton(x));
+            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(AbstractInitializer)) && !Type.IsAbstract).ToList().ForEach(Type => ServiceCollection.AddSingleton(Type));
+            
+            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(AbstractModule)) && !Type.IsAbstract).ToList().ForEach(Type => ServiceCollection.AddSingleton(Type));
 
             ServiceProvider Services = ServiceCollection.BuildServiceProvider();
 
-            Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsSubclassOf(typeof(AbstractInitializer)) && !t.IsAbstract).ToList().ForEach(x => (Services.GetService(x) as AbstractInitializer).AddDelegates());
+            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(AbstractInitializer)) && !Type.IsAbstract).ToList().ForEach(Type => (Services.GetService(Type) as AbstractInitializer).AddDelegates());
 
             await Services.GetRequiredService<FrontendConsole>().RunAsync();
 

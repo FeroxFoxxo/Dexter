@@ -30,15 +30,11 @@ namespace Dexter.Core.Frontend {
         }
 
         public async Task RunAsync() {
-            await DrawState();
+            await ResetConsole();
 
             if (!string.IsNullOrEmpty(BotConfiguration.Token)) {
-                for (int _ = 0; _ < 6; _++)
-                    await Console.Out.WriteLineAsync();
-
                 try {
                     await Client.LoginAsync(TokenType.Bot, BotConfiguration.Token);
-
                     await Client.StartAsync();
                 } catch (Exception Exception) {
                     Console.WriteLine($"\n {Exception.Message}");
@@ -48,17 +44,8 @@ namespace Dexter.Core.Frontend {
                 Console.ReadKey(true);
             }
 
-            await HandleInput();
-        }
-
-        private async Task HandleInput() {
             while (true) {
-                Console.Clear();
-
-                await DrawState();
-
-                for (int _ = 0; _ < 6; _++)
-                    await Console.Out.WriteLineAsync();
+                await ResetConsole();
 
                 if (GetOptionMenu(new string[3] {"Edit Configuration", $"Start/Stop {BotConfiguration.Bot_Name}", $"Exit {BotConfiguration.Bot_Name}"}, "Menu", out int Choice)) {
                     if (Choice == 1) {
@@ -139,6 +126,15 @@ namespace Dexter.Core.Frontend {
             }
         }
 
+        private async Task ResetConsole() {
+            Console.Clear();
+
+            await DrawState();
+
+            for (int _ = 0; _ < 6; _++)
+                await Console.Out.WriteLineAsync();
+        }
+
         private bool GetOptionMenu(object[] Possibilities, string Name, out int ReturnedChoice) {
             Console.WriteLine($"\n {Name}s:");
 
@@ -174,7 +170,8 @@ namespace Dexter.Core.Frontend {
             Console.ForegroundColor = Client.ConnectionState switch {
                 ConnectionState.Connected => ConsoleColor.Green,
                 ConnectionState.Disconnected => ConsoleColor.Red,
-                _ => ConsoleColor.Red,
+                ConnectionState.Disconnecting => ConsoleColor.Red,
+                _ => ConsoleColor.Yellow,
             };
 
             await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(BotConfiguration.Bot_Name));

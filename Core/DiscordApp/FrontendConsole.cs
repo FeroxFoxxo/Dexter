@@ -9,7 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Dexter.Core.Frontend {
+namespace Dexter.Core.DiscordApp {
     public class FrontendConsole : AbstractInitializer {
 
         private readonly DiscordSocketClient Client;

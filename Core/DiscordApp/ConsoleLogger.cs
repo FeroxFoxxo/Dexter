@@ -5,7 +5,7 @@ using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
 
-namespace Dexter.Core {
+namespace Dexter.Core.DiscordApp {
     public class ConsoleLogger : AbstractInitializer {
         private readonly DiscordSocketClient Client;
         private readonly CommandService Commands;

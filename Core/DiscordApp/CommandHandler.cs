@@ -1,13 +1,13 @@
-﻿using Dexter.Core.Abstractions;
+﻿using Dexter.Commands;
+using Dexter.Core.Abstractions;
 using Dexter.Core.Configuration;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Dexter.Core {
+namespace Dexter.Core.DiscordApp {
     public class CommandHandler : AbstractInitializer {
         private readonly DiscordSocketClient Client;
 
@@ -17,16 +17,25 @@ namespace Dexter.Core {
 
         private readonly BotConfiguration BotConfiguration;
 
-        public CommandHandler(DiscordSocketClient _Client, CommandService _CommandService, BotConfiguration _BotConfiguration, IServiceProvider _Services) {
+        private readonly HelpCommands HelpCommands;
+
+        public CommandHandler(DiscordSocketClient _Client, CommandService _CommandService, BotConfiguration _BotConfiguration, IServiceProvider _Services, HelpCommands _HelpCommands) {
             Client = _Client;
             BotConfiguration = _BotConfiguration;
             CommandService = _CommandService;
             Services = _Services;
+            HelpCommands = _HelpCommands;
         }
 
         public override void AddDelegates() {
             Client.MessageReceived += HandleCommandAsync;
+            Client.Ready += ReadyAsync;
+            CommandService.CommandExecuted += HelpCommands.SendCommandError;
             CommandService.AddModulesAsync(Assembly.GetExecutingAssembly(), Services);
+        }
+
+        public async Task ReadyAsync() {
+            await Client.SetGameAsync("Spotify", null, Discord.ActivityType.Listening);
         }
 
         public async Task HandleCommandAsync(SocketMessage SocketMessage) {

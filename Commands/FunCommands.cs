@@ -1,6 +1,5 @@
 ﻿using Dexter.Core.Abstractions;
 using Dexter.Core.Configuration;
-using Dexter.Core.Enums;
 using Discord;
 using Discord.Commands;
 using System;
@@ -73,7 +72,7 @@ namespace Dexter.Commands {
         public async Task Question(string Type, Dictionary<string, string[]> Dictionary) {
             List<KeyValuePair<string, string>> NameQuestionDictionary = new List<KeyValuePair<string, string>>();
 
-            foreach (KeyValuePair<string, string[]> PairsOfQuestions in FunConfiguration.WouldYouRather)
+            foreach (KeyValuePair<string, string[]> PairsOfQuestions in Dictionary)
                 foreach (string PairedWYR in PairsOfQuestions.Value)
                     NameQuestionDictionary.Add(new KeyValuePair<string, string>(PairsOfQuestions.Key, PairedWYR));
 

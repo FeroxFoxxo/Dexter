@@ -1,4 +1,4 @@
-﻿namespace Dexter.Core.Enums {
+﻿namespace Dexter.Core.Abstractions {
     public enum EmojiEnum {
         Unknown,
         Annoyed,

@@ -1,5 +1,5 @@
 ﻿using Dexter.Core.Abstractions;
-using Dexter.Core.Frontend;
+using Dexter.Core.DiscordApp;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,6 +1,5 @@
 ﻿using Dexter.Core.Abstractions;
 using Dexter.Core.Configuration;
-using Dexter.Core.Enums;
 using Discord;
 using Discord.Commands;
 using System.Collections.Generic;

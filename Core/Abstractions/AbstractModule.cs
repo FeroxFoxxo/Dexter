@@ -1,5 +1,4 @@
-﻿using Dexter.Core.Enums;
-using Dexter.Core.Configuration;
+﻿using Dexter.Core.Configuration;
 using Discord;
 using Discord.Commands;
 

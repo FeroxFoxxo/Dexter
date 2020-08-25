@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 
 namespace Dexter.Core {
     public static class InitializeDependencies {
+        private static ServiceProvider Services;
+
         public static async Task Main() {
             ServiceCollection ServiceCollection = new ServiceCollection();
 
@@ -19,7 +21,7 @@ namespace Dexter.Core {
 
             ServiceCollection.AddSingleton<CommandService>();
 
-            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(AbstractConfiguration)) && !Type.IsAbstract).ToList().ForEach(Type => {
+            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(JSONConfiguration)) && !Type.IsAbstract).ToList().ForEach(Type => {
                 if (!File.Exists($"{Type.Name}.json")) {
                     File.WriteAllText($"{Type.Name}.json", JsonSerializer.Serialize(Activator.CreateInstance(Type), new JsonSerializerOptions() { WriteIndented = true }));
                     ServiceCollection.AddSingleton(Type);
@@ -27,17 +29,22 @@ namespace Dexter.Core {
                     ServiceCollection.AddSingleton(Type, JsonSerializer.Deserialize(File.ReadAllText($"{Type.Name}.json"), Type, new JsonSerializerOptions() { WriteIndented = true }));
             });
 
-            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(AbstractInitializer)) && !Type.IsAbstract).ToList().ForEach(Type => ServiceCollection.AddSingleton(Type));
+            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(InitializableModule)) && !Type.IsAbstract).ToList().ForEach(Type => ServiceCollection.AddSingleton(Type));
             
-            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(AbstractModule)) && !Type.IsAbstract).ToList().ForEach(Type => ServiceCollection.AddSingleton(Type));
+            Services = ServiceCollection.BuildServiceProvider();
 
-            ServiceProvider Services = ServiceCollection.BuildServiceProvider();
-
-            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(AbstractInitializer)) && !Type.IsAbstract).ToList().ForEach(Type => (Services.GetService(Type) as AbstractInitializer).AddDelegates());
+            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(InitializableModule)) && !Type.IsAbstract).ToList().ForEach(Type => (Services.GetService(Type) as InitializableModule).AddDelegates());
+            
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
+            Console.CancelKeyPress += new ConsoleCancelEventHandler(OnProcessExit);
 
             await Services.GetRequiredService<FrontendConsole>().RunAsync();
+        }
 
-            await Task.Delay(-1);
+        public static void OnProcessExit(object Sender, EventArgs Arguments) {
+            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(JSONConfiguration)) && !Type.IsAbstract).ToList().ForEach(Type => {
+                File.WriteAllText($"{Type.Name}.json", JsonSerializer.Serialize(Services.GetService(Type), new JsonSerializerOptions() { WriteIndented = true }));
+            });
         }
     }
 }

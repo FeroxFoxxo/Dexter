@@ -1,5 +1,6 @@
 ﻿using Dexter.Core.Abstractions;
 using Dexter.Core.Configuration;
+using Dexter.Core.DiscordApp;
 using Discord;
 using Discord.Commands;
 using System;
@@ -8,10 +9,10 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
-    public class FunCommands : AbstractModule {
+    public class FunCommands : ModuleBase<CommandModule> {
         private readonly FunConfiguration FunConfiguration;
 
-        public FunCommands(BotConfiguration _BotConfiguration, FunConfiguration _FunConfiguration) : base(_BotConfiguration) {
+        public FunCommands(FunConfiguration _FunConfiguration) {
             FunConfiguration = _FunConfiguration;
         }
 
@@ -27,6 +28,7 @@ namespace Dexter.Commands {
         [Command("say")]
         [Summary("I now have a voice! Use the ~say command so speak *through* me!")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
+        [RequireModerator]
         public async Task SayCommand([Remainder] string Message) {
             await Context.Message.DeleteAsync();
             await Context.Channel.SendMessageAsync(Message);
@@ -78,9 +80,9 @@ namespace Dexter.Commands {
 
             KeyValuePair<string, string> Question = NameQuestionDictionary[new Random().Next(NameQuestionDictionary.Count)];
 
-            await BuildEmbed(EmojiEnum.Sign)
+            await Context.BuildEmbed(EmojiEnum.Sign)
                 .WithAuthor(Context.Message.Author)
-                .WithTitle($"{BotConfiguration.Bot_Name} Asks")
+                .WithTitle($"{Context.BotConfiguration.Bot_Name} Asks")
                 .WithDescription(Question.Value)
                 .WithFooter($"{Type} Written by {Question.Key}")
                 .SendEmbed(Context.Channel);

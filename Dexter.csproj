@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <None Update="BotConfiguration.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="FunConfiguration.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -10,7 +10,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Dexter.Core.DiscordApp {
-    public class FrontendConsole : AbstractInitializer {
+    public class FrontendConsole : InitializableModule {
 
         private readonly DiscordSocketClient Client;
 
@@ -52,7 +52,7 @@ namespace Dexter.Core.DiscordApp {
                         List<Type> Configurations = new List<Type>();
                         List<string> ConfigurationNames = new List<string>();
 
-                        Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(AbstractConfiguration)) && !Type.IsAbstract).ToList().ForEach(Configuration => {
+                        Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(JSONConfiguration)) && !Type.IsAbstract).ToList().ForEach(Configuration => {
                             bool HasWritableFields = false;
 
                             Configuration.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).ToList().ForEach(Field => {

@@ -6,7 +6,7 @@ using System;
 using System.Threading.Tasks;
 
 namespace Dexter.Core.DiscordApp {
-    public class ConsoleLogger : AbstractInitializer {
+    public class ConsoleLogger : InitializableModule {
         private readonly DiscordSocketClient Client;
         private readonly CommandService Commands;
 
@@ -21,10 +21,10 @@ namespace Dexter.Core.DiscordApp {
         }
 
         private async Task LogMessageAsync(LogMessage Event) {
-            if (Event.Severity == LogSeverity.Critical)
+            if (Event.Severity != LogSeverity.Info)
                 Console.ForegroundColor = ConsoleColor.Red;
 
-            await Console.Out.WriteLineAsync($"\n {DateTime.Now:G} - {Event.Message} ");
+            await Console.Out.WriteLineAsync($"\n {DateTime.Now:G} - {Event} ");
 
             Console.ResetColor();
         }

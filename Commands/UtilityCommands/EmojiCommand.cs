@@ -1,7 +1,6 @@
 ﻿using Dexter.Core.Abstractions;
 using Discord;
 using Discord.Commands;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands.UtilityCommands {
@@ -10,8 +9,7 @@ namespace Dexter.Commands.UtilityCommands {
         [Command("emote")]
         [Summary("Gets the full image of an emote.")]
         [Alias("emoji")]
-
-        public async Task EmojiCommand([Optional] string Emoji) {
+        public async Task EmojiCommand(string Emoji) {
             if (Emote.TryParse(Emoji, out var Emojis))
                 await Context.BuildEmbed(EmojiEnum.Unknown)
                     .WithImageUrl(Emojis.Url)

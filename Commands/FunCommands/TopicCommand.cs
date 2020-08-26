@@ -1,5 +1,4 @@
 ﻿using Dexter.Core.Abstractions;
-using Dexter.Core.DiscordApp;
 using Discord;
 using Discord.Commands;
 using System;
@@ -11,7 +10,6 @@ namespace Dexter.Commands.FunCommands {
 
         [Command("topic")]
         [Summary("A topic starter command - perfect for when chat has died!")]
-
         public async Task TopicCommand() {
             List<KeyValuePair<string, string>> NameQuestionDictionary = new List<KeyValuePair<string, string>>();
 

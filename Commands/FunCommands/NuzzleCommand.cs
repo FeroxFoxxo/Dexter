@@ -1,20 +1,22 @@
 ﻿using Discord;
 using Discord.Commands;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands.FunCommands {
     public partial class FunCommands {
 
-        [Command("nuzzle")]
-        [Summary("Nuzzles a mentioned user or yourself.")]
-        [Alias("nuzzles")]
+        [Command("sleep")]
+        [Summary("Sweet dreams! Use this command to be wished a good night <3")]
+        [Alias("goodnight", "ninite", "gnight")]
+        public async Task SleepCommand() {
+            await SleepCommand(Context.Guild.GetUser(Context.User.Id));
+        }
 
-        public async Task NuzzleCommand([Optional] IGuildUser User) {
-            if (User == null)
-                User = (IGuildUser)Context.User;
-
-            await Context.Channel.SendMessageAsync($"*nuzzles {User.Mention} floofily*");
+        [Command("sleep")]
+        [Summary("Sweet dreams! Use this command to be wished a good night <3")]
+        [Alias("goodnight", "ninite", "gnight")]
+        public async Task SleepCommand(IGuildUser User) {
+            await Context.Channel.SendMessageAsync($"Goodnight {User.Mention}, sleep well! :blue_heart:");
         }
 
     }

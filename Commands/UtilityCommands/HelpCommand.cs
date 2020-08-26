@@ -1,4 +1,5 @@
 ﻿using Dexter.Core.Abstractions;
+using Dexter.Core.DiscordApp;
 using Discord;
 using Discord.Commands;
 using System.Collections.Generic;
@@ -12,7 +13,6 @@ namespace Dexter.Commands.UtilityCommands {
         [Command("help")]
         [Summary("Displays all avaliable commands.")]
         [Alias("helpme", "help me", "help-me", "pleasehelp", "please help", "how2use", "howtouse", "how 2 use", "how to use")]
-
         public async Task HelpCommand() {
             List<EmbedFieldBuilder> Fields = new List<EmbedFieldBuilder>();
 
@@ -45,19 +45,15 @@ namespace Dexter.Commands.UtilityCommands {
         [Command("help")]
         [Summary("Displays detailed information about a command.")]
         [Alias("helpme", "help me", "help-me", "pleasehelp", "please help", "how2use", "howtouse", "how 2 use", "how to use")]
-
         public async Task HelpCommand(string Command) {
             SearchResult Result = CommandHandler.CommandService.Search(Context, Command);
 
-            if (!Result.IsSuccess) {
+            if (!Result.IsSuccess)
                 await Context.BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unknown Command")
                     .WithDescription($"Sorry, I couldn't find a command like **{Command}**.")
                     .SendEmbed(Context.Channel);
-                return;
-            }
-
-            await Context.BuildEmbed(EmojiEnum.Love)
+            else await Context.BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"Here are some commands like **{Command}**!")
                 .WithFields(CommandHandler.GetParametersForCommand(Command))
                 .SendEmbed(Context.Channel);

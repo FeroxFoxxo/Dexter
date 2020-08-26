@@ -11,7 +11,6 @@ namespace Dexter.Commands.UtilityCommands {
         [Command("uptime")]
         [Summary("Displays the amount of time I have been running for!")]
         [Alias("runtime")]
-
         public async Task UptimeCommand() {
             await Context.BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Uptime")

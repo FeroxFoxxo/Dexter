@@ -3,7 +3,6 @@ using Discord;
 using Discord.Commands;
 using Humanizer;
 using System;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands.UtilityCommands {
@@ -12,11 +11,14 @@ namespace Dexter.Commands.UtilityCommands {
         [Command("profile")]
         [Summary("Gets the profile of the user mentioned or yours.")]
         [Alias("userinfo")]
+        public async Task ProfileCommand() {
+            await ProfileCommand(Context.Guild.GetUser(Context.User.Id));
+        }
 
-        public async Task ProfileCommand([Optional] IGuildUser User) {
-            if (User == null)
-                User = (IGuildUser)Context.User;
-
+        [Command("profile")]
+        [Summary("Gets the profile of the user mentioned or yours.")]
+        [Alias("userinfo")]
+        public async Task ProfileCommand(IGuildUser User) {
             await Context.BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle($"User Profile For {User.Username}#{User.Discriminator}")
                 .WithThumbnailUrl(User.GetAvatarUrl())

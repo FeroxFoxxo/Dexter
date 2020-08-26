@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using System;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands.FunCommands {
@@ -10,11 +9,14 @@ namespace Dexter.Commands.FunCommands {
         [Command("gay")]
         [Summary("How gay are you? Use this command to find out-")]
         [Alias("straight", "bisexual", "bi-sexual", "bi sexual")]
+        public async Task GayCommand() {
+            await GayCommand(Context.Guild.GetUser(Context.User.Id));
+        }
 
-        public async Task GayCommand([Optional] IGuildUser User) {
-            if (User == null)
-                User = (IGuildUser)Context.User;
-
+        [Command("gay")]
+        [Summary("How gay are you? Use this command to find out-")]
+        [Alias("straight", "bisexual", "bi-sexual", "bi sexual")]
+        public async Task GayCommand(IGuildUser User) {
             int Percentage = new Random((User.Id / new DateTime(1970, 1, 1).Subtract(DateTime.Now).TotalDays).ToString().GetHashCode()).Next(102);
 
             await Context.Channel.SendMessageAsync($"**{User.Username}'s** level of gay is {(Percentage > 100 ? "***over 9000!***" : $"**{Percentage}%**")}. "

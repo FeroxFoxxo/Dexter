@@ -34,6 +34,19 @@ namespace Dexter.Core.DiscordApp {
             CommandService.CommandExecuted += SendCommandError;
             CommandService.AddModulesAsync(Assembly.GetExecutingAssembly(), Services);
         }
+        
+        public async Task HandleCommandAsync(SocketMessage SocketMessage) {
+            if (!(SocketMessage is SocketUserMessage Message))
+                return;
+
+            int ArgumentPosition = 0;
+            if (!(Message.HasStringPrefix(BotConfiguration.Prefix, ref ArgumentPosition) ||
+                    Message.HasMentionPrefix(Client.CurrentUser, ref ArgumentPosition)) ||
+                    Message.Author.IsBot)
+                return;
+
+            await CommandService.ExecuteAsync(new CommandModule(Client, Message, BotConfiguration), ArgumentPosition, Services);
+        }
 
         public async Task SendCommandError(Optional<CommandInfo> Command, ICommandContext Context, IResult Result) {
             if (Result.IsSuccess)
@@ -45,7 +58,7 @@ namespace Dexter.Core.DiscordApp {
                         await Modules.BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("You've entered an invalid amount of parameters for this command!")
                             .WithDescription($"Here are some options of parameters you can have for the command **{Command.Value.Name}**.")
-                            .WithFields(GetParametersForCommand(Command.Value.Name))
+                            .GetParametersForCommand(CommandService, Command.Value.Name)
                             .SendEmbed(Context.Channel);
                         break;
                     case CommandError.UnmetPrecondition:
@@ -75,46 +88,6 @@ namespace Dexter.Core.DiscordApp {
                 }
             else
                 Console.WriteLine("\n Unable to cast context to CommandModule!");
-        }
-
-        public EmbedFieldBuilder[] GetParametersForCommand(string Command) {
-            List<EmbedFieldBuilder> Fields = new List<EmbedFieldBuilder>();
-            SearchResult Result = CommandService.Search(Command);
-
-            foreach (CommandMatch Match in Result.Commands) {
-                CommandInfo CommandInfo = Match.Command;
-
-                string CommandDescription = $"Parameters: {string.Join(", ", CommandInfo.Parameters.Select(p => p.Name))}";
-
-                if (CommandInfo.Parameters.Count > 0)
-                    CommandDescription = $"Parameters: {string.Join(", ", CommandInfo.Parameters.Select(p => p.Name))}";
-                else
-                    CommandDescription = "No parameters";
-
-                if (!string.IsNullOrEmpty(CommandInfo.Summary))
-                    CommandDescription += $"\nSummary: {CommandInfo.Summary}";
-
-                Fields.Add(new EmbedFieldBuilder {
-                    Name = string.Join(", ", CommandInfo.Aliases),
-                    Value = CommandDescription,
-                    IsInline = false
-                });
-            }
-
-            return Fields.ToArray();
-        }
-
-        public async Task HandleCommandAsync(SocketMessage SocketMessage) {
-            if (!(SocketMessage is SocketUserMessage Message))
-                return;
-
-            int ArgumentPosition = 0;
-            if (!(Message.HasStringPrefix(BotConfiguration.Prefix, ref ArgumentPosition) ||
-                    Message.HasMentionPrefix(Client.CurrentUser, ref ArgumentPosition)) ||
-                    Message.Author.IsBot)
-                return;
-
-            await CommandService.ExecuteAsync(new CommandModule(Client, Message, BotConfiguration), ArgumentPosition, Services);
         }
     }
 }

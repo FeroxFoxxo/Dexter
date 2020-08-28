@@ -1,14 +1,24 @@
 ﻿using Dexter.Core.Abstractions;
-using Dexter.Core.DiscordApp;
+using Dexter.Core.Configuration;
 using Discord.Commands;
+using System.Diagnostics;
 
 namespace Dexter.Commands.UtilityCommands {
     public partial class UtilityCommands : ModuleBase<CommandModule> {
 
-        private readonly CommandHandler CommandHandler;
+        private readonly CommandService CommandService;
 
-        public UtilityCommands(CommandHandler _CommandHandler) {
-            CommandHandler = _CommandHandler;
+        private readonly PerformanceCounter CPUCounter;
+
+        private readonly PerformanceCounter MemCounter;
+
+        private readonly BotConfiguration BotConfiguration;
+
+        public UtilityCommands(CommandService _CommandService, BotConfiguration _BotConfiguration) {
+            CommandService = _CommandService;
+            BotConfiguration = _BotConfiguration;
+            CPUCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            MemCounter = new PerformanceCounter("Memory", "Available MBytes");
         }
 
     }

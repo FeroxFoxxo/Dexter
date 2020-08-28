@@ -14,39 +14,34 @@ namespace Dexter.Commands.UtilityCommands {
         [Summary("Displays all avaliable commands.")]
         [Alias("helpme", "help me", "help-me", "pleasehelp", "please help", "how2use", "howtouse", "how 2 use", "how to use")]
         public async Task HelpCommand() {
-            List<EmbedFieldBuilder> Fields = new List<EmbedFieldBuilder>();
+            EmbedBuilder Embed = Context.BuildEmbed(EmojiEnum.Love)
+                .WithTitle($"Hiya, I'm {Context.BotConfiguration.Bot_Name}~! Here's a list of modules and commands you can use!")
+                .WithDescription("Use ~help [commandName] to show information about a command!");
 
-            foreach (ModuleInfo Module in CommandHandler.CommandService.Modules) {
+            foreach (ModuleInfo Module in CommandService.Modules) {
                 List<string> Description = new List<string>();
 
                 foreach (CommandInfo CommandInfo in Module.Commands) {
                     PreconditionResult Result = await CommandInfo.CheckPreconditionsAsync(Context);
 
-                    if (Description.Contains($"~{CommandInfo.Aliases.First()}"))
-                        continue;
-                    else if (Result.IsSuccess)
-                        Description.Add($"~{CommandInfo.Aliases.First()}");
+                    if (!Description.Contains($"~{CommandInfo.Aliases[0]}")) {
+                        if (Result.IsSuccess)
+                            Description.Add($"~{CommandInfo.Aliases[0]}");
+                    } else continue;
                 }
 
-                if (Description.Count != 0)
-                    Fields.Add(new EmbedFieldBuilder {
-                        Name = Regex.Replace(Module.Name, "[a-z][A-Z]", m => m.Value[0] + " " + m.Value[1]),
-                        Value = string.Join("\n", Description.ToArray())
-                    });
+                if (Description.Count > 0)
+                    Embed.AddField(Regex.Replace(Module.Name, "[a-z][A-Z]", m => m.Value[0] + " " + m.Value[1]), string.Join("\n", Description.ToArray()));
             }
 
-            await Context.BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"Hiya, I'm {Context.BotConfiguration.Bot_Name}~! Here's a list of modules and commands you can use!")
-                .WithDescription("Use ~help [commandName] to show information about a command!")
-                .WithFields(Fields.ToArray())
-                .SendEmbed(Context.Channel);
+            await Embed.SendEmbed(Context.Channel);
         }
 
         [Command("help")]
         [Summary("Displays detailed information about a command.")]
         [Alias("helpme", "help me", "help-me", "pleasehelp", "please help", "how2use", "howtouse", "how 2 use", "how to use")]
         public async Task HelpCommand(string Command) {
-            SearchResult Result = CommandHandler.CommandService.Search(Context, Command);
+            SearchResult Result = CommandService.Search(Context, Command);
 
             if (!Result.IsSuccess)
                 await Context.BuildEmbed(EmojiEnum.Annoyed)
@@ -55,7 +50,7 @@ namespace Dexter.Commands.UtilityCommands {
                     .SendEmbed(Context.Channel);
             else await Context.BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"Here are some commands like **{Command}**!")
-                .WithFields(CommandHandler.GetParametersForCommand(Command))
+                .GetParametersForCommand(CommandService, Command)
                 .SendEmbed(Context.Channel);
         }
 

@@ -24,7 +24,7 @@ namespace Dexter.Commands.FunCommands {
                 .WithAuthor(Context.Message.Author)
                 .WithTitle($"{Context.BotConfiguration.Bot_Name} Asks")
                 .WithDescription(Question.Value)
-                .WithFooter($"Topic Written by {Question.Key}")
+                .WithFooter($"Would You Rather Written by {Question.Key}")
                 .SendEmbed(Context.Channel);
         }
 

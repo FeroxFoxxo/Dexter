@@ -20,7 +20,7 @@ namespace Dexter.Core.DiscordApp {
             Commands.Log += LogMessageAsync;
         }
 
-        private async Task LogMessageAsync(LogMessage Event) {
+        public async Task LogMessageAsync(LogMessage Event) {
             if (Event.Severity != LogSeverity.Info)
                 Console.ForegroundColor = ConsoleColor.Red;
 

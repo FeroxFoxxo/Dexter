@@ -1,12 +1,17 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.Webhook;
+using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Core.Abstractions {
     public static class ExtensionMethods {
         public static async Task SendEmbed(this EmbedBuilder Embed, IMessageChannel Channel) =>
-            await Channel.SendMessageAsync(string.Empty, false, Embed.Build());
+            await Channel.SendMessageAsync(embed: Embed.Build());
+
+        public static async Task SendEmbed(this EmbedBuilder Embed, DiscordWebhookClient Channel) =>
+            await Channel.SendMessageAsync(embeds: new Embed[1] { Embed.Build() });
 
         public static EmbedBuilder AddField(this EmbedBuilder Embed, bool Condition, string Name, object Value) {
             if (Condition)

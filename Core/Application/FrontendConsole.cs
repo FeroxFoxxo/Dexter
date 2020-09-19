@@ -135,7 +135,7 @@ namespace Dexter.Core.DiscordApp {
                 await Console.Out.WriteLineAsync();
         }
 
-        private bool GetOptionMenu(object[] Possibilities, string Name, out int ReturnedChoice) {
+        private static bool GetOptionMenu(object[] Possibilities, string Name, out int ReturnedChoice) {
             Console.WriteLine($"\n {Name}s:");
 
             for (int i = 0; i < Possibilities.Length; i++)

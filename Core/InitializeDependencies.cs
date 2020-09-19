@@ -17,7 +17,7 @@ namespace Dexter.Core {
         public static async Task Main() {
             ServiceCollection ServiceCollection = new ServiceCollection();
 
-            ServiceCollection.AddSingleton<DiscordSocketClient>();
+            ServiceCollection.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig { MessageCacheSize = 1000 }));
 
             ServiceCollection.AddSingleton<CommandService>();
 

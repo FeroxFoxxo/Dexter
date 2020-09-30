@@ -12,7 +12,7 @@ namespace Dexter.Services {
         private readonly MNGConfiguration MNGConfig;
         private readonly DiscordWebhookClient Webhook;
 
-        public MeetNGreetService(DiscordSocketClient _Client, ConsoleLogger _Logger, MNGConfiguration _MNGConfig) {
+        public MeetNGreetService(DiscordSocketClient _Client, MNGConfiguration _MNGConfig) {
             Client = _Client;
             MNGConfig = _MNGConfig;
             

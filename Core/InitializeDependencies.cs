@@ -2,6 +2,7 @@
 using Dexter.Core.DiscordApp;
 using Discord.Commands;
 using Discord.WebSocket;
+using Figgle;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
@@ -15,19 +16,26 @@ namespace Dexter.Core {
         private static ServiceProvider Services;
 
         public static async Task Main() {
+            Console.Title = "Starting...";
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render("Starting..."));
+
             ServiceCollection ServiceCollection = new ServiceCollection();
+
+            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(JSONConfiguration)) && !Type.IsAbstract).ToList().ForEach(Type => {
+                if (!File.Exists($"Configurations/{Type.Name}.json")) {
+                    File.WriteAllText($"Configurations/{Type.Name}.json", JsonSerializer.Serialize(Activator.CreateInstance(Type), new JsonSerializerOptions() { WriteIndented = true }));
+                    ServiceCollection.AddSingleton(Type);
+                    Console.WriteLine($" This application does not have a configuration file for {Type.Name}! A mock JSON class has been created in its place...");
+                } else
+                    ServiceCollection.AddSingleton(Type, JsonSerializer.Deserialize(File.ReadAllText($"Configurations/{Type.Name}.json"), Type, new JsonSerializerOptions() { WriteIndented = true }));
+            });
+
+            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(EntityDatabase)) && !Type.IsAbstract).ToList().ForEach(Type => { ServiceCollection.AddSingleton(Type) });
 
             ServiceCollection.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig { MessageCacheSize = 1000 }));
 
             ServiceCollection.AddSingleton<CommandService>();
-
-            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(JSONConfiguration)) && !Type.IsAbstract).ToList().ForEach(Type => {
-                if (!File.Exists($"{Type.Name}.json")) {
-                    File.WriteAllText($"{Type.Name}.json", JsonSerializer.Serialize(Activator.CreateInstance(Type), new JsonSerializerOptions() { WriteIndented = true }));
-                    ServiceCollection.AddSingleton(Type);
-                } else
-                    ServiceCollection.AddSingleton(Type, JsonSerializer.Deserialize(File.ReadAllText($"{Type.Name}.json"), Type, new JsonSerializerOptions() { WriteIndented = true }));
-            });
 
             Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(InitializableModule)) && !Type.IsAbstract).ToList().ForEach(Type => ServiceCollection.AddSingleton(Type));
             

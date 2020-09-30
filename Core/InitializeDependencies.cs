@@ -3,6 +3,8 @@ using Dexter.Core.DiscordApp;
 using Discord.Commands;
 using Discord.WebSocket;
 using Figgle;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
@@ -17,7 +19,7 @@ namespace Dexter.Core {
 
         public static async Task Main() {
             Console.Title = "Starting...";
-            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.ForegroundColor = ConsoleColor.Red;
             await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render("Starting..."));
 
             ServiceCollection ServiceCollection = new ServiceCollection();
@@ -31,7 +33,7 @@ namespace Dexter.Core {
                     ServiceCollection.AddSingleton(Type, JsonSerializer.Deserialize(File.ReadAllText($"Configurations/{Type.Name}.json"), Type, new JsonSerializerOptions() { WriteIndented = true }));
             });
 
-            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(EntityDatabase)) && !Type.IsAbstract).ToList().ForEach(Type => { ServiceCollection.AddSingleton(Type) });
+            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(EntityDatabase)) && !Type.IsAbstract).ToList().ForEach(Type => ServiceCollection.AddSingleton(Type));
 
             ServiceCollection.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig { MessageCacheSize = 1000 }));
 
@@ -45,6 +47,20 @@ namespace Dexter.Core {
             
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
             Console.CancelKeyPress += new ConsoleCancelEventHandler(OnProcessExit);
+
+            Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.IsSubclassOf(typeof(EntityDatabase)) && !Type.IsAbstract).ToList().ForEach(DBType => {
+                EntityDatabase EntityDatabase = (EntityDatabase) Services.GetRequiredService(DBType);
+
+                if (EntityDatabase.Database.EnsureCreated()) {
+                    RelationalDatabaseCreator RelationalDatabaseCreator = (RelationalDatabaseCreator) EntityDatabase.Database.GetService<IDatabaseCreator>();
+
+                    try {
+                        RelationalDatabaseCreator.CreateTables();
+                    } catch (Exception Exception) {
+                        Console.WriteLine(Exception.Message);
+                    }
+                }
+            });
 
             await Services.GetRequiredService<FrontendConsole>().RunAsync();
         }

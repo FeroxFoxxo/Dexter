@@ -1,5 +1,6 @@
 ﻿using Dexter.Core.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.Suggestions {
     public class SuggestionDB : EntityDatabase {
@@ -7,12 +8,14 @@ namespace Dexter.Databases.Suggestions {
     }
 
     public class Suggestion {
-        public string Tracker;
-        public string Suggestor;
-        public string Status;
-        public string Content;
-        public string MessageID;
-        public string StaffMessageID;
-        public string Expiry;
+        [Key]
+        public string TrackerID { get; set; }
+
+        public string Suggestor { get; set; }
+        public string Status { get; set; }
+        public string Content { get; set; }
+        public string MessageID { get; set; }
+        public string StaffMessageID { get; set; }
+        public string Expiry { get; set; }
     }
 }

@@ -4,9 +4,9 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net50</TargetFramework>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   
@@ -15,12 +15,14 @@
     <PackageReference Include="Figgle" Version="0.4.0" />
     <PackageReference Include="Humanizer.Core" Version="2.8.26" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0-preview.8.20407.11" />
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="5.0.0-preview.8.20407.11" />
     <PackageReference Include="System.Management" Version="5.0.0-preview.8.20407.11" />
-  </ItemGroup>
-
-  <ItemGroup>
+    
     <None Update="Configurations\MNGConfiguration.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

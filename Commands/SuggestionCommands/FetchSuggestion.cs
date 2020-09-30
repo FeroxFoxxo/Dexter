@@ -8,18 +8,18 @@ namespace Dexter.Commands.SuggestionCommands {
     public partial class SuggestionCommands {
 
         [Command("fetchSuggestion")]
-        [Summary("Fetches a suggestion")]
+        [Summary("Fetches a suggestion based on a message's ID or the suggestion's tracker.")]
         [Alias("suggestionFetch")]
         [RequireModerator]
         public async Task FetchSuggestion(string SuggestionProperty) {
-            Suggestion Suggestion = SuggestionDB.Suggestions.AsQueryable().Where(Suggestions => Suggestions.Tracker == SuggestionProperty ||
-                Suggestions.MessageID == SuggestionProperty || Suggestions.StaffMessageID == SuggestionProperty).FirstOrDefault();
+            Suggestion Suggestion = await SuggestionDB.Suggestions.AsAsyncEnumerable().Where(Suggestions => Suggestions.TrackerID == SuggestionProperty ||
+                Suggestions.MessageID == SuggestionProperty || Suggestions.StaffMessageID == SuggestionProperty).FirstOrDefaultAsync();
 
             if(Suggestion != null) {
                 
-            } else {
-
-            }
+            } else
+                await Context.Channel.SendMessageAsync($"Haiya! It doesn't seem as though any suggestions matching '{SuggestionProperty}' exists in the database! Are you sure it's a tracker or message id?");
         }
+
     }
 }

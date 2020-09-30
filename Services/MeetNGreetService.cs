@@ -1,6 +1,5 @@
 ﻿using Dexter.Core.Abstractions;
 using Dexter.Core.Configuration;
-using Dexter.Core.DiscordApp;
 using Discord;
 using Discord.Webhook;
 using Discord.WebSocket;

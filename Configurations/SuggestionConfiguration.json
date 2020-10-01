@@ -1,0 +1,16 @@
+{
+  "SuggestionsChannel": 742619199863521342,
+  "StaffSuggestionsChannel": 761051229648191538,
+  "EmojiStorageGuild": 742241811258408971,
+  "SuggestionColors": {
+    "Suggested": "00F1FF",
+    "Pending": "FFFF00",
+    "Approved": "00FF00",
+    "Declined": "FF0000"
+  },
+  "Emoji": {
+    "Upvote": 761111839060000788,
+    "Downvote": 761111838711611414,
+    "Bin": 761111838921981952
+  }
+}

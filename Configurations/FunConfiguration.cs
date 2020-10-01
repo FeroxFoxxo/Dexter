@@ -3,7 +3,10 @@ using System.Collections.Generic;
 
 namespace Dexter.Core.Configuration {
     public class FunConfiguration : JSONConfiguration {
-        public Dictionary<string, string> EmojiIDs { get; set; }
+
+        public ulong EmojiGuildID { get; set; }
+
+        public Dictionary<string, ulong> EmojiIDs { get; set; }
 
         public Dictionary<string, string[]> WouldYouRather { get; set; }
 
@@ -12,5 +15,6 @@ namespace Dexter.Core.Configuration {
         public Dictionary<string, string[]> EightBall { get; set; }
 
         public Dictionary<string, string> EightBallEmoji { get; set; }
+
     }
 }

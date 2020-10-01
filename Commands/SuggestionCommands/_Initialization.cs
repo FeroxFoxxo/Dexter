@@ -1,5 +1,5 @@
 ﻿using Dexter.Core.Abstractions;
-using Dexter.Databases.Suggestions;
+using Dexter.Databases;
 using Discord.Commands;
 
 namespace Dexter.Commands.SuggestionCommands {

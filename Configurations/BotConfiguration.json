@@ -4,6 +4,10 @@
   "ModeratorRoleID": 743753305280348190,
   "AdminitratorRoleID": 747691096875991050,
   "Prefix": "~",
+  "ErrorChannel": {
+    "Guild": 742241811258408971,
+    "Channel": 761097217851260934
+  },
   "ThumbnailURLs": [
     "",
     "https://us-furries.com/Dexter/DexAnnoyed.png",

@@ -8,6 +8,9 @@
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <PlatformTarget>x64</PlatformTarget>
+    <AnalysisLevel>preview</AnalysisLevel>
+    <ApplicationIcon>DexLove.ico</ApplicationIcon>
+    <Optimize>true</Optimize>
   </PropertyGroup>
   
   <ItemGroup>
@@ -30,6 +33,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Configurations\FunConfiguration.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configurations\SuggestionConfiguration.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

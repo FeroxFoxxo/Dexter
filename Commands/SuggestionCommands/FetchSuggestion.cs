@@ -1,5 +1,5 @@
 ﻿using Dexter.Core.DiscordApp;
-using Dexter.Databases.Suggestions;
+using Dexter.Databases;
 using Discord.Commands;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,7 +13,7 @@ namespace Dexter.Commands.SuggestionCommands {
         [RequireModerator]
         public async Task FetchSuggestion(string SuggestionProperty) {
             Suggestion Suggestion = await SuggestionDB.Suggestions.AsAsyncEnumerable().Where(Suggestions => Suggestions.TrackerID == SuggestionProperty ||
-                Suggestions.MessageID == SuggestionProperty || Suggestions.StaffMessageID == SuggestionProperty).FirstOrDefaultAsync();
+                Suggestions.MessageID.ToString() == SuggestionProperty || Suggestions.StaffMessageID.ToString() == SuggestionProperty).FirstOrDefaultAsync();
 
             if(Suggestion != null) {
                 

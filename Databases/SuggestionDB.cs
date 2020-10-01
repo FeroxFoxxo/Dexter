@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.Suggestions {
+namespace Dexter.Databases {
     public class SuggestionDB : EntityDatabase {
         public DbSet<Suggestion> Suggestions { get; set; }
     }
@@ -11,11 +11,18 @@ namespace Dexter.Databases.Suggestions {
         [Key]
         public string TrackerID { get; set; }
 
-        public string Suggestor { get; set; }
-        public string Status { get; set; }
+        public ulong Suggestor { get; set; }
+        public SuggestionStatus Status { get; set; }
         public string Content { get; set; }
-        public string MessageID { get; set; }
-        public string StaffMessageID { get; set; }
+        public ulong MessageID { get; set; }
+        public ulong StaffMessageID { get; set; }
         public string Expiry { get; set; }
+    }
+
+    public enum SuggestionStatus {
+        Suggested,
+        Pending,
+        Approved,
+        Declined
     }
 }

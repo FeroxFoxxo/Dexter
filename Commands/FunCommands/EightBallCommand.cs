@@ -14,7 +14,7 @@ namespace Dexter.Commands.FunCommands {
 
             string[] Responces = FunConfiguration.EightBall[Result];
 
-            Emote emoji = Emote.Parse(FunConfiguration.EmojiIDs[FunConfiguration.EightBallEmoji[Result]]);
+            Emote emoji = await Client.GetGuild(FunConfiguration.EmojiGuildID).GetEmoteAsync(FunConfiguration.EmojiIDs[FunConfiguration.EightBallEmoji[Result]]);
 
             await Context.Channel.SendMessageAsync($"{Responces[new Random().Next(Responces.Length)]}, **{Context.Message.Author}** {emoji}");
         }

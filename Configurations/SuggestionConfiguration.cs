@@ -4,6 +4,8 @@ using System.Collections.Generic;
 namespace Dexter.Configurations {
     public class SuggestionConfiguration : JSONConfiguration {
         
+        public ulong SuggestionGuild { get; set; }
+
         public ulong SuggestionsChannel { get; set; }
 
         public ulong StaffSuggestionsChannel { get; set; }
@@ -13,6 +15,8 @@ namespace Dexter.Configurations {
         public Dictionary<string, string> SuggestionColors { get; set; }
 
         public Dictionary<string, ulong> Emoji { get; set; }
+
+        public int ReactionPass { get; set; }
 
     }
 }

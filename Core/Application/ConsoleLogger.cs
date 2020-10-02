@@ -29,14 +29,12 @@ namespace Dexter.Core.DiscordApp {
                 string ErrorMessage = $"{Event.Message}";
 
                 if (Event.Exception != null)
-                    return;
-
-                await Commands.SendError(
-                    Client.GetGuild(BotConfiguration.ErrorChannel["Guild"])
-                        .GetTextChannel(BotConfiguration.ErrorChannel["Channel"]),
-                    Event.Exception.GetType(),
-                    ErrorMessage.Length > 1750 ? ErrorMessage.Substring(0, 1750) : ErrorMessage
-                );
+                    await Commands.SendError(
+                        Client.GetGuild(BotConfiguration.ErrorChannel["Guild"])
+                            .GetTextChannel(BotConfiguration.ErrorChannel["Channel"]),
+                        Event.Exception.GetType(),
+                        ErrorMessage.Length > 1750 ? ErrorMessage.Substring(0, 1750) : ErrorMessage
+                    );
             }
 
             await Console.Out.WriteLineAsync($"\n {DateTime.Now:G} - {Event} ");

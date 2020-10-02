@@ -19,10 +19,17 @@ namespace Dexter.Databases {
         public string Expiry { get; set; }
     }
 
+    public enum SuggestionVotes {
+        Pass,
+        Fail,
+        Remain
+    }
+
     public enum SuggestionStatus {
         Suggested,
         Pending,
         Approved,
-        Declined
+        Declined,
+        Deleted
     }
 }

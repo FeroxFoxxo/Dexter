@@ -34,6 +34,9 @@ namespace Dexter.Services {
         }
 
         private async Task ReactionAdded(Cacheable<IUserMessage, ulong> MessageCache, ISocketMessageChannel Channel, SocketReaction Reaction) {
+            if (Reaction.User.Value.IsBot)
+                return;
+
             if (Channel.Id != SuggestionConfiguration.SuggestionsChannel)
                 return;
 
@@ -43,29 +46,44 @@ namespace Dexter.Services {
                 throw new Exception("Suggestion message does not exist in cache and could not be downloaded! Aborting...");
 
             if (Reaction.Emote is Emote Emote)
-                foreach(KeyValuePair<string, ulong> Emotes in SuggestionConfiguration.Emoji)
-                    if(Emotes.Value == Emote.Id) {
+                foreach (KeyValuePair<string, ulong> Emotes in SuggestionConfiguration.Emoji)
+                    if (Emotes.Value == Emote.Id) {
                         Suggestion Suggested = SuggestionDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.MessageID == Message.Id).FirstOrDefault();
+
+                        ReactionMetadata Upvotes = Message.Reactions[
+                            await Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild)
+                            .GetEmoteAsync(SuggestionConfiguration.Emoji["Upvote"])
+                        ];
+
+                        ReactionMetadata Downvotes = Message.Reactions[
+                            await Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild)
+                            .GetEmoteAsync(SuggestionConfiguration.Emoji["Downvote"])
+                        ];
 
                         if (Suggested == null)
                             throw new Exception("Haiya, it doesn't seem like this message exists in the database!");
 
                         switch (Emotes.Key) {
                             case "Upvote":
-                                if(Suggested.Suggestor != Reaction.UserId) {
-
-                                    return;
-                                }
-                                break;
                             case "Downvote":
                                 if (Suggested.Suggestor != Reaction.UserId) {
-
+                                    switch (CheckVotes(Upvotes, Downvotes)) {
+                                        case SuggestionVotes.Pass:
+                                            await UpdateSuggestion(Suggested, SuggestionStatus.Pending);
+                                            break;
+                                        case SuggestionVotes.Fail:
+                                            await UpdateSuggestion(Suggested, SuggestionStatus.Declined);
+                                            break;
+                                        case SuggestionVotes.Remain:
+                                            break;
+                                    }
                                     return;
                                 }
                                 break;
                             case "Bin":
                                 if (Suggested.Suggestor == Reaction.UserId) {
-
+                                    await UpdateSuggestion(Suggested, SuggestionStatus.Deleted);
+                                    await Message.DeleteAsync();
                                     return;
                                 }
                                 break;
@@ -74,15 +92,69 @@ namespace Dexter.Services {
                                     $"Please make sure that the reaction {Emotes.Key} is assigned the correct value in {GetType().Name}.");
                         }
                     }
-
-            if(Reaction.User.GetValueOrDefault() != null)
+            if (Reaction.User.GetValueOrDefault() != null)
                 await Message.RemoveReactionAsync(Reaction.Emote, Reaction.User.GetValueOrDefault());
         }
 
-        private async Task ReactionRemoved(Cacheable<IUserMessage, ulong> Message, ISocketMessageChannel Channel, SocketReaction Reaction) {
+        private SuggestionVotes CheckVotes(ReactionMetadata Upvotes, ReactionMetadata Downvotes) {
+            if (Upvotes.ReactionCount - Downvotes.ReactionCount >= SuggestionConfiguration.ReactionPass)
+                return SuggestionVotes.Pass;
+            
+            if (Downvotes.ReactionCount - Upvotes.ReactionCount >= SuggestionConfiguration.ReactionPass)
+                return SuggestionVotes.Fail;
+
+            return SuggestionVotes.Remain;
+        }
+
+        private async Task UpdateSuggestion(Suggestion Suggestion, SuggestionStatus Status) {
+            Suggestion.Status = Status;
+            await SuggestionDB.SaveChangesAsync();
+
+            IMessage SuggestionMessage = await Client.GetGuild(SuggestionConfiguration.SuggestionGuild)
+                .GetTextChannel(SuggestionConfiguration.SuggestionsChannel).GetMessageAsync(Suggestion.MessageID);
+
+            if (SuggestionMessage is RestUserMessage SuggestionMSG) {
+                await SuggestionMessage.RemoveAllReactionsAsync();
+                await SuggestionMSG.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildSuggestion(Suggestion));
+            } else
+                throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? Type: {SuggestionMessage.GetType()}");
+        }
+
+        private async Task ReactionRemoved(Cacheable<IUserMessage, ulong> MessageCache, ISocketMessageChannel Channel, SocketReaction Reaction) {
+            if (Reaction.User.Value.IsBot)
+                return;
+            
             if (Channel.Id != SuggestionConfiguration.SuggestionsChannel)
                 return;
 
+            IUserMessage Message = await MessageCache.GetOrDownloadAsync();
+
+            ReactionMetadata Upvotes = Message.Reactions[
+                await Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild)
+                .GetEmoteAsync(SuggestionConfiguration.Emoji["Upvote"])
+            ];
+
+            ReactionMetadata Downvotes = Message.Reactions[
+                await Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild)
+                .GetEmoteAsync(SuggestionConfiguration.Emoji["Downvote"])
+            ];
+
+            Suggestion Suggested = SuggestionDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.MessageID == Message.Id).FirstOrDefault();
+
+            if (Suggested == null)
+                throw new Exception("Haiya, it doesn't seem like this message exists in the database!");
+
+            switch (CheckVotes(Upvotes, Downvotes)) {
+                case SuggestionVotes.Pass:
+                    await UpdateSuggestion(Suggested, SuggestionStatus.Pending);
+                    break;
+                case SuggestionVotes.Fail:
+                    await UpdateSuggestion(Suggested, SuggestionStatus.Declined);
+                    break;
+                case SuggestionVotes.Remain:
+                    break;
+            }
+            return;
         }
 
         private async Task MessageRecieved(SocketMessage Message) {

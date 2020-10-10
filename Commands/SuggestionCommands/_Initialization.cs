@@ -1,9 +1,8 @@
 ﻿using Dexter.Core.Abstractions;
-using Dexter.Databases;
-using Discord.Commands;
+using Dexter.Databases.Suggestions;
 
 namespace Dexter.Commands.SuggestionCommands {
-    public partial class SuggestionCommands : ModuleBase<CommandModule> {
+    public partial class SuggestionCommands : Module {
 
         private readonly SuggestionDB SuggestionDB;
 

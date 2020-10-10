@@ -4,7 +4,7 @@ using Discord.Commands;
 using System.Diagnostics;
 
 namespace Dexter.Commands.UtilityCommands {
-    public partial class UtilityCommands : ModuleBase<CommandModule> {
+    public partial class UtilityCommands : Module {
 
         private readonly CommandService CommandService;
 

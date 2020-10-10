@@ -1,5 +1,5 @@
 ﻿using Dexter.Core.DiscordApp;
-using Dexter.Databases;
+using Dexter.Databases.Suggestions;
 using Discord.Commands;
 using System.Linq;
 using System.Threading.Tasks;

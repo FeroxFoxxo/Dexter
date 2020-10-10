@@ -1,6 +1,6 @@
 ﻿using Dexter.Configurations;
 using Dexter.Core.Abstractions;
-using Dexter.Databases;
+using Dexter.Databases.Suggestions;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
@@ -34,35 +34,101 @@ namespace Dexter.Services {
         }
 
         private async Task ReactionAdded(Cacheable<IUserMessage, ulong> MessageCache, ISocketMessageChannel Channel, SocketReaction Reaction) {
-            if (Reaction.User.Value.IsBot)
-                return;
-
-            if (Channel.Id != SuggestionConfiguration.SuggestionsChannel)
+            if (IsNotSuggestion(Channel, Reaction))
                 return;
 
             IUserMessage Message = await MessageCache.GetOrDownloadAsync();
 
             if (Message == null)
-                throw new Exception("Suggestion message does not exist in cache and could not be downloaded! Aborting...");
+                throw new Exception("Message does not exist in cache and could not be downloaded! Aborting...");
+
+            if (await CheckAsync(Message, Reaction))
+                await Message.RemoveReactionAsync(Reaction.Emote, Reaction.User.Value);
+        }
+
+        private async Task ReactionRemoved(Cacheable<IUserMessage, ulong> MessageCache, ISocketMessageChannel Channel, SocketReaction Reaction) {
+            if (IsNotSuggestion(Channel, Reaction))
+                return;
+
+            IUserMessage Message = await MessageCache.GetOrDownloadAsync();
+
+            if (Message == null)
+                throw new Exception("Message does not exist in cache and could not be downloaded! Aborting...");
+
+            await CheckAsync(Message, Reaction);
+        }
+
+        private async Task MessageRecieved(SocketMessage Message) {
+            if (Message.Channel.Id != SuggestionConfiguration.SuggestionsChannel || Message.Author.IsBot)
+                return;
+
+            if (Message.Content.Length > 1750) {
+                await Module.BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Your suggestion is too big!")
+                    .WithDescription("Please try to summarise your suggestion a little! " +
+                    "Keep in mind that emoji add a lot of characters to your suggestion - even if it doesn't seem like it - " +
+                    "as Discord handles emoji differently to text, so if you're using a lot of emoji try to cut down on those! <3")
+                    .SendEmbed(Message.Author);
+
+                await Message.DeleteAsync();
+                return;
+            }
+
+            Suggestion Suggested = new Suggestion() {
+                Content = Message.Content,
+                Status = SuggestionStatus.Suggested,
+                Suggestor = Message.Author.Id,
+                TrackerID = CreateToken()
+            };
+
+            RestUserMessage Embed;
+
+            if (Message.Attachments.Count > 0)
+                Embed = await Message.Channel.SendFileAsync(
+                    Message.Attachments.First().ProxyUrl,
+                    embed: BuildSuggestion(Suggested)
+                );
+            else
+                Embed = await Message.Channel.SendMessageAsync(embed: BuildSuggestion(Suggested));
+
+            await Message.DeleteAsync();
+
+            Suggested.MessageID = Embed.Id;
+
+            SuggestionDB.Suggestions.Add(Suggested);
+            await SuggestionDB.SaveChangesAsync();
+
+            SocketGuild Guild = Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild);
+
+            foreach (ulong EmoteReactions in SuggestionConfiguration.Emoji.Values)
+                await Embed.AddReactionAsync(await Guild.GetEmoteAsync(EmoteReactions));
+        }
+
+        private bool IsNotSuggestion(ISocketMessageChannel Channel, SocketReaction Reaction) {
+            if (Channel.Id != SuggestionConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
+                return true;
+            return false;
+        }
+
+        private async Task<bool> CheckAsync(IUserMessage Message, SocketReaction Reaction) {
+            Suggestion Suggested = SuggestionDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.MessageID == Message.Id).FirstOrDefault();
+
+            if (Message == null)
+                throw new Exception("Suggestion does not exist in database! Aborting...");
+
+            ReactionMetadata Upvotes = Message.Reactions[
+                await Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild)
+                .GetEmoteAsync(SuggestionConfiguration.Emoji["Upvote"])
+            ];
+
+            ReactionMetadata Downvotes = Message.Reactions[
+                await Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild)
+                .GetEmoteAsync(SuggestionConfiguration.Emoji["Downvote"])
+            ];
 
             if (Reaction.Emote is Emote Emote)
                 foreach (KeyValuePair<string, ulong> Emotes in SuggestionConfiguration.Emoji)
                     if (Emotes.Value == Emote.Id) {
-                        Suggestion Suggested = SuggestionDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.MessageID == Message.Id).FirstOrDefault();
-
-                        ReactionMetadata Upvotes = Message.Reactions[
-                            await Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild)
-                            .GetEmoteAsync(SuggestionConfiguration.Emoji["Upvote"])
-                        ];
-
-                        ReactionMetadata Downvotes = Message.Reactions[
-                            await Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild)
-                            .GetEmoteAsync(SuggestionConfiguration.Emoji["Downvote"])
-                        ];
-
-                        if (Suggested == null)
-                            throw new Exception("Haiya, it doesn't seem like this message exists in the database!");
-
                         switch (Emotes.Key) {
                             case "Upvote":
                             case "Downvote":
@@ -72,19 +138,20 @@ namespace Dexter.Services {
                                             await UpdateSuggestion(Suggested, SuggestionStatus.Pending);
                                             break;
                                         case SuggestionVotes.Fail:
+                                            Suggested.Reason = "Declined by the community.";
                                             await UpdateSuggestion(Suggested, SuggestionStatus.Declined);
                                             break;
                                         case SuggestionVotes.Remain:
                                             break;
                                     }
-                                    return;
+                                    return false;
                                 }
                                 break;
                             case "Bin":
                                 if (Suggested.Suggestor == Reaction.UserId) {
                                     await UpdateSuggestion(Suggested, SuggestionStatus.Deleted);
                                     await Message.DeleteAsync();
-                                    return;
+                                    return false;
                                 }
                                 break;
                             default:
@@ -92,8 +159,7 @@ namespace Dexter.Services {
                                     $"Please make sure that the reaction {Emotes.Key} is assigned the correct value in {GetType().Name}.");
                         }
                     }
-            if (Reaction.User.GetValueOrDefault() != null)
-                await Message.RemoveReactionAsync(Reaction.Emote, Reaction.User.GetValueOrDefault());
+            return true;
         }
 
         private SuggestionVotes CheckVotes(ReactionMetadata Upvotes, ReactionMetadata Downvotes) {
@@ -120,83 +186,6 @@ namespace Dexter.Services {
                 throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? Type: {SuggestionMessage.GetType()}");
         }
 
-        private async Task ReactionRemoved(Cacheable<IUserMessage, ulong> MessageCache, ISocketMessageChannel Channel, SocketReaction Reaction) {
-            if (Reaction.User.Value.IsBot)
-                return;
-            
-            if (Channel.Id != SuggestionConfiguration.SuggestionsChannel)
-                return;
-
-            IUserMessage Message = await MessageCache.GetOrDownloadAsync();
-
-            ReactionMetadata Upvotes = Message.Reactions[
-                await Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild)
-                .GetEmoteAsync(SuggestionConfiguration.Emoji["Upvote"])
-            ];
-
-            ReactionMetadata Downvotes = Message.Reactions[
-                await Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild)
-                .GetEmoteAsync(SuggestionConfiguration.Emoji["Downvote"])
-            ];
-
-            Suggestion Suggested = SuggestionDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.MessageID == Message.Id).FirstOrDefault();
-
-            if (Suggested == null)
-                throw new Exception("Haiya, it doesn't seem like this message exists in the database!");
-
-            switch (CheckVotes(Upvotes, Downvotes)) {
-                case SuggestionVotes.Pass:
-                    await UpdateSuggestion(Suggested, SuggestionStatus.Pending);
-                    break;
-                case SuggestionVotes.Fail:
-                    await UpdateSuggestion(Suggested, SuggestionStatus.Declined);
-                    break;
-                case SuggestionVotes.Remain:
-                    break;
-            }
-            return;
-        }
-
-        private async Task MessageRecieved(SocketMessage Message) {
-            if (Message.Channel.Id != SuggestionConfiguration.SuggestionsChannel || Message.Author.IsBot)
-                return;
-
-            if (Message.Content.Length > 1750) {
-                await Module.BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle("Your suggestion is too big!")
-                    .WithDescription("Please try to summarise your suggestion a little! " +
-                    "Keep in mind that emoji add a lot of characters to your suggestion - even if it doesn't seem like it - " +
-                    "as Discord handles emoji differently to text, so if you're using a lot of emoji try to cut down on those! <3")
-                    .SendEmbed(Message.Author);
-
-                await Message.DeleteAsync();
-                return;
-            }
-
-            Suggestion Suggested = new Suggestion() {
-                Content = Message.Content,
-                Status = SuggestionStatus.Suggested,
-                Suggestor = Message.Author.Id,
-                TrackerID = CreateToken()
-            };
-
-            RestUserMessage Embed = await Message.Channel.SendMessageAsync(
-                embed: BuildSuggestion(Suggested)
-            );
-
-            await Message.DeleteAsync();
-
-            Suggested.MessageID = Embed.Id;
-
-            SuggestionDB.Suggestions.Add(Suggested);
-            await SuggestionDB.SaveChangesAsync();
-
-            SocketGuild Guild = Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild);
-
-            foreach (ulong EmoteReactions in SuggestionConfiguration.Emoji.Values)
-                await Embed.AddReactionAsync(await Guild.GetEmoteAsync(EmoteReactions));
-        }
-
         private string CreateToken() {
             char[] TokenArray = new char[8];
 
@@ -212,7 +201,7 @@ namespace Dexter.Services {
         }
 
         private Embed BuildSuggestion(Suggestion Suggestion) {
-            return new EmbedBuilder()
+            EmbedBuilder Embed = new EmbedBuilder()
                 .WithTitle(Suggestion.Status.ToString().ToUpper())
                 .WithColor(new Color(Convert.ToUInt32(SuggestionConfiguration.SuggestionColors[Suggestion.Status.ToString()], 16)))
                 .WithThumbnailUrl(Client.GetUser(Suggestion.Suggestor).GetAvatarUrl())
@@ -220,8 +209,12 @@ namespace Dexter.Services {
                 .WithDescription(Suggestion.Content)
                 .WithAuthor(Client.GetUser(Suggestion.Suggestor))
                 .WithCurrentTimestamp()
-                .WithFooter(Suggestion.TrackerID)
-                .Build();
+                .WithFooter(Suggestion.TrackerID);
+
+            if (!string.IsNullOrEmpty(Suggestion.Reason))
+                Embed.AddField("Reason", Suggestion.Reason);
+
+            return Embed.Build();
         }
     }
 }

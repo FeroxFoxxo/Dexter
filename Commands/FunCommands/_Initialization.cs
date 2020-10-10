@@ -1,10 +1,9 @@
 ﻿using Dexter.Core.Abstractions;
 using Dexter.Core.Configuration;
-using Discord.Commands;
 using Discord.WebSocket;
 
 namespace Dexter.Commands.FunCommands {
-    public partial class FunCommands : ModuleBase<CommandModule> {
+    public partial class FunCommands : Module {
 
         private readonly FunConfiguration FunConfiguration;
         private readonly DiscordSocketClient Client;

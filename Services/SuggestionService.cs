@@ -183,6 +183,9 @@ namespace Dexter.Services {
             if (SuggestionMessage is RestUserMessage SuggestionMSG) {
                 await SuggestionMessage.RemoveAllReactionsAsync();
                 await SuggestionMSG.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildSuggestion(Suggestion));
+            } else if (SuggestionMessage is SocketUserMessage SuggestionMSG2) {
+                await SuggestionMessage.RemoveAllReactionsAsync();
+                await SuggestionMSG2.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildSuggestion(Suggestion));
             } else
                 throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? Type: {SuggestionMessage.GetType()}");
         }

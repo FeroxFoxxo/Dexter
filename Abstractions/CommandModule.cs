@@ -1,9 +1,9 @@
-﻿using Dexter.Core.Configuration;
+﻿using Dexter.Configuration;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
-namespace Dexter.Core.Abstractions {
+namespace Dexter.Abstractions {
     public class CommandModule : SocketCommandContext {
         public BotConfiguration BotConfiguration;
 

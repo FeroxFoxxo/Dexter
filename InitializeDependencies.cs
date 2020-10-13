@@ -1,6 +1,6 @@
-﻿using Dexter.Core.Abstractions;
-using Dexter.Core.Configuration;
-using Dexter.Core.DiscordApp;
+﻿using Dexter.Abstractions;
+using Dexter.Configuration;
+using Dexter.Services;
 using Discord.Commands;
 using Discord.WebSocket;
 using Figgle;
@@ -21,7 +21,6 @@ namespace Dexter.Core {
 
         public static async Task Main() {
             Console.Title = "Starting...";
-            Console.ForegroundColor = ConsoleColor.Blue;
             await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render("Starting..."));
 
             ServiceCollection ServiceCollection = new ServiceCollection();
@@ -78,9 +77,6 @@ namespace Dexter.Core {
                 Type => (Services.GetService(Type) as InitializableModule).AddDelegates()
             );
             
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
-            Console.CancelKeyPress += new ConsoleCancelEventHandler(OnProcessExit);
-
             Assembly.GetExecutingAssembly().GetTypes()
                     .Where(Type => Type.IsSubclassOf(typeof(EntityDatabase)) && !Type.IsAbstract)
                     .ToList().ForEach(
@@ -100,8 +96,13 @@ namespace Dexter.Core {
             );
 
             Services.GetRequiredService<CommandModule>().BotConfiguration = Services.GetRequiredService<BotConfiguration>();
+            
+            await Services.GetRequiredService<StartupService>().StartAsync();
 
-            await Services.GetRequiredService<FrontendConsole>().RunAsync();
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
+            Console.CancelKeyPress += new ConsoleCancelEventHandler(OnProcessExit);
+
+            await Task.Delay(-1);
         }
 
         public static void OnProcessExit(object Sender, EventArgs Arguments) {

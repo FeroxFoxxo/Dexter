@@ -1,5 +1,5 @@
-﻿using Dexter.Core.Abstractions;
-using Dexter.Core.DiscordApp;
+﻿using Dexter.Abstractions;
+using Dexter.Attributes;
 using Discord;
 using Discord.Commands;
 using Discord.Net;

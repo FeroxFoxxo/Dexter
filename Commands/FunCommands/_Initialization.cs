@@ -1,5 +1,5 @@
-﻿using Dexter.Core.Abstractions;
-using Dexter.Core.Configuration;
+﻿using Dexter.Abstractions;
+using Dexter.Configuration;
 using Discord.WebSocket;
 
 namespace Dexter.Commands.FunCommands {

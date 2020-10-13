@@ -1,6 +1,6 @@
-﻿using Dexter.Core.Abstractions;
+﻿using Dexter.Abstractions;
 
-namespace Dexter.Core.Configuration {
+namespace Dexter.Configuration {
     public class MNGConfiguration : JSONConfiguration {
 
         public ulong MeetNGreetChannel { get; set; }

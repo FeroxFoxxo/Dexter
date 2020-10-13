@@ -1,14 +1,12 @@
-﻿using Dexter.Core.Abstractions;
-using Dexter.Core.DiscordApp;
+﻿using Dexter.Abstractions;
 using Discord;
 using Discord.Commands;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands.UtilityCommands {
-    public partial class UtilityCommands {
+namespace Dexter.Commands.HelpCommands {
+    public partial class HelpCommands {
 
         [Command("help")]
         [Summary("Displays all avaliable commands.")]

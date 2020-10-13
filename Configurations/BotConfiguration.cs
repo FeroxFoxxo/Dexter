@@ -1,7 +1,7 @@
-﻿using Dexter.Core.Abstractions;
+﻿using Dexter.Abstractions;
 using System.Collections.Generic;
 
-namespace Dexter.Core.Configuration {
+namespace Dexter.Configuration {
     public class BotConfiguration : JSONConfiguration {
 
         public string Token { get; set; }
@@ -12,11 +12,15 @@ namespace Dexter.Core.Configuration {
 
         public ulong ModeratorRoleID { get; set; }
 
-        public ulong AdminitratorRoleID { get; set; }
-        
-        public Dictionary<string, ulong> ErrorChannel { get; set; }
+        public ulong GuildID { get; set; }
+
+        public ulong ModerationLogChannelID { get; set; }
 
         public string[] ThumbnailURLs { get; set; }
+
+        public string DeveloperMention { get; set; }
+
+        public Dictionary<string, bool> ModuleConfigurations { get; set; }
 
     }
 }

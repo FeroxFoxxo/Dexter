@@ -1,4 +1,4 @@
-﻿using Dexter.Core.Abstractions;
+﻿using Dexter.Abstractions;
 using System.Collections.Generic;
 
 namespace Dexter.Configurations {

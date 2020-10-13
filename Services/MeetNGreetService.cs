@@ -1,5 +1,5 @@
-﻿using Dexter.Core.Abstractions;
-using Dexter.Core.Configuration;
+﻿using Dexter.Abstractions;
+using Dexter.Configuration;
 using Discord;
 using Discord.Webhook;
 using Discord.WebSocket;
@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Dexter.Services {
     public class MeetNGreetService : InitializableModule {
+
         private readonly DiscordSocketClient Client;
         private readonly MNGConfiguration MNGConfig;
         private readonly DiscordWebhookClient Webhook;
@@ -69,5 +70,6 @@ namespace Dexter.Services {
                     .WithColor(Color.Blue)
                     .SendEmbed(Webhook);
         }
+
     }
 }

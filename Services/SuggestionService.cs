@@ -1,5 +1,5 @@
-﻿using Dexter.Configurations;
-using Dexter.Core.Abstractions;
+﻿using Dexter.Abstractions;
+using Dexter.Configurations;
 using Dexter.Databases.Suggestions;
 using Discord;
 using Discord.Rest;
@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace Dexter.Services {
     public class SuggestionService : InitializableModule {
+
         private readonly DiscordSocketClient Client;
         private readonly SuggestionConfiguration SuggestionConfiguration;
         private readonly SuggestionDB SuggestionDB;
@@ -216,5 +217,6 @@ namespace Dexter.Services {
 
             return Embed.Build();
         }
+
     }
 }

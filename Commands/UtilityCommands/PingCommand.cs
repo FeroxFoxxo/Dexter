@@ -1,4 +1,4 @@
-﻿using Dexter.Core.Abstractions;
+﻿using Dexter.Abstractions;
 using Discord.Commands;
 using System.Threading.Tasks;
 

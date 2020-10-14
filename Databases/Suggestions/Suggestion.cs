@@ -2,6 +2,7 @@
 
 namespace Dexter.Databases.Suggestions {
     public class Suggestion {
+
         [Key]
         public string TrackerID { get; set; }
 
@@ -16,5 +17,6 @@ namespace Dexter.Databases.Suggestions {
         public ulong StaffMessageID { get; set; }
 
         public string Expiry { get; set; }
+
     }
 }

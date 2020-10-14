@@ -31,7 +31,7 @@ namespace Dexter.Commands.ConfigurationCommands {
                         else {
                             bool Active = ModuleAction == ModuleActionType.Enable;
                             await ModuleService.SetModuleState(ModuleName, Active);
-                            await Context.BuildEmbed(EmojiEnum.Annoyed)
+                            await Context.BuildEmbed(Active ? EmojiEnum.Love : EmojiEnum.Annoyed)
                                 .WithTitle("Module set!")
                                 .WithDescription($"The module **{ModuleName}** is now **{(Active ? "enabled" : "disabled")}**!")
                                 .SendEmbed(Context.Channel);

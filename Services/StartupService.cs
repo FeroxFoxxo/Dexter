@@ -43,7 +43,8 @@ namespace Dexter.Services {
 
             ITextChannel Channel = DiscordSocketClient.GetGuild(Guild).GetTextChannel(LoggingChannel);
 
-            await Module.BuildEmbed(EmojiEnum.Love)
+            if(BotConfiguration.EnableStartupWarning)
+                await Module.BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Startup complete!")
                 .WithDescription($"This is **{BotConfiguration.Bot_Name} v{Assembly.GetExecutingAssembly().GetName().Version}** running **Discord.Net v{Discord.DiscordConfig.Version}**!")
                 .SendEmbed(Channel);

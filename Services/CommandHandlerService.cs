@@ -1,11 +1,11 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Configuration;
-using Dexter.CustomCommands;
+using Dexter.Databases.CustomCommands;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
-using System.Reflection;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Services {
@@ -21,19 +21,19 @@ namespace Dexter.Services {
 
         private readonly CommandModule Module;
 
-        private readonly CustomCommandsService CustomCommandsService;
+        private readonly CustomCommandDB CustomCommandDB;
 
         private readonly LoggingService LoggingService;
 
         private static readonly string[] SensitiveCharacters = { "\\", "*", "_", "~", "`", "|", ">", "[", "(" };
 
-        public CommandHandlerService(DiscordSocketClient _Client, CommandService _CommandService, BotConfiguration _BotConfiguration, IServiceProvider _Services, CommandModule _Module, CustomCommandsService _CustomCommandsService, LoggingService _LoggingService) {
+        public CommandHandlerService(DiscordSocketClient _Client, CommandService _CommandService, BotConfiguration _BotConfiguration, IServiceProvider _Services, CommandModule _Module, CustomCommandDB _CustomCommandDB, LoggingService _LoggingService) {
             Client = _Client;
             BotConfiguration = _BotConfiguration;
             CommandService = _CommandService;
             Services = _Services;
             Module = _Module;
-            CustomCommandsService = _CustomCommandsService;
+            CustomCommandDB = _CustomCommandDB;
             LoggingService = _LoggingService;
         }
 
@@ -77,9 +77,17 @@ namespace Dexter.Services {
                 case CommandError.UnknownCommand:
                     string[] CustomCommandArgs = Context.Message.Content[BotConfiguration.Prefix.Length..].Split(' ');
 
-                    if (CustomCommandsService.TryGetCommand(CustomCommandArgs[0], out CustomCommand CustomCommand))
-                        await CustomCommand.ExecuteCommand(Context, Module);
-                    else {
+                    CustomCommand CustomCommand = CustomCommandDB.GetCommandByNameOrAlias(CustomCommandArgs[0].ToLower());
+
+                    if (CustomCommand != null) {
+                        if (CustomCommand.Reply.Length > 0)
+                            await Context.Channel.SendMessageAsync(CustomCommand.Reply.Replace("USER", Context.Message.MentionedUserIds.Count > 0 ? $"<@{Context.Message.MentionedUserIds.First()}>" : Context.Message.Author.Mention));
+                        else
+                            await Module.BuildEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Misconfigured command!")
+                                .WithDescription($"{CustomCommand.CommandName} has not been configured! Please contact a moderator about this. <3")
+                                .SendEmbed(Context.Channel);
+                    } else {
                         await Module.BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Unknown Command")
                         .WithDescription($"Oopsies! It seems as if the command **{SanitizeMarkdown(CustomCommandArgs[0])}** doesn't exist!")

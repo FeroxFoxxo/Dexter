@@ -12,7 +12,7 @@ namespace Dexter.Commands.ConfigurationCommands {
         [RequireAdministrator]
 
         public async Task ListModulesAsync()
-            => await Context.BuildEmbed(EmojiEnum.Unknown)
+            => await Context.BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Modules")
                 .WithDescription($"Use `{BotConfiguration.Prefix}module enable/disable <name>` to change the state of a module!")
                 .WithFields(

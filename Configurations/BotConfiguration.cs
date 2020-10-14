@@ -22,5 +22,7 @@ namespace Dexter.Configuration {
 
         public Dictionary<string, bool> ModuleConfigurations { get; set; }
 
+        public bool EnableStartupWarning { get; set; }
+
     }
 }

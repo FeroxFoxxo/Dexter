@@ -13,5 +13,6 @@
     "https://us-furries.com/Dexter/DexWut.png",
     "https://us-furries.com/Dexter/DexSignOwO.png"
   ],
-  "ModuleConfigurations": {}
+  "ModuleConfigurations": {},
+  "EnableStartupWarning": false
 }

@@ -44,6 +44,16 @@ namespace Dexter.Services {
             lock (LockLogFile)
                 File.AppendAllText(LogFile, Log + "\n");
 
+            Console.ForegroundColor = Message.Severity switch {
+                LogSeverity.Info => ConsoleColor.Blue,
+                LogSeverity.Critical => ConsoleColor.DarkRed,
+                LogSeverity.Error => ConsoleColor.Red,
+                LogSeverity.Warning => ConsoleColor.Yellow,
+                LogSeverity.Verbose => ConsoleColor.Magenta,
+                LogSeverity.Debug => ConsoleColor.DarkCyan,
+                _ => ConsoleColor.Red,
+            };
+
             return Console.Out.WriteLineAsync(Log);
         }
 

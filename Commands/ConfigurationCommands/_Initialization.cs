@@ -2,7 +2,6 @@
 using Dexter.Attributes;
 using Dexter.Configuration;
 using Dexter.Services;
-using Discord.Commands;
 
 namespace Dexter.Commands.ConfigurationCommands {
     [EssentialModule]

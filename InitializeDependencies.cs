@@ -1,6 +1,7 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Configuration;
 using Dexter.Services;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Figgle;
@@ -21,7 +22,6 @@ namespace Dexter.Core {
 
         public static async Task Main() {
             Console.Title = "Starting...";
-            await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render("Starting..."));
 
             ServiceCollection ServiceCollection = new ServiceCollection();
 
@@ -71,6 +71,16 @@ namespace Dexter.Core {
             
             Services = ServiceCollection.BuildServiceProvider();
 
+            BotConfiguration BotConfiguration = Services.GetRequiredService<BotConfiguration>();
+
+            Console.Title = $"{BotConfiguration.Bot_Name} v{Assembly.GetExecutingAssembly().GetName().Version} (Discord.Net v{DiscordConfig.Version})";
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+
+            await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(BotConfiguration.Bot_Name));
+
+            Services.GetRequiredService<CommandModule>().BotConfiguration = BotConfiguration;
+
             Assembly.GetExecutingAssembly().GetTypes()
                     .Where(Type => Type.IsSubclassOf(typeof(InitializableModule)) && !Type.IsAbstract)
                     .ToList().ForEach(
@@ -83,19 +93,9 @@ namespace Dexter.Core {
                 DBType => {
                     EntityDatabase EntityDatabase = (EntityDatabase)Services.GetRequiredService(DBType);
 
-                    if (EntityDatabase.Database.EnsureCreated()) {
-                        RelationalDatabaseCreator RelationalDatabaseCreator =
-                                (RelationalDatabaseCreator)EntityDatabase.Database.GetService<IDatabaseCreator>();
-                        try {
-                            RelationalDatabaseCreator.CreateTables();
-                        } catch (Exception Exception) {
-                            Console.WriteLine(Exception.Message);
-                        }
-                    }
+                    EntityDatabase.Database.EnsureCreated();
                 }
             );
-
-            Services.GetRequiredService<CommandModule>().BotConfiguration = Services.GetRequiredService<BotConfiguration>();
             
             await Services.GetRequiredService<StartupService>().StartAsync();
 

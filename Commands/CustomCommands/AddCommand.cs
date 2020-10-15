@@ -11,7 +11,7 @@ namespace Dexter.Commands.CustomCommands {
 
         [Command("ccadd")]
         [Summary("Creates a new customizeable command.")]
-        [Alias("cc", "customcommand")]
+        [Alias("cccreate", "ccmake")]
         [RequireModerator]
 
         public async Task CreateCommandAsync(string CommandName, [Remainder] string Reply) {
@@ -20,14 +20,15 @@ namespace Dexter.Commands.CustomCommands {
 
             CustomCommandDB.CustomCommands.Add(new CustomCommand() {
                 CommandName = CommandName.ToLower(),
-                Reply = Reply
+                Reply = Reply,
+                Alias = ""
             });
 
             await CustomCommandDB.SaveChangesAsync();
 
             await Context.BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"The command `{CommandName}` was added!")
-                .WithDescription($"Use `{BotConfiguration.Prefix}ccaddAlias` to add an alias to the command! \n" +
+                .WithDescription($"Use `{BotConfiguration.Prefix}ccalias add` to add an alias to the command! \n" +
                     "Please note, to make the command ping a user if mentioned, add `USER` to the reply~! \n" +
                     $"To modify the reply at any time, use ``{BotConfiguration.Prefix}ccedit``")
                 .SendEmbed(Context.Channel);

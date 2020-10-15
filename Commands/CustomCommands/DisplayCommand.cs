@@ -11,7 +11,7 @@ namespace Dexter.Commands.CustomCommands {
         [Alias("cclist", "ccl")]
 
         public async Task DisplayCommandsAsync() {
-            string CustomCommands = string.Join("\n", CustomCommandDB.CustomCommands.AsQueryable().Select(CustomCommand => CustomCommand.CommandName).ToArray());
+            string CustomCommands = string.Join("\n", CustomCommandDB.CustomCommands.AsQueryable().Select(CustomCommand => BotConfiguration.Prefix + CustomCommand.CommandName).ToArray());
 
             await Context.BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Here is a list of usable commands! <3")

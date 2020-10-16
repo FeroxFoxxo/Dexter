@@ -1,4 +1,5 @@
-﻿using Dexter.Abstractions;
+﻿using Dexter.Core.Enums;
+using Dexter.Core.Extensions;
 using Dexter.Databases.Suggestions;
 using Dexter.Services;
 using Discord.Commands;
@@ -28,7 +29,7 @@ namespace Dexter.Commands.SuggestionCommands {
 
                 await Context.BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Suggestion Denied")
-                    .WithDescription($"Suggestion {Suggestion.TrackerID} was successfully approved by {Context.Message.Author.Mention}")
+                    .WithDescription($"Suggestion {Suggestion.TrackerID} was successfully denied by {Context.Message.Author.Mention}")
                     .AddField("Reason:", string.IsNullOrEmpty(Reason) ? "No reason provided" : Reason)
                     .WithCurrentTimestamp()
                     .SendEmbed(Context.Channel);

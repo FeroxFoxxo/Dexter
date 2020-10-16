@@ -1,14 +1,16 @@
-﻿using Dexter.Abstractions;
-using Dexter.Attributes;
+﻿using Dexter.Core.Abstractions;
+using Dexter.Core.Attributes;
 using Discord.Commands;
 
 namespace Dexter.Commands.HelpCommands {
     [EssentialModule]
-    public partial class HelpCommands : Module {
+    public partial class HelpCommands : ModuleD {
+
         private readonly CommandService CommandService;
 
         public HelpCommands(CommandService _CommandService) {
             CommandService = _CommandService;
         }
+
     }
 }

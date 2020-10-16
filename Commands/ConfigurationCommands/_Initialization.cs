@@ -1,11 +1,11 @@
-﻿using Dexter.Abstractions;
-using Dexter.Attributes;
-using Dexter.Configuration;
+﻿using Dexter.Configuration;
+using Dexter.Core.Abstractions;
+using Dexter.Core.Attributes;
 using Dexter.Services;
 
 namespace Dexter.Commands.ConfigurationCommands {
     [EssentialModule]
-    public partial class ConfigurationCommands : Module {
+    public partial class ConfigurationCommands : ModuleD {
 
         private readonly ModuleService ModuleService;
         private readonly BotConfiguration BotConfiguration;

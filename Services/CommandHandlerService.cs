@@ -1,5 +1,7 @@
-﻿using Dexter.Abstractions;
-using Dexter.Configuration;
+﻿using Dexter.Configuration;
+using Dexter.Core.Abstractions;
+using Dexter.Core.Enums;
+using Dexter.Core.Extensions;
 using Dexter.Databases.CustomCommands;
 using Discord;
 using Discord.Commands;
@@ -109,14 +111,12 @@ namespace Dexter.Services {
                         await Context.Channel.SendMessageAsync("Unknown error! I wanted to tell the developers, but I don't know who they are!");
 
                     if (Result is ExecuteResult ExecuteResult)
-                        await new EmbedBuilder()
-                            .WithColor(Color.Red)
+                        await Module.BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle(ExecuteResult.Exception.GetType().Name.Prettify())
                             .WithDescription(ExecuteResult.Exception.Message)
                             .SendEmbed(Context.Channel);
                     else
-                        await new EmbedBuilder()
-                            .WithColor(Color.Red)
+                        await Module.BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle(Result.Error.GetType().Name.Prettify())
                             .WithDescription(Result.ErrorReason)
                             .SendEmbed(Context.Channel);

@@ -1,4 +1,4 @@
-﻿using Dexter.Abstractions;
+﻿using Dexter.Core.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dexter.Databases.Warnings {

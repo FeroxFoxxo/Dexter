@@ -1,9 +1,10 @@
-﻿using Dexter.Abstractions;
+﻿using Dexter.Core.Enums;
 using Discord;
 using Discord.Commands;
 using Humanizer;
 using System;
 using System.Threading.Tasks;
+using Dexter.Core.Extensions;
 
 namespace Dexter.Commands.UtilityCommands {
     public partial class UtilityCommands {

@@ -1,7 +1,7 @@
-﻿using Dexter.Abstractions;
+﻿using Dexter.Core.Enums;
 using System;
 
-namespace Dexter.Attributes {
+namespace Dexter.Core.Attributes {
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class RequireAdministratorAttribute : RequirePermissionLevelAttribute {
         public RequireAdministratorAttribute() : base(PermissionLevel.Administrator) { }

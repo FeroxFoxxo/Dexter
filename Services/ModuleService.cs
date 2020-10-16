@@ -1,6 +1,6 @@
-﻿using Dexter.Abstractions;
-using Dexter.Attributes;
-using Dexter.Configuration;
+﻿using Dexter.Configuration;
+using Dexter.Core.Abstractions;
+using Dexter.Core.Attributes;
 using Discord;
 using Discord.Commands;
 using System;
@@ -91,7 +91,7 @@ namespace Dexter.Services {
 
         private static Type[] GetModuleTypes()
             => Assembly.GetExecutingAssembly().GetTypes()
-                .Where(Type => typeof(Abstractions.Module).IsAssignableFrom(Type) && !Type.IsAbstract)
+                .Where(Type => typeof(ModuleD).IsAssignableFrom(Type) && !Type.IsAbstract)
                 .ToArray();
 
         private Type GetModuleTypeByName(string ModuleName)

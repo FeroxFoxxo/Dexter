@@ -1,4 +1,4 @@
-﻿using Dexter.Abstractions;
+﻿using Dexter.Core.Abstractions;
 
 namespace Dexter.Configuration {
     public class MNGConfiguration : JSONConfiguration {

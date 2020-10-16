@@ -1,11 +1,11 @@
-﻿using Dexter.Abstractions;
-using Dexter.Configuration;
+﻿using Dexter.Configuration;
+using Dexter.Core.Abstractions;
 using Dexter.Services;
 using Discord.Commands;
 using System.Diagnostics;
 
 namespace Dexter.Commands.UtilityCommands {
-    public partial class UtilityCommands : Module {
+    public partial class UtilityCommands : ModuleD {
 
         private readonly CommandService CommandService;
 

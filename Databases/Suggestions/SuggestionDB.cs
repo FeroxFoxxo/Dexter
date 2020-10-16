@@ -1,7 +1,5 @@
-﻿using Dexter.Abstractions;
-using Dexter.Configurations;
+﻿using Dexter.Core.Abstractions;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Linq;
 
 namespace Dexter.Databases.Suggestions {

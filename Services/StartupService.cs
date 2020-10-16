@@ -1,5 +1,7 @@
-﻿using Dexter.Abstractions;
-using Dexter.Configuration;
+﻿using Dexter.Configuration;
+using Dexter.Core.Abstractions;
+using Dexter.Core.Enums;
+using Dexter.Core.Extensions;
 using Discord;
 using Discord.WebSocket;
 using System.Reflection;
@@ -43,7 +45,7 @@ namespace Dexter.Services {
 
             ITextChannel Channel = DiscordSocketClient.GetGuild(Guild).GetTextChannel(LoggingChannel);
 
-            if(BotConfiguration.EnableStartupWarning)
+            if(BotConfiguration.EnableStartupAlert)
                 await Module.BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Startup complete!")
                 .WithDescription($"This is **{BotConfiguration.Bot_Name} v{Assembly.GetExecutingAssembly().GetName().Version}** running **Discord.Net v{Discord.DiscordConfig.Version}**!")

@@ -1,12 +1,10 @@
-﻿using Dexter.Abstractions;
-using Dexter.Configuration;
+﻿using Dexter.Configuration;
+using Dexter.Core.Abstractions;
 using Dexter.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Figgle;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;

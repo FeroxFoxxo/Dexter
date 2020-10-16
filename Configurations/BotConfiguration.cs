@@ -1,4 +1,4 @@
-﻿using Dexter.Abstractions;
+﻿using Dexter.Core.Abstractions;
 using System.Collections.Generic;
 
 namespace Dexter.Configuration {
@@ -22,7 +22,7 @@ namespace Dexter.Configuration {
 
         public Dictionary<string, bool> ModuleConfigurations { get; set; }
 
-        public bool EnableStartupWarning { get; set; }
+        public bool EnableStartupAlert { get; set; }
 
     }
 }

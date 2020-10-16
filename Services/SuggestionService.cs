@@ -1,5 +1,7 @@
-﻿using Dexter.Abstractions;
-using Dexter.Configurations;
+﻿using Dexter.Configurations;
+using Dexter.Core.Abstractions;
+using Dexter.Core.Enums;
+using Dexter.Core.Extensions;
 using Dexter.Databases.Suggestions;
 using Discord;
 using Discord.Rest;
@@ -97,6 +99,7 @@ namespace Dexter.Services {
             Suggested.MessageID = Embed.Id;
 
             SuggestionDB.Suggestions.Add(Suggested);
+
             await SuggestionDB.SaveChangesAsync();
 
             SocketGuild Guild = Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild);
@@ -193,20 +196,16 @@ namespace Dexter.Services {
             Suggestion.Status = Status;
             await SuggestionDB.SaveChangesAsync();
 
-            IMessage SuggestionMessage = await Client.GetGuild(SuggestionConfiguration.SuggestionGuild)
-                .GetTextChannel(SuggestionConfiguration.SuggestionsChannel).GetMessageAsync(Suggestion.MessageID);
-
-            if (SuggestionMessage != null)
-                await UpdateSpecificSuggestion(Suggestion, SuggestionMessage);
-
-            IMessage StaffSuggestionMessage = await Client.GetGuild(SuggestionConfiguration.SuggestionGuild)
-                .GetTextChannel(SuggestionConfiguration.StaffSuggestionsChannel).GetMessageAsync(Suggestion.StaffMessageID);
-
-            if (StaffSuggestionMessage != null)
-                await UpdateSpecificSuggestion(Suggestion, StaffSuggestionMessage);
+            await UpdateSpecificSuggestion(Suggestion, SuggestionConfiguration.SuggestionsChannel, Suggestion.MessageID);
+            await UpdateSpecificSuggestion(Suggestion, SuggestionConfiguration.StaffSuggestionsChannel, Suggestion.StaffMessageID);
         }
 
-        public async Task UpdateSpecificSuggestion(Suggestion Suggestion, IMessage SuggestionMessage) {
+        private async Task UpdateSpecificSuggestion(Suggestion Suggestion, ulong Channel, ulong MessageID) {
+            if (Channel == 0 || MessageID == 0)
+                return;
+
+            IMessage SuggestionMessage = await Client.GetGuild(SuggestionConfiguration.SuggestionGuild).GetTextChannel(Channel).GetMessageAsync(MessageID);
+
             if (SuggestionMessage is RestUserMessage SuggestionMSG) {
                 await SuggestionMessage.RemoveAllReactionsAsync();
                 await SuggestionMSG.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildSuggestion(Suggestion));
@@ -242,9 +241,6 @@ namespace Dexter.Services {
                 .WithAuthor(Client.GetUser(Suggestion.Suggestor))
                 .WithCurrentTimestamp()
                 .WithFooter(Suggestion.TrackerID);
-
-            if (!string.IsNullOrEmpty(Suggestion.Reason))
-                Embed.AddField("Reason", Suggestion.Reason);
 
             return Embed.Build();
         }

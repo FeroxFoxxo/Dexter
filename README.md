@@ -1,4 +1,4 @@
-![USF Banner](https://us-furries.com/Dexter/DexLove.png)
+# Dexter .NET
 
 [![Build Status](https://dev.azure.com/frostrixz/Dexter/_apis/build/status/Frostrix.Dexter?branchName=master)](https://dev.azure.com/frostrixz/Dexter/_build/latest?definitionId=2&branchName=master)&nbsp;
 [![All Contributors](https://img.shields.io/badge/All_Contributors-1-default.svg?style=flat&logo=github)](https://github.com/Frostrix/Dexter)&nbsp;

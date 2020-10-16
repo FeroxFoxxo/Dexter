@@ -1,0 +1,17 @@
+﻿using Dexter.Abstractions;
+using Dexter.Databases.Suggestions;
+using Dexter.Services;
+
+namespace Dexter.Commands.SuggestionCommands {
+    public partial class SuggestionCommands : Module {
+
+        private readonly SuggestionDB SuggestionDB;
+        private readonly SuggestionService SuggestionService;
+
+        public SuggestionCommands(SuggestionDB _SuggestionDB, SuggestionService _SuggestionService) {
+            SuggestionDB = _SuggestionDB;
+            SuggestionService = _SuggestionService;
+        }
+
+    }
+}

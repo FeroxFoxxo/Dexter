@@ -12,6 +12,9 @@ namespace Dexter.Abstractions {
         public static async Task SendEmbed(this EmbedBuilder Embed, IMessageChannel Channel) =>
             await Channel.SendMessageAsync(embed: Embed.Build());
 
+        public static async Task SendEmbed(this Embed Embed, IMessageChannel Channel) =>
+            await Channel.SendMessageAsync(embed: Embed);
+
         public static async Task SendEmbed(this EmbedBuilder Embed, DiscordWebhookClient Channel) =>
             await Channel.SendMessageAsync(embeds: new Embed[1] { Embed.Build() });
 

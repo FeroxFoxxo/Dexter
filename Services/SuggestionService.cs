@@ -101,8 +101,10 @@ namespace Dexter.Services {
 
             SocketGuild Guild = Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild);
 
-            foreach (ulong EmoteReactions in SuggestionConfiguration.Emoji.Values)
-                await Embed.AddReactionAsync(await Guild.GetEmoteAsync(EmoteReactions));
+            foreach (string Emoji in SuggestionConfiguration.SuggestionEmoji) {
+                GuildEmote Emote = await Guild.GetEmoteAsync(SuggestionConfiguration.Emoji[Emoji]);
+                await Embed.AddReactionAsync(Emote);
+            }
         }
 
         private bool IsNotSuggestion(ISocketMessageChannel Channel, SocketReaction Reaction) {
@@ -133,10 +135,24 @@ namespace Dexter.Services {
                         switch (Emotes.Key) {
                             case "Upvote":
                             case "Downvote":
-                                if (Suggested.Suggestor != Reaction.UserId) {
+                                if (Suggested.Suggestor == Reaction.UserId) {
                                     switch (CheckVotes(Upvotes, Downvotes)) {
                                         case SuggestionVotes.Pass:
                                             await UpdateSuggestion(Suggested, SuggestionStatus.Pending);
+                                            RestUserMessage StaffSuggestion = await Client.GetGuild(SuggestionConfiguration.SuggestionGuild)
+                                                .GetTextChannel(SuggestionConfiguration.StaffSuggestionsChannel)
+                                                .SendMessageAsync(embed: BuildSuggestion(Suggested));
+
+                                            Suggested.StaffMessageID = StaffSuggestion.Id;
+                                            await SuggestionDB.SaveChangesAsync();
+
+                                            SocketGuild Guild = Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild);
+
+                                            foreach (string Emoji in SuggestionConfiguration.StaffSuggestionEmoji) {
+                                                GuildEmote EmoteStaff = await Guild.GetEmoteAsync(SuggestionConfiguration.Emoji[Emoji]);
+                                                await StaffSuggestion.AddReactionAsync(EmoteStaff);
+                                            }
+
                                             break;
                                         case SuggestionVotes.Fail:
                                             Suggested.Reason = "Declined by the community.";
@@ -173,13 +189,24 @@ namespace Dexter.Services {
             return SuggestionVotes.Remain;
         }
 
-        private async Task UpdateSuggestion(Suggestion Suggestion, SuggestionStatus Status) {
+        public async Task UpdateSuggestion(Suggestion Suggestion, SuggestionStatus Status) {
             Suggestion.Status = Status;
             await SuggestionDB.SaveChangesAsync();
 
             IMessage SuggestionMessage = await Client.GetGuild(SuggestionConfiguration.SuggestionGuild)
                 .GetTextChannel(SuggestionConfiguration.SuggestionsChannel).GetMessageAsync(Suggestion.MessageID);
 
+            if (SuggestionMessage != null)
+                await UpdateSpecificSuggestion(Suggestion, SuggestionMessage);
+
+            IMessage StaffSuggestionMessage = await Client.GetGuild(SuggestionConfiguration.SuggestionGuild)
+                .GetTextChannel(SuggestionConfiguration.StaffSuggestionsChannel).GetMessageAsync(Suggestion.StaffMessageID);
+
+            if (StaffSuggestionMessage != null)
+                await UpdateSpecificSuggestion(Suggestion, StaffSuggestionMessage);
+        }
+
+        public async Task UpdateSpecificSuggestion(Suggestion Suggestion, IMessage SuggestionMessage) {
             if (SuggestionMessage is RestUserMessage SuggestionMSG) {
                 await SuggestionMessage.RemoveAllReactionsAsync();
                 await SuggestionMSG.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildSuggestion(Suggestion));
@@ -191,7 +218,7 @@ namespace Dexter.Services {
         }
 
         private string CreateToken() {
-            char[] TokenArray = new char[8];
+            char[] TokenArray = new char[SuggestionConfiguration.TrackerLength];
 
             for (int i = 0; i < TokenArray.Length; i++)
                 TokenArray[i] = RandomCharacters[Random.Next(RandomCharacters.Length)];
@@ -204,13 +231,14 @@ namespace Dexter.Services {
                 return CreateToken();
         }
 
-        private Embed BuildSuggestion(Suggestion Suggestion) {
+        public Embed BuildSuggestion(Suggestion Suggestion) {
             EmbedBuilder Embed = new EmbedBuilder()
                 .WithTitle(Suggestion.Status.ToString().ToUpper())
                 .WithColor(new Color(Convert.ToUInt32(SuggestionConfiguration.SuggestionColors[Suggestion.Status.ToString()], 16)))
                 .WithThumbnailUrl(Client.GetUser(Suggestion.Suggestor).GetAvatarUrl())
                 .WithTitle(Suggestion.Status.ToString().ToUpper())
                 .WithDescription(Suggestion.Content)
+                .AddField(!string.IsNullOrEmpty(Suggestion.Reason), "Reason:", Suggestion.Reason)
                 .WithAuthor(Client.GetUser(Suggestion.Suggestor))
                 .WithCurrentTimestamp()
                 .WithFooter(Suggestion.TrackerID);

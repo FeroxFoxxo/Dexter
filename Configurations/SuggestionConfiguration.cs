@@ -12,9 +12,15 @@ namespace Dexter.Configurations {
 
         public ulong EmojiStorageGuild { get; set; }
 
+        public int TrackerLength { get; set; }
+
         public Dictionary<string, string> SuggestionColors { get; set; }
 
         public Dictionary<string, ulong> Emoji { get; set; }
+
+        public List<string> SuggestionEmoji { get; set; }
+
+        public List<string> StaffSuggestionEmoji { get; set; }
 
         public int ReactionPass { get; set; }
 

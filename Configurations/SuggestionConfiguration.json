@@ -15,5 +15,15 @@
     "Downvote": 761111838711611414,
     "Bin": 761111838921981952
   },
+  "TrackerLength": 6,
+  "SuggestionEmoji": [
+    "Upvote",
+    "Downvote",
+    "Bin"
+  ],
+  "StaffSuggestionEmoji": [
+    "Upvote",
+    "Downvote"
+  ],
   "ReactionPass": 1
 }

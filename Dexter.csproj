@@ -9,6 +9,7 @@
     <AnalysisLevel>preview</AnalysisLevel>
     <ApplicationIcon>DexLove.ico</ApplicationIcon>
     <Optimize>true</Optimize>
+    <DefaultItemExcludes>.git\**;$(DefaultItemExcludes)</DefaultItemExcludes>
   </PropertyGroup>
   
   <ItemGroup>

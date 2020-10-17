@@ -18,7 +18,7 @@ namespace Dexter.Core {
     public static class InitializeDependencies {
         private static ServiceProvider Services;
 
-        public static async Task Main() {
+        public static async Task Main(string[] Arguments) {
             Console.Title = "Starting...";
 
             ServiceCollection ServiceCollection = new ServiceCollection();
@@ -95,7 +95,7 @@ namespace Dexter.Core {
                 }
             );
             
-            await Services.GetRequiredService<StartupService>().StartAsync();
+            await Services.GetRequiredService<StartupService>().StartAsync(Arguments);
 
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
             Console.CancelKeyPress += new ConsoleCancelEventHandler(OnProcessExit);

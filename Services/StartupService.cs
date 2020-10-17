@@ -26,13 +26,17 @@ namespace Dexter.Services {
             DiscordSocketClient.Ready += DisplayStartupVersionAsync;
         }
 
-        public async Task StartAsync() {
-            if (string.IsNullOrEmpty(BotConfiguration.Token)) {
-                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Startup", "The login token in the config.yaml file was not set."));
-                return;
-            }
+        public async Task StartAsync(string[] Arguments) {
+            if (!string.IsNullOrEmpty(BotConfiguration.Token))
+                await RunBot(BotConfiguration.Token);
+            else if (Arguments.Length > 0)
+                await RunBot(Arguments[0]);
+            else
+                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Startup", $"The login token in the {BotConfiguration.GetType().Name.Prettify()} file was not set."));
+        }
 
-            await DiscordSocketClient.LoginAsync(TokenType.Bot, BotConfiguration.Token);
+        private async Task RunBot(string Token) {
+            await DiscordSocketClient.LoginAsync(TokenType.Bot, Token);
             await DiscordSocketClient.StartAsync();
         }
 

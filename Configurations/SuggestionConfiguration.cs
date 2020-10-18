@@ -14,8 +14,6 @@ namespace Dexter.Configurations {
 
         public int TrackerLength { get; set; }
 
-        public Dictionary<string, string> SuggestionColors { get; set; }
-
         public Dictionary<string, ulong> Emoji { get; set; }
 
         public List<string> SuggestionEmoji { get; set; }

@@ -15,7 +15,7 @@ namespace Dexter.Commands.UtilityCommands {
         [RequireModerator]
         public async Task UserDMCommand(IGuildUser User, [Remainder] string Message) {
             EmbedBuilder Embed = Context.BuildEmbed(EmojiEnum.Unknown)
-                .WithTitle("**User DM**")
+                .WithTitle("User DM")
                 .WithDescription(Message)
                 .AddField("Recipient", $"{User.Mention} {User.Username + User.Discriminator} ({User.Id})")
                 .AddField("Sent By", $"{Context.User.Mention} {Context.User.Username + Context.User.Discriminator} ({Context.User.Id})");
@@ -28,7 +28,7 @@ namespace Dexter.Commands.UtilityCommands {
                     .WithThumbnailUrl(BotConfiguration.ThumbnailURLs[(int)EmojiEnum.Love]);
             } catch (HttpException) {
                 Embed.WithColor(Color.Red)
-                    .AddField("Failed", "This fluff may have either DMs from the server or me! :C")
+                    .AddField("Failed", "This fluff may have either blocked DMs from the server or me!")
                     .WithThumbnailUrl(BotConfiguration.ThumbnailURLs[(int)EmojiEnum.Annoyed]);
             }
 

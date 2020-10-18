@@ -9,6 +9,8 @@ namespace Dexter.Databases.Warnings {
         public ulong Issuer { get; set; }
         public ulong User { get; set; }
         public string Reason { get; set; }
+        public WarningType Type { get; set; }
+        public long TimeOfIssue { get; set; }
 
     }
 }

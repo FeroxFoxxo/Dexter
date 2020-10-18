@@ -231,9 +231,18 @@ namespace Dexter.Services {
         }
 
         public Embed BuildSuggestion(Suggestion Suggestion) {
+            Color Color = Suggestion.Status switch {
+                SuggestionStatus.Suggested => Color.Blue,
+                SuggestionStatus.Pending => Color.Orange,
+                SuggestionStatus.Approved => Color.Green,
+                SuggestionStatus.Declined => Color.Red,
+                SuggestionStatus.Deleted => Color.Magenta,
+                _ => Color.Teal
+            };
+
             EmbedBuilder Embed = new EmbedBuilder()
                 .WithTitle(Suggestion.Status.ToString().ToUpper())
-                .WithColor(new Color(Convert.ToUInt32(SuggestionConfiguration.SuggestionColors[Suggestion.Status.ToString()], 16)))
+                .WithColor(Color)
                 .WithThumbnailUrl(Client.GetUser(Suggestion.Suggestor).GetAvatarUrl())
                 .WithTitle(Suggestion.Status.ToString().ToUpper())
                 .WithDescription(Suggestion.Content)

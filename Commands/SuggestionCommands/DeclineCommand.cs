@@ -1,8 +1,11 @@
-﻿using Dexter.Core.Enums;
+﻿using Dexter.Core.Attributes;
+using Dexter.Core.Enums;
 using Dexter.Core.Extensions;
 using Dexter.Databases.Suggestions;
 using Dexter.Services;
+using Discord;
 using Discord.Commands;
+using Discord.Net;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -12,6 +15,7 @@ namespace Dexter.Commands.SuggestionCommands {
         [Command("decline")]
         [Summary("Denies a suggestion from an ID with an optional reason.")]
         [Alias("deny")]
+        [RequireAdministrator]
 
         public async Task DenySuggestion(string Tracker, [Optional][Remainder] string Reason) {
             Suggestion Suggestion = SuggestionDB.GetSuggestionByNameOrID(Tracker);
@@ -27,12 +31,21 @@ namespace Dexter.Commands.SuggestionCommands {
 
                 await SuggestionService.UpdateSuggestion(Suggestion, SuggestionStatus.Declined);
 
-                await Context.BuildEmbed(EmojiEnum.Annoyed)
+                EmbedBuilder Builder = Context.BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Suggestion Denied")
                     .WithDescription($"Suggestion {Suggestion.TrackerID} was successfully denied by {Context.Message.Author.Mention}")
                     .AddField("Reason:", string.IsNullOrEmpty(Reason) ? "No reason provided" : Reason)
-                    .WithCurrentTimestamp()
-                    .SendEmbed(Context.Channel);
+                    .WithCurrentTimestamp();
+
+                try {
+                    await SuggestionService.BuildSuggestion(Suggestion).SendEmbed(Context.Guild.GetUser(Suggestion.Suggestor));
+
+                    Builder.AddField("Success", "The DM was successfully sent!");
+                } catch (HttpException) {
+                    Builder.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
+                }
+
+                await Builder.SendEmbed(Context.Channel);
             }
         }
 

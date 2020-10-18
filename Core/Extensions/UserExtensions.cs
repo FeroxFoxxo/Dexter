@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace Dexter.Core.Extensions {
     public static class UserExtensions {
+
         public static PermissionLevel GetPermissionLevel(this IGuildUser User, BotConfiguration Configuration) {
             if (User.GuildPermissions.Has(GuildPermission.Administrator))
                 return PermissionLevel.Administrator;
@@ -15,5 +16,10 @@ namespace Dexter.Core.Extensions {
 
             return PermissionLevel.Default;
         }
+
+        public static string GetUserInformation(this IUser User) {
+            return $"{User.Username}#{User.Discriminator} ({User.Mention}) ({User.Id})";
+        }
+
     }
 }

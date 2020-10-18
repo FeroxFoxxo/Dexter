@@ -1,10 +1,10 @@
 ﻿using Dexter.Configuration;
 using Dexter.Core.Abstractions;
 using Dexter.Core.Attributes;
+using Dexter.Databases.Configuration;
 using Discord;
 using Discord.Commands;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -15,46 +15,96 @@ namespace Dexter.Services {
         private readonly LoggingService LoggingService;
         private readonly CommandService CommandService;
         private readonly IServiceProvider Services;
-        private readonly BotConfiguration BotConfiguration;
+        private readonly ConfigurationDB ConfigurationDB;
 
-        private Type[] ModuleTypes;
-
-        public ModuleService(CommandService _CommandService, LoggingService _LoggingService, IServiceProvider _Services, BotConfiguration _BotConfiguration) {
+        public ModuleService(CommandService _CommandService, LoggingService _LoggingService, IServiceProvider _Services, ConfigurationDB _ConfigurationDB) {
             CommandService = _CommandService;
             LoggingService = _LoggingService;
             Services = _Services;
-            BotConfiguration = _BotConfiguration;
+            ConfigurationDB = _ConfigurationDB;
         }
 
         public async override void AddDelegates() {
-            ModuleTypes = GetModuleTypes();
-
             int Essentials = 0, Others = 0;
 
-            foreach (Type EssentialModule in ModuleTypes.Where(Module => Module.IsDefined(typeof(EssentialModuleAttribute)))) {
-                await CommandService.AddModuleAsync(EssentialModule, Services);
-                Essentials++;
-            }
+            string[] EssentialModules = GetEssentialModules();
 
-            foreach (KeyValuePair<string, bool> Module in BotConfiguration.ModuleConfigurations) {
-                if (Module.Value) {
-                    await CommandService.AddModuleAsync(GetModuleTypeByName(Module.Key), Services);
-                    Others++;
+            // Check for configs not in project but in database
+            foreach (Config Configuration in ConfigurationDB.Configurations.ToArray())
+                if (GetModuleTypeByName(Configuration.ConfigurationName) == null) {
+                    ConfigurationDB.Configurations.Remove(Configuration);
+                    await ConfigurationDB.SaveChangesAsync();
+                }
+
+            // Check for configs not in database but in project
+            foreach (Type Type in GetModuleTypes()) {
+                string TypeName = Type.Name.Sanitize();
+
+                if (ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationName == TypeName).FirstOrDefault() == null) {
+                    ConfigurationDB.Configurations.Add(new Config() {
+                        ConfigurationName = TypeName,
+                        ConfigurationType = ConfigrationType.Disabled
+                    });
+                    await ConfigurationDB.SaveChangesAsync();
                 }
             }
 
+            // Check for attribute set in database not matching project
+            foreach (Config Configuration in ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == ConfigrationType.Essential).ToArray())
+                if (!EssentialModules.Contains(Configuration.ConfigurationName)) {
+                    Configuration.ConfigurationType = ConfigrationType.Disabled;
+                    await ConfigurationDB.SaveChangesAsync();
+                }
+
+            // Check for attribute not set in database but in project
+            foreach (Type Type in GetModuleTypes().Where(Module => Module.IsDefined(typeof(EssentialModuleAttribute)))) {
+                string TypeName = Type.Name.Sanitize();
+
+                Config Config = ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationName == TypeName).FirstOrDefault();
+
+                if(Config.ConfigurationType != ConfigrationType.Essential) {
+                    Config.ConfigurationType = ConfigrationType.Essential;
+                    await ConfigurationDB.SaveChangesAsync();
+                }
+            }
+
+            // Loop through all enabled or essential modules
+            foreach (Config Configuration in ConfigurationDB.Configurations.ToArray())
+                switch (Configuration.ConfigurationType) {
+                    case ConfigrationType.Enabled:
+                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), Services);
+                        Others++;
+                        break;
+                    case ConfigrationType.Essential:
+                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), Services);
+                        Essentials++;
+                        break;
+                }
+
             await LoggingService.LogMessageAsync(
-                new LogMessage(LogSeverity.Info, "Modules", $"Initialized the module service with {Essentials} essential module(s) and {Others} other module(s)."));
+                new LogMessage(LogSeverity.Info, "Modules", $"Initialized the module service with {Essentials} essential module(s) and {Others} other module(s).")
+            );
+        }
+
+        public string[] GetModules(ConfigrationType Type) {
+            return ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == Type).Select(Configuration => Configuration.ConfigurationName).ToArray();
         }
 
         public bool GetModuleState(string ModuleName) {
-            if (BotConfiguration.ModuleConfigurations.TryGetValue(ModuleName, out bool IsActive))
-                return IsActive;
-
-            return false;
+            return ConfigurationDB.Configurations.AsQueryable().Where(Module => Module.ConfigurationName == ModuleName).FirstOrDefault().ConfigurationType != ConfigrationType.Disabled;
         }
 
-        public bool VerifyModuleName(ref string ModuleName) {
+        public async Task SetModuleState(string ModuleName, bool IsEnabed) {
+            ConfigurationDB.Configurations.AsQueryable().Where(Module => Module.ConfigurationName == ModuleName).FirstOrDefault().ConfigurationType = IsEnabed ? ConfigrationType.Enabled : ConfigrationType.Disabled;
+            await ConfigurationDB.SaveChangesAsync();
+
+            if(IsEnabed)
+                await CommandService.AddModuleAsync(GetModuleTypeByName(ModuleName), Services);
+            else
+                await CommandService.RemoveModuleAsync(GetModuleTypeByName(ModuleName));
+        }
+
+        public static bool VerifyModuleName(ref string ModuleName) {
             Type HasMatch = GetModuleTypeByName(ModuleName);
 
             if (HasMatch != null) {
@@ -65,36 +115,15 @@ namespace Dexter.Services {
             return false;
         }
 
-        public async Task SetModuleState(string ModuleName, bool IsActive) {
-            if (!BotConfiguration.ModuleConfigurations.TryAdd(ModuleName, IsActive))
-                BotConfiguration.ModuleConfigurations[ModuleName] = IsActive;
-
-            Type TargetModule = GetModuleTypeByName(ModuleName);
-
-            if (IsActive)
-                await CommandService.AddModuleAsync(TargetModule, Services);
-            else
-                await CommandService.RemoveModuleAsync(TargetModule);
-        }
-
-        public string[] GetEnabledModules()
-            => BotConfiguration.ModuleConfigurations.Where(IsActive => IsActive.Value).Select(Module => Module.Key).ToArray();
-
-        public string[] GetEssentialModules()
-            => ModuleTypes.Where(Module => Module.IsDefined(typeof(EssentialModuleAttribute))).Select(Module => Module.Name.Sanitize()).ToArray();
-
-        public string[] GetDisabledModules()
-            => GetAllModuleNames().Except(GetEnabledModules().Concat(GetEssentialModules())).ToArray();
-
-        public string[] GetAllModuleNames()
-            => ModuleTypes.Select(Module => Module.Name.Sanitize()).ToArray();
+        public static string[] GetEssentialModules()
+            => GetModuleTypes().Where(Module => Module.IsDefined(typeof(EssentialModuleAttribute))).Select(Module => Module.Name.Sanitize()).ToArray();
 
         private static Type[] GetModuleTypes()
             => Assembly.GetExecutingAssembly().GetTypes()
                 .Where(Type => typeof(ModuleD).IsAssignableFrom(Type) && !Type.IsAbstract)
                 .ToArray();
 
-        private Type GetModuleTypeByName(string ModuleName)
-            => ModuleTypes.FirstOrDefault(Module => string.Equals(Module.Name.Sanitize(), ModuleName, StringComparison.InvariantCultureIgnoreCase));
+        private static Type GetModuleTypeByName(string ModuleName)
+            => GetModuleTypes().FirstOrDefault(Module => string.Equals(Module.Name.Sanitize(), ModuleName, StringComparison.InvariantCultureIgnoreCase));
     }
 }

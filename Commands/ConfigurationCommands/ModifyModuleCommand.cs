@@ -13,7 +13,7 @@ namespace Dexter.Commands.ConfigurationCommands {
         [Alias("mod")]
 
         public async Task ModifyModuleAsync(ModuleActionType ModuleAction, string ModuleName) {
-            if (ModuleService.VerifyModuleName(ref ModuleName)) {
+            if (Services.ModuleService.VerifyModuleName(ref ModuleName)) {
                 bool IsActive = ModuleService.GetModuleState(ModuleName);
 
                 switch (ModuleAction) {

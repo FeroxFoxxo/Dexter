@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.Webhook;
-using Discord.WebSocket;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,8 +15,11 @@ namespace Dexter.Core.Extensions {
         public static async Task SendEmbed(this EmbedBuilder Embed, DiscordWebhookClient Channel) =>
             await Channel.SendMessageAsync(embeds: new Embed[1] { Embed.Build() });
 
-        public static async Task SendEmbed(this EmbedBuilder Embed, SocketUser User) =>
+        public static async Task SendEmbed(this EmbedBuilder Embed, IUser User) =>
             await User.SendMessageAsync(embed: Embed.Build());
+
+        public static async Task SendEmbed(this Embed Embed, IUser User) =>
+            await User.SendMessageAsync(embed: Embed);
 
         public static EmbedBuilder AddField(this EmbedBuilder Embed, bool Condition, string Name, object Value) {
             if (Condition)

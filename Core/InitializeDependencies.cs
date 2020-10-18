@@ -5,6 +5,8 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Figgle;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
@@ -80,12 +82,6 @@ namespace Dexter.Core {
             Services.GetRequiredService<CommandModule>().BotConfiguration = BotConfiguration;
 
             Assembly.GetExecutingAssembly().GetTypes()
-                    .Where(Type => Type.IsSubclassOf(typeof(InitializableModule)) && !Type.IsAbstract)
-                    .ToList().ForEach(
-                Type => (Services.GetService(Type) as InitializableModule).AddDelegates()
-            );
-            
-            Assembly.GetExecutingAssembly().GetTypes()
                     .Where(Type => Type.IsSubclassOf(typeof(EntityDatabase)) && !Type.IsAbstract)
                     .ToList().ForEach(
                 DBType => {
@@ -93,6 +89,12 @@ namespace Dexter.Core {
 
                     EntityDatabase.Database.EnsureCreated();
                 }
+            );
+
+            Assembly.GetExecutingAssembly().GetTypes()
+                    .Where(Type => Type.IsSubclassOf(typeof(InitializableModule)) && !Type.IsAbstract)
+                    .ToList().ForEach(
+                Type => (Services.GetService(Type) as InitializableModule).AddDelegates()
             );
             
             await Services.GetRequiredService<StartupService>().StartAsync(Arguments);

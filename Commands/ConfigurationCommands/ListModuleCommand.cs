@@ -1,6 +1,7 @@
 ﻿using Dexter.Core.Attributes;
 using Dexter.Core.Enums;
 using Dexter.Core.Extensions;
+using Dexter.Databases.Configuration;
 using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
@@ -17,9 +18,9 @@ namespace Dexter.Commands.ConfigurationCommands {
                 .WithTitle("Modules")
                 .WithDescription($"Use `{BotConfiguration.Prefix}module enable/disable <name>` to change the state of a module!")
                 .WithFields(
-                    CreateModuleListField("Enabled", ModuleService.GetEnabledModules()),
-                    CreateModuleListField("Disabled", ModuleService.GetDisabledModules()),
-                    CreateModuleListField("Essential", ModuleService.GetEssentialModules())
+                    CreateModuleListField("Enabled", ModuleService.GetModules(ConfigrationType.Enabled)),
+                    CreateModuleListField("Disabled", ModuleService.GetModules(ConfigrationType.Disabled)),
+                    CreateModuleListField("Essential", ModuleService.GetModules(ConfigrationType.Essential))
                 )
                 .SendEmbed(Context.Channel);
 

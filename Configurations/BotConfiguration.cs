@@ -1,5 +1,4 @@
 ﻿using Dexter.Core.Abstractions;
-using System.Collections.Generic;
 
 namespace Dexter.Configuration {
     public class BotConfiguration : JSONConfiguration {
@@ -19,8 +18,6 @@ namespace Dexter.Configuration {
         public string[] ThumbnailURLs { get; set; }
 
         public string DeveloperMention { get; set; }
-
-        public Dictionary<string, bool> ModuleConfigurations { get; set; }
 
         public bool EnableStartupAlert { get; set; }
 

@@ -15,7 +15,7 @@ namespace Dexter.Commands.HelpCommands {
         public async Task HelpCommand() {
             EmbedBuilder Embed = Context.BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"Hiya, I'm {Context.BotConfiguration.Bot_Name}~! Here's a list of modules and commands you can use!")
-                .WithDescription("Use ~help [commandName] to show information about a command!");
+                .WithDescription($"Use {BotConfiguration.Prefix}help [commandName] to show information about a command!");
 
             foreach (ModuleInfo Module in CommandService.Modules) {
                 List<string> Description = new List<string>();
@@ -23,9 +23,9 @@ namespace Dexter.Commands.HelpCommands {
                 foreach (CommandInfo CommandInfo in Module.Commands) {
                     PreconditionResult Result = await CommandInfo.CheckPreconditionsAsync(Context);
 
-                    if (!Description.Contains($"~{CommandInfo.Aliases[0]}")) {
+                    if (!Description.Contains($"{BotConfiguration.Prefix}{CommandInfo.Aliases[0]}")) {
                         if (Result.IsSuccess)
-                            Description.Add($"~{CommandInfo.Aliases[0]}");
+                            Description.Add($"{BotConfiguration.Prefix}{CommandInfo.Aliases[0]}");
                     } else continue;
                 }
 

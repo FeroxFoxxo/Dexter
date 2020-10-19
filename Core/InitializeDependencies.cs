@@ -20,7 +20,7 @@ namespace Dexter.Core {
 
         public static double Version { get; private set; }
 
-        public static async Task Main(string Token, int _Version) {
+        public static async Task Main(string Token, int Version) {
             Console.Title = "Starting...";
 
             ServiceCollection ServiceCollection = new ServiceCollection();
@@ -73,7 +73,7 @@ namespace Dexter.Core {
 
             BotConfiguration BotConfiguration = Services.GetRequiredService<BotConfiguration>();
 
-            Version = 1.0 + Convert.ToSingle(_Version) / 10.0;
+            InitializeDependencies.Version = 1.0 + Convert.ToSingle(Version) / 10.0;
 
             Console.Title = $"{BotConfiguration.Bot_Name} v{Version} (Discord.Net v{DiscordConfig.Version})";
 

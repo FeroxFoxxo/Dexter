@@ -17,6 +17,8 @@ namespace Dexter.Configuration {
 
         public string[] ThumbnailURLs { get; set; }
 
+        public ulong[] BotChannels { get; set; }
+
         public string DeveloperMention { get; set; }
 
         public bool EnableStartupAlert { get; set; }

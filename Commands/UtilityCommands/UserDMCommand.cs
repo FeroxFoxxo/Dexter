@@ -13,6 +13,7 @@ namespace Dexter.Commands.UtilityCommands {
         [Summary("Sends a direct message to a user!")]
         [Alias("dm", "message")]
         [RequireModerator]
+
         public async Task UserDMCommand(IGuildUser User, [Remainder] string Message) {
             EmbedBuilder Embed = Context.BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle("User DM")

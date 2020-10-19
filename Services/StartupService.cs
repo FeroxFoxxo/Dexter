@@ -1,4 +1,5 @@
 ﻿using Dexter.Configuration;
+using Dexter.Core;
 using Dexter.Core.Abstractions;
 using Dexter.Core.Enums;
 using Dexter.Core.Extensions;
@@ -26,11 +27,11 @@ namespace Dexter.Services {
             DiscordSocketClient.Ready += DisplayStartupVersionAsync;
         }
 
-        public async Task StartAsync(string[] Arguments) {
+        public async Task StartAsync(string Token) {
+            if(!string.IsNullOrEmpty(Token))
+                await RunBot(Token);
             if (!string.IsNullOrEmpty(BotConfiguration.Token))
                 await RunBot(BotConfiguration.Token);
-            else if (Arguments.Length > 0)
-                await RunBot(Arguments[0]);
             else
                 await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Startup", $"The login token in the {BotConfiguration.GetType().Name.Prettify()} file was not set."));
         }
@@ -52,7 +53,7 @@ namespace Dexter.Services {
             if(BotConfiguration.EnableStartupAlert)
                 await Module.BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Startup complete!")
-                .WithDescription($"This is **{BotConfiguration.Bot_Name} v{Assembly.GetExecutingAssembly().GetName().Version}** running **Discord.Net v{Discord.DiscordConfig.Version}**!")
+                .WithDescription($"This is **{BotConfiguration.Bot_Name} v{InitializeDependencies.Version}** running **Discord.Net v{Discord.DiscordConfig.Version}**!")
                 .SendEmbed(Channel);
         }
 

@@ -10,6 +10,7 @@ namespace Dexter.Commands.UtilityCommands {
         [Command("emote")]
         [Summary("Gets the full image of an emote.")]
         [Alias("emoji")]
+
         public async Task EmojiCommand(string Emoji) {
             if (Emote.TryParse(Emoji, out Emote Emojis))
                 await Context.BuildEmbed(EmojiEnum.Unknown)

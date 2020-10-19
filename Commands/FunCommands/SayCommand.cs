@@ -11,6 +11,7 @@ namespace Dexter.Commands.FunCommands {
         [Alias("speak")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
         [RequireModerator]
+
         public async Task SayCommand([Remainder] string Message) {
             await Context.Message.DeleteAsync();
             await Context.Channel.SendMessageAsync(Message);

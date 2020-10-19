@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using Dexter.Core.Attributes;
+using Discord;
 using Discord.Commands;
 using System;
 using System.Threading.Tasks;
@@ -8,14 +9,18 @@ namespace Dexter.Commands.FunCommands {
 
         [Command("gay")]
         [Summary("How gay are you? Use this command to find out-")]
-        [Alias("straight", "bisexual", "bi-sexual", "bi sexual")]
+        [Alias("straight", "bisexual")]
+        [BotChannel]
+
         public async Task GayCommand() {
             await GayCommand(Context.Guild.GetUser(Context.User.Id));
         }
 
         [Command("gay")]
         [Summary("How gay are you? Use this command to find out-")]
-        [Alias("straight", "bisexual", "bi-sexual", "bi sexual")]
+        [Alias("straight", "bisexual")]
+        [BotChannel]
+
         public async Task GayCommand(IGuildUser User) {
             int Percentage = new Random((User.Id / new DateTime(1970, 1, 1).Subtract(DateTime.Now).TotalDays).ToString().GetHashCode()).Next(102);
 

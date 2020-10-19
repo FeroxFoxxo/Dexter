@@ -9,6 +9,7 @@ namespace Dexter.Commands.UtilityCommands {
         [Command("ping")]
         [Summary("Displays the latency between both Discord and I.")]
         [Alias("latency")]
+
         public async Task PingCommand() {
             await Context.BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Gateway Ping")

@@ -10,7 +10,7 @@ namespace Dexter.Commands.SuggestionCommands {
 
         [Command("fetch")]
         [Summary("Fetches a suggestion from the tracker or a message ID.")]
-        [Alias("suggestionFetch", "sfetch")]
+        [Alias("find")]
 
         public async Task FetchAsync(string Tracker) {
             Suggestion Suggestion = SuggestionDB.GetSuggestionByNameOrID(Tracker);

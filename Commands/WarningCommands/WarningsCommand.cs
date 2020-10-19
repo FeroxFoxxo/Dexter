@@ -4,6 +4,7 @@ using Dexter.Core.Extensions;
 using Dexter.Databases.Warnings;
 using Discord;
 using Discord.Commands;
+using Discord.Net;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
@@ -31,8 +32,24 @@ namespace Dexter.Commands.WarningCommands {
         public async Task WarningsCommand() {
             Embed[] Embeds = GetWarnings(Context.Message.Author, false);
 
-            foreach (Embed Embed in Embeds)
-                await Embed.SendEmbed(Context.Message.Author);
+            try {
+                foreach (Embed Embed in Embeds)
+                    await Embed.SendEmbed(Context.Message.Author);
+
+                await Context.BuildEmbed(EmojiEnum.Love)
+                    .WithTitle("Sent warnings log.")
+                    .WithDescription("Heya! I've sent you a log of your warnings. " +
+                        "Please note these records are not indicitive of a mute or ban, and are simply a sign of when we've had to verbally warn you in the chat.")
+                    .SendEmbed(Context.Channel);
+            } catch (HttpException) {
+                await Context.BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Unable to send warnings log!")
+                    .WithDescription("Woa, it seems as though I'm not able to send you a log of your warnings! " +
+                        "This is usually indicitive of having DMs from the server blocked or me personally! " +
+                        "Please note, for the sake of transparency, we often use Dexter to notify you of events that concern you - " +
+                        "so it's critical that we're able to message you through Dexter. <3")
+                    .SendEmbed(Context.Channel);
+            }
         }
 
         public Embed[] GetWarnings(IUser User, bool ShowIssuer) {
@@ -60,7 +77,7 @@ namespace Dexter.Commands.WarningCommands {
                 EmbedFieldBuilder Field = new EmbedFieldBuilder()
                     .WithName($"Warning {Index} - ID {Warnings[Index].WarningID}")
                     .WithValue($"{(ShowIssuer ? $":cop: {(Issuer != null ? Issuer.GetUserInformation() : "Unknown")}\n" : "")}" +
-                    $":calendar: {Time.ToString("M/d/yyyy h:mm:ss")}\n" +
+                    $":calendar: {Time:M/d/yyyy h:mm:ss}\n" +
                     $":notepad_spiral: {Warnings[Index].Reason}");
 
                 try {

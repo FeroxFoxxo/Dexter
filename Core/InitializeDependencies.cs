@@ -5,8 +5,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Figgle;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
@@ -20,7 +18,9 @@ namespace Dexter.Core {
     public static class InitializeDependencies {
         private static ServiceProvider Services;
 
-        public static async Task Main(string[] Arguments) {
+        public static double Version { get; private set; }
+
+        public static async Task Main(string Token, int _Version) {
             Console.Title = "Starting...";
 
             ServiceCollection ServiceCollection = new ServiceCollection();
@@ -73,7 +73,9 @@ namespace Dexter.Core {
 
             BotConfiguration BotConfiguration = Services.GetRequiredService<BotConfiguration>();
 
-            Console.Title = $"{BotConfiguration.Bot_Name} v{Assembly.GetExecutingAssembly().GetName().Version} (Discord.Net v{DiscordConfig.Version})";
+            Version = 1.0 + Convert.ToSingle(_Version) / 10.0;
+
+            Console.Title = $"{BotConfiguration.Bot_Name} v{Version} (Discord.Net v{DiscordConfig.Version})";
 
             Console.ForegroundColor = ConsoleColor.Cyan;
 
@@ -97,28 +99,9 @@ namespace Dexter.Core {
                 Type => (Services.GetService(Type) as InitializableModule).AddDelegates()
             );
             
-            await Services.GetRequiredService<StartupService>().StartAsync(Arguments);
-
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
-            Console.CancelKeyPress += new ConsoleCancelEventHandler(OnProcessExit);
+            await Services.GetRequiredService<StartupService>().StartAsync(Token);
 
             await Task.Delay(-1);
-        }
-
-        public static void OnProcessExit(object Sender, EventArgs Arguments) {
-            Assembly.GetExecutingAssembly().GetTypes()
-                    .Where(Type => Type.IsSubclassOf(typeof(JSONConfiguration)) && !Type.IsAbstract)
-                    .ToList().ForEach(
-                Type => {
-                    File.WriteAllText(
-                        $"Configurations/{Type.Name}.json",
-                        JsonSerializer.Serialize(
-                            Services.GetService(Type),
-                            new JsonSerializerOptions() { WriteIndented = true }
-                        )
-                    );
-                }
-            );
         }
     }
 }

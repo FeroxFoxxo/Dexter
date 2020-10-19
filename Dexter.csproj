@@ -11,6 +11,11 @@
     <Optimize>true</Optimize>
     <DefaultItemExcludes>.git\**;$(DefaultItemExcludes)</DefaultItemExcludes>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+  </PropertyGroup>
   
   <ItemGroup>
     <PackageReference Include="Costura.Fody" Version="5.0.0-alpha0281">
@@ -30,6 +35,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0-rc.1.20451.14" />
+    <PackageReference Include="System.CommandLine.DragonFruit" Version="0.3.0-alpha.20371.2" />
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="5.0.0-rc.1.20451.14" />
     <PackageReference Include="System.Management" Version="5.0.0-rc.1.20451.14" />
     

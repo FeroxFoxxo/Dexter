@@ -12,6 +12,7 @@ namespace Dexter.Commands.UtilityCommands {
         [Summary("Shuts me down in my entirety.")]
         [Alias("shutdown")]
         [RequireAdministrator]
+
         public async Task HaltCommand() {
             await Context.BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Shutting Down")

@@ -55,6 +55,15 @@ namespace Dexter.Services {
                     Message.Author.IsBot)
                 return;
 
+            if (!(Message.Channel is IGuildChannel)) {
+                if (!Message.Author.IsBot)
+                    await Module.BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle($"{BotConfiguration.Bot_Name} is not avaliable in DMs!")
+                        .WithDescription($"Heya! I'm not avaliable in DMs at the moment, please use {Client.GetGuild(BotConfiguration.GuildID).Name} to communicate with me!")
+                        .SendEmbed(Message.Channel);
+                return;
+            }
+
             await CommandService.ExecuteAsync(new CommandModule(Client, Message, BotConfiguration), ArgumentPosition, Services);
         }
 

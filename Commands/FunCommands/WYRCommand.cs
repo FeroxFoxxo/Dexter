@@ -12,6 +12,7 @@ namespace Dexter.Commands.FunCommands {
         [Command("wyr")]
         [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from.")]
         [Alias("would you rather", "would_you_rather", "wouldyourather")]
+
         public async Task WYRCommand() {
             List<KeyValuePair<string, string>> NameQuestionDictionary = new List<KeyValuePair<string, string>>();
 

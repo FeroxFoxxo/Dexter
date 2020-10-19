@@ -19,7 +19,7 @@ namespace Dexter.Core.Attributes {
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext Context, CommandInfo Command, IServiceProvider Services) {
             return Task.FromResult((Context.User as IGuildUser).GetPermissionLevel((Context as CommandModule).BotConfiguration) >= Level
                 ? PreconditionResult.FromSuccess()
-                : PreconditionResult.FromError($"User does not meet the permission level {Level}."));
+                : PreconditionResult.FromError($"Haiya! It seems like you don't have the {Level} role! Are you sure you're a {Level.ToString().ToLower()}? <3"));
         }
 
     }

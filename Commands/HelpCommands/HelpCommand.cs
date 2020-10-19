@@ -11,7 +11,7 @@ namespace Dexter.Commands.HelpCommands {
 
         [Command("help")]
         [Summary("Displays all avaliable commands.")]
-        [Alias("helpme", "help me", "help-me", "pleasehelp", "please help", "how2use", "howtouse", "how 2 use", "how to use")]
+        [Alias("helpme", "pleasehelp", "how2use", "howtouse")]
         public async Task HelpCommand() {
             EmbedBuilder Embed = Context.BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"Hiya, I'm {Context.BotConfiguration.Bot_Name}~! Here's a list of modules and commands you can use!")
@@ -38,7 +38,7 @@ namespace Dexter.Commands.HelpCommands {
 
         [Command("help")]
         [Summary("Displays detailed information about a command.")]
-        [Alias("helpme", "help me", "help-me", "pleasehelp", "please help", "how2use", "howtouse", "how 2 use", "how to use")]
+        [Alias("helpme", "pleasehelp", "how2use", "howtouse")]
         public async Task HelpCommand(string Command) {
             SearchResult Result = CommandService.Search(Context, Command);
 

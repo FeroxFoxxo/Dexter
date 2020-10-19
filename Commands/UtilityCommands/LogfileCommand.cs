@@ -10,6 +10,7 @@ namespace Dexter.Commands.UtilityCommands {
         [Summary("Provides today's logfile.")]
         [Alias("log")]
         [RequireModerator]
+
         public async Task LogfileCommand() {
             string FilePath = LoggingService.LogFile;
 

@@ -1,4 +1,5 @@
-﻿using Dexter.Core.Enums;
+﻿using Dexter.Core.Attributes;
+using Dexter.Core.Enums;
 using Dexter.Core.Extensions;
 using Dexter.Databases.CustomCommands;
 using Discord.Commands;
@@ -11,6 +12,7 @@ namespace Dexter.Commands.CustomCommands {
         [Command("ccedit")]
         [Summary("Edit a list of custom commands.")]
         [Alias("ccchange")]
+        [RequireModerator]
 
         public async Task EditCommandsAsync(string CommandName, [Remainder] string EditedReply) {
             CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);

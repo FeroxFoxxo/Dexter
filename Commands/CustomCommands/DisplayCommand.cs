@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace Dexter.Commands.CustomCommands {
     public partial class CustomCommands {
 
-        [Command("customcommands")]
+        [Command("cclist")]
         [Summary("Displays a list of custom commands.")]
-        [Alias("cclist", "ccl")]
+        [Alias("customcommands", "ccl")]
 
         public async Task DisplayCommandsAsync() {
             string CustomCommands = string.Join("\n", CustomCommandDB.CustomCommands.AsQueryable().Select(CustomCommand => BotConfiguration.Prefix + CustomCommand.CommandName).ToArray());

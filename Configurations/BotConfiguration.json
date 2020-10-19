@@ -14,5 +14,8 @@
     "https://us-furries.com/Dexter/DexSignOwO.png"
   ],
   "ModuleConfigurations": {},
-  "EnableStartupAlert": false
+  "EnableStartupAlert": true,
+  "BotChannels": [
+    742619335427883030
+  ]
 }

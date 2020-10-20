@@ -6,7 +6,7 @@
           "files": [
             "**.csproj"
           ],
-          "src": "C:\\Users\\frost\\source\\repos\\Frostrix\\Dexter"
+          "src": "/home/dexter/Dexter"
         }
       ],
       "dest": "api",

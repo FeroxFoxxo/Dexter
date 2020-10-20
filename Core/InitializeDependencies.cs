@@ -18,7 +18,7 @@ namespace Dexter.Core {
     public static class InitializeDependencies {
         private static ServiceProvider Services;
 
-        public static double Version { get; private set; }
+        public static string Version { get; private set; }
 
         public static async Task Main(string Token, int Version) {
             Console.Title = "Starting...";
@@ -73,7 +73,13 @@ namespace Dexter.Core {
 
             BotConfiguration BotConfiguration = Services.GetRequiredService<BotConfiguration>();
 
-            InitializeDependencies.Version = 1.0 + Convert.ToSingle(Version) / 10.0;
+            double Versioning = 1.0 + Convert.ToSingle(Version) / 100;
+
+            string Patch = Versioning.ToString("N2");
+
+            Patch = Patch[^1].ToString();
+
+            InitializeDependencies.Version = $"{Versioning:N1}.{Patch}";
 
             Console.Title = $"{BotConfiguration.Bot_Name} v{Version} (Discord.Net v{DiscordConfig.Version})";
 

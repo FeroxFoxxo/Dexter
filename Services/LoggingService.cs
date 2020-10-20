@@ -37,9 +37,9 @@ namespace Dexter.Services {
 
             string Date = DateTime.UtcNow.ToString("hh:mm:ss tt");
 
-            string Severity = "[" + Message.Severity + "]";
+            string Severity = $"[{Message.Severity}]";
 
-            string Log = $"{Date} {Severity,9} {Message.Source}: {Message.Exception?.ToString() ?? Message.Message}";
+            string Log = $"{Date} {Severity, 9} {Message.Source}: {Message.Exception?.ToString() ?? Message.Message}";
             
             lock (LockLogFile)
                 File.AppendAllText(LogFile, Log + "\n");

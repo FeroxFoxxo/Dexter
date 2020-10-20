@@ -16,14 +16,18 @@ namespace Dexter.Services {
         private readonly BotConfiguration BotConfiguration;
         private readonly CommandModule Module;
 
+        private bool IsStarted;
+
         public StartupService(DiscordSocketClient _DiscordSocketClient, BotConfiguration _BotConfiguration, LoggingService _LoggingService, CommandModule _Module) {
             DiscordSocketClient = _DiscordSocketClient;
             BotConfiguration = _BotConfiguration;
             LoggingService = _LoggingService;
             Module = _Module;
+            IsStarted = true;
         }
 
         public override void AddDelegates() {
+            IsStarted = false;
             DiscordSocketClient.Ready += DisplayStartupVersionAsync;
         }
 
@@ -45,7 +49,7 @@ namespace Dexter.Services {
             ulong Guild = BotConfiguration.GuildID;
             ulong LoggingChannel = BotConfiguration.ModerationLogChannelID;
 
-            if (Guild == 0 || LoggingChannel == 0)
+            if (Guild == 0 || LoggingChannel == 0 || IsStarted)
                 return;
 
             ITextChannel Channel = DiscordSocketClient.GetGuild(Guild).GetTextChannel(LoggingChannel);
@@ -55,6 +59,8 @@ namespace Dexter.Services {
                 .WithTitle("Startup complete!")
                 .WithDescription($"This is **{BotConfiguration.Bot_Name} v{InitializeDependencies.Version}** running **Discord.Net v{Discord.DiscordConfig.Version}**!")
                 .SendEmbed(Channel);
+
+            IsStarted = true;
         }
 
     }

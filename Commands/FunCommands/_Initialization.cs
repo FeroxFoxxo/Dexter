@@ -2,7 +2,7 @@
 using Dexter.Core.Abstractions;
 using Discord.WebSocket;
 
-namespace Dexter.Commands.FunCommands {
+namespace Dexter.Commands {
     public partial class FunCommands : ModuleD {
 
         private readonly FunConfiguration FunConfiguration;

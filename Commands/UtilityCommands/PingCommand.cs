@@ -3,7 +3,7 @@ using Dexter.Core.Extensions;
 using Discord.Commands;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands.UtilityCommands {
+namespace Dexter.Commands {
     public partial class UtilityCommands {
 
         [Command("ping")]

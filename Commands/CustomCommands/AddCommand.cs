@@ -7,7 +7,7 @@ using Discord.Commands;
 using System;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands.CustomCommands {
+namespace Dexter.Commands {
     public partial class CustomCommands {
 
         [Command("ccadd")]

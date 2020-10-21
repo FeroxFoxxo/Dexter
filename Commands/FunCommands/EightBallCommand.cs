@@ -3,7 +3,7 @@ using Discord.Commands;
 using System;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands.FunCommands {
+namespace Dexter.Commands {
     public partial class FunCommands {
 
         [Command("8ball")]

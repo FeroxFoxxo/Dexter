@@ -4,7 +4,7 @@ using Discord.Commands;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands.CustomCommands {
+namespace Dexter.Commands {
     public partial class CustomCommands {
 
         [Command("cclist")]

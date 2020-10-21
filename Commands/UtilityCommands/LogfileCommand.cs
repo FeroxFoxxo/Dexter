@@ -3,7 +3,7 @@ using Discord.Commands;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands.UtilityCommands {
+namespace Dexter.Commands {
     public partial class UtilityCommands {
 
         [Command("logfile")]

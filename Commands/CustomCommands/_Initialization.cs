@@ -2,7 +2,7 @@
 using Dexter.Core.Abstractions;
 using Dexter.Databases.CustomCommands;
 
-namespace Dexter.Commands.CustomCommands {
+namespace Dexter.Commands {
     public partial class CustomCommands : ModuleD {
 
         private readonly CustomCommandDB CustomCommandDB;

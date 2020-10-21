@@ -2,7 +2,7 @@
 using Dexter.Databases.Suggestions;
 using Dexter.Services;
 
-namespace Dexter.Commands.SuggestionCommands {
+namespace Dexter.Commands {
     public partial class SuggestionCommands : ModuleD {
 
         private readonly SuggestionDB SuggestionDB;

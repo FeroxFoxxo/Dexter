@@ -3,7 +3,7 @@ using Dexter.Core.Abstractions;
 using Dexter.Databases.Warnings;
 using System;
 
-namespace Dexter.Commands.WarningCommands {
+namespace Dexter.Commands {
     public partial class WarningCommands : ModuleD {
 
         private readonly WarningsDB WarningsDB;

@@ -6,7 +6,7 @@ using Discord.Commands;
 using Discord.Net;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands.UtilityCommands {
+namespace Dexter.Commands {
     public partial class UtilityCommands {
 
         [Command("userdm")]

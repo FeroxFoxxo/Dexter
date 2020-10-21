@@ -3,7 +3,7 @@ using Dexter.Core.Abstractions;
 using Dexter.Core.Attributes;
 using Dexter.Services;
 
-namespace Dexter.Commands.ConfigurationCommands {
+namespace Dexter.Commands {
     [EssentialModule]
     public partial class ConfigurationCommands : ModuleD {
 

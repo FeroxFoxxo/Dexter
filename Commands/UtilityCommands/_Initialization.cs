@@ -2,7 +2,7 @@
 using Dexter.Core.Abstractions;
 using Dexter.Services;
 
-namespace Dexter.Commands.UtilityCommands {
+namespace Dexter.Commands {
     public partial class UtilityCommands : ModuleD {
 
         private readonly LoggingService LoggingService;

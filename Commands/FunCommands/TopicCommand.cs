@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands.FunCommands {
+namespace Dexter.Commands {
     public partial class FunCommands {
 
         [Command("topic")]

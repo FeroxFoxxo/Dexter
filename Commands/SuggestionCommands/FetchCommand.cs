@@ -5,7 +5,7 @@ using Dexter.Services;
 using Discord.Commands;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands.SuggestionCommands {
+namespace Dexter.Commands {
     public partial class SuggestionCommands {
 
         [Command("fetch")]

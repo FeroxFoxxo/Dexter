@@ -3,7 +3,7 @@ using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands.FunCommands {
+namespace Dexter.Commands {
     public partial class FunCommands {
 
         [Command("say")]

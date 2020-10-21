@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands.WarningCommands {
+namespace Dexter.Commands {
     public partial class WarningCommands {
 
         [Command("warnings")]

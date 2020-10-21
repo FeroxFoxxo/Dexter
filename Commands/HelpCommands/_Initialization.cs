@@ -3,7 +3,7 @@ using Dexter.Core.Abstractions;
 using Dexter.Core.Attributes;
 using Discord.Commands;
 
-namespace Dexter.Commands.HelpCommands {
+namespace Dexter.Commands {
     [EssentialModule]
     public partial class HelpCommands : ModuleD {
 

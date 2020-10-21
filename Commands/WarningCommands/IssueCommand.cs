@@ -9,7 +9,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands.WarningCommands {
+namespace Dexter.Commands {
     public partial class WarningCommands {
 
         [Command("warn")]

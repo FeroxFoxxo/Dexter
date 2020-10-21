@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands.HelpCommands {
+namespace Dexter.Commands {
     public partial class HelpCommands {
 
         [Command("help")]

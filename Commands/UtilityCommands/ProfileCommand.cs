@@ -6,7 +6,7 @@ using System;
 using System.Threading.Tasks;
 using Dexter.Core.Extensions;
 
-namespace Dexter.Commands.UtilityCommands {
+namespace Dexter.Commands {
     public partial class UtilityCommands {
 
         [Command("profile")]

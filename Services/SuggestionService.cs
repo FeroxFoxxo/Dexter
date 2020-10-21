@@ -219,6 +219,11 @@ namespace Dexter.Services {
                 throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? Type: {SuggestionMessage.GetType()}");
         }
 
+        /// <summary>
+        /// The Create Token method creates a random token, the length of which is supplied in the suggestion
+        /// configuration class, that is not in the SuggestionDB already.
+        /// </summary>
+        /// <returns>A randomly generated token in the form of a string that is not in the suggestion database already.</returns>
         private string CreateToken() {
             char[] TokenArray = new char[SuggestionConfiguration.TrackerLength];
 
@@ -233,6 +238,13 @@ namespace Dexter.Services {
                 return CreateToken();
         }
 
+        /// <summary>
+        /// The BuildSuggestion method takes a Suggestion in as its input and generates an embed from it.
+        /// It sets the color based on the suggestion status, the title to the status, and fills the rest in
+        /// with the related suggestion fields.
+        /// </summary>
+        /// <param name="Suggestion">The suggestion of which you wish to generate the embed from.</param>
+        /// <returns>An automatically generated embed based on the input suggestion's fields.</returns>
         public Embed BuildSuggestion(Suggestion Suggestion) {
             Color Color = Suggestion.Status switch {
                 SuggestionStatus.Suggested => Color.Blue,

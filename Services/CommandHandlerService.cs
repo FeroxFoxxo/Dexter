@@ -11,6 +11,12 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Services {
+    /// <summary>
+    /// The CommandHandlerService deals with invoking the command and the errors that may occur as a result.
+    /// It filters the command to see if the user is not a bot and that it has the prefix set in the
+    /// bot configuration. It also catches all errors that may crop up in a command, logs it, and then sends
+    /// an appropriate error to the channel, pinging the developers if the error is unknown.
+    /// </summary>
     public class CommandHandlerService : InitializableModule {
 
         private readonly DiscordSocketClient Client;

@@ -73,15 +73,11 @@ namespace Dexter.Core {
 
             BotConfiguration BotConfiguration = Services.GetRequiredService<BotConfiguration>();
 
-            double Versioning = 1.0 + Convert.ToSingle(Version) / 100;
+            string Versioning = Math.Round(Convert.ToSingle(Version) / 100 - .001, 2).ToString();
 
-            string Patch = Versioning.ToString("N2");
+            InitializeDependencies.Version = $"{Versioning[0..^1]}.{Versioning[^1].ToString()}";
 
-            Patch = Patch[^1].ToString();
-
-            InitializeDependencies.Version = $"{Versioning:N1}.{Patch}";
-
-            Console.Title = $"{BotConfiguration.Bot_Name} v{Version} (Discord.Net v{DiscordConfig.Version})";
+            Console.Title = $"{BotConfiguration.Bot_Name} v{InitializeDependencies.Version} (Discord.Net v{DiscordConfig.Version})";
 
             Console.ForegroundColor = ConsoleColor.Cyan;
 

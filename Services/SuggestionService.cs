@@ -119,8 +119,11 @@ namespace Dexter.Services {
         private async Task<bool> CheckAsync(IUserMessage Message, SocketReaction Reaction) {
             Suggestion Suggested = SuggestionDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.MessageID == Message.Id).FirstOrDefault();
 
-            if (Message == null)
+            if (Suggested == null)
                 throw new Exception("Suggestion does not exist in database! Aborting...");
+
+            if (Suggested.Status != SuggestionStatus.Suggested)
+                return true;
 
             ReactionMetadata Upvotes = Message.Reactions[
                 await Client.GetGuild(SuggestionConfiguration.EmojiStorageGuild)

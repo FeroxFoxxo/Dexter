@@ -37,7 +37,7 @@ namespace Dexter.Services {
 
             if (Webhook != null)
                 await new EmbedBuilder()
-                    .WithAuthor(CachedMessage.Author)
+                    .WithAuthor(Reaction.User.Value)
                     .WithDescription($"**Reaction removed in <#{Channel.Id}> by {Reaction.User.GetValueOrDefault().GetUserInformation()}**")
                     .AddField("Message", CachedMessage.Content.Length > 50 ? CachedMessage.Content.Substring(0, 50) + "..." : CachedMessage.Content)
                     .AddField("Reaction Removed", Reaction.Emote)

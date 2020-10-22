@@ -41,7 +41,7 @@ namespace Dexter.Services {
         /// <param name="BotConfiguration">The BotConfiguration JSON file, which contains the prefix used to parse commands and developer mention for if the command errors unexpectedly.</param>
         /// <param name="Services">The ServiceProvider, which is where our dependencies are stored - given as a field to DiscordNet's execution method.</param>
         /// <param name="CommandModule">The CommandModule is simply a basic command module, which we can hook into in order to generate the standardized embeds used throughout the bot.</param>
-        /// <param name="CustomCommandDB">The CustomCommandDB is used to get our custom commands, which - if we fail and the command is unknown - we parse to find a match.</param>
+        /// <param name="CustomCommandDB">The CustomCommandDB is used to get our custom commands, which - if we fail as the command is unknown - we parse to find a match.</param>
         /// <param name="LoggingService">The LoggingService is used to log unexpected errors that may occur on command execution</param>
         public CommandHandlerService(DiscordSocketClient Client, CommandService CommandService, BotConfiguration BotConfiguration, IServiceProvider Services, CommandModule CommandModule, CustomCommandDB CustomCommandDB, LoggingService LoggingService) {
             this.Client = Client;
@@ -65,7 +65,7 @@ namespace Dexter.Services {
         /// The HandleCommandAsync runs on MessageReceived and will check for if the message has the bot's prefix, if the author is a bot and if we're in a guild, if so - execute!
         /// </summary>
         /// <param name="SocketMessage">The SocketMessage event is given as a parameter of MessageRecieved and is used to find and execute the command if the parameters have been met.</param>
-        /// <returns></returns>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
         public async Task HandleCommandAsync(SocketMessage SocketMessage) {
             if (SocketMessage is not SocketUserMessage Message)
                 return;
@@ -95,7 +95,7 @@ namespace Dexter.Services {
         /// <param name="Command">This gives information about the command that may have been run, such as its name.</param>
         /// <param name="Context">The context command provides is with information about the message, including who sent it and the channel it was set in.</param>
         /// <param name="Result">The Result specifies the outcome of the attempted run of the command - whether it was successful or not and the error it may have run in to.</param>
-        /// <returns></returns>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
         public async Task SendCommandError(Optional<CommandInfo> Command, ICommandContext Context, IResult Result) {
             if (Result.IsSuccess)
                 return;
@@ -110,7 +110,7 @@ namespace Dexter.Services {
                     break;
                 case CommandError.UnmetPrecondition:
                     await CommandModule.BuildEmbed(EmojiEnum.Annoyed)
-                        .WithTitle("Access Denied")
+                        .WithTitle("Access Denied.")
                         .WithDescription(Result.ErrorReason)
                         .SendEmbed(Context.Channel);
                     break;
@@ -129,7 +129,7 @@ namespace Dexter.Services {
                                 .SendEmbed(Context.Channel);
                     } else {
                         await CommandModule.BuildEmbed(EmojiEnum.Annoyed)
-                        .WithTitle("Unknown Command")
+                        .WithTitle("Unknown Command.")
                         .WithDescription($"Oopsies! It seems as if the command **{CustomCommandArgs[0].SanitizeMarkdown()}** doesn't exist!")
                         .SendEmbed(Context.Channel);
                     }

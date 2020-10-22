@@ -7,28 +7,47 @@ using System.IO;
 using System.Threading.Tasks;
 
 namespace Dexter.Services {
+    /// <summary>
+    /// The LoggingService is used to log messages from both the DiscordSocketClient and CommandService
+    /// to the console and logging file for debugging purposes.
+    /// </summary>
     public class LoggingService : InitializableModule {
 
         private readonly DiscordSocketClient Client;
         private readonly CommandService Commands;
 
-        public string LogDirectory { get; }
-        public string LogFile => Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.log");
+        private string LogDirectory { get; }
+        private string LogFile => Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.log");
 
         private static readonly object LockLogFile = new object();
 
-        public LoggingService(DiscordSocketClient _Client, CommandService _Commands) {
+        /// <summary>
+        /// The constructor for the LoggingService module. This takes in the injected dependencies and sets them as per what the class requires.
+        /// </summary>
+        /// <param name="Client">The current instance of the DiscordSocketClient, which is used to hook into the Log delegate to run LogMessageAsync.</param>
+        /// <param name="Commands">The CommandService is used to hook into the Log delegate to run LogMessageAsync.</param>
+        public LoggingService(DiscordSocketClient Client, CommandService Commands) {
             LogDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
-            Client = _Client;
-            Commands = _Commands;
+            this.Client = Client;
+            this.Commands = Commands;
         }
 
+        /// <summary>
+        /// The AddDelegates override hooks into both the Commands.Log event and the Client.Log event to run LogMessageAsync.
+        /// </summary>
         public override void AddDelegates() {
             Client.Log += LogMessageAsync;
             Commands.Log += LogMessageAsync;
         }
 
-        public Task LogMessageAsync(LogMessage Message) {
+        /// <summary>
+        /// The LogMessageAsync method creates the log file if it doesn't exist already, appends the logged message to the file,
+        /// switches the console color to the severity of the message and finally logs the message to the console.
+        /// </summary>
+        /// <param name="LogMessage">The LogMessage field which gives us information about the message, for example the type of
+        /// exception we have run into, the severity of the exception and the message of the exception to log.</param>
+        /// <returns></returns>
+        public Task LogMessageAsync(LogMessage LogMessage) {
             if (!Directory.Exists(LogDirectory))
                 Directory.CreateDirectory(LogDirectory);
 
@@ -37,14 +56,14 @@ namespace Dexter.Services {
 
             string Date = DateTime.UtcNow.ToString("hh:mm:ss tt");
 
-            string Severity = $"[{Message.Severity}]";
+            string Severity = $"[{LogMessage.Severity}]";
 
-            string Log = $"{Date} {Severity, 9} {Message.Source}: {Message.Exception?.ToString() ?? Message.Message}";
+            string Log = $"{Date} {Severity, 9} {LogMessage.Source}: {LogMessage.Exception?.ToString() ?? LogMessage.Message}";
             
             lock (LockLogFile)
                 File.AppendAllText(LogFile, Log + "\n");
 
-            Console.ForegroundColor = Message.Severity switch {
+            Console.ForegroundColor = LogMessage.Severity switch {
                 LogSeverity.Info => ConsoleColor.Blue,
                 LogSeverity.Critical => ConsoleColor.DarkRed,
                 LogSeverity.Error => ConsoleColor.Red,

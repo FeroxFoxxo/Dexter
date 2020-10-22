@@ -1,12 +1,12 @@
-﻿using Dexter.Core.Abstractions;
-using Dexter.Core.Enums;
-using Dexter.Core.Extensions;
+﻿using Dexter.Abstractions;
+using Dexter.Enums;
+using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using System;
 using System.Threading.Tasks;
 
-namespace Dexter.Core.Attributes {
+namespace Dexter.Attributes {
     [AttributeUsage(AttributeTargets.Method)]
     public class RequirePermissionLevelAttribute : PreconditionAttribute {
 

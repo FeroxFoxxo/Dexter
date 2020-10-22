@@ -1,5 +1,5 @@
-﻿using Dexter.Configuration;
-using Dexter.Core.Abstractions;
+﻿using Dexter.Configurations;
+using Dexter.Abstractions;
 using Dexter.Databases.Warnings;
 using System;
 

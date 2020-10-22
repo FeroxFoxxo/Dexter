@@ -1,6 +1,6 @@
-﻿using Dexter.Configuration;
-using Dexter.Core.Abstractions;
-using Dexter.Core.Attributes;
+﻿using Dexter.Configurations;
+using Dexter.Abstractions;
+using Dexter.Attributes;
 using Dexter.Services;
 
 namespace Dexter.Commands {

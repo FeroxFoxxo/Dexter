@@ -4,7 +4,7 @@ using Discord.Webhook;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dexter.Core.Extensions {
+namespace Dexter.Extensions {
     public static class EmbedExtensions {
         public static async Task SendEmbed(this EmbedBuilder Embed, IMessageChannel Channel) =>
             await Channel.SendMessageAsync(embed: Embed.Build());

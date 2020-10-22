@@ -1,7 +1,7 @@
-﻿using Dexter.Core.Abstractions;
+﻿using Dexter.Abstractions;
 using System.Collections.Generic;
 
-namespace Dexter.Configuration {
+namespace Dexter.Configurations {
     public class FunConfiguration : JSONConfiguration {
 
         public ulong EmojiGuildID { get; set; }

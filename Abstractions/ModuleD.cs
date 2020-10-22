@@ -1,5 +1,5 @@
 ﻿using Discord.Commands;
 
-namespace Dexter.Core.Abstractions {
+namespace Dexter.Abstractions {
     public abstract class ModuleD : ModuleBase<CommandModule> { }
 }

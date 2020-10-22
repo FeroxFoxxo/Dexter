@@ -1,6 +1,6 @@
-﻿using Dexter.Core.Abstractions;
+﻿using Dexter.Abstractions;
 
-namespace Dexter.Configuration {
+namespace Dexter.Configurations {
     public class BotConfiguration : JSONConfiguration {
 
         public string Token { get; set; }

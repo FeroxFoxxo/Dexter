@@ -1,7 +1,7 @@
 ﻿using Dexter.Configurations;
-using Dexter.Core.Abstractions;
-using Dexter.Core.Enums;
-using Dexter.Core.Extensions;
+using Dexter.Abstractions;
+using Dexter.Enums;
+using Dexter.Extensions;
 using Dexter.Databases.Suggestions;
 using Discord;
 using Discord.Rest;

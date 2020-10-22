@@ -1,10 +1,10 @@
-﻿using Dexter.Configuration;
-using Dexter.Core.Enums;
+﻿using Dexter.Configurations;
+using Dexter.Enums;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
-namespace Dexter.Core.Abstractions {
+namespace Dexter.Abstractions {
     public class CommandModule : SocketCommandContext {
         public BotConfiguration BotConfiguration;
 

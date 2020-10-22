@@ -1,4 +1,4 @@
-﻿using Dexter.Core.Abstractions;
+﻿using Dexter.Abstractions;
 
 namespace Dexter.Configurations {
     public class ModerationConfiguration : JSONConfiguration {

@@ -1,4 +1,4 @@
-﻿using Dexter.Core.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Databases.Suggestions;
 using Dexter.Services;
 

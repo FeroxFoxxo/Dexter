@@ -1,5 +1,5 @@
-﻿using Dexter.Core.Enums;
-using Dexter.Core.Extensions;
+﻿using Dexter.Enums;
+using Dexter.Extensions;
 using Dexter.Databases.Suggestions;
 using Dexter.Services;
 using Discord.Commands;

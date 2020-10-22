@@ -1,10 +1,10 @@
-﻿using Dexter.Configuration;
-using Dexter.Core.Enums;
+﻿using Dexter.Configurations;
+using Dexter.Enums;
 using Discord;
 using System;
 using System.Linq;
 
-namespace Dexter.Core.Extensions {
+namespace Dexter.Extensions {
     public static class UserExtensions {
 
         public static PermissionLevel GetPermissionLevel(this IGuildUser User, BotConfiguration Configuration) {

@@ -1,4 +1,4 @@
-﻿using Dexter.Core.Abstractions;
+﻿using Dexter.Abstractions;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -17,8 +17,9 @@ namespace Dexter.Services {
         private readonly CommandService Commands;
 
         private string LogDirectory { get; }
-        private string LogFile => Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.log");
 
+        private readonly string LogFile;
+        
         private static readonly object LockLogFile = new object();
 
         /// <summary>
@@ -28,6 +29,7 @@ namespace Dexter.Services {
         /// <param name="Commands">The CommandService is used to hook into the Log delegate to run LogMessageAsync.</param>
         public LoggingService(DiscordSocketClient Client, CommandService Commands) {
             LogDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
+            LogFile = Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.log");
             this.Client = Client;
             this.Commands = Commands;
         }
@@ -51,8 +53,8 @@ namespace Dexter.Services {
             if (!Directory.Exists(LogDirectory))
                 Directory.CreateDirectory(LogDirectory);
 
-            if (!File.Exists(LogFile))
-                File.Create(LogFile).Dispose();
+            if (!File.Exists(GetLogFile()))
+                File.Create(GetLogFile()).Dispose();
 
             string Date = DateTime.UtcNow.ToString("hh:mm:ss tt");
 
@@ -61,7 +63,7 @@ namespace Dexter.Services {
             string Log = $"{Date} {Severity, 9} {LogMessage.Source}: {LogMessage.Exception?.ToString() ?? LogMessage.Message}";
             
             lock (LockLogFile)
-                File.AppendAllText(LogFile, Log + "\n");
+                File.AppendAllText(GetLogFile(), Log + "\n");
 
             Console.ForegroundColor = LogMessage.Severity switch {
                 LogSeverity.Info => ConsoleColor.Blue,
@@ -74,6 +76,14 @@ namespace Dexter.Services {
             };
 
             return Console.Out.WriteLineAsync(Log);
+        }
+
+        /// <summary>
+        /// Gets the LogFile from the instance of the class, initialized in the constructor.
+        /// </summary>
+        /// <returns>Returns the directory of which the log file resides in.</returns>
+        public string GetLogFile() {
+            return LogFile;
         }
 
     }

@@ -1,10 +1,10 @@
-﻿using Dexter.Core.Abstractions;
+﻿using Dexter.Abstractions;
 using Discord.Commands;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dexter.Core.Attributes {
+namespace Dexter.Attributes {
     [AttributeUsage(AttributeTargets.Method)]
     public class BotChannelAttribute : PreconditionAttribute {
 

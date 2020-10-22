@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Dexter.Core.Abstractions {
+namespace Dexter.Abstractions {
     public static class StringExtensions {
 
         private static readonly string[] SensitiveCharacters = { "\\", "*", "_", "~", "`", "|", ">", "[", "(" };

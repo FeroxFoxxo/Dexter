@@ -1,5 +1,5 @@
-﻿using Dexter.Configuration;
-using Dexter.Core.Abstractions;
+﻿using Dexter.Configurations;
+using Dexter.Abstractions;
 using Dexter.Services;
 using Discord;
 using Discord.Commands;
@@ -14,7 +14,7 @@ using System.Runtime.Serialization;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Dexter.Core {
+namespace Dexter {
     public static class InitializeDependencies {
         private static ServiceProvider Services;
 

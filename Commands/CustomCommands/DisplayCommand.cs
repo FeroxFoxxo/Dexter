@@ -1,5 +1,5 @@
-﻿using Dexter.Core.Enums;
-using Dexter.Core.Extensions;
+﻿using Dexter.Enums;
+using Dexter.Extensions;
 using Discord.Commands;
 using System.Linq;
 using System.Threading.Tasks;

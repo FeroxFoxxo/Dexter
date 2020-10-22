@@ -1,6 +1,6 @@
-﻿using Dexter.Core.Attributes;
-using Dexter.Core.Enums;
-using Dexter.Core.Extensions;
+﻿using Dexter.Attributes;
+using Dexter.Enums;
+using Dexter.Extensions;
 using Dexter.Databases.CustomCommands;
 using Discord.Commands;
 using System;

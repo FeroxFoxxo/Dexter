@@ -14,11 +14,15 @@ steps:
     version: 5.0.x
     performMultiLevelLookup: true
     includePreviewVersions: true
+    
 - task: DotNetCoreCLI@2
+  displayName: Restore
   inputs:
     command: 'restore'
+    projects: '**/*.sln'
     feedsToUse: 'config'
-
+    nugetConfigPath: './NuGet.Config'
+  
 - task: DotNetCoreCLI@2
   displayName: Publish
   inputs:

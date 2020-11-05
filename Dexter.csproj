@@ -10,10 +10,6 @@
 		<ApplicationIcon>DexLove.ico</ApplicationIcon>
 		<Optimize>true</Optimize>
 		<DefaultItemExcludes>.git\**;$(DefaultItemExcludes)</DefaultItemExcludes>
-
-		<PublishTrimmed>true</PublishTrimmed>
-		<TrimMode>link</TrimMode>
-		<SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
 	</PropertyGroup>
 
 	<ItemGroup>

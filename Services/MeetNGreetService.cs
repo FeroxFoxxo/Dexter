@@ -7,20 +7,33 @@ using Discord.WebSocket;
 using System.Threading.Tasks;
 
 namespace Dexter.Services {
+    /// <summary>
+    /// The MeetNGreet service is used to log messages that have been updated and deleted from the MeetNGreet channel.
+    /// It does this through creating a webhook and sending to that very webhook each time an event runs.
+    /// </summary>
     public class MeetNGreetService : InitializableModule {
 
         private readonly DiscordSocketClient Client;
         private readonly MNGConfiguration MNGConfig;
         private readonly DiscordWebhookClient Webhook;
 
-        public MeetNGreetService(DiscordSocketClient _Client, MNGConfiguration _MNGConfig) {
-            Client = _Client;
-            MNGConfig = _MNGConfig;
+        /// <summary>
+        /// The constructor for the MeetNGreetService module. This takes in the injected dependencies and sets them as per what the class requires.
+        /// The constructor also creates the MeetNGreet webhook if it doesn't exist already in the MeetNGreet logs channel.
+        /// </summary>
+        /// <param name="Client">The instance of the client, which is used to hook into the API.</param>
+        /// <param name="MNGConfig">The instance of the MNGConfiguration, which is used to find and create the MNG webhook.</param>
+        public MeetNGreetService(DiscordSocketClient Client, MNGConfiguration MNGConfig) {
+            this.Client = Client;
+            this.MNGConfig = MNGConfig;
             
-            if(!string.IsNullOrEmpty(_MNGConfig.MeetNGreetWebhookURL))
-                Webhook = new DiscordWebhookClient(_MNGConfig.MeetNGreetWebhookURL);
+            if(!string.IsNullOrEmpty(MNGConfig.MeetNGreetWebhookURL))
+                Webhook = new DiscordWebhookClient(MNGConfig.MeetNGreetWebhookURL);
         }
 
+        /// <summary>
+        /// The AddDelegates method adds the MessageDeleted and MessageUpdated hooks into their respective MNG check methods.
+        /// </summary>
         public override void AddDelegates() {
             Client.MessageDeleted += MNGMessageDeleted;
             Client.MessageUpdated += MNGMessageUpdated;

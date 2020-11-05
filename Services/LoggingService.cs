@@ -24,6 +24,7 @@ namespace Dexter.Services {
 
         /// <summary>
         /// The constructor for the LoggingService module. This takes in the injected dependencies and sets them as per what the class requires.
+        /// This constructor also sets the LogDirectory to a folder called "logs" in the base directory, and the LogFile - a file with the current date in that directory.
         /// </summary>
         /// <param name="Client">The current instance of the DiscordSocketClient, which is used to hook into the Log delegate to run LogMessageAsync.</param>
         /// <param name="Commands">The CommandService is used to hook into the Log delegate to run LogMessageAsync.</param>

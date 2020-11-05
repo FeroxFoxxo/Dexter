@@ -89,10 +89,10 @@ namespace Dexter.Services {
             if (Message.Attachments.Count > 0)
                 Embed = await Message.Channel.SendFileAsync(
                     Message.Attachments.First().ProxyUrl,
-                    embed: BuildSuggestion(Suggested)
+                    embed: BuildSuggestion(Suggested).Build()
                 );
             else
-                Embed = await Message.Channel.SendMessageAsync(embed: BuildSuggestion(Suggested));
+                Embed = await Message.Channel.SendMessageAsync(embed: BuildSuggestion(Suggested).Build());
 
             await Message.DeleteAsync();
 
@@ -147,7 +147,7 @@ namespace Dexter.Services {
                                             await UpdateSuggestion(Suggested, SuggestionStatus.Pending);
                                             RestUserMessage StaffSuggestion = await Client.GetGuild(SuggestionConfiguration.SuggestionGuild)
                                                 .GetTextChannel(SuggestionConfiguration.StaffSuggestionsChannel)
-                                                .SendMessageAsync(embed: BuildSuggestion(Suggested));
+                                                .SendMessageAsync(embed: BuildSuggestion(Suggested).Build());
 
                                             Suggested.StaffMessageID = StaffSuggestion.Id;
                                             await SuggestionDB.SaveChangesAsync();
@@ -211,10 +211,10 @@ namespace Dexter.Services {
 
             if (SuggestionMessage is RestUserMessage SuggestionMSG) {
                 await SuggestionMessage.RemoveAllReactionsAsync();
-                await SuggestionMSG.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildSuggestion(Suggestion));
+                await SuggestionMSG.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildSuggestion(Suggestion).Build());
             } else if (SuggestionMessage is SocketUserMessage SuggestionMSG2) {
                 await SuggestionMessage.RemoveAllReactionsAsync();
-                await SuggestionMSG2.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildSuggestion(Suggestion));
+                await SuggestionMSG2.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildSuggestion(Suggestion).Build());
             } else
                 throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? Type: {SuggestionMessage.GetType()}");
         }
@@ -245,7 +245,7 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="Suggestion">The suggestion of which you wish to generate the embed from.</param>
         /// <returns>An automatically generated embed based on the input suggestion's fields.</returns>
-        public Embed BuildSuggestion(Suggestion Suggestion) {
+        public EmbedBuilder BuildSuggestion(Suggestion Suggestion) {
             Color Color = Suggestion.Status switch {
                 SuggestionStatus.Suggested => Color.Blue,
                 SuggestionStatus.Pending => Color.Orange,
@@ -255,7 +255,7 @@ namespace Dexter.Services {
                 _ => Color.Teal
             };
 
-            EmbedBuilder Embed = new EmbedBuilder()
+            return new EmbedBuilder()
                 .WithTitle(Suggestion.Status.ToString().ToUpper())
                 .WithColor(Color)
                 .WithThumbnailUrl(Client.GetUser(Suggestion.Suggestor).GetAvatarUrl())
@@ -265,8 +265,6 @@ namespace Dexter.Services {
                 .WithAuthor(Client.GetUser(Suggestion.Suggestor))
                 .WithCurrentTimestamp()
                 .WithFooter(Suggestion.TrackerID);
-
-            return Embed.Build();
         }
 
     }

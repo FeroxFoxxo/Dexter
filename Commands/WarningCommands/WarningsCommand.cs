@@ -19,9 +19,9 @@ namespace Dexter.Commands {
         [RequireModerator]
 
         public async Task WarningsCommand(IGuildUser User) {
-            Embed[] Embeds = GetWarnings(User, true);
+            EmbedBuilder[] Embeds = GetWarnings(User, true);
 
-            foreach (Embed Embed in Embeds)
+            foreach (EmbedBuilder Embed in Embeds)
                 await Embed.SendEmbed(Context.Channel);
         }
 
@@ -30,10 +30,10 @@ namespace Dexter.Commands {
         [Alias("records", "record")]
 
         public async Task WarningsCommand() {
-            Embed[] Embeds = GetWarnings(Context.Message.Author, false);
+            EmbedBuilder[] Embeds = GetWarnings(Context.Message.Author, false);
 
             try {
-                foreach (Embed Embed in Embeds)
+                foreach (EmbedBuilder Embed in Embeds)
                     await Embed.SendEmbed(Context.Message.Author);
 
                 await Context.BuildEmbed(EmojiEnum.Love)
@@ -52,18 +52,17 @@ namespace Dexter.Commands {
             }
         }
 
-        public Embed[] GetWarnings(IUser User, bool ShowIssuer) {
+        public EmbedBuilder[] GetWarnings(IUser User, bool ShowIssuer) {
             Warning[] Warnings = WarningsDB.GetWarnings(User.Id);
 
             if (Warnings.Length <= 0)
-                return new Embed[1] {
+                return new EmbedBuilder[1] {
                     Context.BuildEmbed(EmojiEnum.Love)
                         .WithTitle("No issued warnings!")
                         .WithDescription($"{User.Mention} has a clean slate! Go give them a pat on the back <3")
-                        .Build()
                 };
 
-            List<Embed> Embeds = new List<Embed>();
+            List<EmbedBuilder> Embeds = new List<EmbedBuilder>();
 
             EmbedBuilder CurrentBuilder = Context.BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"{User.Username}'s Warnings - {Warnings.Length} {(Warnings.Length == 1 ? "Entry" : "Entries")}")
@@ -83,12 +82,12 @@ namespace Dexter.Commands {
                 try {
                     CurrentBuilder.AddField(Field);
                 } catch (Exception) {
-                    Embeds.Add(CurrentBuilder.Build());
+                    Embeds.Add(CurrentBuilder);
                     CurrentBuilder = new EmbedBuilder().AddField(Field).WithColor(Color.Blue);
                 }
             }
 
-            Embeds.Add(CurrentBuilder.Build());
+            Embeds.Add(CurrentBuilder);
 
             return Embeds.ToArray();
         }

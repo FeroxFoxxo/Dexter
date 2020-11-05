@@ -5,7 +5,17 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Extensions {
+    /// <summary>
+    /// The Embed Extensions class offers a variety of different extensions that can be applied to an embed to modify or send it.
+    /// </summary>
     public static class EmbedExtensions {
+
+        /// <summary>
+        /// The SendEmbed 
+        /// </summary>
+        /// <param name="Embed"></param>
+        /// <param name="Channel"></param>
+        /// <returns></returns>
         public static async Task SendEmbed(this EmbedBuilder Embed, IMessageChannel Channel) =>
             await Channel.SendMessageAsync(embed: Embed.Build());
 

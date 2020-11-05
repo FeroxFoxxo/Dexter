@@ -1,5 +1,4 @@
-﻿using Dexter.Configurations;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Attributes;
 using Dexter.Databases.Configuration;
 using Discord;
@@ -8,6 +7,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Dexter.Extensions;
 
 namespace Dexter.Services {
     public class ModuleService : InitializableModule {
@@ -36,7 +36,7 @@ namespace Dexter.Services {
                     await ConfigurationDB.SaveChangesAsync();
                 }
 
-            // Check for configs not in database but in project
+            // Check for configs not in database but in project.
             foreach (Type Type in GetModuleTypes()) {
                 string TypeName = Type.Name.Sanitize();
 
@@ -49,14 +49,14 @@ namespace Dexter.Services {
                 }
             }
 
-            // Check for attribute set in database not matching project
+            // Check for attribute set in database not matching project.
             foreach (Config Configuration in ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == ConfigrationType.Essential).ToArray())
                 if (!EssentialModules.Contains(Configuration.ConfigurationName)) {
                     Configuration.ConfigurationType = ConfigrationType.Disabled;
                     await ConfigurationDB.SaveChangesAsync();
                 }
 
-            // Check for attribute not set in database but in project
+            // Check for attribute not set in database but in project.
             foreach (Type Type in GetModuleTypes().Where(Module => Module.IsDefined(typeof(EssentialModuleAttribute)))) {
                 string TypeName = Type.Name.Sanitize();
 
@@ -68,7 +68,7 @@ namespace Dexter.Services {
                 }
             }
 
-            // Loop through all enabled or essential modules
+            // Loop through all enabled or essential modules.
             foreach (Config Configuration in ConfigurationDB.Configurations.ToArray())
                 switch (Configuration.ConfigurationType) {
                     case ConfigrationType.Enabled:

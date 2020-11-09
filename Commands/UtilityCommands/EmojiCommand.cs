@@ -13,14 +13,14 @@ namespace Dexter.Commands {
 
         public async Task EmojiCommand(string Emoji) {
             if (Emote.TryParse(Emoji, out Emote Emojis))
-                await Context.BuildEmbed(EmojiEnum.Unknown)
+                await BuildEmbed(EmojiEnum.Unknown)
                     .WithImageUrl(Emojis.Url)
                     .WithUrl(Emojis.Url)
                     .WithAuthor(Emojis.Name)
                     .WithTitle("Get Emoji URL")
                     .SendEmbed(Context.Channel);
             else
-                await Context.BuildEmbed(EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unknown Emoji")
                     .WithDescription("An invalid emote was specified! Please make sure that what you have sent is a valid emote. Please make sure this is a **custom emote** aswell and does not fall under the unicode specification.")
                     .SendEmbed(Context.Channel);

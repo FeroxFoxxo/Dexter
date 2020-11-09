@@ -15,7 +15,7 @@ namespace Dexter.Commands {
         [RequireModerator]
 
         public async Task UserDMCommand(IGuildUser User, [Remainder] string Message) {
-            EmbedBuilder Embed = Context.BuildEmbed(EmojiEnum.Unknown)
+            EmbedBuilder Embed = BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle("User DM")
                 .WithDescription(Message)
                 .AddField("Recipient", $"{User.Mention} {User.Username + User.Discriminator} ({User.Id})")

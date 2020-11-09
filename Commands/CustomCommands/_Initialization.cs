@@ -8,7 +8,7 @@ namespace Dexter.Commands {
         private readonly CustomCommandDB CustomCommandDB;
         private readonly BotConfiguration BotConfiguration;
 
-        public CustomCommands(CustomCommandDB _CustomCommandDB, BotConfiguration _BotConfiguration) {
+        public CustomCommands(CustomCommandDB _CustomCommandDB, BotConfiguration _BotConfiguration) : base (_BotConfiguration) {
             CustomCommandDB = _CustomCommandDB;
             BotConfiguration = _BotConfiguration;
         }

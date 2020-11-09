@@ -14,7 +14,7 @@ namespace Dexter.Commands {
         [Alias("runtime")]
 
         public async Task UptimeCommand() {
-            await Context.BuildEmbed(EmojiEnum.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Uptime")
                 .WithDescription($"I've been runnin' for **{(DateTime.Now - Process.GetCurrentProcess().StartTime).Humanize()}**~!\n*yawns*")
                 .SendEmbed(Context.Channel);

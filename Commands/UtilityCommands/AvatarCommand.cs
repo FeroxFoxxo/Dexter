@@ -18,7 +18,7 @@ namespace Dexter.Commands {
         [Summary("Gets the avatar of a user mentioned or yours.")]
 
         public async Task AvatarCommand(IGuildUser User) {
-            await Context.BuildEmbed(EmojiEnum.Unknown)
+            await BuildEmbed(EmojiEnum.Unknown)
                 .WithImageUrl(User.GetAvatarUrl(ImageFormat.Png, 1024))
                 .WithUrl(User.GetAvatarUrl(ImageFormat.Png, 1024))
                 .WithAuthor(User)

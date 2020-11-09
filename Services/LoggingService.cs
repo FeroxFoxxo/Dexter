@@ -1,4 +1,5 @@
 ﻿using Dexter.Abstractions;
+using Dexter.Configurations;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -28,7 +29,8 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="Client">The current instance of the DiscordSocketClient, which is used to hook into the Log delegate to run LogMessageAsync.</param>
         /// <param name="Commands">The CommandService is used to hook into the Log delegate to run LogMessageAsync.</param>
-        public LoggingService(DiscordSocketClient Client, CommandService Commands) {
+        /// <param name="BotConfiguration">The BotConfiguration, which is given to the base method for use when needed to create a generic embed.</param>
+        public LoggingService(DiscordSocketClient Client, CommandService Commands, BotConfiguration BotConfiguration) : base (BotConfiguration) {
             LogDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
             LogFile = Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.log");
             this.Client = Client;

@@ -27,7 +27,7 @@ namespace Dexter.Commands {
 
             await CustomCommandDB.SaveChangesAsync();
 
-            await Context.BuildEmbed(EmojiEnum.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"The command `{CommandName}` was added!")
                 .WithDescription($"Use `{BotConfiguration.Prefix}ccalias add` to add an alias to the command! \n" +
                     "Please note, to make the command ping a user if mentioned, add `USER` to the reply~! \n" +

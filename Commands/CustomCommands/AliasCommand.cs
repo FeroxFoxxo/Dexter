@@ -35,7 +35,7 @@ namespace Dexter.Commands {
 
                     await CustomCommandDB.SaveChangesAsync();
 
-                    await Context.BuildEmbed(EmojiEnum.Love)
+                    await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"The command `{CommandName}` was given the alias of `{Alias}`!")
                         .WithDescription($"Use `{BotConfiguration.Prefix}ccalias remove` to remove an alias from this command! \n" +
                             $"You may use the `{BotConfiguration.Prefix}ccalias list` command to view the aliases of this command.")
@@ -55,7 +55,7 @@ namespace Dexter.Commands {
 
                     await CustomCommandDB.SaveChangesAsync();
 
-                    await Context.BuildEmbed(EmojiEnum.Love)
+                    await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"The command `{CommandName}` was removed from the alias of `{Alias}`!")
                         .WithDescription($"Use `{BotConfiguration.Prefix}ccalias add` to add an alias to this command! \n" +
                             $"You may use the `{BotConfiguration.Prefix}ccalias list` command to view the aliases of this command.")
@@ -82,13 +82,13 @@ namespace Dexter.Commands {
 
                     string Aliases = string.Join('\n', List.Alias.Split(","));
 
-                    await Context.BuildEmbed(EmojiEnum.Love)
+                    await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"The command `{CommandName}` has these aliases:")
                         .WithDescription(Aliases.Replace("\n", "").Length > 0 ? Aliases : "No aliases set!")
                         .SendEmbed(Context.Channel);
                     break;
                 case AliasActionType.Add:
-                    await Context.BuildEmbed(EmojiEnum.Love)
+                    await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"Bad argument count!")
                         .WithDescription("Please specify which command you would want to add this alias to! <3")
                         .SendEmbed(Context.Channel);
@@ -107,7 +107,7 @@ namespace Dexter.Commands {
 
                     await CustomCommandDB.SaveChangesAsync();
 
-                    await Context.BuildEmbed(EmojiEnum.Love)
+                    await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"The alias `{CommandName}` was removed as an alias of `{Remove.CommandName}`!")
                         .WithDescription($"Use `{BotConfiguration.Prefix}ccalias add` to add an alias to this command! \n" +
                             $"You may use the `{BotConfiguration.Prefix}ccalias list` command to view the aliases of this command.")

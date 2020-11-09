@@ -14,7 +14,7 @@ namespace Dexter.Commands {
         [RequireAdministrator]
 
         public async Task HaltCommand() {
-            await Context.BuildEmbed(EmojiEnum.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Shutting Down")
                 .WithDescription($"Haiya! I'll be going to sleep now.\nCya when I wake back up!")
                 .SendEmbed(Context.Channel);

@@ -1,5 +1,6 @@
-﻿using Dexter.Abstractions;
+﻿using Dexter.Configurations;
 using Discord.Commands;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace Dexter.Attributes {
 
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext Context, CommandInfo Command, IServiceProvider Services) {
             return Task.FromResult(
-                (Context as CommandModule).BotConfiguration.BotChannels.Contains(Context.Channel.Id) ?
+                Services.GetRequiredService<BotConfiguration>().BotChannels.Contains(Context.Channel.Id) ?
                     PreconditionResult.FromSuccess() :
                     PreconditionResult.FromError($"Heya! You're not permitted to use this command in {Context.Channel.Name}. Please use a designated bot channel instead <3"));
         }

@@ -26,7 +26,7 @@ namespace Dexter.Commands {
 
             await CustomCommandDB.SaveChangesAsync();
 
-            await Context.BuildEmbed(EmojiEnum.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"The command `{CommandName}`'s reply was edited!")
                 .WithDescription($"Changed command `{BotConfiguration.Prefix}{CommandName}` from `{OldReply}` to `{EditedReply}`")
                 .SendEmbed(Context.Channel);

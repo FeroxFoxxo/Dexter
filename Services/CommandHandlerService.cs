@@ -27,8 +27,6 @@ namespace Dexter.Services {
 
         private readonly BotConfiguration BotConfiguration;
 
-        private readonly CommandModule CommandModule;
-
         private readonly CustomCommandDB CustomCommandDB;
 
         private readonly LoggingService LoggingService;
@@ -40,15 +38,14 @@ namespace Dexter.Services {
         /// <param name="CommandService">The CommandService of the bot, which is used to check if there are any errors on the CommandExecuted event.</param>
         /// <param name="BotConfiguration">The BotConfiguration JSON file, which contains the prefix used to parse commands and developer mention for if the command errors unexpectedly.</param>
         /// <param name="Services">The ServiceProvider, which is where our dependencies are stored - given as a field to DiscordNet's execution method.</param>
-        /// <param name="CommandModule">The CommandModule is simply a basic command module, which we can hook into in order to generate the standardized embeds used throughout the bot.</param>
         /// <param name="CustomCommandDB">The CustomCommandDB is used to get our custom commands, which - if we fail as the command is unknown - we parse to find a match.</param>
         /// <param name="LoggingService">The LoggingService is used to log unexpected errors that may occur on command execution</param>
-        public CommandHandlerService(DiscordSocketClient Client, CommandService CommandService, BotConfiguration BotConfiguration, IServiceProvider Services, CommandModule CommandModule, CustomCommandDB CustomCommandDB, LoggingService LoggingService) {
+        public CommandHandlerService(DiscordSocketClient Client, CommandService CommandService, BotConfiguration BotConfiguration,
+                IServiceProvider Services, CustomCommandDB CustomCommandDB, LoggingService LoggingService) : base (BotConfiguration) {
             this.Client = Client;
             this.BotConfiguration = BotConfiguration;
             this.CommandService = CommandService;
             this.Services = Services;
-            this.CommandModule = CommandModule;
             this.CustomCommandDB = CustomCommandDB;
             this.LoggingService = LoggingService;
         }
@@ -79,14 +76,14 @@ namespace Dexter.Services {
 
             if (!(Message.Channel is IGuildChannel)) {
                 if (!Message.Author.IsBot)
-                    await CommandModule.BuildEmbed(EmojiEnum.Annoyed)
+                    await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle($"{BotConfiguration.Bot_Name} is not avaliable in DMs!")
                         .WithDescription($"Heya! I'm not avaliable in DMs at the moment, please use {Client.GetGuild(BotConfiguration.GuildID).Name} to communicate with me!")
                         .SendEmbed(Message.Channel);
                 return;
             }
 
-            await CommandService.ExecuteAsync(new CommandModule(Client, Message, BotConfiguration), ArgumentPosition, Services);
+            await CommandService.ExecuteAsync(new CommandContext(Client, Message), ArgumentPosition, Services);
         }
 
         /// <summary>
@@ -102,14 +99,14 @@ namespace Dexter.Services {
 
             switch (Result.Error) {
                 case CommandError.BadArgCount:
-                    await CommandModule.BuildEmbed(EmojiEnum.Annoyed)
+                    await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("You've entered an invalid amount of parameters for this command!")
                         .WithDescription($"Here are some options of parameters you can have for the command **{Command.Value.Name}**.")
                         .GetParametersForCommand(CommandService, Command.Value.Name)
                         .SendEmbed(Context.Channel);
                     break;
                 case CommandError.UnmetPrecondition:
-                    await CommandModule.BuildEmbed(EmojiEnum.Annoyed)
+                    await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Access Denied.")
                         .WithDescription(Result.ErrorReason)
                         .SendEmbed(Context.Channel);
@@ -123,19 +120,19 @@ namespace Dexter.Services {
                         if (CustomCommand.Reply.Length > 0)
                             await Context.Channel.SendMessageAsync(CustomCommand.Reply.Replace("USER", Context.Message.MentionedUserIds.Count > 0 ? $"<@{Context.Message.MentionedUserIds.First()}>" : Context.Message.Author.Mention));
                         else
-                            await CommandModule.BuildEmbed(EmojiEnum.Annoyed)
+                            await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Misconfigured command!")
                                 .WithDescription($"{CustomCommand.CommandName} has not been configured! Please contact a moderator about this. <3")
                                 .SendEmbed(Context.Channel);
                     } else {
-                        await CommandModule.BuildEmbed(EmojiEnum.Annoyed)
+                        await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Unknown Command.")
                         .WithDescription($"Oopsies! It seems as if the command **{CustomCommandArgs[0].SanitizeMarkdown()}** doesn't exist!")
                         .SendEmbed(Context.Channel);
                     }
                     break;
                 case CommandError.ParseFailed:
-                    await CommandModule.BuildEmbed(EmojiEnum.Annoyed)
+                    await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Unable to parse command!")
                         .WithDescription("Invalid amount of command arguments.")
                         .SendEmbed(Context.Channel);
@@ -149,12 +146,12 @@ namespace Dexter.Services {
                         await Context.Channel.SendMessageAsync("Unknown error! I wanted to tell the developers, but I don't know who they are!");
 
                     if (Result is ExecuteResult ExecuteResult)
-                        await CommandModule.BuildEmbed(EmojiEnum.Annoyed)
+                        await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle(ExecuteResult.Exception.GetType().Name.Prettify())
                             .WithDescription(ExecuteResult.Exception.Message)
                             .SendEmbed(Context.Channel);
                     else
-                        await CommandModule.BuildEmbed(EmojiEnum.Annoyed)
+                        await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle(Result.Error.GetType().Name.Prettify())
                             .WithDescription(Result.ErrorReason)
                             .SendEmbed(Context.Channel);

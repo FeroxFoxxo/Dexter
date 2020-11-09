@@ -24,7 +24,7 @@ namespace Dexter.Commands {
 
             await CustomCommandDB.SaveChangesAsync();
 
-            await Context.BuildEmbed(EmojiEnum.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"The command `{CommandName}` was removed!")
                 .WithDescription("If this was a mistake, please use `ccadd` to remake this command.\nWe hope you enjoyed using this command <3")
                 .SendEmbed(Context.Channel);

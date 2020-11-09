@@ -25,7 +25,7 @@ namespace Dexter.Commands {
             SocketGuildUser Issuer = Context.Guild.GetUser(Warning.Issuer);
             SocketGuildUser Warned = Context.Guild.GetUser(Warning.User);
 
-            await Context.BuildEmbed(EmojiEnum.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Warning revoked!")
                 .WithDescription($"Heya! I revoked a warning issued to {(Warned == null ? "Unknown" : Warned.GetUserInformation())}")
                 .AddField("Issued by", Issuer == null ? "Unknown" : Issuer.GetUserInformation())

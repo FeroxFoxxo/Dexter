@@ -12,7 +12,7 @@ namespace Dexter.Commands {
         private readonly string RandomizedCharacters;
         private readonly Random Random;
 
-        public WarningCommands(WarningsDB _WarningsDB, BotConfiguration _BotConfiguration) {
+        public WarningCommands(WarningsDB _WarningsDB, BotConfiguration _BotConfiguration) : base (_BotConfiguration) {
             WarningsDB = _WarningsDB;
             BotConfiguration = _BotConfiguration;
             RandomizedCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

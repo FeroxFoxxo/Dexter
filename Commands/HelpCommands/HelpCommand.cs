@@ -13,8 +13,8 @@ namespace Dexter.Commands {
         [Summary("Displays all avaliable commands.")]
         [Alias("helpme", "pleasehelp", "how2use", "howtouse")]
         public async Task HelpCommand() {
-            EmbedBuilder Embed = Context.BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"Hiya, I'm {Context.BotConfiguration.Bot_Name}~! Here's a list of modules and commands you can use!")
+            EmbedBuilder Embed = BuildEmbed(EmojiEnum.Love)
+                .WithTitle($"Hiya, I'm {BotConfiguration.Bot_Name}~! Here's a list of modules and commands you can use!")
                 .WithDescription($"Use {BotConfiguration.Prefix}help [commandName] to show information about a command!");
 
             foreach (ModuleInfo Module in CommandService.Modules) {
@@ -43,11 +43,11 @@ namespace Dexter.Commands {
             SearchResult Result = CommandService.Search(Context, Command);
 
             if (!Result.IsSuccess)
-                await Context.BuildEmbed(EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unknown Command")
                     .WithDescription($"Sorry, I couldn't find a command like **{Command}**.")
                     .SendEmbed(Context.Channel);
-            else await Context.BuildEmbed(EmojiEnum.Love)
+            else await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"Here are some commands like **{Command}**!")
                 .GetParametersForCommand(CommandService, Command)
                 .SendEmbed(Context.Channel);

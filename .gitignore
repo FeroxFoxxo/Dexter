@@ -339,7 +339,7 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 
-# Bot confiuguration, as contains token
+# Confiugurations
 *.json
 
 log.txt

@@ -21,9 +21,9 @@ namespace Dexter.Commands {
 
             KeyValuePair<string, string> Question = NameQuestionDictionary[new Random().Next(NameQuestionDictionary.Count)];
 
-            await Context.BuildEmbed(EmojiEnum.Sign)
+            await BuildEmbed(EmojiEnum.Sign)
                 .WithAuthor(Context.Message.Author)
-                .WithTitle($"{Context.BotConfiguration.Bot_Name} Asks")
+                .WithTitle($"{BotConfiguration.Bot_Name} Asks")
                 .WithDescription(Question.Value)
                 .WithFooter($"Topic Written by {Question.Key}")
                 .SendEmbed(Context.Channel);

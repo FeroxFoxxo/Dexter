@@ -7,10 +7,12 @@ namespace Dexter.Commands {
 
         private readonly FunConfiguration FunConfiguration;
         private readonly DiscordSocketClient Client;
+        private readonly BotConfiguration BotConfiguration;
 
-        public FunCommands(DiscordSocketClient _Client, FunConfiguration _FunConfiguration) {
-            FunConfiguration = _FunConfiguration;
-            Client = _Client;
+        public FunCommands(DiscordSocketClient Client, FunConfiguration FunConfiguration, BotConfiguration BotConfiguration) : base (BotConfiguration) {
+            this.FunConfiguration = FunConfiguration;
+            this.Client = Client;
+            this.BotConfiguration = BotConfiguration;
         }
 
     }

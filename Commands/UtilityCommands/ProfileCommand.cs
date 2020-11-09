@@ -22,7 +22,7 @@ namespace Dexter.Commands {
         [Alias("userinfo")]
 
         public async Task ProfileCommand(IGuildUser User) {
-            await Context.BuildEmbed(EmojiEnum.Unknown)
+            await BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle($"User Profile For {User.Username}#{User.Discriminator}")
                 .WithThumbnailUrl(User.GetAvatarUrl())
                 .AddField("Username", User.Username)

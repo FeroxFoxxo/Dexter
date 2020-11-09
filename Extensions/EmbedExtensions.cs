@@ -1,4 +1,6 @@
-﻿using Discord;
+﻿using Dexter.Configurations;
+using Dexter.Enums;
+using Discord;
 using Discord.Commands;
 using Discord.Webhook;
 using System.Linq;
@@ -9,6 +11,26 @@ namespace Dexter.Extensions {
     /// The Embed Extensions class offers a variety of different extensions that can be applied to an embed to modify or send it.
     /// </summary>
     public static class EmbedExtensions {
+
+        /// <summary>
+        /// Builds an embed with the attributes specified by the emoji enum.
+        /// </summary>
+        /// <param name="Embed">The embed which you wish to be built upon.</param>
+        /// <param name="Thumbnails">The type of embed you wish it to be, specified by an enum of possibilities.</param>
+        /// <param name="BotConfiguration">An instance of the bot configuration, which contains the URLs for each thumbnail.</param>
+        /// <returns>The built embed, with the thumbnail and color applied.</returns>
+        public static EmbedBuilder BuildEmbed(this EmbedBuilder Embed, EmojiEnum Thumbnails, BotConfiguration BotConfiguration) {
+            Color Color = Thumbnails switch {
+                EmojiEnum.Annoyed => Color.Red,
+                EmojiEnum.Love => Color.Green,
+                EmojiEnum.Sign => Color.Blue,
+                EmojiEnum.Wut => Color.Teal,
+                EmojiEnum.Unknown => Color.Orange,
+                _ => Color.Magenta
+            };
+
+            return Embed.WithThumbnailUrl(BotConfiguration.ThumbnailURLs[(int)Thumbnails]).WithColor(Color);
+        }
 
         /// <summary>
         /// Builds an EmbedBuilder and sends it to the specified IMessageChannel.

@@ -21,7 +21,7 @@ namespace Dexter.Commands {
             Suggestion Suggestion = SuggestionDB.GetSuggestionByNameOrID(Tracker);
 
             if (Suggestion == null)
-                await Context.BuildEmbed(EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Suggestion does not exist!")
                     .WithDescription($"Cound not fetch suggestion from tracker / message ID / staff message ID `{Tracker}`.\n" +
                     $"Are you sure it exists?")
@@ -31,7 +31,7 @@ namespace Dexter.Commands {
 
                 await SuggestionService.UpdateSuggestion(Suggestion, SuggestionStatus.Approved);
 
-                EmbedBuilder Builder = Context.BuildEmbed(EmojiEnum.Love)
+                EmbedBuilder Builder = BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Suggestion Approved")
                     .WithDescription($"Suggestion {Suggestion.TrackerID} was successfully approved by {Context.Message.Author.Mention}")
                     .AddField("Reason:", string.IsNullOrEmpty(Reason) ? "No reason provided" : Reason)

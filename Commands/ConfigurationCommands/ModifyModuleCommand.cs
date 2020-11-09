@@ -18,21 +18,21 @@ namespace Dexter.Commands {
 
                 switch (ModuleAction) {
                     case ModuleActionType.Status:
-                        await Context.BuildEmbed(IsActive ? EmojiEnum.Love : EmojiEnum.Annoyed)
+                        await BuildEmbed(IsActive ? EmojiEnum.Love : EmojiEnum.Annoyed)
                             .WithTitle("Module Status")
                             .WithDescription($"The module **{ModuleName}** is currently **{(IsActive ? "enabled" : "disabled")}**.")
                             .SendEmbed(Context.Channel);
                         break;
                     default:
                         if ((ModuleAction == ModuleActionType.Enable && IsActive) || (ModuleAction == ModuleActionType.Disable && !IsActive))
-                            await Context.BuildEmbed(EmojiEnum.Annoyed)
+                            await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Module already set to value!")
                                 .WithDescription($"The module **{ModuleName}** is already **{(IsActive ? "enabled" : "disabled")}**!")
                                 .SendEmbed(Context.Channel);
                         else {
                             bool Active = ModuleAction == ModuleActionType.Enable;
                             await ModuleService.SetModuleState(ModuleName, Active);
-                            await Context.BuildEmbed(Active ? EmojiEnum.Love : EmojiEnum.Annoyed)
+                            await BuildEmbed(Active ? EmojiEnum.Love : EmojiEnum.Annoyed)
                                 .WithTitle("Module set!")
                                 .WithDescription($"The module **{ModuleName}** is now **{(Active ? "enabled" : "disabled")}**!")
                                 .SendEmbed(Context.Channel);
@@ -40,7 +40,7 @@ namespace Dexter.Commands {
                         break;
                 }
             } else
-                await Context.BuildEmbed(EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unknown Module!")
                     .WithDescription($"I don't know a module called **{ModuleName}**.")
                     .SendEmbed(Context.Channel);

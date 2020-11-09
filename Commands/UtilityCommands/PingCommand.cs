@@ -11,7 +11,7 @@ namespace Dexter.Commands {
         [Alias("latency")]
 
         public async Task PingCommand() {
-            await Context.BuildEmbed(EmojiEnum.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Gateway Ping")
                 .WithDescription($"**{Context.Client.Latency}ms**")
                 .SendEmbed(Context.Channel);

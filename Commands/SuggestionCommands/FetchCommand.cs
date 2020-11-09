@@ -16,7 +16,7 @@ namespace Dexter.Commands {
             Suggestion Suggestion = SuggestionDB.GetSuggestionByNameOrID(Tracker);
 
             if (Suggestion == null)
-                await Context.BuildEmbed(EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Suggestion does not exist!")
                     .WithDescription($"Cound not fetch suggestion from tracker / message ID / staff message ID `{Tracker}`.\n" +
                     $"Are you sure it exists?")

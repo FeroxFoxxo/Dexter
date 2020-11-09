@@ -1,4 +1,5 @@
 ﻿using Dexter.Abstractions;
+using Dexter.Configurations;
 using Dexter.Databases.Suggestions;
 using Dexter.Services;
 
@@ -8,7 +9,7 @@ namespace Dexter.Commands {
         private readonly SuggestionDB SuggestionDB;
         private readonly SuggestionService SuggestionService;
 
-        public SuggestionCommands(SuggestionDB _SuggestionDB, SuggestionService _SuggestionService) {
+        public SuggestionCommands(SuggestionDB _SuggestionDB, SuggestionService _SuggestionService, BotConfiguration BotConfiguration) : base (BotConfiguration) {
             SuggestionDB = _SuggestionDB;
             SuggestionService = _SuggestionService;
         }

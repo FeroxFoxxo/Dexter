@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Dexter.Extensions;
 using Discord.WebSocket;
+using Dexter.Configurations;
 
 namespace Dexter.Services {
     /// <summary>
@@ -31,7 +32,9 @@ namespace Dexter.Services {
         /// <param name="LoggingService">The LoggingService instance, which we use to log information on the currently enabled modules for use when we start up.</param>
         /// <param name="Services">The ServiceProvider, which contains references to all the classes that have been specified through recursion, more specifically the CommandModule classes.</param>
         /// <param name="ConfigurationDB">An instance of the ConfigurationDB, which keeps track of enabled and disabled commands.</param>
-        public ModuleService(DiscordSocketClient Client, CommandService CommandService, LoggingService LoggingService, IServiceProvider Services, ConfigurationDB ConfigurationDB) {
+        /// <param name="BotConfiguration">The BotConfiguration, which is given to the base method for use when needed to create a generic embed.</param>
+        public ModuleService(DiscordSocketClient Client, CommandService CommandService, LoggingService LoggingService,
+                IServiceProvider Services, ConfigurationDB ConfigurationDB, BotConfiguration BotConfiguration) : base (BotConfiguration) {
             this.Client = Client;
             this.CommandService = CommandService;
             this.LoggingService = LoggingService;

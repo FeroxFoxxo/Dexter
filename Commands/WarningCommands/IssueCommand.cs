@@ -19,7 +19,7 @@ namespace Dexter.Commands {
 
         public async Task IssueCommand (IGuildUser User, [Remainder] string Reason) {
             if (Reason.Length > 250) {
-                await Context.BuildEmbed(EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Reason too long")
                     .WithDescription($"Your reason should be around 250 characters, give or take-\nWe found {Reason.Length} instead.")
                     .SendEmbed(Context.Channel);
@@ -41,7 +41,7 @@ namespace Dexter.Commands {
 
             await WarningsDB.SaveChangesAsync();
 
-            EmbedBuilder Embed = Context.BuildEmbed(EmojiEnum.Love)
+            EmbedBuilder Embed = BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Warning Issued!")
                 .WithDescription($"Warned {User.GetUserInformation()}")
                 .AddField("Issued by", Context.Message.Author.GetUserInformation())
@@ -51,7 +51,7 @@ namespace Dexter.Commands {
                 .WithCurrentTimestamp();
 
             try {
-                await Context.BuildEmbed(EmojiEnum.Love)
+                await BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"You were issued a warning from {Context.Guild.Name}")
                     .WithDescription("Please note that whenever we warn you verbally, you will recieve a logged warning. " +
                     "This is not indicative of a mute or ban.")

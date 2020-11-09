@@ -36,13 +36,13 @@ namespace Dexter.Commands {
                 foreach (EmbedBuilder Embed in Embeds)
                     await Embed.SendEmbed(Context.Message.Author);
 
-                await Context.BuildEmbed(EmojiEnum.Love)
+                await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Sent warnings log.")
                     .WithDescription("Heya! I've sent you a log of your warnings. " +
                         "Please note these records are not indicitive of a mute or ban, and are simply a sign of when we've had to verbally warn you in the chat.")
                     .SendEmbed(Context.Channel);
             } catch (HttpException) {
-                await Context.BuildEmbed(EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to send warnings log!")
                     .WithDescription("Woa, it seems as though I'm not able to send you a log of your warnings! " +
                         "This is usually indicitive of having DMs from the server blocked or me personally! " +
@@ -57,14 +57,14 @@ namespace Dexter.Commands {
 
             if (Warnings.Length <= 0)
                 return new EmbedBuilder[1] {
-                    Context.BuildEmbed(EmojiEnum.Love)
+                    BuildEmbed(EmojiEnum.Love)
                         .WithTitle("No issued warnings!")
                         .WithDescription($"{User.Mention} has a clean slate! Go give them a pat on the back <3")
                 };
 
             List<EmbedBuilder> Embeds = new List<EmbedBuilder>();
 
-            EmbedBuilder CurrentBuilder = Context.BuildEmbed(EmojiEnum.Love)
+            EmbedBuilder CurrentBuilder = BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"{User.Username}'s Warnings - {Warnings.Length} {(Warnings.Length == 1 ? "Entry" : "Entries")}")
                 .WithDescription($"All times are displayed in {TimeZoneInfo.Local.DisplayName}");
 

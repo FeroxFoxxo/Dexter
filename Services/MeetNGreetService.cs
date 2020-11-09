@@ -23,7 +23,8 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="Client">The instance of the client, which is used to hook into the API.</param>
         /// <param name="MNGConfig">The instance of the MNGConfiguration, which is used to find and create the MNG webhook.</param>
-        public MeetNGreetService(DiscordSocketClient Client, MNGConfiguration MNGConfig) {
+        /// <param name="BotConfiguration">The BotConfiguration, which is given to the base method for use when needed to create a generic embed.</param>
+        public MeetNGreetService(DiscordSocketClient Client, MNGConfiguration MNGConfig, BotConfiguration BotConfiguration) : base (BotConfiguration) {
             this.Client = Client;
             this.MNGConfig = MNGConfig;
             

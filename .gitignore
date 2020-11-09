@@ -340,6 +340,6 @@ ASALocalRun/
 healthchecksdb
 
 # Bot confiuguration, as contains token
-BotConfiguration.json
+*.json
 
 log.txt

@@ -10,20 +10,27 @@ namespace Dexter.Services {
     /// <summary>
     /// The Startup Serivce module applies the token for the bot, as well as running the bot once all dependencies have loaded up.
     /// Furthermore, it logs and sends a message to the moderation channel when it does start up, including various information
-    /// like its bot 
+    /// like its bot and Discord.NET versionings.
     /// </summary>
     public class StartupService : InitializableModule {
 
         private readonly DiscordSocketClient DiscordSocketClient;
         private readonly LoggingService LoggingService;
         private readonly BotConfiguration BotConfiguration;
-        private readonly CommandModule Module;
+        private readonly CommandModule CommandModule;
 
-        public StartupService(DiscordSocketClient _DiscordSocketClient, BotConfiguration _BotConfiguration, LoggingService _LoggingService, CommandModule _Module) {
-            DiscordSocketClient = _DiscordSocketClient;
-            BotConfiguration = _BotConfiguration;
-            LoggingService = _LoggingService;
-            Module = _Module;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DiscordSocketClient"></param>
+        /// <param name="BotConfiguration"></param>
+        /// <param name="LoggingService"></param>
+        /// <param name="CommandModule"></param>
+        public StartupService(DiscordSocketClient DiscordSocketClient, BotConfiguration BotConfiguration, LoggingService LoggingService, CommandModule CommandModule) {
+            this.DiscordSocketClient = DiscordSocketClient;
+            this.BotConfiguration = BotConfiguration;
+            this.LoggingService = LoggingService;
+            this.CommandModule = CommandModule;
         }
 
         public override void AddDelegates() {
@@ -54,9 +61,9 @@ namespace Dexter.Services {
             ITextChannel Channel = DiscordSocketClient.GetGuild(Guild).GetTextChannel(LoggingChannel);
 
             if(BotConfiguration.EnableStartupAlert)
-                await Module.BuildEmbed(EmojiEnum.Love)
+                await CommandModule.BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Startup complete!")
-                .WithDescription($"This is **{BotConfiguration.Bot_Name} v{InitializeDependencies.Version}** running **Discord.Net v{Discord.DiscordConfig.Version}**!")
+                .WithDescription($"This is **{BotConfiguration.Bot_Name} v{InitializeDependencies.Version}** running **Discord.Net v{DiscordConfig.Version}**!")
                 .SendEmbed(Channel);
         }
 

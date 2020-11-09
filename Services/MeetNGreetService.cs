@@ -39,7 +39,16 @@ namespace Dexter.Services {
             Client.MessageUpdated += MNGMessageUpdated;
         }
 
-        private async Task MNGMessageUpdated(Cacheable<IMessage, ulong> OldMessage, SocketMessage NewMessage, ISocketMessageChannel Channel) {
+        /// <summary>
+        /// The MNGMessageUpdated method check if a message is edited in the MNG channel and, if so,
+        /// it uses the MNG webhook to send details pertaining to the previous message, the now updated message,
+        /// the author of the message, the ID of the message, and a link to quickly scroll to the message in question.
+        /// </summary>
+        /// <param name="OldMessage">An object of the previous message that had been edited.</param>
+        /// <param name="NewMessage">The instance of the new, changed message.</param>
+        /// <param name="Channel">The channel from which the message had been sent from.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        public async Task MNGMessageUpdated(Cacheable<IMessage, ulong> OldMessage, SocketMessage NewMessage, ISocketMessageChannel Channel) {
             if (Channel.Id != MNGConfig.MeetNGreetChannel)
                 return;
 
@@ -63,7 +72,14 @@ namespace Dexter.Services {
                     .SendEmbed(Webhook);
         }
 
-        private async Task MNGMessageDeleted(Cacheable<IMessage, ulong> Message, IChannel Channel) {
+        /// <summary>
+        /// The MNGMessageDeleted method checks if a message is deleted in the MNG channel and, if so,
+        /// send a message through the webhook containing the message sent, author, ID and content.
+        /// </summary>
+        /// <param name="Message">The message that has been cached from the sent channel.</param>
+        /// <param name="Channel">The channel from which the message had been sent from.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        public async Task MNGMessageDeleted(Cacheable<IMessage, ulong> Message, IChannel Channel) {
             if (Channel.Id != MNGConfig.MeetNGreetChannel)
                 return;
 

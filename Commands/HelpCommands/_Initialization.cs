@@ -5,7 +5,7 @@ using Discord.Commands;
 
 namespace Dexter.Commands {
     [EssentialModule]
-    public partial class HelpCommands : ModuleD {
+    public partial class HelpCommands : DiscordModule {
 
         private readonly CommandService CommandService;
         private readonly BotConfiguration BotConfiguration;

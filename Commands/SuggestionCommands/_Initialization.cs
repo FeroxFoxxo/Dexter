@@ -3,7 +3,7 @@ using Dexter.Databases.Suggestions;
 using Dexter.Services;
 
 namespace Dexter.Commands {
-    public partial class SuggestionCommands : ModuleD {
+    public partial class SuggestionCommands : DiscordModule {
 
         private readonly SuggestionDB SuggestionDB;
         private readonly SuggestionService SuggestionService;

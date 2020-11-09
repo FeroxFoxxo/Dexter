@@ -4,7 +4,7 @@ using Dexter.Databases.Warnings;
 using System;
 
 namespace Dexter.Commands {
-    public partial class WarningCommands : ModuleD {
+    public partial class WarningCommands : DiscordModule {
 
         private readonly WarningsDB WarningsDB;
         private readonly BotConfiguration BotConfiguration;

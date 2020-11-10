@@ -20,6 +20,8 @@ namespace Dexter.Commands {
         public async Task AliasCommandAsync(AliasActionType AliasAction, string CommandName, string Alias) {
             CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
+            Alias = Alias.Replace(",", "");
+
             switch (AliasAction) {
                 case AliasActionType.Add:
                     CustomCommand Add = CustomCommandDB.GetCommandByNameOrAlias(Alias);

@@ -41,7 +41,7 @@ namespace Dexter.Services {
         /// <param name="CustomCommandDB">The CustomCommandDB is used to get our custom commands, which - if we fail as the command is unknown - we parse to find a match.</param>
         /// <param name="LoggingService">The LoggingService is used to log unexpected errors that may occur on command execution</param>
         public CommandHandlerService(DiscordSocketClient Client, CommandService CommandService, BotConfiguration BotConfiguration,
-                IServiceProvider Services, CustomCommandDB CustomCommandDB, LoggingService LoggingService) : base (BotConfiguration) {
+                IServiceProvider Services, CustomCommandDB CustomCommandDB, LoggingService LoggingService) {
             this.Client = Client;
             this.BotConfiguration = BotConfiguration;
             this.CommandService = CommandService;
@@ -77,7 +77,7 @@ namespace Dexter.Services {
             if (!(Message.Channel is IGuildChannel)) {
                 if (!Message.Author.IsBot)
                     await BuildEmbed(EmojiEnum.Annoyed)
-                        .WithTitle($"{BotConfiguration.Bot_Name} is not avaliable in DMs!")
+                        .WithTitle($"{Client.CurrentUser.Username} is not avaliable in DMs!")
                         .WithDescription($"Heya! I'm not avaliable in DMs at the moment, please use {Client.GetGuild(BotConfiguration.GuildID).Name} to communicate with me!")
                         .SendEmbed(Message.Channel);
                 return;
@@ -138,7 +138,7 @@ namespace Dexter.Services {
                         .SendEmbed(Context.Channel);
                     break;
                 default:
-                    await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Warning, GetType().Name.Prettify(), $"Unknown statement reached!\nCommand: {(Command.IsSpecified ? Command.Value : null)}\nResult: {Result}"));
+                    await LoggingService.TryLogMessage(new LogMessage(LogSeverity.Warning, GetType().Name.Prettify(), $"Unknown statement reached!\nCommand: {(Command.IsSpecified ? Command.Value : null)}\nResult: {Result}"));
 
                     if (!string.IsNullOrEmpty(BotConfiguration.DeveloperMention))
                         await Context.Channel.SendMessageAsync($"Unknown error! I'll tell the developers.\n{BotConfiguration.DeveloperMention}");

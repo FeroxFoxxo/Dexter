@@ -5,6 +5,8 @@ using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
 using System.Threading.Tasks;
+using System;
+using Figgle;
 
 namespace Dexter.Services {
     /// <summary>
@@ -24,7 +26,7 @@ namespace Dexter.Services {
         /// <param name="DiscordSocketClient">An instance of the DiscordSocketClient, is what we use to hook into the ready event.</param>
         /// <param name="BotConfiguration">The BotConfiguration, which contains the bot's token, as well as which channel to send the startup message to.</param>
         /// <param name="LoggingService">An instance of the Logging Service, which we use to log if the token has not been set to the console.</param>
-        public StartupService(DiscordSocketClient DiscordSocketClient, BotConfiguration BotConfiguration, LoggingService LoggingService) : base (BotConfiguration) {
+        public StartupService(DiscordSocketClient DiscordSocketClient, BotConfiguration BotConfiguration, LoggingService LoggingService) {
             this.DiscordSocketClient = DiscordSocketClient;
             this.BotConfiguration = BotConfiguration;
             this.LoggingService = LoggingService;
@@ -50,7 +52,7 @@ namespace Dexter.Services {
             if (!string.IsNullOrEmpty(BotConfiguration.Token))
                 await RunBot(BotConfiguration.Token);
             else
-                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Startup", $"The login token in the {BotConfiguration.GetType().Name.Prettify()} file was not set."));
+                await LoggingService.TryLogMessage(new LogMessage(LogSeverity.Error, "Startup", $"The login token in the {BotConfiguration.GetType().Name.Prettify()} file was not set."));
         }
 
         /// <summary>
@@ -59,6 +61,7 @@ namespace Dexter.Services {
         /// <param name="Token">A string containing the token from which we use to log into Discord.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
         public async Task RunBot(string Token) {
+            LoggingService.SetOutputToLocked(true);
             await DiscordSocketClient.LoginAsync(TokenType.Bot, Token);
             await DiscordSocketClient.StartAsync();
         }
@@ -77,10 +80,20 @@ namespace Dexter.Services {
 
             ITextChannel Channel = DiscordSocketClient.GetGuild(Guild).GetTextChannel(LoggingChannel);
 
-            if(BotConfiguration.EnableStartupAlert)
+            Console.Clear();
+
+            Console.Title = $"{DiscordSocketClient.CurrentUser.Username} v{InitializeDependencies.Version} (Discord.Net v{DiscordConfig.Version})";
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+
+            await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(DiscordSocketClient.CurrentUser.Username));
+
+            LoggingService.SetOutputToLocked(false);
+
+            if (BotConfiguration.EnableStartupAlert)
                 await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Startup complete!")
-                .WithDescription($"This is **{BotConfiguration.Bot_Name} v{InitializeDependencies.Version}** running **Discord.Net v{DiscordConfig.Version}**!")
+                .WithDescription($"This is **{DiscordSocketClient.CurrentUser.Username} v{InitializeDependencies.Version}** running **Discord.Net v{DiscordConfig.Version}**!")
                 .SendEmbed(Channel);
         }
 

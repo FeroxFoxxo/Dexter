@@ -14,7 +14,7 @@ namespace Dexter.Commands {
         public async Task VersionCommand() {
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Bot Version")
-                .WithDescription($"Hello? is anyone out there-\nThis is **{BotConfiguration.Bot_Name} v{InitializeDependencies.Version}** running **Discord.NET v{DiscordConfig.Version}**")
+                .WithDescription($"Hello? is anyone out there-\nThis is **{Context.Client.CurrentUser.Username} v{InitializeDependencies.Version}** running **Discord.NET v{DiscordConfig.Version}**")
                 .SendEmbed(Context.Channel);
         }
 

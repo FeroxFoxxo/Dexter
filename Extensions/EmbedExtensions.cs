@@ -1,5 +1,4 @@
-﻿using Dexter.Configurations;
-using Dexter.Enums;
+﻿using Dexter.Enums;
 using Discord;
 using Discord.Commands;
 using Discord.Webhook;
@@ -15,11 +14,10 @@ namespace Dexter.Extensions {
         /// <summary>
         /// Builds an embed with the attributes specified by the emoji enum.
         /// </summary>
-        /// <param name="Embed">The embed which you wish to be built upon.</param>
-        /// <param name="Thumbnails">The type of embed you wish it to be, specified by an enum of possibilities.</param>
-        /// <param name="BotConfiguration">An instance of the bot configuration, which contains the URLs for each thumbnail.</param>
+        /// <param name="Embed">The Embed which you wish to be built upon.</param>
+        /// <param name="Thumbnails">The type of Embed you wish it to be, specified by an enum of possibilities.</param>
         /// <returns>The built embed, with the thumbnail and color applied.</returns>
-        public static EmbedBuilder BuildEmbed(this EmbedBuilder Embed, EmojiEnum Thumbnails, BotConfiguration BotConfiguration) {
+        public static EmbedBuilder BuildEmbed(this EmbedBuilder Embed, EmojiEnum Thumbnails) {
             Color Color = Thumbnails switch {
                 EmojiEnum.Annoyed => Color.Red,
                 EmojiEnum.Love => Color.Green,
@@ -29,7 +27,7 @@ namespace Dexter.Extensions {
                 _ => Color.Magenta
             };
 
-            return Embed.WithThumbnailUrl(BotConfiguration.ThumbnailURLs[(int)Thumbnails]).WithColor(Color);
+            return Embed.WithThumbnailUrl(InitializeDependencies.BotConfiguration.ThumbnailURLs[(int)Thumbnails]).WithColor(Color);
         }
 
         /// <summary>
@@ -62,7 +60,7 @@ namespace Dexter.Extensions {
         /// <summary>
         /// The AddField method adds a field to an EmbedBuilder if a given condition is true.
         /// </summary>
-        /// <param name="Embed">The embed you wish to add the field to.</param>
+        /// <param name="Embed">The Embed you wish to add the field to.</param>
         /// <param name="Condition">The condition which must be true to add the field.</param>
         /// <param name="Name">The name of the field you wish to add.</param>
         /// <param name="Value">The description of the field you wish to add.</param>
@@ -102,5 +100,6 @@ namespace Dexter.Extensions {
 
             return Embed;
         }
+
     }
 }

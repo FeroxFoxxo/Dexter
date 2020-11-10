@@ -9,7 +9,7 @@ namespace Dexter.Commands {
         private readonly SuggestionDB SuggestionDB;
         private readonly SuggestionService SuggestionService;
 
-        public SuggestionCommands(SuggestionDB _SuggestionDB, SuggestionService _SuggestionService, BotConfiguration BotConfiguration) : base (BotConfiguration) {
+        public SuggestionCommands(SuggestionDB _SuggestionDB, SuggestionService _SuggestionService) {
             SuggestionDB = _SuggestionDB;
             SuggestionService = _SuggestionService;
         }

@@ -14,7 +14,7 @@ namespace Dexter.Commands {
         [Alias("helpme", "pleasehelp", "how2use", "howtouse")]
         public async Task HelpCommand() {
             EmbedBuilder Embed = BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"Hiya, I'm {BotConfiguration.Bot_Name}~! Here's a list of modules and commands you can use!")
+                .WithTitle($"Hiya, I'm {Context.Client.CurrentUser.Username}~! Here's a list of modules and commands you can use!")
                 .WithDescription($"Use {BotConfiguration.Prefix}help [commandName] to show information about a command!");
 
             foreach (ModuleInfo Module in CommandService.Modules) {

@@ -32,9 +32,8 @@ namespace Dexter.Services {
         /// <param name="LoggingService">The LoggingService instance, which we use to log information on the currently enabled modules for use when we start up.</param>
         /// <param name="Services">The ServiceProvider, which contains references to all the classes that have been specified through recursion, more specifically the CommandModule classes.</param>
         /// <param name="ConfigurationDB">An instance of the ConfigurationDB, which keeps track of enabled and disabled commands.</param>
-        /// <param name="BotConfiguration">The BotConfiguration, which is given to the base method for use when needed to create a generic embed.</param>
         public ModuleService(DiscordSocketClient Client, CommandService CommandService, LoggingService LoggingService,
-                IServiceProvider Services, ConfigurationDB ConfigurationDB, BotConfiguration BotConfiguration) : base (BotConfiguration) {
+                IServiceProvider Services, ConfigurationDB ConfigurationDB) {
             this.Client = Client;
             this.CommandService = CommandService;
             this.LoggingService = LoggingService;
@@ -65,7 +64,7 @@ namespace Dexter.Services {
             string[] EssentialModules = GetModuleTypes().Where(Module => Module.IsDefined(typeof(EssentialModuleAttribute))).Select(Module => Module.Name.Sanitize()).ToArray();
 
             // Check for configs not in project but in database.
-            foreach (Config Configuration in ConfigurationDB.Configurations.ToArray())
+            foreach (Configuration Configuration in ConfigurationDB.Configurations.ToArray())
                 if (GetModuleTypeByName(Configuration.ConfigurationName) == null) {
                     ConfigurationDB.Configurations.Remove(Configuration);
                     await ConfigurationDB.SaveChangesAsync();
@@ -76,18 +75,18 @@ namespace Dexter.Services {
                 string TypeName = Type.Name.Sanitize();
 
                 if (ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationName == TypeName).FirstOrDefault() == null) {
-                    ConfigurationDB.Configurations.Add(new Config() {
+                    ConfigurationDB.Configurations.Add(new Configuration() {
                         ConfigurationName = TypeName,
-                        ConfigurationType = ConfigrationType.Disabled
+                        ConfigurationType = ConfigurationType.Disabled
                     });
                     await ConfigurationDB.SaveChangesAsync();
                 }
             }
 
             // Check for attribute set in database not matching project.
-            foreach (Config Configuration in ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == ConfigrationType.Essential).ToArray())
+            foreach (Configuration Configuration in ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == ConfigurationType.Essential).ToArray())
                 if (!EssentialModules.Contains(Configuration.ConfigurationName)) {
-                    Configuration.ConfigurationType = ConfigrationType.Disabled;
+                    Configuration.ConfigurationType = ConfigurationType.Disabled;
                     await ConfigurationDB.SaveChangesAsync();
                 }
 
@@ -95,29 +94,29 @@ namespace Dexter.Services {
             foreach (Type Type in GetModuleTypes().Where(Module => Module.IsDefined(typeof(EssentialModuleAttribute)))) {
                 string TypeName = Type.Name.Sanitize();
 
-                Config Config = ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationName == TypeName).FirstOrDefault();
+                Configuration Config = ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationName == TypeName).FirstOrDefault();
 
-                if (Config.ConfigurationType != ConfigrationType.Essential) {
-                    Config.ConfigurationType = ConfigrationType.Essential;
+                if (Config.ConfigurationType != ConfigurationType.Essential) {
+                    Config.ConfigurationType = ConfigurationType.Essential;
                     await ConfigurationDB.SaveChangesAsync();
                 }
             }
 
             // Loop through all enabled or essential modules.
-            foreach (Config Configuration in ConfigurationDB.Configurations.ToArray())
+            foreach (Configuration Configuration in ConfigurationDB.Configurations.ToArray())
                 switch (Configuration.ConfigurationType) {
-                    case ConfigrationType.Enabled:
+                    case ConfigurationType.Enabled:
                         await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), Services);
                         Others++;
                         break;
-                    case ConfigrationType.Essential:
+                    case ConfigurationType.Essential:
                         await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), Services);
                         Essentials++;
                         break;
                 }
 
             // Logs the number of currently enabled modules to the console.
-            await LoggingService.LogMessageAsync(
+            await LoggingService.TryLogMessage(
                 new LogMessage(LogSeverity.Info, "Modules", $"Initialized the module service with {Essentials} essential module(s) and {Others} other module(s).")
             );
         }
@@ -127,7 +126,7 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="Type">The type of the modules you would like to return in a string array - either essential, enabled or disabled.</param>
         /// <returns>Returns an array of strings containing the name of the module that has type ConfigurationType.</returns>
-        public string[] GetModules(ConfigrationType Type) {
+        public string[] GetModules(ConfigurationType Type) {
             return ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == Type).Select(Configuration => Configuration.ConfigurationName).ToArray();
         }
 
@@ -137,7 +136,7 @@ namespace Dexter.Services {
         /// <param name="ModuleName">The name of the module you'd like to check for in the database.</param>
         /// <returns>Whether or not the module is, in fact, enabled or not.</returns>
         public bool GetModuleState(string ModuleName) {
-            return ConfigurationDB.Configurations.AsQueryable().Where(Module => Module.ConfigurationName == ModuleName).FirstOrDefault().ConfigurationType != ConfigrationType.Disabled;
+            return ConfigurationDB.Configurations.AsQueryable().Where(Module => Module.ConfigurationName == ModuleName).FirstOrDefault().ConfigurationType != ConfigurationType.Disabled;
         }
 
         /// <summary>
@@ -147,7 +146,7 @@ namespace Dexter.Services {
         /// <param name="IsEnabed">A boolean of whether or not the module should be enabled.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
         public async Task SetModuleState(string ModuleName, bool IsEnabed) {
-            ConfigurationDB.Configurations.AsQueryable().Where(Module => Module.ConfigurationName == ModuleName).FirstOrDefault().ConfigurationType = IsEnabed ? ConfigrationType.Enabled : ConfigrationType.Disabled;
+            ConfigurationDB.Configurations.AsQueryable().Where(Module => Module.ConfigurationName == ModuleName).FirstOrDefault().ConfigurationType = IsEnabed ? ConfigurationType.Enabled : ConfigurationType.Disabled;
             await ConfigurationDB.SaveChangesAsync();
 
             if (IsEnabed)

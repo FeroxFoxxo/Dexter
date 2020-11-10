@@ -30,9 +30,8 @@ namespace Dexter.Services {
         /// <param name="Client">An instance of the DiscordSocketClient, which is used to hook into events like the MessageRecieved, ReactionAdd and ReactionRemoved events.</param>
         /// <param name="SuggestionConfiguration">The SuggestionConfiguration, which contains the location of the emoji storage guild, as well as IDs of channels.</param>
         /// <param name="SuggestionDB">An instance of the SuggestionDB, which is used as a storage for the suggestions.</param>
-        /// <param name="BotConfiguration">The BotConfiguration, which is given to the base method for use when needed to create a generic embed.</param>
         public SuggestionService(DiscordSocketClient Client, SuggestionConfiguration SuggestionConfiguration,
-                SuggestionDB SuggestionDB, BotConfiguration BotConfiguration) : base (BotConfiguration) {
+                SuggestionDB SuggestionDB) {
 
             this.Client = Client;
             this.SuggestionConfiguration = SuggestionConfiguration;

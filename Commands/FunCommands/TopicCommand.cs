@@ -23,7 +23,7 @@ namespace Dexter.Commands {
 
             await BuildEmbed(EmojiEnum.Sign)
                 .WithAuthor(Context.Message.Author)
-                .WithTitle($"{BotConfiguration.Bot_Name} Asks")
+                .WithTitle($"{Context.Client.CurrentUser.Username} Asks")
                 .WithDescription(Question.Value)
                 .WithFooter($"Topic Written by {Question.Key}")
                 .SendEmbed(Context.Channel);

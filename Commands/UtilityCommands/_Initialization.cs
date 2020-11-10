@@ -9,7 +9,7 @@ namespace Dexter.Commands {
 
         private readonly BotConfiguration BotConfiguration;
 
-        public UtilityCommands(BotConfiguration _BotConfiguration, LoggingService _LoggingService) : base (_BotConfiguration) {
+        public UtilityCommands(BotConfiguration _BotConfiguration, LoggingService _LoggingService) {
             BotConfiguration = _BotConfiguration;
             LoggingService = _LoggingService;
         }

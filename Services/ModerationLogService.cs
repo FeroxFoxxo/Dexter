@@ -24,8 +24,7 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="Client">The current instance of the DiscordSocketClient, which is used to hook into the ReactionRemoved delegate.</param>
         /// <param name="ModerationConfiguration">The instance of the ModerationLogService, which is used to find and create the moderation logs webhook.</param>
-        /// <param name="BotConfiguration">The BotConfiguration, which is given to the base method for use when needed to create a generic embed.</param>
-        public ModerationLogService(DiscordSocketClient Client, ModerationConfiguration ModerationConfiguration, BotConfiguration BotConfiguration) : base (BotConfiguration) {
+        public ModerationLogService(DiscordSocketClient Client, ModerationConfiguration ModerationConfiguration) {
             this.ModerationConfiguration = ModerationConfiguration;
             this.Client = Client;
 

@@ -20,9 +20,14 @@ namespace Dexter {
     public static class InitializeDependencies {
 
         /// <summary>
-        /// The current version of Dexter, specified in the format X.X.X.
+        /// The current version of the bot, specified in the format X.X.X.
         /// </summary>
         public static string Version { get; private set; }
+
+        /// <summary>
+        /// The instance of the BotConfiguration, which is used for various things like embed building.
+        /// </summary>
+        public static BotConfiguration BotConfiguration { get; private set; }
 
         /// <summary>
         /// The Main method is the entrance to the program. Arguments can be added to this method and supplied
@@ -35,6 +40,11 @@ namespace Dexter {
         public static async Task Main(string Token, int Version, string WorkingDirectory) {
             // Set title to "Starting..."
             Console.Title = "Starting...";
+
+            // Draws "STARTING..." in the color of cyan.
+            Console.ForegroundColor = ConsoleColor.Cyan;
+
+            await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render("Starting..."));
 
             // Sets the version based on the release pipeline version.
             string Versioning = Math.Round(Convert.ToSingle(Version) / 100 - .001, 2).ToString();
@@ -98,16 +108,6 @@ namespace Dexter {
             
             // Builds the service collection to the provider.
             ServiceProvider Services = ServiceCollection.BuildServiceProvider();
-
-            // Sets the title of the console to be the name of the bot, the version of the bot, and the version of Discord.NET.
-            BotConfiguration BotConfiguration = Services.GetRequiredService<BotConfiguration>();
-
-            Console.Title = $"{BotConfiguration.Bot_Name} v{InitializeDependencies.Version} (Discord.Net v{DiscordConfig.Version})";
-
-            // Draws the name of the bot to the screen in the color of cyan.
-            Console.ForegroundColor = ConsoleColor.Cyan;
-
-            await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(BotConfiguration.Bot_Name));
 
             // Makes sure all entity databases exist and are created if they do not.
             Assembly.GetExecutingAssembly().GetTypes()

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Services {
+
     /// <summary>
     /// The ModerationLog Service deals with logging certain events to a channel.
     /// Currently, this only includes the logging of reactions to the channel.
@@ -15,7 +16,9 @@ namespace Dexter.Services {
     public class ModerationLogService : InitializableModule {
 
         private readonly ModerationConfiguration ModerationConfiguration;
+
         private readonly DiscordSocketClient Client;
+
         private readonly DiscordWebhookClient Webhook;
 
         /// <summary>
@@ -68,4 +71,5 @@ namespace Dexter.Services {
         }
 
     }
+
 }

@@ -1,7 +1,6 @@
 ﻿using Dexter.Configurations;
 using Dexter.Abstractions;
 using Dexter.Services;
-using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Figgle;

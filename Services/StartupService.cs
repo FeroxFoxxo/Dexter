@@ -9,6 +9,7 @@ using System;
 using Figgle;
 
 namespace Dexter.Services {
+
     /// <summary>
     /// The Startup Serivce module applies the token for the bot, as well as running the bot once all dependencies have loaded up.
     /// Furthermore, it logs and sends a message to the moderation channel when it does start up, including various information
@@ -17,7 +18,9 @@ namespace Dexter.Services {
     public class StartupService : InitializableModule {
 
         private readonly DiscordSocketClient DiscordSocketClient;
+
         private readonly LoggingService LoggingService;
+
         private readonly BotConfiguration BotConfiguration;
 
         /// <summary>
@@ -98,4 +101,5 @@ namespace Dexter.Services {
         }
 
     }
+
 }

@@ -1,4 +1,5 @@
 ﻿namespace Dexter.Enums {
+
     /// <summary>
     /// The EmojiEnum specifies the type of Embed you wish to be genereated by the builder.
     /// </summary>
@@ -30,4 +31,5 @@
         Sign
 
     }
+
 }

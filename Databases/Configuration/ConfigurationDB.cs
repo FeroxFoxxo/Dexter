@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 
 namespace Dexter.Databases.Configuration {
+
     /// <summary>
     /// The ConfigurationDB contains a set of configurations of whether a module has been enabled or disabled.
     /// </summary>
@@ -13,4 +14,5 @@ namespace Dexter.Databases.Configuration {
         public DbSet<Configuration> Configurations { get; set; }
 
     }
+
 }

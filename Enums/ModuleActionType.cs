@@ -1,4 +1,5 @@
 ﻿namespace Dexter.Enums {
+
     /// <summary>
     /// An enum of the types of actions you can run through the ~module command.
     /// </summary>
@@ -20,4 +21,5 @@
         Status
 
     }
+
 }

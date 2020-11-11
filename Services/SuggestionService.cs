@@ -12,15 +12,20 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Services {
+
     /// <summary>
     /// The Suggestion service, which is used to create and update suggestions on the change of a reaction.
     /// </summary>
     public class SuggestionService : InitializableModule {
 
         private readonly DiscordSocketClient Client;
+
         private readonly SuggestionConfiguration SuggestionConfiguration;
+
         private readonly SuggestionDB SuggestionDB;
+
         private readonly string RandomCharacters;
+
         private readonly Random Random;
 
         /// <summary>
@@ -187,7 +192,7 @@ namespace Dexter.Services {
                     await UpdateSuggestion(Suggested, SuggestionStatus.Pending);
 
                     // Create a new embed in the staff suggestions channel of the current suggestion.
-                    RestUserMessage StaffSuggestion = await Client.GetGuild(SuggestionConfiguration.SuggestionGuild)
+                    RestUserMessage StaffSuggestion = await (Message.Channel as SocketGuildChannel).Guild
                         .GetTextChannel(SuggestionConfiguration.StaffSuggestionsChannel)
                         .SendMessageAsync(embed: BuildSuggestion(Suggested).Build());
 
@@ -347,4 +352,5 @@ namespace Dexter.Services {
         }
 
     }
+
 }

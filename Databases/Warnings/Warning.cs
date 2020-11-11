@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.Warnings {
+
     /// <summary>
     /// The Warning class contains information on a warning, such as the ID, issuer, user and reason.
     /// It is stored in the WarningsDB and can be pulled from its related Warnings DBSet.
@@ -40,4 +41,5 @@ namespace Dexter.Databases.Warnings {
         public long TimeOfIssue { get; set; }
 
     }
+
 }

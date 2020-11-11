@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace Dexter.Databases.CustomCommands {
+
     /// <summary>
     /// The CustomCommandDB contains a set of custom commands that the bot will reply with once a command has been run.
     /// </summary>
@@ -26,4 +27,5 @@ namespace Dexter.Databases.CustomCommands {
         }
 
     }
+
 }

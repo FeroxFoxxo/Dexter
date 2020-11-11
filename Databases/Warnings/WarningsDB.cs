@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace Dexter.Databases.Warnings {
+
     /// <summary>
     /// The WarningsDB contains a set of warnings, issued by a moderator, when a user has been warned in chat.
     /// </summary>
@@ -25,4 +26,5 @@ namespace Dexter.Databases.Warnings {
             .ToArray();
 
     }
+
 }

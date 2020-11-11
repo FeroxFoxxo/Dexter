@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 
 namespace Dexter.Extensions {
+
     /// <summary>
     /// The User Extensions class offers a variety of different extensions that can be applied to user to return specific attributes.
     /// </summary>
@@ -37,4 +38,5 @@ namespace Dexter.Extensions {
         }
 
     }
+
 }

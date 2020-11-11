@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 
 namespace Dexter.Extensions {
+
     /// <summary>
     /// The String Extensions class offers a variety of different extensions that can be applied to a string to modify it.
     /// These include the prettify, sanitize and markdown extensions.
@@ -36,4 +37,5 @@ namespace Dexter.Extensions {
         }
 
     }
+
 }

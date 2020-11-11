@@ -56,4 +56,5 @@ namespace Dexter.Configurations {
         public bool EnableStartupAlert { get; set; }
 
     }
+
 }

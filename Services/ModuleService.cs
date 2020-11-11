@@ -9,9 +9,9 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Dexter.Extensions;
 using Discord.WebSocket;
-using Dexter.Configurations;
 
 namespace Dexter.Services {
+
     /// <summary>
     /// The Module service adds all the modules that have been specified as enabled to the command service, aswell as all essential moodules.
     /// It does this through a database dedicated to keeping track of the status of modules, looping through it and setting them respectively.
@@ -19,9 +19,13 @@ namespace Dexter.Services {
     public class ModuleService : InitializableModule {
 
         private readonly DiscordSocketClient Client;
+
         private readonly LoggingService LoggingService;
+
         private readonly CommandService CommandService;
+
         private readonly IServiceProvider Services;
+
         private readonly ConfigurationDB ConfigurationDB;
 
         /// <summary>
@@ -189,4 +193,5 @@ namespace Dexter.Services {
         public static Type GetModuleTypeByName(string ModuleName)
             => GetModuleTypes().FirstOrDefault(Module => string.Equals(Module.Name.Sanitize(), ModuleName, StringComparison.InvariantCultureIgnoreCase));
     }
+
 }

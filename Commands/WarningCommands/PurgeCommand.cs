@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 namespace Dexter.Commands {
     public partial class WarningCommands {
 
-        /*
         [Command("purgewarns")]
         [Summary("Removes all warnings from a user [CONFIRMATION]")]
         [RequireAdministrator]
@@ -87,6 +86,6 @@ namespace Dexter.Commands {
             else
                 return RandomizedToken;
         }
-        */
+
     }
 }

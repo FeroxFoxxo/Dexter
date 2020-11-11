@@ -8,6 +8,7 @@ using System.IO;
 using System.Threading.Tasks;
 
 namespace Dexter.Services {
+
     /// <summary>
     /// The LoggingService is used to log messages from both the DiscordSocketClient and CommandService
     /// to the console and logging file for debugging purposes.
@@ -15,6 +16,7 @@ namespace Dexter.Services {
     public class LoggingService : InitializableModule {
 
         private readonly DiscordSocketClient Client;
+
         private readonly CommandService Commands;
 
         private string LogDirectory { get; }
@@ -130,4 +132,5 @@ namespace Dexter.Services {
         }
 
     }
+
 }

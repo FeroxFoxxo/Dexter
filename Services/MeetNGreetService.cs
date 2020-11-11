@@ -7,6 +7,7 @@ using Discord.WebSocket;
 using System.Threading.Tasks;
 
 namespace Dexter.Services {
+
     /// <summary>
     /// The MeetNGreet service is used to log messages that have been updated and deleted from the MeetNGreet channel.
     /// It does this through creating a webhook and sending to that very webhook each time an event runs.
@@ -14,7 +15,9 @@ namespace Dexter.Services {
     public class MeetNGreetService : InitializableModule {
 
         private readonly DiscordSocketClient Client;
+
         private readonly MNGConfiguration MNGConfig;
+
         private readonly DiscordWebhookClient Webhook;
 
         /// <summary>
@@ -102,4 +105,5 @@ namespace Dexter.Services {
         }
 
     }
+
 }

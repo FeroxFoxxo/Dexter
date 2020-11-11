@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Services {
+
     /// <summary>
     /// The CommandHandlerService deals with invoking the command and the errors that may occur as a result.
     /// It filters the command to see if the user is not a bot and that it has the prefix set in the
@@ -159,5 +160,7 @@ namespace Dexter.Services {
                     break;
             }
         }
+
     }
+
 }

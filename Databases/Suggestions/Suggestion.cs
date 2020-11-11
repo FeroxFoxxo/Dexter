@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.Suggestions {
+
     /// <summary>
     /// The Suggestion class contains information on a suggested proposal, including an automatically
     /// generated alphanumeric tracker as its key, the ID of the suggestor, the reason, content, status
@@ -52,4 +53,5 @@ namespace Dexter.Databases.Suggestions {
         public string Expiry { get; set; }
 
     }
+
 }

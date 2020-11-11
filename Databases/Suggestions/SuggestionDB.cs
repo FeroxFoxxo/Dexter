@@ -3,8 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace Dexter.Databases.Suggestions {
+
     /// <summary>
-    /// The SuggestionDB contains a set of suggestions proposed by a user through the #suggestion(s) channel.
+    /// The SuggestionDB contains a set of suggestions proposed by a user through the #suggestions channel.
     /// </summary>
     public class SuggestionDB : EntityDatabase {
 
@@ -26,4 +27,5 @@ namespace Dexter.Databases.Suggestions {
         }
 
     }
+
 }

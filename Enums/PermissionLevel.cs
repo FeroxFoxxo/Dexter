@@ -1,4 +1,5 @@
 ﻿namespace Dexter.Enums {
+
     /// <summary>
     /// An enum of the types of the different permission levels a user can have.
     /// </summary>
@@ -20,4 +21,5 @@
         Administrator
 
     }
+
 }

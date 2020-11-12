@@ -16,9 +16,7 @@
 <p align="center">
     <a href="#built-with">Libraries</a> •
     <a href="#commemorations">Commemorations</a> •
-    <a href="https://github.com/Frostrix/Dexter/blob/master/LICENSE">License</a> •
-    <a href="https://github.com/Frostrix/Dexter/blob/master/.github/CODE_OF_CONDUCT.md">Code of Conduct</a> •
-    <a href="https://github.com/Frostrix/Dexter/blob/master/.github/CONTRIBUTING.md">Contributing</a>
+    <a href="https://github.com/Frostrix/Dexter/blob/master/LICENSE">License</a>
 </p>
 
 ## Built With

@@ -3,7 +3,7 @@
 namespace Dexter.Databases.CustomCommands {
 
     /// <summary>
-    /// The Suggestion class contains information on a custom command, including its name,
+    /// The CustomCommand class contains information on a custom command, including its name,
     /// the reply it gives, and its possible aliases of sorts.
     /// </summary>
     public class CustomCommand {

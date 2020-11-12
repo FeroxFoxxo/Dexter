@@ -78,14 +78,5 @@ namespace Dexter.Commands {
                 .SendEmbed(Context.Channel);
         }
 
-        private string Token() {
-            string RandomizedToken = new string(Enumerable.Repeat(RandomizedCharacters, 8).Select(Token => Token[Random.Next(Token.Length)]).ToArray());
-
-            if (WarningsDB.PurgeConfirmations.AsQueryable().Where(Purge => Purge.Token == RandomizedToken).FirstOrDefault() != null)
-                return Token();
-            else
-                return RandomizedToken;
-        }
-
     }
 }

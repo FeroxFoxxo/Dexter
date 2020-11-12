@@ -1,9 +1,8 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Databases.FunTopics;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
@@ -14,19 +13,13 @@ namespace Dexter.Commands {
         [Alias("would you rather", "would_you_rather", "wouldyourather")]
 
         public async Task WYRCommand() {
-            List<KeyValuePair<string, string>> NameQuestionDictionary = new List<KeyValuePair<string, string>>();
-
-            foreach (KeyValuePair<string, string[]> PairsOfQuestions in FunConfiguration.WouldYouRather)
-                foreach (string PairedWYR in PairsOfQuestions.Value)
-                    NameQuestionDictionary.Add(new KeyValuePair<string, string>(PairsOfQuestions.Key, PairedWYR));
-
-            KeyValuePair<string, string> Question = NameQuestionDictionary[new Random().Next(NameQuestionDictionary.Count)];
+            FunTopic Topic = await FunTopicsDB.WouldYouRather.GetRandomTopic();
 
             await BuildEmbed(EmojiEnum.Sign)
                 .WithAuthor(Context.Message.Author)
                 .WithTitle($"{Context.Client.CurrentUser.Username} Asks")
-                .WithDescription(Question.Value)
-                .WithFooter($"Would You Rather Written by {Question.Key}")
+                .WithDescription(Topic.Topic)
+                .WithFooter($"Would You Rather Written by {Client.GetUser(Topic.ProposerID).Username}")
                 .SendEmbed(Context.Channel);
         }
 

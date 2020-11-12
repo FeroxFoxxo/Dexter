@@ -18,28 +18,34 @@ namespace Dexter.Services {
 
         private readonly MNGConfiguration MNGConfig;
 
-        private readonly DiscordWebhookClient Webhook;
+        private DiscordWebhookClient Webhook;
 
         /// <summary>
         /// The constructor for the MeetNGreetService module. This takes in the injected dependencies and sets them as per what the class requires.
-        /// The constructor also creates the MeetNGreet webhook if it doesn't exist already in the MeetNGreet logs channel.
         /// </summary>
         /// <param name="Client">The instance of the client, which is used to hook into the API.</param>
         /// <param name="MNGConfig">The instance of the MNGConfiguration, which is used to find and create the MNG webhook.</param>
         public MeetNGreetService(DiscordSocketClient Client, MNGConfiguration MNGConfig) {
             this.Client = Client;
             this.MNGConfig = MNGConfig;
-            
-            if(!string.IsNullOrEmpty(MNGConfig.MeetNGreetWebhookURL))
-                Webhook = new DiscordWebhookClient(MNGConfig.MeetNGreetWebhookURL);
         }
 
         /// <summary>
         /// The AddDelegates method adds the MessageDeleted and MessageUpdated hooks into their respective MNG check methods.
+        /// It also hooks the ready event to the CreateWebhook delegate.
         /// </summary>
         public override void AddDelegates() {
             Client.MessageDeleted += MNGMessageDeleted;
             Client.MessageUpdated += MNGMessageUpdated;
+            Client.Ready += CreateWebhook;
+        }
+
+        /// <summary>
+        /// The Create Webhook method runs on Ready and is what initializes our webhook.
+        /// </summary>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        public async Task CreateWebhook() {
+            Webhook = await Client.CreateOrGetWebhook(MNGConfig.WebhookChannel, MNGConfig.WebhookName);
         }
 
         /// <summary>

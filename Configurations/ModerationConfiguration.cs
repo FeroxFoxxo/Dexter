@@ -13,6 +13,16 @@ namespace Dexter.Configurations {
         /// </summary>
         public ulong[] DisabledReactionChannels { get; set; }
 
+        /// <summary>
+        /// The WEBHOOK CHANNEL specifies the snowflake ID of the channel in which the moderation channel shall log to.
+        /// </summary>
+        public ulong WebhookChannel { get; set; }
+
+        /// <summary>
+        /// The WEBHOOK NAME specifies the name of the webhook that will be instantiated in the given moderation channel. 
+        /// </summary>
+        public string WebhookName { get; set; }
+
     }
 
 }

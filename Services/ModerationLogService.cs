@@ -19,7 +19,7 @@ namespace Dexter.Services {
 
         private readonly DiscordSocketClient Client;
 
-        private readonly DiscordWebhookClient Webhook;
+        private DiscordWebhookClient Webhook;
 
         /// <summary>
         /// The constructor for the ModerationLogService module. This takes in the injected dependencies and sets them as per what the class requires.
@@ -30,16 +30,23 @@ namespace Dexter.Services {
         public ModerationLogService(DiscordSocketClient Client, ModerationConfiguration ModerationConfiguration) {
             this.ModerationConfiguration = ModerationConfiguration;
             this.Client = Client;
-
-            if (!string.IsNullOrEmpty(ModerationConfiguration.ModerationWebhookURL))
-                Webhook = new DiscordWebhookClient(ModerationConfiguration.ModerationWebhookURL);
         }
 
         /// <summary>
         /// The AddDelegates method adds the ReactionRemoved hook to the ReactionRemovedLog method.
+        /// It also hooks the ready event to the CreateWebhook delegate.
         /// </summary>
         public override void AddDelegates() {
             Client.ReactionRemoved += ReactionRemovedLog;
+            Client.Ready += CreateWebhook;
+        }
+
+        /// <summary>
+        /// The Create Webhook method runs on Ready and is what initializes our webhook.
+        /// </summary>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        public async Task CreateWebhook() {
+            Webhook = await Client.CreateOrGetWebhook(ModerationConfiguration.WebhookChannel, ModerationConfiguration.WebhookName);
         }
 
         /// <summary>

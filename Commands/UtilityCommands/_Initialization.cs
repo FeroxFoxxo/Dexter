@@ -6,7 +6,6 @@ namespace Dexter.Commands {
     public partial class UtilityCommands : DiscordModule {
 
         private readonly LoggingService LoggingService;
-
         private readonly BotConfiguration BotConfiguration;
 
         public UtilityCommands(BotConfiguration _BotConfiguration, LoggingService _LoggingService) {

@@ -60,9 +60,11 @@ namespace Dexter.Services {
         }
 
         /// <summary>
-        /// The HandleCommandAsync runs on MessageReceived and will check for if the message has the bot's prefix, if the author is a bot and if we're in a guild, if so - execute!
+        /// The HandleCommandAsync runs on MessageReceived and will check for if the message has the bot's prefix,
+        /// if the author is a bot and if we're in a guild, if so - execute!
         /// </summary>
-        /// <param name="SocketMessage">The SocketMessage event is given as a parameter of MessageRecieved and is used to find and execute the command if the parameters have been met.</param>
+        /// <param name="SocketMessage">The SocketMessage event is given as a parameter of MessageRecieved and
+        /// is used to find and execute the command if the parameters have been met.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
         public async Task HandleCommandAsync(SocketMessage SocketMessage) {
             if (SocketMessage is not SocketUserMessage Message)
@@ -79,7 +81,8 @@ namespace Dexter.Services {
                 if (!Message.Author.IsBot)
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle($"{Client.CurrentUser.Username} is not avaliable in DMs!")
-                        .WithDescription($"Heya! I'm not avaliable in DMs at the moment, please use {Client.GetGuild(BotConfiguration.GuildID).Name} to communicate with me!")
+                        .WithDescription($"Heya! I'm not avaliable in DMs at the moment, " +
+                            $"please use {Client.GetGuild(BotConfiguration.GuildID).Name} to communicate with me!")
                         .SendEmbed(Message.Channel);
                 return;
             }

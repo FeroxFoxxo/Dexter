@@ -1,14 +1,18 @@
-# Dexter .NET
+<h1 align="center" style="position: relative;">
+  <img src="https://us-furries.com/Dexter/DexLove.png" width="200" style="border-radius: 50%;" align="center">
+  <br>
+  Dexter .NET
+</h1>
 
-[![Build Status](https://dev.azure.com/frostrixz/Dexter/_apis/build/status/Frostrix.Dexter?branchName=master)](https://dev.azure.com/frostrixz/Dexter/_build/latest?definitionId=2&branchName=master)&nbsp;
-[![All Contributors](https://img.shields.io/badge/All_Contributors-1-default.svg?style=flat&logo=github)](https://github.com/Frostrix/Dexter)&nbsp;
-[![GPLv3](https://img.shields.io/badge/License-GNU&nbsp;GPL&nbsp;Version&nbsp;3-blue.svg?style=flat&logo=gnu)](https://github.com/Frostrix/Dexter/blob/master/LICENSE)
+<h3 align="center">The official USFurries Discord bot!</h3>
+<h4 align="center">Contains tools to moderate the server and to create a better user experience overall!</h4>
 
-💙 **Dexter** is a bot for use in the server [**USFurries**](https://discord.gg/USFurries). Visit the website [**here**](https://us-furries.com).
+<p align="center">
+    <img alt="Discord" src="https://img.shields.io/discord/336243033416794118?color=%237289DA&label=Discord">
+    <img alt="Azure Pipelines" src="https://dev.azure.com/frostrixz/Dexter/_apis/build/status/Frostrix.Dexter?branchName=master">
+    <img alt="GitHub" src="https://img.shields.io/github/license/Frostrix/Dexter?label=License">
+</p>
 
-**Built With:**
+## Built With:
 - [.NET 5.0](https://dotnet.microsoft.com/download/dotnet/5.0)
 - [Discord.NET](https://github.com/discord-net/Discord.Net)
-
-**License:**
-- This project is licensed under the GNU GPL Version 3 License - see the [LICENSE](https://github.com/Frostrix/Dexter/blob/master/LICENSE) file for details.

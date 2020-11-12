@@ -13,6 +13,19 @@
     <img alt="GitHub" src="https://img.shields.io/github/license/Frostrix/Dexter?label=License">
 </p>
 
-## Built With:
+<p align="center">
+    <a href="#built-with">Libraries</a> •
+    <a href="#commemorations">Commemorations</a> •
+    <a href="https://github.com/Frostrix/Dexter/blob/master/LICENSE">License</a> •
+    <a href="https://github.com/Frostrix/Dexter/blob/master/.github/CODE_OF_CONDUCT.md">Code of Conduct</a> •
+    <a href="https://github.com/Frostrix/Dexter/blob/master/.github/CONTRIBUTING.md">Contributing</a>
+</p>
+
+## Built With
 - [.NET 5.0](https://dotnet.microsoft.com/download/dotnet/5.0)
 - [Discord.NET](https://github.com/discord-net/Discord.Net)
+
+## Commemorations
+This bot is loosely based off of the bot from the guys over at [Brackeys Bot](https://github.com/YilianSource/brackeys-bot). Although many key components of the bot have been changed to meet our own purposes, such as databases using Entity Framework Core and having switched from YAML to using Newtonsoft JSON serializer, this bot was a great learning resource.
+
+This bot is also an adaption from our previous version of Dexter, written in JavaScript by [Jakey Floofle](https://github.com/Jakey-F). As such, many of commands have been adaptions from their original sources.

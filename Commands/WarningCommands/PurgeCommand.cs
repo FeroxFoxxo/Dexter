@@ -1,5 +1,4 @@
-﻿using Dexter.Attributes;
-using Dexter.Enums;
+﻿using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Databases.Warnings;
 using Discord;
@@ -10,8 +9,6 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
 using Discord.Net;
-using Microsoft.Extensions.DependencyInjection;
-using Humanizer;
 
 namespace Dexter.Commands {
     public partial class WarningCommands {
@@ -52,6 +49,7 @@ namespace Dexter.Commands {
         ///     UserID = Specifies the UserID who will have their warnings purged.
         /// </param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task PurgeWarningsCallback(Dictionary<string, string> CallbackInformation) {
             ulong UserID = Convert.ToUInt64(CallbackInformation["UserID"]);
 

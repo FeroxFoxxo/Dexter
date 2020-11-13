@@ -39,7 +39,7 @@ namespace Dexter.Attributes {
         /// <param name="Services">The Services are used to find the role IDs to get the permission level of the user from the BotConfiguration.</param>
         /// <returns></returns>
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext Context, CommandInfo Command, IServiceProvider Services) {
-            return Task.FromResult((Context.User as IGuildUser).GetPermissionLevel(Services.GetRequiredService<BotConfiguration>()) >= Level
+            return Task.FromResult((Context.User as IGuildUser).GetPermissionLevel(InitializeDependencies.BotConfiguration) >= Level
                 ? PreconditionResult.FromSuccess()
                 : PreconditionResult.FromError($"Haiya! To run the {Command.Name} command you need to have the " +
                 $"{Level} role! Are you sure you're a {Level.ToString().ToLower()}? <3"));

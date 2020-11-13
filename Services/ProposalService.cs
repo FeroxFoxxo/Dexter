@@ -37,6 +37,8 @@ namespace Dexter.Services {
 
         private readonly Random Random;
 
+        private readonly IServiceProvider Services;
+
         /// <summary>
         /// The constructor for the ProposalService module. This takes in the injected dependencies and sets them as per what the class requires.
         /// It also creates the list of random characters and a new instance of the Random class, which can be used to randomly generate a token.
@@ -45,11 +47,12 @@ namespace Dexter.Services {
         /// <param name="BotConfiguration">The BotConfiguration is where the ID for the admin confirmation panel is found.</param>
         /// <param name="ProposalConfiguration">The ProposalConfiguration, which contains the location of the emoji storage guild, as well as IDs of channels.</param>
         /// <param name="ProposalDB">An instance of the ProposalDB, which is used as a storage for the proposals.</param>
-        public ProposalService(DiscordSocketClient Client, BotConfiguration BotConfiguration, ProposalConfiguration ProposalConfiguration, ProposalDB ProposalDB) {
+        public ProposalService(DiscordSocketClient Client, BotConfiguration BotConfiguration, ProposalConfiguration ProposalConfiguration, ProposalDB ProposalDB, IServiceProvider Services) {
             this.Client = Client;
             this.BotConfiguration = BotConfiguration;
             this.ProposalConfiguration = ProposalConfiguration;
             this.ProposalDB = ProposalDB;
+            this.Services = Services;
 
             RandomCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             Random = new Random();
@@ -393,7 +396,7 @@ namespace Dexter.Services {
 
                         Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Confirmation.CallbackParameters);
                         Type Class = Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.Name.Equals(Confirmation.CallbackClass)).FirstOrDefault();
-                        Class.GetMethod(Confirmation.CallbackMethod).Invoke(InitializeDependencies.Services.GetRequiredService(Class), new object[1] { Parameters });
+                        Class.GetMethod(Confirmation.CallbackMethod).Invoke(Services.GetRequiredService(Class), new object[1] { Parameters });
                     }
 
                     break;

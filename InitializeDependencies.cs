@@ -24,9 +24,14 @@ namespace Dexter {
         public static string Version { get; private set; }
 
         /// <summary>
-        /// The instance of the ServiceProvider, which is used for various things like embed building.
+        /// The instance of the BotConfiguration, which is used for various things like embed building.
         /// </summary>
-        public static ServiceProvider Services { get; private set; }
+        public static BotConfiguration BotConfiguration { get; private set; }
+
+        /// <summary>
+        /// The instance of the ProposalService, which is used for various things like admin confirmation.
+        /// </summary>
+        public static ProposalService ProposalService { get; private set; }
 
         /// <summary>
         /// The Main method is the entrance to the program. Arguments can be added to this method and supplied
@@ -106,7 +111,11 @@ namespace Dexter {
             );
             
             // Builds the service collection to the provider.
-            Services = ServiceCollection.BuildServiceProvider();
+            ServiceProvider Services = ServiceCollection.BuildServiceProvider();
+
+            // Set our static instances.
+            BotConfiguration = Services.GetRequiredService<BotConfiguration>();
+            ProposalService = Services.GetRequiredService<ProposalService>();
 
             // Makes sure all entity databases exist and are created if they do not.
             Assembly.GetExecutingAssembly().GetTypes()

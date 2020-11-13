@@ -1,7 +1,9 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Configurations;
+using Dexter.Enums;
 using Discord;
 using Discord.Commands;
 using Discord.Webhook;
+using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -27,7 +29,7 @@ namespace Dexter.Extensions {
                 _ => Color.Magenta
             };
 
-            return Embed.WithThumbnailUrl(InitializeDependencies.BotConfiguration.ThumbnailURLs[(int)Thumbnails]).WithColor(Color);
+            return Embed.WithThumbnailUrl(InitializeDependencies.Services.GetRequiredService<BotConfiguration>().ThumbnailURLs[(int)Thumbnails]).WithColor(Color);
         }
 
         /// <summary>

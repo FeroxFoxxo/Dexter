@@ -15,7 +15,7 @@ namespace Dexter.Commands {
 
         public async Task ListModulesAsync()
             => await BuildEmbed(EmojiEnum.Love)
-                .WithTitle("Modules")
+                .WithTitle("Modules:")
                 .WithDescription($"Use `{BotConfiguration.Prefix}module enable/disable <name>` to change the state of a module!")
                 .WithFields(
                     CreateModuleListField("Enabled", ModuleService.GetModules(ConfigurationType.Enabled)),

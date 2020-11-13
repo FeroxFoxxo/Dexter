@@ -28,6 +28,7 @@ namespace Dexter.Commands {
         [Command("warnings")]
         [Summary("Returns your own, personal record of warnings.")]
         [Alias("records", "record")]
+        [BotChannel]
 
         public async Task WarningsCommand() {
             EmbedBuilder[] Embeds = GetWarnings(Context.Message.Author, false);
@@ -45,7 +46,7 @@ namespace Dexter.Commands {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to send warnings log!")
                     .WithDescription("Woa, it seems as though I'm not able to send you a log of your warnings! " +
-                        "This is usually indicitive of having DMs from the server blocked or me personally! " +
+                        "This is usually indicitive of having DMs from the server blocked or me personally. " +
                         "Please note, for the sake of transparency, we often use Dexter to notify you of events that concern you - " +
                         "so it's critical that we're able to message you through Dexter. <3")
                     .SendEmbed(Context.Channel);

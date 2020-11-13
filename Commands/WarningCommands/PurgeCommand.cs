@@ -4,78 +4,70 @@ using Dexter.Extensions;
 using Dexter.Databases.Warnings;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System;
+using Discord.Net;
+using Microsoft.Extensions.DependencyInjection;
+using Humanizer;
 
 namespace Dexter.Commands {
     public partial class WarningCommands {
 
+        /// <summary>
+        /// The Purge Warnings method runs on the PURGEWARNS command. It sends a callback to the SendForAdminApproval
+        /// method, which will put it up to be voted on by the administrators. After this has been voted on, it will
+        /// set all warnings to a revoked state and notify the user that their warnings have been removed.
+        /// </summary>
+        /// <param name="User">The user from which you wish all warnings to be cleared from.</param>
+        /// <returns></returns>
+
         [Command("purgewarns")]
-        [Summary("Removes all warnings from a user [CONFIRMATION]")]
-        [RequireAdministrator]
+        [Summary("Removes all warnings from a user.")]
 
-        public async Task PurgeWarningsCommand([Remainder] string Token) {
-            if (WarningsDB.PurgeConfirmations.AsQueryable().Where(Purge => Purge.Token == Token).FirstOrDefault() == null) {
-                await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle("Invalid Purge Confirmation")
-                    .WithDescription($"Whoops! It seems as though the purge confirmation token `{Token}` does not exist in the confirmation logs! " +
-                    $"Please triple check this is the right token <3")
-                    .SendEmbed(Context.Channel);
-
-                return;
-            }
-
-            PurgeConfirmation PurgeConfirmation = WarningsDB.PurgeConfirmations.AsQueryable().Where(Purge => Purge.Token == Token).FirstOrDefault();
-
-            WarningsDB.PurgeConfirmations.Remove(PurgeConfirmation);
-
-            int Count = WarningsDB.GetWarnings(PurgeConfirmation.User).Length;
-
-            await WarningsDB.Warnings.AsQueryable().Where(Warning => Warning.User == PurgeConfirmation.User).ForEachAsync(Warning => Warning.Type = WarningType.Revoked);
-
-            await WarningsDB.SaveChangesAsync();
-
-            SocketGuildUser User = Context.Guild.GetUser(PurgeConfirmation.User);
+        public async Task PurgeWarnings(IUser User) {
+            await SendForAdminApproval(PurgeWarningsCallback,
+                new Dictionary<string, string>() {
+                    { "UserID", User.Id.ToString() }
+                },
+                Context.Message.Author.Id,
+                $"{Context.Message.Author.Username} has proposed that the user {User.GetUserInformation()} should have all their warnings purged. " +
+                $"On approval of this command, {User.Username}'s slate will be fully cleared."
+            );
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle("Warnings Purged")
-                .WithDescription($"Heya! I've purged {Count} warnings from {(User == null ? "Unknown" : User.GetUserInformation())}.")
-                .AddField("Purged by", Context.Message.Author.GetUserInformation())
+                .WithTitle("Warnings Purge Confimation")
+                .WithDescription($"Heya! I've send the warnings purge for {User.GetUserInformation()} to the administrators for approval.")
+                .AddField("Purge instantiated by", Context.Message.Author.GetUserInformation())
                 .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
         }
 
-        [Command("purgewarns")]
-        [Summary("Removes all warnings from a user.")]
-        [RequireAdministrator]
+        /// <summary>
+        /// The PurgeWarningsCallback fires on an admin approving a purge confirmation. It sets all warnings to a revoked state.
+        /// </summary>
+        /// <param name="CallbackInformation">The callback information is a dictionary of parameters parsed to the original callback statement.
+        ///     UserID = Specifies the UserID who will have their warnings purged.
+        /// </param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        public async Task PurgeWarningsCallback(Dictionary<string, string> CallbackInformation) {
+            ulong UserID = Convert.ToUInt64(CallbackInformation["UserID"]);
 
-        public async Task PurgeWarningsCommand(IUser User) {
-            if (WarningsDB.PurgeConfirmations.AsQueryable().Where(Purge => Purge.User == User.Id).FirstOrDefault() != null) {
-                string Token = WarningsDB.PurgeConfirmations.AsQueryable().Where(Purge => Purge.User == User.Id).Select(Purge => Purge.Token).FirstOrDefault();
+            int Count = WarningsDB.GetWarnings(UserID).Length;
 
-                await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle("Token already generated!")
-                    .WithDescription($"{User.GetUserInformation()} already has a confirmation token of `{Token}`. " +
-                        $"Please re-enter this token using the command `{BotConfiguration.Prefix}purgewarns {Token}`.")
-                    .SendEmbed(Context.Channel);
-                return;
-            }
-
-            string TokenString = Token();
-
-            WarningsDB.PurgeConfirmations.Add(new PurgeConfirmation() {
-                Token = TokenString,
-                User = User.Id
-            });
+            await WarningsDB.Warnings.AsQueryable().Where(Warning => Warning.User == UserID).ForEachAsync(Warning => Warning.Type = WarningType.Revoked);
 
             await WarningsDB.SaveChangesAsync();
 
-            await BuildEmbed(EmojiEnum.Love)
-                .WithTitle("Confirmation Required")
-                .WithDescription($"Please reissue this command with the token of `{TokenString}` in order to confirm that you wish to purge the warnings for {User.GetUserInformation()} <3")
-                .SendEmbed(Context.Channel);
+            try {
+                await BuildEmbed(EmojiEnum.Love)
+                    .WithTitle("Warnings Purged")
+                    .WithDescription($"Heya! I've purged {Count} warnings from your account. You now have a clean slate! <3")
+                    .WithCurrentTimestamp()
+                    .SendEmbed(Client.GetUser(UserID));
+            } catch (HttpException) { }
         }
 
     }

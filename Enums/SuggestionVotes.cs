@@ -1,4 +1,4 @@
-﻿namespace Dexter.Databases.Suggestions {
+﻿namespace Dexter.Enums {
     
     /// <summary>
     /// This enum is to be used to tell whether a suggestion has reached a passing

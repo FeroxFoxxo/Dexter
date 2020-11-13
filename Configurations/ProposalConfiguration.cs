@@ -4,9 +4,9 @@ using System.Collections.Generic;
 namespace Dexter.Configurations {
 
     /// <summary>
-    /// The SuggestionConfiguration relates to all configuration data that the suggestion service requires to operate.
+    /// The ProposalConfiguration relates to all configuration data that the suggestion service requires to operate.
     /// </summary>
-    public class SuggestionConfiguration : JSONConfiguration {
+    public class ProposalConfiguration : JSONConfiguration {
         
         /// <summary>
         /// The SUGGESTION CHANNEL specifies the snowflake ID of the channel in which proposals are to be sent in.
@@ -24,7 +24,7 @@ namespace Dexter.Configurations {
         public ulong EmojiStorageGuild { get; set; }
 
         /// <summary>
-        /// The TRACKER LENGTH specifies the length of the token assosiated with the suggestion.
+        /// The TRACKER LENGTH specifies the length of the token assosiated with the proposal.
         /// </summary>
         public int TrackerLength { get; set; }
 

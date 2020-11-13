@@ -87,7 +87,7 @@ namespace Dexter.Services {
                 return;
             }
 
-            await CommandService.ExecuteAsync(new CommandContext(Client, Message), ArgumentPosition, Services);
+            await CommandService.ExecuteAsync(new SocketCommandContext(Client, Message), ArgumentPosition, Services);
         }
 
         /// <summary>

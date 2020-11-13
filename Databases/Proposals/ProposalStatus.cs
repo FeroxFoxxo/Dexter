@@ -1,12 +1,12 @@
-﻿namespace Dexter.Databases.Suggestions {
+﻿namespace Dexter.Databases.Proposals {
 
     /// <summary>
-    /// This enum is to be used to clarify which point of contention the suggestion is in.
+    /// This enum is to be used to clarify which point of contention the proposal is in.
     /// It specifies whether it has been suggested in the specified channel, if the suggestion
     /// is pending and has been passed through, if the suggestion has been approved or denied,
     /// or if the suggestion has since been deleted.
     /// </summary>
-    public enum SuggestionStatus {
+    public enum ProposalStatus {
 
         /// <summary>
         /// The SUGGESTED field specifies that the suggestion has been proposed and the
@@ -22,13 +22,13 @@
         Pending,
         
         /// <summary>
-        /// The APPROVED field specifies that the suggestion has been approved by a moderator through the related approval command.
+        /// The APPROVED field specifies that the suggestion has been approved by an administrator through the related approval command.
         /// </summary>
         Approved,
 
         /// <summary>
         /// The DECLINED field specifies that the suggestion has either been pass through staff
-        /// voting but has since been denied by a moderator or has been declined by the community
+        /// voting but has since been denied by an administrator or has been declined by the community
         /// (IE it has reached the threshold of downvotes over upvotes to have been declared unwanted)
         /// </summary>
         Declined,

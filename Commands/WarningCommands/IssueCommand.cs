@@ -12,12 +12,21 @@ using System.Threading.Tasks;
 namespace Dexter.Commands {
     public partial class WarningCommands {
 
+        /// <summary>
+        /// The Issue Warning method runs on the WARN command. It applies a warning to a user by adding it to the related database.
+        /// It attaches this warning with a reason, and then notifies the recipient of the warning having been applied.
+        /// This command can only be used by a moderator or higher position in the server.
+        /// </summary>
+        /// <param name="User">The user of which you wish to warn.</param>
+        /// <param name="Reason">The reason for the user having been warned.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+
         [Command("warn")]
         [Summary("Issues a warning to a specified user.")]
         [Alias("issue", "warnUser")]
         [RequireModerator]
 
-        public async Task IssueCommand (IGuildUser User, [Remainder] string Reason) {
+        public async Task IssueWarning(IUser User, [Remainder] string Reason) {
             if (Reason.Length > 250) {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Reason too long")

@@ -8,7 +8,6 @@ namespace Dexter.Commands {
     /// <summary>
     /// The ProposalCommands module relates to the approval, denial and fetching of a suggested proposal.
     /// </summary>
-    [EssentialModule]
     public partial class ProposalCommands : DiscordModule {
 
         private readonly ProposalDB ProposalDB;

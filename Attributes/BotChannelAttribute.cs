@@ -29,7 +29,7 @@ namespace Dexter.Attributes {
                 CommandInfo Command, IServiceProvider Services) {
 
             return Task.FromResult(
-                InitializeDependencies.BotConfiguration.BotChannels.Contains(Context.Channel.Id) ?
+                InitializeDependencies.Services.GetRequiredService<BotConfiguration>().BotChannels.Contains(Context.Channel.Id) ?
                     PreconditionResult.FromSuccess() :
                     PreconditionResult.FromError($"Heya! You're not permitted to use the command {Command.Name} " +
                     $"in the channel {Context.Channel.Name}. Please use a designated bot channel instead <3"));

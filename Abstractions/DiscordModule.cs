@@ -32,13 +32,15 @@ namespace Dexter.Abstractions {
         /// </summary>
         /// <param name="CallbackMethod">The method you wish to callback once approved.</param>
         /// <param name="CallbackParameters">The parameters you wish to callback with once approved.</param>
+        /// <param name="Author">The author of the message who will be attached to the proposal.</param>
+        /// <param name="Proposal">The message that will be attached to the proposal.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
         public static async Task SendForAdminApproval(Func<Dictionary<string, string>, Task> CallbackMethod,
                 Dictionary<string, string> CallbackParameters, ulong Author, string Proposal) {
 
             string JSON = JsonConvert.SerializeObject(CallbackParameters);
 
-            await InitializeDependencies.ProposalService.SendAdminConfirmation(JSON, CallbackMethod.Target.GetType().Name,
+            await InitializeDependencies.Services.GetRequiredService<ProposalService>().SendAdminConfirmation(JSON, CallbackMethod.Target.GetType().Name,
                 CallbackMethod.Method.Name, Author, Proposal);
         }
 

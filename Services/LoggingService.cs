@@ -52,8 +52,8 @@ namespace Dexter.Services {
         /// The AddDelegates override hooks into both the Commands.Log event and the Client.Log event to run LogMessageAsync.
         /// </summary>
         public override void AddDelegates() {
-            Client.Log += TryLogMessage;
-            Commands.Log += TryLogMessage;
+            Client.Log += LogMessageAsync;
+            Commands.Log += LogMessageAsync;
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Dexter.Services {
         /// <param name="LogMessage">The LogMessage field which gives us information about the message, for example the type of
         /// exception we have run into, the severity of the exception and the message of the exception to log.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        public async Task TryLogMessage(LogMessage LogMessage) {
+        public async Task LogMessageAsync(LogMessage LogMessage) {
             if (LockedCMDOut) {
                 BackloggedMessages.Add(LogMessage);
                 return;
@@ -71,12 +71,12 @@ namespace Dexter.Services {
 
             if (BackloggedMessages.Count > 0) {
                 foreach (LogMessage Message in BackloggedMessages)
-                    await LogMessageAsync(Message);
+                    await PrivateLogMessageAsync(Message);
 
                 BackloggedMessages.Clear();
             }
 
-            await LogMessageAsync(LogMessage);
+            await PrivateLogMessageAsync(LogMessage);
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Dexter.Services {
         /// <param name="LogMessage">The LogMessage field which gives us information about the message, for example the type of
         /// exception we have run into, the severity of the exception and the message of the exception to log.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        public async Task LogMessageAsync(LogMessage LogMessage) {
+        private async Task PrivateLogMessageAsync(LogMessage LogMessage) {
             if (!Directory.Exists(LogDirectory))
                 Directory.CreateDirectory(LogDirectory);
 

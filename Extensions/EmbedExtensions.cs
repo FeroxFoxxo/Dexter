@@ -29,7 +29,7 @@ namespace Dexter.Extensions {
                 _ => Color.Magenta
             };
 
-            return Embed.WithThumbnailUrl(InitializeDependencies.BotConfiguration.ThumbnailURLs[(int)Thumbnails]).WithColor(Color);
+            return Embed.WithThumbnailUrl(InitializeDependencies.Services.GetRequiredService<BotConfiguration>().ThumbnailURLs[(int)Thumbnails]).WithColor(Color);
         }
 
         /// <summary>

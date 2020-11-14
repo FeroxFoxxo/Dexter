@@ -101,18 +101,20 @@ namespace Dexter.Services {
             if (Result.IsSuccess)
                 return;
 
+
+
             switch (Result.Error) {
+                case CommandError.UnmetPrecondition:
+                    await BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Access Denied.")
+                        .WithDescription(Result.ErrorReason)
+                        .SendEmbed(Context.Channel);
+                    break;
                 case CommandError.BadArgCount:
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("You've entered an invalid amount of parameters for this command!")
                         .WithDescription($"Here are some options of parameters you can have for the command **{Command.Value.Name}**.")
                         .GetParametersForCommand(CommandService, Command.Value.Name)
-                        .SendEmbed(Context.Channel);
-                    break;
-                case CommandError.UnmetPrecondition:
-                    await BuildEmbed(EmojiEnum.Annoyed)
-                        .WithTitle("Access Denied.")
-                        .WithDescription(Result.ErrorReason)
                         .SendEmbed(Context.Channel);
                     break;
                 case CommandError.UnknownCommand:
@@ -142,7 +144,7 @@ namespace Dexter.Services {
                         .SendEmbed(Context.Channel);
                     break;
                 default:
-                    await LoggingService.TryLogMessage(new LogMessage(LogSeverity.Warning, GetType().Name.Prettify(), $"Unknown statement reached!\nCommand: {(Command.IsSpecified ? Command.Value : null)}\nResult: {Result}"));
+                    await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Warning, GetType().Name.Prettify(), $"Unknown statement reached!\nCommand: {(Command.IsSpecified ? Command.Value : null)}\nResult: {Result}"));
 
                     if (!string.IsNullOrEmpty(BotConfiguration.DeveloperMention))
                         await Context.Channel.SendMessageAsync($"Unknown error! I'll tell the developers.\n{BotConfiguration.DeveloperMention}");

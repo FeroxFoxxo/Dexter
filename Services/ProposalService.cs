@@ -37,8 +37,6 @@ namespace Dexter.Services {
 
         private readonly Random Random;
 
-        private readonly IServiceProvider Services;
-
         /// <summary>
         /// The constructor for the ProposalService module. This takes in the injected dependencies and sets them as per what the class requires.
         /// It also creates the list of random characters and a new instance of the Random class, which can be used to randomly generate a token.
@@ -47,12 +45,11 @@ namespace Dexter.Services {
         /// <param name="BotConfiguration">The BotConfiguration is where the ID for the admin confirmation panel is found.</param>
         /// <param name="ProposalConfiguration">The ProposalConfiguration, which contains the location of the emoji storage guild, as well as IDs of channels.</param>
         /// <param name="ProposalDB">An instance of the ProposalDB, which is used as a storage for the proposals.</param>
-        public ProposalService(DiscordSocketClient Client, BotConfiguration BotConfiguration, ProposalConfiguration ProposalConfiguration, ProposalDB ProposalDB, IServiceProvider Services) {
+        public ProposalService(DiscordSocketClient Client, BotConfiguration BotConfiguration, ProposalConfiguration ProposalConfiguration, ProposalDB ProposalDB) {
             this.Client = Client;
             this.BotConfiguration = BotConfiguration;
             this.ProposalConfiguration = ProposalConfiguration;
             this.ProposalDB = ProposalDB;
-            this.Services = Services;
 
             RandomCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             Random = new Random();
@@ -172,7 +169,7 @@ namespace Dexter.Services {
             }
 
             // Creates a new Proposal object with the related fields.
-            Proposal Proposal = new Proposal {
+            Proposal Proposal = new() {
                 Tracker = CreateToken(),
                 Content = Message.Content,
                 Status = ProposalStatus.Suggested,
@@ -181,7 +178,7 @@ namespace Dexter.Services {
             };
 
             // Creates a new Suggestion object with the related fields.
-            Suggestion Suggested = new Suggestion() {
+            Suggestion Suggested = new() {
                 Tracker = Proposal.Tracker
             };
 
@@ -228,7 +225,7 @@ namespace Dexter.Services {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
         public async Task SendAdminConfirmation(string JSON, string Type, string Method, ulong Author, string ProposedMessage) {
             // Creates a new Proposal object with the related fields.
-            Proposal Proposal = new Proposal {
+            Proposal Proposal = new() {
                 Tracker = CreateToken(),
                 Content = ProposedMessage,
                 Status = ProposalStatus.Suggested,
@@ -237,7 +234,7 @@ namespace Dexter.Services {
             };
 
             // Creates a new AdminConfirmation object with the related fields.
-            AdminConfirmation Confirmation = new AdminConfirmation {
+            AdminConfirmation Confirmation = new() {
                 Tracker = Proposal.Tracker,
                 CallbackClass = Type,
                 CallbackMethod = Method,
@@ -396,7 +393,7 @@ namespace Dexter.Services {
 
                         Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Confirmation.CallbackParameters);
                         Type Class = Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.Name.Equals(Confirmation.CallbackClass)).FirstOrDefault();
-                        Class.GetMethod(Confirmation.CallbackMethod).Invoke(Services.GetRequiredService(Class), new object[1] { Parameters });
+                        Class.GetMethod(Confirmation.CallbackMethod).Invoke(InitializeDependencies.Services.GetRequiredService(Class), new object[1] { Parameters });
                     }
 
                     break;
@@ -442,7 +439,7 @@ namespace Dexter.Services {
             for (int i = 0; i < TokenArray.Length; i++)
                 TokenArray[i] = RandomCharacters[Random.Next(RandomCharacters.Length)];
 
-            string Token = new string(TokenArray);
+            string Token = new (TokenArray);
 
             if (ProposalDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.Tracker == Token).FirstOrDefault() == null)
                 return Token;

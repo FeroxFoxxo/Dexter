@@ -17,8 +17,7 @@ namespace Dexter.Commands {
         [Command("warnings")]
         [Summary("Returns a record of warnings.")]
         [Alias("records", "record")]
-        [RequireModerator(Group = "ModeratorOrBotChannel")]
-        [BotChannel(Group = "ModeratorOrBotChannel")]
+        [BotChannel]
 
         public async Task WarningsCommand([Optional] [RequireModeratorParameter] IUser User) {
             bool IsUserSpecified = User != null;

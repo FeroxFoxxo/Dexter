@@ -4,7 +4,7 @@
   Dexter .NET
 </h1>
 
-<h3 align="center">The official USFurries Discord bot!</h3>
+<h3 align="center">The (unofficial) USFurries Discord bot!</h3>
 <h4 align="center">Contains tools to moderate the server and to create a better user experience overall!</h4>
 
 <p align="center">
@@ -27,4 +27,4 @@
 ## Commemorations
 This bot is loosely based off of the bot from the guys over at [Brackeys Bot](https://github.com/YilianSource/brackeys-bot). Although many key components of the bot have been changed to meet our own purposes, such as databases using Entity Framework Core and having switched from YAML to using Newtonsoft JSON serializer, this bot was a great learning resource.
 
-This bot is also an adaption from our previous version of Dexter, written in JavaScript by [Jakey Floofle](https://github.com/Jakey-F). As such, many of commands have been adaptions from their original sources.
+This bot is also an adaption from the JS version of Dexter, written in JavaScript by [Jakey Floofle](https://github.com/Jakey-F). As such, many of commands have been adaptions from their original sources.

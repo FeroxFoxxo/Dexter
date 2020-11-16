@@ -20,29 +20,29 @@ namespace Dexter.Attributes {
         /// <summary>
         /// The Permission Level is the level at which a user has to meet or exceed to be able to run the command.
         /// </summary>
-        public readonly PermissionLevel Level;
+        public readonly PermissionLevel PermissionLevel;
 
         /// <summary>
         /// The RequirePermissionLevel constructor takes in the level at which a user has to be at to run the command.
         /// </summary>
-        /// <param name="Level">The permission level required to run the command.</param>
-        public RequirePermissionLevelAttribute(PermissionLevel Level) {
-            this.Level = Level;
+        /// <param name="PermissionLevel">The permission level required to run the command.</param>
+        public RequirePermissionLevelAttribute(PermissionLevel PermissionLevel) {
+            this.PermissionLevel = PermissionLevel;
         }
 
         /// <summary>
         /// The CheckPermissionsAsync is an overriden method from its superclass, which checks
         /// to see if a command can be run by a user through their roles that they have applied.
         /// </summary>
-        /// <param name="Context">The Context is used to find the user who has run the command.</param>
-        /// <param name="Command">The Command is used to find the name of the command that has been run.</param>
-        /// <param name="Services">The Services are used to find the role IDs to get the permission level of the user from the BotConfiguration.</param>
+        /// <param name="CommandContext">The Context is used to find the user who has run the command.</param>
+        /// <param name="CommandInfo">The Command is used to find the name of the command that has been run.</param>
+        /// <param name="ServiceProvider">The Services are used to find the role IDs to get the permission level of the user from the BotConfiguration.</param>
         /// <returns></returns>
-        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext Context, CommandInfo Command, IServiceProvider Services) {
-            return Task.FromResult((Context.User as IGuildUser).GetPermissionLevel(InitializeDependencies.Services.GetRequiredService<BotConfiguration>()) >= Level
+        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, CommandInfo CommandInfo, IServiceProvider ServiceProvider) {
+            return Task.FromResult((CommandContext.User as IGuildUser).GetPermissionLevel(InitializeDependencies.ServiceProvider.GetRequiredService<BotConfiguration>()) >= PermissionLevel
                 ? PreconditionResult.FromSuccess()
-                : PreconditionResult.FromError($"Haiya! To run the {Command.Name} command you need to have the " +
-                $"{Level} role! Are you sure you're a {Level.ToString().ToLower()}? <3"));
+                : PreconditionResult.FromError($"Haiya! To run the {CommandInfo.Name} command you need to have the " +
+                $"{PermissionLevel} role! Are you sure you're a {PermissionLevel.ToString().ToLower()}? <3"));
         }
 
     }

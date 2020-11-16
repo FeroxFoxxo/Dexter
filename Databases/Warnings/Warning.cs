@@ -31,9 +31,9 @@ namespace Dexter.Databases.Warnings {
         public string Reason { get; set; }
 
         /// <summary>
-        /// The Type field specifies if the warning is still valid or if it has been revoked.
+        /// The WarningType field specifies if the warning is still valid or if it has been revoked.
         /// </summary>
-        public WarningType Type { get; set; }
+        public WarningType WarningType { get; set; }
 
         /// <summary>
         /// The Time Of Issue field is a long field of the UNIX time at which the warning had been issued on.

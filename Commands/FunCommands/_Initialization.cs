@@ -8,12 +8,12 @@ namespace Dexter.Commands {
     public partial class FunCommands : DiscordModule {
 
         private readonly FunConfiguration FunConfiguration;
-        private readonly DiscordSocketClient Client;
+        private readonly DiscordSocketClient DiscordSocketClient;
         private readonly FunTopicsDB FunTopicsDB;
 
-        public FunCommands(DiscordSocketClient Client, FunConfiguration FunConfiguration, FunTopicsDB FunTopicsDB) {
+        public FunCommands(DiscordSocketClient DiscordSocketClient, FunConfiguration FunConfiguration, FunTopicsDB FunTopicsDB) {
             this.FunConfiguration = FunConfiguration;
-            this.Client = Client;
+            this.DiscordSocketClient = DiscordSocketClient;
             this.FunTopicsDB = FunTopicsDB;
         }
 

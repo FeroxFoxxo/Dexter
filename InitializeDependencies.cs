@@ -26,7 +26,7 @@ namespace Dexter {
         /// <summary>
         /// The instance of the ServiceProvider, which is used for various things like embed building and confirmations.
         /// </summary>
-        public static ServiceProvider Services { get; private set; }
+        public static ServiceProvider ServiceProvider { get; private set; }
 
         /// <summary>
         /// The Main method is the entrance to the program. Arguments can be added to this method and supplied
@@ -113,14 +113,14 @@ namespace Dexter {
             );
             
             // Builds the service collection to the provider.
-            Services = ServiceCollection.BuildServiceProvider();
+            ServiceProvider = ServiceCollection.BuildServiceProvider();
 
             // Makes sure all entity databases exist and are created if they do not.
             Assembly.GetExecutingAssembly().GetTypes()
                     .Where(Type => Type.IsSubclassOf(typeof(EntityDatabase)) && !Type.IsAbstract)
                     .ToList().ForEach(
                 DBType => {
-                    EntityDatabase EntityDatabase = (EntityDatabase)Services.GetRequiredService(DBType);
+                    EntityDatabase EntityDatabase = (EntityDatabase)ServiceProvider.GetRequiredService(DBType);
 
                     EntityDatabase.Database.EnsureCreated();
                 }
@@ -130,11 +130,11 @@ namespace Dexter {
             Assembly.GetExecutingAssembly().GetTypes()
                     .Where(Type => Type.IsSubclassOf(typeof(InitializableModule)) && !Type.IsAbstract)
                     .ToList().ForEach(
-                Type => (Services.GetService(Type) as InitializableModule).AddDelegates()
+                Type => (ServiceProvider.GetService(Type) as InitializableModule).AddDelegates()
             );
             
             // Runs the bot using the token specified as a commands line argument.
-            await Services.GetRequiredService<StartupService>().StartAsync(Token);
+            await ServiceProvider.GetRequiredService<StartupService>().StartAsync(Token);
 
             // Sets the bot to continue running forever until the process is culled.
             await Task.Delay(-1);

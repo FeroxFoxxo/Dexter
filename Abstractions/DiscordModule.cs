@@ -40,7 +40,7 @@ namespace Dexter.Abstractions {
 
             string JSON = JsonConvert.SerializeObject(CallbackParameters);
 
-            await InitializeDependencies.Services.GetRequiredService<ProposalService>().SendAdminConfirmation(JSON, CallbackMethod.Target.GetType().Name,
+            await InitializeDependencies.ServiceProvider.GetRequiredService<ProposalService>().SendAdminConfirmation(JSON, CallbackMethod.Target.GetType().Name,
                 CallbackMethod.Method.Name, Author, Proposal);
         }
 

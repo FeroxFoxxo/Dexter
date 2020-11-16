@@ -19,7 +19,7 @@ namespace Dexter.Commands {
                 .WithAuthor(Context.Message.Author)
                 .WithTitle($"{Context.Client.CurrentUser.Username} Asks")
                 .WithDescription(Topic.Topic)
-                .WithFooter($"Would You Rather Written by {Client.GetUser(Topic.ProposerID).Username}")
+                .WithFooter($"Would You Rather Written by {DiscordSocketClient.GetUser(Topic.ProposerID).Username}")
                 .SendEmbed(Context.Channel);
         }
 

@@ -26,7 +26,7 @@ namespace Dexter.Databases.FunTopics {
         /// <summary>
         /// A TopicType specifies whether the desired topic is enabled to be shown.
         /// </summary>
-        public TopicType Type { get; set; }
+        public TopicType TopicType { get; set; }
 
     }
 

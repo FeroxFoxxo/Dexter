@@ -21,13 +21,13 @@ namespace Dexter.Databases.Proposals {
         public ulong Proposer { get; set; }
 
         /// <summary>
-        /// The Status field is the status of the suggestion that has been put fourth.
+        /// The ProposalStatus field is the status of the suggestion that has been put fourth.
         /// This can be either SUGGESTED, PENDING, APPROVED, DENIED or DELETED.
         /// </summary>
-        public ProposalStatus Status { get; set; }
+        public ProposalStatus ProposalStatus { get; set; }
 
         /// <summary>
-        /// The Proposal Type field is the type of proposal this is, whether that be an admin confirmation or a suggestion.
+        /// The Proposal TopicType field is the type of proposal this is, whether that be an admin confirmation or a suggestion.
         /// </summary>
         public ProposalType ProposalType { get; set; }
 

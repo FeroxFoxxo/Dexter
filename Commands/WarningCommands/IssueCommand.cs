@@ -44,7 +44,7 @@ namespace Dexter.Commands {
                 Reason = Reason,
                 User = User.Id,
                 WarningID = WarningID,
-                Type = WarningType.Issued,
+                WarningType = WarningType.Issued,
                 TimeOfIssue = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
             });
 

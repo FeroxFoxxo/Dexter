@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Dexter.Extensions {
 
     /// <summary>
-    /// The Client Extensions class offers a variety of different extensions that can be applied to a DiscordSocketClient.
+    /// The DiscordSocketClient Extensions class offers a variety of different extensions that can be applied to a DiscordSocketClient.
     /// </summary>
     public static class ClientExtensions {
 
@@ -15,15 +15,15 @@ namespace Dexter.Extensions {
         /// The Create Or Get Webhook extension extends upon a client, finds the given channel and, when provided a name, attempts to find a webhook
         /// with that said name. If the webhook can not be found, it creates a new webhook in the channel with the set name.
         /// </summary>
-        /// <param name="Client">The Client is the DiscordSocketClient used to find the channel that the method extends upon.</param>
+        /// <param name="DiscordSocketClient">The DiscordSocketClient is the DiscordSocketClient used to find the channel that the method extends upon.</param>
         /// <param name="ChannelID">The Channel ID is the snowflake ID of the channel which you wish the webhook to be made in.</param>
         /// <param name="WebhookName">The Webhook Name is the identifier of the webhook, and is what the webhook will be called.</param>
         /// <returns>The DiscordWebhookClient of the webhook that has been gotten or created.</returns>
-        public static async Task<DiscordWebhookClient> CreateOrGetWebhook (this DiscordSocketClient Client, ulong ChannelID, string WebhookName) {
+        public static async Task<DiscordWebhookClient> CreateOrGetWebhook (this DiscordSocketClient DiscordSocketClient, ulong ChannelID, string WebhookName) {
             if (ChannelID <= 0)
                 return null;
 
-            SocketChannel Channel = Client.GetChannel(ChannelID);
+            SocketChannel Channel = DiscordSocketClient.GetChannel(ChannelID);
 
             if (Channel is SocketTextChannel TextChannel) {
                 foreach (RestWebhook RestWebhook in await TextChannel.GetWebhooksAsync())

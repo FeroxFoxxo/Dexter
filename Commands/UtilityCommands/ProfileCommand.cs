@@ -21,15 +21,15 @@ namespace Dexter.Commands {
         [Summary("Gets the profile of the user mentioned or yours.")]
         [Alias("userinfo")]
 
-        public async Task ProfileCommand(IGuildUser User) {
+        public async Task ProfileCommand(IGuildUser GuildUser) {
             await BuildEmbed(EmojiEnum.Unknown)
-                .WithTitle($"User Profile For {User.Username}#{User.Discriminator}")
-                .WithThumbnailUrl(User.GetAvatarUrl())
-                .AddField("Username", User.Username)
-                .AddField(!string.IsNullOrEmpty(User.Nickname), "Nickname", User.Nickname)
-                .AddField("Created", $"{User.CreatedAt:dd/MM/yyyy HH:mm:ss} ({User.CreatedAt.Humanize()})")
-                .AddField(User.JoinedAt.HasValue, "Joined", $"{(DateTimeOffset)User.JoinedAt:dd/MM/yyyy HH:mm:ss)} ({User.JoinedAt.Humanize()})")
-                .AddField("Status", User.Status)
+                .WithTitle($"User Profile For {GuildUser.Username}#{GuildUser.Discriminator}")
+                .WithThumbnailUrl(GuildUser.GetAvatarUrl())
+                .AddField("Username", GuildUser.Username)
+                .AddField(!string.IsNullOrEmpty(GuildUser.Nickname), "Nickname", GuildUser.Nickname)
+                .AddField("Created", $"{GuildUser.CreatedAt:dd/MM/yyyy HH:mm:ss} ({GuildUser.CreatedAt.Humanize()})")
+                .AddField(GuildUser.JoinedAt.HasValue, "Joined", $"{(DateTimeOffset)GuildUser.JoinedAt:dd/MM/yyyy HH:mm:ss)} ({GuildUser.JoinedAt.Humanize()})")
+                .AddField("ProposalStatus", GuildUser.Status)
                 .SendEmbed(Context.Channel);
         }
 

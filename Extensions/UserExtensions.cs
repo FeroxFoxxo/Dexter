@@ -14,14 +14,14 @@ namespace Dexter.Extensions {
         /// <summary>
         /// The GetPermissionLevel returns the highest permission the user has access to for commands.
         /// </summary>
-        /// <param name="User">The GuildUser of which you want to get the permission level of.</param>
-        /// <param name="Configuration">The instance of the bot configuration which is used to get the role ID for roles.</param>
+        /// <param name="GuildUser">The GuildUser of which you want to get the permission level of.</param>
+        /// <param name="BotConfiguration">The instance of the bot configuration which is used to get the role ID for roles.</param>
         /// <returns>What permission level the user has, in the form from the PermissionLevel enum.</returns>
-        public static PermissionLevel GetPermissionLevel(this IGuildUser User, BotConfiguration Configuration) {
-            if (User.GuildPermissions.Has(GuildPermission.Administrator))
+        public static PermissionLevel GetPermissionLevel(this IGuildUser GuildUser, BotConfiguration BotConfiguration) {
+            if (GuildUser.GuildPermissions.Has(GuildPermission.Administrator))
                 return PermissionLevel.Administrator;
 
-            if (User.RoleIds.Contains(Configuration.ModeratorRoleID))
+            if (GuildUser.RoleIds.Contains(BotConfiguration.ModeratorRoleID))
                 return PermissionLevel.Moderator;
 
             return PermissionLevel.Default;

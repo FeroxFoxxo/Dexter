@@ -36,25 +36,25 @@ namespace Dexter.Commands {
         [RequireAdministrator]
         [Alias("module", "mod")]
 
-        public async Task ModifyModuleAsync(ModuleActionType ModuleAction, string ModuleName) {
+        public async Task ModifyModuleAsync(ModuleActionType ModuleActionType, string ModuleName) {
             if (Services.ModuleService.VerifyModuleName(ref ModuleName)) {
                 bool IsActive = ModuleService.GetModuleState(ModuleName);
 
-                switch (ModuleAction) {
+                switch (ModuleActionType) {
                     case ModuleActionType.Status:
                         await BuildEmbed(IsActive ? EmojiEnum.Love : EmojiEnum.Annoyed)
-                            .WithTitle("Module Status.")
+                            .WithTitle("Module ProposalStatus.")
                             .WithDescription($"The module **{ModuleName}** is currently **{(IsActive ? "enabled" : "disabled")}.**")
                             .SendEmbed(Context.Channel);
                         break;
                     default:
-                        if ((ModuleAction == ModuleActionType.Enable && IsActive) || (ModuleAction == ModuleActionType.Disable && !IsActive))
+                        if ((ModuleActionType == ModuleActionType.Enable && IsActive) || (ModuleActionType == ModuleActionType.Disable && !IsActive))
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Module already set to value!")
                                 .WithDescription($"The module **{ModuleName}** is already **{(IsActive ? "enabled" : "disabled")}.**")
                                 .SendEmbed(Context.Channel);
                         else {
-                            bool Active = ModuleAction == ModuleActionType.Enable;
+                            bool Active = ModuleActionType == ModuleActionType.Enable;
                             await ModuleService.SetModuleState(ModuleName, Active);
                             await BuildEmbed(Active ? EmojiEnum.Love : EmojiEnum.Annoyed)
                                 .WithTitle("Module set!")

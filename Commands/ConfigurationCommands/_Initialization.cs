@@ -10,9 +10,9 @@ namespace Dexter.Commands {
         private readonly ModuleService ModuleService;
         private readonly BotConfiguration BotConfiguration;
 
-        public ConfigurationCommands(ModuleService _ModuleService, BotConfiguration _BotConfiguration) {
-            ModuleService = _ModuleService;
-            BotConfiguration = _BotConfiguration;
+        public ConfigurationCommands(ModuleService ModuleService, BotConfiguration BotConfiguration) {
+            this.ModuleService = ModuleService;
+            this.BotConfiguration = BotConfiguration;
         }
 
     }

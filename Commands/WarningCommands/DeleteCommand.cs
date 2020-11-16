@@ -25,7 +25,7 @@ namespace Dexter.Commands {
         public async Task DeleteWarning(int WarningID) {
             Warning Warning = WarningsDB.Warnings.AsQueryable().Where(Warning => Warning.WarningID == WarningID).FirstOrDefault();
 
-            Warning.Type = WarningType.Revoked;
+            Warning.WarningType = WarningType.Revoked;
 
             await WarningsDB.SaveChangesAsync();
 

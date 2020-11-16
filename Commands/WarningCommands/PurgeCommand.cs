@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
 using Discord.Net;
+using Dexter.Attributes;
 
 namespace Dexter.Commands {
     public partial class WarningCommands {
@@ -23,6 +24,7 @@ namespace Dexter.Commands {
 
         [Command("purgewarns")]
         [Summary("Removes all warnings from a user.")]
+        [RequireModerator]
 
         public async Task PurgeWarnings(IUser User) {
             await SendForAdminApproval(PurgeWarningsCallback,
@@ -55,7 +57,7 @@ namespace Dexter.Commands {
 
             int Count = WarningsDB.GetWarnings(UserID).Length;
 
-            await WarningsDB.Warnings.AsQueryable().Where(Warning => Warning.User == UserID).ForEachAsync(Warning => Warning.Type = WarningType.Revoked);
+            await WarningsDB.Warnings.AsQueryable().Where(Warning => Warning.User == UserID).ForEachAsync(Warning => Warning.WarningType = WarningType.Revoked);
 
             await WarningsDB.SaveChangesAsync();
 

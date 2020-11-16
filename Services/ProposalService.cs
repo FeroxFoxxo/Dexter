@@ -25,7 +25,7 @@ namespace Dexter.Services {
     /// </summary>
     public class ProposalService : InitializableModule {
 
-        private readonly DiscordSocketClient Client;
+        private readonly DiscordSocketClient DiscordSocketClient;
 
         private readonly BotConfiguration BotConfiguration;
 
@@ -41,12 +41,12 @@ namespace Dexter.Services {
         /// The constructor for the ProposalService module. This takes in the injected dependencies and sets them as per what the class requires.
         /// It also creates the list of random characters and a new instance of the Random class, which can be used to randomly generate a token.
         /// </summary>
-        /// <param name="Client">An instance of the DiscordSocketClient, which is used to hook into events like the MessageRecieved, ReactionAdd and ReactionRemoved events.</param>
+        /// <param name="DiscordSocketClient">An instance of the DiscordSocketClient, which is used to hook into events like the MessageRecieved, ReactionAdd and ReactionRemoved events.</param>
         /// <param name="BotConfiguration">The BotConfiguration is where the ID for the admin confirmation panel is found.</param>
         /// <param name="ProposalConfiguration">The ProposalConfiguration, which contains the location of the emoji storage guild, as well as IDs of channels.</param>
         /// <param name="ProposalDB">An instance of the ProposalDB, which is used as a storage for the proposals.</param>
-        public ProposalService(DiscordSocketClient Client, BotConfiguration BotConfiguration, ProposalConfiguration ProposalConfiguration, ProposalDB ProposalDB) {
-            this.Client = Client;
+        public ProposalService(DiscordSocketClient DiscordSocketClient, BotConfiguration BotConfiguration, ProposalConfiguration ProposalConfiguration, ProposalDB ProposalDB) {
+            this.DiscordSocketClient = DiscordSocketClient;
             this.BotConfiguration = BotConfiguration;
             this.ProposalConfiguration = ProposalConfiguration;
             this.ProposalDB = ProposalDB;
@@ -59,9 +59,9 @@ namespace Dexter.Services {
         /// The AddDelegates method hooks the client MessageReceived, ReactionAdded and ReactionRemoved events and sets them to their related delegates.
         /// </summary>
         public override void AddDelegates() {
-            Client.MessageReceived += MessageRecieved;
-            Client.ReactionAdded += ReactionAdded;
-            Client.ReactionRemoved += ReactionRemoved;
+            DiscordSocketClient.MessageReceived += MessageRecieved;
+            DiscordSocketClient.ReactionAdded += ReactionAdded;
+            DiscordSocketClient.ReactionRemoved += ReactionRemoved;
         }
 
         /// <summary>
@@ -70,10 +70,10 @@ namespace Dexter.Services {
         /// <param name="Tracker">The tracker of the proposal, used to search up the suggestion in the given database.</param>
         /// <param name="Reason">The optional reason for the proposal having been approved / declined.</param>
         /// <param name="Approver">The administrator who has approved the given suggestion.</param>
-        /// <param name="Channel">The channel in which the approval command was run.</param>
-        /// <param name="Status">The type of proposal status you wish to set the embed to.</param>
+        /// <param name="MessageChannel">The channel in which the approval command was run.</param>
+        /// <param name="ProposalStatus">The type of proposal status you wish to set the embed to.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        public async Task EditProposal(string Tracker, string Reason, IUser Approver, IMessageChannel Channel, ProposalStatus Status) {
+        public async Task EditProposal(string Tracker, string Reason, IUser Approver, IMessageChannel MessageChannel, ProposalStatus ProposalStatus) {
             Proposal Proposal = ProposalDB.GetProposalByNameOrID(Tracker);
 
             if (Proposal == null)
@@ -81,27 +81,27 @@ namespace Dexter.Services {
                     .WithTitle("Proposal does not exist!")
                     .WithDescription($"Cound not fetch the proposal from tracker / message ID / staff message ID `{Tracker}`.\n" +
                         $"Are you sure it exists?")
-                    .SendEmbed(Channel);
+                    .SendEmbed(MessageChannel);
             else {
                 Proposal.Reason = Reason;
 
-                await UpdateProposal(Proposal, Status);
+                await UpdateProposal(Proposal, ProposalStatus);
 
                 EmbedBuilder Builder = BuildEmbed(EmojiEnum.Love)
-                    .WithTitle($"{Proposal.ProposalType.ToString().Prettify()} {Proposal.Status}.")
-                    .WithDescription($"{Proposal.ProposalType.ToString().Prettify()} {Proposal.Tracker} was successfully {Proposal.Status.ToString().ToLower()} by {Approver.Mention}.")
+                    .WithTitle($"{Proposal.ProposalType.ToString().Prettify()} {Proposal.ProposalStatus}.")
+                    .WithDescription($"{Proposal.ProposalType.ToString().Prettify()} {Proposal.Tracker} was successfully {Proposal.ProposalStatus.ToString().ToLower()} by {Approver.Mention}.")
                     .AddField("Reason", string.IsNullOrEmpty(Reason) ? "No reason provided" : Reason)
                     .WithCurrentTimestamp();
 
                 try {
-                    await BuildProposal(Proposal).SendEmbed(Client.GetUser(Proposal.Proposer));
+                    await BuildProposal(Proposal).SendEmbed(DiscordSocketClient.GetUser(Proposal.Proposer));
 
                     Builder.AddField("Success", "The DM was successfully sent!");
                 } catch (HttpException) {
                     Builder.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
                 }
 
-                await Builder.SendEmbed(Channel);
+                await Builder.SendEmbed(MessageChannel);
             }
         }
 
@@ -109,11 +109,11 @@ namespace Dexter.Services {
         /// The ReactionAdded method checks to see if reaction is added in the suggestion channel and, if so, it runs CheckAsync.
         /// </summary>
         /// <param name="CachedMessage">The cached message the reaction was applied to, used to get the suggestion it relates to.</param>
-        /// <param name="Channel">The channel of which the reaction was added to.</param>
+        /// <param name="MessageChannel">The channel of which the reaction was added to.</param>
         /// <param name="Reaction">The reaction of question which was added.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        public async Task ReactionAdded(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel Channel, SocketReaction Reaction) {
-            if (Channel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
+        public async Task ReactionAdded(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel MessageChannel, SocketReaction Reaction) {
+            if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
                 return;
 
             IUserMessage Message = await CachedMessage.GetOrDownloadAsync();
@@ -129,11 +129,11 @@ namespace Dexter.Services {
         /// The ReactionRemoved method checks to see if reaction was removed in the suggestion channel and, if so, it runs CheckAsync.
         /// </summary>
         /// <param name="CachedMessage">The cached message the reaction was removed from, used to get the suggestion it relates to.</param>
-        /// <param name="Channel">The channel of which the reaction was removed from.</param>
+        /// <param name="MessageChannel">The channel of which the reaction was removed from.</param>
         /// <param name="Reaction">The reaction of question which was removed.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        public async Task ReactionRemoved(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel Channel, SocketReaction Reaction) {
-            if (Channel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
+        public async Task ReactionRemoved(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel MessageChannel, SocketReaction Reaction) {
+            if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
                 return;
 
             IUserMessage Message = await CachedMessage.GetOrDownloadAsync();
@@ -148,32 +148,32 @@ namespace Dexter.Services {
         /// The MessageRecieved method runs when a message is sent in the suggestions channel, and converts the message to a proposal and suggestion object.
         /// This suggestion object is then sent back to the channel once deleted as a formatted embed for use to vote on.
         /// </summary>
-        /// <param name="Message">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
+        /// <param name="RecievedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        public async Task MessageRecieved(SocketMessage Message) {
+        public async Task MessageRecieved(SocketMessage RecievedMessage) {
             // Check to see if the message has been sent in the suggestion channel and is not a bot, least we return.
-            if (Message.Channel.Id != ProposalConfiguration.SuggestionsChannel || Message.Author.IsBot)
+            if (RecievedMessage.Channel.Id != ProposalConfiguration.SuggestionsChannel || RecievedMessage.Author.IsBot)
                 return;
 
             // Check to see if the embed message length is more than 1750, else will fail the embed from sending due to character limits.
-            if (Message.Content.Length > 1750) {
+            if (RecievedMessage.Content.Length > 1750) {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Your suggestion is too big!")
                     .WithDescription("Please try to summarise your suggestion a little! " +
                     "Keep in mind that emoji add a lot of characters to your suggestion - even if it doesn't seem like it - " +
                     "as Discord handles emoji differently to text, so if you're using a lot of emoji try to cut down on those! <3")
-                    .SendEmbed(Message.Author);
+                    .SendEmbed(RecievedMessage.Author);
 
-                await Message.DeleteAsync();
+                await RecievedMessage.DeleteAsync();
                 return;
             }
 
             // Creates a new Proposal object with the related fields.
             Proposal Proposal = new() {
                 Tracker = CreateToken(),
-                Content = Message.Content,
-                Status = ProposalStatus.Suggested,
-                Proposer = Message.Author.Id,
+                Content = RecievedMessage.Content,
+                ProposalStatus = ProposalStatus.Suggested,
+                Proposer = RecievedMessage.Author.Id,
                 ProposalType = ProposalType.Suggestion
             };
 
@@ -185,16 +185,16 @@ namespace Dexter.Services {
             RestUserMessage Embed;
 
             // Add related attachments to the embed.
-            if (Message.Attachments.Count > 0)
-                Embed = await Message.Channel.SendFileAsync(
-                    Message.Attachments.First().ProxyUrl,
+            if (RecievedMessage.Attachments.Count > 0)
+                Embed = await RecievedMessage.Channel.SendFileAsync(
+                    RecievedMessage.Attachments.First().ProxyUrl,
                     embed: BuildProposal(Proposal).Build()
                 );
             else
-                Embed = await Message.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
+                Embed = await RecievedMessage.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
 
             // Delete the message sent by the user.
-            await Message.DeleteAsync();
+            await RecievedMessage.DeleteAsync();
 
             // Set the message ID in the suggestion object to the ID of the embed.
             Proposal.MessageID = Embed.Id;
@@ -206,7 +206,7 @@ namespace Dexter.Services {
             await ProposalDB.SaveChangesAsync();
 
             // Add the related emoji specified in the ProposalConfiguration to the suggestion.
-            SocketGuild Guild = Client.GetGuild(ProposalConfiguration.EmojiStorageGuild);
+            SocketGuild Guild = DiscordSocketClient.GetGuild(ProposalConfiguration.EmojiStorageGuild);
 
             foreach (string Emoji in ProposalConfiguration.SuggestionEmoji) {
                 GuildEmote Emote = await Guild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
@@ -228,7 +228,7 @@ namespace Dexter.Services {
             Proposal Proposal = new() {
                 Tracker = CreateToken(),
                 Content = ProposedMessage,
-                Status = ProposalStatus.Suggested,
+                ProposalStatus = ProposalStatus.Suggested,
                 ProposalType = ProposalType.AdminConfirmation,
                 Proposer = Author
             };
@@ -241,7 +241,7 @@ namespace Dexter.Services {
                 CallbackParameters = JSON
             };
 
-            RestUserMessage Embed = await (Client.GetChannel(BotConfiguration.ModerationLogChannelID) as SocketTextChannel).SendMessageAsync(embed: BuildProposal(Proposal).Build());
+            RestUserMessage Embed = await (DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as SocketTextChannel).SendMessageAsync(embed: BuildProposal(Proposal).Build());
 
             // Set the message ID in the suggestion object to the ID of the embed.
             Proposal.MessageID = Embed.Id;
@@ -257,26 +257,26 @@ namespace Dexter.Services {
         /// The Check Async method checks to see whether or not a suggestion is passing or has been denied in the suggestions channel.
         /// It also handles the removing of the embed through the trash can emoji.
         /// </summary>
-        /// <param name="Message">The message that has had the emoji applied or removed from it.</param>
+        /// <param name="UserMessage">The message that has had the emoji applied or removed from it.</param>
         /// <param name="Reaction">The reaction that was applied.</param>
         /// <returns>A boolean value of whether or not you should remove the emoji from after the method has run.</returns>
-        public async Task<bool> CheckAsync(IUserMessage Message, SocketReaction Reaction) {
+        public async Task<bool> CheckAsync(IUserMessage UserMessage, SocketReaction Reaction) {
             // Get the suggestion from the database which has a message ID which matches the one of which we're looking for.
-            Proposal Proposal = ProposalDB.Proposals.AsQueryable().Where(Suggestion => Suggestion.MessageID == Message.Id).FirstOrDefault();
+            Proposal Proposal = ProposalDB.Proposals.AsQueryable().Where(Suggestion => Suggestion.MessageID == UserMessage.Id).FirstOrDefault();
 
             // Check if the proposal is not null.
             if (Proposal == null)
                 throw new Exception("Proposal does not exist in database! Aborting...");
 
             // Check the current amount of upvotes the message has.
-            ReactionMetadata Upvotes = Message.Reactions[
-                await Client.GetGuild(ProposalConfiguration.EmojiStorageGuild)
+            ReactionMetadata Upvotes = UserMessage.Reactions[
+                await DiscordSocketClient.GetGuild(ProposalConfiguration.EmojiStorageGuild)
                 .GetEmoteAsync(ProposalConfiguration.Emoji["Upvote"])
             ];
 
             // Check the current amount of downvotes the message has.
-            ReactionMetadata Downvotes = Message.Reactions[
-                await Client.GetGuild(ProposalConfiguration.EmojiStorageGuild)
+            ReactionMetadata Downvotes = UserMessage.Reactions[
+                await DiscordSocketClient.GetGuild(ProposalConfiguration.EmojiStorageGuild)
                 .GetEmoteAsync(ProposalConfiguration.Emoji["Downvote"])
             ];
 
@@ -288,7 +288,7 @@ namespace Dexter.Services {
                     await UpdateProposal(Proposal, ProposalStatus.Pending);
 
                     // Create a new embed in the staff suggestions channel of the current suggestion.
-                    RestUserMessage StaffSuggestion = await (Message.Channel as SocketGuildChannel).Guild
+                    RestUserMessage StaffSuggestion = await (UserMessage.Channel as SocketGuildChannel).Guild
                         .GetTextChannel(ProposalConfiguration.StaffSuggestionsChannel)
                         .SendMessageAsync(embed: BuildProposal(Proposal).Build());
 
@@ -303,7 +303,7 @@ namespace Dexter.Services {
                     await ProposalDB.SaveChangesAsync();
 
                     // Get the staff suggestions channel and add the related emoji to the message.
-                    SocketGuild EmojiCacheGuild = Client.GetGuild(ProposalConfiguration.EmojiStorageGuild);
+                    SocketGuild EmojiCacheGuild = DiscordSocketClient.GetGuild(ProposalConfiguration.EmojiStorageGuild);
 
                     foreach (string Emoji in ProposalConfiguration.StaffSuggestionEmoji) {
                         GuildEmote EmoteStaff = await EmojiCacheGuild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
@@ -336,7 +336,7 @@ namespace Dexter.Services {
                                 // If the suggestion has had the bin icon applied by the user, set the status of the suggestion to "deleted" and delete the message.
                                 if (Proposal.Proposer == Reaction.UserId) {
                                     await UpdateProposal(Proposal, ProposalStatus.Deleted);
-                                    await Message.DeleteAsync();
+                                    await UserMessage.DeleteAsync();
                                     return false;
                                 }
                                 break;
@@ -372,10 +372,10 @@ namespace Dexter.Services {
         /// and then subsequencely updates the related message and staff suggestion messages.
         /// </summary>
         /// <param name="Proposal">The proposal object which has had the status applied to it.</param>
-        /// <param name="Status">The status of which you wish to apply to the proposal.</param>
+        /// <param name="ProposalStatus">The status of which you wish to apply to the proposal.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        public async Task UpdateProposal(Proposal Proposal, ProposalStatus Status) {
-            Proposal.Status = Status;
+        public async Task UpdateProposal(Proposal Proposal, ProposalStatus ProposalStatus) {
+            Proposal.ProposalStatus = ProposalStatus;
             await ProposalDB.SaveChangesAsync();
 
             switch (Proposal.ProposalType) {
@@ -388,12 +388,12 @@ namespace Dexter.Services {
                 case ProposalType.AdminConfirmation:
                     await UpdateSpecificProposal(Proposal, BotConfiguration.ModerationLogChannelID, Proposal.MessageID);
 
-                    if (Status == ProposalStatus.Approved) {
+                    if (ProposalStatus == ProposalStatus.Approved) {
                         AdminConfirmation Confirmation = ProposalDB.AdminConfirmations.AsQueryable().Where(Confirmation => Confirmation.Tracker == Proposal.Tracker).FirstOrDefault();
 
                         Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Confirmation.CallbackParameters);
                         Type Class = Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.Name.Equals(Confirmation.CallbackClass)).FirstOrDefault();
-                        Class.GetMethod(Confirmation.CallbackMethod).Invoke(InitializeDependencies.Services.GetRequiredService(Class), new object[1] { Parameters });
+                        Class.GetMethod(Confirmation.CallbackMethod).Invoke(InitializeDependencies.ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
                     }
 
                     break;
@@ -411,7 +411,7 @@ namespace Dexter.Services {
             if (Channel == 0 || MessageID == 0)
                 return;
 
-            SocketChannel SocketChannel = Client.GetChannel(Channel);
+            SocketChannel SocketChannel = DiscordSocketClient.GetChannel(Channel);
 
             if (SocketChannel is SocketTextChannel TextChannel) {
                 IMessage ProposalMessage = await TextChannel.GetMessageAsync(MessageID);
@@ -423,7 +423,7 @@ namespace Dexter.Services {
                     await ProposalMessage.RemoveAllReactionsAsync();
                     await ProposalMSG2.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildProposal(Proposal).Build());
                 } else
-                    throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? Type: {ProposalMessage.GetType()}");
+                    throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? TopicType: {ProposalMessage.GetType()}");
             } else
                 throw new Exception($"Eek! The given channel of {SocketChannel} turned out *not* to be an instance of SocketTextChannel, rather {SocketChannel.GetType().Name}!");
         }
@@ -455,7 +455,7 @@ namespace Dexter.Services {
         /// <param name="Proposal">The proposal of which you wish to generate the embed from.</param>
         /// <returns>An automatically generated embed based on the input proposal's fields.</returns>
         public EmbedBuilder BuildProposal(Proposal Proposal) {
-            Color Color = Proposal.Status switch {
+            Color Color = Proposal.ProposalStatus switch {
                 ProposalStatus.Suggested => Color.Blue,
                 ProposalStatus.Pending => Color.Orange,
                 ProposalStatus.Approved => Color.Green,
@@ -465,13 +465,13 @@ namespace Dexter.Services {
             };
 
             return new EmbedBuilder()
-                .WithTitle(Proposal.Status.ToString().ToUpper())
+                .WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
                 .WithColor(Color)
-                .WithThumbnailUrl(Client.GetUser(Proposal.Proposer).GetAvatarUrl())
-                .WithTitle(Proposal.Status.ToString().ToUpper())
+                .WithThumbnailUrl(DiscordSocketClient.GetUser(Proposal.Proposer).GetAvatarUrl())
+                .WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
                 .WithDescription(Proposal.Content)
                 .AddField(!string.IsNullOrEmpty(Proposal.Reason), "Reason:", Proposal.Reason)
-                .WithAuthor(Client.GetUser(Proposal.Proposer))
+                .WithAuthor(DiscordSocketClient.GetUser(Proposal.Proposer))
                 .WithCurrentTimestamp()
                 .WithFooter(Proposal.Tracker);
         }

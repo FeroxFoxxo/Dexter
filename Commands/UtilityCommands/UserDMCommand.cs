@@ -14,12 +14,12 @@ namespace Dexter.Commands {
         [Alias("dm", "message")]
         [RequireModerator]
 
-        public async Task UserDMCommand(IGuildUser User, [Remainder] string Message) {
+        public async Task UserDMCommand(IUser User, [Remainder] string Message) {
             EmbedBuilder Embed = BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle("User DM")
                 .WithDescription(Message)
-                .AddField("Recipient", $"{User.Mention} {User.Username + User.Discriminator} ({User.Id})")
-                .AddField("Sent By", $"{Context.User.Mention} {Context.User.Username + Context.User.Discriminator} ({Context.User.Id})");
+                .AddField("Recipient", User.GetUserInformation())
+                .AddField("Sent By", Context.Message.Author.GetUserInformation());
 
             try {
                 await User.SendMessageAsync($"**__Message From {Context.Guild.Name}__**\n{Message}");

@@ -11,13 +11,13 @@ namespace Dexter.Commands {
         [Summary("Gets the avatar of a user mentioned or yours.")]
 
         public async Task AvatarCommand() {
-            await AvatarCommand(Context.Guild.GetUser(Context.User.Id));
+            await AvatarCommand(Context.User);
         }
 
         [Command("avatar")]
         [Summary("Gets the avatar of a user mentioned or yours.")]
 
-        public async Task AvatarCommand(IGuildUser User) {
+        public async Task AvatarCommand(IUser User) {
             await BuildEmbed(EmojiEnum.Unknown)
                 .WithImageUrl(User.GetAvatarUrl(ImageFormat.Png, 1024))
                 .WithUrl(User.GetAvatarUrl(ImageFormat.Png, 1024))

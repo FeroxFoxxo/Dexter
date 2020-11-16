@@ -15,9 +15,9 @@ namespace Dexter.Services {
     /// </summary>
     public class LoggingService : InitializableModule {
 
-        private readonly DiscordSocketClient Client;
+        private readonly DiscordSocketClient DiscordSocketClient;
 
-        private readonly CommandService Commands;
+        private readonly CommandService CommandService;
 
         private string LogDirectory { get; }
 
@@ -33,11 +33,11 @@ namespace Dexter.Services {
         /// The constructor for the LoggingService module. This takes in the injected dependencies and sets them as per what the class requires.
         /// This constructor also sets the LogDirectory to a folder called "logs" in the base directory, and the LogFile - a file with the current date in that directory.
         /// </summary>
-        /// <param name="Client">The current instance of the DiscordSocketClient, which is used to hook into the Log delegate to run LogMessageAsync.</param>
-        /// <param name="Commands">The CommandService is used to hook into the Log delegate to run LogMessageAsync.</param>
-        public LoggingService(DiscordSocketClient Client, CommandService Commands) {
-            this.Client = Client;
-            this.Commands = Commands;
+        /// <param name="DiscordSocketClient">The current instance of the DiscordSocketClient, which is used to hook into the Log delegate to run LogMessageAsync.</param>
+        /// <param name="CommandService">The CommandService is used to hook into the Log delegate to run LogMessageAsync.</param>
+        public LoggingService(DiscordSocketClient DiscordSocketClient, CommandService CommandService) {
+            this.DiscordSocketClient = DiscordSocketClient;
+            this.CommandService = CommandService;
 
             LogDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
             LogFile = Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.log");
@@ -52,8 +52,8 @@ namespace Dexter.Services {
         /// The AddDelegates override hooks into both the Commands.Log event and the Client.Log event to run LogMessageAsync.
         /// </summary>
         public override void AddDelegates() {
-            Client.Log += LogMessageAsync;
-            Commands.Log += LogMessageAsync;
+            DiscordSocketClient.Log += LogMessageAsync;
+            CommandService.Log += LogMessageAsync;
         }
 
         /// <summary>
@@ -65,43 +65,61 @@ namespace Dexter.Services {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
         public async Task LogMessageAsync(LogMessage LogMessage) {
             if (LockedCMDOut) {
+                await LogToConsole(LogMessage);
                 BackloggedMessages.Add(LogMessage);
                 return;
             }
 
             if (BackloggedMessages.Count > 0) {
                 foreach (LogMessage Message in BackloggedMessages)
-                    await PrivateLogMessageAsync(Message);
+                    await LogToFile(Message);
 
                 BackloggedMessages.Clear();
             }
 
-            await PrivateLogMessageAsync(LogMessage);
+            await LogToFile(LogMessage);
         }
 
         /// <summary>
-        /// The LogMessageAsync method creates the log file if it doesn't exist already, appends the logged message to the file,
-        /// switches the console color to the severity of the message and finally logs the message to the console.
+        /// The CreateLog method creates the log string from an instance of LogMessage and returns it.
+        /// </summary>
+        /// <param name="LogMessage">The LogMessage field which gives us information about the message, for example the type of
+        /// exception we have run into, the severity of the exception and the message of the exception to log.</param>
+        /// <returns>A string of the logged message.</returns>
+        private static string CreateLog(LogMessage LogMessage) {
+            string Date = DateTime.UtcNow.ToString("hh:mm:ss tt");
+
+            string Severity = $"[{LogMessage.Severity}]";
+
+            return $"{Date} {Severity,9} {LogMessage.Source}: {LogMessage.Exception?.ToString() ?? LogMessage.Message}";
+        }
+
+        /// <summary>
+        /// The LogToFile method creates the log file if it doesn't exist already, appends the logged message to the file,
         /// </summary>
         /// <param name="LogMessage">The LogMessage field which gives us information about the message, for example the type of
         /// exception we have run into, the severity of the exception and the message of the exception to log.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        private async Task PrivateLogMessageAsync(LogMessage LogMessage) {
+        private async Task LogToFile(LogMessage LogMessage) {
             if (!Directory.Exists(LogDirectory))
                 Directory.CreateDirectory(LogDirectory);
 
             if (!File.Exists(GetLogFile()))
                 File.Create(GetLogFile()).Dispose();
 
-            string Date = DateTime.UtcNow.ToString("hh:mm:ss tt");
-
-            string Severity = $"[{LogMessage.Severity}]";
-
-            string Log = $"{Date} {Severity,9} {LogMessage.Source}: {LogMessage.Exception?.ToString() ?? LogMessage.Message}";
-
             lock (LockLogFile)
-                File.AppendAllText(GetLogFile(), Log + "\n");
+                File.AppendAllText(GetLogFile(), CreateLog(LogMessage) + "\n");
 
+            await LogToConsole(LogMessage);
+        }
+
+        /// <summary>
+        /// The LogToConsole method switches the console color to the severity of the message and logs the message to the console.
+        /// </summary>
+        /// <param name="LogMessage">The LogMessage field which gives us information about the message, for example the type of
+        /// exception we have run into, the severity of the exception and the message of the exception to log.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        private async Task LogToConsole (LogMessage LogMessage) {
             Console.ForegroundColor = LogMessage.Severity switch {
                 LogSeverity.Info => ConsoleColor.Blue,
                 LogSeverity.Critical => ConsoleColor.DarkRed,
@@ -112,7 +130,7 @@ namespace Dexter.Services {
                 _ => ConsoleColor.Red,
             };
 
-            await Console.Out.WriteLineAsync(Log);
+            await Console.Out.WriteLineAsync(CreateLog(LogMessage));
         }
 
         /// <summary>

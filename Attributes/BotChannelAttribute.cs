@@ -18,21 +18,21 @@ namespace Dexter.Attributes {
         /// The CheckPermissionsAsync is an overriden method from its superclass,
         /// which checks to see if a command can be run in the specified channel.
         /// </summary>
-        /// <param name="Context">The Context is used to find the name of the channel that the message has been sent in.</param>
-        /// <param name="Command">The Command is used to find the name of the command run,
+        /// <param name="CommandContext">The Context is used to find the name of the channel that the message has been sent in.</param>
+        /// <param name="CommandInfo">The Command is used to find the name of the command run,
         /// and to specify whether or not it is able to run in a given channel.</param>
-        /// <param name="Services">The Services is the Service Provider which contains references to initialized classes
+        /// <param name="ServiceProvider">The Service Provider contains references to initialized classes
         /// such as the BotConfigurations class, used to find if the command has been run in a specified bot channel.</param>
         /// <returns>The result of the checked permission, returning successful if it is able to be run or an error if not.
         /// This error is then thrown to the Command Handler Service to log to the user.</returns>
-        public override Task<PreconditionResult> CheckPermissionsAsync (ICommandContext Context,
-                CommandInfo Command, IServiceProvider Services) {
+        public override Task<PreconditionResult> CheckPermissionsAsync (ICommandContext CommandContext,
+                CommandInfo CommandInfo, IServiceProvider ServiceProvider) {
 
             return Task.FromResult(
-                InitializeDependencies.Services.GetRequiredService<BotConfiguration>().BotChannels.Contains(Context.Channel.Id) ?
+                InitializeDependencies.ServiceProvider.GetRequiredService<BotConfiguration>().BotChannels.Contains(CommandContext.Channel.Id) ?
                     PreconditionResult.FromSuccess() :
-                    PreconditionResult.FromError($"Heya! You're not permitted to use the command {Command.Name} " +
-                    $"in the channel {Context.Channel.Name}. Please use a designated bot channel instead <3"));
+                    PreconditionResult.FromError($"Heya! You're not permitted to use the command {CommandInfo.Name} " +
+                    $"in the channel {CommandContext.Channel.Name}. Please use a designated bot channel instead <3"));
         }
 
     }

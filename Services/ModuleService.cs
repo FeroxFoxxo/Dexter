@@ -18,30 +18,30 @@ namespace Dexter.Services {
     /// </summary>
     public class ModuleService : InitializableModule {
 
-        private readonly DiscordSocketClient Client;
+        private readonly DiscordSocketClient DiscordSocketClient;
 
         private readonly LoggingService LoggingService;
 
         private readonly CommandService CommandService;
 
-        private readonly IServiceProvider Services;
+        private readonly IServiceProvider ServiceProvider;
 
         private readonly ConfigurationDB ConfigurationDB;
 
         /// <summary>
         /// The constructor for the ModuleService module. This takes in the injected dependencies and sets them as per what the class requires.
         /// </summary>
-        /// <param name="Client">An instance of the DiscordSocketClient, which we use to hook into the OnReady event.</param>
+        /// <param name="DiscordSocketClient">An instance of the DiscordSocketClient, which we use to hook into the OnReady event.</param>
         /// <param name="CommandService">An instance of the CommandService, which tracks all the currently enabled commands and their delegates.</param>
         /// <param name="LoggingService">The LoggingService instance, which we use to log information on the currently enabled modules for use when we start up.</param>
-        /// <param name="Services">The ServiceProvider, which contains references to all the classes that have been specified through recursion, more specifically the CommandModule classes.</param>
+        /// <param name="ServiceProvider">The ServiceProvider, which contains references to all the classes that have been specified through recursion, more specifically the CommandModule classes.</param>
         /// <param name="ConfigurationDB">An instance of the ConfigurationDB, which keeps track of enabled and disabled commands.</param>
-        public ModuleService(DiscordSocketClient Client, CommandService CommandService, LoggingService LoggingService,
-                IServiceProvider Services, ConfigurationDB ConfigurationDB) {
-            this.Client = Client;
+        public ModuleService(DiscordSocketClient DiscordSocketClient, CommandService CommandService, LoggingService LoggingService,
+                IServiceProvider ServiceProvider, ConfigurationDB ConfigurationDB) {
+            this.DiscordSocketClient = DiscordSocketClient;
             this.CommandService = CommandService;
             this.LoggingService = LoggingService;
-            this.Services = Services;
+            this.ServiceProvider = ServiceProvider;
             this.ConfigurationDB = ConfigurationDB;
         }
 
@@ -49,7 +49,7 @@ namespace Dexter.Services {
         /// The AddDelegates method hooks the client's Ready event up to the EnableModules method, which will set all the modules as defined in the ConfigurationDB.
         /// </summary>
         public override void AddDelegates() {
-            Client.Ready += EnableModules;
+            DiscordSocketClient.Ready += EnableModules;
         }
 
         /// <summary>
@@ -59,8 +59,8 @@ namespace Dexter.Services {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
         public async Task EnableModules() {
             // Remove all modules.
-            foreach (ModuleInfo Module in CommandService.Modules)
-                await CommandService.RemoveModuleAsync(Module);
+            foreach (ModuleInfo ModuleInfo in CommandService.Modules)
+                await CommandService.RemoveModuleAsync(ModuleInfo);
 
             int Essentials = 0, Others = 0;
 
@@ -110,11 +110,11 @@ namespace Dexter.Services {
             foreach (Configuration Configuration in ConfigurationDB.Configurations.ToArray())
                 switch (Configuration.ConfigurationType) {
                     case ConfigurationType.Enabled:
-                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), Services);
+                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
                         Others++;
                         break;
                     case ConfigurationType.Essential:
-                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), Services);
+                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
                         Essentials++;
                         break;
                 }
@@ -128,10 +128,10 @@ namespace Dexter.Services {
         /// <summary>
         /// The Get Modules method finds all modules of type ConfigrationType in the database, returning all the names of the modules in one string array.
         /// </summary>
-        /// <param name="Type">The type of the modules you would like to return in a string array - either essential, enabled or disabled.</param>
+        /// <param name="ConfigurationType">The type of the modules you would like to return in a string array - either essential, enabled or disabled.</param>
         /// <returns>Returns an array of strings containing the name of the module that has type ConfigurationType.</returns>
-        public string[] GetModules(ConfigurationType Type) {
-            return ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == Type).Select(Configuration => Configuration.ConfigurationName).ToArray();
+        public string[] GetModules(ConfigurationType ConfigurationType) {
+            return ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == ConfigurationType).Select(Configuration => Configuration.ConfigurationName).ToArray();
         }
 
         /// <summary>
@@ -154,7 +154,7 @@ namespace Dexter.Services {
             await ConfigurationDB.SaveChangesAsync();
 
             if (IsEnabed)
-                await CommandService.AddModuleAsync(GetModuleTypeByName(ModuleName), Services);
+                await CommandService.AddModuleAsync(GetModuleTypeByName(ModuleName), ServiceProvider);
             else
                 await CommandService.RemoveModuleAsync(GetModuleTypeByName(ModuleName));
         }
@@ -185,7 +185,7 @@ namespace Dexter.Services {
                 .ToArray();
 
         /// <summary>
-        /// The Get Module Type By Name method attempts to find a module reflexively that has the name of the specified module name, with its case ignored.
+        /// The Get Module TopicType By Name method attempts to find a module reflexively that has the name of the specified module name, with its case ignored.
         /// If a match does exist, it returns the type of the module. If otherwise, it returns null.
         /// </summary>
         /// <param name="ModuleName">The name of the module you'd like to be reflexively searched for.</param>

@@ -17,12 +17,12 @@ namespace Dexter.Commands {
         [Alias("ccaka", "ccother")]
         [RequireModerator]
 
-        public async Task AliasCommandAsync(AliasActionType AliasAction, string CommandName, string Alias) {
+        public async Task AliasCommandAsync(AliasActionType AliasActionType, string CommandName, string Alias) {
             CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
             Alias = Alias.Replace(",", "");
 
-            switch (AliasAction) {
+            switch (AliasActionType) {
                 case AliasActionType.Add:
                     CustomCommand Add = CustomCommandDB.GetCommandByNameOrAlias(Alias);
 
@@ -64,7 +64,7 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(AliasAction.ToString());
+                    throw new ArgumentOutOfRangeException(AliasActionType.ToString());
             }
         }
 

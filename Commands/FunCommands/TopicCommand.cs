@@ -18,7 +18,7 @@ namespace Dexter.Commands {
                 .WithAuthor(Context.Message.Author)
                 .WithTitle($"{Context.Client.CurrentUser.Username} Asks")
                 .WithDescription(Topic.Topic)
-                .WithFooter($"Topic Written by {Client.GetUser(Topic.ProposerID).Username}")
+                .WithFooter($"Topic Written by {DiscordSocketClient.GetUser(Topic.ProposerID).Username}")
                 .SendEmbed(Context.Channel);
         }
 

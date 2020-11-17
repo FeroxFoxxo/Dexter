@@ -7,11 +7,16 @@ using System.Threading.Tasks;
 namespace Dexter.Commands {
     public partial class CustomCommands {
 
+        /// <summary>
+        /// The ListCommands method runs on CCLIST and will list all the custom commands in the database.
+        /// </summary>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+
         [Command("cclist")]
         [Summary("Displays a list of custom commands.")]
         [Alias("customcommands", "ccl")]
 
-        public async Task DisplayCommandsAsync() {
+        public async Task ListCommands () {
             string CustomCommands = string.Join("\n", CustomCommandDB.CustomCommands.AsQueryable().Select(CustomCommand => BotConfiguration.Prefix + CustomCommand.CommandName));
 
             await BuildEmbed(EmojiEnum.Love)

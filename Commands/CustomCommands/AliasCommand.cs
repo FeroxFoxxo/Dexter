@@ -13,12 +13,21 @@ using System.Threading.Tasks;
 namespace Dexter.Commands {
     public partial class CustomCommands {
 
+        /// <summary>
+        /// The Alias method runs on CCALIAS and will add or remove an alias from a command by the given AliasType
+        /// to/from the CustomCommandDB based to the command provided by the CommandName string.
+        /// </summary>
+        /// <param name="AliasActionType">The AliasActionType specifies whether the action is to add or remove the alias from the command.</param>
+        /// <param name="CommandName">The CommandName specifies the command that you want the alias to be applied to.</param>
+        /// <param name="Alias">The Alias is the string of the alias that you wish to be applied to the command.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+
         [Command("ccalias")]
-        [Summary("Creates a new customizeable command.")]
+        [Summary("Adds or removes an alias from a command by using ADD or REMOVE as the parameter.")]
         [Alias("ccaka")]
         [RequireModerator]
 
-        public async Task AliasCommandAsync(AliasActionType AliasActionType, string CommandName, string Alias) {
+        public async Task Alias (AliasActionType AliasActionType, string CommandName, string Alias) {
             CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
             switch (AliasActionType) {
@@ -66,43 +75,20 @@ namespace Dexter.Commands {
             }
         }
 
-        public async Task AddAliasCallback(Dictionary<string, string> Parameters) {
-            string CommandName = Parameters["CommandName"];
-            string Alias = Parameters["Alias"];
-
-            CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
-
-            List<string> AddedAlias = JsonConvert.DeserializeObject<List<string>>(Command.Alias);
-
-            AddedAlias.Add(Alias);
-
-            Command.Alias = JsonConvert.SerializeObject(AddedAlias);
-
-            await CustomCommandDB.SaveChangesAsync();
-        }
-
-        public async Task RemoveAliasCallback(Dictionary<string, string> Parameters) {
-            string CommandName = Parameters["CommandName"];
-            string Alias = Parameters["Alias"];
-
-            CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
-
-            List<string> RemovedAlias = JsonConvert.DeserializeObject<List<string>>(Command.Alias);
-
-            RemovedAlias.Remove(Alias);
-
-            Command.Alias = JsonConvert.SerializeObject(RemovedAlias);
-
-            await CustomCommandDB.SaveChangesAsync();
-        }
+        /// <summary>
+        /// The Alias method runs on CCALIAS and will list the aliases of a user or throw an argument out of bounds exception.
+        /// </summary>
+        /// <param name="AliasActionType">The AliasActionType specifies if the action is to list the aliases of the command.</param>
+        /// <param name="CommandName">The CommandName specifies the command that you want to list the aliases of.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         [Command("ccalias")]
-        [Summary("Creates a new customizeable command.")]
+        [Summary("Lists the aliases of a command by using LIST as the parameter.")]
         [Alias("ccaka", "ccother")]
         [RequireModerator]
 
-        public async Task AliasCommandAsync(AliasActionType AliasAction, string CommandName) {
-            switch (AliasAction) {
+        public async Task AliasCommandAsync(AliasActionType AliasActionType, string CommandName) {
+            switch (AliasActionType) {
                 case AliasActionType.List:
                     CustomCommand List = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
@@ -122,12 +108,59 @@ namespace Dexter.Commands {
                 case AliasActionType.Remove:
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"Bad argument count.")
-                        .WithDescription($"Please specify which command you wish to {AliasAction.ToString().ToLower()} this alias from! <3")
+                        .WithDescription($"Please specify which command you wish to {AliasActionType.ToString().ToLower()} this alias from! <3")
                         .SendEmbed(Context.Channel);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(AliasAction.ToString());
+                    throw new ArgumentOutOfRangeException(AliasActionType.ToString());
             }
         }
+
+        /// <summary>
+        /// The AddAliasCallback runs on the confirmation of the admins approving a given alias addition.
+        /// </summary>
+        /// <param name="Parameters">The called back parameters:
+        ///     CommandName = The name of the command you wish to add the alias to.
+        ///     Alias = The alias you wish to add to the command.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+
+        public async Task AddAliasCallback(Dictionary<string, string> Parameters) {
+            string CommandName = Parameters["CommandName"];
+            string Alias = Parameters["Alias"];
+
+            CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
+
+            List<string> AddedAlias = JsonConvert.DeserializeObject<List<string>>(Command.Alias);
+
+            AddedAlias.Add(Alias);
+
+            Command.Alias = JsonConvert.SerializeObject(AddedAlias);
+
+            await CustomCommandDB.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// The RemoveAliasCallback runs on the confirmation of the admins approving a given alias removal.
+        /// </summary>
+        /// <param name="Parameters">The called back parameters:
+        ///     CommandName = The name of the command you wish to remove the alias from.
+        ///     Alias = The alias you wish to remove from the command.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+
+        public async Task RemoveAliasCallback(Dictionary<string, string> Parameters) {
+            string CommandName = Parameters["CommandName"];
+            string Alias = Parameters["Alias"];
+
+            CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
+
+            List<string> RemovedAlias = JsonConvert.DeserializeObject<List<string>>(Command.Alias);
+
+            RemovedAlias.Remove(Alias);
+
+            Command.Alias = JsonConvert.SerializeObject(RemovedAlias);
+
+            await CustomCommandDB.SaveChangesAsync();
+        }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Dexter.Databases.Warnings;
+using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.FunTopics {
 
@@ -24,9 +25,14 @@ namespace Dexter.Databases.FunTopics {
         public string Topic { get; set; }
 
         /// <summary>
-        /// A TopicType specifies whether the desired topic is enabled to be shown.
+        /// The TopicType specifies whether the desired topic is enabled to be shown.
         /// </summary>
         public TopicType TopicType { get; set; }
+
+        /// <summary>
+        /// The EntryType specifies whether this topic has been added or removed.
+        /// </summary>
+        public EntryType EntryType { get; set; }
 
     }
 

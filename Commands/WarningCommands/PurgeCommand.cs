@@ -57,7 +57,7 @@ namespace Dexter.Commands {
 
             int Count = WarningsDB.GetWarnings(UserID).Length;
 
-            await WarningsDB.Warnings.AsQueryable().Where(Warning => Warning.User == UserID).ForEachAsync(Warning => Warning.WarningType = WarningType.Revoked);
+            await WarningsDB.Warnings.AsQueryable().Where(Warning => Warning.User == UserID).ForEachAsync(Warning => Warning.EntryType = EntryType.Removed);
 
             await WarningsDB.SaveChangesAsync();
 

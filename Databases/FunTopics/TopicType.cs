@@ -1,4 +1,5 @@
 ﻿namespace Dexter.Databases.FunTopics {
+
     /// <summary>
     /// The TopicType specifies whether the topic has been enabled or disabled.
     /// </summary>

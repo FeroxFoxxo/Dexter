@@ -7,10 +7,20 @@ using Discord.Commands;
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Dexter.Commands {
 
     public partial class CustomCommands {
+
+        /// <summary>
+        /// The CustomCommand method runs on CC and will add or edit a custom command in the CustomCommandDB
+        /// based on the given ActionType and apply the REPLY parameter to it.
+        /// </summary>
+        /// <param name="ActionType">The ActionType specifies whether the action is to add or edit the command in the database.</param>
+        /// <param name="CommandName">The CommandName specifies the command that you wish to add or edit from the database.</param>
+        /// <param name="Reply">The Reply specifies the reply that you wish to given command to have.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         [Command("cc")]
         [Summary("Applies an action to a customizeable command.")]
@@ -77,19 +87,26 @@ namespace Dexter.Commands {
         }
 
 
+        /// <summary>
+        /// The CustomCommand method runs on CC and will remove or get a custom command from the CustomCommandDB based on the given ActionType.
+        /// </summary>
+        /// <param name="ActionType">The ActionType specifies whether the action is to remove or get the command from the database.</param>
+        /// <param name="CommandName">The CommandName specifies the command that you wish to remove or get from the database.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+
         [Command("cc")]
         [Summary("Applies an action to a customizeable command.")]
         [Alias("customcommand", "command")]
         [RequireModerator]
 
         public async Task CustomCommand(ActionType ActionType, string CommandName) {
+            CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
+
+            if (Command == null)
+                throw new InvalidOperationException($"A command with the name `{BotConfiguration.Prefix}{CommandName}` doesn't exist!");
+
             switch (ActionType) {
                 case ActionType.Remove:
-                    CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
-
-                    if (Command == null)
-                        throw new InvalidOperationException($"A command with the name `{BotConfiguration.Prefix}{CommandName}` doesn't exist!");
-
                     await SendForAdminApproval(RemoveCommandCallback,
                         new Dictionary<string, string>() {
                             { "CommandName", CommandName.ToLower() },
@@ -104,8 +121,25 @@ namespace Dexter.Commands {
                             $"The command `{BotConfiguration.Prefix}{CommandName}` will be removed from the database.")
                         .SendEmbed(Context.Channel);
                     break;
+                case ActionType.Get:
+                    await BuildEmbed(EmojiEnum.Love)
+                        .WithTitle($"{BotConfiguration.Prefix}{CommandName}")
+                        .AddField("Reply", Command.Reply)
+                        .AddField("Aliases", string.Join('\n', JsonConvert.DeserializeObject<List<string>>(Command.Alias)))
+                        .SendEmbed(Context.Channel);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(ActionType.ToString());
             }
         }
+
+        /// <summary>
+        /// The CreateCommandCallback runs on the confirmation of the admins approving a custom command.
+        /// </summary>
+        /// <param name="Parameters">The called back parameters:
+        ///     CommandName = The name of the command you wish to add.
+        ///     Reply = The reply of the given command.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         public async Task CreateCommandCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];
@@ -119,7 +153,15 @@ namespace Dexter.Commands {
 
             await CustomCommandDB.SaveChangesAsync();
         }
-        
+
+        /// <summary>
+        /// The EditCommandCallback runs on the confirmation of the admins approving the editing of a custom command.
+        /// </summary>
+        /// <param name="Parameters">The called back parameters:
+        ///     CommandName = The name of the command you wish to edit.
+        ///     Reply = The edited reply of the given command.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+
         public async Task EditCommandCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];
             string Reply = Parameters["Reply"];
@@ -128,6 +170,13 @@ namespace Dexter.Commands {
 
             await CustomCommandDB.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// The RemoveCommandCallback runs on the confirmation of the admins approving the removal of a custom command.
+        /// </summary>
+        /// <param name="Parameters">The called back parameters:
+        ///     CommandName = The name of the command you wish to remove.
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         public async Task RemoveCommandCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];

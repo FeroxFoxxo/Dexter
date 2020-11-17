@@ -59,6 +59,14 @@ namespace Dexter.Commands {
             }
         }
 
+        /// <summary>
+        /// The GetWarnings method returns an array of embeds detailing the user's warnings, time of warning, and moderator (if enabled).
+        /// </summary>
+        /// <param name="User">The user of whose warnings you wish to recieve.</param>
+        /// <param name="RunBy">The user who has run the given warnings command.</param>
+        /// <param name="ShowIssuer">Whether or not the moderators should be shown in the log. Enabled for moderators, disabled for DMed records.</param>
+        /// <returns>An array of embeds containing the given users warnings.</returns>
+        
         public EmbedBuilder[] GetWarnings(IUser User, IUser RunBy, bool ShowIssuer) {
             Warning[] Warnings = WarningsDB.GetWarnings(User.Id);
 

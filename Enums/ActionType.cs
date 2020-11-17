@@ -1,8 +1,8 @@
 ﻿namespace Dexter.Enums {
 
     /// <summary>
-    /// The ActionType represents a generic action that a user may make on a command
-    /// that interfaces with a database. It includes add, remove and edit commands.
+    /// The ActionType represents an action that a user may make on a command
+    /// that interfaces with the fun database. It includes add, remove, get and edit commands.
     /// </summary>
     public enum ActionType {
 
@@ -19,7 +19,12 @@
         /// <summary>
         /// The EDIT field specifies the user is changing a given entry in the database.
         /// </summary>
-        Edit
+        Edit,
+
+        /// <summary>
+        /// The GET field returns the ID of an entry from the database.
+        /// </summary>
+        Get
 
     }
 

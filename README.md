@@ -23,7 +23,7 @@
     <a href="#built-with">Libraries</a> •
     <a href="#commemorations">Commemorations</a> •
     <a href="https://github.com/Frostrix/Dexter/blob/master/LICENSE">License</a> •
-    <a href="http://usfurries.tk/documentation/api">Documentation</a>
+    <a href="http://usfurries.tk/documentation/api/index.html">Documentation</a>
 </p>
 
 ## Built With

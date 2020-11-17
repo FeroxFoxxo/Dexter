@@ -5,7 +5,7 @@
 </h1>
 
 <h3 align="center">The (unofficial) USFurries Discord bot!</h3>
-<h4 align="center">Contains tools to moderate the server and to create a better user experience overall!</h4>
+<h4 align="center">A moderation tool for the USFurries server. Made with love 💙 </h4>
 
 <p align="center">
     <img alt="Discord" src="https://img.shields.io/discord/336243033416794118?color=%237289DA&label=Discord">

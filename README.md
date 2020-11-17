@@ -8,13 +8,13 @@
 <h4 align="center">Used to help moderate the server and provides useful tools. Made with love <3</h4>
 
 <p align="center">
-  <a href="https://discord.gg/USFurries">
+  <a style="text-decoration:none" href="https://discord.gg/USFurries">
     <img alt="Discord" src="https://img.shields.io/discord/336243033416794118?color=%237289DA&label=Discord">
   </a>
-  <a href="https://dev.azure.com/frostrixz/Dexter">
+  <a style="text-decoration:none" href="https://dev.azure.com/frostrixz/Dexter">
     <img alt="Azure Pipelines" src="https://dev.azure.com/frostrixz/Dexter/_apis/build/status/Frostrix.Dexter?branchName=master">
   </a>
-  <a href="https://github.com/Frostrix/Dexter/blob/master/LICENSE">
+  <a style="text-decoration:none" href="https://github.com/Frostrix/Dexter/blob/master/LICENSE">
     <img alt="GitHub" src="https://img.shields.io/github/license/frostrix/dexter?label=License">
   </a>
 </p>

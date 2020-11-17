@@ -7,13 +7,6 @@
 <h3 align="center">The (unofficial) USFurries Discord bot!</h3>
 
 <p align="center">
-    <a href="#built-with">Libraries</a> •
-    <a href="#commemorations">Commemorations</a> •
-    <a href="https://github.com/Frostrix/Dexter/blob/master/LICENSE">License</a> •
-    <a href="http://usfurries.tk/documentation/api">Documentation</a>
-</p>
-
-<p align="center">
   <a href="https://discord.gg/USFurries">
     <img alt="Discord" src="https://img.shields.io/discord/336243033416794118?color=%237289DA&label=Discord">
   </a>
@@ -23,6 +16,13 @@
   <a href="https://github.com/Frostrix/Dexter/blob/master/LICENSE">
     <img alt="GitHub" src="https://img.shields.io/github/license/frostrix/dexter?label=License">
   </a>
+</p>
+
+<p align="center">
+    <a href="#built-with">Libraries</a> •
+    <a href="#commemorations">Commemorations</a> •
+    <a href="https://github.com/Frostrix/Dexter/blob/master/LICENSE">License</a> •
+    <a href="http://usfurries.tk/documentation/api">Documentation</a>
 </p>
 
 ## Built With

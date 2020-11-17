@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Dexter.Commands {
     public partial class GreetFurCommands {
 
-        [Command("greetfur")]
+        [Command("gfactivity")]
         [Summary("Gets the GreetFur's Activity for the fortnight.")]
         [BotChannel]
 

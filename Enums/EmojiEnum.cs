@@ -11,22 +11,22 @@
         Unknown,
 
         /// <summary>
-        /// The ANNOYED value will have an annoyed thumbnail of Dexter and will be RED.
+        /// The ANNOYED value will have an annoyed thumbnail and will be RED.
         /// </summary>
         Annoyed,
 
         /// <summary>
-        /// The LOVE value will have a thumbnail of Dexter blepping with hearts and will be GREEN.
+        /// The LOVE value will have a thumbnail with hearts and will be GREEN.
         /// </summary>
         Love,
-        
+
         /// <summary>
-        /// The WUT value will be a confused image of Dexter and will be TEAL.
+        /// The WUT value will be a confused thumbnail and will be TEAL.
         /// </summary>
         Wut,
         
         /// <summary>
-        /// The SIGN value will be an image of Dexter holding up a sign and will be BLUE.
+        /// The SIGN value will be an image of a sign and will be BLUE.
         /// </summary>
         Sign
 

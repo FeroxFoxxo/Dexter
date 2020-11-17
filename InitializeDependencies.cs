@@ -11,6 +11,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Discord;
 
 namespace Dexter {
     /// <summary>
@@ -55,12 +57,24 @@ namespace Dexter {
                 Directory.SetCurrentDirectory(WorkingDirectory);
 
             // Creates a ServiceCollection of the depencencies the project needs.
-            ServiceCollection ServiceCollection = new ();
+            ServiceCollection ServiceCollection = new();
+
+            // Adds an instance of the DiscordSocketClient to the collection, specifying the cache it should retain should be 1000 messages in size.
+            DiscordSocketClient DiscordSocketClient = new ( new DiscordSocketConfig { MessageCacheSize = 1000 } );
+            ServiceCollection.AddSingleton(DiscordSocketClient);
+
+            // Adds an instance of the CommandService, which is what calls our various commands.
+            CommandService CommandService = new();
+            ServiceCollection.AddSingleton(CommandService);
+
+            // Adds an instance of LoggingService, which allows us to log to the console.
+            LoggingService LoggingService = new ( DiscordSocketClient, CommandService );
+            ServiceCollection.AddSingleton(LoggingService);
 
             // Finds all JSON configurations and initializes them from their respective files.
             // If a JSON file is not created, a new one is initialized in its place.
             Assembly.GetExecutingAssembly().GetTypes()
-                    .Where(Type => Type.IsSubclassOf(typeof(JSONConfiguration)) && !Type.IsAbstract).ToList().ForEach(Type => {
+                    .Where(Type => Type.IsSubclassOf(typeof(JSONConfiguration)) && !Type.IsAbstract).ToList().ForEach(async Type => {
                 if (!File.Exists($"Configurations/{Type.Name}.json")) {
                     File.WriteAllText(
                         $"Configurations/{Type.Name}.json",
@@ -70,10 +84,11 @@ namespace Dexter {
                         )
                     );
 
-                    ServiceCollection.AddSingleton(Type);
+                    ServiceCollection.TryAddSingleton(Type);
 
-                    Console.WriteLine($" This application does not have a configuration file for {Type.Name}! " +
-                        $"A mock JSON class has been created in its place...");
+                    await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Warning, "Initialization",
+                        $" This application does not have a configuration file for {Type.Name}! " +
+                        $"A mock JSON class has been created in its place..."));
                 } else
                     ServiceCollection.AddSingleton(
                         Type,
@@ -88,28 +103,20 @@ namespace Dexter {
             // Finds all the Entity databases and adds them respecively to the service collection.
             Assembly.GetExecutingAssembly().GetTypes()
                 .Where(Type => Type.IsSubclassOf(typeof(EntityDatabase)) && !Type.IsAbstract)
-                .ToList().ForEach(Type => ServiceCollection.AddSingleton(Type));
-
-            // Adds an instance of the DiscordSocketClient to the collection, specifying the cache it should retain should be 1000 messages in size.
-            ServiceCollection.AddSingleton(
-                new DiscordSocketClient(new DiscordSocketConfig { MessageCacheSize = 1000 })
-            );
-
-            // Adds an instance of the CommandService, which is what calls our various commands.
-            ServiceCollection.AddSingleton<CommandService>();
+                .ToList().ForEach(Type => ServiceCollection.TryAddSingleton(Type));
 
             // Adds all commands that can be initialized to the service collection.
             Assembly.GetExecutingAssembly().GetTypes()
                     .Where(Type => Type.IsSubclassOf(typeof(DiscordModule)) && !Type.IsAbstract)
                     .ToList().ForEach(
-                Type => ServiceCollection.AddSingleton(Type)
+                Type => ServiceCollection.TryAddSingleton(Type)
             );
 
             // Adds all services that can be initialized to the service collection.
             Assembly.GetExecutingAssembly().GetTypes()
                     .Where(Type => Type.IsSubclassOf(typeof(InitializableModule)) && !Type.IsAbstract)
                     .ToList().ForEach(
-                Type => ServiceCollection.AddSingleton(Type)
+                Type => ServiceCollection.TryAddSingleton(Type)
             );
             
             // Builds the service collection to the provider.

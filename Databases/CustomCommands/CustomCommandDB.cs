@@ -1,5 +1,7 @@
 ﻿using Dexter.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Dexter.Databases.CustomCommands {
@@ -21,9 +23,18 @@ namespace Dexter.Databases.CustomCommands {
         /// <param name="Name">The name of the command or alias you wish to query for.</param>
         /// <returns>A CustomCommand object of the command you queried.</returns>
         public CustomCommand GetCommandByNameOrAlias(string Name) {
-            return CustomCommands.AsQueryable()
-                        .Where(CustomCMD => CustomCMD.CommandName == Name || CustomCMD.Alias.Contains(Name))
-                        .FirstOrDefault();
+            CustomCommand GetCommandByName = CustomCommands.AsQueryable().Where(CustomCMD => CustomCMD.CommandName.Equals(Name)).FirstOrDefault();
+
+            if (GetCommandByName != null)
+                return GetCommandByName;
+
+            CustomCommand[] GetCommandsByAlias = CustomCommands.AsQueryable().Where(CustomCMD => CustomCMD.Alias.Contains(Name)).ToArray();
+
+            foreach (CustomCommand Command in GetCommandsByAlias)
+                if (JsonConvert.DeserializeObject<List<string>>(Command.Alias).Contains(Name))
+                    return Command;
+
+            return null;
         }
 
     }

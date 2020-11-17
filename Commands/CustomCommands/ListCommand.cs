@@ -12,7 +12,7 @@ namespace Dexter.Commands {
         [Alias("customcommands", "ccl")]
 
         public async Task DisplayCommandsAsync() {
-            string CustomCommands = string.Join("\n", CustomCommandDB.CustomCommands.AsQueryable().Select(CustomCommand => BotConfiguration.Prefix + CustomCommand.CommandName).ToArray());
+            string CustomCommands = string.Join("\n", CustomCommandDB.CustomCommands.AsQueryable().Select(CustomCommand => BotConfiguration.Prefix + CustomCommand.CommandName));
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Here is a list of usable commands! <3")

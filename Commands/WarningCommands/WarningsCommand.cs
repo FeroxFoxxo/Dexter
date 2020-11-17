@@ -14,6 +14,14 @@ using System.Runtime.InteropServices;
 namespace Dexter.Commands {
     public partial class WarningCommands {
 
+        /// <summary>
+        /// The WarningsCommand runs on WARNINGS and will send a DM to the author of the message if the command is run in a bot
+        /// channel and no user is specified of their own warnings. If a user is specified and the author is a moderator it will
+        /// proceed to print out all the warnings of that specified member into the channel the command had been sent into.
+        /// </summary>
+        /// <param name="User">The User field specifies the user that you wish to get the warnings of.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+
         [Command("warnings")]
         [Summary("Returns a record of warnings.")]
         [Alias("records", "record")]

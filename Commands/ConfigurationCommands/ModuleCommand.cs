@@ -2,41 +2,47 @@
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Databases.Configuration;
-using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class ConfigurationCommands {
+
+        /// <summary>
+        /// The ListModule method runs on MODULES and will list all the enabled, disabled and essential commands when
+        /// given no parameters to the command, sending it into the specified channel.
+        /// </summary>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         [Command("modules")]
         [Summary("Lists all modules.")]
         [RequireAdministrator]
         [Alias("module", "mod")]
 
-        public async Task ListModulesAsync()
+        public async Task ListModules()
             => await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Modules:")
                 .WithDescription($"Use `{BotConfiguration.Prefix}module enable/disable <name>` to change the state of a module!")
-                .WithFields(
-                    CreateModuleListField("Enabled", ModuleService.GetModules(ConfigurationType.Enabled)),
-                    CreateModuleListField("Disabled", ModuleService.GetModules(ConfigurationType.Disabled)),
-                    CreateModuleListField("Essential", ModuleService.GetModules(ConfigurationType.Essential))
-                )
+                .AddField("Enabled", ModuleService.GetModules(ConfigurationType.Enabled), true)
+                .AddField("Disabled", ModuleService.GetModules(ConfigurationType.Disabled), true)
+                .AddField("Essential", ModuleService.GetModules(ConfigurationType.Essential), true)
                 .SendEmbed(Context.Channel);
 
-        private static EmbedFieldBuilder CreateModuleListField(string Name, string[] Modules)
-            => new EmbedFieldBuilder()
-                .WithName(Name)
-                .WithValue(Modules.Length > 0 ? string.Join("\n", Modules) : "No Modules")
-                .WithIsInline(true);
+        /// <summary>
+        /// The ModifyModule method runs on MODULES and will set a given module to a specific module type or will
+        /// reply with the status of the given module to the channel that the command had been send to.
+        /// </summary>
+        /// <param name="ModuleActionType">The ModuleActionType specifies the action you wish to apply to the command, whether that be ENABLE, DISABLE of LIST.</param>
+        /// <param name="ModuleName">The ModuleName specifies the name of the module that you wish the action to be applied to.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         [Command("modules")]
         [Summary("Performs an action on a module.")]
         [RequireAdministrator]
         [Alias("module", "mod")]
 
-        public async Task ModifyModuleAsync(ModuleActionType ModuleActionType, string ModuleName) {
+        public async Task ModifyModule(ModuleActionType ModuleActionType, string ModuleName) {
             if (Services.ModuleService.VerifyModuleName(ref ModuleName)) {
                 bool IsActive = ModuleService.GetModuleState(ModuleName);
 
@@ -69,5 +75,7 @@ namespace Dexter.Commands {
                     .WithDescription($"I don't know a module called **{ModuleName}.**")
                     .SendEmbed(Context.Channel);
         }
+
     }
+
 }

@@ -119,7 +119,7 @@ namespace Dexter.Services {
         /// <param name="LogMessage">The LogMessage field which gives us information about the message, for example the type of
         /// exception we have run into, the severity of the exception and the message of the exception to log.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        private async Task LogToConsole (LogMessage LogMessage) {
+        private static async Task LogToConsole (LogMessage LogMessage) {
             Console.ForegroundColor = LogMessage.Severity switch {
                 LogSeverity.Info => ConsoleColor.Blue,
                 LogSeverity.Critical => ConsoleColor.DarkRed,

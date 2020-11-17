@@ -5,6 +5,7 @@
 </h1>
 
 <h3 align="center">The (unofficial) USFurries Discord bot!</h3>
+<h4 align="center">Used to help moderate the server and provides useful tools. Made with love <3
 
 <p align="center">
   <a href="https://discord.gg/USFurries">

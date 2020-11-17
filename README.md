@@ -10,7 +10,7 @@
 <p align="center">
     <img alt="Discord" src="https://img.shields.io/discord/336243033416794118?color=%237289DA&label=Discord">
     <img alt="Azure Pipelines" src="https://dev.azure.com/frostrixz/Dexter/_apis/build/status/Frostrix.Dexter?branchName=master">
-    <img alt="GitHub" src="https://img.shields.io/github/license/Frostrix/Dexter?label=License">
+    <img alt="GitHub" src="https://img.shields.io/github/license/frostrix/dexter?label=License">
 </p>
 
 <p align="center">

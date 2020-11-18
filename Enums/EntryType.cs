@@ -1,4 +1,4 @@
-﻿namespace Dexter.Databases.Warnings {
+﻿namespace Dexter.Enums {
 
     /// <summary>
     /// This enum is to be able to see whether or not this entry has been removed or not.

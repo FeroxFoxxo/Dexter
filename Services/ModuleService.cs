@@ -130,8 +130,9 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="ConfigurationType">The type of the modules you would like to return in a string array - either essential, enabled or disabled.</param>
         /// <returns>Returns an array of strings containing the name of the module that has type ConfigurationType.</returns>
-        public string[] GetModules(ConfigurationType ConfigurationType) {
-            return ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == ConfigurationType).Select(Configuration => Configuration.ConfigurationName).ToArray();
+        public string GetModules(ConfigurationType ConfigurationType) {
+            return string.Join('\n', ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == ConfigurationType)
+                .Select(Configuration => Configuration.ConfigurationName).ToArray());
         }
 
         /// <summary>

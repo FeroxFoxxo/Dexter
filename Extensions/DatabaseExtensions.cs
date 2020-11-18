@@ -1,4 +1,5 @@
 ﻿using Dexter.Databases.FunTopics;
+using Dexter.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -17,11 +18,16 @@ namespace Dexter.Extensions {
         /// <param name="Topics">The topics field is the set of fun topics you wish to query from.</param>
         /// <returns>A tasked result of an instance of a fun object.</returns>
         public static async Task<FunTopic> GetRandomTopic(this DbSet<FunTopic> Topics) {
-            int RandomID = new Random().Next(await Topics.AsQueryable().CountAsync());
-            FunTopic FunTopic = Topics.AsQueryable().Where(Topic => Topic.TopicID == RandomID && Topic.TopicType != TopicType.Disabled).FirstOrDefault();
+            if (!Topics.AsQueryable().Any())
+                return null;
+
+            int RandomID = new Random().Next(1, Topics.AsQueryable().Count());
+
+            FunTopic FunTopic = Topics.AsQueryable().Where(Topic => Topic.TopicID == RandomID && Topic.EntryType != EntryType.Removed).FirstOrDefault();
 
             if (FunTopic != null)
                 return FunTopic;
+
             else return await Topics.GetRandomTopic();
         }
 

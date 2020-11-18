@@ -1,10 +1,10 @@
 ﻿namespace Dexter.Enums {
 
     /// <summary>
-    /// The ActionType represents an action that a user may make on a command
+    /// The CMDActionType represents an action that a user may make on a command
     /// that interfaces with the fun database. It includes add, remove, get and edit commands.
     /// </summary>
-    public enum ActionType {
+    public enum CMDActionType {
 
         /// <summary>
         /// The ADD field specifies the user is adding the given field to the database.

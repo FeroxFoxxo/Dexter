@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Microsoft.Extensions.DependencyInjection;
+using System.Data;
 
 namespace Dexter.Services {
 
@@ -393,6 +394,10 @@ namespace Dexter.Services {
 
                         Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Confirmation.CallbackParameters);
                         Type Class = Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.Name.Equals(Confirmation.CallbackClass)).FirstOrDefault();
+
+                        if (Class.GetMethod(Confirmation.CallbackMethod) == null)
+                            throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
+                        
                         Class.GetMethod(Confirmation.CallbackMethod).Invoke(InitializeDependencies.ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
                     }
 

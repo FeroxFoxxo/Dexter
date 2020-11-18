@@ -1,4 +1,4 @@
-﻿using Dexter.Databases.Warnings;
+﻿using Dexter.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.FunTopics {
@@ -23,11 +23,6 @@ namespace Dexter.Databases.FunTopics {
         /// The TOPIC field specifies the topic that will be printed once the command has run.
         /// </summary>
         public string Topic { get; set; }
-
-        /// <summary>
-        /// The TopicType specifies whether the desired topic is enabled to be shown.
-        /// </summary>
-        public TopicType TopicType { get; set; }
 
         /// <summary>
         /// The EntryType specifies whether this topic has been added or removed.

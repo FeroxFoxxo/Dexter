@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Dexter.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.Warnings {
 

@@ -15,9 +15,9 @@ namespace Dexter.Commands {
 
         /// <summary>
         /// The CustomCommand method runs on CC and will add or edit a custom command in the CustomCommandDB
-        /// based on the given ActionType and apply the REPLY parameter to it.
+        /// based on the given CMDActionType and apply the REPLY parameter to it.
         /// </summary>
-        /// <param name="ActionType">The ActionType specifies whether the action is to add or edit the command in the database.</param>
+        /// <param name="CMDActionType">The CMDActionType specifies whether the action is to add or edit the command in the database.</param>
         /// <param name="CommandName">The CommandName specifies the command that you wish to add or edit from the database.</param>
         /// <param name="Reply">The Reply specifies the reply that you wish to given command to have.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
@@ -27,9 +27,9 @@ namespace Dexter.Commands {
         [Alias("customcommand", "command")]
         [RequireModerator]
 
-        public async Task CustomCommand (ActionType ActionType, string CommandName, [Remainder] string Reply) {
-            switch (ActionType) {
-                case ActionType.Add:
+        public async Task CustomCommand (CMDActionType CMDActionType, string CommandName, [Remainder] string Reply) {
+            switch (CMDActionType) {
+                case CMDActionType.Add:
                     if (CustomCommandDB.GetCommandByNameOrAlias(CommandName) != null)
                         throw new InvalidOperationException($"A command with the name `{BotConfiguration.Prefix}{CommandName}` already exists!");
 
@@ -55,7 +55,7 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
 
                     break;
-                case ActionType.Edit:
+                case CMDActionType.Edit:
                     CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
                     if (Command == null)
@@ -82,15 +82,15 @@ namespace Dexter.Commands {
 
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(ActionType.ToString());
+                    throw new ArgumentOutOfRangeException(CMDActionType.ToString());
             }
         }
 
 
         /// <summary>
-        /// The CustomCommand method runs on CC and will remove or get a custom command from the CustomCommandDB based on the given ActionType.
+        /// The CustomCommand method runs on CC and will remove or get a custom command from the CustomCommandDB based on the given CMDActionType.
         /// </summary>
-        /// <param name="ActionType">The ActionType specifies whether the action is to remove or get the command from the database.</param>
+        /// <param name="CMDActionType">The CMDActionType specifies whether the action is to remove or get the command from the database.</param>
         /// <param name="CommandName">The CommandName specifies the command that you wish to remove or get from the database.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
@@ -99,14 +99,14 @@ namespace Dexter.Commands {
         [Alias("customcommand", "command")]
         [RequireModerator]
 
-        public async Task CustomCommand(ActionType ActionType, string CommandName) {
+        public async Task CustomCommand(CMDActionType CMDActionType, string CommandName) {
             CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
             if (Command == null)
                 throw new InvalidOperationException($"A command with the name `{BotConfiguration.Prefix}{CommandName}` doesn't exist!");
 
-            switch (ActionType) {
-                case ActionType.Remove:
+            switch (CMDActionType) {
+                case CMDActionType.Remove:
                     await SendForAdminApproval(RemoveCommandCallback,
                         new Dictionary<string, string>() {
                             { "CommandName", CommandName.ToLower() },
@@ -121,7 +121,7 @@ namespace Dexter.Commands {
                             $"The command `{BotConfiguration.Prefix}{CommandName}` will be removed from the database.")
                         .SendEmbed(Context.Channel);
                     break;
-                case ActionType.Get:
+                case CMDActionType.Get:
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"{BotConfiguration.Prefix}{CommandName}")
                         .AddField("Reply", Command.Reply)
@@ -129,7 +129,7 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(ActionType.ToString());
+                    throw new ArgumentOutOfRangeException(CMDActionType.ToString());
             }
         }
 
@@ -176,6 +176,7 @@ namespace Dexter.Commands {
         /// </summary>
         /// <param name="Parameters">The called back parameters:
         ///     CommandName = The name of the command you wish to remove.
+        /// </param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         public async Task RemoveCommandCallback(Dictionary<string, string> Parameters) {

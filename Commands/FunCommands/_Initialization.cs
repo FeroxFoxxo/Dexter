@@ -2,7 +2,6 @@
 using Dexter.Abstractions;
 using Discord.WebSocket;
 using Dexter.Databases.FunTopics;
-using System;
 
 namespace Dexter.Commands {
     public partial class FunCommands : DiscordModule {
@@ -10,11 +9,14 @@ namespace Dexter.Commands {
         private readonly FunConfiguration FunConfiguration;
         private readonly DiscordSocketClient DiscordSocketClient;
         private readonly FunTopicsDB FunTopicsDB;
+        private readonly BotConfiguration BotConfiguration;
 
-        public FunCommands(DiscordSocketClient DiscordSocketClient, FunConfiguration FunConfiguration, FunTopicsDB FunTopicsDB) {
+        public FunCommands(DiscordSocketClient DiscordSocketClient, FunConfiguration FunConfiguration,
+                FunTopicsDB FunTopicsDB, BotConfiguration BotConfiguration) {
             this.FunConfiguration = FunConfiguration;
             this.DiscordSocketClient = DiscordSocketClient;
             this.FunTopicsDB = FunTopicsDB;
+            this.BotConfiguration = BotConfiguration;
         }
 
     }

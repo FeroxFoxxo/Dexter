@@ -90,7 +90,7 @@ namespace Dexter.Services {
 
                 EmbedBuilder Builder = BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"{Proposal.ProposalType.ToString().Prettify()} {Proposal.ProposalStatus}.")
-                    .WithDescription($"{Proposal.ProposalType.ToString().Prettify()} {Proposal.Tracker} was successfully {Proposal.ProposalStatus.ToString().ToLower()} by {Approver.Mention}.")
+                    .WithDescription($"The {Proposal.ProposalType.ToString().Prettify().ToLower()} `{Proposal.Tracker}` was successfully {Proposal.ProposalStatus.ToString().ToLower()} by {Approver.Mention}.")
                     .AddField("Reason", string.IsNullOrEmpty(Reason) ? "No reason provided" : Reason)
                     .WithCurrentTimestamp();
 

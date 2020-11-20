@@ -15,10 +15,10 @@ namespace Dexter.Commands {
         public async Task HelpCommand() {
             EmbedBuilder Embed = BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"Hiya, I'm {Context.Client.CurrentUser.Username}~! Here's a list of modules and commands you can use!")
-                .WithDescription($"Use {BotConfiguration.Prefix}help [commandName] to show information about a command!");
+                .WithDescription($"Use {BotConfiguration.Prefix}help [commandName] to show information about a command.");
 
             foreach (ModuleInfo Module in CommandService.Modules) {
-                List<string> Description = new List<string>();
+                List<string> Description = new ();
 
                 foreach (CommandInfo CommandInfo in Module.Commands) {
                     PreconditionResult Result = await CommandInfo.CheckPreconditionsAsync(Context);
@@ -30,7 +30,7 @@ namespace Dexter.Commands {
                 }
 
                 if (Description.Count > 0)
-                    Embed.AddField(Regex.Replace(Module.Name, "[a-z][A-Z]", m => m.Value[0] + " " + m.Value[1]), string.Join("\n", Description.ToArray()));
+                    Embed.AddField(Regex.Replace(Module.Name, "[a-z][A-Z]", m => m.Value[0] + " " + m.Value[1]), string.Join("\n", Description.ToArray()), false);
             }
 
             await Embed.SendEmbed(Context.Channel);

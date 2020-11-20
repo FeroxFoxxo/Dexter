@@ -6,8 +6,11 @@ namespace Dexter.Commands {
 
         private readonly LoggingService LoggingService;
 
-        public UtilityCommands(LoggingService LoggingService) {
+        private readonly ProfileService ProfileService;
+
+        public UtilityCommands(LoggingService LoggingService, ProfileService ProfileService) {
             this.LoggingService = LoggingService;
+            this.ProfileService = ProfileService;
         }
 
     }

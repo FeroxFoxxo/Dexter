@@ -19,7 +19,7 @@ namespace Dexter.Commands {
         /// <param name="User">The user you wish to remove the cooldown from.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
-        [Command("comCooldown")]
+        [Command("commCooldown")]
         [Summary("Applies a specified action to a user's commission cooldown. This action can either be to ISSUE or REVOKE a cooldown.")]
         [Alias("commCooldown", "cooldown")]
         [RequireModerator]

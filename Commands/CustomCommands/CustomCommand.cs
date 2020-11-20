@@ -44,7 +44,7 @@ namespace Dexter.Commands {
                         },
                         Context.Message.Author.Id,
                         $"{Context.Message.Author.GetUserInformation()} has suggested that the command `{BotConfiguration.Prefix}{CommandName}` should be " +
-                        $"added with the reply of {Reply}.");
+                        $"added with the reply of `{Reply}`.");
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"The command `{CommandName}` was suggested!")
@@ -77,7 +77,7 @@ namespace Dexter.Commands {
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"The edit to `{BotConfiguration.Prefix}{CommandName}` was suggested!")
                         .WithDescription($"Once it has passed admin approval, " +
-                            $"The command `{BotConfiguration.Prefix}{CommandName}` will be changed to have the reply of {Reply} rahter than {Command.Reply}.")
+                            $"The command `{BotConfiguration.Prefix}{CommandName}` will be changed to have the reply of `{Reply}` rahter than `{Command.Reply}`.")
                         .SendEmbed(Context.Channel);
 
                     break;

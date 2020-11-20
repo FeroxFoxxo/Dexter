@@ -22,6 +22,11 @@ namespace Dexter.Services {
         private readonly Random Random;
 
         /// <summary>
+        /// The CurrentPFP represents the filename of the current profile picture.
+        /// </summary>
+        public string CurrentPFP { get; private set; }
+
+        /// <summary>
         /// The constructor for the ProfileService module. This takes in the injected dependencies and sets them as per what the class requires.
         /// It also creates our instance of Random, which is used to pick a random file from the given directory.
         /// </summary>
@@ -58,9 +63,13 @@ namespace Dexter.Services {
 
                 FileInfo[] Files = DirectoryInfo.GetFiles("*.*").Where(File => PFPConfiguration.PFPExtensions.Contains(File.Extension.ToLower())).ToArray();
 
-                FileStream PFP = Files[Random.Next(0, Files.Length)].OpenRead();
+                FileInfo ProfilePicture = Files[Random.Next(0, Files.Length)];
 
-                await DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(PFP));
+                CurrentPFP = ProfilePicture.Name;
+
+                FileStream ProfilePictureStream = ProfilePicture.OpenRead();
+
+                await DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(ProfilePictureStream));
             } catch (Exception Exception) {
                 await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, GetType().Name, Exception.Message));
             }

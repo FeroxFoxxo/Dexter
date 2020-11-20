@@ -91,7 +91,7 @@ namespace Dexter.Commands {
                 DateTimeOffset Time = DateTimeOffset.FromUnixTimeSeconds(TimeOfIssue > 253402300799 ? TimeOfIssue / 1000 : TimeOfIssue);
 
                 EmbedFieldBuilder Field = new EmbedFieldBuilder()
-                    .WithName($"Warning {Index} - ID {Warnings[Index].WarningID}")
+                    .WithName($"Warning {Index + 1} - ID {Warnings[Index].WarningID}")
                     .WithValue($"{(ShowIssuer ? $":cop: {(Issuer != null ? Issuer.GetUserInformation() : "Unknown")}\n" : "")}" +
                     $":calendar: {Time:M/d/yyyy h:mm:ss}\n" +
                     $":notepad_spiral: {Warnings[Index].Reason}");

@@ -187,9 +187,8 @@ namespace Dexter.Services {
 
             // Add related attachments to the embed.
             if (RecievedMessage.Attachments.Count > 0)
-                Embed = await RecievedMessage.Channel.SendFileAsync(
-                    RecievedMessage.Attachments.First().ProxyUrl,
-                    embed: BuildProposal(Proposal).Build()
+                Embed = await RecievedMessage.Channel.SendMessageAsync(
+                    embed: BuildProposal(Proposal).WithImageUrl(RecievedMessage.Attachments.First().ProxyUrl).Build()
                 );
             else
                 Embed = await RecievedMessage.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());

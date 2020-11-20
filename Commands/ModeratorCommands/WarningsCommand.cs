@@ -86,7 +86,9 @@ namespace Dexter.Commands {
             for(int Index = 0; Index < Warnings.Length; Index++) {
                 SocketGuildUser Issuer = Context.Guild.GetUser(Warnings[Index].Issuer);
 
-                DateTimeOffset Time = DateTimeOffset.FromUnixTimeSeconds(Warnings[Index].TimeOfIssue);
+                long TimeOfIssue = Warnings[Index].TimeOfIssue;
+
+                DateTimeOffset Time = DateTimeOffset.FromUnixTimeSeconds(TimeOfIssue > 253402300799 ? TimeOfIssue / 1000 : TimeOfIssue);
 
                 EmbedFieldBuilder Field = new EmbedFieldBuilder()
                     .WithName($"Warning {Index} - ID {Warnings[Index].WarningID}")

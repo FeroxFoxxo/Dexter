@@ -133,10 +133,10 @@ namespace Dexter.Services {
                                 .WithDescription($"{CustomCommand.CommandName} has not been configured! Please contact a moderator about this. <3")
                                 .SendEmbed(CommandContext.Channel);
                     } else {
-                        await BuildEmbed(EmojiEnum.Annoyed)
-                        .WithTitle("Unknown Command.")
-                        .WithDescription($"Oopsies! It seems as if the command **{CustomCommandArgs[0].SanitizeMarkdown()}** doesn't exist!")
-                        .SendEmbed(CommandContext.Channel);
+                        //await BuildEmbed(EmojiEnum.Annoyed)
+                        //    .WithTitle("Unknown Command.")
+                        //    .WithDescription($"Oopsies! It seems as if the command **{CustomCommandArgs[0].SanitizeMarkdown()}** doesn't exist!")
+                        //    .SendEmbed(CommandContext.Channel);
                     }
                     break;
                 case CommandError.ParseFailed:

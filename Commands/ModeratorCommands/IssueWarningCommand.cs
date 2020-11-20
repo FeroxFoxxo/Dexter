@@ -35,7 +35,7 @@ namespace Dexter.Commands {
                 return;
             }
 
-            int WarningID = WarningsDB.Warnings.Count() + 1;
+            int WarningID = WarningsDB.Warnings.Max(Warning => Warning.WarningID) + 1;
 
             int TotalWarnings = WarningsDB.GetWarnings(User.Id).Length + 1;
 

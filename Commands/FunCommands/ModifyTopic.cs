@@ -86,7 +86,7 @@ namespace Dexter.Commands {
 
             FunTopic FunTopic = new () {
                 Topic = Topic,
-                EntryType = EntryType.Valid,
+                EntryType = EntryType.Issue,
                 ProposerID = Proposer,
                 TopicID = TopicDatabase.Count() + 1
             };

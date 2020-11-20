@@ -81,7 +81,7 @@ namespace Dexter.Services {
                 if (ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationName == TypeName).FirstOrDefault() == null) {
                     ConfigurationDB.Configurations.Add(new Configuration() {
                         ConfigurationName = TypeName,
-                        ConfigurationType = ConfigurationType.Disabled
+                        ConfigurationType = ConfigurationType.Enabled
                     });
                     await ConfigurationDB.SaveChangesAsync();
                 }
@@ -90,7 +90,7 @@ namespace Dexter.Services {
             // Check for attribute set in database not matching project.
             foreach (Configuration Configuration in ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == ConfigurationType.Essential).ToArray())
                 if (!EssentialModules.Contains(Configuration.ConfigurationName)) {
-                    Configuration.ConfigurationType = ConfigurationType.Disabled;
+                    Configuration.ConfigurationType = ConfigurationType.Enabled;
                     await ConfigurationDB.SaveChangesAsync();
                 }
 

@@ -23,7 +23,7 @@ namespace Dexter.Databases.Warnings {
         /// <returns>An array of warning objects that the user has.</returns>
         public Warning[] GetWarnings(ulong UserID) =>
             Warnings.AsQueryable()
-            .Where(Warning => Warning.User == UserID && Warning.EntryType != EntryType.Removed)
+            .Where(Warning => Warning.User == UserID && Warning.EntryType != EntryType.Revoke)
             .ToArray();
 
     }

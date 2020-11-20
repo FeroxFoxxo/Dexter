@@ -10,10 +10,10 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
-    public partial class WarningCommands {
+    public partial class ModeratorCommands {
 
         /// <summary>
-        /// The Issue Warning method runs on the WARN command. It applies a warning to a user by adding it to the related database.
+        /// The Issue Warning method runs on WARN. It applies a warning to a user by adding it to the related database.
         /// It attaches this warning with a reason, and then notifies the recipient of the warning having been applied.
         /// This command can only be used by a moderator or higher position in the server.
         /// </summary>
@@ -44,7 +44,7 @@ namespace Dexter.Commands {
                 Reason = Reason,
                 User = User.Id,
                 WarningID = WarningID,
-                EntryType = EntryType.Valid,
+                EntryType = EntryType.Issue,
                 TimeOfIssue = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
             });
 

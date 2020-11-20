@@ -8,17 +8,17 @@
     public enum EntryType {
 
         /// <summary>
-        /// The valid enum state is to differenciate this entry to one that has been removed.
+        /// The issue enum state is to differenciate this entry to one that has been removed.
         /// When an entry is created, it is automatically set to this enum value unless a command
         /// has been run that has changed its state into a removed state.
         /// </summary>
-        Valid,
+        Issue,
 
         /// <summary>
         /// Whenever an entry is revoked, it is ommitted from its command.
         /// This is to help with accidental removals.
         /// </summary>
-        Removed
+        Revoke
 
     }
 

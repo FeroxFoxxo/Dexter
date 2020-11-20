@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
 namespace Dexter.Commands {
-    public partial class WarningCommands {
+    public partial class ModeratorCommands {
 
         /// <summary>
         /// The WarningsCommand runs on WARNINGS and will send a DM to the author of the message if the command is run in a bot

@@ -24,13 +24,11 @@ namespace Dexter.Commands {
             try {
                 await User.SendMessageAsync($"**__Message From {Context.Guild.Name}__**\n{Message}");
 
-                Embed.WithColor(Color.Green)
-                    .AddField("Success", "The DM was successfully sent!")
-                    .WithThumbnailUrl(BotConfiguration.ThumbnailURLs[(int)EmojiEnum.Love]);
+                Embed.BuildEmbed(EmojiEnum.Love)
+                    .AddField("Success", "The DM was successfully sent!");
             } catch (HttpException) {
-                Embed.WithColor(Color.Red)
-                    .AddField("Failed", "This fluff may have either blocked DMs from the server or me!")
-                    .WithThumbnailUrl(BotConfiguration.ThumbnailURLs[(int)EmojiEnum.Annoyed]);
+                Embed.BuildEmbed(EmojiEnum.Annoyed)
+                    .AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
             }
 
             await Embed.SendEmbed(Context.Channel);

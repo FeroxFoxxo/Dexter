@@ -12,10 +12,10 @@ using Discord.Net;
 using Dexter.Attributes;
 
 namespace Dexter.Commands {
-    public partial class WarningCommands {
+    public partial class ModeratorCommands {
 
         /// <summary>
-        /// The Purge Warnings method runs on the PURGEWARNS command. It sends a callback to the SendForAdminApproval
+        /// The Purge Warnings method runs on PURGEWARNS. It sends a callback to the SendForAdminApproval
         /// method, which will put it up to be voted on by the administrators. After this has been voted on, it will
         /// set all warnings to a revoked state and notify the user that their warnings have been removed.
         /// </summary>
@@ -57,7 +57,7 @@ namespace Dexter.Commands {
 
             int Count = WarningsDB.GetWarnings(UserID).Length;
 
-            await WarningsDB.Warnings.AsQueryable().Where(Warning => Warning.User == UserID).ForEachAsync(Warning => Warning.EntryType = EntryType.Removed);
+            await WarningsDB.Warnings.AsQueryable().Where(Warning => Warning.User == UserID).ForEachAsync(Warning => Warning.EntryType = EntryType.Revoke);
 
             await WarningsDB.SaveChangesAsync();
 

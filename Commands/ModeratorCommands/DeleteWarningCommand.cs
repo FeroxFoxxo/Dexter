@@ -8,10 +8,10 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
-    public partial class WarningCommands {
+    public partial class ModeratorCommands {
 
         /// <summary>
-        /// The Delete Warnings method runs on the DELWARN command. It sets a warning to a revoked status,
+        /// The Delete Warning method runs on DELWARN. It sets a warning to a revoked status,
         /// making it so that the warning is thus removed from an individual and cannot be seen through the records command.
         /// </summary>
         /// <param name="WarningID">The ID of the warning that you wish to remove from the user.</param>
@@ -22,10 +22,10 @@ namespace Dexter.Commands {
         [Alias("deletewarn", "revokewarn")]
         [RequireModerator]
 
-        public async Task DeleteWarning(int WarningID) {
+        public async Task DeleteWarning (int WarningID) {
             Warning Warning = WarningsDB.Warnings.AsQueryable().Where(Warning => Warning.WarningID == WarningID).FirstOrDefault();
 
-            Warning.EntryType = EntryType.Removed;
+            Warning.EntryType = EntryType.Revoke;
 
             await WarningsDB.SaveChangesAsync();
 

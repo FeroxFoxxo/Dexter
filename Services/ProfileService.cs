@@ -17,7 +17,6 @@ namespace Dexter.Services {
 
         private readonly DiscordSocketClient DiscordSocketClient;
         private readonly PFPConfiguration PFPConfiguration;
-        private readonly LoggingService LoggingService;
 
         private readonly Random Random;
 
@@ -32,13 +31,9 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="DiscordSocketClient">The DiscordSocketClient is used to hook the ready event up to the change PFP method.</param>
         /// <param name="PFPConfiguration">The PFPConfiguration stores data on where the pfps are located and which extensions are viable.</param>
-        /// <param name="LoggingService">The LoggingService is used to log exceptions that occur on the attempt of trying to change a PFP.</param>
-        public ProfileService(DiscordSocketClient DiscordSocketClient, PFPConfiguration PFPConfiguration,
-                LoggingService LoggingService) {
-
+        public ProfileService(DiscordSocketClient DiscordSocketClient, PFPConfiguration PFPConfiguration) {
             this.DiscordSocketClient = DiscordSocketClient;
             this.PFPConfiguration = PFPConfiguration;
-            this.LoggingService = LoggingService;
 
             Random = new Random();
         }
@@ -47,32 +42,27 @@ namespace Dexter.Services {
         /// The AddDelegates void hooks the Client.Ready event to the ChangePFP method.
         /// </summary>
         public override void AddDelegates() {
-            DiscordSocketClient.Ready += ChangePFP;
+            DiscordSocketClient.Ready += async () => await DiscordSocketClient.CurrentUser
+                .ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP()));
         }
 
         /// <summary>
-        /// The ChangePFP method runs on Client.Ready and it simply changes the PFP of the bot.
+        /// The GetRandomPFP method runs on Client.Ready and it simply gets a random PFP of the bot.
         /// </summary>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        public async Task ChangePFP() {
+        public FileStream GetRandomPFP() {
             if (string.IsNullOrEmpty(PFPConfiguration.PFPDirectory))
-                return;
+                return null;
 
-            try {
-                DirectoryInfo DirectoryInfo = new(PFPConfiguration.PFPDirectory);
+            DirectoryInfo DirectoryInfo = new(PFPConfiguration.PFPDirectory);
 
-                FileInfo[] Files = DirectoryInfo.GetFiles("*.*").Where(File => PFPConfiguration.PFPExtensions.Contains(File.Extension.ToLower())).ToArray();
+            FileInfo[] Files = DirectoryInfo.GetFiles("*.*").Where(File => PFPConfiguration.PFPExtensions.Contains(File.Extension.ToLower())).ToArray();
 
-                FileInfo ProfilePicture = Files[Random.Next(0, Files.Length)];
+            FileInfo ProfilePicture = Files[Random.Next(0, Files.Length)];
 
-                CurrentPFP = ProfilePicture.Name;
+            CurrentPFP = ProfilePicture.Name;
 
-                FileStream ProfilePictureStream = ProfilePicture.OpenRead();
-
-                await DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(ProfilePictureStream));
-            } catch (Exception Exception) {
-                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, GetType().Name, Exception.Message));
-            }
+            return ProfilePicture.OpenRead();
         }
     }
 

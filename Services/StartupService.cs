@@ -7,6 +7,8 @@ using Discord.WebSocket;
 using System.Threading.Tasks;
 using System;
 using Figgle;
+using System.Net.Http;
+using Newtonsoft.Json.Linq;
 
 namespace Dexter.Services {
 
@@ -93,10 +95,22 @@ namespace Dexter.Services {
 
             LoggingService.SetOutputToLocked(false);
 
+            using HttpClient HTTPClient = new();
+
+            HTTPClient.DefaultRequestHeaders.Add("User-Agent",
+                "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; WOW64; Trident/6.0)");
+
+            using HttpResponseMessage Response = HTTPClient.GetAsync("https://api.github.com/repos/Frostrix/Dexter/commits").Result;
+            string JSON = Response.Content.ReadAsStringAsync().Result;
+
+            dynamic Commits = JArray.Parse(JSON);
+            string LastCommit = Commits[0].commit.message;
+
             if (BotConfiguration.EnableStartupAlert)
                 await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Startup complete!")
                 .WithDescription($"This is **{DiscordSocketClient.CurrentUser.Username} v{InitializeDependencies.Version}** running **Discord.Net v{DiscordConfig.Version}**!")
+                .AddField("Latest Commit:", LastCommit)
                 .SendEmbed(Channel);
         }
 

@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
-using Discord.Net;
 using Dexter.Attributes;
 
 namespace Dexter.Commands {
@@ -24,7 +23,7 @@ namespace Dexter.Commands {
 
         [Command("purgewarns")]
         [Summary("Removes all warnings from a user.")]
-        [RequireModerator]
+        [RequireAdministrator]
 
         public async Task PurgeWarnings(IUser User) {
             await SendForAdminApproval(PurgeWarningsCallback,

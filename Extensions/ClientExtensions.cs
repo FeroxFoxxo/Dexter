@@ -1,6 +1,8 @@
-﻿using Discord.Rest;
+﻿using Dexter.Services;
+using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
 
@@ -30,7 +32,7 @@ namespace Dexter.Extensions {
                     if (RestWebhook.Name.Equals(WebhookName))
                         return new DiscordWebhookClient(RestWebhook.Id, RestWebhook.Token);
 
-                RestWebhook Webhook = await TextChannel.CreateWebhookAsync(WebhookName);
+                RestWebhook Webhook = await TextChannel.CreateWebhookAsync(WebhookName, InitializeDependencies.ServiceProvider.GetRequiredService<ProfileService>().GetRandomPFP());
 
                 return new DiscordWebhookClient(Webhook.Id, Webhook.Token);
             }

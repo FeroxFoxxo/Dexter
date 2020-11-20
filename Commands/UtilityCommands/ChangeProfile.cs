@@ -1,5 +1,6 @@
 ﻿using Dexter.Enums;
 using Dexter.Extensions;
+using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
 
@@ -10,7 +11,8 @@ namespace Dexter.Commands {
         [Summary("Changes the profile picture of the bot to a random image from a selection made for him.")]
 
         public async Task ChangeProfile () {
-            await ProfileService.ChangePFP();
+            await DiscordSocketClient.CurrentUser
+                .ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(ProfileService.GetRandomPFP()));
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Profile Changed.")

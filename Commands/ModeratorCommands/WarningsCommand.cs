@@ -84,7 +84,7 @@ namespace Dexter.Commands {
                 .WithDescription($"All times are displayed in {TimeZoneInfo.Local.DisplayName}");
 
             for(int Index = 0; Index < Warnings.Length; Index++) {
-                SocketGuildUser Issuer = Context.Guild.GetUser(Warnings[Index].Issuer);
+                IUser Issuer = Client.GetUser(Warnings[Index].Issuer);
 
                 long TimeOfIssue = Warnings[Index].TimeOfIssue;
 

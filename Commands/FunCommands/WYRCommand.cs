@@ -1,4 +1,5 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes;
+using Dexter.Enums;
 using Discord.Commands;
 using System;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace Dexter.Commands {
         [Command("wyr")]
         [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from.")]
         [Alias("would you rather", "wouldyourather")]
+        [CommandCooldown(240)]
 
         public async Task WYRCommand() => await SendTopic(TopicType.WouldYouRather);
 

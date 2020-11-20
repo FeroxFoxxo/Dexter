@@ -165,7 +165,7 @@ namespace Dexter.Services {
                     .WithDescription("Please try to summarise your suggestion a little! " +
                     "Keep in mind that emoji add a lot of characters to your suggestion - even if it doesn't seem like it - " +
                     "as Discord handles emoji differently to text, so if you're using a lot of emoji try to cut down on those! <3")
-                    .SendEmbed(RecievedMessage.Author, RecievedMessage.Channel);
+                    .SendEmbed(RecievedMessage.Author, RecievedMessage.Channel as ITextChannel);
                 return;
             }
 
@@ -421,12 +421,9 @@ namespace Dexter.Services {
             if (SocketChannel is SocketTextChannel TextChannel) {
                 IMessage ProposalMessage = await TextChannel.GetMessageAsync(MessageID);
 
-                if (ProposalMessage is RestUserMessage ProposalMSG) {
+                if (ProposalMessage is IUserMessage ProposalMSG) {
                     await ProposalMessage.RemoveAllReactionsAsync();
                     await ProposalMSG.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildProposal(Proposal).Build());
-                } else if (ProposalMessage is SocketUserMessage ProposalMSG2) {
-                    await ProposalMessage.RemoveAllReactionsAsync();
-                    await ProposalMSG2.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildProposal(Proposal).Build());
                 } else
                     throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? TopicType: {ProposalMessage.GetType()}");
             } else

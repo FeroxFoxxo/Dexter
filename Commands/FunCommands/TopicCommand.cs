@@ -1,4 +1,5 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes;
+using Dexter.Enums;
 using Discord.Commands;
 using System;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace Dexter.Commands {
 
         [Command("topic")]
         [Summary("A topic starter command - perfect for when chat has died!")]
+        [CommandCooldown(240)]
 
         public async Task TopicCommand() => await SendTopic(TopicType.Topic);
 

@@ -3,6 +3,7 @@ using Dexter.Configurations;
 using Dexter.Databases.Cooldowns;
 using Dexter.Enums;
 using Dexter.Extensions;
+using Discord;
 using Discord.WebSocket;
 using System;
 using System.Linq;
@@ -31,8 +32,8 @@ namespace Dexter.Services {
             if (SocketMessage.Channel.Id != CommissionCooldownConfiguration.CommissionsCornerID || SocketMessage.Author.IsBot)
                 return;
 
-            Cooldown Cooldown = CooldownDB.CommissionCooldowns.AsQueryable()
-                .Where(Cooldown => Cooldown.Identifier == SocketMessage.Author.Id.ToString()).FirstOrDefault();
+            Cooldown Cooldown = CooldownDB.Cooldowns.AsQueryable()
+                .Where(Cooldown => Cooldown.Token.Equals($"{SocketMessage.Author.Id}{SocketMessage.Channel.Id}")).FirstOrDefault();
 
             if (Cooldown != null) {
                 if (Cooldown.TimeOfCooldown + CommissionCooldownConfiguration.CommissionCornerCooldown > DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
@@ -49,7 +50,7 @@ namespace Dexter.Services {
                             .AddField("Last Commission Sent:", $"{CooldownTime.ToLongTimeString()}, {CooldownTime.ToLongDateString()}")
                             .WithFooter($"Times are in {(TimeZoneInfo.Local.IsDaylightSavingTime(CooldownTime) ? TimeZoneInfo.Local.DaylightName : TimeZoneInfo.Local.StandardName)}.")
                             .WithCurrentTimestamp()
-                            .SendEmbed(SocketMessage.Author, SocketMessage.Channel);
+                            .SendEmbed(SocketMessage.Author, SocketMessage.Channel as ITextChannel);
                     }
                 } else {
                     Cooldown.TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -57,10 +58,10 @@ namespace Dexter.Services {
                     await CooldownDB.SaveChangesAsync();
                 }
             } else {
-                CooldownDB.CommissionCooldowns.Add(
+                CooldownDB.Cooldowns.Add(
                     new Cooldown() {
-                        Identifier = SocketMessage.Author.Id.ToString(),
-                        TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                        Token = $"{SocketMessage.Author.Id}{SocketMessage.Channel.Id}",
+                        TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                     }
                 );
 

@@ -5,9 +5,7 @@ namespace Dexter.Databases.Cooldowns {
     
     public class CooldownDB : EntityDatabase {
         
-        public DbSet<Cooldown> CommissionCooldowns { get; set; }
-
-        public DbSet<Cooldown> FunCooldowns { get; set; }
+        public DbSet<Cooldown> Cooldowns { get; set; }
 
     }
 

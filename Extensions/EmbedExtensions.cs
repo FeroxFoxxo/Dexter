@@ -56,16 +56,19 @@ namespace Dexter.Extensions {
         /// </summary>
         /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
         /// <param name="User">The IUser you wish to send the embed to.</param>
+        /// <param name="Fallback">The Fallback is the channel it will send the embed to if the user has blocked DMs.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, IUser User, IMessageChannel Fallback) {
+        public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, IUser User, ITextChannel Fallback) {
             try {
                 await User.SendMessageAsync(embed: EmbedBuilder.Build());
             } catch (HttpException) {
                 IUserMessage Message = await Fallback.SendMessageAsync(embed: EmbedBuilder
-                    .WithAuthor($"Psst, {User.Username}! Please unblock me or allow direct messages from USF. <3")
+                    .WithAuthor($"Psst, {User.Username}! Please unblock me or allow direct messages from {Fallback.Guild.Name}. <3")
                     .Build());
-                await Task.Delay(5000);
-                await Message.DeleteAsync();
+                _ = Task.Run(async () => {
+                    await Task.Delay(5000);
+                    await Message.DeleteAsync();
+                });
             }
         }
 

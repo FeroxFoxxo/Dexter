@@ -11,6 +11,7 @@ namespace Dexter.Commands {
         [Summary("How gay are you? Use this command to find out-")]
         [Alias("straight", "bisexual")]
         [BotChannel]
+        [CommandCooldown(60)]
 
         public async Task GayCommand() {
             await GayCommand(Context.Guild.GetUser(Context.User.Id));
@@ -20,9 +21,10 @@ namespace Dexter.Commands {
         [Summary("How gay are you? Use this command to find out-")]
         [Alias("straight", "bisexual")]
         [BotChannel]
+        [CommandCooldown(60)]
 
         public async Task GayCommand(IUser User) {
-            int Percentage = new Random((User.Id / new DateTime(1970, 1, 1).Subtract(DateTime.Now).TotalDays).ToString().GetHashCode()).Next(102);
+            int Percentage = new Random((User.Id / DateTime.UnixEpoch.Subtract(DateTime.UtcNow).TotalDays).ToString().GetHashCode()).Next(102);
 
             await Context.Channel.SendMessageAsync($"**{User.Username}'s** level of gay is {(Percentage > 100 ? "***over 9000!***" : $"**{Percentage}%**")}. "
                 + $"{(User.Id == Context.Message.Author.Id ? "You're" : User.Id == Context.Client.CurrentUser.Id ? "I'm" : "They're")} **{(Percentage < 33 ? "heterosexual" : Percentage < 66 ? "bisexual" : "homosexual")}**! "

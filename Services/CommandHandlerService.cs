@@ -9,6 +9,7 @@ using Discord.WebSocket;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Humanizer;
 
 namespace Dexter.Services {
 
@@ -103,6 +104,9 @@ namespace Dexter.Services {
 
             switch (Result.Error) {
                 case CommandError.UnmetPrecondition:
+                    if (Result.ErrorReason.Length <= 0)
+                        return;
+
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Halt! Don't go there-")
                         .WithDescription(Result.ErrorReason)
@@ -142,7 +146,7 @@ namespace Dexter.Services {
                         .SendEmbed(CommandContext.Channel);
                     break;
                 default:
-                    await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Warning, GetType().Name.Prettify(), $"Unknown statement reached!\nCommand: {(CommandInfo.IsSpecified ? CommandInfo.Value : null)}\nResult: {Result}"));
+                    await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Warning, GetType().Name.Prettify(), $"Unknown statement reached!\nCommand: {(CommandInfo.IsSpecified ? CommandInfo.Value.Name : null)}\nResult: {Result}"));
 
                     if (!string.IsNullOrEmpty(BotConfiguration.DeveloperMention))
                         await CommandContext.Channel.SendMessageAsync($"Unknown error! I'll tell the developers.\n{BotConfiguration.DeveloperMention}");

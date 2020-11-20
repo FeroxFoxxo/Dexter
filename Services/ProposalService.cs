@@ -95,7 +95,7 @@ namespace Dexter.Services {
                     .WithCurrentTimestamp();
 
                 try {
-                    await BuildProposal(Proposal).SendEmbed(DiscordSocketClient.GetUser(Proposal.Proposer));
+                    await BuildProposal(Proposal).SendEmbed(await DiscordSocketClient.GetUser(Proposal.Proposer).GetOrCreateDMChannelAsync());
 
                     Builder.AddField("Success", "The DM was successfully sent!");
                 } catch (HttpException) {
@@ -158,14 +158,14 @@ namespace Dexter.Services {
 
             // Check to see if the embed message length is more than 1750, else will fail the embed from sending due to character limits.
             if (RecievedMessage.Content.Length > 1750) {
+                await RecievedMessage.DeleteAsync();
+
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Your suggestion is too big!")
                     .WithDescription("Please try to summarise your suggestion a little! " +
                     "Keep in mind that emoji add a lot of characters to your suggestion - even if it doesn't seem like it - " +
                     "as Discord handles emoji differently to text, so if you're using a lot of emoji try to cut down on those! <3")
-                    .SendEmbed(RecievedMessage.Author);
-
-                await RecievedMessage.DeleteAsync();
+                    .SendEmbed(RecievedMessage.Author, RecievedMessage.Channel);
                 return;
             }
 

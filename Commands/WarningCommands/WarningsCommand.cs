@@ -40,7 +40,7 @@ namespace Dexter.Commands {
 
                 try {
                     foreach (EmbedBuilder Embed in Embeds)
-                        await Embed.SendEmbed(Context.Message.Author);
+                        await Embed.SendEmbed(await Context.Message.Author.GetOrCreateDMChannelAsync());
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Sent warnings log.")

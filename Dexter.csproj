@@ -25,6 +25,9 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0" />
 		<PackageReference Include="System.CommandLine.DragonFruit" Version="0.3.0-alpha.20371.2" />
+		<None Update="Configurations\CommissionCooldownConfiguration.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Configurations\GreetFurConfiguration.json">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

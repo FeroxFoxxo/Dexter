@@ -2,6 +2,7 @@
 using Dexter.Enums;
 using Discord;
 using Discord.Commands;
+using Discord.Net;
 using Discord.Webhook;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
@@ -56,8 +57,17 @@ namespace Dexter.Extensions {
         /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
         /// <param name="User">The IUser you wish to send the embed to.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, IUser User) =>
-            await User.SendMessageAsync(embed: EmbedBuilder.Build());
+        public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, IUser User, IMessageChannel Fallback) {
+            try {
+                await User.SendMessageAsync(embed: EmbedBuilder.Build());
+            } catch (HttpException) {
+                IUserMessage Message = await Fallback.SendMessageAsync(embed: EmbedBuilder
+                    .WithAuthor($"Psst, {User.Username}! Please unblock me or allow direct messages from USF. <3")
+                    .Build());
+                await Task.Delay(5000);
+                await Message.DeleteAsync();
+            }
+        }
 
         /// <summary>
         /// The AddField method adds a field to an EmbedBuilder if a given condition is true.

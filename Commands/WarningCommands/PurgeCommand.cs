@@ -61,13 +61,11 @@ namespace Dexter.Commands {
 
             await WarningsDB.SaveChangesAsync();
 
-            try {
-                await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle("Warnings Purged")
-                    .WithDescription($"Heya! I've purged {Count} warnings from your account. You now have a clean slate! <3")
-                    .WithCurrentTimestamp()
-                    .SendEmbed(Client.GetUser(UserID));
-            } catch (HttpException) { }
+            await BuildEmbed(EmojiEnum.Love)
+                .WithTitle("Warnings Purged")
+                .WithDescription($"Heya! I've purged {Count} warnings from your account. You now have a clean slate! <3")
+                .WithCurrentTimestamp()
+                .SendEmbed(await Client.GetUser(UserID).GetOrCreateDMChannelAsync());
         }
 
     }

@@ -50,7 +50,7 @@ namespace Dexter.Commands {
         [Summary("A way to EDIT a wyr in the database. " +
             "Takes in the wyr's ID as a parameter, which can be gotten from the GET command, and the edited wyr.")]
 
-        public async Task TopicCommand(CMDActionType CMDActionType, int TopicID, [Remainder] string EditedTopic) {
+        public async Task WYRCommand(CMDActionType CMDActionType, int TopicID, [Remainder] string EditedTopic) {
 
             switch (CMDActionType) {
                 case CMDActionType.Edit:

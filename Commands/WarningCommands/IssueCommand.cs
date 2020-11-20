@@ -67,7 +67,7 @@ namespace Dexter.Commands {
                     .AddField("Reason", Reason)
                     .AddField("Total Warnings", TotalWarnings)
                     .WithCurrentTimestamp()
-                    .SendEmbed(User);
+                    .SendEmbed(await User.GetOrCreateDMChannelAsync());
 
                 Embed.AddField("Success", "The DM was successfully sent!");
             } catch (HttpException) {

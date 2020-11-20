@@ -104,7 +104,7 @@ namespace Dexter.Services {
             switch (Result.Error) {
                 case CommandError.UnmetPrecondition:
                     await BuildEmbed(EmojiEnum.Annoyed)
-                        .WithTitle("Access Denied.")
+                        .WithTitle("Halt! Don't go there-")
                         .WithDescription(Result.ErrorReason)
                         .SendEmbed(CommandContext.Channel);
                     break;

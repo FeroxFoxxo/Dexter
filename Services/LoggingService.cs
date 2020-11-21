@@ -39,7 +39,7 @@ namespace Dexter.Services {
             this.DiscordSocketClient = DiscordSocketClient;
             this.CommandService = CommandService;
 
-            LogDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
+            LogDirectory = Path.Combine(Directory.GetCurrentDirectory(), "logs");
             LogFile = Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.log");
 
             LockLogFile = new object();

@@ -107,17 +107,20 @@ namespace Dexter.Services {
             }
 
             // Loop through all enabled or essential modules.
-            foreach (Configuration Configuration in ConfigurationDB.Configurations.ToArray())
-                switch (Configuration.ConfigurationType) {
-                    case ConfigurationType.Enabled:
-                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
-                        Others++;
-                        break;
-                    case ConfigurationType.Essential:
-                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
-                        Essentials++;
-                        break;
-                }
+            foreach (Configuration Configuration in ConfigurationDB.Configurations.ToArray()) {
+                try {
+                    switch (Configuration.ConfigurationType) {
+                        case ConfigurationType.Enabled:
+                            await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
+                            Others++;
+                            break;
+                        case ConfigurationType.Essential:
+                            await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
+                            Essentials++;
+                            break;
+                    }
+                } catch (ArgumentException) {}
+            }
 
             // Logs the number of currently enabled modules to the console.
             await LoggingService.LogMessageAsync(

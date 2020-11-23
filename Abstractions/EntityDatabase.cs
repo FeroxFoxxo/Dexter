@@ -14,7 +14,7 @@ namespace Dexter.Abstractions {
         /// </summary>
         /// <param name="Options">The Context Options is what this method aims to configure,
         /// setting it to use SQLite and set the database name to be the class'.</param>
-        protected override void OnConfiguring(DbContextOptionsBuilder Options) => Options.UseSqlite($"Data Source={GetType().Name}.db");
+        protected override void OnConfiguring(DbContextOptionsBuilder Options) => Options.UseSqlite($"Data Source=Databases/{GetType().Name}.db");
 
     }
 

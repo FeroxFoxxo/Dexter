@@ -110,11 +110,15 @@ namespace Dexter.Services {
             foreach (Configuration Configuration in ConfigurationDB.Configurations.ToArray()) {
                 switch (Configuration.ConfigurationType) {
                     case ConfigurationType.Enabled:
-                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
+                        try {
+                            await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
+                        } catch (ArgumentException) { }
                         Others++;
                         break;
                     case ConfigurationType.Essential:
-                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
+                        try {
+                            await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
+                        } catch (ArgumentException) { }
                         Essentials++;
                         break;
                 }

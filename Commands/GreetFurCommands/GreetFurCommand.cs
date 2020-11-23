@@ -17,6 +17,9 @@ namespace Dexter.Commands {
         [BotChannel]
 
         public async Task GreetFurCommand() {
+            if (SheetsService == null)
+                await SetupGoogleSheets();
+
             Spreadsheet Spreadsheet = await SheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
 
             Sheet CurrentFortnight = Spreadsheet.Sheets

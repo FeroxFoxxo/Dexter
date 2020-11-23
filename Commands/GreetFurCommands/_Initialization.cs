@@ -8,31 +8,37 @@ using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Dexter.Commands {
     public partial class GreetFurCommands : DiscordModule {
 
-        private readonly SheetsService SheetsService;
+        private SheetsService SheetsService;
+
+        private readonly LoggingService LoggingService;
         private readonly GreetFurConfiguration GreetFurConfiguration;
 
         public GreetFurCommands(LoggingService LoggingService, GreetFurConfiguration GreetFurConfiguration) {
+            this.LoggingService = LoggingService;
             this.GreetFurConfiguration = GreetFurConfiguration;
+        }
 
+        public async Task SetupGoogleSheets() {
             if (!File.Exists(GreetFurConfiguration.CredentialFile)) {
-                _ = LoggingService.LogMessageAsync( new LogMessage (LogSeverity.Error, GetType().Name,
+                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, GetType().Name,
                     $"GreetFur SpreadSheet credential file {GreetFurConfiguration.CredentialFile} does not exist!"));
                 return;
             }
 
             // Open the FileStream to the related file.
-            using FileStream Stream = new (GreetFurConfiguration.CredentialFile, FileMode.Open, FileAccess.Read);
+            using FileStream Stream = new(GreetFurConfiguration.CredentialFile, FileMode.Open, FileAccess.Read);
 
             // The file token.json stores the user's access and refresh tokens, and is created
             // automatically when the authorization flow completes for the first time.
 
             UserCredential Credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                 GoogleClientSecrets.Load(Stream).Secrets,
-                new string [1] { SheetsService.Scope.SpreadsheetsReadonly },
+                new string[1] { SheetsService.Scope.SpreadsheetsReadonly },
                 "user",
                 CancellationToken.None,
                 new FileDataStore(GreetFurConfiguration.TokenFile, true)

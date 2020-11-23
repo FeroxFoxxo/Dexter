@@ -27,9 +27,9 @@ namespace Dexter.Commands {
         [Alias("customcommand", "command")]
         [RequireModerator]
 
-        public async Task CustomCommand (CMDActionType CMDActionType, string CommandName, [Remainder] string Reply) {
+        public async Task CustomCommand (ActionType CMDActionType, string CommandName, [Remainder] string Reply) {
             switch (CMDActionType) {
-                case CMDActionType.Add:
+                case ActionType.Add:
                     if (CustomCommandDB.GetCommandByNameOrAlias(CommandName) != null)
                         throw new InvalidOperationException($"A command with the name `{BotConfiguration.Prefix}{CommandName}` already exists!");
 
@@ -55,7 +55,7 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
 
                     break;
-                case CMDActionType.Edit:
+                case ActionType.Edit:
                     CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
                     if (Command == null)
@@ -99,14 +99,14 @@ namespace Dexter.Commands {
         [Alias("customcommand", "command")]
         [RequireModerator]
 
-        public async Task CustomCommand(CMDActionType CMDActionType, string CommandName) {
+        public async Task CustomCommand(ActionType CMDActionType, string CommandName) {
             CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
             if (Command == null)
                 throw new InvalidOperationException($"A command with the name `{BotConfiguration.Prefix}{CommandName}` doesn't exist!");
 
             switch (CMDActionType) {
-                case CMDActionType.Remove:
+                case ActionType.Remove:
                     await SendForAdminApproval(RemoveCommandCallback,
                         new Dictionary<string, string>() {
                             { "CommandName", CommandName.ToLower() },
@@ -121,7 +121,7 @@ namespace Dexter.Commands {
                             $"The command `{BotConfiguration.Prefix}{CommandName}` will be removed from the database.")
                         .SendEmbed(Context.Channel);
                     break;
-                case CMDActionType.Get:
+                case ActionType.Get:
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"{BotConfiguration.Prefix}{CommandName}")
                         .AddField("Reply", Command.Reply)

@@ -1,7 +1,8 @@
-﻿using Dexter.Attributes;
-using Dexter.Enums;
+﻿using Dexter.Enums;
 using Discord.Commands;
 using System;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
@@ -9,54 +10,35 @@ namespace Dexter.Commands {
     public partial class FunCommands {
 
         [Command("wyr")]
-        [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from.")]
-        [Alias("would you rather", "wouldyourather")]
-        [CommandCooldown(240)]
-
-        public async Task WYRCommand() => await SendTopic(TopicType.WouldYouRather);
-
-        [Command("wyr")]
-        [Summary("A way to ADD or GET a wyr to/fro the database. Takes in a topic or ID as a parameter.")]
+        [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from. " +
+                    "Use the add [WYR] command to add a wyr to the database. " +
+                    "Use the get [WYR] command to get a wyr by name from the database. " +
+                    "Use the edit [WYR ID] [WYR] command to edit a wyr in the database. " +
+                    "Use the remove [WYR ID] command to remove a wyr from the database.")]
         [Alias("would you rather", "wouldyourather")]
 
-        public async Task WYRCommand(CMDActionType CMDActionType, [Remainder] string WYR) {
+        public async Task WYRCommand([Optional] ActionType CMDActionType, [Optional][Remainder] string Topic) {
             switch (CMDActionType) {
-                case CMDActionType.Add:
-                    await AddTopic(WYR, TopicType.WouldYouRather);
+                case ActionType.Add:
+                    await AddTopic(Topic, TopicType.WouldYouRather);
                     break;
-                case CMDActionType.Get:
-                    await GetTopic(WYR, TopicType.WouldYouRather);
+                case ActionType.Get:
+                    await GetTopic(Topic, TopicType.WouldYouRather);
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException(CMDActionType.ToString());
-            }
-
-        }
-
-        [Command("wyr")]
-        [Summary("A way to REMOVE a wyr from the database. Takes in a wyr's ID as a parameter, which can be gotten from the GET command.")]
-
-        public async Task WYRCommand(CMDActionType CMDActionType, int TopicID) {
-
-            switch (CMDActionType) {
-                case CMDActionType.Remove:
-                    await RemoveTopic(TopicID, TopicType.WouldYouRather);
+                case ActionType.Remove:
+                    if (int.TryParse(Topic, out int TopicID))
+                        await RemoveTopic(TopicID, TopicType.WouldYouRather);
+                    else
+                        throw new Exception("No wyr ID provided! To use this command please use the syntax of `remove [WYR ID]`.");
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException(CMDActionType.ToString());
-            }
-
-        }
-
-        [Command("wyr")]
-        [Summary("A way to EDIT a wyr in the database. " +
-            "Takes in the wyr's ID as a parameter, which can be gotten from the GET command, and the edited wyr.")]
-
-        public async Task WYRCommand(CMDActionType CMDActionType, int TopicID, [Remainder] string EditedTopic) {
-
-            switch (CMDActionType) {
-                case CMDActionType.Edit:
-                    await EditTopic(TopicID, EditedTopic, TopicType.Topic);
+                case ActionType.Edit:
+                    if (int.TryParse(Topic.Split(' ')[0], out int EditTopicID))
+                        await EditTopic(EditTopicID, string.Join(' ', Topic.Split(' ').Skip(1).ToArray()), TopicType.WouldYouRather);
+                    else
+                        throw new Exception("No wyr ID provided! To use this command please use the syntax of `edit [WYR ID] [EDITED WYR]`.");
+                    break;
+                case ActionType.Unknown:
+                    await SendTopic(TopicType.WouldYouRather);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(CMDActionType.ToString());

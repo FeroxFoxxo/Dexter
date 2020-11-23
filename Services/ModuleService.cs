@@ -108,18 +108,16 @@ namespace Dexter.Services {
 
             // Loop through all enabled or essential modules.
             foreach (Configuration Configuration in ConfigurationDB.Configurations.ToArray()) {
-                try {
-                    switch (Configuration.ConfigurationType) {
-                        case ConfigurationType.Enabled:
-                            await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
-                            Others++;
-                            break;
-                        case ConfigurationType.Essential:
-                            await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
-                            Essentials++;
-                            break;
-                    }
-                } catch (ArgumentException) {}
+                switch (Configuration.ConfigurationType) {
+                    case ConfigurationType.Enabled:
+                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
+                        Others++;
+                        break;
+                    case ConfigurationType.Essential:
+                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
+                        Essentials++;
+                        break;
+                }
             }
 
             // Logs the number of currently enabled modules to the console.
@@ -134,8 +132,13 @@ namespace Dexter.Services {
         /// <param name="ConfigurationType">The type of the modules you would like to return in a string array - either essential, enabled or disabled.</param>
         /// <returns>Returns an array of strings containing the name of the module that has type ConfigurationType.</returns>
         public string GetModules(ConfigurationType ConfigurationType) {
-            return string.Join('\n', ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == ConfigurationType)
+            string Modules = string.Join('\n', ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == ConfigurationType)
                 .Select(Configuration => Configuration.ConfigurationName).ToArray());
+
+            if (string.IsNullOrEmpty(Modules))
+                return $"No {ConfigurationType} Modules!";
+            else
+                return Modules;
         }
 
         /// <summary>

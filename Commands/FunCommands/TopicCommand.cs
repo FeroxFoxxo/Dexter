@@ -1,7 +1,8 @@
-﻿using Dexter.Attributes;
-using Dexter.Enums;
+﻿using Dexter.Enums;
 using Discord.Commands;
 using System;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
@@ -9,53 +10,34 @@ namespace Dexter.Commands {
     public partial class FunCommands {
 
         [Command("topic")]
-        [Summary("A topic starter command - perfect for when chat has died!")]
-        [CommandCooldown(240)]
+        [Summary("A topic starter command - perfect for when chat has died! " +
+                    "Use the add [TOPIC] command to add a topic to the database. " +
+                    "Use the get [TOPIC] command to get a topic by name from the database. " +
+                    "Use the edit [TOPIC ID] [TOPIC] command to edit a topic in the database. " +
+                    "Use the remove [TOPIC ID] command to remove a topic from the database.")]
 
-        public async Task TopicCommand() => await SendTopic(TopicType.Topic);
-
-        [Command("topic")]
-        [Summary("A way to ADD or GET a topic to/fro the database. Takes in a topic as a parameter.")]
-
-        public async Task TopicCommand(CMDActionType CMDActionType, [Remainder] string Topic) {
-
-            switch(CMDActionType) {
-                case CMDActionType.Add:
+        public async Task TopicCommand([Optional] ActionType CMDActionType, [Optional][Remainder] string Topic) {
+            switch (CMDActionType) {
+                case ActionType.Add:
                     await AddTopic(Topic, TopicType.Topic);
                     break;
-                case CMDActionType.Get:
+                case ActionType.Get:
                     await GetTopic(Topic, TopicType.Topic);
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException(CMDActionType.ToString());
-            }
-
-        }
-
-        [Command("topic")]
-        [Summary("A way to REMOVE a topic from the database. Takes in a topic's ID as a parameter, which can be gotten from the GET command.")]
-
-        public async Task TopicCommand(CMDActionType CMDActionType, int TopicID) {
-
-            switch (CMDActionType) {
-                case CMDActionType.Remove:
-                    await RemoveTopic(TopicID, TopicType.Topic);
+                case ActionType.Remove:
+                    if (int.TryParse(Topic, out int TopicID))
+                        await RemoveTopic(TopicID, TopicType.Topic);
+                    else
+                        throw new Exception("No topic ID provided! To use this command please use the syntax of `remove [TOPIC ID]`.");
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException(CMDActionType.ToString());
-            }
-
-        }
-
-        [Command("topic")]
-        [Summary("A way to EDIT a topic in the database. " +
-            "Takes in the topic's ID as a parameter, which can be gotten from the GET command, and the edited topic.")]
-
-        public async Task TopicCommand(CMDActionType CMDActionType, int TopicID, [Remainder] string EditedTopic) {
-
-            switch (CMDActionType) {
-                case CMDActionType.Edit:
-                    await EditTopic(TopicID, EditedTopic, TopicType.Topic);
+                case ActionType.Edit:
+                    if (int.TryParse(Topic.Split(' ')[0], out int EditTopicID))
+                        await EditTopic(EditTopicID, string.Join(' ', Topic.Split(' ').Skip(1).ToArray()), TopicType.Topic);
+                    else
+                        throw new Exception("No topic ID provided! To use this command please use the syntax of `edit [TOPIC ID] [EDITED TOPIC]`.");
+                    break;
+                case ActionType.Unknown:
+                    await SendTopic(TopicType.Topic);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(CMDActionType.ToString());

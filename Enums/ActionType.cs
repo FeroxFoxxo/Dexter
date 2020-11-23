@@ -4,7 +4,12 @@
     /// The CMDActionType represents an action that a user may make on a command
     /// that interfaces with the fun database. It includes add, remove, get and edit commands.
     /// </summary>
-    public enum CMDActionType {
+    public enum ActionType {
+
+        /// <summary>
+        /// The UNKNOWN field specifies that the given command has not been specified.
+        /// </summary>
+        Unknown,
 
         /// <summary>
         /// The ADD field specifies the user is adding the given field to the database.

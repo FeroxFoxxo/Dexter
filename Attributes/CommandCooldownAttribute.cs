@@ -1,4 +1,5 @@
 ﻿using Dexter.Abstractions;
+using Dexter.Configurations;
 using Dexter.Databases.Cooldowns;
 using Dexter.Enums;
 using Dexter.Extensions;
@@ -21,6 +22,9 @@ namespace Dexter.Attributes {
         }
 
         public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, CommandInfo CommandInfo, IServiceProvider ServiceProvider) {
+            if (ServiceProvider.GetService<BotConfiguration>() == null)
+                return PreconditionResult.FromSuccess();
+
             CooldownDB CooldownDB = InitializeDependencies.ServiceProvider.GetRequiredService<CooldownDB>();
 
             Cooldown Cooldown = CooldownDB.Cooldowns.AsQueryable()

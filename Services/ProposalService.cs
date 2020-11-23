@@ -88,7 +88,7 @@ namespace Dexter.Services {
 
                 await UpdateProposal(Proposal, ProposalStatus);
 
-                EmbedBuilder Builder = BuildEmbed(EmojiEnum.Love)
+                EmbedBuilder Builder = BuildEmbed(ProposalStatus == ProposalStatus.Declined ? EmojiEnum.Annoyed : EmojiEnum.Love)
                     .WithTitle($"{Proposal.ProposalType.ToString().Prettify()} {Proposal.ProposalStatus}.")
                     .WithDescription($"The {Proposal.ProposalType.ToString().Prettify().ToLower()} `{Proposal.Tracker}` was successfully {Proposal.ProposalStatus.ToString().ToLower()} by {Approver.Mention}.")
                     .AddField("Reason", string.IsNullOrEmpty(Reason) ? "No reason provided" : Reason)
@@ -329,12 +329,12 @@ namespace Dexter.Services {
                             case "Upvote":
                             case "Downvote":
                                 // If an upvote or downvote has been applied by the suggestor, remove it.
-                                if (Proposal.Proposer != Reaction.UserId)
+                                if (Proposal.Proposer != Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(BotConfiguration) < PermissionLevel.Moderator)
                                     return false;
                                 break;
                             case "Bin":
                                 // If the suggestion has had the bin icon applied by the user, set the status of the suggestion to "deleted" and delete the message.
-                                if (Proposal.Proposer == Reaction.UserId) {
+                                if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(BotConfiguration) >= PermissionLevel.Moderator) {
                                     await UpdateProposal(Proposal, ProposalStatus.Deleted);
                                     await UserMessage.DeleteAsync();
                                     return false;

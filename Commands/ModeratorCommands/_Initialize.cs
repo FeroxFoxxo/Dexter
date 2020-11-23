@@ -1,6 +1,7 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Cooldowns;
+using Dexter.Databases.Relay;
 using Dexter.Databases.Warnings;
 using Discord.WebSocket;
 
@@ -15,6 +16,8 @@ namespace Dexter.Commands {
 
         private readonly WarningsDB WarningsDB;
 
+        private readonly RelayDB RelayDB;
+
         private readonly DiscordSocketClient Client;
 
         private readonly CommissionCooldownConfiguration CommissionCooldownConfiguration;
@@ -24,12 +27,14 @@ namespace Dexter.Commands {
         /// </summary>
         /// <param name="WarningsDB">The WarningsDB stores the warnings that these commands interface.</param>
         /// <param name="CooldownDB">The CooldownDB stores the cooldowns that the cooldown command interfaces with.</param>
+        /// <param name="RelayDB">The RelayDB stores the relays that are used to send messages to a channel in set intervals.</param>
         /// <param name="CommissionCooldownConfiguration">The CommissionCooldownConfiguration stores the length of time a commission cooldown lasts for.</param>
         /// <param name="Client">The Client is an instance of the DiscordSocketClient, used to get a user on callback.</param>
-        public ModeratorCommands(WarningsDB WarningsDB, CooldownDB CooldownDB,
+        public ModeratorCommands(WarningsDB WarningsDB, CooldownDB CooldownDB, RelayDB RelayDB,
                 CommissionCooldownConfiguration CommissionCooldownConfiguration, DiscordSocketClient Client) {
             this.WarningsDB = WarningsDB;
             this.CooldownDB = CooldownDB;
+            this.RelayDB = RelayDB;
             this.Client = Client;
             this.CommissionCooldownConfiguration = CommissionCooldownConfiguration;
         }

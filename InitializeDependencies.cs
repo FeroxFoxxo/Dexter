@@ -50,14 +50,19 @@ namespace Dexter {
             // Sets the version based on the release pipeline version.
             string Versioning = Math.Round(Convert.ToSingle(Version) / 100 - .001, 2).ToString();
 
-            InitializeDependencies.Version = $"{Versioning[0..^1]}.{Versioning[^1].ToString()}";
+            if (Versioning.Split('.').Length <= 1)
+                InitializeDependencies.Version = $"{Versioning}.0.0";
+            else if(Versioning.Split('.')[1].Length == 1)
+                InitializeDependencies.Version = $"{Versioning[0..^1]}.{Versioning[^1].ToString()}.0";
+            else
+                InitializeDependencies.Version = $"{Versioning[0..^1]}.{Versioning[^1].ToString()}";
 
             // Sets the current, active directory to the working directory specified in the azure cloud.
             if (!string.IsNullOrEmpty(WorkingDirectory))
                 Directory.SetCurrentDirectory(WorkingDirectory);
 
             // Creates a ServiceCollection of the depencencies the project needs.
-            ServiceCollection ServiceCollection = new();
+            ServiceCollection ServiceCollection = new ();
 
             // Adds an instance of the DiscordSocketClient to the collection, specifying the cache it should retain should be 1000 messages in size.
             DiscordSocketClient DiscordSocketClient = new ( new DiscordSocketConfig { MessageCacheSize = 1000,

@@ -68,7 +68,7 @@ namespace Dexter.Commands {
                 $"{Context.Message.Author.GetUserInformation()} has suggested that the {TopicType.ToString().ToLower()} `{TopicEntry}` should be added to Dexter.");
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"The {TopicType.ToString().ToLower()} `{TopicEntry}` was suggested!")
+                .WithTitle($"The {TopicType.ToString().ToLower()} `{(TopicEntry.Length > 200 ? $"{TopicEntry.Substring(0, 200)}..." : TopicEntry)}` was suggested!")
                 .WithDescription($"Once it has passed admin approval, it will be added to the database.")
                 .SendEmbed(Context.Channel);
         }
@@ -121,7 +121,9 @@ namespace Dexter.Commands {
                 $"{Context.Message.Author.GetUserInformation()} has suggested that the {TopicType.ToString().ToLower()} `{FunTopic.Topic}` should be removed from Dexter.");
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"The {TopicType.ToString().ToLower()} `{FunTopic.Topic}` was suggested to be removed!")
+                .WithTitle($"The {TopicType.ToString().ToLower()} `" +
+                    $"{(FunTopic.Topic.Length > 200 ? $"{FunTopic.Topic.Substring(0, 200)}..." : FunTopic.Topic)}" +
+                    $"` was suggested to be removed!")
                 .WithDescription($"Once it has passed admin approval, it will be removed from the database.")
                 .SendEmbed(Context.Channel);
         }
@@ -187,11 +189,15 @@ namespace Dexter.Commands {
                     { "EditedTopic", EditedTopic }
                 },
                 Context.Message.Author.Id,
-                $"{Context.Message.Author.GetUserInformation()} has suggested that the {TopicType.ToString().ToLower()} `{FunTopic.Topic}` should be changed to {EditedTopic}."
+                $"{Context.Message.Author.GetUserInformation()} has suggested that the {TopicType.ToString().ToLower()} `{FunTopic.Topic}` should be changed to `{EditedTopic}`."
             );
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"The {TopicType.ToString().ToLower()} `{FunTopic.Topic}` was suggested to be edited to {EditedTopic}!")
+                .WithTitle($"The {TopicType.ToString().ToLower()} `" +
+                $"{(FunTopic.Topic.Length > 100 ? $"{FunTopic.Topic.Substring(0, 100)}..." : FunTopic.Topic)}" +
+                $"` was suggested to be edited to `" +
+                $"{(EditedTopic.Length > 100 ? $"{EditedTopic.Substring(0, 100)}..." : EditedTopic)}" +
+                $"`!")
                 .WithDescription($"Once it has passed admin approval, it will be edited in the database accordingly.")
                 .SendEmbed(Context.Channel);
         }

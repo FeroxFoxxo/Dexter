@@ -33,7 +33,7 @@ namespace Dexter.Commands {
             int IndexOfUser = -1;
 
             for (int Index = 0; Index < Columns.Values.Count; Index++) {
-                if (Columns.Values[Index][0].Equals(Context.Message.Author.Id))
+                if (Columns.Values[Index][0].Equals(Context.Message.Author.Id.ToString()))
                     IndexOfUser = Index + 1;
             }
 

@@ -50,7 +50,7 @@
 		<None Update="Configurations\ProposalConfiguration.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="credentials.json">
+		<None Update="Credentials.json">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Images\Headpats\0.png">

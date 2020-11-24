@@ -54,9 +54,7 @@ namespace Dexter.Services {
             if (string.IsNullOrEmpty(PFPConfiguration.PFPDirectory))
                 return null;
 
-            DirectoryInfo DirectoryInfo = new(PFPConfiguration.PFPDirectory);
-
-            FileInfo[] Files = DirectoryInfo.GetFiles("*.*").Where(File => PFPConfiguration.PFPExtensions.Contains(File.Extension.ToLower())).ToArray();
+            FileInfo[] Files = GetProfilePictures();
 
             FileInfo ProfilePicture = Files[Random.Next(0, Files.Length)];
 
@@ -64,6 +62,17 @@ namespace Dexter.Services {
 
             return ProfilePicture.OpenRead();
         }
+
+        /// <summary>
+        /// The GetProfilePictures method runs on invocation and will get all the files in the pfp directory and return it. 
+        /// </summary>
+        /// <returns>A list of FileInfo's of each PFP in the given directory.</returns>
+        public FileInfo[] GetProfilePictures() {
+            DirectoryInfo DirectoryInfo = new(Path.Combine(Directory.GetCurrentDirectory(), PFPConfiguration.PFPDirectory));
+
+            return DirectoryInfo.GetFiles("*.*").Where(File => PFPConfiguration.PFPExtensions.Contains(File.Extension.ToLower())).ToArray();
+        }
+
     }
 
 }

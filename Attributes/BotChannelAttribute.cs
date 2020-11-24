@@ -27,6 +27,8 @@ namespace Dexter.Attributes {
         /// This error is then thrown to the Command Handler Service to log to the user.</returns>
         public override Task<PreconditionResult> CheckPermissionsAsync (ICommandContext CommandContext,
                 CommandInfo CommandInfo, IServiceProvider ServiceProvider) {
+            if (ServiceProvider.GetService<BotConfiguration>() == null)
+                return Task.FromResult(PreconditionResult.FromSuccess());
 
             return Task.FromResult(
                 InitializeDependencies.ServiceProvider.GetRequiredService<BotConfiguration>().BotChannels.Contains(CommandContext.Channel.Id) ?

@@ -41,7 +41,8 @@ namespace Dexter.Commands {
                 new string[1] { SheetsService.Scope.SpreadsheetsReadonly },
                 "user",
                 CancellationToken.None,
-                new FileDataStore(GreetFurConfiguration.TokenFile, true)
+                new FileDataStore(GreetFurConfiguration.TokenFile, true),
+                new PromptCodeReceiver()
             ).Result;
 
             // Create Google Sheets API service.

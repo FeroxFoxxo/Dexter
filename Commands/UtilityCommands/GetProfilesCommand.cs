@@ -12,10 +12,11 @@ namespace Dexter.Commands {
         [Alias("getpfps")]
 
         public async Task GetProfiles () {
+            string ProfilePictures = string.Join('\n', ProfileService.GetProfilePictures().Select(Profile => Profile.Name).ToArray());
+
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Profile Pictures.")
-                .WithDescription($"Bellow lists the current profile pictures in the given profile picture directory.\n" +
-                    $"{string.Join('\n', ProfileService.GetProfilePictures().Select(Profile => Profile.Name).ToArray())}")
+                .WithDescription(string.IsNullOrEmpty(ProfilePictures) ? "No Profile Pictures!" : ProfilePictures)
                 .AddField("Current PFP:", ProfileService.CurrentPFP)
                 .SendEmbed(Context.Channel);
         }

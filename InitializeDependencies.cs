@@ -61,13 +61,23 @@ namespace Dexter {
             if (!string.IsNullOrEmpty(WorkingDirectory))
                 Directory.SetCurrentDirectory(WorkingDirectory);
 
+            string DatabaseDirectory = Path.Join(Directory.GetCurrentDirectory(), "Databases");
+
+            if (!Directory.Exists(DatabaseDirectory))
+                Directory.CreateDirectory(DatabaseDirectory);
+
             // Creates a ServiceCollection of the depencencies the project needs.
             ServiceCollection ServiceCollection = new ();
 
             // Adds an instance of the DiscordSocketClient to the collection, specifying the cache it should retain should be 1000 messages in size.
-            DiscordSocketClient DiscordSocketClient = new ( new DiscordSocketConfig { MessageCacheSize = 1000,
-                GatewayIntents = GatewayIntents.GuildWebhooks | GatewayIntents.Guilds | GatewayIntents.GuildPresences | GatewayIntents.GuildMessages | GatewayIntents.GuildMessageReactions
-                                    | GatewayIntents.DirectMessages | GatewayIntents.DirectMessageReactions} );
+            DiscordSocketClient DiscordSocketClient = new (
+                new DiscordSocketConfig {
+                    MessageCacheSize = 1000,
+                    GatewayIntents = GatewayIntents.GuildWebhooks | GatewayIntents.Guilds | GatewayIntents.GuildPresences | GatewayIntents.GuildMessages | GatewayIntents.GuildMessageReactions
+                                    | GatewayIntents.DirectMessages | GatewayIntents.DirectMessageReactions,
+                    ExclusiveBulkDelete = false
+                }
+            );
             ServiceCollection.AddSingleton(DiscordSocketClient);
 
             // Adds an instance of the CommandService, which is what calls our various commands.

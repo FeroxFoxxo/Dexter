@@ -40,11 +40,12 @@ namespace Dexter.Commands {
                         Description.Add($"**~{string.Join("/", CommandInfo.Aliases.ToArray())}:** {CommandInfo.Summary}");
                 }
 
-                EmbedBuilders.Add(
-                    BuildEmbed(EmojiEnum.Love)
-                        .WithTitle($"{ModuleName}")
-                        .WithDescription(string.Join("\n\n", Description.ToArray()))
-                );
+                if(Description.Count > 0)
+                    EmbedBuilders.Add(
+                        BuildEmbed(EmojiEnum.Love)
+                            .WithTitle($"{ModuleName}")
+                            .WithDescription(string.Join("\n\n", Description.ToArray()))
+                    );
             }
 
             await ReactionMenuService.CreateReactionMenu(EmbedBuilders.ToArray(), Context.Channel);

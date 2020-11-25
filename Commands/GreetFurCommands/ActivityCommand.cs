@@ -33,7 +33,7 @@ namespace Dexter.Commands {
             int IndexOfUser = -1;
 
             for (int Index = 0; Index < Columns.Values.Count; Index++) {
-                if (Columns.Values[Index][0].Equals(Context.Message.Author.Id.ToString()))
+                if (Columns.Values[Index][0].Equals(Context.User.Id.ToString()))
                     IndexOfUser = Index + 1;
             }
 
@@ -66,9 +66,9 @@ namespace Dexter.Commands {
             string Notes = Information[GreetFurConfiguration.Information["Notes"]].ToString();
 
             await BuildEmbed(Activity >= 66 ? EmojiEnum.Love : Activity > 33 ? EmojiEnum.Wut : EmojiEnum.Annoyed)
-                .WithAuthor(Context.Message.Author)
+                .WithAuthor(Context.User)
                 .WithTitle("GreetFur Activity")
-                .WithDescription($"**Name:** {Context.Message.Author.GetUserInformation()}\n" +
+                .WithDescription($"**Name:** {Context.User.GetUserInformation()}\n" +
                                  $"**Manager:** {Information[GreetFurConfiguration.Information["Manager"]]}\n" +
                                  (string.IsNullOrEmpty(Notes) ? "" : $"**Notes:** {Notes}"))
                 .AddField("Yes", Information[GreetFurConfiguration.Information["Yes"]], true)

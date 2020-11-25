@@ -40,7 +40,7 @@ namespace Dexter.Commands {
             int TotalWarnings = WarningsDB.GetWarnings(User.Id).Length + 1;
 
             WarningsDB.Warnings.Add(new Warning() {
-                Issuer = Context.Message.Author.Id,
+                Issuer = Context.User.Id,
                 Reason = Reason,
                 User = User.Id,
                 WarningID = WarningID,
@@ -53,7 +53,7 @@ namespace Dexter.Commands {
             EmbedBuilder Embed = BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Warning Issued!")
                 .WithDescription($"Warned {User.GetUserInformation()}")
-                .AddField("Issued by", Context.Message.Author.GetUserInformation())
+                .AddField("Issued by", Context.User.GetUserInformation())
                 .AddField("Warning ID", WarningID)
                 .AddField("Total Warnings", TotalWarnings)
                 .AddField("Reason", Reason.Length > 250 ? Reason.Substring(0, 250) + "..." : Reason)

@@ -24,7 +24,7 @@ namespace Dexter.Commands {
         [RequireAdministrator]
 
         public async Task DeclineProposal(string Tracker, [Optional][Remainder] string Reason) {
-            await ProposalService.EditProposal(Tracker, Reason, Context.Message.Author, Context.Channel, ProposalStatus.Declined);
+            await ProposalService.EditProposal(Tracker, Reason, Context.User, Context.Channel, ProposalStatus.Declined);
         }
 
     }

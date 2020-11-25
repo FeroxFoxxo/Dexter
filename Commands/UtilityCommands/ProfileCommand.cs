@@ -16,7 +16,7 @@ namespace Dexter.Commands {
 
         public async Task ProfileCommand([Optional] IGuildUser GuildUser) {
             if (GuildUser == null)
-                GuildUser = Context.Guild.GetUser(Context.Message.Author.Id);
+                GuildUser = Context.Guild.GetUser(Context.User.Id);
 
             await BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle($"User Profile For {GuildUser.Username}#{GuildUser.Discriminator}")

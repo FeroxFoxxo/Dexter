@@ -13,7 +13,7 @@ namespace Dexter.Commands {
 
         public async Task AvatarCommand([Optional] IUser User) {
             if (User == null)
-                User = Context.Message.Author;
+                User = Context.User;
 
             await BuildEmbed(EmojiEnum.Unknown)
                 .WithImageUrl(User.GetAvatarUrl(ImageFormat.Png, 1024))

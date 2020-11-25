@@ -36,7 +36,7 @@ namespace Dexter.Commands {
                 .WithTitle("Warning revoked!")
                 .WithDescription($"Heya! I revoked a warning issued to {(Warned == null ? "Unknown" : Warned.GetUserInformation())}")
                 .AddField("Issued by", Issuer == null ? "Unknown" : Issuer.GetUserInformation())
-                .AddField("Revoked by", Context.Message.Author.GetUserInformation())
+                .AddField("Revoked by", Context.User.GetUserInformation())
                 .AddField("Reason", Warning.Reason)
                 .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);

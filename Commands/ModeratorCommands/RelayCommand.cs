@@ -38,8 +38,8 @@ namespace Dexter.Commands {
                     { "ChannelID", Channel.Id.ToString() },
                     { "Message", Message }
                 },
-                Context.Message.Author.Id,
-                $"{Context.Message.Author.GetUserInformation()} has suggested that `{Message}` should be added to the channel {Channel} with an interval of {MessageInterval} messages.");
+                Context.User.Id,
+                $"{Context.User.GetUserInformation()} has suggested that `{Message}` should be added to the channel {Channel} with an interval of {MessageInterval} messages.");
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"The relay to `#{Channel}` with the message `{(Message.Length > 100 ? $"{Message.Substring(0, 100)}..." : Message)}` for every {MessageInterval} messages has been suggested!")

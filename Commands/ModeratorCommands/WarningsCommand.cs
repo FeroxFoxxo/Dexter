@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.DependencyInjection;
+using Dexter.Configurations;
 
 namespace Dexter.Commands {
     public partial class ModeratorCommands {
@@ -27,20 +29,30 @@ namespace Dexter.Commands {
         [Alias("records", "record")]
         [BotChannel]
 
-        public async Task WarningsCommand([Optional] [RequireModeratorParameter] IUser User) {
+        public async Task WarningsCommand([Optional] IUser User) {
             bool IsUserSpecified = User != null;
 
             if (IsUserSpecified) {
-                EmbedBuilder[] Embeds = GetWarnings(User, Context.Message.Author, true);
+                if ((Context.User as IGuildUser).GetPermissionLevel(
+                        InitializeDependencies.ServiceProvider.GetRequiredService<BotConfiguration>())
+                    >= PermissionLevel.Moderator) {
 
-                foreach (EmbedBuilder Embed in Embeds)
-                    await Embed.SendEmbed(Context.Channel);
+                    EmbedBuilder[] Embeds = GetWarnings(User, Context.User, true);
+
+                    foreach (EmbedBuilder Embed in Embeds)
+                        await Embed.SendEmbed(Context.Channel);
+                } else {
+                    await BuildEmbed(EmojiEnum.Love)
+                        .WithTitle("Halt! Don't go there-")
+                        .WithDescription("Heya! To run this command with a user specified, you will need to be a moderator. <3")
+                        .SendEmbed(Context.Channel);
+                }
             } else {
-                EmbedBuilder[] Embeds = GetWarnings(Context.Message.Author, Context.Message.Author, false);
+                EmbedBuilder[] Embeds = GetWarnings(Context.User, Context.User, false);
 
                 try {
                     foreach (EmbedBuilder Embed in Embeds)
-                        await Embed.SendEmbed(await Context.Message.Author.GetOrCreateDMChannelAsync());
+                        await Embed.SendEmbed(await Context.User.GetOrCreateDMChannelAsync());
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Sent warnings log.")

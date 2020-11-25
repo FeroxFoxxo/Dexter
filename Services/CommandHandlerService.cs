@@ -126,7 +126,7 @@ namespace Dexter.Services {
 
                     if (CustomCommand != null) {
                         if (CustomCommand.Reply.Length > 0)
-                            await CommandContext.Channel.SendMessageAsync(CustomCommand.Reply.Replace("USER", CommandContext.Message.MentionedUserIds.Count > 0 ? $"<@{CommandContext.Message.MentionedUserIds.First()}>" : CommandContext.Message.Author.Mention));
+                            await CommandContext.Channel.SendMessageAsync(CustomCommand.Reply.Replace("USER", CommandContext.Message.MentionedUserIds.Count > 0 ? $"<@{CommandContext.Message.MentionedUserIds.First()}>" : CommandContext.User.Mention));
                         else
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Misconfigured command!")

@@ -30,15 +30,15 @@ namespace Dexter.Commands {
                 new Dictionary<string, string>() {
                     { "UserID", User.Id.ToString() }
                 },
-                Context.Message.Author.Id,
-                $"{Context.Message.Author.Username} has proposed that the user {User.GetUserInformation()} should have all their warnings purged. " +
+                Context.User.Id,
+                $"{Context.User.Username} has proposed that the user {User.GetUserInformation()} should have all their warnings purged. " +
                 $"On approval of this command, {User.Username}'s slate will be fully cleared."
             );
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Warnings Purge Confimation")
                 .WithDescription($"Heya! I've send the warnings purge for {User.GetUserInformation()} to the administrators for approval.")
-                .AddField("Purge instantiated by", Context.Message.Author.GetUserInformation())
+                .AddField("Purge instantiated by", Context.User.GetUserInformation())
                 .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
         }

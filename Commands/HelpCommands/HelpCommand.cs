@@ -13,7 +13,7 @@ namespace Dexter.Commands {
 
         [Command("help")]
         [Summary("Displays all avaliable commands.")]
-        [Alias("helpme", "pleasehelp", "how2use", "howtouse")]
+        [Alias("helpme", "pleasehelp", "how2use", "howtouse", "commands")]
         public async Task HelpCommand() {
             List<EmbedBuilder> EmbedBuilders = new ();
 
@@ -53,7 +53,7 @@ namespace Dexter.Commands {
 
         [Command("help")]
         [Summary("Displays detailed information about a command.")]
-        [Alias("helpme", "pleasehelp", "how2use", "howtouse")]
+        [Alias("helpme", "pleasehelp", "how2use", "howtouse", "commands")]
         public async Task HelpCommand(string Command) {
             SearchResult Result = CommandService.Search(Context, Command);
 

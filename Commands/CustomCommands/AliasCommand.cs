@@ -52,8 +52,8 @@ namespace Dexter.Commands {
                             { "CommandName", CommandName.ToLower() },
                             { "Alias", Alias }
                         },
-                        Context.Message.Author.Id,
-                        $"{Context.Message.Author.GetUserInformation()} has suggested that the command `{BotConfiguration.Prefix}{CommandName}` should have the alias `{BotConfiguration.Prefix}{Alias}` added to it!");
+                        Context.User.Id,
+                        $"{Context.User.GetUserInformation()} has suggested that the command `{BotConfiguration.Prefix}{CommandName}` should have the alias `{BotConfiguration.Prefix}{Alias}` added to it!");
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"The command `{BotConfiguration.Prefix}{CommandName}` was suggested to have added the alias of `{BotConfiguration.Prefix}{Alias}`!")
@@ -74,8 +74,8 @@ namespace Dexter.Commands {
                             { "CommandName", CommandName.ToLower() },
                             { "Alias", Alias }
                         },
-                        Context.Message.Author.Id,
-                        $"{Context.Message.Author.GetUserInformation()} has suggested that the command `{BotConfiguration.Prefix}{CommandName}` should have the alias `{BotConfiguration.Prefix}{Alias}` removed from it!");
+                        Context.User.Id,
+                        $"{Context.User.GetUserInformation()} has suggested that the command `{BotConfiguration.Prefix}{CommandName}` should have the alias `{BotConfiguration.Prefix}{Alias}` removed from it!");
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"The command `{BotConfiguration.Prefix}{CommandName}` was suggested to be remved from the alias of `{BotConfiguration.Prefix}{Alias}`!")

@@ -19,7 +19,7 @@ namespace Dexter.Commands {
                 .WithTitle("User DM")
                 .WithDescription(Message)
                 .AddField("Recipient", User.GetUserInformation())
-                .AddField("Sent By", Context.Message.Author.GetUserInformation());
+                .AddField("Sent By", Context.User.GetUserInformation());
 
             try {
                 await User.SendMessageAsync($"**__Message From {Context.Guild.Name}__**\n{Message}");

@@ -32,8 +32,8 @@ namespace Dexter.Commands {
                 new Dictionary<string, string>() {
                     { "ChannelID", Channel.Id.ToString() }
                 },
-                Context.Message.Author.Id,
-                $"{Context.Message.Author.GetUserInformation()} has suggested that `{FindRelay.Message}` should be removed from the channel {Channel} which has an interval of {FindRelay.MessageInterval}.");
+                Context.User.Id,
+                $"{Context.User.GetUserInformation()} has suggested that `{FindRelay.Message}` should be removed from the channel {Channel} which has an interval of {FindRelay.MessageInterval}.");
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"The relay to `#{Channel}` with the message `{(FindRelay.Message.Length > 100 ? $"{FindRelay.Message.Substring(0, 100)}..." : FindRelay.Message)}` for every {FindRelay.MessageInterval} messages has been suggested for removal!")

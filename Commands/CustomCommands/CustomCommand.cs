@@ -51,8 +51,8 @@ namespace Dexter.Commands {
                             { "CommandName", CommandName.ToLower() },
                             { "Reply", Reply }
                         },
-                        Context.Message.Author.Id,
-                        $"{Context.Message.Author.GetUserInformation()} has suggested that the command `{BotConfiguration.Prefix}{CommandName}` should be " +
+                        Context.User.Id,
+                        $"{Context.User.GetUserInformation()} has suggested that the command `{BotConfiguration.Prefix}{CommandName}` should be " +
                         $"added with the reply of `{Reply}`.");
 
                     await BuildEmbed(EmojiEnum.Love)
@@ -82,8 +82,8 @@ namespace Dexter.Commands {
                             { "CommandName", CommandName.ToLower() },
                             { "Reply", Reply }
                         },
-                        Context.Message.Author.Id,
-                        $"{Context.Message.Author.GetUserInformation()} has suggested that the command {BotConfiguration.Prefix}{CommandName} should be " +
+                        Context.User.Id,
+                        $"{Context.User.GetUserInformation()} has suggested that the command {BotConfiguration.Prefix}{CommandName} should be " +
                         $"edited from from `{Command.Reply}` to `{Reply}`");
 
                     await BuildEmbed(EmojiEnum.Love)
@@ -98,8 +98,8 @@ namespace Dexter.Commands {
                         new Dictionary<string, string>() {
                             { "CommandName", CommandName.ToLower() },
                         },
-                        Context.Message.Author.Id,
-                        $"{Context.Message.Author.GetUserInformation()} has suggested that the command `{BotConfiguration.Prefix}{CommandName}` should be removed!"
+                        Context.User.Id,
+                        $"{Context.User.GetUserInformation()} has suggested that the command `{BotConfiguration.Prefix}{CommandName}` should be removed!"
                     );
 
                     await BuildEmbed(EmojiEnum.Love)

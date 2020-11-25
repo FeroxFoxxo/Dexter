@@ -30,7 +30,7 @@ namespace Dexter.Commands {
             }
 
             await BuildEmbed(EmojiEnum.Sign)
-                .WithAuthor(Context.Message.Author)
+                .WithAuthor(Context.User)
                 .WithTitle($"{Context.Client.CurrentUser.Username} Asks")
                 .WithDescription(FunTopic.Topic)
                 .WithFooter($"{TopicType} Written by {DiscordSocketClient.GetUser(FunTopic.ProposerID).Username}.")
@@ -62,10 +62,10 @@ namespace Dexter.Commands {
                 new Dictionary<string, string>() {
                     { "Topic", TopicEntry },
                     { "TopicType", ( (int) TopicType ).ToString() },
-                    { "Proposer", Context.Message.Author.Id.ToString() }
+                    { "Proposer", Context.User.Id.ToString() }
                 },
-                Context.Message.Author.Id,
-                $"{Context.Message.Author.GetUserInformation()} has suggested that the {TopicType.ToString().ToLower()} `{TopicEntry}` should be added to Dexter.");
+                Context.User.Id,
+                $"{Context.User.GetUserInformation()} has suggested that the {TopicType.ToString().ToLower()} `{TopicEntry}` should be added to Dexter.");
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"The {TopicType.ToString().ToLower()} `{(TopicEntry.Length > 200 ? $"{TopicEntry.Substring(0, 200)}..." : TopicEntry)}` was suggested!")
@@ -117,8 +117,8 @@ namespace Dexter.Commands {
                     { "TopicID", TopicID.ToString() },
                     { "TopicType", ( (int) TopicType ).ToString() }
                 },
-                Context.Message.Author.Id,
-                $"{Context.Message.Author.GetUserInformation()} has suggested that the {TopicType.ToString().ToLower()} `{FunTopic.Topic}` should be removed from Dexter.");
+                Context.User.Id,
+                $"{Context.User.GetUserInformation()} has suggested that the {TopicType.ToString().ToLower()} `{FunTopic.Topic}` should be removed from Dexter.");
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"The {TopicType.ToString().ToLower()} `" +
@@ -188,8 +188,8 @@ namespace Dexter.Commands {
                     { "TopicType", ( (int) TopicType ).ToString() },
                     { "EditedTopic", EditedTopic }
                 },
-                Context.Message.Author.Id,
-                $"{Context.Message.Author.GetUserInformation()} has suggested that the {TopicType.ToString().ToLower()} `{FunTopic.Topic}` should be changed to `{EditedTopic}`."
+                Context.User.Id,
+                $"{Context.User.GetUserInformation()} has suggested that the {TopicType.ToString().ToLower()} `{FunTopic.Topic}` should be changed to `{EditedTopic}`."
             );
 
             await BuildEmbed(EmojiEnum.Love)

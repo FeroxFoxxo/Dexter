@@ -19,7 +19,7 @@ namespace Dexter.Commands {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         [Command("approve")]
-        [Summary("Approves a suggestion from a tracker with an optional reason.")]
+        [Summary("Approves a proposal from a tracker with an optional reason.")]
         [Alias("accept")]
         [RequireAdministrator]
 

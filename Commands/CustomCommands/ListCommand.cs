@@ -13,7 +13,7 @@ namespace Dexter.Commands {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         [Command("cclist")]
-        [Summary("Displays a list of custom commands.")]
+        [Summary("Displays all avaliable custom commands in the database.")]
         [Alias("customcommands", "ccl")]
 
         public async Task ListCommands () {

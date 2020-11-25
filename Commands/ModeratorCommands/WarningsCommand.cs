@@ -23,7 +23,7 @@ namespace Dexter.Commands {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         [Command("warnings")]
-        [Summary("Returns a record of warnings.")]
+        [Summary("Returns a record of warnings for a set user or your own.")]
         [Alias("records", "record")]
         [BotChannel]
 
@@ -74,7 +74,8 @@ namespace Dexter.Commands {
                 return new EmbedBuilder[1] {
                     BuildEmbed(EmojiEnum.Love)
                         .WithTitle("No issued warnings!")
-                        .WithDescription($"{User.Mention} has a clean slate! Go give {(User.Id == RunBy.Id ? "yourself" : "them")} a pat on the back <3")
+                        .WithDescription($"{User.Mention} has a clean slate!\n" +
+                        $"Go give {(User.Id == RunBy.Id ? "yourself" : "them")} a pat on the back. <3")
                 };
 
             List<EmbedBuilder> Embeds = new ();

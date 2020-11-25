@@ -7,7 +7,7 @@ namespace Dexter.Commands {
     public partial class UtilityCommands {
 
         [Command("logfile")]
-        [Summary("Provides today's logfile.")]
+        [Summary("Provides the logfile for the current instance of the bot.")]
         [Alias("log")]
         [RequireModerator]
 

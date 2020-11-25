@@ -19,7 +19,7 @@ namespace Dexter.Commands {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         [Command("decline")]
-        [Summary("Denies a suggestion from a tracker with an optional reason.")]
+        [Summary("Denies a proposal from a tracker with an optional reason.")]
         [Alias("deny")]
         [RequireAdministrator]
 

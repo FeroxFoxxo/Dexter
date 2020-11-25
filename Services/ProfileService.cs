@@ -5,7 +5,6 @@ using Discord.WebSocket;
 using System;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Dexter.Services {
 

@@ -16,7 +16,7 @@ namespace Dexter.Commands {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         [Command("modules")]
-        [Summary("Lists all modules.")]
+        [Summary("Lists all modules in the bot's arsenal.")]
         [RequireAdministrator]
         [Alias("module", "mod")]
 
@@ -38,7 +38,7 @@ namespace Dexter.Commands {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         [Command("modules")]
-        [Summary("Performs an action on a module.")]
+        [Summary("Performs an action on a module in the command service.")]
         [RequireAdministrator]
         [Alias("module", "mod")]
 

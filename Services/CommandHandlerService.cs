@@ -116,7 +116,7 @@ namespace Dexter.Services {
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("You've entered an invalid amount of parameters for this command!")
                         .WithDescription($"Here are some options of parameters you can have for the command **{CommandInfo.Value.Name}**.")
-                        .GetParametersForCommand(CommandService, CommandInfo.Value.Name)
+                        .GetParametersForCommand(CommandInfo.Value)
                         .SendEmbed(CommandContext.Channel);
                     break;
                 case CommandError.UnknownCommand:

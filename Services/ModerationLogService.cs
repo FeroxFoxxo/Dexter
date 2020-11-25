@@ -65,6 +65,9 @@ namespace Dexter.Services {
             if (CachedMessage == null)
                 return;
 
+            if (string.IsNullOrEmpty(CachedMessage.Content))
+                return;
+
             if (DiscordWebhookClient != null)
                 await new EmbedBuilder()
                     .WithAuthor(Reaction.User.Value)

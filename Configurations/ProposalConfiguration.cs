@@ -19,9 +19,14 @@ namespace Dexter.Configurations {
         public ulong StaffSuggestionsChannel { get; set; }
 
         /// <summary>
-        /// The EMOJI STORAGE GUILD specifies the snowflake ID of the server that the suggestion emoji are located in.
+        /// The STORAGE GUILD specifies the snowflake ID of the server that the suggestion emoji are located in and where images will be stored.
         /// </summary>
-        public ulong EmojiStorageGuild { get; set; }
+        public ulong StorageGuild { get; set; }
+
+        /// <summary>
+        /// The PICTURE CHANNEL specifies the snowflake ID of the channel Dexter will store messages sent in suggestion channels.
+        /// </summary>
+        public ulong PictureChannel { get; set; }
 
         /// <summary>
         /// The TRACKER LENGTH specifies the length of the token assosiated with the proposal.

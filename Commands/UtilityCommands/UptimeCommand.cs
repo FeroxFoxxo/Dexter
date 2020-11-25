@@ -10,7 +10,7 @@ namespace Dexter.Commands {
     public partial class UtilityCommands {
 
         [Command("uptime")]
-        [Summary("Displays the amount of time I have been running for!")]
+        [Summary("Displays the amount of time that the bot has been running for.")]
         [Alias("runtime")]
 
         public async Task UptimeCommand() {

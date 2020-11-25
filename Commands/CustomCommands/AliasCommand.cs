@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
@@ -16,6 +17,7 @@ namespace Dexter.Commands {
         /// <summary>
         /// The Alias method runs on CCALIAS and will add or remove an alias from a command by the given AliasType
         /// to/from the CustomCommandDB based to the command provided by the CommandName string.
+        /// It will also list all command aliases.
         /// </summary>
         /// <param name="AliasActionType">The AliasActionType specifies whether the action is to add or remove the alias from the command.</param>
         /// <param name="CommandName">The CommandName specifies the command that you want the alias to be applied to.</param>
@@ -23,15 +25,22 @@ namespace Dexter.Commands {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         [Command("ccalias")]
-        [Summary("Adds or removes an alias from a command by using ADD or REMOVE as the parameter.")]
+        [Summary("Modifies a custom commands aliases.\n" +
+            "`ADD [COMMAND NAME] [ALIAS]` - adds an alias to a given command.\n" +
+            "`REMOVE [COMMAND NAME] [ALIAS]` - removes an alias from a given command.\n" +
+            "`LIST [COMMAND NAME]` - lists all the aliases of a command."
+        )]
         [Alias("ccaka")]
         [RequireModerator]
 
-        public async Task Alias (AliasActionType AliasActionType, string CommandName, string Alias) {
+        public async Task Alias (AliasActionType AliasActionType, string CommandName, [Optional] string Alias) {
             CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
             switch (AliasActionType) {
                 case AliasActionType.Add:
+                    if (string.IsNullOrEmpty(Alias))
+                        throw new Exception("Alias is not given! Please enter an alias with this command.");
+
                     CustomCommand Add = CustomCommandDB.GetCommandByNameOrAlias(Alias);
 
                     if (Add != null)
@@ -52,6 +61,9 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
                     break;
                 case AliasActionType.Remove:
+                    if (string.IsNullOrEmpty(Alias))
+                        throw new Exception("Alias is not given! Please enter an alias with this command.");
+
                     CustomCommand Remove = CustomCommandDB.GetCommandByNameOrAlias(Alias);
 
                     if (Remove == null)
@@ -70,25 +82,6 @@ namespace Dexter.Commands {
                         .WithDescription($"Once the suggestion has passed admin approval, you may use the `{BotConfiguration.Prefix}ccalias list` command to view the aliases of this command.")
                         .SendEmbed(Context.Channel);
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException(AliasActionType.ToString());
-            }
-        }
-
-        /// <summary>
-        /// The Alias method runs on CCALIAS and will list the aliases of a user or throw an argument out of bounds exception.
-        /// </summary>
-        /// <param name="AliasActionType">The AliasActionType specifies if the action is to list the aliases of the command.</param>
-        /// <param name="CommandName">The CommandName specifies the command that you want to list the aliases of.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-
-        [Command("ccalias")]
-        [Summary("Lists the aliases of a command by using LIST as the parameter.")]
-        [Alias("ccaka", "ccother")]
-        [RequireModerator]
-
-        public async Task AliasCommandAsync(AliasActionType AliasActionType, string CommandName) {
-            switch (AliasActionType) {
                 case AliasActionType.List:
                     CustomCommand List = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
@@ -102,13 +95,6 @@ namespace Dexter.Commands {
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"The command `{BotConfiguration.Prefix}{CommandName}` has these aliases:")
                         .WithDescription(AliasList.Count > 0 ? Aliases : "No aliases set!")
-                        .SendEmbed(Context.Channel);
-                    break;
-                case AliasActionType.Add:
-                case AliasActionType.Remove:
-                    await BuildEmbed(EmojiEnum.Love)
-                        .WithTitle($"Bad argument count.")
-                        .WithDescription($"Please specify which command you wish to {AliasActionType.ToString().ToLower()} this alias from! <3")
                         .SendEmbed(Context.Channel);
                     break;
                 default:

@@ -1,4 +1,5 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes;
+using Dexter.Enums;
 using Discord.Commands;
 using System;
 using System.Linq;
@@ -10,14 +11,14 @@ namespace Dexter.Commands {
     public partial class FunCommands {
 
         [Command("topic")]
-        [Summary("A topic starter command - perfect for when chat has died! " +
-                    "Use the add [TOPIC] command to add a topic to the database. " +
-                    "Use the get [TOPIC] command to get a topic by name from the database. " +
-                    "Use the edit [TOPIC ID] [TOPIC] command to edit a topic in the database. " +
-                    "Use the remove [TOPIC ID] command to remove a topic from the database.")]
+        [Summary("A topic starter command - perfect for when chat has died!\n" +
+                    "`ADD [TOPIC]` - adds a topic to the database.\n" +
+                    "`GET [TOPIC]` - gets a topic by name from the database.\n" +
+                    "`EDIT [TOPIC ID] [TOPIC]` - edits a topic in the database.\n" +
+                    "`REMOVE [TOPIC ID]` - removes a topic from the database.")]
 
-        public async Task TopicCommand([Optional] ActionType CMDActionType, [Optional][Remainder] string Topic) {
-            switch (CMDActionType) {
+        public async Task TopicCommand([Optional] [BotChannelParameter] ActionType ActionType, [Optional] [Remainder] [BotChannelParameter] string Topic) {
+            switch (ActionType) {
                 case ActionType.Add:
                     await AddTopic(Topic, TopicType.Topic);
                     break;
@@ -40,7 +41,7 @@ namespace Dexter.Commands {
                     await SendTopic(TopicType.Topic);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(CMDActionType.ToString());
+                    throw new ArgumentOutOfRangeException(ActionType.ToString());
             }
 
         }

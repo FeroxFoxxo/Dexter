@@ -4,6 +4,7 @@ using Dexter.Databases.Proposals;
 using Dexter.Services;
 using Discord.Commands;
 using System.Threading.Tasks;
+using Dexter.Attributes;
 
 namespace Dexter.Commands {
     public partial class ProposalCommands {
@@ -15,8 +16,9 @@ namespace Dexter.Commands {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         [Command("fetch")]
-        [Summary("Fetches a suggestion from the tracker or a message ID.")]
+        [Summary("Fetches a proposal from the tracker or a message ID.")]
         [Alias("find")]
+        [RequireAdministrator]
 
         public async Task FetchProposal(string Tracker) {
             Proposal Proposal = ProposalDB.GetProposalByNameOrID(Tracker);

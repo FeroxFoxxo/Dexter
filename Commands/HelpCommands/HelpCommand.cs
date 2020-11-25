@@ -2,7 +2,9 @@
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -13,27 +15,39 @@ namespace Dexter.Commands {
         [Summary("Displays all avaliable commands.")]
         [Alias("helpme", "pleasehelp", "how2use", "howtouse")]
         public async Task HelpCommand() {
-            EmbedBuilder Embed = BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"Hiya, I'm {Context.Client.CurrentUser.Username}~! Here's a list of modules and commands you can use!")
-                .WithDescription($"Use {BotConfiguration.Prefix}help [commandName] to show information about a command.");
+            List<EmbedBuilder> EmbedBuilders = new ();
+
+            int PageNumber = 2;
+
+            EmbedBuilders.Add(
+                BuildEmbed(EmojiEnum.Love)
+                    .WithTitle($"{DiscordSocketClient.CurrentUser.Username} Help")
+                    .WithDescription($"{BotConfiguration.Help}")
+                    .AddField("Help Pages",
+                        string.Join('\n', CommandService.Modules.Select(Module => $"**Page {PageNumber++}:** {Regex.Replace(Module.Name, "[a-z][A-Z]", m => m.Value[0] + " " + m.Value[1])}").ToArray())
+                    )
+            );
 
             foreach (ModuleInfo Module in CommandService.Modules) {
+                string ModuleName = Regex.Replace(Module.Name, "[a-z][A-Z]", m => m.Value[0] + " " + m.Value[1]);
+
                 List<string> Description = new ();
 
                 foreach (CommandInfo CommandInfo in Module.Commands) {
                     PreconditionResult Result = await CommandInfo.CheckPreconditionsAsync(Context);
 
-                    if (!Description.Contains($"{BotConfiguration.Prefix}{CommandInfo.Aliases[0]}")) {
-                        if (Result.IsSuccess)
-                            Description.Add($"{BotConfiguration.Prefix}{CommandInfo.Aliases[0]}");
-                    } else continue;
+                    if (Result.IsSuccess)
+                        Description.Add($"**~{string.Join("/", CommandInfo.Aliases.ToArray())}:** {CommandInfo.Summary}");
                 }
 
-                if (Description.Count > 0)
-                    Embed.AddField(Regex.Replace(Module.Name, "[a-z][A-Z]", m => m.Value[0] + " " + m.Value[1]), string.Join("\n", Description.ToArray()), false);
+                EmbedBuilders.Add(
+                    BuildEmbed(EmojiEnum.Love)
+                        .WithTitle($"{ModuleName}")
+                        .WithDescription(string.Join("\n\n", Description.ToArray()))
+                );
             }
 
-            await Embed.SendEmbed(Context.Channel);
+            await ReactionMenuService.CreateReactionMenu(EmbedBuilders.ToArray(), Context.Channel);
         }
 
         [Command("help")]
@@ -47,10 +61,15 @@ namespace Dexter.Commands {
                     .WithTitle("Unknown Command")
                     .WithDescription($"Sorry, I couldn't find a command like **{Command}**.")
                     .SendEmbed(Context.Channel);
-            else await BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"Here are some commands like **{Command}**!")
-                .GetParametersForCommand(CommandService, Command)
-                .SendEmbed(Context.Channel);
+            else {
+                EmbedBuilder EmbedBuilder = BuildEmbed(EmojiEnum.Love)
+                    .WithTitle($"Here are some commands like **{Command}**!");
+
+                foreach (CommandMatch CommandMatch in Result.Commands)
+                    EmbedBuilder.GetParametersForCommand(CommandMatch.Command);
+
+                await EmbedBuilder.SendEmbed(Context.Channel);
+            }
         }
 
     }

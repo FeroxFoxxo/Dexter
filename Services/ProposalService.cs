@@ -18,6 +18,8 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Microsoft.Extensions.DependencyInjection;
 using System.Data;
+using System.Net;
+using System.IO;
 
 namespace Dexter.Services {
 
@@ -146,8 +148,7 @@ namespace Dexter.Services {
         }
 
         /// <summary>
-        /// The MessageRecieved method runs when a message is sent in the suggestions channel, and converts the message to a proposal and suggestion object.
-        /// This suggestion object is then sent back to the channel once deleted as a formatted embed for use to vote on.
+        /// The MessageRecieved method runs when a message is sent in the suggestions channel, and runs checks to see if the message is a suggestion.
         /// </summary>
         /// <param name="RecievedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
@@ -156,6 +157,16 @@ namespace Dexter.Services {
             if (RecievedMessage.Channel.Id != ProposalConfiguration.SuggestionsChannel || RecievedMessage.Author.IsBot)
                 return;
 
+
+        }
+
+        /// <summary>
+        /// The CreateSuggestion method converts the message to a proposal and suggestion object.
+        /// This suggestion object is then sent back to the channel once deleted as a formatted embed for use to vote on.
+        /// </summary>
+        /// <param name="RecievedMessage"></param>
+        /// <returns></returns>
+        public async Task CreateSuggestion (SocketMessage RecievedMessage) {
             // Check to see if the embed message length is more than 1750, else will fail the embed from sending due to character limits.
             if (RecievedMessage.Content.Length > 1750) {
                 await RecievedMessage.DeleteAsync();
@@ -178,20 +189,36 @@ namespace Dexter.Services {
                 ProposalType = ProposalType.Suggestion
             };
 
+            Attachment Attachment = RecievedMessage.Attachments.FirstOrDefault();
+
+            if (Attachment != null) {
+                string FileName = Attachment.Filename.Prettify();
+
+                if (string.IsNullOrEmpty(FileName))
+                    return;
+
+                if (File.Exists(FileName))
+                    return;
+
+                using WebClient WebClient = new();
+
+                await WebClient.DownloadFileTaskAsync(Attachment.ProxyUrl, Attachment.Filename);
+
+                ITextChannel Channel = DiscordSocketClient.GetChannel(ProposalConfiguration.PictureChannel) as ITextChannel;
+
+                IUserMessage AttachmentMSG = await Channel.SendFileAsync(Attachment.Filename);
+
+                Proposal.ProxyURL = AttachmentMSG.Attachments.FirstOrDefault().ProxyUrl;
+
+                File.Delete(Attachment.Filename);
+            }
+
             // Creates a new Suggestion object with the related fields.
-            Suggestion Suggested = new() {
+            Suggestion Suggested = new () {
                 Tracker = Proposal.Tracker
             };
 
-            RestUserMessage Embed;
-
-            // Add related attachments to the embed.
-            if (RecievedMessage.Attachments.Count > 0)
-                Embed = await RecievedMessage.Channel.SendMessageAsync(
-                    embed: BuildProposal(Proposal).WithImageUrl(RecievedMessage.Attachments.First().ProxyUrl).Build()
-                );
-            else
-                Embed = await RecievedMessage.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
+            RestUserMessage Embed = await RecievedMessage.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
 
             // Delete the message sent by the user.
             await RecievedMessage.DeleteAsync();
@@ -206,7 +233,7 @@ namespace Dexter.Services {
             await ProposalDB.SaveChangesAsync();
 
             // Add the related emoji specified in the ProposalConfiguration to the suggestion.
-            SocketGuild Guild = DiscordSocketClient.GetGuild(ProposalConfiguration.EmojiStorageGuild);
+            SocketGuild Guild = DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild);
 
             foreach (string Emoji in ProposalConfiguration.SuggestionEmoji) {
                 GuildEmote Emote = await Guild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
@@ -270,13 +297,13 @@ namespace Dexter.Services {
 
             // Check the current amount of upvotes the message has.
             ReactionMetadata Upvotes = UserMessage.Reactions[
-                await DiscordSocketClient.GetGuild(ProposalConfiguration.EmojiStorageGuild)
+                await DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild)
                 .GetEmoteAsync(ProposalConfiguration.Emoji["Upvote"])
             ];
 
             // Check the current amount of downvotes the message has.
             ReactionMetadata Downvotes = UserMessage.Reactions[
-                await DiscordSocketClient.GetGuild(ProposalConfiguration.EmojiStorageGuild)
+                await DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild)
                 .GetEmoteAsync(ProposalConfiguration.Emoji["Downvote"])
             ];
 
@@ -303,7 +330,7 @@ namespace Dexter.Services {
                     await ProposalDB.SaveChangesAsync();
 
                     // Get the staff suggestions channel and add the related emoji to the message.
-                    SocketGuild EmojiCacheGuild = DiscordSocketClient.GetGuild(ProposalConfiguration.EmojiStorageGuild);
+                    SocketGuild EmojiCacheGuild = DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild);
 
                     foreach (string Emoji in ProposalConfiguration.StaffSuggestionEmoji) {
                         GuildEmote EmoteStaff = await EmojiCacheGuild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
@@ -471,6 +498,7 @@ namespace Dexter.Services {
                 .WithThumbnailUrl(DiscordSocketClient.GetUser(Proposal.Proposer).GetAvatarUrl())
                 .WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
                 .WithDescription(Proposal.Content)
+                .WithImageUrl(Proposal.ProxyURL)
                 .AddField(!string.IsNullOrEmpty(Proposal.Reason), "Reason:", Proposal.Reason)
                 .WithAuthor(DiscordSocketClient.GetUser(Proposal.Proposer))
                 .WithCurrentTimestamp()

@@ -1,4 +1,5 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes;
+using Dexter.Enums;
 using Discord.Commands;
 using System;
 using System.Linq;
@@ -10,15 +11,15 @@ namespace Dexter.Commands {
     public partial class FunCommands {
 
         [Command("wyr")]
-        [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from. " +
-                    "Use the add [WYR] command to add a wyr to the database. " +
-                    "Use the get [WYR] command to get a wyr by name from the database. " +
-                    "Use the edit [WYR ID] [WYR] command to edit a wyr in the database. " +
-                    "Use the remove [WYR ID] command to remove a wyr from the database.")]
+        [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from.\n" +
+                    "`ADD [WYR]` - adds a wyr to the database.\n" +
+                    "`GET [WYR]` - gets a wyr by name from the database.\n" +
+                    "`EDIT [WYR ID] [WYR]` - edits a wyr in the database.\n" +
+                    "`REMOVE [WYR ID]` - removes a wyr from the database.")]
         [Alias("would you rather", "wouldyourather")]
 
-        public async Task WYRCommand([Optional] ActionType CMDActionType, [Optional][Remainder] string Topic) {
-            switch (CMDActionType) {
+        public async Task WYRCommand([Optional][BotChannelParameter] ActionType ActionType, [Optional][Remainder][BotChannelParameter] string Topic) {
+            switch (ActionType) {
                 case ActionType.Add:
                     await AddTopic(Topic, TopicType.WouldYouRather);
                     break;
@@ -41,7 +42,7 @@ namespace Dexter.Commands {
                     await SendTopic(TopicType.WouldYouRather);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(CMDActionType.ToString());
+                    throw new ArgumentOutOfRangeException(ActionType.ToString());
             }
 
         }

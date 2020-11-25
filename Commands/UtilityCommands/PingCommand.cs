@@ -7,7 +7,7 @@ namespace Dexter.Commands {
     public partial class UtilityCommands {
 
         [Command("ping")]
-        [Summary("Displays the latency between both Discord and I.")]
+        [Summary("Displays the latency between both Discord and the bot.")]
         [Alias("latency")]
 
         public async Task PingCommand() {

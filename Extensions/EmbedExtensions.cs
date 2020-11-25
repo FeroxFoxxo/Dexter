@@ -91,27 +91,20 @@ namespace Dexter.Extensions {
         /// The GetParametersForCommand adds fields to an embed containing the parameters and summary of the command.
         /// </summary>
         /// <param name="EmbedBuilder">The EmbedBuilder you wish to add the fields to.</param>
-        /// <param name="CommandService">An instance of the CommandService, which contains all the currently active commands.</param>
-        /// <param name="Command">The command of which you wish to search for.</param>
+        /// <param name="CommandInfo">The command of which you wish to search for.</param>
         /// <returns>The embed with the parameter fields for the command added.</returns>
-        public static EmbedBuilder GetParametersForCommand(this EmbedBuilder EmbedBuilder, CommandService CommandService, string Command) {
-            SearchResult Result = CommandService.Search(Command);
+        public static EmbedBuilder GetParametersForCommand(this EmbedBuilder EmbedBuilder, CommandInfo CommandInfo) {
+            string CommandDescription = string.Empty;
 
-            foreach (CommandMatch Match in Result.Commands) {
-                CommandInfo CommandInfo = Match.Command;
+            if (CommandInfo.Parameters.Count > 0)
+                CommandDescription = $"Parameters: {string.Join(", ", CommandInfo.Parameters.Select(p => p.Name))}";
 
-                string CommandDescription = $"Parameters: {string.Join(", ", CommandInfo.Parameters.Select(p => p.Name))}";
+            if (!string.IsNullOrEmpty(CommandInfo.Summary))
+                CommandDescription += $"\nSummary: {CommandInfo.Summary}";
 
-                if (CommandInfo.Parameters.Count > 0)
-                    CommandDescription = $"Parameters: {string.Join(", ", CommandInfo.Parameters.Select(p => p.Name))}";
-                else
-                    CommandDescription = "No parameters";
+            BotConfiguration BotConfiguration = InitializeDependencies.ServiceProvider.GetRequiredService<BotConfiguration>();
 
-                if (!string.IsNullOrEmpty(CommandInfo.Summary))
-                    CommandDescription += $"\nSummary: {CommandInfo.Summary}";
-
-                EmbedBuilder.AddField(string.Join(", ", CommandInfo.Aliases), CommandDescription);
-            }
+            EmbedBuilder.AddField(string.Join(", ", CommandInfo.Aliases.Select(Name => $"{BotConfiguration.Prefix}{Name}")), CommandDescription);
 
             return EmbedBuilder;
         }

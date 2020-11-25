@@ -2,19 +2,33 @@
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
+using Newtonsoft.Json.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
     public partial class UtilityCommands {
 
         [Command("version")]
-        [Summary("Displays my current version <3")]
+        [Summary("Displays the current version Dexter is running on.")]
         [Alias("v")]
 
         public async Task VersionCommand() {
+            using HttpClient HTTPClient = new();
+
+            HTTPClient.DefaultRequestHeaders.Add("User-Agent",
+                "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; WOW64; Trident/6.0)");
+
+            using HttpResponseMessage Response = HTTPClient.GetAsync("https://api.github.com/repos/Frostrix/Dexter/commits").Result;
+            string JSON = Response.Content.ReadAsStringAsync().Result;
+
+            dynamic Commits = JArray.Parse(JSON);
+            string LastCommit = Commits[0].commit.message;
+
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Bot Version")
                 .WithDescription($"Hello? Is anyone out there-\nThis is **{Context.Client.CurrentUser.Username} v{InitializeDependencies.Version}** running **Discord.NET v{DiscordConfig.Version}**")
+                .AddField("Latest Commit:", LastCommit.Length > 1200 ? $"{LastCommit.Substring(0, 1200)}..." : LastCommit)
                 .SendEmbed(Context.Channel);
         }
 

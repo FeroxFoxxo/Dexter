@@ -37,9 +37,9 @@ namespace Dexter.Attributes {
         /// <param name="CommandContext">The Context is used to find the user who has run the command.</param>
         /// <param name="ParameterInfo">The ParameterInfo is used to find the name of the parameter that has been run.</param>
         /// <param name="Parameter">The raw value of the parameter.</param>
-        /// <param name="ServicesProvider">The Services are used to find the role IDs to get the permission level of the user from the BotConfiguration.</param>
+        /// <param name="ServiceProvider">The Services are used to find the role IDs to get the permission level of the user from the BotConfiguration.</param>
         /// <returns></returns>
-        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, ParameterInfo ParameterInfo, object Parameter, IServiceProvider ServicesProvider) {
+        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, ParameterInfo ParameterInfo, object Parameter, IServiceProvider ServiceProvider) {
             return Task.FromResult((CommandContext.User as IGuildUser).GetPermissionLevel(InitializeDependencies.ServiceProvider.GetRequiredService<BotConfiguration>()) >= Level
                 ? PreconditionResult.FromSuccess()
                 : PreconditionResult.FromError($"Haiya! To run the {ParameterInfo.Name} you need to have the " +

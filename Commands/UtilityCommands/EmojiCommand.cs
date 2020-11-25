@@ -8,7 +8,7 @@ namespace Dexter.Commands {
     public partial class UtilityCommands {
 
         [Command("emote")]
-        [Summary("Gets the full image of an emote.")]
+        [Summary("Gets the full image of an emoji.")]
         [Alias("emoji")]
 
         public async Task EmojiCommand(string Emoji) {
@@ -22,7 +22,8 @@ namespace Dexter.Commands {
             else
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unknown Emoji")
-                    .WithDescription("An invalid emote was specified! Please make sure that what you have sent is a valid emote. Please make sure this is a **custom emote** aswell and does not fall under the unicode specification.")
+                    .WithDescription("An invalid emoji was specified! Please make sure that what you have sent is a valid emoji. " +
+                        "Please make sure this is a **custom emoji** aswell, and that it does not fall under the unicode specification.")
                     .SendEmbed(Context.Channel);
         }
 

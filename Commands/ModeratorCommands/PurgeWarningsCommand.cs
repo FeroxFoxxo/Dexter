@@ -22,7 +22,7 @@ namespace Dexter.Commands {
         /// <returns></returns>
 
         [Command("purgewarns")]
-        [Summary("Removes all warnings from a user.")]
+        [Summary("Removes all warnings from a user, having been sent to the admins for confirmation.")]
         [RequireAdministrator]
 
         public async Task PurgeWarnings(IUser User) {

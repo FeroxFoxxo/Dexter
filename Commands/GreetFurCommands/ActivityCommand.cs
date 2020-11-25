@@ -16,7 +16,7 @@ namespace Dexter.Commands {
         [Summary("Gets the GreetFur's Activity for the fortnight.")]
         [BotChannel]
 
-        public async Task GreetFurCommand() {
+        public async Task GreetFurActivity () {
             if (SheetsService == null)
                 await SetupGoogleSheets();
 
@@ -41,7 +41,6 @@ namespace Dexter.Commands {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to Find GreetFur")
                     .WithDescription("Haiya, it seems as if you're not in the GreetFur database! Are you sure you're a GreetFur? <3")
-                    .WithCurrentTimestamp()
                     .SendEmbed(Context.Channel);
                 return;
             }
@@ -66,7 +65,7 @@ namespace Dexter.Commands {
 
             string Notes = Information[GreetFurConfiguration.Information["Notes"]].ToString();
 
-            await BuildEmbed(EmojiEnum.Love)
+            await BuildEmbed(Activity >= 66 ? EmojiEnum.Love : Activity > 33 ? EmojiEnum.Wut : EmojiEnum.Annoyed)
                 .WithAuthor(Context.Message.Author)
                 .WithTitle("GreetFur Activity")
                 .WithDescription($"**Name:** {Context.Message.Author.GetUserInformation()}\n" +
@@ -78,7 +77,6 @@ namespace Dexter.Commands {
                 .AddField("Week 1", Information[GreetFurConfiguration.Information["W1"]], true)
                 .AddField("Week 2", Information[GreetFurConfiguration.Information["W2"]], true)
                 .AddField("Activity", $"{Activity}%", true)
-                .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
         }
 

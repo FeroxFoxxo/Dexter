@@ -18,7 +18,7 @@ namespace Dexter.Commands {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         [Command("delwarn")]
-        [Summary("Removes a warning from a specified user.")]
+        [Summary("Removes a warning from a specified user based on the warning's ID.")]
         [Alias("deletewarn", "revokewarn")]
         [RequireModerator]
 

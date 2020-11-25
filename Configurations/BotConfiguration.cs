@@ -56,6 +56,11 @@ namespace Dexter.Configurations {
         /// </summary>
         public bool EnableStartupAlert { get; set; }
 
+        /// <summary>
+        /// The HELP field contains information for the help command.
+        /// </summary>
+        public string Help { get; set; }
+
     }
 
 }

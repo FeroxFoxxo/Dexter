@@ -7,7 +7,7 @@ namespace Dexter.Commands {
     public partial class FunCommands {
 
         [Command("say")]
-        [Summary("I now have a voice! Use the ~say command so speak *through* me!")]
+        [Summary("I do have a voice! Use the ~say command so speak *through* me!")]
         [Alias("speak")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
         [RequireModerator]

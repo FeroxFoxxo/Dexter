@@ -9,7 +9,7 @@ namespace Dexter.Commands {
     public partial class UtilityCommands {
 
         [Command("halt")]
-        [Summary("Shuts me down in my entirety.")]
+        [Summary("Shuts the bot down and, if in use with continuous intergration, restarts the process.")]
         [Alias("shutdown")]
         [RequireAdministrator]
 

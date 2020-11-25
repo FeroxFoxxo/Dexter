@@ -46,6 +46,11 @@ namespace Dexter.Databases.Proposals {
         /// </summary>
         public ulong MessageID { get; set; }
 
+        /// <summary>
+        /// The Proxy URL field is the URL of the attachment which has been fed through the storage channel.
+        /// </summary>
+        public string ProxyURL { get; set; }
+
     }
 
 }

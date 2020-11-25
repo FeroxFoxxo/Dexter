@@ -108,10 +108,10 @@ namespace Dexter.Services {
 
             if (BotConfiguration.EnableStartupAlert)
                 await BuildEmbed(EmojiEnum.Love)
-                .WithTitle("Startup complete!")
-                .WithDescription($"This is **{DiscordSocketClient.CurrentUser.Username} v{InitializeDependencies.Version}** running **Discord.Net v{DiscordConfig.Version}**!")
-                .AddField("Latest Commit:", LastCommit.Length > 1200 ? $"{LastCommit.Substring(0, 1200)}..." : LastCommit)
-                .SendEmbed(Channel);
+                    .WithTitle("Startup complete!")
+                    .WithDescription($"This is **{DiscordSocketClient.CurrentUser.Username} v{InitializeDependencies.Version}** running **Discord.Net v{DiscordConfig.Version}**!")
+                    .AddField("Latest Commit:", LastCommit.Length > 1200 ? $"{LastCommit.Substring(0, 1200)}..." : LastCommit)
+                    .SendEmbed(Channel);
         }
 
     }

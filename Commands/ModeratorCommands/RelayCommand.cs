@@ -42,7 +42,7 @@ namespace Dexter.Commands {
                 $"{Context.Message.Author.GetUserInformation()} has suggested that `{Message}` should be added to the channel {Channel} with an interval of {MessageInterval} messages.");
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"The relay to `#{Channel}` with the message `{(Message.Length > 300 ? $"{Message.Substring(0, 300)}..." : Message)}` for every {MessageInterval} messages has been suggested!")
+                .WithTitle($"The relay to `#{Channel}` with the message `{(Message.Length > 100 ? $"{Message.Substring(0, 100)}..." : Message)}` for every {MessageInterval} messages has been suggested!")
                 .WithDescription($"Once it has passed admin approval, it will run on this channel.")
                 .SendEmbed(Context.Channel);
         }
@@ -60,43 +60,6 @@ namespace Dexter.Commands {
             });
 
             await RelayDB.SaveChangesAsync();
-        }
-
-
-        [Command("clearrelay")]
-        [Summary("Clears a channel's relay in the related database.")]
-        [RequireAdministrator]
-
-        public async Task ClearRelay(ITextChannel Channel) {
-            Relay FindRelay = RelayDB.Relays.AsQueryable().Where(Relay => Relay.ChannelID.Equals(Channel.Id)).FirstOrDefault();
-
-            if (FindRelay == null) {
-                await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle($"Relay already exists!")
-                    .WithDescription($"The relay to the channel {Channel} does not exist and thus can not be removed!")
-                    .SendEmbed(Context.Channel);
-                return;
-            }
-
-            await SendForAdminApproval(RemoveRelayCallback,
-                new Dictionary<string, string>() {
-                    { "ChannelID", Channel.Id.ToString() }
-                },
-                Context.Message.Author.Id,
-                $"{Context.Message.Author.GetUserInformation()} has suggested that `{FindRelay.Message}` should be removed from the channel {Channel} which has an interval of {FindRelay.MessageInterval}.");
-
-            await BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"The relay to `#{Channel}` with the message `{(FindRelay.Message.Length > 300 ? $"{FindRelay.Message.Substring(0, 300)}..." : FindRelay.Message)}` for every {FindRelay.MessageInterval} messages has been suggested for removal!")
-                .WithDescription($"Once it has passed admin approval, it will be removed from the database.")
-                .SendEmbed(Context.Channel);
-        }
-
-        public async Task RemoveRelayCallback(Dictionary<string, string> Parameters) {
-            ulong ChannelID = ulong.Parse(Parameters["ChannelID"]);
-
-            Relay RelayToRemove = RelayDB.Relays.AsQueryable().Where(Relay => Relay.ChannelID.Equals(ChannelID)).FirstOrDefault();
-
-            RelayDB.Relays.Remove(RelayToRemove);
         }
 
     }

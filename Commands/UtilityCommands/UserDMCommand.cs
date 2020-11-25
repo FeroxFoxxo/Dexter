@@ -10,7 +10,7 @@ namespace Dexter.Commands {
     public partial class UtilityCommands {
 
         [Command("userdm")]
-        [Summary("Sends a direct message to a user!")]
+        [Summary("Sends a direct message to a user specified.")]
         [Alias("dm", "message")]
         [RequireModerator]
 

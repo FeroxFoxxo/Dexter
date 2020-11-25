@@ -157,7 +157,7 @@ namespace Dexter.Services {
             if (RecievedMessage.Channel.Id != ProposalConfiguration.SuggestionsChannel || RecievedMessage.Author.IsBot)
                 return;
 
-
+            _ = Task.Run(async () => await CreateSuggestion(RecievedMessage));
         }
 
         /// <summary>

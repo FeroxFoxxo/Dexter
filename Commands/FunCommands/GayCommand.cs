@@ -12,7 +12,6 @@ namespace Dexter.Commands {
         [Summary("How gay are you? Use this command to find out~!")]
         [Alias("straight", "bisexual")]
         [BotChannel]
-        [CommandCooldown(60)]
 
         public async Task GayCommand([Optional] IUser User) {
             if (User == null)

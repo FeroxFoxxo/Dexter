@@ -34,9 +34,19 @@ namespace Dexter.Configurations {
         public string FortnightSpreadsheet { get; set; }
 
         /// <summary>
-        /// The IDColumnIndex is the index of the column that contains all the UserIDs
+        /// The TheBigPictureSpreadsheet represents the title of the spreadsheet containing all the records for the GreetFurs.
+        /// </summary>
+        public string TheBigPictureSpreadsheet { get; set; }
+        
+        /// <summary>
+        /// The IDColumnIndex is the index of the column that contains all the UserIDs.
         /// </summary>
         public string IDColumnIndex { get; set; }
+
+        /// <summary>
+        /// The TotalID is the index of the column that contains all the total amounts for the Big Picture spreadsheet.
+        /// </summary>
+        public string TotalID { get; set; }
 
         /// <summary>
         /// The Information dictionary stores all the column indexes and their respective names.

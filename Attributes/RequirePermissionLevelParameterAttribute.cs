@@ -42,8 +42,8 @@ namespace Dexter.Attributes {
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, ParameterInfo ParameterInfo, object Parameter, IServiceProvider ServiceProvider) {
             return Task.FromResult((CommandContext.User as IGuildUser).GetPermissionLevel(InitializeDependencies.ServiceProvider.GetRequiredService<BotConfiguration>()) >= Level
                 ? PreconditionResult.FromSuccess()
-                : PreconditionResult.FromError($"Haiya! To run the {ParameterInfo.Name} you need to have the " +
-                $"{Level} role! Are you sure you're a {Level.ToString().ToLower()}? <3"));
+                : PreconditionResult.FromError($"Haiya! To run the specified comamnd with the `{ParameterInfo.Name}` parameter you need to have the " +
+                $"`{Level}` role! Are you sure you're a `{Level.ToString().ToLower()}`? <3"));
         }
 
     }

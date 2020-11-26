@@ -17,10 +17,12 @@ namespace Dexter.Commands {
 
         private readonly LoggingService LoggingService;
         private readonly GreetFurConfiguration GreetFurConfiguration;
+        private readonly ReactionMenuService ReactionMenuService;
 
-        public GreetFurCommands(LoggingService LoggingService, GreetFurConfiguration GreetFurConfiguration) {
+        public GreetFurCommands(LoggingService LoggingService, GreetFurConfiguration GreetFurConfiguration, ReactionMenuService ReactionMenuService) {
             this.LoggingService = LoggingService;
             this.GreetFurConfiguration = GreetFurConfiguration;
+            this.ReactionMenuService = ReactionMenuService;
         }
 
         public async Task SetupGoogleSheets() {

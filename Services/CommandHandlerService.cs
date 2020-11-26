@@ -130,7 +130,7 @@ namespace Dexter.Services {
                         else
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Misconfigured command!")
-                                .WithDescription($"{CustomCommand.CommandName} has not been configured! Please contact a moderator about this. <3")
+                                .WithDescription($"`{CustomCommand.CommandName}` has not been configured! Please contact a moderator about this. <3")
                                 .SendEmbed(CommandContext.Channel);
                     } else {
                         //await BuildEmbed(EmojiEnum.Annoyed)

@@ -29,6 +29,8 @@ namespace Dexter.Services {
             if (Menu == null || Reaction.User.Value.IsBot)
                 return;
 
+            IUserMessage Message = await CachedMessage.GetOrDownloadAsync();
+
             if (Reaction.Emote.Name.Equals("⬅️")) {
                 Menu.CurrentPage--;
                 if (Menu.CurrentPage < 1)
@@ -38,8 +40,6 @@ namespace Dexter.Services {
                 if (Menu.CurrentPage > Menu.EmbedMenus.Length)
                     Menu.CurrentPage = 1;
             }
-
-            IUserMessage Message = await CachedMessage.GetOrDownloadAsync();
 
             await Message.ModifyAsync(MessageP => MessageP.Embed = CreateMenuEmbed(Menu));
 

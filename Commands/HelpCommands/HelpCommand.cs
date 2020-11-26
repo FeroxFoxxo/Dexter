@@ -13,7 +13,7 @@ namespace Dexter.Commands {
 
         [Command("help")]
         [Summary("Displays all avaliable commands.")]
-        [Alias("helpme", "pleasehelp", "how2use", "howtouse", "commands")]
+        [Alias("commands")]
         public async Task HelpCommand() {
             List<EmbedBuilder> EmbedBuilders = new ();
 
@@ -23,10 +23,9 @@ namespace Dexter.Commands {
                 BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"{DiscordSocketClient.CurrentUser.Username} Help")
                     .WithDescription($"{BotConfiguration.Help}")
-                    .AddField("Help Pages",
-                        string.Join('\n', CommandService.Modules.Select(Module => $"**Page {PageNumber++}:** {Regex.Replace(Module.Name, "[a-z][A-Z]", m => m.Value[0] + " " + m.Value[1])}").ToArray())
-                    )
             );
+
+            List<string> Pages = new ();
 
             foreach (ModuleInfo Module in CommandService.Modules) {
                 string ModuleName = Regex.Replace(Module.Name, "[a-z][A-Z]", m => m.Value[0] + " " + m.Value[1]);
@@ -40,20 +39,26 @@ namespace Dexter.Commands {
                         Description.Add($"**~{string.Join("/", CommandInfo.Aliases.ToArray())}:** {CommandInfo.Summary}");
                 }
 
-                if(Description.Count > 0)
+                if (Description.Count > 0) {
+                    Pages.Add($"**Page {PageNumber++}:** {ModuleName}");
                     EmbedBuilders.Add(
                         BuildEmbed(EmojiEnum.Love)
                             .WithTitle($"{ModuleName}")
                             .WithDescription(string.Join("\n\n", Description.ToArray()))
                     );
+                }
             }
+
+            EmbedBuilders[0].AddField("Help Pages",
+                string.Join('\n', Pages.ToArray())
+            );
 
             await ReactionMenuService.CreateReactionMenu(EmbedBuilders.ToArray(), Context.Channel);
         }
 
         [Command("help")]
         [Summary("Displays detailed information about a command.")]
-        [Alias("helpme", "pleasehelp", "how2use", "howtouse", "commands")]
+        [Alias("commands")]
         public async Task HelpCommand(string Command) {
             SearchResult Result = CommandService.Search(Context, Command);
 

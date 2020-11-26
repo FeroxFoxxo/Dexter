@@ -3,7 +3,6 @@ using Dexter.Enums;
 using Discord.Commands;
 using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
@@ -11,14 +10,17 @@ namespace Dexter.Commands {
     public partial class FunCommands {
 
         [Command("wyr")]
-        [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from.\n" +
-                    "`ADD [WYR]` - adds a wyr to the database.\n" +
+        [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from.")]
+        public async Task WYRCommand() => await SendTopic(TopicType.Topic);
+
+        [Command("wyr")]
+        [Summary("`ADD [WYR]` - adds a wyr to the database.\n" +
                     "`GET [WYR]` - gets a wyr by name from the database.\n" +
                     "`EDIT [WYR ID] [WYR]` - edits a wyr in the database.\n" +
                     "`REMOVE [WYR ID]` - removes a wyr from the database.")]
         [Alias("would you rather", "wouldyourather")]
 
-        public async Task WYRCommand([Optional][BotChannelParameter] ActionType ActionType, [Optional][Remainder][BotChannelParameter] string Topic) {
+        public async Task WYRCommand([BotChannelParameter] ActionType ActionType, [Remainder][BotChannelParameter] string Topic) {
             switch (ActionType) {
                 case ActionType.Add:
                     await AddTopic(Topic, TopicType.WouldYouRather);

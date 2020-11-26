@@ -42,7 +42,7 @@ namespace Dexter.Commands {
                     foreach (EmbedBuilder Embed in Embeds)
                         await Embed.SendEmbed(Context.Channel);
                 } else {
-                    await BuildEmbed(EmojiEnum.Love)
+                    await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Halt! Don't go there-")
                         .WithDescription("Heya! To run this command with a user specified, you will need to be a moderator. <3")
                         .SendEmbed(Context.Channel);

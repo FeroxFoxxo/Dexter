@@ -133,6 +133,11 @@ namespace Dexter.Services {
                                 .WithDescription($"`{CustomCommand.CommandName}` has not been configured! Please contact a moderator about this. <3")
                                 .SendEmbed(CommandContext.Channel);
                     } else {
+                        if (CommandContext.Message.Content.Length <= 1)
+                            return;
+                        else if (CommandContext.Message.Content.Substring(0, 2) == "~~")
+                            return;
+
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unknown Command.")
                             .WithDescription($"Oopsies! It seems as if the command **{CustomCommandArgs[0].SanitizeMarkdown()}** doesn't exist!")

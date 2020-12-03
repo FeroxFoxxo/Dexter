@@ -1,10 +1,12 @@
-﻿using Dexter.Configurations;
+﻿using Dexter.Attributes;
+using Dexter.Configurations;
 using Dexter.Enums;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.Webhook;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -99,7 +101,11 @@ namespace Dexter.Extensions {
             if (CommandInfo.Parameters.Count > 0)
                 CommandDescription = $"Parameters: {string.Join(", ", CommandInfo.Parameters.Select(p => p.Name))}";
 
-            if (!string.IsNullOrEmpty(CommandInfo.Summary))
+            Attribute ExtendedSummary = CommandInfo.Attributes.Where(Attribute => Attribute is ExtendedSummaryAttribute).FirstOrDefault();
+
+            if (ExtendedSummary is not null)
+                CommandDescription += $"\nSummary: {(ExtendedSummary as ExtendedSummaryAttribute).ExtendedSummary}";
+            else if (!string.IsNullOrEmpty(CommandInfo.Summary))
                 CommandDescription += $"\nSummary: {CommandInfo.Summary}";
 
             BotConfiguration BotConfiguration = InitializeDependencies.ServiceProvider.GetRequiredService<BotConfiguration>();

@@ -3,9 +3,9 @@ using Dexter.Abstractions;
 using Dexter.Attributes;
 using Discord.Commands;
 using Discord.WebSocket;
-using Dexter.Services;
 
 namespace Dexter.Commands {
+
     [EssentialModule]
     public partial class HelpCommands : DiscordModule {
 
@@ -21,4 +21,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

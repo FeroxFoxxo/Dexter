@@ -16,9 +16,7 @@ namespace Dexter.Services {
     /// The Module service adds all the modules that have been specified as enabled to the command service, aswell as all essential moodules.
     /// It does this through a database dedicated to keeping track of the status of modules, looping through it and setting them respectively.
     /// </summary>
-    public class ModuleService : InitializableModule {
-
-        private readonly DiscordSocketClient DiscordSocketClient;
+    public class ModuleService {
 
         private readonly LoggingService LoggingService;
 
@@ -31,25 +29,16 @@ namespace Dexter.Services {
         /// <summary>
         /// The constructor for the ModuleService module. This takes in the injected dependencies and sets them as per what the class requires.
         /// </summary>
-        /// <param name="DiscordSocketClient">An instance of the DiscordSocketClient, which we use to hook into the OnReady event.</param>
         /// <param name="CommandService">An instance of the CommandService, which tracks all the currently enabled commands and their delegates.</param>
         /// <param name="LoggingService">The LoggingService instance, which we use to log information on the currently enabled modules for use when we start up.</param>
         /// <param name="ServiceProvider">The ServiceProvider, which contains references to all the classes that have been specified through recursion, more specifically the CommandModule classes.</param>
         /// <param name="ConfigurationDB">An instance of the ConfigurationDB, which keeps track of enabled and disabled commands.</param>
-        public ModuleService(DiscordSocketClient DiscordSocketClient, CommandService CommandService, LoggingService LoggingService,
+        public ModuleService(CommandService CommandService, LoggingService LoggingService,
                 IServiceProvider ServiceProvider, ConfigurationDB ConfigurationDB) {
-            this.DiscordSocketClient = DiscordSocketClient;
             this.CommandService = CommandService;
             this.LoggingService = LoggingService;
             this.ServiceProvider = ServiceProvider;
             this.ConfigurationDB = ConfigurationDB;
-        }
-
-        /// <summary>
-        /// The Initialize method hooks the client's Ready event up to the EnableModules method, which will set all the modules as defined in the ConfigurationDB.
-        /// </summary>
-        public override void Initialize() {
-            DiscordSocketClient.Ready += EnableModules;
         }
 
         /// <summary>
@@ -58,10 +47,6 @@ namespace Dexter.Services {
         /// </summary>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
         public async Task EnableModules() {
-            // Remove all modules.
-            foreach (ModuleInfo ModuleInfo in CommandService.Modules)
-                await CommandService.RemoveModuleAsync(ModuleInfo);
-
             int Essentials = 0, Others = 0;
 
             // Find all modules that are deemed essential through the attribute.
@@ -110,15 +95,11 @@ namespace Dexter.Services {
             foreach (Configuration Configuration in ConfigurationDB.Configurations.ToArray()) {
                 switch (Configuration.ConfigurationType) {
                     case ConfigurationType.Enabled:
-                        try {
-                            await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
-                        } catch (ArgumentException) { }
+                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
                         Others++;
                         break;
                     case ConfigurationType.Essential:
-                        try {
-                            await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
-                        } catch (ArgumentException) { }
+                        await CommandService.AddModuleAsync(GetModuleTypeByName(Configuration.ConfigurationName), ServiceProvider);
                         Essentials++;
                         break;
                 }

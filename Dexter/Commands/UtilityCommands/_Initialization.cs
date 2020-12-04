@@ -3,6 +3,7 @@ using Dexter.Services;
 using Discord.WebSocket;
 
 namespace Dexter.Commands {
+
     public partial class UtilityCommands : DiscordModule {
 
         private readonly LoggingService LoggingService;
@@ -18,4 +19,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

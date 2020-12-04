@@ -78,11 +78,14 @@ namespace Dexter {
                     ExclusiveBulkDelete = false
                 }
             );
+
             ServiceCollection.AddSingleton(DiscordSocketClient);
 
             // Adds an instance of the CommandService, which is what calls our various commands.
             CommandService CommandService = new();
             ServiceCollection.AddSingleton(CommandService);
+
+            ServiceCollection.AddSingleton<ModuleService>();
 
             // Adds an instance of LoggingService, which allows us to log to the console.
             LoggingService LoggingService = new(DiscordSocketClient, CommandService);
@@ -159,6 +162,8 @@ namespace Dexter {
 
             // Runs the bot using the token specified as a commands line argument.
             await ServiceProvider.GetRequiredService<StartupService>().StartAsync(Token);
+
+            await ServiceProvider.GetRequiredService<ModuleService>().EnableModules();
 
             // Sets the bot to continue running forever until the process is culled.
             await Task.Delay(-1);

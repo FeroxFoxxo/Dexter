@@ -295,6 +295,9 @@ namespace Dexter.Services {
             if (Proposal == null)
                 throw new Exception("Proposal does not exist in database! Aborting...");
 
+            if (Proposal.ProposalStatus != ProposalStatus.Suggested)
+                return true;
+
             // Check the current amount of upvotes the message has.
             ReactionMetadata Upvotes = UserMessage.Reactions[
                 await DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild)
@@ -356,7 +359,9 @@ namespace Dexter.Services {
                             case "Upvote":
                             case "Downvote":
                                 // If an upvote or downvote has been applied by the suggestor, remove it.
-                                if (Proposal.Proposer != Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(BotConfiguration) < PermissionLevel.Moderator)
+                                if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(BotConfiguration) >= PermissionLevel.Moderator)
+                                    return true;
+                                else
                                     return false;
                                 break;
                             case "Bin":

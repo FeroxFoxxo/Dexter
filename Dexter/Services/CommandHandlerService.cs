@@ -154,7 +154,7 @@ namespace Dexter.Services {
                     if (Result.ToString().Contains("ObjectNotFound")) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle(Result.ErrorReason)
-                            .WithDescription("If you believe this was an error, please do ping a developer!\nObjectNotFound Exception")
+                            .WithDescription("If you believe this was an error, please do ping a developer!\nIf the argument does exist, it may be due to caching. If so, please wait a few minutes.")
                             .SendEmbed(CommandContext.Channel);
 
                         return;

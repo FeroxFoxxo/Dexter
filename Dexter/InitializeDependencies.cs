@@ -53,7 +53,7 @@ namespace Dexter {
             if (Versioning.Split('.').Length <= 1)
                 InitializeDependencies.Version = $"{Versioning}.0.0";
             else if (Versioning.Split('.')[1].Length == 1)
-                InitializeDependencies.Version = $"{Versioning[0..^1]}.{Versioning[^1].ToString()}.0";
+                InitializeDependencies.Version = $"{Versioning[0..^1]}{Versioning[^1].ToString()}.0";
             else
                 InitializeDependencies.Version = $"{Versioning[0..^1]}.{Versioning[^1].ToString()}";
 

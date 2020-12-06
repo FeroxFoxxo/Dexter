@@ -1,4 +1,4 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Databases.Proposals;
 using Dexter.Services;
 using Discord;
@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class ProposalCommands {
 
         /// <summary>
@@ -28,4 +29,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

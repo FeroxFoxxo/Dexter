@@ -1,4 +1,4 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Discord.Commands;
 using System;
@@ -14,12 +14,13 @@ namespace Dexter.Commands {
         public async Task TopicCommand() => await SendTopic(TopicType.Topic);
 
         [Command("topic")]
+        [BotChannel]
         [Summary("`ADD [TOPIC]` - adds a topic to the database.\n" +
                     "`GET [TOPIC]` - gets a topic by name from the database.\n" +
                     "`EDIT [TOPIC ID] [TOPIC]` - edits a topic in the database.\n" +
                     "`REMOVE [TOPIC ID]` - removes a topic from the database.")]
 
-        public async Task TopicCommand([BotChannelParameter] ActionType ActionType, [Remainder] [BotChannelParameter] string Topic) {
+        public async Task TopicCommand(ActionType ActionType, [Remainder] string Topic) {
             switch (ActionType) {
                 case ActionType.Add:
                     await AddTopic(Topic, TopicType.Topic);

@@ -1,6 +1,6 @@
 ﻿using Dexter.Configurations;
 using Dexter.Abstractions;
-using Dexter.Attributes;
+using Dexter.Attributes.Classes;
 using Discord.Commands;
 using Discord.WebSocket;
 
@@ -9,16 +9,9 @@ namespace Dexter.Commands {
     [EssentialModule]
     public partial class HelpCommands : DiscordModule {
 
-        private readonly CommandService CommandService;
-        private readonly BotConfiguration BotConfiguration;
-        private readonly DiscordSocketClient DiscordSocketClient;
+        public CommandService CommandService { get; set; }
 
-        public HelpCommands(CommandService CommandService, BotConfiguration BotConfiguration,
-                DiscordSocketClient DiscordSocketClient) {
-            this.CommandService = CommandService;
-            this.BotConfiguration = BotConfiguration;
-            this.DiscordSocketClient = DiscordSocketClient;
-        }
+        public DiscordSocketClient DiscordSocketClient { get; set; }
 
     }
 

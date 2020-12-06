@@ -1,10 +1,11 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Discord;
 using Discord.Commands;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class FunCommands {
 
         [Command("headpat", RunMode = RunMode.Async)]
@@ -17,4 +18,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

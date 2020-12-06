@@ -6,9 +6,7 @@ using System.Timers;
 
 namespace Dexter.Services {
 
-    public class TimerService : InitializableModule {
-
-        private readonly DiscordSocketClient DiscordSocketClient;
+    public class TimerService : Service {
 
         public TimerService(DiscordSocketClient DiscordSocketClient) {
             this.DiscordSocketClient = DiscordSocketClient;
@@ -26,7 +24,7 @@ namespace Dexter.Services {
             DiscordSocketClient.Ready += () => Task.Run(() => EventTimer.Start());
         }
 
-        public void LoopThroughEvents() {
+        public static void LoopThroughEvents() {
 
         }
 

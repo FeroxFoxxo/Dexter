@@ -1,4 +1,4 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
@@ -7,6 +7,7 @@ using Discord.Net;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class UtilityCommands {
 
         [Command("userdm")]
@@ -24,10 +25,10 @@ namespace Dexter.Commands {
             try {
                 await User.SendMessageAsync($"**__Message From {Context.Guild.Name}__**\n{Message}");
 
-                Embed.BuildEmbed(EmojiEnum.Love)
+                Embed.BuildEmbed(EmojiEnum.Love, BotConfiguration)
                     .AddField("Success", "The DM was successfully sent!");
             } catch (HttpException) {
-                Embed.BuildEmbed(EmojiEnum.Annoyed)
+                Embed.BuildEmbed(EmojiEnum.Annoyed, BotConfiguration)
                     .AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
             }
 
@@ -35,4 +36,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

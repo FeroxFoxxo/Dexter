@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class UtilityCommands {
 
         [Command("avatar")]
@@ -24,4 +25,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

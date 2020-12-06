@@ -1,4 +1,4 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Configurations;
 using Dexter.Enums;
 using Discord;
@@ -11,9 +11,11 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Extensions {
+
     /// <summary>
     /// The EmbedBuilder Extensions class offers a variety of different extensions that can be applied to an embed to modify or send it.
     /// </summary>
+    
     public static class EmbedExtensions {
 
         /// <summary>
@@ -21,8 +23,10 @@ namespace Dexter.Extensions {
         /// </summary>
         /// <param name="EmbedBuilder">The EmbedBuilder which you wish to be built upon.</param>
         /// <param name="Thumbnails">The type of EmbedBuilder you wish it to be, specified by an enum of possibilities.</param>
+        /// <param name="BotConfiguration">The BotConfiguration which is used to find the thumbnail of the embed.</param>
         /// <returns>The built embed, with the thumbnail and color applied.</returns>
-        public static EmbedBuilder BuildEmbed(this EmbedBuilder EmbedBuilder, EmojiEnum Thumbnails) {
+        
+        public static EmbedBuilder BuildEmbed(this EmbedBuilder EmbedBuilder, EmojiEnum Thumbnails, BotConfiguration BotConfiguration) {
             Color Color = Thumbnails switch {
                 EmojiEnum.Annoyed => Color.Red,
                 EmojiEnum.Love => Color.Green,
@@ -32,7 +36,7 @@ namespace Dexter.Extensions {
                 _ => Color.Magenta
             };
 
-            return EmbedBuilder.WithThumbnailUrl(InitializeDependencies.ServiceProvider.GetRequiredService<BotConfiguration>().ThumbnailURLs[(int)Thumbnails]).WithColor(Color);
+            return EmbedBuilder.WithThumbnailUrl(BotConfiguration.ThumbnailURLs[(int)Thumbnails]).WithColor(Color);
         }
 
         /// <summary>
@@ -41,6 +45,7 @@ namespace Dexter.Extensions {
         /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
         /// <param name="MessageChannel">The IMessageChannel you wish to send the embed to.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, IMessageChannel MessageChannel) =>
             await MessageChannel.SendMessageAsync(embed: EmbedBuilder.Build());
 
@@ -50,6 +55,7 @@ namespace Dexter.Extensions {
         /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
         /// <param name="DiscordWebhookClient">The DiscordWebhookClient you wish to send the embed to.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, DiscordWebhookClient DiscordWebhookClient) =>
             await DiscordWebhookClient.SendMessageAsync(embeds: new Embed[1] { EmbedBuilder.Build() });
 
@@ -60,6 +66,7 @@ namespace Dexter.Extensions {
         /// <param name="User">The IUser you wish to send the embed to.</param>
         /// <param name="Fallback">The Fallback is the channel it will send the embed to if the user has blocked DMs.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, IUser User, ITextChannel Fallback) {
             try {
                 await User.SendMessageAsync(embed: EmbedBuilder.Build());
@@ -82,6 +89,7 @@ namespace Dexter.Extensions {
         /// <param name="Name">The name of the field you wish to add.</param>
         /// <param name="Value">The description of the field you wish to add.</param>
         /// <returns>The embed with the field added to it if true.</returns>
+        
         public static EmbedBuilder AddField(this EmbedBuilder EmbedBuilder, bool Condition, string Name, object Value) {
             if (Condition)
                 EmbedBuilder.AddField(Name, Value);
@@ -94,8 +102,10 @@ namespace Dexter.Extensions {
         /// </summary>
         /// <param name="EmbedBuilder">The EmbedBuilder you wish to add the fields to.</param>
         /// <param name="CommandInfo">The command of which you wish to search for.</param>
+        /// <param name="BotConfiguration">The BotConfiguration, which is used to find the prefix for the parameter.</param>
         /// <returns>The embed with the parameter fields for the command added.</returns>
-        public static EmbedBuilder GetParametersForCommand(this EmbedBuilder EmbedBuilder, CommandInfo CommandInfo) {
+        
+        public static EmbedBuilder GetParametersForCommand(this EmbedBuilder EmbedBuilder, CommandInfo CommandInfo, BotConfiguration BotConfiguration) {
             string CommandDescription = string.Empty;
 
             if (CommandInfo.Parameters.Count > 0)
@@ -108,12 +118,11 @@ namespace Dexter.Extensions {
             else if (!string.IsNullOrEmpty(CommandInfo.Summary))
                 CommandDescription += $"\nSummary: {CommandInfo.Summary}";
 
-            BotConfiguration BotConfiguration = InitializeDependencies.ServiceProvider.GetRequiredService<BotConfiguration>();
-
             EmbedBuilder.AddField(string.Join(", ", CommandInfo.Aliases.Select(Name => $"{BotConfiguration.Prefix}{Name}")), CommandDescription);
 
             return EmbedBuilder;
         }
 
     }
+
 }

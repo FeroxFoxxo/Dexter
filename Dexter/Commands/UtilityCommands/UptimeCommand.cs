@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class UtilityCommands {
 
         [Command("uptime")]
@@ -21,4 +22,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

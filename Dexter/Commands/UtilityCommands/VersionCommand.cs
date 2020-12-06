@@ -1,5 +1,6 @@
 ﻿using Dexter.Enums;
 using Dexter.Extensions;
+using Dexter.Services;
 using Discord;
 using Discord.Commands;
 using Newtonsoft.Json.Linq;
@@ -7,6 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class UtilityCommands {
 
         [Command("version")]
@@ -27,10 +29,11 @@ namespace Dexter.Commands {
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Bot Version")
-                .WithDescription($"Hello? Is anyone out there-\nThis is **{Context.Client.CurrentUser.Username} v{InitializeDependencies.Version}** running **Discord.NET v{DiscordConfig.Version}**")
+                .WithDescription($"Hello? Is anyone out there-\nThis is **{Context.Client.CurrentUser.Username} v{StartupService.Version}** running **Discord.NET v{DiscordConfig.Version}**")
                 .AddField("Latest Commit:", LastCommit.Length > 1200 ? $"{LastCommit.Substring(0, 1200)}..." : LastCommit)
                 .SendEmbed(Context.Channel);
         }
 
     }
+
 }

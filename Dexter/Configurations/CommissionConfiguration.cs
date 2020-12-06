@@ -2,7 +2,7 @@
 
 namespace Dexter.Configurations {
     
-    public class CommissionCooldownConfiguration : JSONConfiguration {
+    public class CommissionCooldownConfiguration : JSONConfig {
 
         public ulong CommissionsCornerID { get; set; }
 

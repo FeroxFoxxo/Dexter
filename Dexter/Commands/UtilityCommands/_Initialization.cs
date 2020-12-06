@@ -6,17 +6,13 @@ namespace Dexter.Commands {
 
     public partial class UtilityCommands : DiscordModule {
 
-        private readonly LoggingService LoggingService;
+        public LoggingService LoggingService { get; set; }
 
-        private readonly ProfileService ProfileService;
+        public ProfileService ProfileService { get; set; }
 
-        private readonly DiscordSocketClient DiscordSocketClient;
+        public DiscordSocketClient DiscordSocketClient { get; set; }
 
-        public UtilityCommands(LoggingService LoggingService, ProfileService ProfileService, DiscordSocketClient DiscordSocketClient) {
-            this.LoggingService = LoggingService;
-            this.ProfileService = ProfileService;
-            this.DiscordSocketClient = DiscordSocketClient;
-        }
+        public StartupService StartupService { get; set; }
 
     }
 

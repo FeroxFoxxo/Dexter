@@ -1,9 +1,10 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Discord.Commands;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class UtilityCommands {
 
         [Command("logfile")]
@@ -12,13 +13,12 @@ namespace Dexter.Commands {
         [RequireModerator]
 
         public async Task LogfileCommand() {
-            string FilePath = LoggingService.GetLogFile();
-
-            if (!File.Exists(FilePath))
+            if (!File.Exists(LoggingService.LogFile))
                 throw new FileNotFoundException();
 
-            await Context.Channel.SendFileAsync(FilePath);
+            await Context.Channel.SendFileAsync(LoggingService.LogFile);
         }
 
     }
+
 }

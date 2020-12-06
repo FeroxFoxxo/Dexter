@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class CustomCommands {
 
         /// <summary>
@@ -26,4 +27,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

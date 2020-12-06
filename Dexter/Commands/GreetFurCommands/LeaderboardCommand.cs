@@ -1,4 +1,4 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Discord;
 using Discord.Commands;
@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class GreetFurCommands {
 
         [Command("gflevels")]
@@ -68,4 +69,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

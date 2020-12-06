@@ -6,15 +6,9 @@ using System.Threading.Tasks;
 
 namespace Dexter.Services {
 
-    public class RelayService : InitializableModule {
+    public class RelayService : Service {
 
-        private readonly DiscordSocketClient DiscordSocketClient;
-        private readonly RelayDB RelayDB;
-
-        public RelayService (DiscordSocketClient DiscordSocketClient, RelayDB RelayDB) {
-            this.DiscordSocketClient = DiscordSocketClient;
-            this.RelayDB = RelayDB;
-        }
+        public RelayDB RelayDB { get; set; }
 
         public override void Initialize() {
             DiscordSocketClient.MessageReceived += CheckRelay;

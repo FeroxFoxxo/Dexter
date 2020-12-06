@@ -1,22 +1,24 @@
 ﻿using Dexter.Abstractions;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace Dexter.Databases.FunTopics {
 
     /// <summary>
     /// The FunTopicsDB contains a set of fun topics that can be added to the database through user suggestion.
     /// </summary>
-    public class FunTopicsDB : EntityDatabase {
+    
+    public class FunTopicsDB : Database {
 
         /// <summary>
         /// A table of the topics in the FunTopicsDB database.
         /// </summary>
+        
         public DbSet<FunTopic> Topics { get; set; }
 
         /// <summary>
         /// A table of the would-you-rathers in the FunTopicsDB database.
         /// </summary>
+        
         public DbSet<FunTopic> WouldYouRather { get; set; }
 
     }

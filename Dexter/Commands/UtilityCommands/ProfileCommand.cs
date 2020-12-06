@@ -8,6 +8,7 @@ using Dexter.Extensions;
 using System.Runtime.InteropServices;
 
 namespace Dexter.Commands {
+
     public partial class UtilityCommands {
 
         [Command("profile")]
@@ -30,4 +31,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

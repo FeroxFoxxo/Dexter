@@ -12,28 +12,26 @@ namespace Dexter.Services {
     /// The MeetNGreet service is used to log messages that have been updated and deleted from the MeetNGreet channel.
     /// It does this through creating a webhook and sending to that very webhook each time an event runs.
     /// </summary>
-    public class MeetNGreetService : InitializableModule {
-
-        private readonly DiscordSocketClient DiscordSocketClient;
-
-        private readonly MNGConfiguration MNGConfiguration;
-
-        private DiscordWebhookClient DiscordWebhookClient;
+    
+    public class MeetNGreetService : Service {
 
         /// <summary>
-        /// The constructor for the MeetNGreetService module. This takes in the injected dependencies and sets them as per what the class requires.
+        /// The MNGConfiguration is used to find and create the MNG webhook.
         /// </summary>
-        /// <param name="DiscordSocketClient">The instance of the client, which is used to hook into the API.</param>
-        /// <param name="MNGConfiguration">The instance of the MNGConfiguration, which is used to find and create the MNG webhook.</param>
-        public MeetNGreetService(DiscordSocketClient DiscordSocketClient, MNGConfiguration MNGConfiguration) {
-            this.DiscordSocketClient = DiscordSocketClient;
-            this.MNGConfiguration = MNGConfiguration;
-        }
+        
+        public MNGConfiguration MNGConfiguration { get; set; }
+
+        /// <summary>
+        /// The DiscordWebhookClient is used for sending messages to the mng logging channel.
+        /// </summary>
+
+        public DiscordWebhookClient DiscordWebhookClient;
 
         /// <summary>
         /// The Initialize method adds the MessageDeleted and MessageUpdated hooks into their respective MNG check methods.
         /// It also hooks the ready event to the CreateWebhook delegate.
         /// </summary>
+        
         public override void Initialize() {
             DiscordSocketClient.MessageDeleted += MNGMessageDeleted;
             DiscordSocketClient.MessageUpdated += MNGMessageUpdated;
@@ -44,8 +42,9 @@ namespace Dexter.Services {
         /// The Create Webhook method runs on Ready and is what initializes our webhook.
         /// </summary>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task CreateWebhook() {
-            DiscordWebhookClient = await DiscordSocketClient.CreateOrGetWebhook(MNGConfiguration.WebhookChannel, MNGConfiguration.WebhookName);
+            DiscordWebhookClient = await CreateOrGetWebhook(MNGConfiguration.WebhookChannel, MNGConfiguration.WebhookName);
         }
 
         /// <summary>
@@ -57,6 +56,7 @@ namespace Dexter.Services {
         /// <param name="NewMessage">The instance of the new, changed message.</param>
         /// <param name="SocketMessageChannel">The channel from which the message had been sent from.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task MNGMessageUpdated(Cacheable<IMessage, ulong> OldMessage, SocketMessage NewMessage, ISocketMessageChannel SocketMessageChannel) {
             if (SocketMessageChannel.Id != MNGConfiguration.MeetNGreetChannel)
                 return;
@@ -88,6 +88,7 @@ namespace Dexter.Services {
         /// <param name="DeletedMessage">The message that has been cached from the sent channel.</param>
         /// <param name="Channel">The channel from which the message had been sent from.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task MNGMessageDeleted(Cacheable<IMessage, ulong> DeletedMessage, IChannel Channel) {
             if (Channel.Id != MNGConfiguration.MeetNGreetChannel)
                 return;

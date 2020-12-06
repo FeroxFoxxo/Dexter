@@ -1,4 +1,4 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Configurations;
 using Dexter.Databases.CustomCommands;
 using Dexter.Enums;
@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class CustomCommands {
 
         /// <summary>
@@ -152,4 +153,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

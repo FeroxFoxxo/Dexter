@@ -1,4 +1,4 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Databases.Relay;
 using Dexter.Enums;
 using Dexter.Extensions;

@@ -8,11 +8,13 @@ namespace Dexter.Databases.Warnings {
     /// <summary>
     /// The WarningsDB contains a set of warnings, issued by a moderator, when a user has been warned in chat.
     /// </summary>
-    public class WarningsDB : EntityDatabase {
+    
+    public class WarningsDB : Database {
 
         /// <summary>
         /// A table of the warnings issued in the WarningDB database.
         /// </summary>
+        
         public DbSet<Warning> Warnings { get; set; }
 
         /// <summary>
@@ -21,6 +23,7 @@ namespace Dexter.Databases.Warnings {
         /// </summary>
         /// <param name="UserID">The ID of the user you wish to query the warnings of.</param>
         /// <returns>An array of warning objects that the user has.</returns>
+        
         public Warning[] GetWarnings(ulong UserID) =>
             Warnings.AsQueryable()
             .Where(Warning => Warning.User == UserID && Warning.EntryType != EntryType.Revoke)

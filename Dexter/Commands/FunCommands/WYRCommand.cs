@@ -1,4 +1,4 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Discord.Commands;
 using System;
@@ -14,13 +14,14 @@ namespace Dexter.Commands {
         public async Task WYRCommand() => await SendTopic(TopicType.Topic);
 
         [Command("wyr")]
+        [BotChannel]
         [Summary("`ADD [WYR]` - adds a wyr to the database.\n" +
                     "`GET [WYR]` - gets a wyr by name from the database.\n" +
                     "`EDIT [WYR ID] [WYR]` - edits a wyr in the database.\n" +
                     "`REMOVE [WYR ID]` - removes a wyr from the database.")]
         [Alias("would you rather", "wouldyourather")]
 
-        public async Task WYRCommand([BotChannelParameter] ActionType ActionType, [Remainder][BotChannelParameter] string Topic) {
+        public async Task WYRCommand(ActionType ActionType, [Remainder] string Topic) {
             switch (ActionType) {
                 case ActionType.Add:
                     await AddTopic(Topic, TopicType.WouldYouRather);

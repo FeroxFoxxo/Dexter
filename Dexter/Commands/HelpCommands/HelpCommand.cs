@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class HelpCommands {
 
         [Command("help")]
@@ -72,11 +73,12 @@ namespace Dexter.Commands {
                     .WithTitle($"Here are some commands like **{Command}**!");
 
                 foreach (CommandMatch CommandMatch in Result.Commands)
-                    EmbedBuilder.GetParametersForCommand(CommandMatch.Command);
+                    EmbedBuilder.GetParametersForCommand(CommandMatch.Command, BotConfiguration);
 
                 await EmbedBuilder.SendEmbed(Context.Channel);
             }
         }
 
     }
+
 }

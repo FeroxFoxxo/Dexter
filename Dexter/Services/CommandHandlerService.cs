@@ -8,7 +8,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Linq;
-using System.Data;
 using System.Threading.Tasks;
 
 namespace Dexter.Services {
@@ -19,42 +18,37 @@ namespace Dexter.Services {
     /// bot configuration. It also catches all errors that may crop up in a command, logs it, and then sends
     /// an appropriate error to the channel, pinging the developers if the error is unknown.
     /// </summary>
-    public class CommandHandlerService : InitializableModule {
+    
+    public class CommandHandlerService : Service {
 
-        private readonly DiscordSocketClient DiscordSocketClient;
+        /// <summary>
+        /// The ServiceProvider is where our dependencies are stored - given as a field to DiscordNet's execution method.
+        /// </summary>
+        
+        public IServiceProvider ServiceProvider { get; set; }
 
-        private readonly IServiceProvider ServiceProvider;
-
-        private readonly CommandService CommandService;
-
-        private readonly BotConfiguration BotConfiguration;
-
-        private readonly CustomCommandDB CustomCommandDB;
-
-        private readonly LoggingService LoggingService;
+        /// <summary>
+        /// The CommandService of the bot is used to check if there are any errors on the CommandExecuted event.
+        /// </summary>
+        
+        public CommandService CommandService { get; set; }
         
         /// <summary>
-        /// The constructor for the CommandHandlerService module. This takes in the injected dependencies and sets them as per what the class requires.
+        /// The CustomCommandDB is used to get our custom commands, which - if we fail as the command is unknown - we parse to find a match.
         /// </summary>
-        /// <param name="DiscordSocketClient">The current instance of the DiscordSocketClient, which is used to hook into the MessegeRecieved delegate.</param>
-        /// <param name="CommandService">The CommandService of the bot, which is used to check if there are any errors on the CommandExecuted event.</param>
-        /// <param name="BotConfiguration">The BotConfiguration JSON file, which contains the prefix used to parse commands and developer mention for if the command errors unexpectedly.</param>
-        /// <param name="ServiceProvider">The ServiceProvider, which is where our dependencies are stored - given as a field to DiscordNet's execution method.</param>
-        /// <param name="CustomCommandDB">The CustomCommandDB is used to get our custom commands, which - if we fail as the command is unknown - we parse to find a match.</param>
-        /// <param name="LoggingService">The LoggingService is used to log unexpected errors that may occur on command execution</param>
-        public CommandHandlerService(DiscordSocketClient DiscordSocketClient, CommandService CommandService, BotConfiguration BotConfiguration,
-                IServiceProvider ServiceProvider, CustomCommandDB CustomCommandDB, LoggingService LoggingService) {
-            this.DiscordSocketClient = DiscordSocketClient;
-            this.BotConfiguration = BotConfiguration;
-            this.CommandService = CommandService;
-            this.ServiceProvider = ServiceProvider;
-            this.CustomCommandDB = CustomCommandDB;
-            this.LoggingService = LoggingService;
-        }
+        
+        public CustomCommandDB CustomCommandDB { get; set; }
+
+        /// <summary>
+        /// The LoggingService is used to log unexpected errors that may occur on command execution.
+        /// </summary>
+        
+        public LoggingService LoggingService { get; set; }
 
         /// <summary>
         /// The Initialize override hooks into both the Client's MessageRecieved event and the CommandService's CommandExecuted event.
         /// </summary>
+        
         public override void Initialize() {
             DiscordSocketClient.MessageReceived += HandleCommandAsync;
             CommandService.CommandExecuted += SendCommandError;
@@ -67,27 +61,31 @@ namespace Dexter.Services {
         /// <param name="SocketMessage">The SocketMessage event is given as a parameter of MessageRecieved and
         /// is used to find and execute the command if the parameters have been met.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task HandleCommandAsync(SocketMessage SocketMessage) {
+            // We do not check the message if it is not an instance of a user message.
             if (SocketMessage is not SocketUserMessage Message)
                 return;
 
             int ArgumentPosition = 0;
 
+            // We do not parse the message if it does not have the prefix or it is from a bot.
             if (!(Message.HasStringPrefix(BotConfiguration.Prefix, ref ArgumentPosition) ||
                     Message.HasMentionPrefix(DiscordSocketClient.CurrentUser, ref ArgumentPosition)) ||
                     Message.Author.IsBot)
                 return;
 
+            // We check to see if the channel is a DM channel (i.e. it is not a guild channel) and, if so, we return.
             if (!(Message.Channel is IGuildChannel)) {
-                if (!Message.Author.IsBot)
-                    await BuildEmbed(EmojiEnum.Annoyed)
-                        .WithTitle($"{DiscordSocketClient.CurrentUser.Username} is not avaliable in DMs!")
-                        .WithDescription($"Heya! I'm not avaliable in DMs at the moment, " +
-                            $"please use {DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Name} to communicate with me!")
-                        .SendEmbed(Message.Channel);
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle($"{DiscordSocketClient.CurrentUser.Username} is not avaliable in DMs!")
+                    .WithDescription($"Heya! I'm not avaliable in DMs at the moment, " +
+                        $"please use {DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Name} to communicate with me!")
+                    .SendEmbed(Message.Channel);
                 return;
             }
 
+            // Finally, if all prerequesites have returned correctly, we run and parse the command with an instance of our socket command context and our services.
             await CommandService.ExecuteAsync(new SocketCommandContext(DiscordSocketClient, Message), ArgumentPosition, ServiceProvider);
         }
 
@@ -98,11 +96,14 @@ namespace Dexter.Services {
         /// <param name="CommandContext">The context command provides is with information about the message, including who sent it and the channel it was set in.</param>
         /// <param name="Result">The Result specifies the outcome of the attempted run of the command - whether it was successful or not and the error it may have run in to.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task SendCommandError(Optional<CommandInfo> CommandInfo, ICommandContext CommandContext, IResult Result) {
             if (Result.IsSuccess)
                 return;
 
             switch (Result.Error) {
+
+                // Unmet Precondition specifies that the error is a result as one of the preconditions specified by an attribute has returned FromError.
                 case CommandError.UnmetPrecondition:
                     if (Result.ErrorReason.Length <= 0)
                         return;
@@ -112,13 +113,17 @@ namespace Dexter.Services {
                         .WithDescription(Result.ErrorReason)
                         .SendEmbed(CommandContext.Channel);
                     break;
+
+                // Bad Argument Count specifies that the command has had an invalid amount of arguments parsed to it. It will send all the commands with their parameters and summaries in response.
                 case CommandError.BadArgCount:
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("You've entered an invalid amount of parameters for this command!")
                         .WithDescription($"Here are some options of parameters you can have for the command **{CommandInfo.Value.Name}**.")
-                        .GetParametersForCommand(CommandInfo.Value)
+                        .GetParametersForCommand(CommandInfo.Value, BotConfiguration)
                         .SendEmbed(CommandContext.Channel);
                     break;
+
+                // Unknown Command specifies that the parser was unable to find a command with the name specified. If this throws, we look for custom commands that may have the name and then send that it is an unknown command if there are not any returned.
                 case CommandError.UnknownCommand:
                     string[] CustomCommandArgs = CommandContext.Message.Content[BotConfiguration.Prefix.Length..].Split(' ');
 
@@ -144,13 +149,19 @@ namespace Dexter.Services {
                             .SendEmbed(CommandContext.Channel);
                     }
                     break;
+
+                // Parse Failed specifies that the TypeReader has been unable to parse a specific parameter of the command.
                 case CommandError.ParseFailed:
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Unable to parse command!")
                         .WithDescription("Invalid amount of command arguments.")
                         .SendEmbed(CommandContext.Channel);
                     break;
+
+                // The default case specifies that this command has run into an unknown error that will need to be reported.
                 default:
+
+                    // If we have been thrown an ObjectNotFound error, this means that the argument has been unable to be found. This could be due to caching, thus we do not need to ping the developers of this error.
                     if (Result.ToString().Contains("ObjectNotFound")) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle(Result.ErrorReason)
@@ -160,10 +171,12 @@ namespace Dexter.Services {
                         return;
                     }
                     
+                    // If the error is not an ObjectNotFound error, we log the message to the console with the appropriate data.
                     await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Warning, GetType().Name.Prettify(), $"Unknown statement reached!\nCommand: {(CommandInfo.IsSpecified ? CommandInfo.Value.Name : null)}\nResult: {Result}"));
 
                     EmbedBuilder CommandErrorEmbed;
 
+                    // Once logged, we check to see if the error is an ExecuteResult error as these execution results have more data about the issue that has gone wrong.
                     if (Result is ExecuteResult ExecuteResult)
                         CommandErrorEmbed = BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle(ExecuteResult.Exception.GetType().Name.Prettify())
@@ -173,10 +186,12 @@ namespace Dexter.Services {
                             .WithTitle(Result.Error.GetType().Name.Prettify())
                             .WithDescription(Result.ErrorReason);
 
+                    // Finally, we send the error into the channel with a ping to the developers to take notice of.
                     await CommandContext.Channel.SendMessageAsync($"Unknown error! I'll tell the developers.\n{BotConfiguration.DeveloperMention}", embed: CommandErrorEmbed.Build());
 
                     break;
             }
+
         }
 
     }

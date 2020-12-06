@@ -1,5 +1,5 @@
 ﻿using Dexter.Configurations;
-using Dexter.Attributes;
+using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Databases.CustomCommands;

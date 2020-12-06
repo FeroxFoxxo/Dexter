@@ -1,4 +1,4 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
@@ -10,6 +10,7 @@ using Dexter.Databases.Cooldowns;
 using Discord.Net;
 
 namespace Dexter.Commands {
+
     public partial class ModeratorCommands {
 
         /// <summary>

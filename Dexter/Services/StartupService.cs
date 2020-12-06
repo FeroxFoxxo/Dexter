@@ -17,29 +17,25 @@ namespace Dexter.Services {
     /// Furthermore, it logs and sends a message to the moderation channel when it does start up, including various information
     /// like its bot and Discord.NET versionings.
     /// </summary>
-    public class StartupService : InitializableModule {
-
-        private readonly DiscordSocketClient DiscordSocketClient;
-
-        private readonly LoggingService LoggingService;
-
-        private readonly BotConfiguration BotConfiguration;
+    
+    public class StartupService : Service {
 
         /// <summary>
-        /// The constructor for the StartupService module. This takes in the injected dependencies and sets them as per what the class requires.
+        /// An instance of the Logging Service, which we use to log if the token has not been set to the console.
         /// </summary>
-        /// <param name="DiscordSocketClient">An instance of the DiscordSocketClient, is what we use to hook into the ready event.</param>
-        /// <param name="BotConfiguration">The BotConfiguration, which contains the bot's token, as well as which channel to send the startup message to.</param>
-        /// <param name="LoggingService">An instance of the Logging Service, which we use to log if the token has not been set to the console.</param>
-        public StartupService(DiscordSocketClient DiscordSocketClient, BotConfiguration BotConfiguration, LoggingService LoggingService) {
-            this.DiscordSocketClient = DiscordSocketClient;
-            this.BotConfiguration = BotConfiguration;
-            this.LoggingService = LoggingService;
-        }
+        
+        public LoggingService LoggingService { get; set; }
+
+        /// <summary>
+        /// The current version of the bot, which as been parsed from the InitializeDependencies method.
+        /// </summary>
+        
+        public string Version;
 
         /// <summary>
         /// The Initialize method hooks the client ready event to the Display Startup Version Async method.
         /// </summary>
+        
         public override void Initialize() {
             DiscordSocketClient.Ready += DisplayStartupVersionAsync;
         }
@@ -50,8 +46,12 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="Token">A string, containing the Token from the command line arguments.
         /// Returns false if does not exist and flows onto the token specified in the BotConfiguration.</param>
+        /// <param name="Version">The current version of the bot, as parsed from the InitializeDependencies class.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        public async Task StartAsync(string Token) {
+        
+        public async Task StartAsync(string Token, string Version) {
+            this.Version = Version;
+
             if(!string.IsNullOrEmpty(Token))
                 await RunBot(Token);
             if (!string.IsNullOrEmpty(BotConfiguration.Token))
@@ -65,8 +65,9 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="Token">A string containing the token from which we use to log into Discord.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task RunBot(string Token) {
-            LoggingService.SetOutputToLocked(true);
+            LoggingService.LockedCMDOut = true;
             await DiscordSocketClient.LoginAsync(TokenType.Bot, Token);
             await DiscordSocketClient.StartAsync();
         }
@@ -76,6 +77,7 @@ namespace Dexter.Services {
         /// to a specified guild that the bot has sucessfully started and the versionings that it is running.
         /// </summary>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task DisplayStartupVersionAsync() {
             SocketChannel LoggingChannel = DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID);
 
@@ -84,13 +86,13 @@ namespace Dexter.Services {
 
             Console.Clear();
 
-            Console.Title = $"{DiscordSocketClient.CurrentUser.Username} v{InitializeDependencies.Version} (Discord.Net v{DiscordConfig.Version})";
+            Console.Title = $"{DiscordSocketClient.CurrentUser.Username} v{Version} (Discord.Net v{DiscordConfig.Version})";
 
             Console.ForegroundColor = ConsoleColor.Cyan;
 
             await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(DiscordSocketClient.CurrentUser.Username));
 
-            LoggingService.SetOutputToLocked(false);
+            LoggingService.LockedCMDOut = false;
 
             using HttpClient HTTPClient = new();
 
@@ -106,7 +108,7 @@ namespace Dexter.Services {
             if (BotConfiguration.EnableStartupAlert)
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Startup complete!")
-                    .WithDescription($"This is **{DiscordSocketClient.CurrentUser.Username} v{InitializeDependencies.Version}** running **Discord.Net v{DiscordConfig.Version}**!")
+                    .WithDescription($"This is **{DiscordSocketClient.CurrentUser.Username} v{Version}** running **Discord.Net v{DiscordConfig.Version}**!")
                     .AddField("Latest Commit:", LastCommit.Length > 1200 ? $"{LastCommit.Substring(0, 1200)}..." : LastCommit)
                     .SendEmbed(LoggingChannel as ITextChannel);
         }

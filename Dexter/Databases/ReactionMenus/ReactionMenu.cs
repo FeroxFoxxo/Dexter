@@ -1,6 +1,6 @@
 ﻿using Discord;
 
-namespace Dexter.Abstractions {
+namespace Dexter.Databases.ReactionMenus {
 
     public class ReactionMenu {
 

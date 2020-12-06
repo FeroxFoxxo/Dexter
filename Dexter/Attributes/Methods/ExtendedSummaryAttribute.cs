@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Dexter.Attributes {
+namespace Dexter.Attributes.Methods {
 
     [AttributeUsage(AttributeTargets.Method, Inherited = true)]
     public sealed class ExtendedSummaryAttribute : Attribute {

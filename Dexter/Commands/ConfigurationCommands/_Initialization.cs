@@ -1,6 +1,6 @@
 ﻿using Dexter.Configurations;
 using Dexter.Abstractions;
-using Dexter.Attributes;
+using Dexter.Attributes.Classes;
 using Dexter.Services;
 
 namespace Dexter.Commands {
@@ -14,18 +14,11 @@ namespace Dexter.Commands {
 
     public partial class ConfigurationCommands : DiscordModule {
 
-        private readonly ModuleService ModuleService;
-        private readonly BotConfiguration BotConfiguration;
-
         /// <summary>
-        /// The constructor for the ConfigurationCommands module. This takes in the injected dependencies and sets them as per what the class requires.
+        /// The ModuleService is what we use to enable and disable the modules, linked to the CommandService.
         /// </summary>
-        /// <param name="ModuleService">The ModuleService is what we use to enable and disable the modules, linked to the CommandService.</param>
-        /// <param name="BotConfiguration">The BotConfiguration is used to get the prefix of commands.</param>
-        public ConfigurationCommands(ModuleService ModuleService, BotConfiguration BotConfiguration) {
-            this.ModuleService = ModuleService;
-            this.BotConfiguration = BotConfiguration;
-        }
+        
+        public ModuleService ModuleService { get; set; }
 
     }
 

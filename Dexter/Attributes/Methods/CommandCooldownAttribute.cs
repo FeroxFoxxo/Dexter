@@ -10,7 +10,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dexter.Attributes {
+namespace Dexter.Attributes.Methods {
 
     public class CommandCooldownAttribute : PreconditionAttribute {
 
@@ -21,11 +21,13 @@ namespace Dexter.Attributes {
         }
 
         public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, CommandInfo CommandInfo, IServiceProvider ServiceProvider) {
-            if (ServiceProvider.GetService<BotConfiguration>() == null ||
-                    InitializeDependencies.ServiceProvider.GetRequiredService<BotConfiguration>().BotChannels.Contains(CommandContext.Channel.Id))
+            if (ServiceProvider.GetService<BotConfiguration>() == null)
                 return PreconditionResult.FromSuccess();
 
-            CooldownDB CooldownDB = InitializeDependencies.ServiceProvider.GetRequiredService<CooldownDB>();
+            if (ServiceProvider.GetRequiredService<BotConfiguration>().BotChannels.Contains(CommandContext.Channel.Id))
+                return PreconditionResult.FromSuccess();
+
+            CooldownDB CooldownDB = ServiceProvider.GetRequiredService<CooldownDB>();
 
             Cooldown Cooldown = CooldownDB.Cooldowns.AsQueryable()
                 .Where(Cooldown => Cooldown.Token.Equals($"{CommandInfo.Name}{CommandContext.Channel.Id}")).FirstOrDefault();
@@ -37,7 +39,7 @@ namespace Dexter.Attributes {
                 } else {
                     DateTime Time = DateTime.UnixEpoch.AddSeconds(Cooldown.TimeOfCooldown + CooldownTimer);
 
-                    await new EmbedBuilder().BuildEmbed(EmojiEnum.Wut)
+                    await new EmbedBuilder().BuildEmbed(EmojiEnum.Wut, ServiceProvider.GetService<BotConfiguration>())
                         .WithAuthor($"Hiya, {CommandContext.User.Username}!")
                         .WithTitle($"Please wait {Time.Humanize()} until you are able to use this command.")
                         .WithDescription("Thanks for your patience, we really do appreciate it. <3")

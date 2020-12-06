@@ -10,6 +10,7 @@ namespace Dexter.Extensions {
     /// <summary>
     /// The Database Extensions class offers a variety of different extensions that can be applied to a database.
     /// </summary>
+    
     public static class DatabaseExtensions {
 
         /// <summary>
@@ -17,6 +18,7 @@ namespace Dexter.Extensions {
         /// </summary>
         /// <param name="Topics">The topics field is the set of fun topics you wish to query from.</param>
         /// <returns>A tasked result of an instance of a fun object.</returns>
+        
         public static async Task<FunTopic> GetRandomTopic(this DbSet<FunTopic> Topics) {
             if (!Topics.AsQueryable().Any())
                 return null;
@@ -32,4 +34,5 @@ namespace Dexter.Extensions {
         }
 
     }
+
 }

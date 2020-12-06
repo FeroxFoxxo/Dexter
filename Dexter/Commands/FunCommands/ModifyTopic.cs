@@ -29,11 +29,13 @@ namespace Dexter.Commands {
                 return;
             }
 
+            IUser User = DiscordSocketClient.GetUser(FunTopic.ProposerID);
+
             await BuildEmbed(EmojiEnum.Sign)
                 .WithAuthor(Context.User)
                 .WithTitle($"{Context.Client.CurrentUser.Username} Asks")
                 .WithDescription(FunTopic.Topic)
-                .WithFooter($"{TopicType} Written by {DiscordSocketClient.GetUser(FunTopic.ProposerID).Username}.")
+                .WithFooter($"{TopicType} Written by {(User == null ? "Unknown" : User.Username)} • Add a topic using `{BotConfiguration.Prefix}topic add TOPIC`")
                 .SendEmbed(Context.Channel);
         }
 
@@ -221,6 +223,7 @@ namespace Dexter.Commands {
 
             await FunTopicsDB.SaveChangesAsync();
         }
+
     }
 
 }

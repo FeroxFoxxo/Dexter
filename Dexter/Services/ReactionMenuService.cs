@@ -1,4 +1,5 @@
 ﻿using Dexter.Abstractions;
+using Dexter.Databases.ReactionMenus;
 using Dexter.Enums;
 using Discord;
 using Discord.Rest;
@@ -8,16 +9,10 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Services {
-    public class ReactionMenuService : InitializableModule {
 
-        private readonly List<ReactionMenu> ReactionMenus;
+    public class ReactionMenuService : Service {
 
-        private readonly DiscordSocketClient DiscordSocketClient;
-
-        public ReactionMenuService (DiscordSocketClient DiscordSocketClient) {
-            ReactionMenus = new ();
-            this.DiscordSocketClient = DiscordSocketClient;
-        }
+        public readonly List<ReactionMenu> ReactionMenus = new ();
 
         public override void Initialize() {
             DiscordSocketClient.ReactionAdded += ReactionMenu;
@@ -66,11 +61,12 @@ namespace Dexter.Services {
             await Message.AddReactionAsync(new Emoji("➡️"));
         }
 
-        public Embed CreateMenuEmbed (ReactionMenu ReactionMenu) {
+        public static Embed CreateMenuEmbed (ReactionMenu ReactionMenu) {
             return ReactionMenu.EmbedMenus[ReactionMenu.CurrentPage - 1]
                 .WithFooter($"Page {ReactionMenu.CurrentPage}/{ReactionMenu.EmbedMenus.Length}")
                 .WithCurrentTimestamp().Build();
         }
 
     }
+
 }

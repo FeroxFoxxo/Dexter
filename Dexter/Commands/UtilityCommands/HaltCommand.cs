@@ -1,4 +1,4 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
@@ -6,6 +6,7 @@ using System;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class UtilityCommands {
 
         [Command("halt")]
@@ -23,4 +24,5 @@ namespace Dexter.Commands {
         }
         
     }
+
 }

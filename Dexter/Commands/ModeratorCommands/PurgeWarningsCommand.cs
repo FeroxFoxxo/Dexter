@@ -8,9 +8,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
-using Dexter.Attributes;
+using Dexter.Attributes.Methods;
 
 namespace Dexter.Commands {
+
     public partial class ModeratorCommands {
 
         /// <summary>
@@ -68,4 +69,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

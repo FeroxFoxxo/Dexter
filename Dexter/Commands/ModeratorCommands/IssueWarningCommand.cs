@@ -1,4 +1,4 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Databases.Warnings;
@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class ModeratorCommands {
 
         /// <summary>
@@ -78,4 +79,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

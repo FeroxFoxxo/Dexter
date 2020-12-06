@@ -1,4 +1,4 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
@@ -6,6 +6,7 @@ using System;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
+
     public partial class FunCommands {
 
         [Command("8ball")]
@@ -24,4 +25,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

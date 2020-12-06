@@ -11,10 +11,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Databases.Proposals;
 using Discord.Net;
-using Discord.Commands;
 using Dexter.Databases.AdminConfirmations;
 using System.Reflection;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Microsoft.Extensions.DependencyInjection;
 using System.Data;
@@ -26,41 +24,36 @@ namespace Dexter.Services {
     /// <summary>
     /// The Proposal service, which is used to create and update proposals on the change of a reaction.
     /// </summary>
-    public class ProposalService : InitializableModule {
-
-        private readonly DiscordSocketClient DiscordSocketClient;
-
-        private readonly BotConfiguration BotConfiguration;
-
-        private readonly ProposalConfiguration ProposalConfiguration;
-
-        private readonly ProposalDB ProposalDB;
-
-        private readonly string RandomCharacters;
-
-        private readonly Random Random;
+    
+    public class ProposalService : Service {
 
         /// <summary>
-        /// The constructor for the ProposalService module. This takes in the injected dependencies and sets them as per what the class requires.
-        /// It also creates the list of random characters and a new instance of the Random class, which can be used to randomly generate a token.
+        /// The ServiceProvider is used to run the initialized command and method that an admin confirmation will call back to.
         /// </summary>
-        /// <param name="DiscordSocketClient">An instance of the DiscordSocketClient, which is used to hook into events like the MessageRecieved, ReactionAdd and ReactionRemoved events.</param>
-        /// <param name="BotConfiguration">The BotConfiguration is where the ID for the admin confirmation panel is found.</param>
-        /// <param name="ProposalConfiguration">The ProposalConfiguration, which contains the location of the emoji storage guild, as well as IDs of channels.</param>
-        /// <param name="ProposalDB">An instance of the ProposalDB, which is used as a storage for the proposals.</param>
-        public ProposalService(DiscordSocketClient DiscordSocketClient, BotConfiguration BotConfiguration, ProposalConfiguration ProposalConfiguration, ProposalDB ProposalDB) {
-            this.DiscordSocketClient = DiscordSocketClient;
-            this.BotConfiguration = BotConfiguration;
-            this.ProposalConfiguration = ProposalConfiguration;
-            this.ProposalDB = ProposalDB;
+        public ServiceProvider ServiceProvider { get; set; }
 
-            RandomCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            Random = new Random();
-        }
+        /// <summary>
+        /// The ProposalConfiguration, which contains the location of the emoji storage guild, as well as IDs of channels.
+        /// </summary>
+
+        public ProposalConfiguration ProposalConfiguration { get; set; }
+
+        /// <summary>
+        /// The ProposalDB is used as a storage for the proposals.
+        /// </summary>
+        
+        public ProposalDB ProposalDB { get; set; }
+
+        /// <summary>
+        /// The Random instance is used to pick a set number of random characters from the configuration to create a token.
+        /// </summary>
+        
+        public Random Random { get; set; }
 
         /// <summary>
         /// The Initialize method hooks the client MessageReceived, ReactionAdded and ReactionRemoved events and sets them to their related delegates.
         /// </summary>
+
         public override void Initialize() {
             DiscordSocketClient.MessageReceived += MessageRecieved;
             DiscordSocketClient.ReactionAdded += ReactionAdded;
@@ -76,6 +69,7 @@ namespace Dexter.Services {
         /// <param name="MessageChannel">The channel in which the approval command was run.</param>
         /// <param name="ProposalStatus">The type of proposal status you wish to set the embed to.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task EditProposal(string Tracker, string Reason, IUser Approver, IMessageChannel MessageChannel, ProposalStatus ProposalStatus) {
             Proposal Proposal = ProposalDB.GetProposalByNameOrID(Tracker);
 
@@ -115,6 +109,7 @@ namespace Dexter.Services {
         /// <param name="MessageChannel">The channel of which the reaction was added to.</param>
         /// <param name="Reaction">The reaction of question which was added.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task ReactionAdded(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel MessageChannel, SocketReaction Reaction) {
             if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
                 return;
@@ -135,6 +130,7 @@ namespace Dexter.Services {
         /// <param name="MessageChannel">The channel of which the reaction was removed from.</param>
         /// <param name="Reaction">The reaction of question which was removed.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task ReactionRemoved(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel MessageChannel, SocketReaction Reaction) {
             if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
                 return;
@@ -152,20 +148,24 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="RecievedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        public async Task MessageRecieved(SocketMessage RecievedMessage) {
+        
+        public Task MessageRecieved(SocketMessage RecievedMessage) {
             // Check to see if the message has been sent in the suggestion channel and is not a bot, least we return.
             if (RecievedMessage.Channel.Id != ProposalConfiguration.SuggestionsChannel || RecievedMessage.Author.IsBot)
-                return;
+                return Task.CompletedTask;
 
             _ = Task.Run(async () => await CreateSuggestion(RecievedMessage));
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
         /// The CreateSuggestion method converts the message to a proposal and suggestion object.
         /// This suggestion object is then sent back to the channel once deleted as a formatted embed for use to vote on.
         /// </summary>
-        /// <param name="RecievedMessage"></param>
-        /// <returns></returns>
+        /// <param name="RecievedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+
         public async Task CreateSuggestion (SocketMessage RecievedMessage) {
             // Check to see if the embed message length is more than 1750, else will fail the embed from sending due to character limits.
             if (RecievedMessage.Content.Length > 1750) {
@@ -192,25 +192,24 @@ namespace Dexter.Services {
             Attachment Attachment = RecievedMessage.Attachments.FirstOrDefault();
 
             if (Attachment != null) {
-                string FileName = Attachment.Filename.Prettify();
+                string TemporaryLogDirectory = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
 
-                if (string.IsNullOrEmpty(FileName))
-                    return;
+                if (!Directory.Exists(TemporaryLogDirectory))
+                    Directory.CreateDirectory(TemporaryLogDirectory);
 
-                if (File.Exists(FileName))
-                    return;
+                string FilePath = Path.Combine(TemporaryLogDirectory, $"{Proposal.Tracker}.{Path.GetExtension(Attachment.Filename)}");
 
                 using WebClient WebClient = new();
 
-                await WebClient.DownloadFileTaskAsync(Attachment.ProxyUrl, Attachment.Filename);
+                await WebClient.DownloadFileTaskAsync(Attachment.ProxyUrl, FilePath);
 
                 ITextChannel Channel = DiscordSocketClient.GetChannel(ProposalConfiguration.PictureChannel) as ITextChannel;
 
-                IUserMessage AttachmentMSG = await Channel.SendFileAsync(Attachment.Filename);
+                IUserMessage AttachmentMSG = await Channel.SendFileAsync(FilePath);
 
                 Proposal.ProxyURL = AttachmentMSG.Attachments.FirstOrDefault().ProxyUrl;
 
-                File.Delete(Attachment.Filename);
+                File.Delete(FilePath);
             }
 
             // Creates a new Suggestion object with the related fields.
@@ -250,6 +249,7 @@ namespace Dexter.Services {
         /// <param name="Author">The author is the snowflake ID of the user who has suggested the proposal.</param>
         /// <param name="ProposedMessage">The proposed message is the content of the approval confirmation message.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task SendAdminConfirmation(string JSON, string Type, string Method, ulong Author, string ProposedMessage) {
             // Creates a new Proposal object with the related fields.
             Proposal Proposal = new() {
@@ -287,6 +287,7 @@ namespace Dexter.Services {
         /// <param name="UserMessage">The message that has had the emoji applied or removed from it.</param>
         /// <param name="Reaction">The reaction that was applied.</param>
         /// <returns>A boolean value of whether or not you should remove the emoji from after the method has run.</returns>
+        
         public async Task<bool> CheckAsync(IUserMessage UserMessage, SocketReaction Reaction) {
             // Get the suggestion from the database which has a message ID which matches the one of which we're looking for.
             Proposal Proposal = ProposalDB.Proposals.AsQueryable().Where(Suggestion => Suggestion.MessageID == UserMessage.Id).FirstOrDefault();
@@ -363,7 +364,6 @@ namespace Dexter.Services {
                                     return true;
                                 else
                                     return false;
-                                break;
                             case "Bin":
                                 // If the suggestion has had the bin icon applied by the user, set the status of the suggestion to "deleted" and delete the message.
                                 if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(BotConfiguration) >= PermissionLevel.Moderator) {
@@ -389,6 +389,7 @@ namespace Dexter.Services {
         /// <param name="Upvotes">The metadata containing the amount of upvotes the suggestion has.</param>
         /// <param name="Downvotes">The metadata containing the amount of downvotes the suggestion has.</param>
         /// <returns>The current status of the suggestion - whether it is now to be passed, denied or whether it remains.</returns>
+        
         public SuggestionVotes CheckVotes(ReactionMetadata Upvotes, ReactionMetadata Downvotes) {
             if (Upvotes.ReactionCount - Downvotes.ReactionCount >= ProposalConfiguration.ReactionPass)
                 return SuggestionVotes.Pass;
@@ -406,6 +407,7 @@ namespace Dexter.Services {
         /// <param name="Proposal">The proposal object which has had the status applied to it.</param>
         /// <param name="ProposalStatus">The status of which you wish to apply to the proposal.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task UpdateProposal(Proposal Proposal, ProposalStatus ProposalStatus) {
             Proposal.ProposalStatus = ProposalStatus;
             await ProposalDB.SaveChangesAsync();
@@ -429,7 +431,7 @@ namespace Dexter.Services {
                         if (Class.GetMethod(Confirmation.CallbackMethod) == null)
                             throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
                         
-                        Class.GetMethod(Confirmation.CallbackMethod).Invoke(InitializeDependencies.ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
+                        Class.GetMethod(Confirmation.CallbackMethod).Invoke(ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
                     }
 
                     break;
@@ -443,6 +445,7 @@ namespace Dexter.Services {
         /// <param name="Channel">The channel in which the message is located.</param>
         /// <param name="MessageID">The ID of the message you wish to change the embed of to update it properly.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        
         public async Task UpdateSpecificProposal(Proposal Proposal, ulong Channel, ulong MessageID) {
             if (Channel == 0 || MessageID == 0)
                 return;
@@ -466,11 +469,12 @@ namespace Dexter.Services {
         /// configuration class, that is not in the ProposalDB already.
         /// </summary>
         /// <returns>A randomly generated token in the form of a string that is not in the proposal database already.</returns>
+        
         public string CreateToken() {
             char[] TokenArray = new char[ProposalConfiguration.TrackerLength];
 
             for (int i = 0; i < TokenArray.Length; i++)
-                TokenArray[i] = RandomCharacters[Random.Next(RandomCharacters.Length)];
+                TokenArray[i] = ProposalConfiguration.RandomCharacters[Random.Next(ProposalConfiguration.RandomCharacters.Length)];
 
             string Token = new (TokenArray);
 
@@ -487,6 +491,7 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="Proposal">The proposal of which you wish to generate the embed from.</param>
         /// <returns>An automatically generated embed based on the input proposal's fields.</returns>
+        
         public EmbedBuilder BuildProposal(Proposal Proposal) {
             Color Color = Proposal.ProposalStatus switch {
                 ProposalStatus.Suggested => Color.Blue,

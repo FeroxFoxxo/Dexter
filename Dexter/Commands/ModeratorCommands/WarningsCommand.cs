@@ -1,11 +1,10 @@
-﻿using Dexter.Attributes;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Databases.Warnings;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
-using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Dexter.Configurations;
 
 namespace Dexter.Commands {
+
     public partial class ModeratorCommands {
 
         /// <summary>
@@ -33,8 +33,7 @@ namespace Dexter.Commands {
             bool IsUserSpecified = User != null;
 
             if (IsUserSpecified) {
-                if ((Context.User as IGuildUser).GetPermissionLevel(
-                        InitializeDependencies.ServiceProvider.GetRequiredService<BotConfiguration>())
+                if ((Context.User as IGuildUser).GetPermissionLevel(BotConfiguration)
                     >= PermissionLevel.Moderator) {
 
                     EmbedBuilder[] Embeds = GetWarnings(User, Context.User, true);
@@ -123,4 +122,5 @@ namespace Dexter.Commands {
         }
 
     }
+
 }

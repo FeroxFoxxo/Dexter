@@ -471,19 +471,14 @@ namespace Dexter.Services {
         /// <returns>A randomly generated token in the form of a string that is not in the proposal database already.</returns>
         
         public string CreateToken() {
-            Console.WriteLine("1");
             char[] TokenArray = new char[ProposalConfiguration.TrackerLength];
 
-            Console.WriteLine("2");
             for (int i = 0; i < TokenArray.Length; i++)
                 TokenArray[i] = ProposalConfiguration.RandomCharacters[Random.Next(ProposalConfiguration.RandomCharacters.Length)];
 
-            Console.WriteLine("3");
             string Token = new (TokenArray);
 
-            Console.WriteLine("4");
             if (ProposalDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.Tracker == Token).FirstOrDefault() == null) {
-                Console.WriteLine("5");
                 return Token;
             } else
                 return CreateToken();

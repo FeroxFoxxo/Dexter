@@ -8,10 +8,6 @@ namespace Dexter.Services {
 
     public class TimerService : Service {
 
-        public TimerService(DiscordSocketClient DiscordSocketClient) {
-            this.DiscordSocketClient = DiscordSocketClient;
-        }
-
         public override void Initialize() {
             // Runs the bot timer to loop through all events that may occur on a timer.
             Timer EventTimer = new(TimeSpan.FromSeconds(20).TotalMilliseconds) {

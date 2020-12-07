@@ -125,7 +125,7 @@ namespace Dexter {
                 Type => ServiceCollection.TryAddSingleton(Type)
             );
 
-            // Builds the service collection to the provider.
+            // Builds the service collection.
             ServiceProvider ServiceProvider = ServiceCollection.BuildServiceProvider();
 
             // Makes sure all entity databases exist and are created if they do not.
@@ -144,9 +144,13 @@ namespace Dexter {
                     .Where(Type => (Type.IsSubclassOf(typeof(DiscordModule)) || Type.IsSubclassOf(typeof(Service)) || Type.IsSubclassOf(typeof(Database))) && !Type.IsAbstract)
                     .ToList().ForEach(
                 Type => Type.GetProperties().ToList().ForEach(Property => {
+                    if (Property.PropertyType == typeof(ServiceProvider))
+                        Property.SetValue(ServiceProvider.GetRequiredService(Type), ServiceProvider);
+
                     object Service = ServiceProvider.GetService(Property.PropertyType);
+
                     if (Service != null)
-                        Property.SetValue(ServiceProvider.GetService(Type), Service);
+                        Property.SetValue(ServiceProvider.GetRequiredService(Type), Service);
                 })
             );
 

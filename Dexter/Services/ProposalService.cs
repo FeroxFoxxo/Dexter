@@ -197,7 +197,7 @@ namespace Dexter.Services {
                 if (!Directory.Exists(TemporaryLogDirectory))
                     Directory.CreateDirectory(TemporaryLogDirectory);
 
-                string FilePath = Path.Combine(TemporaryLogDirectory, $"{Proposal.Tracker}.{Path.GetExtension(Attachment.Filename)}");
+                string FilePath = Path.Combine(TemporaryLogDirectory, $"{Proposal.Tracker}{Path.GetExtension(Attachment.Filename)}");
 
                 using WebClient WebClient = new();
 
@@ -430,7 +430,7 @@ namespace Dexter.Services {
 
                         if (Class.GetMethod(Confirmation.CallbackMethod) == null)
                             throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
-                        
+
                         Class.GetMethod(Confirmation.CallbackMethod).Invoke(ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
                     }
 

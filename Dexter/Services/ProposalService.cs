@@ -154,8 +154,6 @@ namespace Dexter.Services {
             if (RecievedMessage.Channel.Id != ProposalConfiguration.SuggestionsChannel || RecievedMessage.Author.IsBot)
                 return Task.CompletedTask;
 
-            Console.WriteLine("1");
-
             _ = Task.Run(async () => await CreateSuggestion(RecievedMessage));
 
             return Task.CompletedTask;
@@ -169,13 +167,9 @@ namespace Dexter.Services {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         public async Task CreateSuggestion (SocketMessage RecievedMessage) {
-            Console.WriteLine("2");
-
             // Check to see if the embed message length is more than 1750, else will fail the embed from sending due to character limits.
             if (RecievedMessage.Content.Length > 1750) {
                 await RecievedMessage.DeleteAsync();
-
-                Console.WriteLine("3");
 
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Your suggestion is too big!")
@@ -186,8 +180,6 @@ namespace Dexter.Services {
                 return;
             }
 
-            Console.WriteLine("4");
-
             // Creates a new Proposal object with the related fields.
             Proposal Proposal = new() {
                 Tracker = CreateToken(),
@@ -197,11 +189,7 @@ namespace Dexter.Services {
                 ProposalType = ProposalType.Suggestion
             };
 
-            Console.WriteLine("5");
-
             Attachment Attachment = RecievedMessage.Attachments.FirstOrDefault();
-
-            Console.WriteLine("6");
 
             if (Attachment != null) {
                 string TemporaryLogDirectory = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
@@ -224,43 +212,27 @@ namespace Dexter.Services {
                 File.Delete(FilePath);
             }
 
-            Console.WriteLine("7");
-
             // Creates a new Suggestion object with the related fields.
             Suggestion Suggested = new () {
                 Tracker = Proposal.Tracker
             };
 
-            Console.WriteLine("8");
-
             RestUserMessage Embed = await RecievedMessage.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
-
-            Console.WriteLine("9");
 
             // Delete the message sent by the user.
             await RecievedMessage.DeleteAsync();
 
-            Console.WriteLine("10");
-
             // Set the message ID in the suggestion object to the ID of the embed.
             Proposal.MessageID = Embed.Id;
-
-            Console.WriteLine("11");
 
             // Add the suggestion and proposal objects to the database.
             ProposalDB.Proposals.Add(Proposal);
             ProposalDB.Suggestions.Add(Suggested);
 
-            Console.WriteLine("12");
-
             await ProposalDB.SaveChangesAsync();
-
-            Console.WriteLine("13");
 
             // Add the related emoji specified in the ProposalConfiguration to the suggestion.
             SocketGuild Guild = DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild);
-
-            Console.WriteLine("14");
 
             foreach (string Emoji in ProposalConfiguration.SuggestionEmoji) {
                 GuildEmote Emote = await Guild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
@@ -499,16 +471,21 @@ namespace Dexter.Services {
         /// <returns>A randomly generated token in the form of a string that is not in the proposal database already.</returns>
         
         public string CreateToken() {
+            Console.WriteLine("1");
             char[] TokenArray = new char[ProposalConfiguration.TrackerLength];
 
+            Console.WriteLine("2");
             for (int i = 0; i < TokenArray.Length; i++)
                 TokenArray[i] = ProposalConfiguration.RandomCharacters[Random.Next(ProposalConfiguration.RandomCharacters.Length)];
 
+            Console.WriteLine("3");
             string Token = new (TokenArray);
 
-            if (ProposalDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.Tracker == Token).FirstOrDefault() == null)
+            Console.WriteLine("4");
+            if (ProposalDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.Tracker == Token).FirstOrDefault() == null) {
+                Console.WriteLine("5");
                 return Token;
-            else
+            } else
                 return CreateToken();
         }
 

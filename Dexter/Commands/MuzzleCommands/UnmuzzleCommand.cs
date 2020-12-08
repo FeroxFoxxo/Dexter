@@ -18,7 +18,7 @@ namespace Dexter.Commands {
             await Unmuzzle(User);
 
             EmbedBuilder Builder = BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"Unmuzzled {User.Username}")
+                .WithTitle($"Unmuzzled {User.Username}.")
                 .WithDescription($"{User.Username} has successfully had their muzzle removed from them. Make sure to fed them with lots of pats. <3")
                 .WithCurrentTimestamp();
 

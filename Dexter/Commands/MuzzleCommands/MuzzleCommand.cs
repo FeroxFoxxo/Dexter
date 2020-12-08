@@ -1,6 +1,10 @@
 ﻿using Dexter.Attributes.Methods;
+using Dexter.Attributes.Parameters;
+using Dexter.Enums;
+using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
@@ -12,19 +16,17 @@ namespace Dexter.Commands {
         [Alias("muzzleme")]
         [CommandCooldown(60)]
 
-        public async Task MuzzleCommand() {
-            await MuzzleCommand(Context.Guild.GetUser(Context.User.Id));
-        }
+        public async Task MuzzleCommand([Optional] IGuildUser User) {
+            bool IsUserSpecified = User != null;
 
-        [Command("muzzle")]
-        [Summary("Issue the command, and s i l e n c e ,  T H O T-!")]
-        [Alias("muzzleme")]
-        [RequireModerator]
+            IGuildUser MuzzledUser = Context.Guild.GetUser(Context.User.Id);
 
-        public async Task MuzzleCommand(IGuildUser User) {
-            await Muzzle(User);
+            if (IsUserSpecified && (Context.User as IGuildUser).GetPermissionLevel(BotConfiguration) >= PermissionLevel.Moderator)
+                MuzzledUser = User;
+            
+            await Muzzle(MuzzledUser);
 
-            await Context.Channel.SendMessageAsync($"Muzzled **{User.Username}#{User.Discriminator}~!**");
+            await Context.Channel.SendMessageAsync($"Muzzled **{MuzzledUser.Username}#{MuzzledUser.Discriminator}~!**");
         }
 
     }

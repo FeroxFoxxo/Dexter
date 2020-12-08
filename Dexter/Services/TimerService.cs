@@ -37,6 +37,10 @@ namespace Dexter.Services {
 
             await EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.ExpirationTime <= CurrentTime)
                 .ForEachAsync((EventTimer Timer) => {
+                    EventTimersDB.EventTimers.Remove(Timer);
+
+                    EventTimersDB.SaveChanges();
+
                     Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Timer.CallbackParameters);
                     Type Class = Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.Name.Equals(Timer.CallbackClass)).FirstOrDefault();
 

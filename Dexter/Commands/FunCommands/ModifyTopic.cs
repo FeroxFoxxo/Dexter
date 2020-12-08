@@ -35,7 +35,8 @@ namespace Dexter.Commands {
                 .WithAuthor(Context.User)
                 .WithTitle($"{Context.Client.CurrentUser.Username} Asks")
                 .WithDescription(FunTopic.Topic)
-                .WithFooter($"{TopicType} Written by {(User == null ? "Unknown" : User.Username)} • Add a topic using `{BotConfiguration.Prefix}topic add TOPIC`")
+                .WithFooter($"{TopicType} Written by {(User == null ? "Unknown" : User.Username)} • " +
+                    $"Add a {TopicType.ToString().ToLower()} using `{BotConfiguration.Prefix}{TopicType.ToString().ToLower()} add [TOPIC]`")
                 .SendEmbed(Context.Channel);
         }
 

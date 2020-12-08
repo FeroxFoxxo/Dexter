@@ -43,6 +43,10 @@ namespace Dexter.Commands {
         
         public CommissionCooldownConfiguration CommissionCooldownConfiguration { get; set; }
 
+        public ModerationConfiguration ModerationConfiguration { get; set; }
+
+        public DiscordSocketClient DiscordSocketClient { get; set; }
+
     }
 
 }

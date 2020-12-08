@@ -3,7 +3,7 @@
 namespace Dexter.Configurations {
 
     /// <summary>
-    /// The ModerationConfiguration relates to the logging of reactions etc to a specified logging channel.
+    /// The ModerationConfiguration relates to the logging of reactions etc to a specified logging channel and to other moderator commands.
     /// </summary>
     
     public class ModerationConfiguration : JSONConfig {
@@ -26,6 +26,12 @@ namespace Dexter.Configurations {
         /// </summary>
         
         public string WebhookName { get; set; }
+
+        public ulong BorkdayRoleID { get; set; }
+
+        public ulong StaffBorkdayRoleID { get; set; }
+
+        public int SecondsOfBorkday { get; set; }
 
     }
 

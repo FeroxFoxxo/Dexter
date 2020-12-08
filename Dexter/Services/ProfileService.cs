@@ -39,11 +39,7 @@ namespace Dexter.Services {
         /// </summary>
         
         public override void Initialize() {
-            DiscordSocketClient.Ready += () =>
-                Task.Run(async () =>
-                    await DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP())
-                )
-            );
+            DiscordSocketClient.Ready += () => _ = DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP()));
         }
 
         /// <summary>

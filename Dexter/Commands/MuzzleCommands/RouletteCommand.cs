@@ -7,7 +7,7 @@ namespace Dexter.Commands {
     public partial class MuzzleCommands {
 
         [Command("roulette")]
-        [Summary("Test your luck, it is a 1 in 4 chance you get muzzled!")]
+        [Summary("Test your luck with a 1 in 4 chance you get muzzled!")]
         [Alias("testmyluck")]
         [CommandCooldown(120)]
 

@@ -15,7 +15,7 @@ namespace Dexter.Commands {
             if (Random.Next(4) == 1)
                 await MuzzleCommand(Context.Guild.GetUser(Context.User.Id));
             else
-                await Context.Channel.SendMessageAsync("Missed it- lucky you!");
+                await Context.Channel.SendMessageAsync("You missed it - lucky you! <3");
         }
 
     }

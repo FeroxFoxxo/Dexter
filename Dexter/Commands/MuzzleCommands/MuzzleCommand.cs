@@ -24,7 +24,7 @@ namespace Dexter.Commands {
         public async Task MuzzleCommand(IGuildUser User) {
             await Muzzle(User);
 
-            await Context.Channel.SendMessageAsync($"Muzzled {User.Username}#{User.Discriminator}");
+            await Context.Channel.SendMessageAsync($"Muzzled **{User.Username}#{User.Discriminator}~!**");
         }
 
     }

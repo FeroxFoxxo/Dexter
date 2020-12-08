@@ -229,7 +229,7 @@ namespace Dexter.Services {
             ProposalDB.Proposals.Add(Proposal);
             ProposalDB.Suggestions.Add(Suggested);
 
-            await ProposalDB.SaveChangesAsync();
+            ProposalDB.SaveChanges();
 
             // Add the related emoji specified in the ProposalConfiguration to the suggestion.
             SocketGuild Guild = DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild);
@@ -277,7 +277,7 @@ namespace Dexter.Services {
             ProposalDB.Proposals.Add(Proposal);
             ProposalDB.AdminConfirmations.Add(Confirmation);
 
-            await ProposalDB.SaveChangesAsync();
+            ProposalDB.SaveChanges();
         }
 
         /// <summary>
@@ -331,7 +331,7 @@ namespace Dexter.Services {
 
                     // Set the staff message ID in the suggestions database to the new suggestion.
                     Suggestion.StaffMessageID = StaffSuggestion.Id;
-                    await ProposalDB.SaveChangesAsync();
+                    ProposalDB.SaveChanges();
 
                     // Get the staff suggestions channel and add the related emoji to the message.
                     SocketGuild EmojiCacheGuild = DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild);
@@ -410,7 +410,7 @@ namespace Dexter.Services {
         
         public async Task UpdateProposal(Proposal Proposal, ProposalStatus ProposalStatus) {
             Proposal.ProposalStatus = ProposalStatus;
-            await ProposalDB.SaveChangesAsync();
+            ProposalDB.SaveChanges();
 
             switch (Proposal.ProposalType) {
                 case ProposalType.Suggestion:

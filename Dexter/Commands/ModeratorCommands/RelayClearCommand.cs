@@ -48,7 +48,7 @@ namespace Dexter.Commands {
 
             RelayDB.Relays.Remove(RelayToRemove);
 
-            await RelayDB.SaveChangesAsync();
+            RelayDB.SaveChanges();
         }
 
     }

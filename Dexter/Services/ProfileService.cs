@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Dexter.Services {
 
@@ -38,8 +39,11 @@ namespace Dexter.Services {
         /// </summary>
         
         public override void Initialize() {
-            DiscordSocketClient.Ready += async () => await DiscordSocketClient.CurrentUser
-                .ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP()));
+            DiscordSocketClient.Ready += () =>
+                Task.Run(async () =>
+                    await DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP())
+                )
+            );
         }
 
         /// <summary>

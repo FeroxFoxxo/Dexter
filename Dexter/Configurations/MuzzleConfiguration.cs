@@ -4,7 +4,11 @@ namespace Dexter.Configurations {
 
     public class MuzzleConfiguration : JSONConfig {
 
-        public ulong MuzzleDuration { get; set; }
+        public int MuzzleDuration { get; set; }
+
+        public ulong MuzzleRoleID { get; set; }
+
+        public ulong ReactionMutedRoleID { get; set; }
 
     }
 

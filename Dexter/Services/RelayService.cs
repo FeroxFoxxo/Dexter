@@ -28,7 +28,7 @@ namespace Dexter.Services {
 
             Relay.CurrentMessageCount += 1;
 
-            await RelayDB.SaveChangesAsync();
+            RelayDB.SaveChanges();
         }
 
     }

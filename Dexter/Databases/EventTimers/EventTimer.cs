@@ -5,12 +5,12 @@ namespace Dexter.Databases.EventTimers {
     public class EventTimer {
 
         /// <summary>
-        /// The Time Of Operation field specifies the UNIX time the timer expires at.
+        /// The Expiration Time field specifies the UNIX time the timer expires at.
         /// </summary>
         
         [Key]
 
-        public int TimeOfOperation { get; set; }
+        public long ExpirationTime { get; set; }
 
         /// <summary>
         /// The Callback Class field specifies the class in which the method is that will be called back to.

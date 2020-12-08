@@ -49,7 +49,7 @@ namespace Dexter.Commands {
                 TimeOfIssue = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
             });
 
-            await WarningsDB.SaveChangesAsync();
+            WarningsDB.SaveChanges();
 
             EmbedBuilder Embed = BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Warning Issued!")

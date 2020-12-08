@@ -28,7 +28,7 @@ namespace Dexter.Commands {
 
             Warning.EntryType = EntryType.Revoke;
 
-            await WarningsDB.SaveChangesAsync();
+            WarningsDB.SaveChanges();
 
             SocketGuildUser Issuer = Context.Guild.GetUser(Warning.Issuer);
             SocketGuildUser Warned = Context.Guild.GetUser(Warning.User);

@@ -30,6 +30,11 @@ namespace Dexter.Abstractions {
         public ReactionMenuService ReactionMenuService { get; set; }
 
         /// <summary>
+        /// The TimerService class is used to create a timer for wait until an expiration time has been reached.
+        /// </summary>
+        public TimerService TimerService { get; set; }
+
+        /// <summary>
         /// The BotConfiguration is used to find the thumbnails for the BuildEmbed method.
         /// </summary>
         public BotConfiguration BotConfiguration { get; set; }
@@ -64,12 +69,29 @@ namespace Dexter.Abstractions {
         }
 
         /// <summary>
+        /// The Create Event Timer method is a generic method that will await for an expiration time to be reached
+        /// before continuing execution of the code set in the CallbackMethod parameter.
+        /// </summary>
+        /// <param name="CallbackMethod">The method you wish to callback once expired.</param>
+        /// <param name="CallbackParameters">The parameters you wish to callback with once expired.</param>
+        /// <param name="SecondsTillExpiration">The count in seconds until the timer will expire.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+
+        public async Task CreateEventTimer (Func<Dictionary<string, string>, Task> CallbackMethod,
+                Dictionary<string, string> CallbackParameters, int SecondsTillExpiration) {
+
+            string JSON = JsonConvert.SerializeObject(CallbackParameters);
+
+            await TimerService.AddTimer(JSON, CallbackMethod.Target.GetType().Name, CallbackMethod.Method.Name, SecondsTillExpiration);
+        }
+
+        /// <summary>
         /// The Create Reaction Menu method creates a reaction menu with pages that you can use to navigate the embeds.
         /// </summary>
         /// <param name="EmbedBuilders">The embeds that you wish to create the reaction menu from.</param>
         /// <param name="Channel">The channel that the reaction menu should be sent to.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        
+
         public async Task CreateReactionMenu(EmbedBuilder[] EmbedBuilders, ISocketMessageChannel Channel) {
             await ReactionMenuService.CreateReactionMenu(EmbedBuilders, Channel);
         }

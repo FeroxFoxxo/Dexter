@@ -59,7 +59,7 @@ namespace Dexter.Commands {
 
             await WarningsDB.Warnings.AsQueryable().Where(Warning => Warning.User == UserID).ForEachAsync(Warning => Warning.EntryType = EntryType.Revoke);
 
-            await WarningsDB.SaveChangesAsync();
+            WarningsDB.SaveChanges();
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Warnings Purged")

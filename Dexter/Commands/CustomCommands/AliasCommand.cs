@@ -126,7 +126,7 @@ namespace Dexter.Commands {
 
             Command.Alias = JsonConvert.SerializeObject(AddedAlias);
 
-            await CustomCommandDB.SaveChangesAsync();
+            CustomCommandDB.SaveChanges();
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace Dexter.Commands {
 
             Command.Alias = JsonConvert.SerializeObject(RemovedAlias);
 
-            await CustomCommandDB.SaveChangesAsync();
+            CustomCommandDB.SaveChanges();
         }
 
     }

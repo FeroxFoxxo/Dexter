@@ -57,7 +57,7 @@ namespace Dexter.Services {
             foreach (Configuration Configuration in ConfigurationDB.Configurations.ToArray())
                 if (GetModuleTypeByName(Configuration.ConfigurationName) == null) {
                     ConfigurationDB.Configurations.Remove(Configuration);
-                    await ConfigurationDB.SaveChangesAsync();
+                    ConfigurationDB.SaveChanges();
                 }
 
             // Check for configs not in database but in project.
@@ -69,7 +69,7 @@ namespace Dexter.Services {
                         ConfigurationName = TypeName,
                         ConfigurationType = ConfigurationType.Enabled
                     });
-                    await ConfigurationDB.SaveChangesAsync();
+                    ConfigurationDB.SaveChanges();
                 }
             }
 
@@ -77,7 +77,7 @@ namespace Dexter.Services {
             foreach (Configuration Configuration in ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationType == ConfigurationType.Essential).ToArray())
                 if (!EssentialModules.Contains(Configuration.ConfigurationName)) {
                     Configuration.ConfigurationType = ConfigurationType.Enabled;
-                    await ConfigurationDB.SaveChangesAsync();
+                    ConfigurationDB.SaveChanges();
                 }
 
             // Check for attribute not set in database but in project.
@@ -88,7 +88,7 @@ namespace Dexter.Services {
 
                 if (Config.ConfigurationType != ConfigurationType.Essential) {
                     Config.ConfigurationType = ConfigurationType.Essential;
-                    await ConfigurationDB.SaveChangesAsync();
+                    ConfigurationDB.SaveChanges();
                 }
             }
 
@@ -147,7 +147,7 @@ namespace Dexter.Services {
         
         public async Task SetModuleState(string ModuleName, bool IsEnabed) {
             ConfigurationDB.Configurations.AsQueryable().Where(Module => Module.ConfigurationName == ModuleName).FirstOrDefault().ConfigurationType = IsEnabed ? ConfigurationType.Enabled : ConfigurationType.Disabled;
-            await ConfigurationDB.SaveChangesAsync();
+            ConfigurationDB.SaveChanges();
 
             if (IsEnabed)
                 await CommandService.AddModuleAsync(GetModuleTypeByName(ModuleName), ServiceProvider);

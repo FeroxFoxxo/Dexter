@@ -59,7 +59,7 @@ namespace Dexter.Commands {
                 Message = Message
             });
 
-            await RelayDB.SaveChangesAsync();
+            RelayDB.SaveChanges();
         }
 
     }

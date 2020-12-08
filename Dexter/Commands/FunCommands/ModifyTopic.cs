@@ -95,7 +95,7 @@ namespace Dexter.Commands {
 
             TopicDatabase.Add(FunTopic);
 
-            await FunTopicsDB.SaveChangesAsync();
+            FunTopicsDB.SaveChanges();
         }
 
         public async Task RemoveTopic(int TopicID, TopicType TopicType) {
@@ -143,7 +143,7 @@ namespace Dexter.Commands {
                     break;
             };
 
-            await FunTopicsDB.SaveChangesAsync();
+            FunTopicsDB.SaveChanges();
         }
 
         public async Task GetTopic(string TopicEntry, TopicType TopicType) {
@@ -221,7 +221,7 @@ namespace Dexter.Commands {
 
             FunTopic.Topic = EditedTopic;
 
-            await FunTopicsDB.SaveChangesAsync();
+            FunTopicsDB.SaveChanges();
         }
 
     }

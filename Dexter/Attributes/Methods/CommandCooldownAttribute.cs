@@ -35,7 +35,7 @@ namespace Dexter.Attributes.Methods {
             if (Cooldown != null) {
                 if (Cooldown.TimeOfCooldown + CooldownTimer < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
                     CooldownDB.Remove(Cooldown);
-                    await CooldownDB.SaveChangesAsync();
+                    CooldownDB.SaveChanges();
                 } else {
                     DateTime Time = DateTime.UnixEpoch.AddSeconds(Cooldown.TimeOfCooldown + CooldownTimer);
 
@@ -56,7 +56,7 @@ namespace Dexter.Attributes.Methods {
                 }
             );
 
-            await CooldownDB.SaveChangesAsync();
+            CooldownDB.SaveChanges();
 
             return PreconditionResult.FromSuccess();
         }

@@ -81,7 +81,7 @@ namespace Dexter.Services {
                     // If the commission has expired we set the new cooldown.
                     Cooldown.TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-                    await CooldownDB.SaveChangesAsync();
+                    CooldownDB.SaveChanges();
                 }
             } else {
                 // If the user has not posted a commission before we add a new commission cooldown to the database.
@@ -92,7 +92,7 @@ namespace Dexter.Services {
                     }
                 );
 
-                await CooldownDB.SaveChangesAsync();
+                CooldownDB.SaveChanges();
             }
         }
 

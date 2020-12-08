@@ -9,7 +9,7 @@ namespace Dexter.Commands {
     public partial class FunCommands {
 
         [Command("headpat", RunMode = RunMode.Async)]
-        [Summary("Oop, you've been a good boy? *gives rapid headpats through a gif send in the chat from your user*")]
+        [Summary("Ooh, you've been a good boy? *gives rapid headpats in an emoji*")]
         [Alias("headpats", "petpat", "petpats")]
         [CommandCooldown(180)]
 

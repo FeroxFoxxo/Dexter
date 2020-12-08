@@ -36,7 +36,7 @@ namespace Dexter.Commands {
                     if (IssueCooldown != null)
                         if (IssueCooldown.TimeOfCooldown + CommissionCooldownConfiguration.CommissionCornerCooldown < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
                             CooldownDB.Cooldowns.Remove(IssueCooldown);
-                            await CooldownDB.SaveChangesAsync();
+                            CooldownDB.SaveChanges();
                         } else {
                             DateTime CooldownTime = DateTime.UnixEpoch.AddSeconds(IssueCooldown.TimeOfCooldown);
 
@@ -57,7 +57,7 @@ namespace Dexter.Commands {
 
                     CooldownDB.Cooldowns.Add(NewCooldown);
 
-                    await CooldownDB.SaveChangesAsync();
+                    CooldownDB.SaveChanges();
 
                     DateTime NewCooldownTime = DateTime.UnixEpoch.AddSeconds(NewCooldown.TimeOfCooldown);
 
@@ -88,7 +88,7 @@ namespace Dexter.Commands {
 
                     if (RevokeCooldown != null) {
                         CooldownDB.Cooldowns.Remove(RevokeCooldown);
-                        await CooldownDB.SaveChangesAsync();
+                        CooldownDB.SaveChanges();
 
                         DateTime CooldownTime = DateTime.UnixEpoch.AddSeconds(RevokeCooldown.TimeOfCooldown);
 

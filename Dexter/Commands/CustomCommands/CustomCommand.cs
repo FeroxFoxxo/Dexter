@@ -143,7 +143,7 @@ namespace Dexter.Commands {
                 Alias = ""
             });
 
-            await CustomCommandDB.SaveChangesAsync();
+            CustomCommandDB.SaveChanges();
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace Dexter.Commands {
 
             CustomCommandDB.GetCommandByNameOrAlias(CommandName).Reply = Reply;
 
-            await CustomCommandDB.SaveChangesAsync();
+            CustomCommandDB.SaveChanges();
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace Dexter.Commands {
 
             CustomCommandDB.CustomCommands.Remove(CustomCommandDB.GetCommandByNameOrAlias(CommandName));
 
-            await CustomCommandDB.SaveChangesAsync();
+            CustomCommandDB.SaveChanges();
         }
 
     }

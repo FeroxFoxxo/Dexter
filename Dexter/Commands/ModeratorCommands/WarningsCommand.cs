@@ -36,10 +36,7 @@ namespace Dexter.Commands {
                 if ((Context.User as IGuildUser).GetPermissionLevel(BotConfiguration)
                     >= PermissionLevel.Moderator) {
 
-                    EmbedBuilder[] Embeds = GetWarnings(User, Context.User, true);
-
-                    foreach (EmbedBuilder Embed in Embeds)
-                        await Embed.SendEmbed(Context.Channel);
+                    await CreateReactionMenu(GetWarnings(User, Context.User, true), Context.Channel);
                 } else {
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Halt! Don't go there-")

@@ -22,6 +22,8 @@ namespace Dexter.Configurations {
         
         public List<string> PFPExtensions { get; set; }
 
+        public int SecTillPFPChange { get; set; }
+
     }
 
 }

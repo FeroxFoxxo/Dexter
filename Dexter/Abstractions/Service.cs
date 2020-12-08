@@ -6,7 +6,9 @@ using Discord;
 using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Dexter.Abstractions {
@@ -32,6 +34,11 @@ namespace Dexter.Abstractions {
         /// The DiscordSocketClient is used to create the webhook for the webhook on create or get.
         /// </summary>
         public DiscordSocketClient DiscordSocketClient { get; set; }
+
+        /// <summary>
+        /// The TimerService class is used to create a timer for wait until an expiration time has been reached.
+        /// </summary>
+        public TimerService TimerService { get; set; }
 
         /// <summary>
         /// The Initialize abstract method is what is called when all dependencies are initialized.
@@ -64,6 +71,24 @@ namespace Dexter.Abstractions {
             }
 
             throw new Exception($"The webhook {WebhookName} could not be initialized in the given channel {Channel} due to it being of type {Channel.GetType().Name}.");
+        }
+
+
+        /// <summary>
+        /// The Create Event Timer method is a generic method that will await for an expiration time to be reached
+        /// before continuing execution of the code set in the CallbackMethod parameter.
+        /// </summary>
+        /// <param name="CallbackMethod">The method you wish to callback once expired.</param>
+        /// <param name="CallbackParameters">The parameters you wish to callback with once expired.</param>
+        /// <param name="SecondsTillExpiration">The count in seconds until the timer will expire.</param>
+        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+
+        public async Task CreateEventTimer(Func<Dictionary<string, string>, Task> CallbackMethod,
+                Dictionary<string, string> CallbackParameters, int SecondsTillExpiration) {
+
+            string JSON = JsonConvert.SerializeObject(CallbackParameters);
+
+            await TimerService.AddTimer(JSON, CallbackMethod.Target.GetType().Name, CallbackMethod.Method.Name, SecondsTillExpiration);
         }
 
         /// <summary>

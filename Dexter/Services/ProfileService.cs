@@ -3,6 +3,7 @@ using Dexter.Configurations;
 using Discord;
 using Discord.WebSocket;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,15 +39,21 @@ namespace Dexter.Services {
         /// The Initialize void hooks the Client.Ready event to the ChangePFP method.
         /// </summary>
         
-        public override void Initialize() {
-            DiscordSocketClient.Ready += () => _ = DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP()));
+        public override async void Initialize() {
+            if (TimerService.EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault() == null)
+                await CreateEventTimer(ChangePFPCallback, new(), PFPConfiguration.SecTillPFPChange);
+        }
+
+        public async Task ChangePFPCallback(Dictionary<string, string> Parameters) {
+            await DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP()));
+            await CreateEventTimer(ChangePFPCallback, new(), PFPConfiguration.SecTillPFPChange);
         }
 
         /// <summary>
         /// The GetRandomPFP method runs on Client.Ready and it simply gets a random PFP of the bot.
         /// </summary>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        
+
         public FileStream GetRandomPFP() {
             if (string.IsNullOrEmpty(PFPConfiguration.PFPDirectory))
                 return null;

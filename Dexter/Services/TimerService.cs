@@ -1,5 +1,6 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Databases.EventTimers;
+using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,8 @@ namespace Dexter.Services {
     public class TimerService : Service {
 
         public EventTimersDB EventTimersDB { get; set; }
+
+        public LoggingService LoggingService { get; set; }
 
         public ServiceProvider ServiceProvider { get; set; }
 
@@ -36,7 +39,7 @@ namespace Dexter.Services {
             long CurrentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             await EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.ExpirationTime <= CurrentTime)
-                .ForEachAsync((EventTimer Timer) => {
+                .ForEachAsync(async (EventTimer Timer) => {
                     EventTimersDB.EventTimers.Remove(Timer);
 
                     EventTimersDB.SaveChanges();
@@ -47,7 +50,14 @@ namespace Dexter.Services {
                     if (Class.GetMethod(Timer.CallbackMethod) == null)
                         throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
 
-                    Class.GetMethod(Timer.CallbackMethod).Invoke(ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
+                    try {
+                        await (Task) Class.GetMethod(Timer.CallbackMethod)
+                            .Invoke(ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
+                    } catch (Exception Exception) {
+                        await LoggingService.LogMessageAsync(
+                            new LogMessage(LogSeverity.Error, GetType().Name, Exception.Message, exception: Exception)
+                        );
+                    }
                 });
         }
 

@@ -1,4 +1,5 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
@@ -10,6 +11,7 @@ namespace Dexter.Commands {
 
         [Command("changepfp", RunMode = RunMode.Async)]
         [Summary("Changes the profile picture of the bot to a random image from a selection made for him.")]
+        [RequireModerator]
 
         public async Task ChangeProfile () {
             await DiscordSocketClient.CurrentUser

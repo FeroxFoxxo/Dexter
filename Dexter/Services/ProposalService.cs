@@ -90,13 +90,18 @@ namespace Dexter.Services {
                     .AddField("Reason", string.IsNullOrEmpty(Reason) ? "No reason provided" : Reason)
                     .WithCurrentTimestamp();
 
-                try {
-                    await BuildProposal(Proposal).SendEmbed(await DiscordSocketClient.GetUser(Proposal.Proposer).GetOrCreateDMChannelAsync());
+                IUser User = DiscordSocketClient.GetUser(Proposal.Proposer);
 
-                    Builder.AddField("Success", "The DM was successfully sent!");
-                } catch (HttpException) {
-                    Builder.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
-                }
+                if (User == null)
+                    Builder.AddField("Failed", "I cannot notify this fluff as they have left the server!");
+                else
+                    try {
+                        await BuildProposal(Proposal).SendEmbed(await User.GetOrCreateDMChannelAsync());
+
+                        Builder.AddField("Success", "The DM was successfully sent!");
+                    } catch (HttpException) {
+                        Builder.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
+                    }
 
                 await Builder.SendEmbed(MessageChannel);
             }

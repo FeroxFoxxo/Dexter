@@ -23,7 +23,7 @@ namespace Dexter.Commands {
         [Command("commCooldown")]
         [Summary("Applies a specified action to a user's commission cooldown.\n" +
             "`ISSUE [USER]` - issues a cooldown to the user.\n" +
-            "`revoke [USER]` - removes a cooldown from a user.")]
+            "`REVOKE [USER]` - removes a cooldown from a user.")]
         [Alias("commCooldown", "cooldown")]
         [RequireModerator]
 

@@ -21,7 +21,7 @@ namespace Dexter.Commands {
 
             await BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle($"User Profile For {GuildUser.Username}#{GuildUser.Discriminator}")
-                .WithThumbnailUrl(GuildUser.GetAvatarUrl())
+                .WithThumbnailUrl(string.IsNullOrEmpty(GuildUser.GetAvatarUrl()) ? GuildUser.GetDefaultAvatarUrl() : GuildUser.GetAvatarUrl())
                 .AddField("Username", GuildUser.Username)
                 .AddField(!string.IsNullOrEmpty(GuildUser.Nickname), "Nickname", GuildUser.Nickname)
                 .AddField("Created", $"{GuildUser.CreatedAt:dd/MM/yyyy HH:mm:ss} ({GuildUser.CreatedAt.Humanize()})")

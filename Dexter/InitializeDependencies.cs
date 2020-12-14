@@ -78,7 +78,12 @@ namespace Dexter {
             ServiceCollection.AddSingleton(DiscordSocketClient);
 
             // Adds an instance of the CommandService, which is what calls our various commands.
-            CommandService CommandService = new();
+            CommandService CommandService = new(
+                new CommandServiceConfig {
+                    IgnoreExtraArgs = true
+                }
+            );
+
             ServiceCollection.AddSingleton(CommandService);
 
             // Adds an instance of LoggingService, which allows us to log to the console.

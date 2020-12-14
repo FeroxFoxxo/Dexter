@@ -17,8 +17,8 @@ namespace Dexter.Commands {
                 User = Context.User;
 
             await BuildEmbed(EmojiEnum.Unknown)
-                .WithImageUrl(User.GetAvatarUrl(ImageFormat.Png, 1024))
-                .WithUrl(User.GetAvatarUrl(ImageFormat.Png, 1024))
+                .WithImageUrl(string.IsNullOrEmpty(User.GetAvatarUrl()) ? User.GetDefaultAvatarUrl() : User.GetAvatarUrl())
+                .WithUrl(string.IsNullOrEmpty(User.GetAvatarUrl()) ? User.GetDefaultAvatarUrl() : User.GetAvatarUrl())
                 .WithAuthor(User)
                 .WithTitle("Get Avatar URL")
                 .SendEmbed(Context.Channel);

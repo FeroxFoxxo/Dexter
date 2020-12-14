@@ -1,8 +1,10 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Abstractions;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -33,8 +35,16 @@ namespace Dexter.Commands {
 
                 List<string> Description = new ();
 
+                ServiceCollection ServiceCollection = new ();
+
+                HelpAbstraction HelpAbstraction = new () {
+                    BotConfiguration = BotConfiguration
+                };
+
+                ServiceCollection.AddSingleton(HelpAbstraction);
+
                 foreach (CommandInfo CommandInfo in Module.Commands) {
-                    PreconditionResult Result = await CommandInfo.CheckPreconditionsAsync(Context);
+                    PreconditionResult Result = await CommandInfo.CheckPreconditionsAsync(Context, ServiceCollection.BuildServiceProvider());
 
                     if (Result.IsSuccess)
                         Description.Add($"**~{string.Join("/", CommandInfo.Aliases.ToArray())}:** {CommandInfo.Summary}");

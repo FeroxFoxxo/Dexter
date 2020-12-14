@@ -1,7 +1,14 @@
-﻿using System;
+﻿using Dexter.Configurations;
+using Discord;
+using Discord.WebSocket;
+using System;
+using System.IO;
+using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Dexter.Extensions {
 
@@ -41,6 +48,27 @@ namespace Dexter.Extensions {
             foreach (string Unsafe in SensitiveCharacters)
                 Text = Text.Replace(Unsafe, $"\\{Unsafe}");
             return Text;
+        }
+
+        public static async Task<string> GetProxiedImage (this string ImageURL, string ImageName, DiscordSocketClient DiscordSocketClient, BotConfiguration BotConfiguration) {
+            string TemporaryLogDirectory = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
+
+            if (!Directory.Exists(TemporaryLogDirectory))
+                Directory.CreateDirectory(TemporaryLogDirectory);
+
+            string FilePath = Path.Combine(TemporaryLogDirectory, $"{ImageName}{Path.GetExtension(ImageURL)}");
+
+            using WebClient WebClient = new();
+
+            await WebClient.DownloadFileTaskAsync(ImageURL, FilePath);
+
+            ITextChannel Channel = DiscordSocketClient.GetChannel(BotConfiguration.StorageChannelID) as ITextChannel;
+
+            IUserMessage AttachmentMSG = await Channel.SendFileAsync(FilePath);
+
+            File.Delete(FilePath);
+
+            return AttachmentMSG.Attachments.FirstOrDefault().ProxyUrl;
         }
 
         public static int GetHash(this object HashingString) {

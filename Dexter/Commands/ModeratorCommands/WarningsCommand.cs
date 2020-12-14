@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.DependencyInjection;
 using Dexter.Configurations;
+using System.Linq;
 
 namespace Dexter.Commands {
 
@@ -36,7 +37,12 @@ namespace Dexter.Commands {
                 if ((Context.User as IGuildUser).GetPermissionLevel(BotConfiguration)
                     >= PermissionLevel.Moderator) {
 
-                    await CreateReactionMenu(GetWarnings(User, Context.User, true), Context.Channel);
+                    EmbedBuilder[] Warnings = GetWarnings(User, Context.User, true);
+
+                    if (Warnings.Length > 1)
+                        await CreateReactionMenu(Warnings, Context.Channel);
+                    else
+                        await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
                 } else {
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Halt! Don't go there-")

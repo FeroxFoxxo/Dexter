@@ -1,4 +1,5 @@
-﻿using Dexter.Configurations;
+﻿using Dexter.Abstractions;
+using Dexter.Configurations;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
@@ -45,10 +46,15 @@ namespace Dexter.Attributes.Methods {
         /// This error is then thrown to the Command Handler Service to log to the user.</returns>
         
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, CommandInfo CommandInfo, IServiceProvider ServiceProvider) {
-            if (ServiceProvider.GetService<BotConfiguration>() == null)
+            BotConfiguration BotConfiguration = ServiceProvider.GetService<BotConfiguration>();
+
+            if (ServiceProvider.GetService<HelpAbstraction>() != null)
+                BotConfiguration = ServiceProvider.GetService<HelpAbstraction>().BotConfiguration;
+            
+            if (BotConfiguration == null)
                 return Task.FromResult(PreconditionResult.FromSuccess());
 
-            return Task.FromResult((CommandContext.User as IGuildUser).GetPermissionLevel(ServiceProvider.GetRequiredService<BotConfiguration>()) >= PermissionLevel
+            return Task.FromResult((CommandContext.User as IGuildUser).GetPermissionLevel(BotConfiguration) >= PermissionLevel
                 ? PreconditionResult.FromSuccess()
                 : PreconditionResult.FromError($"Haiya! To run the `{CommandInfo.Name}` command you need to have the " +
                 $"`{PermissionLevel}` role! Are you sure you're a `{PermissionLevel.ToString().ToLower()}`? <3"));

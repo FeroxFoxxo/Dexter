@@ -23,16 +23,25 @@ namespace Dexter.Services {
 
         public ServiceProvider ServiceProvider { get; set; }
 
+        public bool HasStarted = false;
+
         public override void Initialize() {
+            DiscordSocketClient.Ready += HasTimerStarted;
+        }
+
+        public async Task HasTimerStarted () {
             // Runs the bot timer to loop through all events that may occur on a timer.
-            Timer EventTimer = new (TimeSpan.FromSeconds(20).TotalMilliseconds) {
-                AutoReset = true,
-                Enabled = true
-            };
+            if (!HasStarted) {
+                Timer EventTimer = new(TimeSpan.FromSeconds(20).TotalMilliseconds) {
+                    AutoReset = true,
+                    Enabled = true
+                };
 
-            EventTimer.Elapsed += async (s, e) => await LoopThroughEvents();
+                EventTimer.Elapsed += async (s, e) => await LoopThroughEvents();
 
-            DiscordSocketClient.Ready += () => Task.Run(() => EventTimer.Start());
+                await Task.Run(() => EventTimer.Start());
+                HasStarted = true;
+            }
         }
 
         public async Task LoopThroughEvents() {

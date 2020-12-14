@@ -61,6 +61,9 @@ namespace Dexter.Databases.Proposals {
         
         public string ProxyURL { get; set; }
 
+        public string AvatarURL { get; set; }
+
+        public string Username { get; set; }
     }
 
 }

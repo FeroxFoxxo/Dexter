@@ -28,12 +28,6 @@ namespace Dexter.Configurations {
         public ulong StorageGuild { get; set; }
 
         /// <summary>
-        /// The PICTURE CHANNEL specifies the snowflake ID of the channel Dexter will store messages sent in suggestion channels.
-        /// </summary>
-        
-        public ulong PictureChannel { get; set; }
-
-        /// <summary>
         /// The TRACKER LENGTH specifies the length of the token assosiated with the proposal.
         /// </summary>
         
@@ -69,6 +63,8 @@ namespace Dexter.Configurations {
         /// </summary>
         
         public string RandomCharacters { get; set; }
+
+        public string DefaultAvatar { get; set; }
 
     }
 

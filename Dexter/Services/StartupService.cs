@@ -32,6 +32,8 @@ namespace Dexter.Services {
         
         public string Version;
 
+        public bool HasStarted = false;
+
         /// <summary>
         /// The Initialize method hooks the client ready event to the Display Startup Version Async method.
         /// </summary>
@@ -79,6 +81,9 @@ namespace Dexter.Services {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
         
         public async Task DisplayStartupVersionAsync() {
+            if (HasStarted)
+                return;
+
             SocketChannel LoggingChannel = DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID);
 
             if (LoggingChannel == null || LoggingChannel is not ITextChannel)
@@ -111,6 +116,8 @@ namespace Dexter.Services {
                     .WithDescription($"This is **{DiscordSocketClient.CurrentUser.Username} v{Version}** running **Discord.Net v{DiscordConfig.Version}**!")
                     .AddField("Latest Commit:", LastCommit.Length > 1200 ? $"{LastCommit.Substring(0, 1200)}..." : LastCommit)
                     .SendEmbed(LoggingChannel as ITextChannel);
+
+            HasStarted = true;
         }
 
     }

@@ -191,31 +191,19 @@ namespace Dexter.Services {
                 Content = RecievedMessage.Content,
                 ProposalStatus = ProposalStatus.Suggested,
                 Proposer = RecievedMessage.Author.Id,
-                ProposalType = ProposalType.Suggestion
+                ProposalType = ProposalType.Suggestion,
+                Username = RecievedMessage.Author.Username,
             };
+
+            string AvatarURL = string.IsNullOrEmpty(RecievedMessage.Author.GetAvatarUrl()) ?
+                RecievedMessage.Author.GetDefaultAvatarUrl() : RecievedMessage.Author.GetAvatarUrl(); ;
+
+            Proposal.AvatarURL = await AvatarURL.GetProxiedImage($"AVATAR{Proposal.Tracker}", DiscordSocketClient, BotConfiguration);
 
             Attachment Attachment = RecievedMessage.Attachments.FirstOrDefault();
 
-            if (Attachment != null) {
-                string TemporaryLogDirectory = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
-
-                if (!Directory.Exists(TemporaryLogDirectory))
-                    Directory.CreateDirectory(TemporaryLogDirectory);
-
-                string FilePath = Path.Combine(TemporaryLogDirectory, $"{Proposal.Tracker}{Path.GetExtension(Attachment.Filename)}");
-
-                using WebClient WebClient = new();
-
-                await WebClient.DownloadFileTaskAsync(Attachment.ProxyUrl, FilePath);
-
-                ITextChannel Channel = DiscordSocketClient.GetChannel(ProposalConfiguration.PictureChannel) as ITextChannel;
-
-                IUserMessage AttachmentMSG = await Channel.SendFileAsync(FilePath);
-
-                Proposal.ProxyURL = AttachmentMSG.Attachments.FirstOrDefault().ProxyUrl;
-
-                File.Delete(FilePath);
-            }
+            if (Attachment != null)
+                Proposal.ProxyURL = await Attachment.ProxyUrl.GetProxiedImage($"{Proposal.Tracker}", DiscordSocketClient, BotConfiguration);
 
             // Creates a new Suggestion object with the related fields.
             Suggestion Suggested = new () {
@@ -264,6 +252,12 @@ namespace Dexter.Services {
                 ProposalType = ProposalType.AdminConfirmation,
                 Proposer = Author
             };
+
+            IUser User = DiscordSocketClient.GetUser(Author);
+
+            string AvatarURL = string.IsNullOrEmpty(User.GetAvatarUrl()) ? User.GetDefaultAvatarUrl() : User.GetAvatarUrl();
+
+            Proposal.AvatarURL = await AvatarURL.GetProxiedImage($"AVATAR{Proposal.Tracker}", DiscordSocketClient, BotConfiguration);
 
             // Creates a new AdminConfirmation object with the related fields.
             AdminConfirmation Confirmation = new() {
@@ -507,15 +501,18 @@ namespace Dexter.Services {
                 _ => Color.Teal
             };
 
+            IUser User = DiscordSocketClient.GetUser(Proposal.Proposer);
+
             return new EmbedBuilder()
                 .WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
                 .WithColor(Color)
-                .WithThumbnailUrl(DiscordSocketClient.GetUser(Proposal.Proposer).GetAvatarUrl())
+                .WithThumbnailUrl(string.IsNullOrEmpty(Proposal.AvatarURL) ? User == null ? ProposalConfiguration.DefaultAvatar : string.IsNullOrEmpty(User.GetAvatarUrl()) ? User.GetDefaultAvatarUrl() : User.GetAvatarUrl() : Proposal.AvatarURL)
                 .WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
                 .WithDescription(Proposal.Content)
                 .WithImageUrl(Proposal.ProxyURL)
                 .AddField(!string.IsNullOrEmpty(Proposal.Reason), "Reason:", Proposal.Reason)
-                .WithAuthor(DiscordSocketClient.GetUser(Proposal.Proposer))
+                .WithAuthor(string.IsNullOrEmpty(Proposal.Username) ? User == null ? "Unknown" : User.Username : Proposal.Username,
+                    string.IsNullOrEmpty(Proposal.AvatarURL) ? User == null ? ProposalConfiguration.DefaultAvatar : string.IsNullOrEmpty(User.GetAvatarUrl()) ? User.GetDefaultAvatarUrl() : User.GetAvatarUrl() : Proposal.AvatarURL)
                 .WithCurrentTimestamp()
                 .WithFooter(Proposal.Tracker);
         }

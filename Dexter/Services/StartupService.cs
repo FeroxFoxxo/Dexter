@@ -9,6 +9,10 @@ using System;
 using Figgle;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Dexter.Services {
 
@@ -26,10 +30,12 @@ namespace Dexter.Services {
         
         public LoggingService LoggingService { get; set; }
 
+        public ServiceProvider ServiceProvider { get; set; }
+
         /// <summary>
         /// The current version of the bot, which as been parsed from the InitializeDependencies method.
         /// </summary>
-        
+
         public string Version;
 
         public bool HasStarted = false;
@@ -99,6 +105,31 @@ namespace Dexter.Services {
 
             LoggingService.LockedCMDOut = false;
 
+            Dictionary<string, List<string>> NulledConfigurations = new();
+
+            Assembly.GetExecutingAssembly().GetTypes()
+                    .Where(Type => Type.IsSubclassOf(typeof(JSONConfig)) && !Type.IsAbstract)
+                    .ToList().ForEach(
+                Configuration => {
+                    object Service = ServiceProvider.GetService(Configuration);
+
+                    Configuration.GetProperties().ToList().ForEach(
+                        Property => {
+                            object Value = Property.GetValue(Service);
+
+                            if (Value != null)
+                                if (!(string.IsNullOrEmpty(Value.ToString()) || Value.ToString().Equals("0")))
+                                    return;
+
+                            if (!NulledConfigurations.ContainsKey(Configuration.Name))
+                                NulledConfigurations.Add(Configuration.Name, new ());
+
+                            NulledConfigurations[Configuration.Name].Add(Property.Name);
+                        }
+                    );
+                }
+            );
+
             using HttpClient HTTPClient = new();
 
             HTTPClient.DefaultRequestHeaders.Add("User-Agent",
@@ -110,11 +141,17 @@ namespace Dexter.Services {
             dynamic Commits = JArray.Parse(JSON);
             string LastCommit = Commits[0].commit.message;
 
+            string UnsetConfigurations = string.Empty;
+
+            foreach (KeyValuePair<string, List<string>> Configuration in NulledConfigurations)
+                UnsetConfigurations += $"**{Configuration.Key} -** {string.Join(", ", Configuration.Value.Take(Configuration.Value.Count - 1)) + (Configuration.Value.Count > 1 ? " and " : "") + Configuration.Value.LastOrDefault()}\n";
+
             if (BotConfiguration.EnableStartupAlert)
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Startup complete!")
                     .WithDescription($"This is **{DiscordSocketClient.CurrentUser.Username} v{Version}** running **Discord.Net v{DiscordConfig.Version}**!")
-                    .AddField("Latest Commit:", LastCommit.Length > 1200 ? $"{LastCommit.Substring(0, 1200)}..." : LastCommit)
+                    .AddField("Latest Commit:", LastCommit.Length > 600 ? $"{LastCommit.Substring(0, 600)}..." : LastCommit)
+                    .AddField(NulledConfigurations.Count > 0, "Unapplied Configurations:", UnsetConfigurations.Length > 600 ? $"{UnsetConfigurations.Substring(0, 600)}..." : UnsetConfigurations)
                     .SendEmbed(LoggingChannel as ITextChannel);
 
             HasStarted = true;

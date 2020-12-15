@@ -56,7 +56,7 @@ namespace Dexter.Extensions {
             if (!Directory.Exists(TemporaryLogDirectory))
                 Directory.CreateDirectory(TemporaryLogDirectory);
 
-            string FilePath = Path.Combine(TemporaryLogDirectory, $"{ImageName}{Path.GetExtension(ImageURL)}");
+            string FilePath = Path.Combine(TemporaryLogDirectory, $"{ImageName}{Path.GetExtension(ImageURL.Split("?")[0])}");
 
             using WebClient WebClient = new();
 

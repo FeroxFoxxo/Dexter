@@ -5,7 +5,6 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.Webhook;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using System.Threading.Tasks;

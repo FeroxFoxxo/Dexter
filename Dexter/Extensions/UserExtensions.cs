@@ -40,6 +40,10 @@ namespace Dexter.Extensions {
             return $"{User.Username}#{User.Discriminator} ({User.Mention}) ({User.Id})";
         }
 
+        public static string GetTrueAvatarUrl (this IUser User, ushort DefaultSize = 128) {
+            return string.IsNullOrEmpty(User.GetAvatarUrl(size: DefaultSize)) ? User.GetDefaultAvatarUrl() : User.GetAvatarUrl(size: DefaultSize);
+        }
+
     }
 
 }

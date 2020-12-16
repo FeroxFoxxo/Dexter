@@ -14,7 +14,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Discord.Net" Version="2.3.0-dev-20201201.2" />
+		<PackageReference Include="AnimatedGif" Version="1.0.5" />
+		<PackageReference Include="Discord.Net" Version="2.3.0-dev-20201214.8" />
 		<PackageReference Include="Figgle" Version="0.4.0" />
 		<PackageReference Include="Google.Apis.Sheets.v4" Version="1.49.0.2160" />
 		<PackageReference Include="Humanizer.Core" Version="2.8.26" />

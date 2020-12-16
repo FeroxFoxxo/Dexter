@@ -16,9 +16,9 @@ namespace Dexter.Commands {
             string ProfilePictures = string.Join('\n', ProfileService.GetProfilePictures().Select(Profile => Profile.Name).ToArray());
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle("Profile Pictures.")
+                .WithTitle("Profile Pictures:")
                 .WithDescription(string.IsNullOrEmpty(ProfilePictures) ? "No Profile Pictures!" : ProfilePictures)
-                .AddField("Current PFP:", ProfileService.CurrentPFP)
+                .AddField(!string.IsNullOrEmpty(ProfileService.CurrentPFP), "Current PFP:", ProfileService.CurrentPFP)
                 .SendEmbed(Context.Channel);
         }
 

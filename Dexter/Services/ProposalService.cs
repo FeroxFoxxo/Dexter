@@ -185,20 +185,25 @@ namespace Dexter.Services {
                 return;
             }
 
+            // Remove content from suggestion from people who do not realise that a command is not needed to run the bot.
+
+            string Content = RecievedMessage.Content;
+
+            if (ProposalConfiguration.CommandRemovals.Contains(Content.Split(' ')[0].ToLower()))
+                Content = Content[(Content.IndexOf(" ") + 1)..];
+
+            string Token = CreateToken();
+
             // Creates a new Proposal object with the related fields.
             Proposal Proposal = new() {
                 Tracker = CreateToken(),
-                Content = RecievedMessage.Content,
+                Content = Content,
                 ProposalStatus = ProposalStatus.Suggested,
                 Proposer = RecievedMessage.Author.Id,
                 ProposalType = ProposalType.Suggestion,
                 Username = RecievedMessage.Author.Username,
+                AvatarURL = await RecievedMessage.Author.GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordSocketClient, BotConfiguration)
             };
-
-            string AvatarURL = string.IsNullOrEmpty(RecievedMessage.Author.GetAvatarUrl()) ?
-                RecievedMessage.Author.GetDefaultAvatarUrl() : RecievedMessage.Author.GetAvatarUrl(); ;
-
-            Proposal.AvatarURL = await AvatarURL.GetProxiedImage($"AVATAR{Proposal.Tracker}", DiscordSocketClient, BotConfiguration);
 
             Attachment Attachment = RecievedMessage.Attachments.FirstOrDefault();
 
@@ -242,22 +247,19 @@ namespace Dexter.Services {
         /// <param name="Author">The author is the snowflake ID of the user who has suggested the proposal.</param>
         /// <param name="ProposedMessage">The proposed message is the content of the approval confirmation message.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        
+
         public async Task SendAdminConfirmation(string JSON, string Type, string Method, ulong Author, string ProposedMessage) {
+            string Token = CreateToken();
+
             // Creates a new Proposal object with the related fields.
             Proposal Proposal = new() {
-                Tracker = CreateToken(),
+                Tracker = Token,
                 Content = ProposedMessage,
                 ProposalStatus = ProposalStatus.Suggested,
                 ProposalType = ProposalType.AdminConfirmation,
-                Proposer = Author
+                Proposer = Author,
+                AvatarURL = await DiscordSocketClient.GetUser(Author).GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordSocketClient, BotConfiguration)
             };
-
-            IUser User = DiscordSocketClient.GetUser(Author);
-
-            string AvatarURL = string.IsNullOrEmpty(User.GetAvatarUrl()) ? User.GetDefaultAvatarUrl() : User.GetAvatarUrl();
-
-            Proposal.AvatarURL = await AvatarURL.GetProxiedImage($"AVATAR{Proposal.Tracker}", DiscordSocketClient, BotConfiguration);
 
             // Creates a new AdminConfirmation object with the related fields.
             AdminConfirmation Confirmation = new() {
@@ -506,13 +508,13 @@ namespace Dexter.Services {
             return new EmbedBuilder()
                 .WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
                 .WithColor(Color)
-                .WithThumbnailUrl(string.IsNullOrEmpty(Proposal.AvatarURL) ? User == null ? ProposalConfiguration.DefaultAvatar : string.IsNullOrEmpty(User.GetAvatarUrl()) ? User.GetDefaultAvatarUrl() : User.GetAvatarUrl() : Proposal.AvatarURL)
+                .WithThumbnailUrl(string.IsNullOrEmpty(Proposal.AvatarURL) ? User == null ? ProposalConfiguration.DefaultAvatar : User.GetTrueAvatarUrl() : Proposal.AvatarURL)
                 .WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
                 .WithDescription(Proposal.Content)
                 .WithImageUrl(Proposal.ProxyURL)
                 .AddField(!string.IsNullOrEmpty(Proposal.Reason), "Reason:", Proposal.Reason)
                 .WithAuthor(string.IsNullOrEmpty(Proposal.Username) ? User == null ? "Unknown" : User.Username : Proposal.Username,
-                    string.IsNullOrEmpty(Proposal.AvatarURL) ? User == null ? ProposalConfiguration.DefaultAvatar : string.IsNullOrEmpty(User.GetAvatarUrl()) ? User.GetDefaultAvatarUrl() : User.GetAvatarUrl() : Proposal.AvatarURL)
+                    string.IsNullOrEmpty(Proposal.AvatarURL) ? User == null ? ProposalConfiguration.DefaultAvatar : User.GetTrueAvatarUrl() : Proposal.AvatarURL)
                 .WithCurrentTimestamp()
                 .WithFooter(Proposal.Tracker);
         }

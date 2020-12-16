@@ -73,7 +73,6 @@ namespace Dexter.Abstractions {
             throw new Exception($"The webhook {WebhookName} could not be initialized in the given channel {Channel} due to it being of type {Channel.GetType().Name}.");
         }
 
-
         /// <summary>
         /// The Create Event Timer method is a generic method that will await for an expiration time to be reached
         /// before continuing execution of the code set in the CallbackMethod parameter.

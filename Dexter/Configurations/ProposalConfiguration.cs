@@ -64,6 +64,8 @@ namespace Dexter.Configurations {
         
         public string RandomCharacters { get; set; }
 
+        public List<string> CommandRemovals { get; set; }
+
         public string DefaultAvatar { get; set; }
 
     }

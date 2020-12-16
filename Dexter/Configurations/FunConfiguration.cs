@@ -33,6 +33,14 @@ namespace Dexter.Configurations {
         
         public Dictionary<string, string> EightBallEmoji { get; set; }
 
+        public string HeadpatsDir { get; set; }
+
+        public List<List<ushort>> HeadpatPositions { get; set; }
+
+        public ulong HeadpatStorageGuild { get; set; }
+
+        public string HeadpatWebhookName { get; set; }
+
     }
 
 }

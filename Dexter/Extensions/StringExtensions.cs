@@ -51,12 +51,12 @@ namespace Dexter.Extensions {
         }
 
         public static async Task<string> GetProxiedImage (this string ImageURL, string ImageName, DiscordSocketClient DiscordSocketClient, BotConfiguration BotConfiguration) {
-            string TemporaryLogDirectory = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
+            string ImageCacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
 
-            if (!Directory.Exists(TemporaryLogDirectory))
-                Directory.CreateDirectory(TemporaryLogDirectory);
+            if (!Directory.Exists(ImageCacheDir))
+                Directory.CreateDirectory(ImageCacheDir);
 
-            string FilePath = Path.Combine(TemporaryLogDirectory, $"{ImageName}{Path.GetExtension(ImageURL.Split("?")[0])}");
+            string FilePath = Path.Combine(ImageCacheDir, $"{ImageName}{Path.GetExtension(ImageURL.Split("size")[0])}");
 
             using WebClient WebClient = new();
 

@@ -9,7 +9,7 @@ namespace Dexter.Commands {
         [Command("roulette")]
         [Summary("Test your luck with a 1 in 4 chance you get muzzled!")]
         [Alias("testmyluck")]
-        [CommandCooldown(120)]
+        [CommandCooldown(45)]
 
         public async Task RouletteCommand() {
             if (Random.Next(4) == 1)

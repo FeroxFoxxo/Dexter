@@ -76,7 +76,7 @@ namespace Dexter.Commands {
                 .SendEmbed(Context.Channel);
         }
 
-        public async Task CreateTopicCallback(Dictionary<string, string> Parameters) {
+        public void CreateTopicCallback(Dictionary<string, string> Parameters) {
             string Topic = Parameters["Topic"];
             TopicType TopicType = (TopicType)int.Parse(Parameters["TopicType"]);
             ulong Proposer = ulong.Parse(Parameters["Proposer"]);
@@ -131,7 +131,7 @@ namespace Dexter.Commands {
                 .SendEmbed(Context.Channel);
         }
 
-        public async Task RemoveTopicCallback(Dictionary<string, string> Parameters) {
+        public void RemoveTopicCallback(Dictionary<string, string> Parameters) {
             int TopicID = int.Parse(Parameters["TopicID"]);
             TopicType TopicType = (TopicType)int.Parse(Parameters["TopicType"]);
 
@@ -205,7 +205,7 @@ namespace Dexter.Commands {
                 .SendEmbed(Context.Channel);
         }
 
-        public async Task EditTopicCallback(Dictionary<string, string> Parameters) {
+        public void EditTopicCallback(Dictionary<string, string> Parameters) {
             int TopicID = int.Parse(Parameters["TopicID"]);
             TopicType TopicType = (TopicType)int.Parse(Parameters["TopicType"]);
             string EditedTopic = Parameters["EditedTopic"];

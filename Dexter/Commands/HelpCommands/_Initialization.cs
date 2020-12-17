@@ -11,8 +11,6 @@ namespace Dexter.Commands {
 
         public CommandService CommandService { get; set; }
 
-        public DiscordSocketClient DiscordSocketClient { get; set; }
-
     }
 
 }

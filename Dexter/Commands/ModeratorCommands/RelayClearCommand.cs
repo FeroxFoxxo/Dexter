@@ -41,7 +41,7 @@ namespace Dexter.Commands {
                 .SendEmbed(Context.Channel);
         }
 
-        public async Task RemoveRelayCallback(Dictionary<string, string> Parameters) {
+        public void RemoveRelayCallback(Dictionary<string, string> Parameters) {
             ulong ChannelID = ulong.Parse(Parameters["ChannelID"]);
 
             Relay RelayToRemove = RelayDB.Relays.AsQueryable().Where(Relay => Relay.ChannelID.Equals(ChannelID)).FirstOrDefault();

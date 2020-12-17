@@ -111,7 +111,7 @@ namespace Dexter.Commands {
         ///     Alias = The alias you wish to add to the command.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
-        public async Task AddAliasCallback(Dictionary<string, string> Parameters) {
+        public void AddAliasCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];
             string Alias = Parameters["Alias"];
 
@@ -137,7 +137,7 @@ namespace Dexter.Commands {
         ///     Alias = The alias you wish to remove from the command.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
-        public async Task RemoveAliasCallback(Dictionary<string, string> Parameters) {
+        public void RemoveAliasCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];
             string Alias = Parameters["Alias"];
 

@@ -133,7 +133,7 @@ namespace Dexter.Commands {
         ///     Reply = The reply of the given command.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
-        public async Task CreateCommandCallback(Dictionary<string, string> Parameters) {
+        public void CreateCommandCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];
             string Reply = Parameters["Reply"];
 
@@ -154,7 +154,7 @@ namespace Dexter.Commands {
         ///     Reply = The edited reply of the given command.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
-        public async Task EditCommandCallback(Dictionary<string, string> Parameters) {
+        public void EditCommandCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];
             string Reply = Parameters["Reply"];
 
@@ -171,7 +171,7 @@ namespace Dexter.Commands {
         /// </param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
-        public async Task RemoveCommandCallback(Dictionary<string, string> Parameters) {
+        public void RemoveCommandCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];
 
             CustomCommandDB.CustomCommands.Remove(CustomCommandDB.GetCommandByNameOrAlias(CommandName));

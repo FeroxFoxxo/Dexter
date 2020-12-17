@@ -39,14 +39,14 @@ namespace Dexter.Services {
         /// The Initialize void hooks the Client.Ready event to the ChangePFP method.
         /// </summary>
         
-        public override async void Initialize() {
+        public override void Initialize() {
             if (TimerService.EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault() == null)
-                await CreateEventTimer(ChangePFPCallback, new(), PFPConfiguration.SecTillPFPChange);
+                CreateEventTimer(ChangePFPCallback, new(), PFPConfiguration.SecTillPFPChange);
         }
 
         public async Task ChangePFPCallback(Dictionary<string, string> Parameters) {
             await DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP()));
-            await CreateEventTimer(ChangePFPCallback, new(), PFPConfiguration.SecTillPFPChange);
+            CreateEventTimer(ChangePFPCallback, new(), PFPConfiguration.SecTillPFPChange);
         }
 
         /// <summary>

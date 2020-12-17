@@ -47,7 +47,7 @@ namespace Dexter.Commands {
                 .SendEmbed(Context.Channel);
         }
 
-        public async Task AddRelayCallback(Dictionary<string, string> Parameters) {
+        public void AddRelayCallback(Dictionary<string, string> Parameters) {
             int MessageInterval = int.Parse(Parameters["MessageInterval"]);
             ulong ChannelID = ulong.Parse(Parameters["ChannelID"]);
             string Message = Parameters["Message"];

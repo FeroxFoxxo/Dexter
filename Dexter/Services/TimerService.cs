@@ -70,7 +70,7 @@ namespace Dexter.Services {
                 });
         }
 
-        public async Task AddTimer(string JSON, string ClassName, string MethodName, int SecondsTillExpiration) {
+        public void AddTimer(string JSON, string ClassName, string MethodName, int SecondsTillExpiration) {
             EventTimersDB.EventTimers.Add(new EventTimer() {
                 CallbackClass = ClassName,
                 CallbackMethod = MethodName,

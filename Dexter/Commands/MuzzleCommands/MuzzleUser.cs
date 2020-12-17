@@ -13,7 +13,7 @@ namespace Dexter.Commands {
                 GuildUser.Guild.GetRole(MuzzleConfiguration.ReactionMutedRoleID)
             });
 
-            await CreateEventTimer(UnmuzzleCallback, new Dictionary<string, string>() {
+            CreateEventTimer(UnmuzzleCallback, new Dictionary<string, string>() {
                 { "User", GuildUser.Id.ToString() }
             }, MuzzleConfiguration.MuzzleDuration);
         }

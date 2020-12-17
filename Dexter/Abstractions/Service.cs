@@ -82,12 +82,12 @@ namespace Dexter.Abstractions {
         /// <param name="SecondsTillExpiration">The count in seconds until the timer will expire.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
-        public async Task CreateEventTimer(Func<Dictionary<string, string>, Task> CallbackMethod,
+        public void CreateEventTimer(Func<Dictionary<string, string>, Task> CallbackMethod,
                 Dictionary<string, string> CallbackParameters, int SecondsTillExpiration) {
 
             string JSON = JsonConvert.SerializeObject(CallbackParameters);
 
-            await TimerService.AddTimer(JSON, CallbackMethod.Target.GetType().Name, CallbackMethod.Method.Name, SecondsTillExpiration);
+            TimerService.AddTimer(JSON, CallbackMethod.Target.GetType().Name, CallbackMethod.Method.Name, SecondsTillExpiration);
         }
 
         /// <summary>

@@ -45,8 +45,6 @@ namespace Dexter.Commands {
 
         public ModerationConfiguration ModerationConfiguration { get; set; }
 
-        public DiscordSocketClient DiscordSocketClient { get; set; }
-
     }
 
 }

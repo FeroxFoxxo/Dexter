@@ -9,8 +9,6 @@ namespace Dexter.Commands {
 
         public FunConfiguration FunConfiguration { get; set; }
 
-        public DiscordSocketClient DiscordSocketClient { get; set; }
-
         public FunTopicsDB FunTopicsDB { get; set; }
 
     }

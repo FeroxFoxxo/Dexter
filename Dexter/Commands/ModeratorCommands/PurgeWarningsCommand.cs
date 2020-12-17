@@ -52,7 +52,7 @@ namespace Dexter.Commands {
         /// </param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
         
-        public async Task PurgeWarningsCallback(Dictionary<string, string> CallbackInformation) {
+        public async void PurgeWarningsCallback(Dictionary<string, string> CallbackInformation) {
             ulong UserID = Convert.ToUInt64(CallbackInformation["UserID"]);
 
             int Count = WarningsDB.GetWarnings(UserID).Length;

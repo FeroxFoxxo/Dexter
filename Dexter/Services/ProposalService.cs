@@ -16,8 +16,6 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Microsoft.Extensions.DependencyInjection;
 using System.Data;
-using System.Net;
-using System.IO;
 
 namespace Dexter.Services {
 

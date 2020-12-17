@@ -9,8 +9,6 @@ namespace Dexter.Commands {
 
         public MuzzleConfiguration MuzzleConfiguration { get; set; }
 
-        public DiscordSocketClient DiscordSocketClient { get; set; }
-
         public Random Random { get; set; }
 
     }

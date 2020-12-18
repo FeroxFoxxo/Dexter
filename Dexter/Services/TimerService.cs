@@ -55,7 +55,15 @@ namespace Dexter.Services {
 
             await EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.ExpirationTime <= CurrentTime)
                 .ForEachAsync(async (EventTimer Timer) => {
-                    EventTimersDB.EventTimers.Remove(Timer);
+
+                    switch (Timer.TimerType) {
+                        case TimerType.Expire:
+                            EventTimersDB.EventTimers.Remove(Timer);
+                            break;
+                        case TimerType.Interval:
+                            Timer.ExpirationTime = Timer.ExpirationLength + DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                            break;
+                    }
 
                     EventTimersDB.SaveChanges();
 
@@ -76,15 +84,17 @@ namespace Dexter.Services {
                 });
         }
 
-        public string AddTimer(string JSON, string ClassName, string MethodName, int SecondsTillExpiration) {
+        public string AddTimer(string JSON, string ClassName, string MethodName, int SecondsTillExpiration, TimerType TimerType) {
             string Token = CreateToken();
 
             EventTimersDB.EventTimers.Add(new EventTimer() {
                 Token = Token,
+                ExpirationLength = SecondsTillExpiration,
                 CallbackClass = ClassName,
                 CallbackMethod = MethodName,
                 CallbackParameters = JSON,
-                ExpirationTime = SecondsTillExpiration + DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                ExpirationTime = SecondsTillExpiration + DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                TimerType = TimerType
             });
 
             EventTimersDB.SaveChanges();

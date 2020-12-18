@@ -16,6 +16,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Microsoft.Extensions.DependencyInjection;
 using System.Data;
+using Dexter.Databases.EventTimers;
 
 namespace Dexter.Services {
 
@@ -216,7 +217,8 @@ namespace Dexter.Services {
             string TimerToken = CreateEventTimer(
                 DeclineSuggestion,
                 new() { { "Suggestion", Proposal.Tracker } },
-                ProposalConfiguration.IdleDeclineTime
+                ProposalConfiguration.IdleDeclineTime,
+                TimerType.Expire
             );
 
             // Creates a new Suggestion object with the related fields.
@@ -352,7 +354,8 @@ namespace Dexter.Services {
                     Suggestion.TimerToken = CreateEventTimer(
                         DeclineStaffSuggestion,
                         new() { { "Suggestion", Proposal.Tracker } },
-                        ProposalConfiguration.IdleDeclineTime
+                        ProposalConfiguration.IdleDeclineTime,
+                        TimerType.Expire
                     );
 
                     // Set the staff message ID in the suggestions database to the new suggestion.

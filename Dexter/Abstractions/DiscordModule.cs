@@ -1,4 +1,5 @@
 ﻿using Dexter.Configurations;
+using Dexter.Databases.EventTimers;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Services;
@@ -39,7 +40,7 @@ namespace Dexter.Abstractions {
         /// <summary>
         /// The ProfileService is used to find a random profile picture for a webhook on create or get.
         /// </summary>
-        public ProfileService ProfileService { get; set; }
+        public ProfilingService ProfileService { get; set; }
 
         /// <summary>
         /// The BotConfiguration is used to find the thumbnails for the BuildEmbed method.
@@ -114,14 +115,15 @@ namespace Dexter.Abstractions {
         /// <param name="CallbackMethod">The method you wish to callback once expired.</param>
         /// <param name="CallbackParameters">The parameters you wish to callback with once expired.</param>
         /// <param name="SecondsTillExpiration">The count in seconds until the timer will expire.</param>
+        /// <param name="TimerType">The given type of the timer, specifying if it should be removed after the set time (EXPIRE) or continue in the set interval.</param>
         /// <returns>The token assosiated with the timed event for use to refer to.</returns>
 
-        public string CreateEventTimer (Func<Dictionary<string, string>, Task> CallbackMethod,
-                Dictionary<string, string> CallbackParameters, int SecondsTillExpiration) {
+        public string CreateEventTimer(Func<Dictionary<string, string>, Task> CallbackMethod,
+                Dictionary<string, string> CallbackParameters, int SecondsTillExpiration, TimerType TimerType) {
 
             string JSON = JsonConvert.SerializeObject(CallbackParameters);
 
-            return TimerService.AddTimer(JSON, CallbackMethod.Target.GetType().Name, CallbackMethod.Method.Name, SecondsTillExpiration);
+            return TimerService.AddTimer(JSON, CallbackMethod.Target.GetType().Name, CallbackMethod.Method.Name, SecondsTillExpiration, TimerType);
         }
 
         /// <summary>

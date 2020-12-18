@@ -1,5 +1,6 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Configurations;
+using Dexter.Databases.EventTimers;
 using Discord;
 using Discord.WebSocket;
 using System;
@@ -11,17 +12,18 @@ using System.Threading.Tasks;
 namespace Dexter.Services {
 
     /// <summary>
-    /// The Profile service deals with the modifying of the profile picture of the bot to a random
-    /// profile picture selected in a given directory through the PFPConfiguration JSON file.
+    /// The Profiling service deals with the modifying of the profile picture of the bot to a random
+    /// profile picture selected in a given directory through the ProfilingConfiguration JSON file.
+    /// It also deals with other profiling aspects like database saving.
     /// </summary>
     
-    public class ProfileService : Service {
+    public class ProfilingService : Service {
 
         /// <summary>
-        /// The PFPConfiguration stores data on where the pfps are located and which extensions are viable.
+        /// The ProfilingConfiguration stores data on where the pfps are located and which extensions are viable.
         /// </summary>
         
-        public PFPConfiguration PFPConfiguration { get; set; }
+        public ProfilingConfiguration ProfilingConfiguration { get; set; }
 
         /// <summary>
         /// The Random instance is used to pick a random file from the given directory
@@ -41,12 +43,11 @@ namespace Dexter.Services {
         
         public override void Initialize() {
             if (TimerService.EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault() == null)
-                CreateEventTimer(ChangePFPCallback, new(), PFPConfiguration.SecTillPFPChange);
+                CreateEventTimer(ProfileCallback, new(), ProfilingConfiguration.SecTillProfiling, TimerType.Interval);
         }
 
-        public async Task ChangePFPCallback(Dictionary<string, string> Parameters) {
+        public async Task ProfileCallback(Dictionary<string, string> Parameters) {
             await DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP()));
-            CreateEventTimer(ChangePFPCallback, new(), PFPConfiguration.SecTillPFPChange);
         }
 
         /// <summary>
@@ -55,7 +56,7 @@ namespace Dexter.Services {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
         public FileStream GetRandomPFP() {
-            if (string.IsNullOrEmpty(PFPConfiguration.PFPDirectory))
+            if (string.IsNullOrEmpty(ProfilingConfiguration.PFPDirectory))
                 return null;
 
             FileInfo[] Files = GetProfilePictures();
@@ -73,9 +74,9 @@ namespace Dexter.Services {
         /// <returns>A list of FileInfo's of each PFP in the given directory.</returns>
         
         public FileInfo[] GetProfilePictures() {
-            DirectoryInfo DirectoryInfo = new(Path.Combine(Directory.GetCurrentDirectory(), PFPConfiguration.PFPDirectory));
+            DirectoryInfo DirectoryInfo = new(Path.Combine(Directory.GetCurrentDirectory(), ProfilingConfiguration.PFPDirectory));
 
-            return DirectoryInfo.GetFiles("*.*").Where(File => PFPConfiguration.PFPExtensions.Contains(File.Extension.ToLower())).ToArray();
+            return DirectoryInfo.GetFiles("*.*").Where(File => ProfilingConfiguration.PFPExtensions.Contains(File.Extension.ToLower())).ToArray();
         }
 
     }

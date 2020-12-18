@@ -150,7 +150,7 @@ namespace Dexter.Services {
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Startup complete!")
                     .WithDescription($"This is **{DiscordSocketClient.CurrentUser.Username} v{Version}** running **Discord.Net v{DiscordConfig.Version}**!")
-                    .AddField("Latest Commit:", LastCommit.Length > 600 ? $"{LastCommit.Substring(0, 600)}..." : LastCommit)
+                    .AddField("Latest Commit:", LastCommit.Length > 1000 ? $"{LastCommit.Substring(0, 1000)}..." : LastCommit)
                     .AddField(NulledConfigurations.Count > 0, "Unapplied Configurations:", UnsetConfigurations.Length > 600 ? $"{UnsetConfigurations.Substring(0, 600)}..." : UnsetConfigurations)
                     .SendEmbed(LoggingChannel as ITextChannel);
 

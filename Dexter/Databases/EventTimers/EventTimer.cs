@@ -6,6 +6,8 @@ namespace Dexter.Databases.EventTimers {
 
         [Key]
         public string Token { get; set; }
+        
+        public int ExpirationLength { get; set; }
 
         /// <summary>
         /// The Expiration Time field specifies the UNIX time the timer expires at.
@@ -30,6 +32,8 @@ namespace Dexter.Databases.EventTimers {
         /// </summary>
         
         public string CallbackParameters { get; set; }
+
+        public TimerType TimerType { get; set; }
 
     }
 

@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using Dexter.Databases.EventTimers;
+using Discord;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,9 +14,12 @@ namespace Dexter.Commands {
                 GuildUser.Guild.GetRole(MuzzleConfiguration.ReactionMutedRoleID)
             });
 
-            CreateEventTimer(UnmuzzleCallback, new Dictionary<string, string>() {
-                { "User", GuildUser.Id.ToString() }
-            }, MuzzleConfiguration.MuzzleDuration);
+            CreateEventTimer(
+                UnmuzzleCallback,
+                new () {  { "User", GuildUser.Id.ToString() } },
+                MuzzleConfiguration.MuzzleDuration,
+                TimerType.Expire
+            );
         }
 
         public async Task UnmuzzleCallback(Dictionary<string, string> Parameters) {

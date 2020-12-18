@@ -1,5 +1,6 @@
 ﻿using Dexter.Attributes.Methods;
 using Dexter.Configurations;
+using Dexter.Databases.EventTimers;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
@@ -31,10 +32,15 @@ namespace Dexter.Commands {
 
             await User.AddRoleAsync(Role);
 
-            CreateEventTimer(RemoveBorkday, new() {
+            CreateEventTimer(
+                RemoveBorkday,
+                new() {
                     { "User", User.Id.ToString() },
                     { "Role", Role.Id.ToString() }
-                }, ModerationConfiguration.SecondsOfBorkday);
+                },
+                ModerationConfiguration.SecondsOfBorkday,
+                TimerType.Expire
+            );
 
             EmbedBuilder Embed = BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Borkday role given!")

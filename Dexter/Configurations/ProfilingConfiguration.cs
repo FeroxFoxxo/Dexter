@@ -25,6 +25,8 @@ namespace Dexter.Configurations {
 
         public int SecTillProfiling { get; set; }
 
+        public ulong DatabaseBackupChannel { get; set; }
+
     }
 
 }

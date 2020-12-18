@@ -52,6 +52,12 @@ namespace Dexter.Configurations {
         
         public int ReactionPass { get; set; }
 
+        /// <summary>
+        /// The STORAGE CHANNEL ID specifies the snowflake ID of the channel Dexter will store images of messages sent.
+        /// </summary>
+
+        public ulong StorageChannelID { get; set; }
+
         public List<string> CommandRemovals { get; set; }
 
         public string DefaultAvatar { get; set; }

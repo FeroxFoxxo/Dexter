@@ -31,10 +31,13 @@ namespace Dexter.Commands {
 
             IUser User = DiscordSocketClient.GetUser(FunTopic.ProposerID);
 
+            string Topic = new Regex(@"(^[a-z])|[?!.:,;]\s+(.)", RegexOptions.ExplicitCapture)
+                .Replace(FunTopic.Topic.ToLower(), String => String.Value.ToUpper());
+
             await BuildEmbed(EmojiEnum.Sign)
                 .WithAuthor(Context.User)
                 .WithTitle($"{Context.Client.CurrentUser.Username} Asks")
-                .WithDescription(FunTopic.Topic)
+                .WithDescription(Topic)
                 .WithFooter($"{TopicType} Written by {(User == null ? "Unknown" : User.Username)} • " +
                     $"Add a {TopicType.ToString().ToLower()} using `{BotConfiguration.Prefix}{TopicType.ToString().ToLower()} add [TOPIC]`")
                 .SendEmbed(Context.Channel);

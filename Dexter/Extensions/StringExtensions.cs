@@ -50,7 +50,7 @@ namespace Dexter.Extensions {
             return Text;
         }
 
-        public static async Task<string> GetProxiedImage (this string ImageURL, string ImageName, DiscordSocketClient DiscordSocketClient, BotConfiguration BotConfiguration) {
+        public static async Task<string> GetProxiedImage (this string ImageURL, string ImageName, DiscordSocketClient DiscordSocketClient, ProposalConfiguration ProposalConfiguration) {
             string ImageCacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
 
             if (!Directory.Exists(ImageCacheDir))
@@ -62,7 +62,7 @@ namespace Dexter.Extensions {
 
             await WebClient.DownloadFileTaskAsync(ImageURL, FilePath);
 
-            ITextChannel Channel = DiscordSocketClient.GetChannel(BotConfiguration.StorageChannelID) as ITextChannel;
+            ITextChannel Channel = DiscordSocketClient.GetChannel(ProposalConfiguration.StorageChannelID) as ITextChannel;
 
             IUserMessage AttachmentMSG = await Channel.SendFileAsync(FilePath);
 

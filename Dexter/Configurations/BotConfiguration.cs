@@ -72,12 +72,6 @@ namespace Dexter.Configurations {
         public string Help { get; set; }
 
         /// <summary>
-        /// The STORAGE CHANNEL ID specifies the snowflake ID of the channel Dexter will store images of messages sent.
-        /// </summary>
-
-        public ulong StorageChannelID { get; set; }
-
-        /// <summary>
         /// The RANDOM CHARACTERS field specifies a string of random characters that may be able to make up a token.
         /// </summary>
 

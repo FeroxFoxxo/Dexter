@@ -38,7 +38,7 @@ namespace Dexter.Services {
         public async Task HasTimerStarted () {
             // Runs the bot timer to loop through all events that may occur on a timer.
             if (!HasStarted) {
-                Timer EventTimer = new(TimeSpan.FromSeconds(20).TotalMilliseconds) {
+                Timer EventTimer = new(TimeSpan.FromSeconds(5).TotalMilliseconds) {
                     AutoReset = true,
                     Enabled = true
                 };
@@ -93,7 +93,7 @@ namespace Dexter.Services {
                 CallbackClass = ClassName,
                 CallbackMethod = MethodName,
                 CallbackParameters = JSON,
-                ExpirationTime = SecondsTillExpiration + DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                ExpirationTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + (TimerType != TimerType.Interval ? SecondsTillExpiration : 0),
                 TimerType = TimerType
             });
 

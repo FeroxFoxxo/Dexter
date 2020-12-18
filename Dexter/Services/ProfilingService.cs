@@ -1,11 +1,16 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
+using Dexter.Enums;
 using Discord;
+using Discord.Net;
 using Discord.WebSocket;
+using Humanizer;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -25,10 +30,12 @@ namespace Dexter.Services {
         
         public ProfilingConfiguration ProfilingConfiguration { get; set; }
 
+        public LoggingService LoggingService { get; set; }
+
         /// <summary>
         /// The Random instance is used to pick a random file from the given directory
         /// </summary>
-        
+
         public Random Random { get; set; }
 
         /// <summary>
@@ -47,7 +54,55 @@ namespace Dexter.Services {
         }
 
         public async Task ProfileCallback(Dictionary<string, string> Parameters) {
-            await DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP()));
+            Stopwatch Stopwatch = new ();
+
+            Stopwatch.Start();
+
+            try {
+                await DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP()));
+            } catch (HttpException) {
+                await LoggingService.LogMessageAsync(
+                    new LogMessage(LogSeverity.Warning, GetType().Name, "Unable to change the bot's profile picture due to ratelimiting!")
+                );
+            }
+
+            string DatabaseDirectory = Path.Join(Directory.GetCurrentDirectory(), "Databases");
+
+            string BackupPath = Path.Join(Directory.GetCurrentDirectory(), "Backups");
+
+            if (!Directory.Exists(BackupPath))
+                Directory.CreateDirectory(BackupPath);
+
+            string BackupZip = Path.Join(BackupPath, $"{DateTime.UtcNow:dd-MM-yyyy}.zip");
+
+            if (File.Exists(BackupZip))
+                File.Delete(BackupZip);
+
+            ZipFile.CreateFromDirectory(DatabaseDirectory, BackupZip, CompressionLevel.Optimal, true);
+
+            string[] Sizes = { "B", "KB", "MB", "GB", "TB" };
+
+            double FileLength = new FileInfo(BackupZip).Length;
+
+            int Order = 0;
+
+            while (FileLength >= 1024 && Order < Sizes.Length - 1) {
+                Order++;
+                FileLength /= 1024;
+            }
+
+            Stopwatch.Stop();
+
+            await (DiscordSocketClient.GetChannel(ProfilingConfiguration.DatabaseBackupChannel) as ITextChannel)
+                .SendFileAsync(BackupZip, embed:
+                    BuildEmbed(EmojiEnum.Love)
+                        .WithTitle("Backup Successfully Concluded.")
+                        .WithDescription($"Haiya! The backup for {DateTime.UtcNow.ToShortDateString()} has been built " +
+                            $"with a file size of {string.Format("{0:0.##} {1}", FileLength, Sizes[Order])}.")
+                        .WithCurrentTimestamp()
+                        .WithFooter($"Profiling took {Stopwatch.Elapsed.Humanize()}")
+                        .Build()
+                );
         }
 
         /// <summary>

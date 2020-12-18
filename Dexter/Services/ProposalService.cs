@@ -201,13 +201,13 @@ namespace Dexter.Services {
                 Proposer = RecievedMessage.Author.Id,
                 ProposalType = ProposalType.Suggestion,
                 Username = RecievedMessage.Author.Username,
-                AvatarURL = await RecievedMessage.Author.GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordSocketClient, BotConfiguration)
+                AvatarURL = await RecievedMessage.Author.GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordSocketClient, ProposalConfiguration)
             };
 
             Attachment Attachment = RecievedMessage.Attachments.FirstOrDefault();
 
             if (Attachment != null)
-                Proposal.ProxyURL = await Attachment.ProxyUrl.GetProxiedImage($"{Proposal.Tracker}", DiscordSocketClient, BotConfiguration);
+                Proposal.ProxyURL = await Attachment.ProxyUrl.GetProxiedImage($"{Proposal.Tracker}", DiscordSocketClient, ProposalConfiguration);
             
             RestUserMessage Embed = await RecievedMessage.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
 
@@ -279,7 +279,7 @@ namespace Dexter.Services {
                 ProposalStatus = ProposalStatus.Suggested,
                 ProposalType = ProposalType.AdminConfirmation,
                 Proposer = Author,
-                AvatarURL = await DiscordSocketClient.GetUser(Author).GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordSocketClient, BotConfiguration)
+                AvatarURL = await DiscordSocketClient.GetUser(Author).GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordSocketClient, ProposalConfiguration)
             };
 
             // Creates a new AdminConfirmation object with the related fields.

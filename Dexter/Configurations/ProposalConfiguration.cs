@@ -28,12 +28,6 @@ namespace Dexter.Configurations {
         public ulong StorageGuild { get; set; }
 
         /// <summary>
-        /// The TRACKER LENGTH specifies the length of the token assosiated with the proposal.
-        /// </summary>
-        
-        public int TrackerLength { get; set; }
-
-        /// <summary>
         /// The EMOJI field is a dictionary of the names of the suggestion emoji, corresponding with their IDs.
         /// </summary>
         
@@ -58,15 +52,13 @@ namespace Dexter.Configurations {
         
         public int ReactionPass { get; set; }
 
-        /// <summary>
-        /// The RANDOM CHARACTERS field specifies a string of random characters that may be able to make up a token.
-        /// </summary>
-        
-        public string RandomCharacters { get; set; }
-
         public List<string> CommandRemovals { get; set; }
 
         public string DefaultAvatar { get; set; }
+
+        public int IdleDeclineTime { get; set; }
+
+        public int StaffVotingThreshold { get; set; }
 
     }
 

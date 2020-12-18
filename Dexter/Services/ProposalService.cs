@@ -207,25 +207,32 @@ namespace Dexter.Services {
 
             if (Attachment != null)
                 Proposal.ProxyURL = await Attachment.ProxyUrl.GetProxiedImage($"{Proposal.Tracker}", DiscordSocketClient, BotConfiguration);
-
-            // Creates a new Suggestion object with the related fields.
-            Suggestion Suggested = new () {
-                Tracker = Proposal.Tracker
-            };
-
+            
             RestUserMessage Embed = await RecievedMessage.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
-
-            // Delete the message sent by the user.
-            await RecievedMessage.DeleteAsync();
 
             // Set the message ID in the suggestion object to the ID of the embed.
             Proposal.MessageID = Embed.Id;
+
+            string TimerToken = CreateEventTimer(
+                DeclineSuggestion,
+                new() { { "Suggestion", Proposal.Tracker } },
+                ProposalConfiguration.IdleDeclineTime
+            );
+
+            // Creates a new Suggestion object with the related fields.
+            Suggestion Suggested = new() {
+                Tracker = Proposal.Tracker,
+                TimerToken = TimerToken
+            };
 
             // Add the suggestion and proposal objects to the database.
             ProposalDB.Proposals.Add(Proposal);
             ProposalDB.Suggestions.Add(Suggested);
 
             ProposalDB.SaveChanges();
+
+            // Delete the message sent by the user.
+            await RecievedMessage.DeleteAsync();
 
             // Add the related emoji specified in the ProposalConfiguration to the suggestion.
             SocketGuild Guild = DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild);
@@ -234,6 +241,20 @@ namespace Dexter.Services {
                 GuildEmote Emote = await Guild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
                 await Embed.AddReactionAsync(Emote);
             }
+        }
+
+        public async Task DeclineSuggestion(Dictionary<string, string> Parameters) {
+            string Token = Parameters["Suggestion"];
+
+            Proposal Proposal = ProposalDB.Proposals.AsQueryable().Where(Proposal => Proposal.Tracker == Token).FirstOrDefault();
+
+            Proposal.Reason = "Suggestion did not have enough support from the community to progress.";
+
+            Suggestion Suggestion = ProposalDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.Tracker == Token).FirstOrDefault();
+
+            Suggestion.TimerToken = string.Empty;
+
+            await UpdateProposal(Proposal, ProposalStatus.Declined);
         }
 
         /// <summary>
@@ -328,8 +349,15 @@ namespace Dexter.Services {
                     if (Suggestion == null)
                         throw new Exception("Suggestion does not exist in database! Aborting...");
 
+                    Suggestion.TimerToken = CreateEventTimer(
+                        DeclineStaffSuggestion,
+                        new() { { "Suggestion", Proposal.Tracker } },
+                        ProposalConfiguration.IdleDeclineTime
+                    );
+
                     // Set the staff message ID in the suggestions database to the new suggestion.
                     Suggestion.StaffMessageID = StaffSuggestion.Id;
+
                     ProposalDB.SaveChanges();
 
                     // Get the staff suggestions channel and add the related emoji to the message.
@@ -382,13 +410,45 @@ namespace Dexter.Services {
             return true;
         }
 
+        public async Task DeclineStaffSuggestion(Dictionary<string, string> Parameters) {
+            string Token = Parameters["Suggestion"];
+
+            Proposal Proposal = ProposalDB.Proposals.AsQueryable().Where(Proposal => Proposal.Tracker == Token).FirstOrDefault();
+
+            Suggestion Suggestion = ProposalDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.Tracker == Proposal.Tracker).FirstOrDefault();
+
+            IMessage StaffMessage = await (DiscordSocketClient.GetChannel(ProposalConfiguration.StaffSuggestionsChannel) as ITextChannel)
+                .GetMessageAsync(Suggestion.StaffMessageID);
+
+            // Check the current amount of upvotes the message has.
+            ReactionMetadata Upvotes = StaffMessage.Reactions[
+                await DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild)
+                .GetEmoteAsync(ProposalConfiguration.Emoji["Upvote"])
+            ];
+
+            // Check the current amount of downvotes the message has.
+            ReactionMetadata Downvotes = StaffMessage.Reactions[
+                await DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild)
+                .GetEmoteAsync(ProposalConfiguration.Emoji["Downvote"])
+            ];
+
+            if (Math.Abs(Upvotes.ReactionCount - Downvotes.ReactionCount) > ProposalConfiguration.StaffVotingThreshold)
+                return;
+
+            Proposal.Reason = "The staff team was too divided on this suggestion to make a confident judgement at this time.";
+
+            Suggestion.TimerToken = string.Empty;
+
+            await UpdateProposal(Proposal, ProposalStatus.Declined);
+        }
+
         /// <summary>
         /// The CheckVotes method checks to see if the difference in reactions triggers a change in the suggestion.
         /// </summary>
         /// <param name="Upvotes">The metadata containing the amount of upvotes the suggestion has.</param>
         /// <param name="Downvotes">The metadata containing the amount of downvotes the suggestion has.</param>
         /// <returns>The current status of the suggestion - whether it is now to be passed, denied or whether it remains.</returns>
-        
+
         public SuggestionVotes CheckVotes(ReactionMetadata Upvotes, ReactionMetadata Downvotes) {
             if (Upvotes.ReactionCount - Downvotes.ReactionCount >= ProposalConfiguration.ReactionPass)
                 return SuggestionVotes.Pass;
@@ -414,6 +474,9 @@ namespace Dexter.Services {
             switch (Proposal.ProposalType) {
                 case ProposalType.Suggestion:
                     Suggestion Suggestion = ProposalDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.Tracker == Proposal.Tracker).FirstOrDefault();
+
+                    if (!string.IsNullOrEmpty(Suggestion.TimerToken))
+                        TimerService.RemoveTimer(Suggestion.TimerToken);
 
                     await UpdateSpecificProposal(Proposal, ProposalConfiguration.SuggestionsChannel, Proposal.MessageID);
                     await UpdateSpecificProposal(Proposal, ProposalConfiguration.StaffSuggestionsChannel, Suggestion.StaffMessageID);
@@ -470,10 +533,10 @@ namespace Dexter.Services {
         /// <returns>A randomly generated token in the form of a string that is not in the proposal database already.</returns>
         
         public string CreateToken() {
-            char[] TokenArray = new char[ProposalConfiguration.TrackerLength];
+            char[] TokenArray = new char[BotConfiguration.TrackerLength];
 
             for (int i = 0; i < TokenArray.Length; i++)
-                TokenArray[i] = ProposalConfiguration.RandomCharacters[Random.Next(ProposalConfiguration.RandomCharacters.Length)];
+                TokenArray[i] = BotConfiguration.RandomCharacters[Random.Next(BotConfiguration.RandomCharacters.Length)];
 
             string Token = new (TokenArray);
 

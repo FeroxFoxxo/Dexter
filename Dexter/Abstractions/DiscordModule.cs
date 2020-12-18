@@ -114,14 +114,14 @@ namespace Dexter.Abstractions {
         /// <param name="CallbackMethod">The method you wish to callback once expired.</param>
         /// <param name="CallbackParameters">The parameters you wish to callback with once expired.</param>
         /// <param name="SecondsTillExpiration">The count in seconds until the timer will expire.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>The token assosiated with the timed event for use to refer to.</returns>
 
-        public void CreateEventTimer (Func<Dictionary<string, string>, Task> CallbackMethod,
+        public string CreateEventTimer (Func<Dictionary<string, string>, Task> CallbackMethod,
                 Dictionary<string, string> CallbackParameters, int SecondsTillExpiration) {
 
             string JSON = JsonConvert.SerializeObject(CallbackParameters);
 
-            TimerService.AddTimer(JSON, CallbackMethod.Target.GetType().Name, CallbackMethod.Method.Name, SecondsTillExpiration);
+            return TimerService.AddTimer(JSON, CallbackMethod.Target.GetType().Name, CallbackMethod.Method.Name, SecondsTillExpiration);
         }
 
         /// <summary>

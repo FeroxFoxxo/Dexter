@@ -77,6 +77,18 @@ namespace Dexter.Configurations {
 
         public ulong StorageChannelID { get; set; }
 
+        /// <summary>
+        /// The RANDOM CHARACTERS field specifies a string of random characters that may be able to make up a token.
+        /// </summary>
+
+        public string RandomCharacters { get; set; }
+
+        /// <summary>
+        /// The TRACKER LENGTH specifies the length of the token assosiated with the tracked item.
+        /// </summary>
+
+        public int TrackerLength { get; set; }
+
     }
 
 }

@@ -36,7 +36,7 @@ namespace Dexter.Commands {
 
             string FilePath = Path.Join(ImageCacheDir, $"{NameOfUser}.gif");
 
-            using (AnimatedGifCreator Gif = AnimatedGif.AnimatedGif.Create(FilePath, 66)) {
+            using (AnimatedGifCreator Gif = AnimatedGif.AnimatedGif.Create(FilePath, 100)) {
                 string[] Files = Directory.GetFiles(FunConfiguration.HeadpatsDir, "*.png", SearchOption.AllDirectories);
 
                 using WebClient WebClient = new();

@@ -4,11 +4,12 @@ namespace Dexter.Databases.EventTimers {
 
     public class EventTimer {
 
+        [Key]
+        public string Token { get; set; }
+
         /// <summary>
         /// The Expiration Time field specifies the UNIX time the timer expires at.
         /// </summary>
-        
-        [Key]
 
         public long ExpirationTime { get; set; }
 

@@ -25,10 +25,10 @@ namespace Dexter.Databases.Proposals {
         public ulong StaffMessageID { get; set; }
 
         /// <summary>
-        /// The Expiry field is the UNIX time at which the suggestion will automatically decline.
+        /// The Timer Token field is the token at which the timer for the expiration refers to.
         /// </summary>
         
-        public string Expiry { get; set; }
+        public string TimerToken { get; set; }
 
     }
 

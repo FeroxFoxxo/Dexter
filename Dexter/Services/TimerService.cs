@@ -23,6 +23,12 @@ namespace Dexter.Services {
 
         public ServiceProvider ServiceProvider { get; set; }
 
+        /// <summary>
+        /// The Random instance is used to pick a set number of random characters from the configuration to create a token.
+        /// </summary>
+
+        public Random Random { get; set; }
+
         public bool HasStarted = false;
 
         public override void Initialize() {
@@ -70,8 +76,11 @@ namespace Dexter.Services {
                 });
         }
 
-        public void AddTimer(string JSON, string ClassName, string MethodName, int SecondsTillExpiration) {
+        public string AddTimer(string JSON, string ClassName, string MethodName, int SecondsTillExpiration) {
+            string Token = CreateToken();
+
             EventTimersDB.EventTimers.Add(new EventTimer() {
+                Token = Token,
                 CallbackClass = ClassName,
                 CallbackMethod = MethodName,
                 CallbackParameters = JSON,
@@ -79,6 +88,36 @@ namespace Dexter.Services {
             });
 
             EventTimersDB.SaveChanges();
+
+            return Token;
+        }
+
+        public void RemoveTimer(string TimerTracker) {
+            EventTimer Timer = EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.Token == TimerTracker).FirstOrDefault();
+
+            if (Timer != null)
+                EventTimersDB.EventTimers.Remove(Timer);
+
+            EventTimersDB.SaveChanges();
+        }
+
+        /// <summary>
+        /// The Create Token method creates a random token for a timer.
+        /// </summary>
+        /// <returns>A randomly generated token in the form of a string that is not in the database already.</returns>
+
+        public string CreateToken() {
+            char[] TokenArray = new char[BotConfiguration.TrackerLength];
+
+            for (int i = 0; i < TokenArray.Length; i++)
+                TokenArray[i] = BotConfiguration.RandomCharacters[Random.Next(BotConfiguration.RandomCharacters.Length)];
+
+            string Token = new(TokenArray);
+
+            if (EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.Token == Token).FirstOrDefault() == null) {
+                return Token;
+            } else
+                return CreateToken();
         }
 
     }

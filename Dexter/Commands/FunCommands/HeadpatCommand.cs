@@ -68,8 +68,8 @@ namespace Dexter.Commands {
 
                 await Webhook.SendMessageAsync(
                     Emote.ToString(),
-                    username: string.IsNullOrEmpty(User.Nickname) ? User.Username : User.Nickname,
-                    avatarUrl: User.GetTrueAvatarUrl()
+                    username: string.IsNullOrEmpty(Context.Guild.GetUser(Context.User.Id).Nickname) ? Context.User.Username : Context.Guild.GetUser(Context.User.Id).Nickname,
+                    avatarUrl: Context.User.GetTrueAvatarUrl()
                 );
 
                 await Guild.DeleteEmoteAsync(Emote);

@@ -30,8 +30,7 @@ namespace Dexter.Commands {
         public async Task CooldownCommand (EntryType EntryType, IUser User) {
             switch (EntryType) {
                 case EntryType.Issue:
-                    Cooldown IssueCooldown = CooldownDB.Cooldowns.AsQueryable()
-                        .Where(Cooldown => Cooldown.Token.Equals($"{User.Id}{CommissionCooldownConfiguration.CommissionsCornerID}")).FirstOrDefault();
+                    Cooldown IssueCooldown = CooldownDB.Cooldowns.Find($"{User.Id}{CommissionCooldownConfiguration.CommissionsCornerID}");
 
                     if (IssueCooldown != null)
                         if (IssueCooldown.TimeOfCooldown + CommissionCooldownConfiguration.CommissionCornerCooldown < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
@@ -83,8 +82,7 @@ namespace Dexter.Commands {
 
                     break;
                 case EntryType.Revoke:
-                    Cooldown RevokeCooldown = CooldownDB.Cooldowns.AsQueryable()
-                        .Where(Cooldown => Cooldown.Token == $"{User.Id}{CommissionCooldownConfiguration.CommissionCornerCooldown}").FirstOrDefault();
+                    Cooldown RevokeCooldown = CooldownDB.Cooldowns.Find($"{User.Id}{CommissionCooldownConfiguration.CommissionCornerCooldown}");
 
                     if (RevokeCooldown != null) {
                         CooldownDB.Cooldowns.Remove(RevokeCooldown);

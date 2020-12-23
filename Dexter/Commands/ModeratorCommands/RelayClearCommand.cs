@@ -18,7 +18,7 @@ namespace Dexter.Commands {
         [RequireAdministrator]
 
         public async Task ClearRelay(ITextChannel Channel) {
-            Relay FindRelay = RelayDB.Relays.AsQueryable().Where(Relay => Relay.ChannelID.Equals(Channel.Id)).FirstOrDefault();
+            Relay FindRelay = RelayDB.Relays.Find(Channel.Id);
 
             if (FindRelay == null) {
                 await BuildEmbed(EmojiEnum.Annoyed)
@@ -44,7 +44,7 @@ namespace Dexter.Commands {
         public void RemoveRelayCallback(Dictionary<string, string> Parameters) {
             ulong ChannelID = ulong.Parse(Parameters["ChannelID"]);
 
-            Relay RelayToRemove = RelayDB.Relays.AsQueryable().Where(Relay => Relay.ChannelID.Equals(ChannelID)).FirstOrDefault();
+            Relay RelayToRemove = RelayDB.Relays.Find(ChannelID);
 
             RelayDB.Relays.Remove(RelayToRemove);
 

@@ -4,6 +4,7 @@ using Dexter.Enums;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,14 +21,15 @@ namespace Dexter.Services {
         }
 
         public async Task ReactionMenu(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel Channel, SocketReaction Reaction) {
-            ReactionMenu ReactionMenu = ReactionMenuDB.ReactionMenus.AsQueryable().Where(Menu => Menu.MessageID == CachedMessage.Id).FirstOrDefault();
+            ReactionMenu ReactionMenu = ReactionMenuDB.ReactionMenus.Find(CachedMessage.Id);
 
             if (ReactionMenu == null || Reaction.User.Value.IsBot)
                 return;
 
             IUserMessage Message = await CachedMessage.GetOrDownloadAsync();
 
-            EmbedBuilder[] Menus = JsonConvert.DeserializeObject<EmbedBuilder[]>(ReactionMenu.EmbedMenusJSON);
+            EmbedBuilder[] Menus = JsonConvert.DeserializeObject<EmbedBuilder[]>
+                (ReactionMenuDB.EmbedMenus.Find(ReactionMenu.EmbedMenuIndex).EmbedMenuJSON);
 
             if (Reaction.Emote.Name.Equals("⬅️")) {
                 ReactionMenu.CurrentPage--;
@@ -54,11 +56,45 @@ namespace Dexter.Services {
             foreach (EmbedBuilder Builder in EmbedBuilders)
                 Colors.Add(Builder.Color.HasValue ? Builder.Color.Value.RawValue : Color.Blue.RawValue);
 
+            int EmbedMenuID;
+            string EmbedMenuJSON = JsonConvert.SerializeObject(EmbedBuilders);
+
+            EmbedMenu EmbedMenu = await ReactionMenuDB.EmbedMenus.AsAsyncEnumerable()
+                .Where(Menu => Menu.EmbedMenuJSON.Equals(EmbedMenuJSON)).FirstOrDefaultAsync();
+
+            if (EmbedMenu != null)
+                EmbedMenuID = EmbedMenu.EmbedIndex;
+            else {
+                EmbedMenuID = await ReactionMenuDB.EmbedMenus.AsAsyncEnumerable().CountAsync();
+
+                await ReactionMenuDB.EmbedMenus.AddAsync(new EmbedMenu() {
+                    EmbedIndex = EmbedMenuID,
+                    EmbedMenuJSON = EmbedMenuJSON
+                });
+            }
+
+            int ColorMenuID;
+            string ColorMenuJSON = JsonConvert.SerializeObject(Colors.ToArray());
+
+            ColorMenu ColorMenu = await ReactionMenuDB.ColorMenus.AsAsyncEnumerable()
+                .Where(Menu => Menu.ColorMenuJSON.Equals(ColorMenuJSON)).FirstOrDefaultAsync();
+
+            if (ColorMenu != null)
+                ColorMenuID = ColorMenu.ColorIndex;
+            else {
+                ColorMenuID = await ReactionMenuDB.ColorMenus.AsAsyncEnumerable().CountAsync();
+
+                await ReactionMenuDB.ColorMenus.AddAsync(new ColorMenu() {
+                    ColorIndex = ColorMenuID,
+                    ColorMenuJSON = ColorMenuJSON
+                });
+            }
+
             ReactionMenu ReactionMenu = new() {
                 CurrentPage = 1,
-                EmbedMenusJSON = JsonConvert.SerializeObject(EmbedBuilders),
                 MessageID = Message.Id,
-                ColorMenusJSON = JsonConvert.SerializeObject(Colors.ToArray())
+                ColorMenuIndex = ColorMenuID,
+                EmbedMenuIndex = EmbedMenuID
             };
 
             ReactionMenuDB.ReactionMenus.Add(ReactionMenu);
@@ -71,10 +107,12 @@ namespace Dexter.Services {
             await Message.AddReactionAsync(new Emoji("➡️"));
         }
 
-        public static Embed CreateMenuEmbed (ReactionMenu ReactionMenu) {
-            EmbedBuilder[] Menus = JsonConvert.DeserializeObject<EmbedBuilder[]>(ReactionMenu.EmbedMenusJSON);
+        public Embed CreateMenuEmbed (ReactionMenu ReactionMenu) {
+            EmbedBuilder[] Menus = JsonConvert.DeserializeObject<EmbedBuilder[]>
+                (ReactionMenuDB.EmbedMenus.Find(ReactionMenu.EmbedMenuIndex).EmbedMenuJSON);
 
-            uint[] Colors = JsonConvert.DeserializeObject<uint[]>(ReactionMenu.ColorMenusJSON);
+            uint[] Colors = JsonConvert.DeserializeObject<uint[]>
+                (ReactionMenuDB.ColorMenus.Find(ReactionMenu.ColorMenuIndex).ColorMenuJSON);
 
             int CurrentPage = ReactionMenu.CurrentPage - 1;
 

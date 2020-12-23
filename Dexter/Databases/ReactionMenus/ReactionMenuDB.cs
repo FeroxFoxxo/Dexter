@@ -7,6 +7,10 @@ namespace Dexter.Databases.ReactionMenus {
 
         public DbSet<ReactionMenu> ReactionMenus { get; set; }
 
+        public DbSet<EmbedMenu> EmbedMenus { get; set; }
+
+        public DbSet<ColorMenu> ColorMenus { get; set; }
+
     }
 
 }

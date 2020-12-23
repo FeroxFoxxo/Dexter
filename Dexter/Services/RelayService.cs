@@ -15,7 +15,7 @@ namespace Dexter.Services {
         }
 
         public async Task CheckRelay(SocketMessage SocketMessage) {
-            Relay Relay = RelayDB.Relays.AsQueryable().Where(Relay => Relay.ChannelID.Equals(SocketMessage.Channel.Id)).FirstOrDefault();
+            Relay Relay = RelayDB.Relays.Find(SocketMessage.Channel.Id);
 
             if (Relay == null)
                 return;

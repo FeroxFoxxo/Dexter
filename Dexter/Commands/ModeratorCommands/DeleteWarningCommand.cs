@@ -24,7 +24,7 @@ namespace Dexter.Commands {
         [RequireModerator]
 
         public async Task DeleteWarning (int WarningID) {
-            Warning Warning = WarningsDB.Warnings.AsQueryable().Where(Warning => Warning.WarningID == WarningID).FirstOrDefault();
+            Warning Warning = WarningsDB.Warnings.Find(WarningID);
 
             Warning.EntryType = EntryType.Revoke;
 

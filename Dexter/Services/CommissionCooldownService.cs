@@ -51,8 +51,7 @@ namespace Dexter.Services {
                 return;
 
             // We then try pull the cooldown from the database to see if the user and channel ID both exist as a token.
-            Cooldown Cooldown = CooldownDB.Cooldowns.AsQueryable()
-                .Where(Cooldown => Cooldown.Token.Equals($"{SocketMessage.Author.Id}{SocketMessage.Channel.Id}")).FirstOrDefault();
+            Cooldown Cooldown = CooldownDB.Cooldowns.Find($"{SocketMessage.Author.Id}{SocketMessage.Channel.Id}");
 
             if (Cooldown != null) {
 

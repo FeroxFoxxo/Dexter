@@ -26,7 +26,7 @@ namespace Dexter.Databases.CustomCommands {
         /// <returns>A CustomCommand object of the command you queried.</returns>
         
         public CustomCommand GetCommandByNameOrAlias(string Name) {
-            CustomCommand GetCommandByName = CustomCommands.AsQueryable().Where(CustomCMD => CustomCMD.CommandName.Equals(Name)).FirstOrDefault();
+            CustomCommand GetCommandByName = CustomCommands.Find(Name);
 
             if (GetCommandByName != null)
                 return GetCommandByName;

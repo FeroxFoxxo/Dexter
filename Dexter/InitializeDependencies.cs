@@ -42,7 +42,7 @@ namespace Dexter {
             string Version = string.Empty;
 
             // Sets the version based on the release pipeline version.
-            string Versioning = Math.Round(Convert.ToSingle(ParsedVersion) / 100 - .001, 2).ToString();
+            string Versioning = Math.Abs(Math.Round(Convert.ToSingle(ParsedVersion) / 100 - .001, 2)).ToString();
 
             if (Versioning.Split('.').Length <= 1)
                 Version = $"{Versioning}.0.0";
@@ -50,6 +50,9 @@ namespace Dexter {
                 Version = $"{Versioning[0..^1]}{Versioning[^1].ToString()}.0";
             else
                 Version = $"{Versioning[0..^1]}.{Versioning[^1].ToString()}";
+
+            if (Version == "0.0.0")
+                Version = ".DEVELOPER";
 
             // Sets the current, active directory to the working directory specified in the azure cloud.
             if (!string.IsNullOrEmpty(WorkingDirectory))

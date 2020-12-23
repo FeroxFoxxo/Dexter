@@ -57,8 +57,7 @@ namespace Dexter.Attributes.Methods {
 
             CooldownDB CooldownDB = ServiceProvider.GetRequiredService<CooldownDB>();
 
-            Cooldown Cooldown = CooldownDB.Cooldowns.AsQueryable()
-                .Where(Cooldown => Cooldown.Token.Equals($"{CommandInfo.Name}{CommandContext.Channel.Id}")).FirstOrDefault();
+            Cooldown Cooldown = CooldownDB.Cooldowns.Find($"{CommandInfo.Name}{CommandContext.Channel.Id}");
 
             if (Cooldown != null) {
                 if (Cooldown.TimeOfCooldown + CooldownTimer < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {

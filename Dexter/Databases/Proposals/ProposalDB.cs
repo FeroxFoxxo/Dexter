@@ -37,7 +37,7 @@ namespace Dexter.Databases.Proposals {
         /// <returns>A proposal object pertaining to the proposal that has been returned on the tracked token.</returns>
         
         public Proposal GetProposalByNameOrID(string Tracker) {
-            Proposal TryTracked = Proposals.AsQueryable().Where(Proposal => Proposal.Tracker == Tracker).FirstOrDefault();
+            Proposal TryTracked = Proposals.Find(Tracker);
 
             if (TryTracked != null)
                 return TryTracked;
@@ -51,7 +51,7 @@ namespace Dexter.Databases.Proposals {
                 Suggestion Suggestion = Suggestions.AsQueryable().Where(Suggestion => Suggestion.StaffMessageID == TrackerASULONG).FirstOrDefault();
 
                 if (Suggestion != null)
-                    return Proposals.AsQueryable().Where(Proposal => Proposal.Tracker == Suggestion.Tracker).FirstOrDefault();
+                    return Proposals.Find(Suggestion.Tracker);
             }
 
             return null;

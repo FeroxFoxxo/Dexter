@@ -9,9 +9,9 @@ namespace Dexter.Databases.ReactionMenus {
 
         public int CurrentPage { get; set; }
 
-        public string EmbedMenusJSON { get; set; }
+        public int EmbedMenuIndex { get; set; }
 
-        public string ColorMenusJSON { get; set; }
+        public int ColorMenuIndex { get; set; }
 
     }
 

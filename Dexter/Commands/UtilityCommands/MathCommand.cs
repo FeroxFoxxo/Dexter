@@ -11,7 +11,11 @@ namespace Dexter.Commands {
 	public partial class UtilityCommands {
 
 		private const int MAX_ROLLS = 999999; //Should probably be moved to a config setting
-
+		
+		/// <summary>
+		/// Evaluates a mathematical expression and gives a result or throws an error.
+		/// </summary>
+		
 		[Command("math")]
 		[Summary("Evaluates a mathematical expression")]
 		[ExtendedSummary(
@@ -23,10 +27,6 @@ namespace Dexter.Commands {
 		)]
 		[Alias("calc", "calculate")]
 
-        /// <summary>
-        /// Evaluates a mathematical expression and gives a result or throws an error.
-        /// </summary>
-
         public async Task MathCommand([Remainder] string expression) {
 			MathResult r = new MathResult(expression);
 
@@ -34,6 +34,7 @@ namespace Dexter.Commands {
 				await BuildEmbed(EmojiEnum.Love)
 					.WithTitle($"Evaluating: **{expression}**.")
 					.WithDescription(r.result.ToString())
+					.AddField(r.rolls != "", "Rolls:", r.rolls)
 					.SendEmbed(Context.Channel);
 			} else {
 				await BuildEmbed(EmojiEnum.Annoyed)
@@ -298,6 +299,7 @@ namespace Dexter.Commands {
 			public string error = "";
 			public List<string> verbose = new List<string>();
 			public List<string> verboseStack = new List<string>();
+			public string rolls = "";
 
 			public MathResult(string arg) {
 				this.result = ProcessMath(arg.Replace(" ", ""), this);
@@ -321,6 +323,18 @@ namespace Dexter.Commands {
 				}
 				return s;
 			}
+
+			public void NewDice(int d) {
+				rolls += $"d{d}:";
+            }
+
+			public void NewRoll(int r) {
+				rolls += $" {r},";
+            }
+
+			public void EndDice() {
+				rolls = rolls[..^1] + '\n';
+            }
 		}
 
 		private static string Simplify(string str, string eval, int start, int end, MathResult result) {
@@ -361,12 +375,15 @@ namespace Dexter.Commands {
 
 			if (n == 0) {
 				result.Echo("Rolled 0 dice.", "a" + "b");
+				return 0;
 			}
 
 			int d = (int)Math.Round(b);
 
 			if (d < 1)
 				return result.ThrowError("Attempt to roll a die with less than one face.");
+
+			result.NewDice(d);
 
 			Random rnd = new Random();
 			double count = 0;
@@ -379,8 +396,10 @@ namespace Dexter.Commands {
 				int newValue = rnd.Next(1, d + 1) * sign;
 				verb += newValue + ", ";
 				count += newValue;
+				result.NewRoll(newValue);
 			}
 
+			result.EndDice();
 			result.Echo($"{verb[0..^2]} on {(sign == -1 ? "-" : "")}{n}d{d}.", a + "d" + b);
 			return count;
 		}

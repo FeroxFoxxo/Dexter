@@ -30,18 +30,18 @@ namespace Dexter.Commands {
 		[Alias("calc", "calculate")]
 
         public async Task MathCommand([Remainder] string expression) {
-			MathResult r = new MathResult(expression);
+			MathResult Res = new MathResult(expression);
 
-			if (!r.errorFlag) {
+			if (!Res.ErrorFlag) {
 				await BuildEmbed(EmojiEnum.Love)
 					.WithTitle($"Evaluating: **{expression}**.")
-					.WithDescription(r.result.ToString())
-					.AddField(r.rolls != "", "Rolls:", r.rolls)
+					.WithDescription(Res.Result.ToString())
+					.AddField(Res.Rolls != "", "Rolls:", Res.Rolls)
 					.SendEmbed(Context.Channel);
 			} else {
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle($"ERROR! Received: `{expression}`.")
-					.WithDescription($"{r.error}\n{r}")
+					.WithDescription($"{Res.Error}\n{Res}")
 					.SendEmbed(Context.Channel);
 			}
 		}
@@ -59,16 +59,16 @@ namespace Dexter.Commands {
 		};
 
 		private class Function {
-			public Func<double, double> f;
-			public Func<double, bool> domain;
+			public Func<double, double> F;
+			public Func<double, bool> Domain;
 
-			public Function(Func<double, double> f, Func<double, bool> domain) {
-				this.f = f;
-				this.domain = domain;
+			public Function(Func<double, double> F, Func<double, bool> Domain) {
+				this.F = F;
+				this.Domain = Domain;
 			}
 		}
 
-		private static readonly Dictionary<string, Function> functions = new Dictionary<string, Function>() {
+		private static readonly Dictionary<string, Function> Functions = new Dictionary<string, Function>() {
 			{"abs", new Function(Math.Abs, d => true)},
 			{"sqrt", new Function(Math.Sqrt, IsPositive)},
 			{"cbrt", new Function(Math.Cbrt, d => true)},
@@ -88,16 +88,16 @@ namespace Dexter.Commands {
 		private static bool IsPositive(double d) { return d >= 0; }
 
 		private class MVFunction {
-			public Func<double[], double> f;
-			public Func<double[], bool> domain;
+			public Func<double[], double> F;
+			public Func<double[], bool> Domain;
 
-			public MVFunction(Func<double[], double> f, Func<double[], bool> domain) {
-				this.f = f;
-				this.domain = domain;
+			public MVFunction(Func<double[], double> F, Func<double[], bool> Domain) {
+				this.F = F;
+				this.Domain = Domain;
 			}
 		}
 
-		private static readonly Dictionary<string, MVFunction> mvfunctions = new Dictionary<string, MVFunction>() {
+		private static readonly Dictionary<string, MVFunction> MVFunctions = new Dictionary<string, MVFunction>() {
 			{"max", new MVFunction(GetMax, d => true)},
 			{"min", new MVFunction(GetMin, d => true)},
 			{"log", new MVFunction(MVLog, MVLogCheck)}
@@ -109,330 +109,330 @@ namespace Dexter.Commands {
 
 		private static bool MVLogCheck(double[] d) { return d.Length == 2 && d[0] > 0 && d[1] > 0; }
 
-		private static double ProcessMath(string arg, MathResult result, double neutralValue = 1) {
+		private static double ProcessMath(string Arg, MathResult Result, double NeutralValue = 1) {
 			//Console.WriteLine(arg);
-			if (result.errorFlag)
+			if (Result.ErrorFlag)
 				return 1;
 
-			if (arg == "")
-				return neutralValue;
+			if (Arg == "")
+				return NeutralValue;
 
 			//parsing parentheses
-			int start = 0;
-			int depth = 0;
-			while (arg.Contains('(') || arg.Contains(')')) {
-				for (int i = 0; i < arg.Length; i++) {
-					if (arg[i] == '(' && depth++ == 0)
-						start = i;
-					else if (arg[i] == ')') {
-						if (--depth == 0) {
+			int Start = 0;
+			int Depth = 0;
+			while (Arg.Contains('(') || Arg.Contains(')')) {
+				for (int i = 0; i < Arg.Length; i++) {
+					if (Arg[i] == '(' && Depth++ == 0)
+						Start = i;
+					else if (Arg[i] == ')') {
+						if (--Depth == 0) {
 							//Simplify everything within the parentheses
-							arg = Simplify(arg, arg[(start + 1)..i], start, i, result);
+							Arg = Simplify(Arg, Arg[(Start + 1)..i], Start, i, Result);
 							//Console.WriteLine("New simplified arg = " + arg);
 							break;
-						} else if (depth < 0) {
-							return result.ThrowError("Unbalanced or unexpected closing parenthesis found.");
+						} else if (Depth < 0) {
+							return Result.ThrowError("Unbalanced or unexpected closing parenthesis found.");
 						}
 					}
 				}
 			}
-			if (depth > 0)
-				return result.ThrowError("Unbalanced or unexpected opening parenthesis found.");
+			if (Depth > 0)
+				return Result.ThrowError("Unbalanced or unexpected opening parenthesis found.");
 
-			double a;
-			double b;
+			double A;
+			double B;
 
 			//parsing addition/subtraction
-			for (int i = arg.Length - 1; i >= 0; i--) {
-				if (arg[i] == '+' || arg[i] == '-') {
-					if (i > 0 && arg[i - 1] == 'E')
+			for (int i = Arg.Length - 1; i >= 0; i--) {
+				if (Arg[i] == '+' || Arg[i] == '-') {
+					if (i > 0 && Arg[i - 1] == 'E')
 						continue; //if the + or - is part of an order of magnitude expression, pass.
-					a = ProcessMath(arg[0..i], result, 0);
-					b = ProcessMath(arg[(i + 1)..], result, 0);
+					A = ProcessMath(Arg[0..i], Result, 0);
+					B = ProcessMath(Arg[(i + 1)..], Result, 0);
 
-					if (arg[i] == '+') {
-						result.Echo("Added " + a + " + " + b + ".", arg);
-						return a + b;
+					if (Arg[i] == '+') {
+						Result.Echo("Added " + A + " + " + B + ".", Arg);
+						return A + B;
 					} else {
-						result.Echo("Subtracted " + a + " - " + b + ".", arg);
-						return a - b;
+						Result.Echo("Subtracted " + A + " - " + B + ".", Arg);
+						return A - B;
 					}
 				}
 			}
 
 			//parsing multiplication/division
-			for (int i = arg.Length - 1; i >= 0; i--) {
-				if (arg[i] == '*' || arg[i] == '/') {
-					a = ProcessMath(arg[0..i], result, 1);
-					b = ProcessMath(arg[(i + 1)..], result, 1);
+			for (int i = Arg.Length - 1; i >= 0; i--) {
+				if (Arg[i] == '*' || Arg[i] == '/') {
+					A = ProcessMath(Arg[0..i], Result, 1);
+					B = ProcessMath(Arg[(i + 1)..], Result, 1);
 
-					if (b == 0)
-						return result.ThrowError("Attempt to divide by zero");
-					if (arg[i] == '*') {
-						result.Echo("Multiplied " + a + " * " + b, arg);
-						return a * b;
+					if (B == 0)
+						return Result.ThrowError("Attempt to divide by zero");
+					if (Arg[i] == '*') {
+						Result.Echo("Multiplied " + A + " * " + B, Arg);
+						return A * B;
 					} else {
-						result.Echo("Divided " + a + " / " + b, arg);
-						return a / b;
+						Result.Echo("Divided " + A + " / " + B, Arg);
+						return A / B;
 					}
 				}
 			}
 
 			//parsing powers
-			for (int i = arg.Length - 1; i >= 0; i--) {
-				if (arg[i] == '^') {
-					a = ProcessMath(arg[0..i], result, 1);
-					b = ProcessMath(arg[(i + 1)..], result, 1);
+			for (int i = Arg.Length - 1; i >= 0; i--) {
+				if (Arg[i] == '^') {
+					A = ProcessMath(Arg[0..i], Result, 1);
+					B = ProcessMath(Arg[(i + 1)..], Result, 1);
 
-					if (a == 0 && b == 0)
-						return result.ThrowError("Attempt to evaluate zero to the power of zero.");
+					if (A == 0 && B == 0)
+						return Result.ThrowError("Attempt to evaluate zero to the power of zero.");
 
-					result.Echo("Evaluated " + a + " ^ " + b, arg);
-					return Math.Pow(a, b);
+					Result.Echo("Evaluated " + A + " ^ " + B, Arg);
+					return Math.Pow(A, B);
 				}
 			}
 
 			//parsing the random operator and the remainder operator
-			for (int i = arg.Length - 1; i >= 0; i--) {
-				if (arg[i] == 'd' || arg[i] == '%') {
-					a = ProcessMath(arg[0..i], result, 1);
-					b = ProcessMath(arg[(i + 1)..], result, 1);
+			for (int i = Arg.Length - 1; i >= 0; i--) {
+				if (Arg[i] == 'd' || Arg[i] == '%') {
+					A = ProcessMath(Arg[0..i], Result, 1);
+					B = ProcessMath(Arg[(i + 1)..], Result, 1);
 
-					if (arg[i] == 'd') { return Roll(a, b, result); }
-					return a % b;
+					if (Arg[i] == 'd') { return Roll(A, B, Result); }
+					return A % B;
 				}
 			}
 
 			//parsing factorials
-			if (arg[^1] == '!') {
-				return Factorial(ProcessMath(arg[0..^1], result), result);
+			if (Arg[^1] == '!') {
+				return Factorial(ProcessMath(Arg[0..^1], Result), Result);
 			}
 
-			string funcComp = arg;
-			string funcNum = "";
-			double factor = 1;
-			for (int i = 0; i < arg.Length; i++) {
-				if (!Char.IsDigit(arg[i])) {
-					funcNum = arg[0..i];
-					funcComp = arg[i..].ToLower();
+			string FuncComp = Arg;
+			string FuncNum = "";
+			double Factor = 1;
+			for (int i = 0; i < Arg.Length; i++) {
+				if (!Char.IsDigit(Arg[i])) {
+					FuncNum = Arg[0..i];
+					FuncComp = Arg[i..].ToLower();
 					break;
 				}
 			}
-			if (funcNum.Length > 0 && funcComp.Length > 0) {
-				result.Echo($"Parsing function multiplicand \"{funcNum}\"", arg);
-				factor = ProcessMath(funcNum, result, 1);
+			if (FuncNum.Length > 0 && FuncComp.Length > 0) {
+				Result.Echo($"Parsing function multiplicand \"{FuncNum}\"", Arg);
+				Factor = ProcessMath(FuncNum, Result, 1);
 			}
 
 			//parsing multivar functions
-			foreach (string f in mvfunctions.Keys) {
-				if (funcComp.StartsWith(f)) {
-					arg = arg[f.Length..];
-					double[] arr = new double[1];
-					if (arg.Length < 3 || arg[0] != '[' || arg[^1] != ']') { //multiparameters have the format [a;b;c; ... ;x;y;z]
-						if (functions.ContainsKey(f))
+			foreach (string FuncName in MVFunctions.Keys) {
+				if (FuncComp.StartsWith(FuncName)) {
+					Arg = Arg[FuncName.Length..];
+					double[] Arr = new double[1];
+					if (Arg.Length < 3 || Arg[0] != '[' || Arg[^1] != ']') { //multiparameters have the format [a;b;c; ... ;x;y;z]
+						if (Functions.ContainsKey(FuncName))
 							break;
-						if (arg.Length > 0 && arg[0] != '[') {
-							arr[0] = ProcessMath(arg, result, 1);
-							if (!mvfunctions[f].domain(arr))
-								return result.ThrowError($"Single argument for multiparameter function {f} is invalid, found \"{arg}\"");
-							result.Echo($"Evaluating multivar function {f} with a single parameter {arr[0]}.", arg);
-							return factor * mvfunctions[f].f(arr);
+						if (Arg.Length > 0 && Arg[0] != '[') {
+							Arr[0] = ProcessMath(Arg, Result, 1);
+							if (!MVFunctions[FuncName].Domain(Arr))
+								return Result.ThrowError($"Single argument for multiparameter function {FuncName} is invalid, found \"{Arg}\"");
+							Result.Echo($"Evaluating multivar function {FuncName} with a single parameter {Arr[0]}.", Arg);
+							return Factor * MVFunctions[FuncName].F(Arr);
 						}
-						return result.ThrowError($"Invalid arguments for multiparametric function {f}. Found \"{arg}\".");
+						return Result.ThrowError($"Invalid arguments for multiparametric function {FuncName}. Found \"{Arg}\".");
 					}
-					List<double> parameters = new List<double>();
-					depth = 0;
-					start = 1;
-					for (int i = 1; i < arg.Length; i++) {
-						if (arg[i] == '[')
-							depth++;
-						if (arg[i] == ']' && depth-- < 0)
-							return result.ThrowError($"Unbalanced or unexpected closing brackets in multiparametric function evaluation for function {f}. Found \"{arg}\"");
-						if ((arg[i] == ';' && depth == 0) || (arg[i] == ']' && depth == -1)) {
-							parameters.Add(ProcessMath(arg[start..i], result, 1));
-							Console.WriteLine("Added new parameter " + parameters[^1]);
-							start = i + 1;
+					List<double> Params = new List<double>();
+					Depth = 0;
+					Start = 1;
+					for (int i = 1; i < Arg.Length; i++) {
+						if (Arg[i] == '[')
+							Depth++;
+						if (Arg[i] == ']' && Depth-- < 0)
+							return Result.ThrowError($"Unbalanced or unexpected closing brackets in multiparametric function evaluation for function {FuncName}. Found \"{Arg}\"");
+						if ((Arg[i] == ';' && Depth == 0) || (Arg[i] == ']' && Depth == -1)) {
+							Params.Add(ProcessMath(Arg[Start..i], Result, 1));
+							Console.WriteLine("Added new parameter " + Params[^1]);
+							Start = i + 1;
 						}
 					}
-					if (depth > 0)
-						return result.ThrowError($"Unbalanced or unexpected opening brackets in multiparametric function evaluation for function {f}. Found \"{arg}\"");
-					arr = parameters.ToArray();
-					if (!mvfunctions[f].domain(arr))
-						return result.ThrowError($"Invalid argument set for function {f}. Found [{string.Join("; ", arr)}].");
-					result.Echo($"Evaluating multivar function {f} with parameter array [{string.Join("; ", arr)}].", arg);
-					return factor * mvfunctions[f].f(arr);
+					if (Depth > 0)
+						return Result.ThrowError($"Unbalanced or unexpected opening brackets in multiparametric function evaluation for function {FuncName}. Found \"{Arg}\"");
+					Arr = Params.ToArray();
+					if (!MVFunctions[FuncName].Domain(Arr))
+						return Result.ThrowError($"Invalid argument set for function {FuncName}. Found [{string.Join("; ", Arr)}].");
+					Result.Echo($"Evaluating multivar function {FuncName} with parameter array [{string.Join("; ", Arr)}].", Arg);
+					return Factor * MVFunctions[FuncName].F(Arr);
 				}
 			}
 
 			//parsing functions
-			foreach (string f in functions.Keys) {
-				if (arg.ToLower().StartsWith(f)) {
-					a = ProcessMath(arg[f.Length..], result, 1);
-					if (!functions[f].domain(a))
-						return result.ThrowError($"Value {a} not included in the domain of function \"{f}\"");
-					result.Echo($"Evaluating {f} of {a}.", arg);
-					return functions[f].f(a);
+			foreach (string FuncName in Functions.Keys) {
+				if (Arg.ToLower().StartsWith(FuncName)) {
+					A = ProcessMath(Arg[FuncName.Length..], Result, 1);
+					if (!Functions[FuncName].Domain(A))
+						return Result.ThrowError($"Value {A} not included in the domain of function \"{FuncName}\"");
+					Result.Echo($"Evaluating {FuncName} of {A}.", Arg);
+					return Functions[FuncName].F(A);
 				}
 			}
 
 			//parsing numbers
-			foreach (string k in constants.Keys) {
-				if (arg.Length - k.Length < 0)
+			foreach (string ConstName in constants.Keys) {
+				if (Arg.Length - ConstName.Length < 0)
 					continue;
-				if (arg[^k.Length..] == k) {
-					result.Echo("Parsed constant " + k + " = " + constants[k] + ".", arg);
-					return ProcessMath(arg[0..^k.Length], result, 1) * constants[k];
+				if (Arg[^ConstName.Length..] == ConstName) {
+					Result.Echo($"Parsed constant {ConstName} = {constants[ConstName]}.", Arg);
+					return ProcessMath(Arg[0..^ConstName.Length], Result, 1) * constants[ConstName];
 				}
 			}
 
-			int sign = 1;
-			if (arg[0] == '_') { arg = arg[1..]; sign = -1; }
-			if (Double.TryParse(arg, out double d)) {
-				result.Echo("Parsed numerical value " + d * sign + ".", (sign == -1 ? "(-)" : "") + arg);
-				return d * sign;
+			int Sign = 1;
+			if (Arg[0] == '_') { Arg = Arg[1..]; Sign = -1; }
+			if (Double.TryParse(Arg, out double d)) {
+				Result.Echo($"Parsed numerical value {d * Sign}.", (Sign == -1 ? "(-)" : "") + Arg);
+				return d * Sign;
 			} else {
-				return result.ThrowError("Failed to parse string \"" + arg + "\".");
+				return Result.ThrowError("Failed to parse string \"" + Arg + "\".");
 			}
 		}
 
 		internal class MathResult {
-			public bool errorFlag = false;
-			public double result = 0;
-			public string error = "";
-			public List<string> verbose = new List<string>();
-			public List<string> verboseStack = new List<string>();
-			public string rolls = "";
-			private int rolln = 0;
+			public bool ErrorFlag = false;
+			public double Result = 0;
+			public string Error = "";
+			public List<string> Verbose = new List<string>();
+			public List<string> VerboseStack = new List<string>();
+			public string Rolls = "";
+			private int RollN = 0;
 
-			public MathResult(string arg) {
-				this.result = ProcessMath(arg.Replace(" ", ""), this);
+			public MathResult(string Arg) {
+				this.Result = ProcessMath(Arg.Replace(" ", ""), this);
 			}
 
-			public double ThrowError(string error) {
-				this.error += '\n' + error;
-				errorFlag = true;
+			public double ThrowError(string Error) {
+				this.Error += '\n' + Error;
+				ErrorFlag = true;
 				return 1;
 			}
 
-			public void Echo(string message, string stack) {
-				this.verbose.Add(message);
-				this.verboseStack.Add(stack);
+			public void Echo(string Message, string Stack) {
+				this.Verbose.Add(Message);
+				this.VerboseStack.Add(Stack);
 			}
 
 			public override string ToString() {
-				string s = "";
-				for (int i = 0; i < verbose.Count && i < verboseStack.Count; i++) {
-					s += $" v: {verbose[i]} with arg = {verboseStack[i]}\n";
+				string Str = "";
+				for (int i = 0; i < Verbose.Count && i < VerboseStack.Count; i++) {
+					Str += $" v: {Verbose[i]} with arg = {VerboseStack[i]}\n";
 				}
-				return s;
+				return Str;
 			}
 
 			public void NewDice(int d) {
-				if (++rolln > MAX_ROLLS_VERBOSE_DICE) {
-					if (rolln == MAX_ROLLS_VERBOSE_DICE + 1)
-						rolls += "...";
+				if (++RollN > MAX_ROLLS_VERBOSE_DICE) {
+					if (RollN == MAX_ROLLS_VERBOSE_DICE + 1)
+						Rolls += "...";
 					return;
 				}
-				rolls += $"d{d}:";
+				Rolls += $"d{d}:";
             }
 
 			public void NewRoll(int r) {
-				if (rolln > MAX_ROLLS_VERBOSE_DICE)
+				if (RollN > MAX_ROLLS_VERBOSE_DICE)
 					return;
-				rolls += $" {r},";
+				Rolls += $" {r},";
             }
 
-			public void EndDice(bool continues = false) {
-				if (rolln > MAX_ROLLS_VERBOSE_DICE)
+			public void EndDice(bool Continues = false) {
+				if (RollN > MAX_ROLLS_VERBOSE_DICE)
 					return;
-				rolls = $"{rolls[..^1]}{(continues ? "..." : "")}\n";
+				Rolls = $"{Rolls[..^1]}{(Continues ? "..." : "")}\n";
             }
 		}
 
-		private static string Simplify(string str, string eval, int start, int end, MathResult result) {
-			string left = str[0..start];
-			string right = str[(end + 1)..];
+		private static string Simplify(string Str, string Eval, int Start, int End, MathResult Result) {
+			string Left = Str[0..Start];
+			string Right = Str[(End + 1)..];
 
-			if (eval.Contains(",")) { //if multiparameter syntax is found, it's converted into "[a; b; c; d;...]" for later processing
-				result.Echo("Parsing function parameters \"" + eval + "\"", str);
+			if (Eval.Contains(",")) { //if multiparameter syntax is found, it's converted into "[a; b; c; d;...]" for later processing
+				Result.Echo("Parsing function parameters \"" + Eval + "\"", Str);
 
-				int depth = 0;
-				for (int i = 1; i < eval.Length; i++) {
-					if (eval[i] == '(')
-						depth++;
-					if (eval[i] == ')')
-						depth--;
-					else if (eval[i] == ',' && depth == 0)
-						eval = eval[0..i] + ';' + eval[(i + 1)..];
+				int Depth = 0;
+				for (int i = 1; i < Eval.Length; i++) {
+					if (Eval[i] == '(')
+						Depth++;
+					if (Eval[i] == ')')
+						Depth--;
+					else if (Eval[i] == ',' && Depth == 0)
+						Eval = Eval[0..i] + ';' + Eval[(i + 1)..];
 				}
 
 				//result.Echo("Parsed function parameters to \"" + eval + "\"", str);
-				return left + "[" + eval + "]" + right;
+				return Left + "[" + Eval + "]" + Right;
 			}
 
 			//otherwise, multiplication shorthands are considered
-			bool asteriskLeft = start > 0 && Char.IsDigit(str[start - 1]);
-			bool asteriskRight = end + 1 < str.Length && Char.IsDigit(str[end + 1]);
+			bool AsteriskLeft = Start > 0 && Char.IsDigit(Str[Start - 1]);
+			bool AsteriskRight = End + 1 < Str.Length && Char.IsDigit(Str[End + 1]);
 
-			double val = ProcessMath(eval, result, 1);
-			result.Echo("Parsing parentheses (" + eval + ") into (" + val + ")", str);
-			return $"{left}{(asteriskLeft ? "*" : "")}{(val < 0 ? "_" : " ")}{Math.Abs(val)}{(asteriskRight ? "*" : "")}{right}";
+			double Value = ProcessMath(Eval, Result, 1);
+			Result.Echo("Parsing parentheses (" + Eval + ") into (" + Value + ")", Str);
+			return $"{Left}{(AsteriskLeft ? "*" : "")}{(Value < 0 ? "_" : " ")}{Math.Abs(Value)}{(AsteriskRight ? "*" : "")}{Right}";
 		}
 
-		private static double Roll(double a, double b, MathResult result) {
-			if (a > MAX_ROLLS)
-				return result.ThrowError($"Exceeded maximum allowed random operations ({a} > {MAX_ROLLS})");
+		private static double Roll(double A, double B, MathResult Result) {
+			if (A > MAX_ROLLS)
+				return Result.ThrowError($"Exceeded maximum allowed random operations ({A} > {MAX_ROLLS})");
 			
-			int n = (int)Math.Round(a);
+			int DiceCount = (int)Math.Round(A);
 
-			if (n == 0) {
-				result.Echo("Rolled 0 dice.", "a" + "b");
+			if (DiceCount == 0) {
+				Result.Echo("Rolled 0 dice.", "a" + "b");
 				return 0;
 			}
 
-			int d = (int)Math.Round(b);
+			int DiceType = (int)Math.Round(B);
 
-			if (d < 1)
-				return result.ThrowError("Attempt to roll a die with less than one face.");
+			if (DiceType < 1)
+				return Result.ThrowError("Attempt to roll a die with less than one face.");
 
-			result.NewDice(d);
+			Result.NewDice(DiceType);
 
-			Random rnd = new Random();
-			double count = 0;
-			int sign = 1;
-			if (n < 0) { sign = -1; n = -n; }
+			Random Rnd = new Random();
+			double Count = 0;
+			int Sign = 1;
+			if (DiceCount < 0) { Sign = -1; DiceCount = -DiceCount; }
 
-			string verb = "Rolled values: ";
+			string Trace = "Rolled values: ";
 
-			int trace_chars = 0;
+			int TraceChars = 0;
 
-			for (int i = 0; i < n; i++) {
-				int newValue = rnd.Next(1, d + 1) * sign;
-				verb += newValue + ", ";
-				count += newValue;
-				if(trace_chars < MAX_ROLLS_VERBOSE_CHARS) {
-                    result.NewRoll(newValue);
-					trace_chars += newValue.ToString().Length + 2;
+			for (int i = 0; i < DiceCount; i++) {
+				int NewRoll = Rnd.Next(1, DiceType + 1) * Sign;
+				Trace += NewRoll + ", ";
+				Count += NewRoll;
+				if(TraceChars < MAX_ROLLS_VERBOSE_CHARS) {
+                    Result.NewRoll(NewRoll);
+					TraceChars += NewRoll.ToString().Length + 2;
                 }
             }
 
-			result.EndDice(trace_chars >= MAX_ROLLS_VERBOSE_CHARS);
-			result.Echo($"{verb[0..^2]} on {(sign == -1 ? "-" : "")}{n}d{d}.", a + "d" + b);
-			return count;
+			Result.EndDice(TraceChars >= MAX_ROLLS_VERBOSE_CHARS);
+			Result.Echo($"{Trace[0..^2]} on {(Sign == -1 ? "-" : "")}{DiceCount}d{DiceType}.", A + "d" + B);
+			return Count;
 		}
 
-		private static double Factorial(double operand, MathResult result) {
-			double value = 1;
-			int a = (int)Math.Round(operand);
+		private static double Factorial(double Operand, MathResult Result) {
+			double Value = 1;
+			int a = (int)Math.Round(Operand);
 			for (int i = a; i > 1; i--) {
-				value *= i;
-				if (double.IsInfinity(value)) {
-					return result.ThrowError("Overflow in factorial operation, result of local expression is infinity.");
+				Value *= i;
+				if (double.IsInfinity(Value)) {
+					return Result.ThrowError("Overflow in factorial operation, result of local expression is infinity.");
 				}
 			}
 
-			result.Echo($"Calculated the factorial of {operand}, rounded to {a}!", operand + "!");
-			return value;
+			Result.Echo($"Calculated the factorial of {Operand}, rounded to {a}!", Operand + "!");
+			return Value;
 		}
 	}
 }

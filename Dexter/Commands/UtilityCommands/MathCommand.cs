@@ -13,23 +13,23 @@ namespace Dexter.Commands {
 		private const int MAX_ROLLS = 999999; //Should probably be moved to a config setting
 		private const int MAX_ROLLS_VERBOSE_CHARS = 80;
 		private const int MAX_ROLLS_VERBOSE_DICE = 8;
-		
+
 		/// <summary>
 		/// Evaluates a mathematical expression and gives a result or throws an error.
 		/// </summary>
-		
+
 		[Command("math")]
 		[Summary("Evaluates a mathematical expression")]
 		[ExtendedSummary(
 			"Evaluates a given mathematical expression. \n" +
 			"Basic arithmetic operators are: + - / * ^. Remainder: %, Factorial: ! \n" +
-			"The random operator, \'d\', allows you to roll dice! 1d20 rolls a twenty-sided die, 4d6 adds up the rolls of four six-sided dice. \n" +
+			"The random operator, \'d\', allows you to roll dice! 1d20 rolls a twenty-sided die, 4d6 adds up the rolls of four six-sided dice. (Use uppercase \'D\' to record the individual rolls.)\n" +
 			"You can also use functions such as sqrt(a), floor(a), abs(a), ln(a), log(b, a), max(a, b, c...), etc. \n" +
 			"A few mathematical and physical constants are available. \'pi\', \'e\', \'phi\', \'c\', \'electron\', etc."
 		)]
 		[Alias("calc", "calculate")]
 
-        public async Task MathCommand([Remainder] string expression) {
+		public async Task MathCommand([Remainder] string expression) {
 			MathResult Res = new MathResult(expression);
 
 			if (!Res.ErrorFlag) {
@@ -46,7 +46,7 @@ namespace Dexter.Commands {
 			}
 		}
 
-		private static readonly Dictionary<string, double> constants = new Dictionary<string, double>() {
+		private static readonly Dictionary<string, double> Constants = new Dictionary<string, double>() {
 			{"epsilon", 8.8541878128e-12},
 			{"electron", 1.60217662e-19},
 			{"phi", 1.618033988749},
@@ -144,7 +144,7 @@ namespace Dexter.Commands {
 
 			//parsing addition/subtraction
 			for (int i = Arg.Length - 1; i >= 0; i--) {
-				if (Arg[i] == '+' || Arg[i] == '-') {
+				if (Arg[i] is '+' or '-') {
 					if (i > 0 && Arg[i - 1] == 'E')
 						continue; //if the + or - is part of an order of magnitude expression, pass.
 					A = ProcessMath(Arg[0..i], Result, 0);
@@ -162,7 +162,7 @@ namespace Dexter.Commands {
 
 			//parsing multiplication/division
 			for (int i = Arg.Length - 1; i >= 0; i--) {
-				if (Arg[i] == '*' || Arg[i] == '/') {
+				if (Arg[i] is '*' or '/') {
 					A = ProcessMath(Arg[0..i], Result, 1);
 					B = ProcessMath(Arg[(i + 1)..], Result, 1);
 
@@ -194,11 +194,12 @@ namespace Dexter.Commands {
 
 			//parsing the random operator and the remainder operator
 			for (int i = Arg.Length - 1; i >= 0; i--) {
-				if (Arg[i] == 'd' || Arg[i] == '%') {
+				if (Arg[i] is 'd' or 'D' or '%') {
 					A = ProcessMath(Arg[0..i], Result, 1);
 					B = ProcessMath(Arg[(i + 1)..], Result, 1);
 
 					if (Arg[i] == 'd') { return Roll(A, B, Result); }
+					if (Arg[i] == 'D') { return Roll(A, B, Result, true); }
 					return A % B;
 				}
 			}
@@ -276,12 +277,12 @@ namespace Dexter.Commands {
 			}
 
 			//parsing numbers
-			foreach (string ConstName in constants.Keys) {
+			foreach (string ConstName in Constants.Keys) {
 				if (Arg.Length - ConstName.Length < 0)
 					continue;
 				if (Arg[^ConstName.Length..] == ConstName) {
-					Result.Echo($"Parsed constant {ConstName} = {constants[ConstName]}.", Arg);
-					return ProcessMath(Arg[0..^ConstName.Length], Result, 1) * constants[ConstName];
+					Result.Echo($"Parsed constant {ConstName} = {Constants[ConstName]}.", Arg);
+					return ProcessMath(Arg[0..^ConstName.Length], Result, 1) * Constants[ConstName];
 				}
 			}
 
@@ -334,19 +335,19 @@ namespace Dexter.Commands {
 					return;
 				}
 				Rolls += $"d{d}:";
-            }
+			}
 
 			public void NewRoll(int r) {
 				if (RollN > MAX_ROLLS_VERBOSE_DICE)
 					return;
 				Rolls += $" {r},";
-            }
+			}
 
 			public void EndDice(bool Continues = false) {
 				if (RollN > MAX_ROLLS_VERBOSE_DICE)
 					return;
 				Rolls = $"{Rolls[..^1]}{(Continues ? "..." : "")}\n";
-            }
+			}
 		}
 
 		private static string Simplify(string Str, string Eval, int Start, int End, MathResult Result) {
@@ -379,10 +380,10 @@ namespace Dexter.Commands {
 			return $"{Left}{(AsteriskLeft ? "*" : "")}{(Value < 0 ? "_" : " ")}{Math.Abs(Value)}{(AsteriskRight ? "*" : "")}{Right}";
 		}
 
-		private static double Roll(double A, double B, MathResult Result) {
+		private static double Roll(double A, double B, MathResult Result, bool Verbose = false) {
 			if (A > MAX_ROLLS)
 				return Result.ThrowError($"Exceeded maximum allowed random operations ({A} > {MAX_ROLLS})");
-			
+
 			int DiceCount = (int)Math.Round(A);
 
 			if (DiceCount == 0) {
@@ -395,10 +396,11 @@ namespace Dexter.Commands {
 			if (DiceType < 1)
 				return Result.ThrowError("Attempt to roll a die with less than one face.");
 
-			Result.NewDice(DiceType);
+			if (Verbose)
+				Result.NewDice(DiceType);
 
 			Random Rnd = new Random();
-			double Count = 0;
+			double Sum = 0;
 			int Sign = 1;
 			if (DiceCount < 0) { Sign = -1; DiceCount = -DiceCount; }
 
@@ -409,16 +411,17 @@ namespace Dexter.Commands {
 			for (int i = 0; i < DiceCount; i++) {
 				int NewRoll = Rnd.Next(1, DiceType + 1) * Sign;
 				Trace += NewRoll + ", ";
-				Count += NewRoll;
-				if(TraceChars < MAX_ROLLS_VERBOSE_CHARS) {
-                    Result.NewRoll(NewRoll);
+				Sum += NewRoll;
+				if (Verbose && TraceChars < MAX_ROLLS_VERBOSE_CHARS) {
+					Result.NewRoll(NewRoll);
 					TraceChars += NewRoll.ToString().Length + 2;
-                }
-            }
+				}
+			}
 
-			Result.EndDice(TraceChars >= MAX_ROLLS_VERBOSE_CHARS);
+			if (Verbose)
+				Result.EndDice(TraceChars >= MAX_ROLLS_VERBOSE_CHARS);
 			Result.Echo($"{Trace[0..^2]} on {(Sign == -1 ? "-" : "")}{DiceCount}d{DiceType}.", A + "d" + B);
-			return Count;
+			return Sum;
 		}
 
 		private static double Factorial(double Operand, MathResult Result) {

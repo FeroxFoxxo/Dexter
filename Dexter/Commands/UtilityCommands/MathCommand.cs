@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
@@ -9,22 +10,35 @@ using Discord.Commands;
 namespace Dexter.Commands {
 	public partial class UtilityCommands {
 
+		private const int MAX_ROLLS = 999999; //Should probably be moved to a config setting
+
 		[Command("math")]
 		[Summary("Evaluates a mathematical expression")]
+		[ExtendedSummary(
+			"Evaluates a given mathematical expression. \n" +
+			"Basic arithmetic operators are: + - / * ^. Remainder: %, Factorial: ! \n" +
+			"The random operator, \'d\', allows you to roll dice! 1d20 rolls a twenty-sided die, 4d6 adds up the rolls of four six-sided dice. \n" +
+			"You can also use functions such as sqrt(a), floor(a), abs(a), ln(a), log(b, a), max(a, b, c...), etc. \n" +
+			"A few mathematical and physical constants are available. \'pi\', \'e\', \'phi\', \'c\', \'electron\', etc."
+		)]
 		[Alias("calc", "calculate")]
 
-		public async Task MathCommand([Remainder] string expression) {
+        /// <summary>
+        /// Evaluates a mathematical expression and gives a result or throws an error.
+        /// </summary>
+
+        public async Task MathCommand([Remainder] string expression) {
 			MathResult r = new MathResult(expression);
 
-			if (r.errorFlag) {
+			if (!r.errorFlag) {
 				await BuildEmbed(EmojiEnum.Love)
-					.WithTitle("Evaluating: **" + expression + "**.")
+					.WithTitle($"Evaluating: **{expression}**.")
 					.WithDescription(r.result.ToString())
 					.SendEmbed(Context.Channel);
 			} else {
 				await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle("ERROR! Received: `" + expression + "`.")
-					.WithDescription(r.error.ToString())
+					.WithTitle($"ERROR! Received: `{expression}`.")
+					.WithDescription($"{r.error}\n{r}")
 					.SendEmbed(Context.Channel);
 			}
 		}
@@ -186,6 +200,11 @@ namespace Dexter.Commands {
 				}
 			}
 
+			//parsing factorials
+			if (arg[^1] == '!') {
+				return Factorial(ProcessMath(arg[0..^1], result), result);
+			}
+
 			string funcComp = arg;
 			string funcNum = "";
 			double factor = 1;
@@ -199,11 +218,6 @@ namespace Dexter.Commands {
 			if (funcNum.Length > 0 && funcComp.Length > 0) {
 				result.Echo($"Parsing function multiplicand \"{funcNum}\"", arg);
 				factor = ProcessMath(funcNum, result, 1);
-			}
-
-			//parsing factorials
-			if (arg[^1] == '!') {
-				return Factorial(ProcessMath(arg[0..^1], result), result);
 			}
 
 			//parsing multivar functions
@@ -340,6 +354,9 @@ namespace Dexter.Commands {
 		}
 
 		private static double Roll(double a, double b, MathResult result) {
+			if (a > MAX_ROLLS)
+				return result.ThrowError($"Exceeded maximum allowed random operations ({a} > {MAX_ROLLS})");
+			
 			int n = (int)Math.Round(a);
 
 			if (n == 0) {
@@ -364,7 +381,7 @@ namespace Dexter.Commands {
 				count += newValue;
 			}
 
-			result.Echo(verb[0..^2] + " on " + (sign == -1 ? "-" : "") + n + "d" + d + ".", a + "d" + b);
+			result.Echo($"{verb[0..^2]} on {(sign == -1 ? "-" : "")}{n}d{d}.", a + "d" + b);
 			return count;
 		}
 

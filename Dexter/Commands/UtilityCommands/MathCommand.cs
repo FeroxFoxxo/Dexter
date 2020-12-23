@@ -11,6 +11,8 @@ namespace Dexter.Commands {
 	public partial class UtilityCommands {
 
 		private const int MAX_ROLLS = 999999; //Should probably be moved to a config setting
+		private const int MAX_ROLLS_VERBOSE_CHARS = 80;
+		private const int MAX_ROLLS_VERBOSE_DICE = 8;
 		
 		/// <summary>
 		/// Evaluates a mathematical expression and gives a result or throws an error.
@@ -300,6 +302,7 @@ namespace Dexter.Commands {
 			public List<string> verbose = new List<string>();
 			public List<string> verboseStack = new List<string>();
 			public string rolls = "";
+			private int rolln = 0;
 
 			public MathResult(string arg) {
 				this.result = ProcessMath(arg.Replace(" ", ""), this);
@@ -325,15 +328,24 @@ namespace Dexter.Commands {
 			}
 
 			public void NewDice(int d) {
+				if (++rolln > MAX_ROLLS_VERBOSE_DICE) {
+					if (rolln == MAX_ROLLS_VERBOSE_DICE + 1)
+						rolls += "...";
+					return;
+				}
 				rolls += $"d{d}:";
             }
 
 			public void NewRoll(int r) {
+				if (rolln > MAX_ROLLS_VERBOSE_DICE)
+					return;
 				rolls += $" {r},";
             }
 
-			public void EndDice() {
-				rolls = rolls[..^1] + '\n';
+			public void EndDice(bool continues = false) {
+				if (rolln > MAX_ROLLS_VERBOSE_DICE)
+					return;
+				rolls = $"{rolls[..^1]}{(continues ? "..." : "")}\n";
             }
 		}
 
@@ -392,14 +404,19 @@ namespace Dexter.Commands {
 
 			string verb = "Rolled values: ";
 
+			int trace_chars = 0;
+
 			for (int i = 0; i < n; i++) {
 				int newValue = rnd.Next(1, d + 1) * sign;
 				verb += newValue + ", ";
 				count += newValue;
-				result.NewRoll(newValue);
-			}
+				if(trace_chars < MAX_ROLLS_VERBOSE_CHARS) {
+                    result.NewRoll(newValue);
+					trace_chars += newValue.ToString().Length + 2;
+                }
+            }
 
-			result.EndDice();
+			result.EndDice(trace_chars >= MAX_ROLLS_VERBOSE_CHARS);
 			result.Echo($"{verb[0..^2]} on {(sign == -1 ? "-" : "")}{n}d{d}.", a + "d" + b);
 			return count;
 		}

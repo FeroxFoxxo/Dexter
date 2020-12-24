@@ -6,6 +6,7 @@ using Discord.Rest;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -59,32 +60,35 @@ namespace Dexter.Services {
             int EmbedMenuID;
             string EmbedMenuJSON = JsonConvert.SerializeObject(EmbedBuilders);
 
-            EmbedMenu EmbedMenu = await ReactionMenuDB.EmbedMenus.AsAsyncEnumerable()
-                .Where(Menu => Menu.EmbedMenuJSON.Equals(EmbedMenuJSON)).FirstOrDefaultAsync();
+            EmbedMenu EmbedMenu = ReactionMenuDB.EmbedMenus.AsQueryable()
+                .Where(Menu => Menu.EmbedMenuJSON.Equals(EmbedMenuJSON)).FirstOrDefault();
 
             if (EmbedMenu != null)
                 EmbedMenuID = EmbedMenu.EmbedIndex;
             else {
-                EmbedMenuID = await ReactionMenuDB.EmbedMenus.AsAsyncEnumerable().CountAsync();
+                EmbedMenuID = ReactionMenuDB.EmbedMenus.AsQueryable().Count() + 1;
 
-                await ReactionMenuDB.EmbedMenus.AddAsync(new EmbedMenu() {
-                    EmbedIndex = EmbedMenuID,
-                    EmbedMenuJSON = EmbedMenuJSON
-                });
+                ReactionMenuDB.EmbedMenus.Add(
+                    new EmbedMenu() {
+                        EmbedIndex = EmbedMenuID,
+                        EmbedMenuJSON = EmbedMenuJSON
+                    }
+                );
             }
+            Console.WriteLine(EmbedMenuID);
 
             int ColorMenuID;
             string ColorMenuJSON = JsonConvert.SerializeObject(Colors.ToArray());
 
-            ColorMenu ColorMenu = await ReactionMenuDB.ColorMenus.AsAsyncEnumerable()
-                .Where(Menu => Menu.ColorMenuJSON.Equals(ColorMenuJSON)).FirstOrDefaultAsync();
+            ColorMenu ColorMenu = ReactionMenuDB.ColorMenus.AsQueryable()
+                .Where(Menu => Menu.ColorMenuJSON.Equals(ColorMenuJSON)).FirstOrDefault();
 
             if (ColorMenu != null)
                 ColorMenuID = ColorMenu.ColorIndex;
             else {
-                ColorMenuID = await ReactionMenuDB.ColorMenus.AsAsyncEnumerable().CountAsync();
+                ColorMenuID = ReactionMenuDB.ColorMenus.AsQueryable().Count() + 1;
 
-                await ReactionMenuDB.ColorMenus.AddAsync(new ColorMenu() {
+                ReactionMenuDB.ColorMenus.Add(new ColorMenu() {
                     ColorIndex = ColorMenuID,
                     ColorMenuJSON = ColorMenuJSON
                 });

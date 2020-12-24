@@ -8,8 +8,8 @@ namespace Dexter.Attributes.Methods {
     /// takes the generalized [Summary] attribute.
     /// </summary>
 
-    [AttributeUsage(AttributeTargets.Method, Inherited = true)]
-    public sealed class ExtendedSummaryAttribute : Attribute {
+    [AttributeUsage(AttributeTargets.Method)]
+    public class ExtendedSummaryAttribute : Attribute {
 
         /// <summary>
         /// The Extended Summary is the string pertaining to the extended information of the command.

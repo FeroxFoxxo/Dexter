@@ -46,10 +46,12 @@ namespace Dexter.Services {
         
         public LoggingService LoggingService { get; set; }
 
+        public ProposalConfiguration ProposalConfiguration { get; set; }
+
         /// <summary>
         /// The Initialize override hooks into both the Client's MessageRecieved event and the CommandService's CommandExecuted event.
         /// </summary>
-        
+
         public override void Initialize() {
             DiscordSocketClient.MessageReceived += HandleCommandAsync;
             CommandService.CommandExecuted += SendCommandError;
@@ -141,10 +143,10 @@ namespace Dexter.Services {
                         } else {
                             if (CommandContext.Message.Content.Length <= 1)
                                 return;
-                            else if (CommandContext.Message.Content.Substring(0, 2) == "~~")
+                            else if (CommandContext.Message.Content.Substring(0, 2) == "~~" ||
+                                    ProposalConfiguration.CommandRemovals.Contains(CommandContext.Message.Content.Split(' ')[0]))
                                 return;
-
-                            await BuildEmbed(EmojiEnum.Annoyed)
+                            else await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Unknown Command.")
                                 .WithDescription($"Oopsies! It seems as if the command **{CustomCommandArgs[0].SanitizeMarkdown()}** doesn't exist!")
                                 .SendEmbed(CommandContext.Channel);

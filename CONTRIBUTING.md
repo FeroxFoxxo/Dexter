@@ -4,7 +4,7 @@
 Welcome
 -------
 
-We invite you to join our team! Everyone is welcome to contribute code via pull requests, to file issues on GitHub and so fourth.
+We invite you to join our team! Everyone is welcome to contribute code via pull requests, to file issues on GitHub and so forth.
 
 We grant commit access to people who have gained our trust and demonstrated a commitment to Dexter.
 
@@ -13,7 +13,7 @@ We communicate primarily over GitHub and on [Discord](https://discord.gg/usfurri
 Developing for Dexter
 ----------------------
 
-To develop for Dexter, you will eventually need to become familiar with our processes and conventions. This section lists the documents that describe these methodologies. The following list is ordered: you are strongly recommended to go through these documents in the order presented.
+To develop for Dexter, you will eventually need to become familiar with our processes and conventions. This section lists the documents that describe these methodologies. The following list is ordered: it is strongly recommended that you go through these documents in the order presented.
 
 1. [Our code of conduct](CODE_OF_CONDUCT.md), which stipulates explicitly that everyone must be gracious, respectful, and professional. This also documents our conflict resolution policy and encourages people to ask questions.
 

@@ -28,6 +28,7 @@ namespace Dexter.Commands {
 			"A few mathematical and physical constants are available. \'pi\', \'e\', \'phi\', \'c\', \'electron\', etc."
 		)]
 		[Alias("calc", "calculate")]
+		[BotChannel]
 
 		public async Task MathCommand([Remainder] string expression) {
 			MathResult Res = new MathResult(expression);

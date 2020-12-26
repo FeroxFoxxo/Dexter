@@ -248,11 +248,11 @@ namespace Dexter.Services {
         public async Task DeclineSuggestion(Dictionary<string, string> Parameters) {
             string Token = Parameters["Suggestion"];
 
-            Proposal Proposal = ProposalDB.Proposals.AsQueryable().Where(Proposal => Proposal.Tracker == Token).FirstOrDefault();
+            Proposal Proposal = ProposalDB.Proposals.Find(Token);
 
             Proposal.Reason = "Suggestion did not have enough support from the community to progress.";
 
-            Suggestion Suggestion = ProposalDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.Tracker == Token).FirstOrDefault();
+            Suggestion Suggestion = ProposalDB.Suggestions.Find(Token);
 
             Suggestion.TimerToken = string.Empty;
 
@@ -345,7 +345,7 @@ namespace Dexter.Services {
                         .GetTextChannel(ProposalConfiguration.StaffSuggestionsChannel)
                         .SendMessageAsync(embed: BuildProposal(Proposal).Build());
 
-                    Suggestion Suggestion = ProposalDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.Tracker == Proposal.Tracker).FirstOrDefault();
+                    Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
 
                     // Check if the suggestion is not null.
                     if (Suggestion == null)
@@ -416,9 +416,9 @@ namespace Dexter.Services {
         public async Task DeclineStaffSuggestion(Dictionary<string, string> Parameters) {
             string Token = Parameters["Suggestion"];
 
-            Proposal Proposal = ProposalDB.Proposals.AsQueryable().Where(Proposal => Proposal.Tracker == Token).FirstOrDefault();
+            Proposal Proposal = ProposalDB.Proposals.Find(Token);
 
-            Suggestion Suggestion = ProposalDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.Tracker == Proposal.Tracker).FirstOrDefault();
+            Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
 
             IMessage StaffMessage = await (DiscordSocketClient.GetChannel(ProposalConfiguration.StaffSuggestionsChannel) as ITextChannel)
                 .GetMessageAsync(Suggestion.StaffMessageID);
@@ -476,7 +476,7 @@ namespace Dexter.Services {
 
             switch (Proposal.ProposalType) {
                 case ProposalType.Suggestion:
-                    Suggestion Suggestion = ProposalDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.Tracker == Proposal.Tracker).FirstOrDefault();
+                    Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
 
                     if (!string.IsNullOrEmpty(Suggestion.TimerToken))
                         TimerService.RemoveTimer(Suggestion.TimerToken);
@@ -488,7 +488,7 @@ namespace Dexter.Services {
                     await UpdateSpecificProposal(Proposal, BotConfiguration.ModerationLogChannelID, Proposal.MessageID);
 
                     if (ProposalStatus == ProposalStatus.Approved) {
-                        AdminConfirmation Confirmation = ProposalDB.AdminConfirmations.AsQueryable().Where(Confirmation => Confirmation.Tracker == Proposal.Tracker).FirstOrDefault();
+                        AdminConfirmation Confirmation = ProposalDB.AdminConfirmations.Find(Proposal.Tracker);
 
                         Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Confirmation.CallbackParameters);
                         Type Class = Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.Name.Equals(Confirmation.CallbackClass)).FirstOrDefault();
@@ -543,7 +543,7 @@ namespace Dexter.Services {
 
             string Token = new (TokenArray);
 
-            if (ProposalDB.Suggestions.AsQueryable().Where(Suggestion => Suggestion.Tracker == Token).FirstOrDefault() == null) {
+            if (ProposalDB.Suggestions.Find(Token) == null) {
                 return Token;
             } else
                 return CreateToken();

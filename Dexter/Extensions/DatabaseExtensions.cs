@@ -25,12 +25,13 @@ namespace Dexter.Extensions {
 
             int RandomID = new Random().Next(1, Topics.AsQueryable().Count());
 
-            FunTopic FunTopic = Topics.AsQueryable().Where(Topic => Topic.TopicID == RandomID && Topic.EntryType != EntryType.Revoke).FirstOrDefault();
+            FunTopic FunTopic = Topics.Find(RandomID);
 
             if (FunTopic != null)
-                return FunTopic;
+                if (FunTopic.EntryType == EntryType.Issue)
+                    return FunTopic;
 
-            else return await Topics.GetRandomTopic();
+            return await Topics.GetRandomTopic();
         }
 
     }

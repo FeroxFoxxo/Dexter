@@ -64,7 +64,7 @@ namespace Dexter.Services {
             foreach (Type Type in GetModuleTypes()) {
                 string TypeName = Type.Name.Sanitize();
 
-                if (ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationName == TypeName).FirstOrDefault() == null) {
+                if (ConfigurationDB.Configurations.Find(TypeName) == null) {
                     ConfigurationDB.Configurations.Add(new Configuration() {
                         ConfigurationName = TypeName,
                         ConfigurationType = ConfigurationType.Enabled
@@ -84,7 +84,7 @@ namespace Dexter.Services {
             foreach (Type Type in GetModuleTypes().Where(Module => Module.IsDefined(typeof(EssentialModuleAttribute)))) {
                 string TypeName = Type.Name.Sanitize();
 
-                Configuration Config = ConfigurationDB.Configurations.AsQueryable().Where(Configuration => Configuration.ConfigurationName == TypeName).FirstOrDefault();
+                Configuration Config = ConfigurationDB.Configurations.Find(TypeName);
 
                 if (Config.ConfigurationType != ConfigurationType.Essential) {
                     Config.ConfigurationType = ConfigurationType.Essential;
@@ -135,7 +135,7 @@ namespace Dexter.Services {
         /// <returns>Whether or not the module is, in fact, enabled or not.</returns>
         
         public bool GetModuleState(string ModuleName) {
-            return ConfigurationDB.Configurations.AsQueryable().Where(Module => Module.ConfigurationName == ModuleName).FirstOrDefault().ConfigurationType != ConfigurationType.Disabled;
+            return ConfigurationDB.Configurations.Find(ModuleName).ConfigurationType != ConfigurationType.Disabled;
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Dexter.Services {
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
         
         public async Task SetModuleState(string ModuleName, bool IsEnabed) {
-            ConfigurationDB.Configurations.AsQueryable().Where(Module => Module.ConfigurationName == ModuleName).FirstOrDefault().ConfigurationType = IsEnabed ? ConfigurationType.Enabled : ConfigurationType.Disabled;
+            ConfigurationDB.Configurations.Find(ModuleName).ConfigurationType = IsEnabed ? ConfigurationType.Enabled : ConfigurationType.Disabled;
             ConfigurationDB.SaveChanges();
 
             if (IsEnabed)

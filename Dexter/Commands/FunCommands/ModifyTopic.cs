@@ -31,7 +31,7 @@ namespace Dexter.Commands {
 
             IUser User = DiscordSocketClient.GetUser(FunTopic.ProposerID);
 
-            string Topic = new Regex(@"(^[a-z])|[?!.:,;]\s+(.)", RegexOptions.ExplicitCapture)
+            string Topic = new Regex(@"(^[a-z])|[?!.:;]\s+(.)", RegexOptions.ExplicitCapture)
                 .Replace(FunTopic.Topic.ToLower(), String => String.Value.ToUpper());
 
             await BuildEmbed(EmojiEnum.Sign)
@@ -104,11 +104,9 @@ namespace Dexter.Commands {
 
         public async Task RemoveTopic(int TopicID, TopicType TopicType) {
             FunTopic FunTopic = TopicType switch {
-                TopicType.Topic => FunTopicsDB.Topics
-                    .AsQueryable().Where(Topic => Topic.TopicID.Equals(TopicID)).FirstOrDefault(),
+                TopicType.Topic => FunTopicsDB.Topics.Find(TopicID),
 
-                TopicType.WouldYouRather => FunTopicsDB.WouldYouRather
-                    .AsQueryable().Where(Topic => Topic.TopicID.Equals(TopicID)).FirstOrDefault(),
+                TopicType.WouldYouRather => FunTopicsDB.WouldYouRather.Find(TopicID),
 
                 _ => null,
             };
@@ -140,10 +138,10 @@ namespace Dexter.Commands {
 
             switch (TopicType) {
                 case TopicType.Topic:
-                    FunTopicsDB.Topics.Remove(FunTopicsDB.Topics.AsQueryable().Where(Topic => Topic.TopicID == TopicID).FirstOrDefault());
+                    FunTopicsDB.Topics.Remove(FunTopicsDB.Topics.Find(TopicID));
                     break;
                 case TopicType.WouldYouRather:
-                    FunTopicsDB.Topics.Remove(FunTopicsDB.WouldYouRather.AsQueryable().Where(Topic => Topic.TopicID == TopicID).FirstOrDefault());
+                    FunTopicsDB.Topics.Remove(FunTopicsDB.WouldYouRather.Find(TopicID));
                     break;
             };
 
@@ -174,11 +172,9 @@ namespace Dexter.Commands {
 
         public async Task EditTopic(int TopicID, string EditedTopic, TopicType TopicType) {
             FunTopic FunTopic = TopicType switch {
-                TopicType.Topic => FunTopicsDB.Topics
-                    .AsQueryable().Where(Topic => Topic.TopicID.Equals(TopicID)).FirstOrDefault(),
+                TopicType.Topic => FunTopicsDB.Topics.Find(TopicID),
 
-                TopicType.WouldYouRather => FunTopicsDB.WouldYouRather
-                    .AsQueryable().Where(Topic => Topic.TopicID.Equals(TopicID)).FirstOrDefault(),
+                TopicType.WouldYouRather => FunTopicsDB.WouldYouRather.Find(TopicID),
 
                 _ => null,
             };
@@ -214,11 +210,9 @@ namespace Dexter.Commands {
             string EditedTopic = Parameters["EditedTopic"];
 
             FunTopic FunTopic = TopicType switch {
-                TopicType.Topic => FunTopicsDB.Topics
-                    .AsQueryable().Where(Topic => Topic.TopicID.Equals(TopicID)).FirstOrDefault(),
+                TopicType.Topic => FunTopicsDB.Topics.Find(TopicID),
 
-                TopicType.WouldYouRather => FunTopicsDB.WouldYouRather
-                    .AsQueryable().Where(Topic => Topic.TopicID.Equals(TopicID)).FirstOrDefault(),
+                TopicType.WouldYouRather => FunTopicsDB.WouldYouRather.Find(TopicID),
 
                 _ => null,
             };

@@ -1,0 +1,29 @@
+{
+  "SuggestionsChannel": 792657918309695498,
+  "StaffSuggestionsChannel": 792657937804951552,
+  "StorageGuild": 613441321751019550,
+  "Emoji": {
+    "Upvote": 614871269615206500,
+    "Downvote": 614871300334288907,
+    "Bin": 675727444849852437
+  },
+  "SuggestionEmoji": [
+    "Upvote",
+    "Downvote",
+    "Bin"
+  ],
+  "StorageChannelID": 792661500182790174,
+  "CommandRemovals": [
+    "c.suggest",
+    "~suggest",
+    "~suggestion",
+    "~suggestions"
+  ],
+  "StaffSuggestionEmoji": [
+    "Upvote",
+    "Downvote"
+  ],
+  "ReactionPass": 1,
+  "IdleDeclineTime": 604800,
+  "StaffVotingThreshold": 4
+}

@@ -1,0 +1,51 @@
+{
+  "EmojiGuildID": 613441321751019550,
+  "EmojiIDs": {
+    "love": 641308752699719700,
+    "annoyed": 641308752552919040,
+    "wut": 734033278784503898
+  },
+  "EightBall": {
+    "yes": [
+      "It is certain",
+      "It is decidedly so",
+      "Without a doubt",
+      "Yes - definitely",
+      "You may rely on it",
+      "As I see it, yes",
+      "Most likely",
+      "Outlook good",
+      "Yes",
+      "Signs point to yes"
+    ],
+    "no": [
+      "Don't count on it",
+      "My reply is no",
+      "My sources say no",
+      "Outlook not so good",
+      "Very doubtful"
+    ],
+    "uncertain": [
+      "Reply hazy, try again",
+      "Ask again later",
+      "Better not tell you now",
+      "Cannot predict now",
+      "Concentrate and ask again"
+    ]
+  },
+  "EightBallEmoji": {
+    "yes": "love",
+    "no": "annoyed",
+    "uncertain": "wut"
+  },
+  "HeadpatsDir": "Images/Headpats",
+  "HeadpatPositions": [
+    [ 34, 36, 62, 76 ],
+    [ 31, 39, 72, 76 ],
+    [ 25, 40, 78, 76 ],
+    [ 23, 39, 73, 72 ],
+    [ 30, 36, 64, 72 ]
+  ],
+  "HeadpatStorageGuild": 613441321751019550,
+  "HeadpatWebhookName": "HeadpatWebhook"
+}

@@ -27,7 +27,7 @@ namespace Dexter.Commands {
 
         [Command("warnings")]
         [Summary("Returns a record of warnings for a set user or your own.")]
-        [Alias("records", "record")]
+        [Alias("records", "record", "warns")]
         [BotChannel]
 
         public async Task WarningsCommand([Optional] IUser User) {

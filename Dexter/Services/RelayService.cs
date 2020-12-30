@@ -1,7 +1,6 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Databases.Relay;
 using Discord.WebSocket;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Services {

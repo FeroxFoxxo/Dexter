@@ -1,0 +1,10 @@
+{
+  "PFPDirectory": "Images/ProfilePictures",
+  "PFPExtensions": [
+    ".png",
+    ".jpg",
+    ".gif"
+  ],
+  "SecTillProfiling": 86400,
+  "DatabaseBackupChannel": 792658192874209330
+}

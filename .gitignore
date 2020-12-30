@@ -339,7 +339,6 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 
-# Confiugurations
-*.json
-
 log.txt
+/Dexter/Properties/launchSettings.json
+/Dexter/Credentials.json

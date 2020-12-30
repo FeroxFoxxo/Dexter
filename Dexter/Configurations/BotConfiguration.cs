@@ -9,12 +9,6 @@ namespace Dexter.Configurations {
     public class BotConfiguration : JSONConfig {
 
         /// <summary>
-        /// The TOKEN is the string of characters that the bot uses to log into its account. It is unique per bot.
-        /// </summary>
-        
-        public string Token { get; set; }
-
-        /// <summary>
         /// The PREFIX is the character that the bot uses to identify the message is a command input from a user.
         /// </summary>
         

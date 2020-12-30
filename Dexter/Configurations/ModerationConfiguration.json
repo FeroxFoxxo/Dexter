@@ -1,0 +1,10 @@
+﻿{
+  "WebhookChannel": 792658154668294193,
+  "WebhookName": "Dexter Moderation",
+  "DisabledReactionChannels": [
+    792657918309695498
+  ],
+  "BorkdayRoleID": 793682158727856151,
+  "StaffBorkdayRoleID": 793682190835515463,
+  "SecondsOfBorkday": 86400
+}

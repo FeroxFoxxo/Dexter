@@ -62,10 +62,8 @@ namespace Dexter.Services {
 
             if(!string.IsNullOrEmpty(Token))
                 await RunBot(Token);
-            if (!string.IsNullOrEmpty(BotConfiguration.Token))
-                await RunBot(BotConfiguration.Token);
             else
-                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Startup", $"The login token in the {BotConfiguration.GetType().Name.Prettify()} file was not set."));
+                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Startup", $"The login token in the command line arguments was not set!~"));
         }
 
         /// <summary>

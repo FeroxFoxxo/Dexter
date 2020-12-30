@@ -4,7 +4,6 @@ using Dexter.Enums;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

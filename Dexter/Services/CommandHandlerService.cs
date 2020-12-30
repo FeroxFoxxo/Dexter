@@ -81,7 +81,7 @@ namespace Dexter.Services {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle($"{DiscordSocketClient.CurrentUser.Username} is not avaliable in DMs!")
                     .WithDescription($"Heya! I'm not avaliable in DMs at the moment, " +
-                        $"please use {DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Name} to communicate with me!")
+                        $"please use `{DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Name}` to communicate with me! Preferably in a bot channel. <3")
                     .SendEmbed(Message.Channel);
                 return;
             }

@@ -60,8 +60,6 @@ namespace Dexter.Configurations {
 
         public List<string> CommandRemovals { get; set; }
 
-        public string DefaultAvatar { get; set; }
-
         public int IdleDeclineTime { get; set; }
 
         public int StaffVotingThreshold { get; set; }

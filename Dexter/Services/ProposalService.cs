@@ -572,13 +572,12 @@ namespace Dexter.Services {
             return new EmbedBuilder()
                 .WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
                 .WithColor(Color)
-                .WithThumbnailUrl(string.IsNullOrEmpty(Proposal.AvatarURL) ? User == null ? ProposalConfiguration.DefaultAvatar : User.GetTrueAvatarUrl() : Proposal.AvatarURL)
+                .WithThumbnailUrl(Proposal.AvatarURL)
                 .WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
                 .WithDescription(Proposal.Content)
                 .WithImageUrl(Proposal.ProxyURL)
                 .AddField(!string.IsNullOrEmpty(Proposal.Reason), "Reason:", Proposal.Reason)
-                .WithAuthor(string.IsNullOrEmpty(Proposal.Username) ? User == null ? "Unknown" : User.Username : Proposal.Username,
-                    string.IsNullOrEmpty(Proposal.AvatarURL) ? User == null ? ProposalConfiguration.DefaultAvatar : User.GetTrueAvatarUrl() : Proposal.AvatarURL)
+                .WithAuthor(string.IsNullOrEmpty(Proposal.Username) ? User == null ? "Unknown" : User.Username : Proposal.Username, Proposal.AvatarURL)
                 .WithCurrentTimestamp()
                 .WithFooter(Proposal.Tracker);
         }

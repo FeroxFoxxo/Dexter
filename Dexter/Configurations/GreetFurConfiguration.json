@@ -1,0 +1,19 @@
+{
+  "ApplicationName": "Dexter",
+  "CredentialFile": "Credentials.json",
+  "TokenFile": "Token",
+  "SpreadSheetID": "1nOJCMRLuZqY3gJGx-1Stj5Peq1vZaQvGL9wNUXEuE68",
+  "FortnightSpreadsheet": "Sheet1",
+  "TheBigPictureSpreadsheet": "The Big Picture",
+  "IDColumnIndex": "B",
+  "TotalID": "F",
+  "Information": {
+    "Notes": 16,
+    "Yes": 18,
+    "No": 19,
+    "Exempts": 20,
+    "W1": 21,
+    "W2": 22,
+    "Manager": 29
+  }
+}

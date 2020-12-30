@@ -47,3 +47,4 @@ steps:
     tagSource: 'gitTag'
     changeLogCompareToRelease: 'lastFullRelease'
     changeLogType: 'commitBased'
+    tagPattern: 'release-v[0-9]*\S*'

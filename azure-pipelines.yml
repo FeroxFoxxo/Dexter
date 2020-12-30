@@ -5,6 +5,10 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
+  MajorVersion: 1
+  MinorVersion: 0
+  InitialReleaseTagNumber: 1
+  IncrementReleaseTagNumber: $[counter(variables['InitialReleaseTagNumber'], 0)]
   solution: '**/*.sln'
 
 steps:
@@ -44,7 +48,7 @@ steps:
     repositoryName: 'Frostrix/Dexter'
     action: 'create'
     target: '$(Build.SourceVersion)'
-    tagSource: 'gitTag'
+    tagSource: 'userSpecifiedTag'
+    tag: 'v$(MajorVersion).$(MinorVersion).$(IncrementReleaseTagNumber)'
     changeLogCompareToRelease: 'lastFullRelease'
     changeLogType: 'commitBased'
-    tagPattern: 'release-v[0-9]*\S*'

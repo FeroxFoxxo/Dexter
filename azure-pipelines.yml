@@ -37,3 +37,13 @@ steps:
   inputs:
     pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
     artifactName: 'Dexter'
+
+- task: GitHubRelease@1
+  inputs:
+    gitHubConnection: 'github.com_Frostrix'
+    repositoryName: 'Frostrix/Dexter'
+    action: 'create'
+    target: '$(Build.SourceVersion)'
+    tagSource: 'gitTag'
+    changeLogCompareToRelease: 'lastFullRelease'
+    changeLogType: 'commitBased'

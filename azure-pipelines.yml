@@ -5,10 +5,6 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  MajorVersion: 1
-  MinorVersion: 0
-  InitialReleaseTagNumber: 1
-  IncrementReleaseTagNumber: $[counter(variables['InitialReleaseTagNumber'], 0)]
   solution: '**/*.sln'
 
 steps:
@@ -41,14 +37,3 @@ steps:
   inputs:
     pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
     artifactName: 'Dexter'
-
-- task: GitHubRelease@1
-  inputs:
-    gitHubConnection: 'github.com_Frostrix'
-    repositoryName: 'Frostrix/Dexter'
-    action: 'create'
-    target: '$(Build.SourceVersion)'
-    tagSource: 'userSpecifiedTag'
-    tag: 'v$(MajorVersion).$(MinorVersion).$(IncrementReleaseTagNumber)'
-    changeLogCompareToRelease: 'lastFullRelease'
-    changeLogType: 'commitBased'

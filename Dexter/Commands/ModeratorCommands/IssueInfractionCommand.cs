@@ -55,7 +55,7 @@ namespace Dexter.Commands {
         [RequireModerator]
 
         public async Task IssueMute(short PointsDeducted, IGuildUser User, TimeSpan Time, [Remainder] string Reason) {
-            if (PointsDeducted == 3 || PointsDeducted == 4)
+            if (PointsDeducted == 3 || PointsDeducted == 4 || PointsDeducted == 0)
                 await IssueInfraction(PointsDeducted, User, Time, Reason);
             else
                 await BuildEmbed(EmojiEnum.Annoyed)

@@ -26,7 +26,7 @@ namespace Dexter.Commands {
                 .AddField(!string.IsNullOrEmpty(GuildUser.Nickname), "Nickname", GuildUser.Nickname)
                 .AddField("Created", $"{GuildUser.CreatedAt:dd/MM/yyyy HH:mm:ss} ({GuildUser.CreatedAt.Humanize()})")
                 .AddField(GuildUser.JoinedAt.HasValue, "Joined", !GuildUser.JoinedAt.HasValue ? string.Empty : $"{(DateTimeOffset)GuildUser.JoinedAt:dd/MM/yyyy HH:mm:ss} ({GuildUser.JoinedAt.Humanize()})")
-                .AddField("User Status", GuildUser.Status)
+                .AddField("User Status", GuildUser.Status.Humanize())
                 .SendEmbed(Context.Channel);
         }
 

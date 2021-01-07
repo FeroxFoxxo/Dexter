@@ -1,6 +1,6 @@
 ﻿using Dexter.Enums;
 using Dexter.Extensions;
-using Dexter.Databases.Warnings;
+using Dexter.Databases.Infractions;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
@@ -15,30 +15,31 @@ namespace Dexter.Commands {
     public partial class ModeratorCommands {
 
         /// <summary>
-        /// The Purge Warnings method runs on PURGEWARNS. It sends a callback to the SendForAdminApproval
+        /// The Purge Infractions method runs on PURGEWARNS. It sends a callback to the SendForAdminApproval
         /// method, which will put it up to be voted on by the administrators. After this has been voted on, it will
         /// set all warnings to a revoked state and notify the user that their warnings have been removed.
         /// </summary>
         /// <param name="User">The user from which you wish all warnings to be cleared from.</param>
         /// <returns></returns>
 
-        [Command("purgewarns")]
-        [Summary("Removes all warnings from a user, having been sent to the admins for confirmation.")]
+        [Command("purgerecords")]
+        [Summary("Removes all infractions from a user, having been sent to the admins for confirmation.")]
+        [Alias("purgeinfractions")]
         [RequireAdministrator]
 
-        public async Task PurgeWarnings(IUser User) {
+        public async Task PurgeInfractions (IUser User) {
             await SendForAdminApproval(PurgeWarningsCallback,
                 new Dictionary<string, string>() {
                     { "UserID", User.Id.ToString() }
                 },
                 Context.User.Id,
-                $"{Context.User.Username} has proposed that the user {User.GetUserInformation()} should have all their warnings purged. " +
+                $"{Context.User.Username} has proposed that the user {User.GetUserInformation()} should have all their infractions purged. " +
                 $"On approval of this command, {User.Username}'s slate will be fully cleared."
             );
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle("Warnings Purge Confimation")
-                .WithDescription($"Heya! I've send the warnings purge for {User.GetUserInformation()} to the administrators for approval.")
+                .WithTitle("Infractions Purge Confimation")
+                .WithDescription($"Heya! I've send the infractions purge for {User.GetUserInformation()} to the administrators for approval.")
                 .AddField("Purge instantiated by", Context.User.GetUserInformation())
                 .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
@@ -55,14 +56,14 @@ namespace Dexter.Commands {
         public async void PurgeWarningsCallback(Dictionary<string, string> CallbackInformation) {
             ulong UserID = Convert.ToUInt64(CallbackInformation["UserID"]);
 
-            int Count = WarningsDB.GetWarnings(UserID).Length;
+            int Count = InfractionsDB.GetInfractions(UserID).Length;
 
-            await WarningsDB.Warnings.AsQueryable().Where(Warning => Warning.User == UserID).ForEachAsync(Warning => Warning.EntryType = EntryType.Revoke);
+            await InfractionsDB.Infractions.AsQueryable().Where(Warning => Warning.User == UserID).ForEachAsync(Warning => Warning.EntryType = EntryType.Revoke);
 
-            WarningsDB.SaveChanges();
+            InfractionsDB.SaveChanges();
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle("Warnings Purged")
+                .WithTitle("Infractions Purged")
                 .WithDescription($"Heya! I've purged {Count} warnings from your account. You now have a clean slate! <3")
                 .WithCurrentTimestamp()
                 .SendEmbed(await Client.GetUser(UserID).GetOrCreateDMChannelAsync());

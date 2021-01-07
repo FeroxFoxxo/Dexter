@@ -214,7 +214,7 @@ namespace Dexter.Services {
             // Set the message ID in the suggestion object to the ID of the embed.
             Proposal.MessageID = Embed.Id;
 
-            string TimerToken = CreateEventTimer(
+            string TimerToken = await CreateEventTimer(
                 DeclineSuggestion,
                 new() { { "Suggestion", Proposal.Tracker } },
                 ProposalConfiguration.IdleDeclineTime,
@@ -254,7 +254,7 @@ namespace Dexter.Services {
 
             Suggestion Suggestion = ProposalDB.Suggestions.Find(Token);
 
-            Suggestion.TimerToken = string.Empty;
+            Suggestion.TimerToken = "";
 
             await UpdateProposal(Proposal, ProposalStatus.Declined);
         }
@@ -351,7 +351,7 @@ namespace Dexter.Services {
                     if (Suggestion == null)
                         throw new Exception("Suggestion does not exist in database! Aborting...");
 
-                    Suggestion.TimerToken = CreateEventTimer(
+                    Suggestion.TimerToken = await CreateEventTimer(
                         DeclineStaffSuggestion,
                         new() { { "Suggestion", Proposal.Tracker } },
                         ProposalConfiguration.IdleDeclineTime,
@@ -440,7 +440,7 @@ namespace Dexter.Services {
 
             Proposal.Reason = "The staff team was too divided on this suggestion to make a confident judgement at this time.";
 
-            Suggestion.TimerToken = string.Empty;
+            Suggestion.TimerToken = "";
 
             await UpdateProposal(Proposal, ProposalStatus.Declined);
         }
@@ -478,7 +478,7 @@ namespace Dexter.Services {
                 case ProposalType.Suggestion:
                     Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
 
-                    if (!string.IsNullOrEmpty(Suggestion.TimerToken))
+                    if (Suggestion.TimerToken != "")
                         TimerService.RemoveTimer(Suggestion.TimerToken);
 
                     await UpdateSpecificProposal(Proposal, ProposalConfiguration.SuggestionsChannel, Proposal.MessageID);

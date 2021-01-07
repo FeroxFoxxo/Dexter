@@ -3,7 +3,7 @@
   "GuildID": 613441321751019550,
   "ModerationLogChannelID": 792657959192231976,
   "Prefix": "~",
-  "DeveloperMention": "<@615312875954634763>",
+  "DeveloperMention": " ",
   "ThumbnailURLs": [
     "",
     "https://us-furries.com/Dexter/DexAnnoyed.png",
@@ -11,11 +11,13 @@
     "https://us-furries.com/Dexter/DexWut.png",
     "https://us-furries.com/Dexter/DexSignOwO.png"
   ],
-  "EnableStartupAlert": true,
+  "EnableStartupAlert": false,
   "BotChannels": [
     792657895014793246
   ],
   "Help": "Dexter is the official USFurries Discord bot, used to moderate the server and provide useful tools. Made with love. <3\n\nFor more in depth help and information you should visit http://docs.usfurries.com.\n\nIf you wish to help in the bot's development, you can find his repository here: https://github.com/Frostrix/Dexter.",
   "TrackerLength": 6,
-  "RandomCharacters": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+  "RandomCharacters": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+  "CommitAPICall": "https://api.github.com/repos/Frostrix/Dexter/commits",
+  "EnableDatabaseBackups": false
 }

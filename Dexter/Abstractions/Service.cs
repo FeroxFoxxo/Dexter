@@ -84,12 +84,12 @@ namespace Dexter.Abstractions {
         /// <param name="TimerType">The given type of the timer, specifying if it should be removed after the set time (EXPIRE) or continue in the set interval.</param>
         /// <returns>The token assosiated with the timed event for use to refer to.</returns>
 
-        public string CreateEventTimer(Func<Dictionary<string, string>, Task> CallbackMethod,
+        public async Task<string> CreateEventTimer(Func<Dictionary<string, string>, Task> CallbackMethod,
                 Dictionary<string, string> CallbackParameters, int SecondsTillExpiration, TimerType TimerType) {
 
             string JSON = JsonConvert.SerializeObject(CallbackParameters);
 
-            return TimerService.AddTimer(JSON, CallbackMethod.Target.GetType().Name, CallbackMethod.Method.Name, SecondsTillExpiration, TimerType);
+            return await TimerService.AddTimer(JSON, CallbackMethod.Target.GetType().Name, CallbackMethod.Method.Name, SecondsTillExpiration, TimerType);
         }
 
         /// <summary>

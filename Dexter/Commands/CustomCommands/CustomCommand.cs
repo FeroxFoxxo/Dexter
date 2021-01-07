@@ -56,7 +56,7 @@ namespace Dexter.Commands {
                         $"added with the reply of `{Reply}`.");
 
                     await BuildEmbed(EmojiEnum.Love)
-                        .WithTitle($"The command `{CommandName}` was suggested!")
+                        .WithTitle($"The command `{BotConfiguration.Prefix}{CommandName}` was suggested!")
                         .WithDescription($"Once it has passed admin approval, " +
                             $"use `{BotConfiguration.Prefix}ccalias add` to add an alias to the command! \n" +
                             "Please note, to make the command ping a user if mentioned, add `USER` to the reply~! \n" +

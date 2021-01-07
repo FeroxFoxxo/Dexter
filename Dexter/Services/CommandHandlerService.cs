@@ -143,7 +143,7 @@ namespace Dexter.Services {
                         } else {
                             if (CommandContext.Message.Content.Length <= 1)
                                 return;
-                            else if (CommandContext.Message.Content.Substring(0, 2) == "~~" ||
+                            else if (CommandContext.Message.Content.Count(Character => Character == '~') > 1 ||
                                     ProposalConfiguration.CommandRemovals.Contains(CommandContext.Message.Content.Split(' ')[0]))
                                 return;
                             else await BuildEmbed(EmojiEnum.Annoyed)

@@ -32,7 +32,7 @@ namespace Dexter.Commands {
 
             await User.AddRoleAsync(Role);
 
-            CreateEventTimer(
+            await CreateEventTimer(
                 RemoveBorkday,
                 new() {
                     { "User", User.Id.ToString() },

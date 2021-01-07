@@ -66,43 +66,45 @@ namespace Dexter.Services {
                 );
             }
 
-            string DatabaseDirectory = Path.Join(Directory.GetCurrentDirectory(), "Databases");
+            if (BotConfiguration.EnableDatabaseBackups) {
+                string DatabaseDirectory = Path.Join(Directory.GetCurrentDirectory(), "Databases");
 
-            string BackupPath = Path.Join(Directory.GetCurrentDirectory(), "Backups");
+                string BackupPath = Path.Join(Directory.GetCurrentDirectory(), "Backups");
 
-            if (!Directory.Exists(BackupPath))
-                Directory.CreateDirectory(BackupPath);
+                if (!Directory.Exists(BackupPath))
+                    Directory.CreateDirectory(BackupPath);
 
-            string BackupZip = Path.Join(BackupPath, $"{DateTime.UtcNow:dd-MM-yyyy}.zip");
+                string BackupZip = Path.Join(BackupPath, $"{DateTime.UtcNow:dd-MM-yyyy}.zip");
 
-            if (File.Exists(BackupZip))
-                File.Delete(BackupZip);
+                if (File.Exists(BackupZip))
+                    File.Delete(BackupZip);
 
-            ZipFile.CreateFromDirectory(DatabaseDirectory, BackupZip, CompressionLevel.Optimal, true);
+                ZipFile.CreateFromDirectory(DatabaseDirectory, BackupZip, CompressionLevel.Optimal, true);
 
-            string[] Sizes = { "B", "KB", "MB", "GB", "TB" };
+                string[] Sizes = { "B", "KB", "MB", "GB", "TB" };
 
-            double FileLength = new FileInfo(BackupZip).Length;
+                double FileLength = new FileInfo(BackupZip).Length;
 
-            int Order = 0;
+                int Order = 0;
 
-            while (FileLength >= 1024 && Order < Sizes.Length - 1) {
-                Order++;
-                FileLength /= 1024;
+                while (FileLength >= 1024 && Order < Sizes.Length - 1) {
+                    Order++;
+                    FileLength /= 1024;
+                }
+
+                Stopwatch.Stop();
+
+                await (DiscordSocketClient.GetChannel(ProfilingConfiguration.DatabaseBackupChannel) as ITextChannel)
+                    .SendFileAsync(BackupZip, embed:
+                        BuildEmbed(EmojiEnum.Love)
+                            .WithTitle("Backup Successfully Concluded.")
+                            .WithDescription($"Haiya! The backup for {DateTime.UtcNow.ToShortDateString()} has been built " +
+                                $"with a file size of {string.Format("{0:0.##} {1}", FileLength, Sizes[Order])}.")
+                            .WithCurrentTimestamp()
+                            .WithFooter($"Profiling took {Stopwatch.Elapsed.Humanize()}")
+                            .Build()
+                    );
             }
-
-            Stopwatch.Stop();
-
-            await (DiscordSocketClient.GetChannel(ProfilingConfiguration.DatabaseBackupChannel) as ITextChannel)
-                .SendFileAsync(BackupZip, embed:
-                    BuildEmbed(EmojiEnum.Love)
-                        .WithTitle("Backup Successfully Concluded.")
-                        .WithDescription($"Haiya! The backup for {DateTime.UtcNow.ToShortDateString()} has been built " +
-                            $"with a file size of {string.Format("{0:0.##} {1}", FileLength, Sizes[Order])}.")
-                        .WithCurrentTimestamp()
-                        .WithFooter($"Profiling took {Stopwatch.Elapsed.Humanize()}")
-                        .Build()
-                );
         }
 
         /// <summary>

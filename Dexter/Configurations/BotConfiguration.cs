@@ -76,6 +76,10 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public int TrackerLength { get; set; }
+        
+        public string CommitAPICall { get; set; }
+
+        public bool EnableDatabaseBackups { get; set; }
 
     }
 

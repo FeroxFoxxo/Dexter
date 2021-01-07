@@ -53,7 +53,7 @@ namespace Dexter.Services {
         public async Task LoopThroughEvents() {
             long CurrentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-            await EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.ExpirationTime <= CurrentTime)
+            await EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.ExpirationTime <= CurrentTime && Timer.TimerType != TimerType.Expired)
                 .ForEachAsync(async (EventTimer Timer) => {
 
                     switch (Timer.TimerType) {
@@ -84,10 +84,10 @@ namespace Dexter.Services {
                 });
         }
 
-        public string AddTimer(string JSON, string ClassName, string MethodName, int SecondsTillExpiration, TimerType TimerType) {
+        public async Task<string> AddTimer(string JSON, string ClassName, string MethodName, int SecondsTillExpiration, TimerType TimerType) {
             string Token = CreateToken();
 
-            EventTimersDB.EventTimers.Add(new EventTimer() {
+            EventTimer Timer = new () {
                 Token = Token,
                 ExpirationLength = SecondsTillExpiration,
                 CallbackClass = ClassName,
@@ -95,20 +95,13 @@ namespace Dexter.Services {
                 CallbackParameters = JSON,
                 ExpirationTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + (TimerType != TimerType.Interval ? SecondsTillExpiration : 0),
                 TimerType = TimerType
-            });
+            };
 
-            EventTimersDB.SaveChanges();
+            EventTimersDB.EventTimers.Add(Timer);
 
-            return Token;
-        }
+            await EventTimersDB.SaveChangesAsync();
 
-        public void RemoveTimer(string TimerTracker) {
-            EventTimer Timer = EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.Token == TimerTracker).FirstOrDefault();
-
-            if (Timer != null)
-                EventTimersDB.EventTimers.Remove(Timer);
-
-            EventTimersDB.SaveChanges();
+            return Timer.Token;
         }
 
         /// <summary>
@@ -128,6 +121,26 @@ namespace Dexter.Services {
                 return Token;
             } else
                 return CreateToken();
+        }
+
+        public bool TimerExists(string TimerTracker) {
+            EventTimer Timer = EventTimersDB.EventTimers.Find(TimerTracker);
+
+            if (Timer == null)
+                return false;
+            else if (Timer.TimerType == TimerType.Expired)
+                return false;
+            else
+                return true;
+        }
+
+        public void RemoveTimer(string TimerTracker) {
+            EventTimer Timer = EventTimersDB.EventTimers.Find(TimerTracker);
+
+            if (Timer != null)
+                Timer.TimerType = TimerType.Expired;
+
+            EventTimersDB.SaveChanges();
         }
 
     }

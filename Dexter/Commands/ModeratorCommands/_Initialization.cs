@@ -2,7 +2,7 @@
 using Dexter.Configurations;
 using Dexter.Databases.Cooldowns;
 using Dexter.Databases.Relay;
-using Dexter.Databases.Warnings;
+using Dexter.Databases.Infractions;
 using Discord.WebSocket;
 
 namespace Dexter.Commands {
@@ -10,7 +10,7 @@ namespace Dexter.Commands {
     /// <summary>
     /// The ModeratorCommands module relates to recording of users in breach of rules and other, miscelaneous commands relating to the moderation of the server.
     /// </summary>
-    
+
     public partial class ModeratorCommands : DiscordModule {
 
         /// <summary>
@@ -20,10 +20,10 @@ namespace Dexter.Commands {
         public CooldownDB CooldownDB { get; set; }
 
         /// <summary>
-        /// The WarningsDB stores the warnings that these commands interface.
+        /// The InfractionsDB stores the warnings that these commands interface.
         /// </summary>
         
-        public WarningsDB WarningsDB { get; set; }
+        public InfractionsDB InfractionsDB { get; set; }
 
         /// <summary>
         /// The RelayDB stores the relays that are used to send messages to a channel in set intervals.

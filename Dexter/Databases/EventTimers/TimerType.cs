@@ -4,7 +4,9 @@
 
         Interval,
 
-        Expire
+        Expire,
+
+        Expired
 
     }
 

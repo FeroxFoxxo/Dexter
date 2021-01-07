@@ -33,6 +33,18 @@ namespace Dexter.Configurations {
 
         public int SecondsOfBorkday { get; set; }
 
+        public ulong MutedRoleID { get; set; }
+
+        public ulong RulesAndInfoChannel { get; set; }
+
+        public short MaxPoints { get; set; }
+
+        public int SecondsTillPointIncrement { get; set; }
+        
+        public ulong StaffBotsChannel { get; set; }
+
+        public string AdministratorMention { get; set; }
+
     }
 
 }

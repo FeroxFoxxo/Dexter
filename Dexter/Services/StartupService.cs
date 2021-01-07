@@ -63,7 +63,7 @@ namespace Dexter.Services {
             if(!string.IsNullOrEmpty(Token))
                 await RunBot(Token);
             else
-                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Startup", $"The login token in the command line arguments was not set!~"));
+                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Startup", $"The login token in the command line arguments was not set~!"));
         }
 
         /// <summary>
@@ -90,9 +90,6 @@ namespace Dexter.Services {
 
             SocketChannel LoggingChannel = DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID);
 
-            if (LoggingChannel == null || LoggingChannel is not ITextChannel)
-                return;
-
             Console.Clear();
 
             Console.Title = $"{DiscordSocketClient.CurrentUser.Username} v{Version} (Discord.Net v{DiscordConfig.Version})";
@@ -102,6 +99,9 @@ namespace Dexter.Services {
             await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(DiscordSocketClient.CurrentUser.Username));
 
             LoggingService.LockedCMDOut = false;
+
+            if (LoggingChannel == null || LoggingChannel is not ITextChannel)
+                return;
 
             Dictionary<string, List<string>> NulledConfigurations = new();
 
@@ -120,7 +120,7 @@ namespace Dexter.Services {
                                     return;
 
                             if (!NulledConfigurations.ContainsKey(Configuration.Name))
-                                NulledConfigurations.Add(Configuration.Name, new ());
+                                NulledConfigurations.Add(Configuration.Name, new());
 
                             NulledConfigurations[Configuration.Name].Add(Property.Name);
                         }
@@ -133,7 +133,7 @@ namespace Dexter.Services {
             HTTPClient.DefaultRequestHeaders.Add("User-Agent",
                 "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; WOW64; Trident/6.0)");
 
-            using HttpResponseMessage Response = HTTPClient.GetAsync("https://api.github.com/repos/Frostrix/Dexter/commits").Result;
+            using HttpResponseMessage Response = HTTPClient.GetAsync(BotConfiguration.CommitAPICall).Result;
             string JSON = Response.Content.ReadAsStringAsync().Result;
 
             dynamic Commits = JArray.Parse(JSON);
@@ -144,7 +144,7 @@ namespace Dexter.Services {
             foreach (KeyValuePair<string, List<string>> Configuration in NulledConfigurations)
                 UnsetConfigurations += $"**{Configuration.Key} -** {string.Join(", ", Configuration.Value.Take(Configuration.Value.Count - 1)) + (Configuration.Value.Count > 1 ? " and " : "") + Configuration.Value.LastOrDefault()}\n";
 
-            if (BotConfiguration.EnableStartupAlert)
+            if (BotConfiguration.EnableStartupAlert || NulledConfigurations.Count > 0)
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Startup complete!")
                     .WithDescription($"This is **{DiscordSocketClient.CurrentUser.Username} v{Version}** running **Discord.Net v{DiscordConfig.Version}**!")

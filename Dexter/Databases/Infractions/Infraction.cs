@@ -1,23 +1,23 @@
 ﻿using Dexter.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.Warnings {
+namespace Dexter.Databases.Infractions {
 
     /// <summary>
-    /// The Warning class contains information on a warning, such as the ID, issuer, user and reason.
-    /// It is stored in the WarningsDB and can be pulled from its related Warnings DBSet.
+    /// The Infraction class contains information on a warning, such as the ID, issuer, user and reason.
+    /// It is stored in the InfractionsDB and can be pulled from its related Infractions DBSet.
     /// </summary>
     
-    public class Warning {
+    public class Infraction {
 
         /// <summary>
-        /// The WarningID is the KEY of the table.
+        /// The InfractionID is the KEY of the table.
         /// Every warning has a unique ID, and this increases on the amount of warnings filled.
         /// </summary>
         
         [Key]
 
-        public int WarningID { get; set; }
+        public int InfractionID { get; set; }
 
         /// <summary>
         /// The Issuer field is the snowflake ID of the moderator that has warned the user.
@@ -48,6 +48,10 @@ namespace Dexter.Databases.Warnings {
         /// </summary>
         
         public long TimeOfIssue { get; set; }
+
+        public double InfrationTime { get; set; }
+
+        public short PointCost { get; set; }
 
     }
 

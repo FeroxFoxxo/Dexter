@@ -22,12 +22,17 @@ namespace Dexter.Commands {
         [BotChannel]
 
         public async Task InfractionsCommand(ulong UserID) {
-            EmbedBuilder[] Warnings = GetWarnings(UserID, Context.User.Id, $"<@{UserID}>", $"Unknown ({UserID})", true);
+            IUser User = DiscordSocketClient.GetUser(UserID);
+            
+            if (User == null) {
+                EmbedBuilder[] Warnings = GetWarnings(UserID, Context.User.Id, $"<@{UserID}>", $"Unknown ({UserID})", true);
 
-            if (Warnings.Length > 1)
-                await CreateReactionMenu(Warnings, Context.Channel);
-            else
-                await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
+                if (Warnings.Length > 1)
+                    await CreateReactionMenu(Warnings, Context.Channel);
+                else
+                    await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
+            } else
+                InfractionsCommand(User);
         }
 
         /// <summary>

@@ -11,7 +11,7 @@ namespace Dexter.Commands {
 
         [Command("topic")]
         [Summary("A topic starter command - perfect for when chat has died!")]
-        [Cooldown(120)]
+        [CommandCooldown(120)]
         public async Task TopicCommand() => await SendTopic(TopicType.Topic);
 
         [Command("topic")]

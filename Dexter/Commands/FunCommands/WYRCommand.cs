@@ -11,7 +11,8 @@ namespace Dexter.Commands {
 
         [Command("wyr")]
         [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from.")]
-        public async Task WYRCommand() => await SendTopic(TopicType.WouldYouRather);
+        [CommandCooldown(120)] 
+       public async Task WYRCommand() => await SendTopic(TopicType.WouldYouRather);
 
         [Command("wyr")]
         [BotChannel]

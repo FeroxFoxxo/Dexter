@@ -18,47 +18,39 @@ namespace Dexter.Commands {
                     "`REMOVE [TOPIC ID]` - removes a topic from the database.")]
         [CommandCooldown(120)]
 
-        public async Task TopicCommand([Optional] ActionType? UserActionType, [Remainder] string Topic) {
-            if (UserActionType.HasValue) {
-                ActionType ActionType = UserActionType.Value;
-
-                switch (ActionType) {
-                    case ActionType.Add:
-                        await AddTopic(Topic, TopicType.Topic);
-                        break;
-                    case ActionType.Get:
-                        await GetTopic(Topic, TopicType.Topic);
-                        break;
-                    case ActionType.Remove:
-                        if (int.TryParse(Topic, out int TopicID))
-                            await RemoveTopic(TopicID, TopicType.Topic);
-                        else
-                            await BuildEmbed(EmojiEnum.Annoyed)
-                                .WithTitle("Error Removing Topic.")
-                                .WithDescription("No topic ID provided! To use this command please use the syntax of `remove [TOPIC ID]`.")
-                                .SendEmbed(Context.Channel);
-                        break;
-                    case ActionType.Edit:
-                        if (int.TryParse(Topic.Split(' ')[0], out int EditTopicID))
-                            await EditTopic(EditTopicID, string.Join(' ', Topic.Split(' ').Skip(1).ToArray()), TopicType.Topic);
-                        else
-                            await BuildEmbed(EmojiEnum.Annoyed)
-                                .WithTitle("Error Editing Topic.")
-                                .WithDescription("No topic ID provided! To use this command please use the syntax of `edit [TOPIC ID] [EDITED TOPIC]`.")
-                                .SendEmbed(Context.Channel);
-                        break;
-                    case ActionType.Unknown:
-                        await SendTopic(TopicType.Topic);
-                        break;
-                    default:
+        public async Task TopicCommand([Optional] ActionType ActionType, [Remainder] string Topic) {
+            switch (ActionType) {
+                case ActionType.Add:
+                    await AddTopic(Topic, TopicType.Topic);
+                    break;
+                case ActionType.Get:
+                    await GetTopic(Topic, TopicType.Topic);
+                    break;
+                case ActionType.Remove:
+                    if (int.TryParse(Topic, out int TopicID))
+                        await RemoveTopic(TopicID, TopicType.Topic);
+                    else
                         await BuildEmbed(EmojiEnum.Annoyed)
-                            .WithTitle("Error Running Topic.")
-                            .WithDescription($"Unable to find the {ActionType} command.")
+                            .WithTitle("Error Removing Topic.")
+                            .WithDescription("No topic ID provided! To use this command please use the syntax of `remove [TOPIC ID]`.")
                             .SendEmbed(Context.Channel);
-                        break;
-                }
-            } else
-                await SendTopic(TopicType.Topic);
+                    break;
+                case ActionType.Edit:
+                    if (int.TryParse(Topic.Split(' ')[0], out int EditTopicID))
+                        await EditTopic(EditTopicID, string.Join(' ', Topic.Split(' ').Skip(1).ToArray()), TopicType.Topic);
+                    else
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Error Editing Topic.")
+                            .WithDescription("No topic ID provided! To use this command please use the syntax of `edit [TOPIC ID] [EDITED TOPIC]`.")
+                            .SendEmbed(Context.Channel);
+                    break;
+                case ActionType.Unknown:
+                    await SendTopic(TopicType.Topic);
+                    break;
+                default:
+                    await SendTopic(TopicType.Topic);
+                    break;
+            }
         }
 
     }

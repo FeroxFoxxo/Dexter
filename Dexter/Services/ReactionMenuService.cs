@@ -25,6 +25,8 @@ namespace Dexter.Services {
 
             if (File.Exists(DBPath))
                 File.Delete(DBPath);
+
+            ReactionMenuDB.Database.EnsureCreated();
         }
 
         public async Task ReactionMenu(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel Channel, SocketReaction Reaction) {

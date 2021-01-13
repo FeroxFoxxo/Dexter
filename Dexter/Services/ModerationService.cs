@@ -6,21 +6,30 @@ using Discord.Webhook;
 using Discord.WebSocket;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
+using Dexter.Databases.Infractions;
+using Microsoft.EntityFrameworkCore;
+using Dexter.Databases.EventTimers;
+using Dexter.Commands;
 
 namespace Dexter.Services {
 
     /// <summary>
-    /// The ModerationLog Service deals with logging certain events to a channel.
+    /// The Moderation Service deals with logging certain events to a channel.
     /// Currently, this only includes the logging of reactions to the channel.
     /// </summary>
     
-    public class ModerationLogService : Service {
+    public class ModerationService : Service {
 
         /// <summary>
-        /// The ModerationLogService is used to find and create the moderation logs webhook.
+        /// The ModerationService is used to find and create the moderation logs webhook.
         /// </summary>
         
         public ModerationConfiguration ModerationConfiguration { get; set; }
+
+        public InfractionsDB InfractionsDB { get; set; }
+
+        public ModeratorCommands ModeratorCommands { get; set; }
 
         /// <summary>
         /// The DiscordWebhookClient is used for sending messages to the logging channel.
@@ -36,13 +45,29 @@ namespace Dexter.Services {
         public override void Initialize() {
             DiscordSocketClient.ReactionRemoved += ReactionRemovedLog;
             DiscordSocketClient.Ready += CreateWebhook;
+            DiscordSocketClient.Ready += DexterProfileChecks;
+        }
+
+        public async Task DexterProfileChecks() {
+            await InfractionsDB.DexterProfiles.AsQueryable().ForEachAsync(
+                async DexterProfile => {
+                    if (DexterProfile.InfractionAmount < ModerationConfiguration.MaxPoints)
+                        if (string.IsNullOrEmpty(DexterProfile.CurrentPointTimer))
+                            DexterProfile.CurrentPointTimer = await CreateEventTimer(
+                                ModeratorCommands.IncrementPoints,
+                                new() { { "UserID", DexterProfile.UserID.ToString() } },
+                                ModerationConfiguration.SecondsTillPointIncrement,
+                                TimerType.Expire
+                            );
+                }
+            );
         }
 
         /// <summary>
         /// The Create Webhook method runs on Ready and is what initializes our webhook.
         /// </summary>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        
+
         public async Task CreateWebhook() {
             DiscordWebhookClient = await CreateOrGetWebhook(ModerationConfiguration.WebhookChannel, ModerationConfiguration.WebhookName);
         }

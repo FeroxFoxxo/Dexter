@@ -178,8 +178,8 @@ namespace Dexter.Commands {
                     await User.AddRoleAsync(Role);
             }
 
-            if (!string.IsNullOrEmpty(DexterProfile.CurrentPointTimer))
-                await CreateEventTimer(IncrementPoints, new() { { "UserID", User.Id.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
+            if (string.IsNullOrEmpty(DexterProfile.CurrentPointTimer))
+                DexterProfile.CurrentPointTimer = await CreateEventTimer(IncrementPoints, new() { { "UserID", User.Id.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
 
             InfractionsDB.Infractions.Add(new Infraction() {
                 Issuer = Context.User.Id,
@@ -241,8 +241,12 @@ namespace Dexter.Commands {
                 DexterProfile.InfractionAmount++;
                 if (DexterProfile.InfractionAmount < ModerationConfiguration.MaxPoints)
                     await CreateEventTimer(IncrementPoints, new() { { "UserID", UserID.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
-            } else if (DexterProfile.InfractionAmount > ModerationConfiguration.MaxPoints)
-                DexterProfile.InfractionAmount = ModerationConfiguration.MaxPoints;
+            } else {
+                if (DexterProfile.InfractionAmount > ModerationConfiguration.MaxPoints)
+                    DexterProfile.InfractionAmount = ModerationConfiguration.MaxPoints;
+
+                DexterProfile.CurrentPointTimer = string.Empty;
+            }
 
             InfractionsDB.SaveChanges();
         }

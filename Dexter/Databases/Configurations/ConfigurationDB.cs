@@ -1,7 +1,7 @@
 ﻿using Dexter.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Dexter.Databases.Configuration {
+namespace Dexter.Databases.Configurations {
 
     /// <summary>
     /// The ConfigurationDB contains a set of configurations of whether a module has been enabled or disabled.

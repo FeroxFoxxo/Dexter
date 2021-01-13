@@ -20,11 +20,13 @@ namespace Dexter.Commands {
                 _ => null,
             };
 
+            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2");
+
             if (FunTopic == null) {
                 await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle($"No {TopicType}s!")
-                    .WithDescription($"Heya! I could not find any {TopicType.ToString().ToLower()}s in the database. " +
-                        $"To add a {TopicType.ToString().ToLower()} to the database, please use `{BotConfiguration.Prefix}{TopicType.ToString().ToLower()} add BLANK`.")
+                    .WithTitle($"No {Name}s!")
+                    .WithDescription($"Heya! I could not find any {Name.ToLower()}s in the database. " +
+                        $"To add a {Name.ToLower()} to the database, please use `{BotConfiguration.Prefix}{Name.ToLower()} add BLANK`.")
                     .SendEmbed(Context.Channel);
                 return;
             }
@@ -39,16 +41,23 @@ namespace Dexter.Commands {
                 .WithTitle($"{Context.Client.CurrentUser.Username} Asks")
                 .WithDescription(Topic)
                 .WithFooter($"{TopicType} Written by {(User == null ? "Unknown" : User.Username)} • " +
-                    $"Add a {TopicType.ToString().ToLower()} using `{BotConfiguration.Prefix}{TopicType.ToString().ToLower()} add [TOPIC]`")
+                    $"Add a {Name.ToLower()} using `{BotConfiguration.Prefix}{Name.ToLower()} add [TOPIC]`")
                 .SendEmbed(Context.Channel);
         }
 
         public async Task AddTopic(string TopicEntry, TopicType TopicType) {
             TopicEntry = Regex.Replace(TopicEntry, @"[^\u0000-\u007F]+", "");
 
-            if (TopicEntry.Length > 1000)
-                throw new InvalidOperationException($"Heya! Please cut down on the length of your {TopicType.ToString().ToLower()}. " +
-                    $"It should be a maximum of 1000 characters. Currently this character count sits at {TopicEntry.Length}");
+            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2");
+
+            if (TopicEntry.Length > 1000) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle($"Unable To Add {Name}!")
+                    .WithDescription($"Heya! Please cut down on the length of your {Name.ToLower()}. " +
+                    $"It should be a maximum of 1000 characters. Currently this character count sits at {TopicEntry.Length}")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
 
             FunTopic FunTopic = TopicType switch {
                 TopicType.Topic => FunTopicsDB.Topics
@@ -60,9 +69,14 @@ namespace Dexter.Commands {
                 _ => null,
             };
 
-            if (FunTopic != null)
-                throw new InvalidOperationException($"The {TopicType.ToString().ToLower()} `{FunTopic.Topic}` " +
-                    $"has already been suggested by {DiscordSocketClient.GetUser(FunTopic.ProposerID).GetUserInformation()}!");
+            if (FunTopic != null) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle($"Unable To Add {Name}!")
+                    .WithDescription($"The {Name.ToLower()} `{FunTopic.Topic}` " +
+                    $"has already been suggested by {DiscordSocketClient.GetUser(FunTopic.ProposerID).GetUserInformation()}!")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
 
             await SendForAdminApproval(CreateTopicCallback,
                 new Dictionary<string, string>() {
@@ -71,10 +85,10 @@ namespace Dexter.Commands {
                     { "Proposer", Context.User.Id.ToString() }
                 },
                 Context.User.Id,
-                $"{Context.User.GetUserInformation()} has suggested that the {TopicType.ToString().ToLower()} `{TopicEntry}` should be added to Dexter.");
+                $"{Context.User.GetUserInformation()} has suggested that the {Name.ToLower()} `{TopicEntry}` should be added to Dexter.");
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"The {TopicType.ToString().ToLower()} `{(TopicEntry.Length > 200 ? $"{TopicEntry.Substring(0, 200)}..." : TopicEntry)}` was suggested!")
+                .WithTitle($"The {Name.ToLower()} `{(TopicEntry.Length > 200 ? $"{TopicEntry.Substring(0, 200)}..." : TopicEntry)}` was suggested!")
                 .WithDescription($"Once it has passed admin approval, it will be added to the database.")
                 .SendEmbed(Context.Channel);
         }
@@ -111,10 +125,17 @@ namespace Dexter.Commands {
                 _ => null,
             };
 
-            if (FunTopic == null)
-                throw new InvalidOperationException($"The {TopicType.ToString().ToLower()} {TopicID} does not exist in the database! " +
-                    $"Please use the `{BotConfiguration.Prefix}{TopicType.ToString().ToLower()} get " +
-                    $"{TopicType.ToString().ToUpper()}` command to get the ID of a {TopicType.ToString().ToLower()}.");
+            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2");
+
+            if (FunTopic == null) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle($"Unable To Remove {Name}.")
+                    .WithDescription($"The {Name.ToLower()} {TopicID} does not exist in the database! " +
+                    $"Please use the `{BotConfiguration.Prefix}{Name.ToLower()} get " +
+                    $"{TopicType.ToString().ToUpper()}` command to get the ID of a {Name.ToLower()}.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
 
             await SendForAdminApproval(RemoveTopicCallback,
                 new Dictionary<string, string>() {
@@ -122,10 +143,10 @@ namespace Dexter.Commands {
                     { "TopicType", ( (int) TopicType ).ToString() }
                 },
                 Context.User.Id,
-                $"{Context.User.GetUserInformation()} has suggested that the {TopicType.ToString().ToLower()} `{FunTopic.Topic}` should be removed from Dexter.");
+                $"{Context.User.GetUserInformation()} has suggested that the {Name.ToLower()} `{FunTopic.Topic}` should be removed from Dexter.");
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"The {TopicType.ToString().ToLower()} `" +
+                .WithTitle($"The {Name.ToLower()} `" +
                     $"{(FunTopic.Topic.Length > 200 ? $"{FunTopic.Topic.Substring(0, 200)}..." : FunTopic.Topic)}" +
                     $"` was suggested to be removed!")
                 .WithDescription($"Once it has passed admin approval, it will be removed from the database.")
@@ -159,8 +180,15 @@ namespace Dexter.Commands {
                 _ => null,
             };
 
-            if (FunTopic == null)
-                throw new InvalidOperationException($"The {TopicType.ToString().ToLower()} `{TopicEntry}` does not exist in the database!");
+            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2");
+
+            if (FunTopic == null) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle($"Unable To Get {Name}.")
+                    .WithDescription($"The {Name.ToLower()} `{TopicEntry}` does not exist in the database!")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"{TopicType} #{FunTopic.TopicID}")
@@ -179,10 +207,16 @@ namespace Dexter.Commands {
                 _ => null,
             };
 
-            if (FunTopic == null)
-                throw new InvalidOperationException($"The {TopicType.ToString().ToLower()} {TopicID} does not exist in the database! " +
-                    $"Please use the `{BotConfiguration.Prefix}{TopicType.ToString().ToLower()} get " +
-                    $"{TopicType.ToString().ToUpper()}` command to get the ID of a {TopicType.ToString().ToLower()}.");
+            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2");
+
+            if (FunTopic == null) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle($"Unable To Edit {Name}.")
+                    .WithDescription($"The {Name.ToLower()} {TopicID} does not exist in the database! " +
+                        $"Please use the `{BotConfiguration.Prefix}{Name.ToLower()} get " +
+                        $"{TopicType.ToString().ToUpper()}` command to get the ID of a {Name.ToLower()}.")
+                    .SendEmbed(Context.Channel);
+            }
 
             await SendForAdminApproval(EditTopicCallback,
                 new Dictionary<string, string>() {
@@ -191,11 +225,11 @@ namespace Dexter.Commands {
                     { "EditedTopic", EditedTopic }
                 },
                 Context.User.Id,
-                $"{Context.User.GetUserInformation()} has suggested that the {TopicType.ToString().ToLower()} `{FunTopic.Topic}` should be changed to `{EditedTopic}`."
+                $"{Context.User.GetUserInformation()} has suggested that the {Name.ToLower()} `{FunTopic.Topic}` should be changed to `{EditedTopic}`."
             );
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"The {TopicType.ToString().ToLower()} `" +
+                .WithTitle($"The {Name.ToLower()} `" +
                 $"{(FunTopic.Topic.Length > 100 ? $"{FunTopic.Topic.Substring(0, 100)}..." : FunTopic.Topic)}" +
                 $"` was suggested to be edited to `" +
                 $"{(EditedTopic.Length > 100 ? $"{EditedTopic.Substring(0, 100)}..." : EditedTopic)}" +

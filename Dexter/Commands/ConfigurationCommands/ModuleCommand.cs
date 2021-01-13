@@ -1,7 +1,7 @@
 ﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Dexter.Databases.Configuration;
+using Dexter.Databases.Configurations;
 using Discord.Commands;
 using System.Threading.Tasks;
 

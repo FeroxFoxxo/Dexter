@@ -1,7 +1,7 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Cooldowns;
-using Dexter.Databases.Relay;
+using Dexter.Databases.Relays;
 using Dexter.Databases.Infractions;
 using Discord.WebSocket;
 

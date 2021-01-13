@@ -39,14 +39,24 @@ namespace Dexter.Commands {
 
             switch (AliasActionType) {
                 case AliasActionType.Add:
-                    if (string.IsNullOrEmpty(Alias))
-                        throw new Exception("Alias is not given! Please enter an alias with this command.");
+                    if (string.IsNullOrEmpty(Alias)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Error Adding Alias.")
+                            .WithDescription("Alias is not given! Please enter an alias with this command.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
 
                     CustomCommand Add = CustomCommandDB.GetCommandByNameOrAlias(Alias);
 
-                    if (Add != null)
-                        throw new InvalidOperationException($"The command `{BotConfiguration.Prefix}{Add.CommandName}` " +
-                            $"already has the alias `{BotConfiguration.Prefix}{Alias}`!");
+                    if (Add != null) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Error Adding Alias.")
+                            .WithDescription($"The command `{BotConfiguration.Prefix}{Add.CommandName}` " +
+                            $"already has the alias `{BotConfiguration.Prefix}{Alias}`!")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
 
                     await SendForAdminApproval(AddAliasCallback,
                         new Dictionary<string, string>() {
@@ -62,13 +72,23 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
                     break;
                 case AliasActionType.Remove:
-                    if (string.IsNullOrEmpty(Alias))
-                        throw new Exception("Alias is not given! Please enter an alias with this command.");
+                    if (string.IsNullOrEmpty(Alias)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Error Removing Alias.")
+                            .WithDescription("Alias is not given! Please enter an alias with this command.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
 
                     CustomCommand Remove = CustomCommandDB.GetCommandByNameOrAlias(Alias);
 
-                    if (Remove == null)
-                        throw new InvalidOperationException($"No command with alias of `{BotConfiguration.Prefix}{Alias}` exists! Are you sure you spelt it correctly?");
+                    if (Remove == null) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Error Removing Alias.")
+                            .WithDescription($"No command with alias of `{BotConfiguration.Prefix}{Alias}` exists! Are you sure you spelt it correctly?")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
 
                     await SendForAdminApproval(AddAliasCallback,
                         new Dictionary<string, string>() {
@@ -86,8 +106,14 @@ namespace Dexter.Commands {
                 case AliasActionType.List:
                     CustomCommand List = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
-                    if (List == null)
-                        throw new InvalidOperationException($"The command `{BotConfiguration.Prefix}{CommandName}` doesn't exist!");
+                    if (List == null) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Error Listing Alias.")
+                            .WithDescription($"The command `{BotConfiguration.Prefix}{CommandName}` doesn't exist!")
+                            .SendEmbed(Context.Channel);
+                        return;
+
+                    }
 
                     List<string> AliasList = JsonConvert.DeserializeObject<List<string>>(List.Alias);
 
@@ -99,7 +125,11 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(AliasActionType.ToString());
+                    await BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Unable To Modify Alias.")
+                        .WithDescription($"The {AliasActionType} does not exist as an option!")
+                        .SendEmbed(Context.Channel);
+                    break;
             }
         }
 

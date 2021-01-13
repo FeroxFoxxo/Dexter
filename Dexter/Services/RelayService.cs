@@ -1,5 +1,5 @@
 ﻿using Dexter.Abstractions;
-using Dexter.Databases.Relay;
+using Dexter.Databases.Relays;
 using Discord.WebSocket;
 using System.Threading.Tasks;
 

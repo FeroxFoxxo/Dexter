@@ -1,4 +1,4 @@
-﻿namespace Dexter.Databases.Configuration {
+﻿namespace Dexter.Databases.Configurations {
 
     /// <summary>
     /// This enum specifies what state the module is in. Whether it be enabled or disabled, or essential to the usage of the bot.

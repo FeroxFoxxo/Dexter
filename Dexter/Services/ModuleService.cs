@@ -1,6 +1,6 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Attributes.Classes;
-using Dexter.Databases.Configuration;
+using Dexter.Databases.Configurations;
 using Discord;
 using Discord.Commands;
 using System;

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.Configuration {
+namespace Dexter.Databases.Configurations {
 
     /// <summary>
     /// The Configuration class contains information on a module, such as its name and configuration type.

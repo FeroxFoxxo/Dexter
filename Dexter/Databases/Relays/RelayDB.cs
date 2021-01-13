@@ -1,7 +1,7 @@
 ﻿using Dexter.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Dexter.Databases.Relay {
+namespace Dexter.Databases.Relays {
 
     /// <summary>
     /// The RelayDB contains a set of relays that will be sent on repeat in a channel.

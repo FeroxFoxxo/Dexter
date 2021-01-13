@@ -20,7 +20,7 @@ namespace Dexter.Commands {
 
         [Command("delrecord")]
         [Summary("Removes an infraction from a specified user based on the infraction's ID.")]
-        [Alias("deletewarn", "revokewarn", "delmute", "deletemute")]
+        [Alias("unmute", "unwarn", "delwarn", "delmute")]
         [RequireModerator]
 
         public async Task DeleteInfraction (int InfractionID) {
@@ -37,6 +37,9 @@ namespace Dexter.Commands {
 
             if (DexterProfile.InfractionAmount > ModerationConfiguration.MaxPoints)
                 DexterProfile.InfractionAmount = ModerationConfiguration.MaxPoints;
+
+            if (Infraction.PointCost > 2)
+                await Warned.RemoveRoleAsync(Context.Guild.GetRole(ModerationConfiguration.MutedRoleID));
 
             InfractionsDB.SaveChanges();
 

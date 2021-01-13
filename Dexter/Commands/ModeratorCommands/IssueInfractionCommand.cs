@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Humanizer;
 using Dexter.Databases.EventTimers;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Dexter.Commands {
 
@@ -65,6 +66,43 @@ namespace Dexter.Commands {
         }
 
         [Command("mute")]
+        [Summary("Issues a mute to a specified user. Does not add it to their records.")]
+        [Alias("muteUser")]
+        [RequireModerator]
+
+        public async Task IssueMute(IGuildUser User, TimeSpan Time, [Remainder] string Reason) {
+            DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
+
+            if (!string.IsNullOrEmpty(DexterProfile.CurrentMute))
+                TimerService.RemoveTimer(DexterProfile.CurrentMute);
+
+            IRole Role = Context.Guild.GetRole(ModerationConfiguration.MutedRoleID);
+
+            if (!User.RoleIds.Contains(ModerationConfiguration.MutedRoleID))
+                await User.AddRoleAsync(Role);
+
+            DexterProfile.CurrentMute = await CreateEventTimer(RemoveMutedRole, new() { { "UserID", User.Id.ToString() } }, Convert.ToInt32(Time.TotalSeconds), TimerType.Expire);
+
+            EmbedBuilder Embed = BuildEmbed(EmojiEnum.Love)
+                .WithTitle("Unrecorded Mute Issued!")
+                .WithDescription($"Warned {User.GetUserInformation()} for **{Time.Humanize(2)}** due to `{Reason}`. Please note that as this mute has not had a point count attached to it, it has not been recorded.");
+            
+            try {
+                await BuildEmbed(EmojiEnum.Love)
+                    .WithTitle($"Unrecorded Mute Applied!")
+                    .WithDescription($"You have been muted in `{Context.Guild.Name}` for `{Reason}` for a time of `{Time.Humanize(2)}`. We hope you enjoy your time. <3")
+                    .WithCurrentTimestamp()
+                    .SendEmbed(await User.GetOrCreateDMChannelAsync());
+
+                Embed.AddField("Success", $"The user has been successfully alerted of this unrecorded mute!");
+            } catch (HttpException) {
+                Embed.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
+            }
+
+            await Embed.SendEmbed(Context.Channel);
+        }
+
+        [Command("mute")]
         [Summary("Issues an infinite mute to a specified user given the point amount of 0.")]
         [Alias("muteUser")]
         [RequireModerator]
@@ -93,6 +131,13 @@ namespace Dexter.Commands {
 
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
 
+            if (DexterProfile.InfractionAmount + PointsDeducted > 4 && DexterProfile.InfractionAmount <= -4)
+                await BuildEmbed(EmojiEnum.Wut)
+                    .WithTitle($"Frequent Rulebreaker Inbound!!!")
+                    .WithDescription($"Haiya! It seems as though the user {User.GetUserInformation()} is currently standing on {DexterProfile.InfractionAmount}. Perhaps this is something the {ModerationConfiguration.AdministratorMention}s can dwell on. <3")
+                    .WithCurrentTimestamp()
+                    .SendEmbed(DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel);
+
             DexterProfile.InfractionAmount -= PointsDeducted;
 
             TimeSpan? AdditionalTime = null;
@@ -107,13 +152,6 @@ namespace Dexter.Commands {
                 AdditionalTime = TimeSpan.FromHours(2);
             else if (DexterProfile.InfractionAmount <= -4)
                 AdditionalTime = TimeSpan.FromHours(3);
-
-            if (DexterProfile.InfractionAmount + PointsDeducted > 4 && DexterProfile.InfractionAmount <= -4)
-                await BuildEmbed(EmojiEnum.Wut)
-                    .WithTitle($"Frequent Rulebreaker Inbound!!!")
-                    .WithDescription($"Haiya! It seems as though the user {User.GetUserInformation()} is currently standing on {DexterProfile.InfractionAmount}. Perhaps this is something the {ModerationConfiguration.AdministratorMention} can dwell on. <3")
-                    .WithCurrentTimestamp()
-                    .SendEmbed(DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel);
 
             if (AdditionalTime.HasValue) {
                 Time = Time.Add(AdditionalTime.Value);
@@ -162,8 +200,8 @@ namespace Dexter.Commands {
 
             if (Context.Channel.Id == ModerationConfiguration.StaffBotsChannel) {
                 Embed = BuildEmbed(EmojiEnum.Love)
-                   .WithTitle($"{InfractionType.ToString().Humanize()} {InfractionID} Issued! Current Points: {DexterProfile.InfractionAmount}.")
-                   .WithDescription($"{(InfractionType == InfractionType.Warning ? "Warned" : "Muted")} {User.GetUserInformation()} " +
+                   .WithTitle($"{Regex.Replace(InfractionType.ToString(), "([A-Z])([a-z]*)", " $1$2")} {InfractionID} Issued! Current Points: {DexterProfile.InfractionAmount}.")
+                   .WithDescription($"{(InfractionType == InfractionType.Warning ? "Warned" : "Muted")} {User.GetUserInformation()}" +
                        $"{(InfractionType == InfractionType.Mute ? $" for **{Time.Humanize(2)}**" : "")} who currently has **{TotalInfractions} " +
                        $"{(TotalInfractions == 1 ? "infraction" : "infractions")}** and has had **{PointsDeducted} {(PointsDeducted == 1 ? "point" : "points")} deducted.**")
                    .AddField("Issued By", Context.User.GetUserInformation())

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.Relay {
+namespace Dexter.Databases.Relays {
     
     public class Relay {
 

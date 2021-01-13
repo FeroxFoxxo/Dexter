@@ -7,6 +7,7 @@ using Discord.WebSocket;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,6 +19,13 @@ namespace Dexter.Services {
 
         public override void Initialize() {
             DiscordSocketClient.ReactionAdded += ReactionMenu;
+
+            // Clear reaction menus if exists.
+            string DBPath = Path.Combine(Directory.GetCurrentDirectory(), "Databases", $"{ReactionMenuDB.GetType().Name}.db");
+            Console.WriteLine($"DELETING {DBPath}");
+            if (File.Exists(DBPath)) {
+                File.Delete(DBPath);
+            }
         }
 
         public async Task ReactionMenu(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel Channel, SocketReaction Reaction) {

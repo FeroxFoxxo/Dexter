@@ -1,5 +1,5 @@
 ﻿using Dexter.Attributes.Methods;
-using Dexter.Databases.Relay;
+using Dexter.Databases.Relays;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;

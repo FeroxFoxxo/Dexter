@@ -121,7 +121,11 @@ namespace Dexter.Commands {
 
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(EntryType.ToString());
+                    await BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Unable To Modify Cooldown")
+                        .WithDescription($"The argument {EntryType} does not exist as an option to use on this command!")
+                        .SendEmbed(Context.Channel);
+                    break;
             }
 
         }

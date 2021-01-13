@@ -1,5 +1,5 @@
 ﻿using Dexter.Attributes.Methods;
-using Dexter.Databases.Relay;
+using Dexter.Databases.Relays;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
@@ -20,9 +20,13 @@ namespace Dexter.Commands {
         public async Task AddRelay(int MessageInterval, ITextChannel Channel, [Remainder] string Message) {
             Relay FindRelay = RelayDB.Relays.AsQueryable().Where(Relay => Relay.ChannelID.Equals(Channel.Id)).FirstOrDefault();
 
-            if (Message.Length > 1500)
-                throw new InvalidOperationException($"Heya! Please cut down on the length of your relay. " +
-                    $"It should be a maximum of 1500 characters. Currently this character count sits at {Message.Length}");
+            if (Message.Length > 1500) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Unable To Add Relay.")
+                    .WithDescription($"Heya! Please cut down on the length of your relay. " +
+                    $"It should be a maximum of 1500 characters. Currently this character count sits at {Message.Length}")
+                    .SendEmbed(Context.Channel);
+            }
 
             if (FindRelay != null) {
                 await BuildEmbed(EmojiEnum.Annoyed)

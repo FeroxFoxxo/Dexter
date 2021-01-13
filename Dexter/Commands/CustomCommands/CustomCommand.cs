@@ -36,15 +36,30 @@ namespace Dexter.Commands {
         public async Task CustomCommand (ActionType ActionType, string CommandName, [Optional] [Remainder] string Reply) {
             switch (ActionType) {
                 case ActionType.Add:
-                    if (string.IsNullOrEmpty(Reply))
-                        throw new Exception("Reply is not given! Please enter a reply with this command.");
+                    if (string.IsNullOrEmpty(Reply)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Unable To Add Reply.")
+                            .WithDescription("Reply is not given! Please enter a reply with this command.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
 
-                    if (CustomCommandDB.GetCommandByNameOrAlias(CommandName) != null)
-                        throw new InvalidOperationException($"A command with the name `{BotConfiguration.Prefix}{CommandName}` already exists!");
+                    if (CustomCommandDB.GetCommandByNameOrAlias(CommandName) != null) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Unable To Add Reply.")
+                            .WithDescription($"A command with the name `{BotConfiguration.Prefix}{CommandName}` already exists!")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
 
-                    if (Reply.Length > 1000)
-                        throw new InvalidOperationException($"Heya! Please cut down on your length of reply. " +
-                            $"It should be a maximum of 1000 characters. Currently this character count sits at {Reply.Length}");
+                    if (Reply.Length > 1000) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Unable To Add Reply.")
+                            .WithDescription("Heya! Please cut down on your length of reply. " +
+                            $"It should be a maximum of 1000 characters. Currently this character count sits at {Reply.Length}!")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
 
                     await SendForAdminApproval(CreateCommandCallback,
                         new Dictionary<string, string>() {
@@ -65,17 +80,32 @@ namespace Dexter.Commands {
 
                     break;
                 case ActionType.Edit:
-                    if (string.IsNullOrEmpty(Reply))
-                        throw new Exception("Reply is not given! Please enter a reply with this command.");
+                    if (string.IsNullOrEmpty(Reply)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Unable To Edit Reply.")
+                            .WithDescription("Reply is not given! Please enter a reply with this command.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
 
                     CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
-                    if (Command == null)
-                        throw new InvalidOperationException($"A command with the name `{BotConfiguration.Prefix}{CommandName}` doesn't exist!");
+                    if (Command == null) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Unable To Edit Reply.")
+                            .WithDescription($"A command with the name `{BotConfiguration.Prefix}{CommandName}` doesn't exist!")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
 
-                    if (Reply.Length > 1000)
-                        throw new InvalidOperationException($"Heya! Please cut down on your length of reply. " +
-                            $"It should be a maximum of 1000 characters. Currently this character count sits at {Reply.Length}");
+                    if (Reply.Length > 1000) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Unable To Edit Reply.")
+                            .WithDescription($"Heya! Please cut down on your length of reply. " +
+                                $"It should be a maximum of 1000 characters. Currently this character count sits at {Reply.Length}")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
 
                     await SendForAdminApproval(EditCommandCallback,
                         new Dictionary<string, string>() {
@@ -111,8 +141,13 @@ namespace Dexter.Commands {
                 case ActionType.Get:
                     CustomCommand GetCommand = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
-                    if (GetCommand == null)
-                        throw new InvalidOperationException($"A command with the name `{BotConfiguration.Prefix}{CommandName}` doesn't exist!");
+                    if (GetCommand == null) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Unable To Get Reply.")
+                            .WithDescription("A command with the name `{BotConfiguration.Prefix}{CommandName}` doesn't exist!")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"{BotConfiguration.Prefix}{CommandName}")
@@ -121,7 +156,11 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(ActionType.ToString());
+                    await BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Unable To Modify Reply.")
+                        .WithDescription($"The {ActionType} does not exist as an option!")
+                        .SendEmbed(Context.Channel);
+                    return;
             }
         }
 

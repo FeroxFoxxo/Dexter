@@ -2,7 +2,6 @@
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
-using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -12,12 +11,12 @@ namespace Dexter.Commands {
     public partial class FunCommands {
 
         [Command("topic")]
-        [BotChannel]
         [Summary("A topic starter command - perfect for when chat has died!\n" +
                     "`ADD [TOPIC]` - adds a topic to the database.\n" +
                     "`GET [TOPIC]` - gets a topic by name from the database.\n" +
                     "`EDIT [TOPIC ID] [TOPIC]` - edits a topic in the database.\n" +
                     "`REMOVE [TOPIC ID]` - removes a topic from the database.")]
+        [CommandCooldown(120)]
 
         public async Task TopicCommand([Optional] ActionType? UserActionType, [Remainder] string Topic) {
             if (UserActionType.HasValue) {

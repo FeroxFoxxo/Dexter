@@ -2,6 +2,8 @@
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
+using Humanizer;
+using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -19,39 +21,50 @@ namespace Dexter.Commands {
         [Alias("would you rather", "wouldyourather")]
         [CommandCooldown(120)]
 
-        public async Task WYRCommand([Optional] ActionType ActionType, [Remainder] string Topic) {
-            switch (ActionType) {
-                case ActionType.Add:
-                    await AddTopic(Topic, TopicType.WouldYouRather);
-                    break;
-                case ActionType.Get:
-                    await GetTopic(Topic, TopicType.WouldYouRather);
-                    break;
-                case ActionType.Remove:
-                    if (int.TryParse(Topic, out int TopicID))
-                        await RemoveTopic(TopicID, TopicType.WouldYouRather);
-                    else
-                        await BuildEmbed(EmojiEnum.Annoyed)
-                            .WithTitle("Error Removing WYR.")
-                            .WithDescription("No would you rather ID provided! To use this command please use the syntax of `remove [WYR ID]`.")
-                            .SendEmbed(Context.Channel);
-                    break;
-                case ActionType.Edit:
-                    if (int.TryParse(Topic.Split(' ')[0], out int EditTopicID))
-                        await EditTopic(EditTopicID, string.Join(' ', Topic.Split(' ').Skip(1).ToArray()), TopicType.WouldYouRather);
-                    else
-                        await BuildEmbed(EmojiEnum.Annoyed)
-                            .WithTitle("Error Editing WYR.")
-                            .WithDescription("No would you rather ID provided! To use this command please use the syntax of `edit [TOPIC ID] [EDITED TOPIC]`.")
-                            .SendEmbed(Context.Channel);
-                    break;
-                case ActionType.Unknown:
+        public async Task WYRCommand([Optional][Remainder] string Command) {
+            if (!string.IsNullOrEmpty(Command)) {
+                if (Enum.TryParse(Command.Split(" ")[0].ToLower().Pascalize(), out ActionType ActionType)) {
+                    string Topic = Command[(Command.Split(" ")[0].Length + 1)..];
+
+                    switch (ActionType) {
+                        case ActionType.Add:
+                            await AddTopic(Topic, TopicType.WouldYouRather);
+                            break;
+                        case ActionType.Get:
+                            await GetTopic(Topic, TopicType.WouldYouRather);
+                            break;
+                        case ActionType.Remove:
+                            if (int.TryParse(Topic, out int TopicID))
+                                await RemoveTopic(TopicID, TopicType.WouldYouRather);
+                            else
+                                await BuildEmbed(EmojiEnum.Annoyed)
+                                    .WithTitle("Error Removing WYR.")
+                                    .WithDescription("No would you rather ID provided! To use this command please use the syntax of `remove [WYR ID]`.")
+                                    .SendEmbed(Context.Channel);
+                            break;
+                        case ActionType.Edit:
+                            if (int.TryParse(Topic.Split(' ')[0], out int EditTopicID))
+                                await EditTopic(EditTopicID, string.Join(' ', Topic.Split(' ').Skip(1).ToArray()), TopicType.WouldYouRather);
+                            else
+                                await BuildEmbed(EmojiEnum.Annoyed)
+                                    .WithTitle("Error Editing WYR.")
+                                    .WithDescription("No would you rather ID provided! To use this command please use the syntax of `edit [TOPIC ID] [EDITED TOPIC]`.")
+                                    .SendEmbed(Context.Channel);
+                            break;
+                        case ActionType.Unknown:
+                            await SendTopic(TopicType.WouldYouRather);
+                            break;
+                        default:
+                            await BuildEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Error Running WYR.")
+                                .WithDescription($"Unable to find the {ActionType} command.")
+                                .SendEmbed(Context.Channel);
+                            break;
+                    }
+                } else
                     await SendTopic(TopicType.WouldYouRather);
-                    break;
-                default:
-                    await SendTopic(TopicType.WouldYouRather);
-                    break;
-            }
+            } else
+                await SendTopic(TopicType.WouldYouRather);
         }
 
     }

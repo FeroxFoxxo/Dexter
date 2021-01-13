@@ -20,7 +20,7 @@ namespace Dexter.Commands {
                 _ => null,
             };
 
-            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2");
+            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", "$1$2");
 
             if (FunTopic == null) {
                 await BuildEmbed(EmojiEnum.Annoyed)
@@ -48,7 +48,7 @@ namespace Dexter.Commands {
         public async Task AddTopic(string TopicEntry, TopicType TopicType) {
             TopicEntry = Regex.Replace(TopicEntry, @"[^\u0000-\u007F]+", "");
 
-            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2");
+            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", "$1$2");
 
             if (TopicEntry.Length > 1000) {
                 await BuildEmbed(EmojiEnum.Annoyed)
@@ -125,7 +125,7 @@ namespace Dexter.Commands {
                 _ => null,
             };
 
-            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2");
+            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", "$1$2");
 
             if (FunTopic == null) {
                 await BuildEmbed(EmojiEnum.Annoyed)
@@ -180,7 +180,7 @@ namespace Dexter.Commands {
                 _ => null,
             };
 
-            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2");
+            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", "$1$2");
 
             if (FunTopic == null) {
                 await BuildEmbed(EmojiEnum.Annoyed)
@@ -207,7 +207,7 @@ namespace Dexter.Commands {
                 _ => null,
             };
 
-            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2");
+            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", "$1$2");
 
             if (FunTopic == null) {
                 await BuildEmbed(EmojiEnum.Annoyed)

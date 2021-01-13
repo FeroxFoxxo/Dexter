@@ -86,7 +86,7 @@ namespace Dexter.Services {
                 EmbedBuilder Builder = BuildEmbed(ProposalStatus == ProposalStatus.Declined ? EmojiEnum.Annoyed : EmojiEnum.Love)
                     .WithTitle($"{Proposal.ProposalType.ToString().Prettify()} {Proposal.ProposalStatus}.")
                     .WithDescription($"The {Proposal.ProposalType.ToString().Prettify().ToLower()} `{Proposal.Tracker}` was successfully {Proposal.ProposalStatus.ToString().ToLower()} by {Approver.Mention}.")
-                    .AddField("Reason", string.IsNullOrEmpty(Reason) ? "No reason provided" : Reason)
+                    .AddField(!string.IsNullOrEmpty(Reason), "Reason", Reason)
                     .WithCurrentTimestamp();
 
                 IUser User = DiscordSocketClient.GetUser(Proposal.Proposer);

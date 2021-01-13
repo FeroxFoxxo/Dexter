@@ -22,10 +22,9 @@ namespace Dexter.Services {
 
             // Clear reaction menus if exists.
             string DBPath = Path.Combine(Directory.GetCurrentDirectory(), "Databases", $"{ReactionMenuDB.GetType().Name}.db");
-            Console.WriteLine($"DELETING {DBPath}");
-            if (File.Exists(DBPath)) {
+
+            if (File.Exists(DBPath))
                 File.Delete(DBPath);
-            }
         }
 
         public async Task ReactionMenu(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel Channel, SocketReaction Reaction) {

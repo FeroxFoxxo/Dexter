@@ -56,7 +56,7 @@ namespace Dexter.Extensions {
             if (!Directory.Exists(ImageCacheDir))
                 Directory.CreateDirectory(ImageCacheDir);
 
-            string FilePath = Path.Combine(ImageCacheDir, $"{ImageName}{Path.GetExtension(ImageURL.Split("size")[0])}");
+            string FilePath = Path.Combine(ImageCacheDir, $"{ImageName}{Path.GetExtension(ImageURL.Split("?")[0])}");
 
             using WebClient WebClient = new();
 

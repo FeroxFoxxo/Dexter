@@ -131,7 +131,7 @@ namespace Dexter.Commands {
 
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
 
-            if (DexterProfile.InfractionAmount + PointsDeducted > 4 && DexterProfile.InfractionAmount <= -4)
+            if (DexterProfile.InfractionAmount - PointsDeducted > 4 && DexterProfile.InfractionAmount <= -4)
                 await BuildEmbed(EmojiEnum.Wut)
                     .WithTitle($"Frequent Rulebreaker Inbound!!!")
                     .WithDescription($"Haiya! It seems as though the user {User.GetUserInformation()} is currently standing on {DexterProfile.InfractionAmount}. Perhaps this is something the {ModerationConfiguration.AdministratorMention}s can dwell on. <3")

@@ -19,7 +19,7 @@ namespace Dexter.Extensions {
         /// <param name="Topics">The topics field is the set of fun topics you wish to query from.</param>
         /// <returns>A tasked result of an instance of a fun object.</returns>
         
-        public static async Task<FunTopic> GetRandomTopic(this DbSet<FunTopic> Topics) {
+        public static async Task<FunTopic> GetRandomTopic(this DbSet<FunTopic> Topics, TopicType TopicType) {
             if (!Topics.AsQueryable().Any())
                 return null;
 
@@ -28,10 +28,10 @@ namespace Dexter.Extensions {
             FunTopic FunTopic = Topics.Find(RandomID);
 
             if (FunTopic != null)
-                if (FunTopic.EntryType == EntryType.Issue)
+                if (FunTopic.EntryType == EntryType.Issue && FunTopic.TopicType == TopicType)
                     return FunTopic;
 
-            return await Topics.GetRandomTopic();
+            return await Topics.GetRandomTopic(TopicType);
         }
 
     }

@@ -1,24 +1,68 @@
 ﻿using Dexter.Databases.FunTopics;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Discord;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Humanizer;
+using Discord;
 
 namespace Dexter.Commands {
 
     public partial class FunCommands {
 
+        public async Task RunTopic (string Command, TopicType TopicType) {
+            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", "$1$2");
+
+            if (!string.IsNullOrEmpty(Command)) {
+                if (Enum.TryParse(Command.Split(" ")[0].ToLower().Pascalize(), out Enums.ActionType ActionType)) {
+                    string Topic = Command[(Command.Split(" ")[0].Length + 1)..];
+
+                    switch (ActionType) {
+                        case Enums.ActionType.Add:
+                            await AddTopic(Topic, TopicType);
+                            break;
+                        case Enums.ActionType.Get:
+                            await GetTopic(Topic, TopicType);
+                            break;
+                        case Enums.ActionType.Remove:
+                            if (int.TryParse(Topic, out int TopicID))
+                                await RemoveTopic(TopicID, TopicType);
+                            else
+                                await BuildEmbed(EmojiEnum.Annoyed)
+                                    .WithTitle($"Error Removing {Name}.")
+                                    .WithDescription($"No {Name.ToLower()} ID provided! To use this command please use the syntax of `remove [ID]`.")
+                                    .SendEmbed(Context.Channel);
+                            break;
+                        case Enums.ActionType.Edit:
+                            if (int.TryParse(Topic.Split(' ')[0], out int EditTopicID))
+                                await EditTopic(EditTopicID, string.Join(' ', Topic.Split(' ').Skip(1).ToArray()), TopicType);
+                            else
+                                await BuildEmbed(EmojiEnum.Annoyed)
+                                    .WithTitle($"Error Editing {Name}.")
+                                    .WithDescription($"No {Name.ToLower()} ID provided! To use this command please use the syntax of `edit [ID] [TOPIC]`.")
+                                    .SendEmbed(Context.Channel);
+                            break;
+                        case Enums.ActionType.Unknown:
+                            await SendTopic(TopicType);
+                            break;
+                        default:
+                            await BuildEmbed(EmojiEnum.Annoyed)
+                                .WithTitle($"Error Running {Name}.")
+                                .WithDescription($"Unable to find the {ActionType} command.")
+                                .SendEmbed(Context.Channel);
+                            break;
+                    }
+                } else
+                    await SendTopic(TopicType);
+            } else
+                await SendTopic(TopicType);
+        }
+
         public async Task SendTopic(TopicType TopicType) {
-            FunTopic FunTopic = TopicType switch {
-                TopicType.Topic => await FunTopicsDB.Topics.GetRandomTopic(),
-                TopicType.WouldYouRather => await FunTopicsDB.WouldYouRather.GetRandomTopic(),
-                _ => null,
-            };
+            FunTopic FunTopic = await FunTopicsDB.Topics.GetRandomTopic(TopicType);
 
             string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", "$1$2");
 
@@ -59,15 +103,7 @@ namespace Dexter.Commands {
                 return;
             }
 
-            FunTopic FunTopic = TopicType switch {
-                TopicType.Topic => FunTopicsDB.Topics
-                    .AsQueryable().Where(Topic => Topic.Topic.Equals(TopicEntry)).FirstOrDefault(),
-                
-                TopicType.WouldYouRather => FunTopicsDB.WouldYouRather
-                    .AsQueryable().Where(Topic => Topic.Topic.Equals(TopicEntry)).FirstOrDefault(),
-                
-                _ => null,
-            };
+            FunTopic FunTopic = FunTopicsDB.Topics.AsQueryable().Where(Topic => Topic.Topic.Equals(TopicEntry) && Topic.EntryType == EntryType.Issue && Topic.TopicType == TopicType).FirstOrDefault();
 
             if (FunTopic != null) {
                 await BuildEmbed(EmojiEnum.Annoyed)
@@ -98,32 +134,22 @@ namespace Dexter.Commands {
             TopicType TopicType = (TopicType)int.Parse(Parameters["TopicType"]);
             ulong Proposer = ulong.Parse(Parameters["Proposer"]);
 
-            DbSet<FunTopic> TopicDatabase = TopicType switch {
-                TopicType.Topic => FunTopicsDB.Topics,
-                TopicType.WouldYouRather => FunTopicsDB.WouldYouRather,
-                _ => null
-            };
-
-            FunTopic FunTopic = new () {
-                Topic = Topic,
-                EntryType = EntryType.Issue,
-                ProposerID = Proposer,
-                TopicID = TopicDatabase.Count() + 1
-            };
-
-            TopicDatabase.Add(FunTopic);
+            FunTopicsDB.Topics.Add(
+                new() {
+                    Topic = Topic,
+                    EntryType = EntryType.Issue,
+                    ProposerID = Proposer,
+                    TopicID = FunTopicsDB.Topics.Count() + 1,
+                    TopicType = TopicType
+                }
+            );
 
             FunTopicsDB.SaveChanges();
         }
 
         public async Task RemoveTopic(int TopicID, TopicType TopicType) {
-            FunTopic FunTopic = TopicType switch {
-                TopicType.Topic => FunTopicsDB.Topics.Find(TopicID),
-
-                TopicType.WouldYouRather => FunTopicsDB.WouldYouRather.Find(TopicID),
-
-                _ => null,
-            };
+            FunTopic FunTopic = FunTopicsDB.Topics
+                    .AsQueryable().Where(Topic => Topic.TopicID == TopicID && Topic.EntryType == EntryType.Issue && Topic.TopicType == TopicType).FirstOrDefault();
 
             string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", "$1$2");
 
@@ -157,28 +183,17 @@ namespace Dexter.Commands {
             int TopicID = int.Parse(Parameters["TopicID"]);
             TopicType TopicType = (TopicType)int.Parse(Parameters["TopicType"]);
 
-            switch (TopicType) {
-                case TopicType.Topic:
-                    FunTopicsDB.Topics.Remove(FunTopicsDB.Topics.Find(TopicID));
-                    break;
-                case TopicType.WouldYouRather:
-                    FunTopicsDB.Topics.Remove(FunTopicsDB.WouldYouRather.Find(TopicID));
-                    break;
-            };
+            FunTopic FunTopic = FunTopicsDB.Topics
+                    .AsQueryable().Where(Topic => Topic.TopicID == TopicID && Topic.EntryType == EntryType.Issue && Topic.TopicType == TopicType).FirstOrDefault();
+
+            FunTopic.EntryType = EntryType.Revoke;
 
             FunTopicsDB.SaveChanges();
         }
 
         public async Task GetTopic(string TopicEntry, TopicType TopicType) {
-            FunTopic FunTopic = TopicType switch {
-                TopicType.Topic => FunTopicsDB.Topics
-                    .AsQueryable().Where(Topic => Topic.Topic.Equals(TopicEntry)).FirstOrDefault(),
-
-                TopicType.WouldYouRather => FunTopicsDB.WouldYouRather
-                    .AsQueryable().Where(Topic => Topic.Topic.Equals(TopicEntry)).FirstOrDefault(),
-
-                _ => null,
-            };
+            FunTopic FunTopic = FunTopicsDB.Topics
+                    .AsQueryable().Where(Topic => Topic.Topic.Equals(TopicEntry) && Topic.EntryType == EntryType.Issue && Topic.TopicType == TopicType).FirstOrDefault();
 
             string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", "$1$2");
 
@@ -199,13 +214,8 @@ namespace Dexter.Commands {
         }
 
         public async Task EditTopic(int TopicID, string EditedTopic, TopicType TopicType) {
-            FunTopic FunTopic = TopicType switch {
-                TopicType.Topic => FunTopicsDB.Topics.Find(TopicID),
-
-                TopicType.WouldYouRather => FunTopicsDB.WouldYouRather.Find(TopicID),
-
-                _ => null,
-            };
+            FunTopic FunTopic = FunTopicsDB.Topics
+                    .AsQueryable().Where(Topic => Topic.TopicID == TopicID && Topic.EntryType == EntryType.Issue && Topic.TopicType == TopicType).FirstOrDefault();
 
             string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", "$1$2");
 
@@ -243,13 +253,8 @@ namespace Dexter.Commands {
             TopicType TopicType = (TopicType)int.Parse(Parameters["TopicType"]);
             string EditedTopic = Parameters["EditedTopic"];
 
-            FunTopic FunTopic = TopicType switch {
-                TopicType.Topic => FunTopicsDB.Topics.Find(TopicID),
-
-                TopicType.WouldYouRather => FunTopicsDB.WouldYouRather.Find(TopicID),
-
-                _ => null,
-            };
+            FunTopic FunTopic = FunTopicsDB.Topics
+                    .AsQueryable().Where(Topic => Topic.TopicID == TopicID && Topic.EntryType == EntryType.Issue && Topic.TopicType == TopicType).FirstOrDefault();
 
             FunTopic.Topic = EditedTopic;
 

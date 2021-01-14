@@ -35,6 +35,7 @@ namespace Dexter.Databases.FunTopics {
         
         public EntryType EntryType { get; set; }
 
+        public TopicType TopicType { get; set; }
     }
 
 }

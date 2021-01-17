@@ -10,6 +10,13 @@ namespace Dexter.Commands {
 
     public partial class MuzzleCommands {
 
+        /// <summary>
+        /// Unmuzzles a target user and notifies them of it.
+        /// </summary>
+        /// <remarks>This command is Staff-only.</remarks>
+        /// <param name="User">The target user</param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+
         [Command("unmuzzle")]
         [Summary("Unmuzzles the specified user.")]
         [RequireModerator]

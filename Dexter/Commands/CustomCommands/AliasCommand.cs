@@ -23,7 +23,7 @@ namespace Dexter.Commands {
         /// <param name="AliasActionType">The AliasActionType specifies whether the action is to add or remove the alias from the command.</param>
         /// <param name="CommandName">The CommandName specifies the command that you want the alias to be applied to.</param>
         /// <param name="Alias">The Alias is the string of the alias that you wish to be applied to the command.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         [Command("ccalias")]
         [Summary("Modifies a custom commands aliases.\n" +
@@ -139,7 +139,7 @@ namespace Dexter.Commands {
         /// <param name="Parameters">The called back parameters:
         ///     CommandName = The name of the command you wish to add the alias to.
         ///     Alias = The alias you wish to add to the command.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         public void AddAliasCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];
@@ -165,7 +165,7 @@ namespace Dexter.Commands {
         /// <param name="Parameters">The called back parameters:
         ///     CommandName = The name of the command you wish to remove the alias from.
         ///     Alias = The alias you wish to remove from the command.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         public void RemoveAliasCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];

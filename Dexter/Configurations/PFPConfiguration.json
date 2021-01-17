@@ -1,0 +1,9 @@
+{
+  "PFPDirectory": "Images/ProfilePictures",
+  "PFPExtensions": [
+    ".png",
+    ".jpg",
+    ".gif"
+  ],
+  "SecTillPFPChange": 86400
+}

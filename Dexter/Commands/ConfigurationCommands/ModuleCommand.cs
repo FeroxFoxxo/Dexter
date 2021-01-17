@@ -13,7 +13,7 @@ namespace Dexter.Commands {
         /// The ListModule method runs on MODULES and will list all the enabled, disabled and essential commands when
         /// given no parameters to the command, sending it into the specified channel.
         /// </summary>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         [Command("modules")]
         [Summary("Lists all modules in the bot's arsenal.")]
@@ -35,7 +35,7 @@ namespace Dexter.Commands {
         /// </summary>
         /// <param name="ModuleActionType">The ModuleActionType specifies the action you wish to apply to the command, whether that be ENABLE, DISABLE of LIST.</param>
         /// <param name="ModuleName">The ModuleName specifies the name of the module that you wish the action to be applied to.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         [Command("modules")]
         [Summary("Performs an action on a module in the command service.")]

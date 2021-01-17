@@ -18,7 +18,7 @@ namespace Dexter.Commands {
         /// </summary>
         /// <remarks>This action requires administrator approval.</remarks>
         /// <param name="Channel">The target channel where the relay is to be removed.</param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("clearrelay")]
         [Summary("Clears a channel's relay in the related database.")]

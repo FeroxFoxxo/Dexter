@@ -66,7 +66,7 @@ namespace Dexter.Services {
         /// <summary>
         /// The Create Webhook method runs on Ready and is what initializes our webhook.
         /// </summary>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         public async Task CreateWebhook() {
             DiscordWebhookClient = await CreateOrGetWebhook(ModerationConfiguration.WebhookChannel, ModerationConfiguration.WebhookName);
@@ -78,7 +78,7 @@ namespace Dexter.Services {
         /// <param name="UserMessage">An instance of the message the reaction has been removed from.</param>
         /// <param name="MessageChannel">The channel of which the reaction has been removed in - used to check if it's from a channel that is often removed from.</param>
         /// <param name="Reaction">An object containing the reaction that had been removed.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
         
         public async Task ReactionRemovedLog(Cacheable<IUserMessage, ulong> UserMessage, ISocketMessageChannel MessageChannel, SocketReaction Reaction) {
             if (ModerationConfiguration.DisabledReactionChannels.Contains(MessageChannel.Id))

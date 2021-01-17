@@ -16,7 +16,7 @@ namespace Dexter.Commands {
         /// <summary>
         /// Displays the information from the Google Sheets database corresponding to the context user.
         /// </summary>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("gfactivity")]
         [Summary("Gets the GreetFur's Activity for the fortnight.")]

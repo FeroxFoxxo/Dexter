@@ -25,7 +25,7 @@ namespace Dexter.Commands {
         /// <param name="PointsDeducted">The number of points to deduct to the user's Dexter Profile for automoderation purposes.</param>
         /// <param name="User">The user of which you wish to warn.</param>
         /// <param name="Reason">The reason for the user having been warned.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         [Command("warn")]
         [Summary("Issues a warning to a specified user.")]
@@ -51,7 +51,7 @@ namespace Dexter.Commands {
         /// <param name="User">The user of which you wish to mute.</param>
         /// <param name="Time">The duration of the mute.</param>
         /// <param name="Reason">The reason for the user having been mute.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         [Command("mute")]
         [Summary("Issues a mute to a specified user.")]
@@ -75,7 +75,7 @@ namespace Dexter.Commands {
         /// <param name="User"></param>
         /// <param name="Time"></param>
         /// <param name="Reason"></param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("mute")]
         [Summary("Issues a mute to a specified user. Does not add it to their records.")]
@@ -120,7 +120,7 @@ namespace Dexter.Commands {
         /// <param name="PointsDeducted">The number of points to remove from the user's Dexter profile. Must be set to 0.</param>
         /// <param name="User">Target user to mute.</param>
         /// <param name="Reason">A string description of the reason why the mute was issued.</param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("mute")]
         [Summary("Issues an infinite mute to a specified user given the point amount of 0.")]
@@ -145,7 +145,7 @@ namespace Dexter.Commands {
         /// <param name="User">The target user.</param>
         /// <param name="Time">The duration of the mute.</param>
         /// <param name="Reason">A string description of the reason why the mute was issued.</param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task IssueInfraction(short PointsDeducted, IGuildUser User, TimeSpan Time, [Remainder] string Reason) {
             if (Reason.Length > 250) {
@@ -269,7 +269,7 @@ namespace Dexter.Commands {
         /// A string-string dictionary containing a definition for "UserID".
         /// This value should be parsable to a type of <c>ulong</c> (User ID).
         /// </param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task IncrementPoints(Dictionary<string, string> Parameters) {
             ulong UserID = ulong.Parse(Parameters["UserID"]);
@@ -297,7 +297,7 @@ namespace Dexter.Commands {
         /// A string-string dictionary containing a definition for "UserID".
         /// This value should be parsable to a type of <c>ulong</c> (User ID).
         /// </param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task RemoveMutedRole(Dictionary<string, string> Parameters) {
             ulong UserID = ulong.Parse(Parameters["UserID"]);

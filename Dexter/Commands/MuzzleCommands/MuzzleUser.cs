@@ -12,7 +12,7 @@ namespace Dexter.Commands {
         /// Performs the muzzling of a target user, a timed event is set up to undo this at the adequate time.
         /// </summary>
         /// <param name="GuildUser">The target user</param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task Muzzle (IGuildUser GuildUser) {
             await GuildUser.AddRolesAsync(new IRole[2] {
@@ -35,7 +35,7 @@ namespace Dexter.Commands {
         /// A string-string dictionary containing a definition for "User".
         /// This value should be parsable to a <c>ulong</c>.
         /// </param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task UnmuzzleCallback(Dictionary<string, string> Parameters) {
             ulong UserID = Convert.ToUInt64(Parameters["User"]);
@@ -52,7 +52,7 @@ namespace Dexter.Commands {
         /// Removes the "Muzzled" and "Reaction Muted" role from a given user.
         /// </summary>
         /// <param name="GuildUser">The target user</param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task Unmuzzle (IGuildUser GuildUser) {
             await GuildUser.RemoveRolesAsync(new IRole[2] {

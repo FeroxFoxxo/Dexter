@@ -67,7 +67,7 @@ namespace Dexter.Services {
         /// <param name="Approver">The administrator who has approved the given suggestion.</param>
         /// <param name="MessageChannel">The channel in which the approval command was run.</param>
         /// <param name="ProposalStatus">The type of proposal status you wish to set the embed to.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
         
         public async Task EditProposal(string Tracker, string Reason, IUser Approver, IMessageChannel MessageChannel, ProposalStatus ProposalStatus) {
             Proposal Proposal = ProposalDB.GetProposalByNameOrID(Tracker);
@@ -112,7 +112,7 @@ namespace Dexter.Services {
         /// <param name="CachedMessage">The cached message the reaction was applied to, used to get the suggestion it relates to.</param>
         /// <param name="MessageChannel">The channel of which the reaction was added to.</param>
         /// <param name="Reaction">The reaction of question which was added.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
         
         public async Task ReactionAdded(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel MessageChannel, SocketReaction Reaction) {
             if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
@@ -133,7 +133,7 @@ namespace Dexter.Services {
         /// <param name="CachedMessage">The cached message the reaction was removed from, used to get the suggestion it relates to.</param>
         /// <param name="MessageChannel">The channel of which the reaction was removed from.</param>
         /// <param name="Reaction">The reaction of question which was removed.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
         
         public async Task ReactionRemoved(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel MessageChannel, SocketReaction Reaction) {
             if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
@@ -151,7 +151,7 @@ namespace Dexter.Services {
         /// The MessageRecieved method runs when a message is sent in the suggestions channel, and runs checks to see if the message is a suggestion.
         /// </summary>
         /// <param name="RecievedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
         
         public Task MessageRecieved(SocketMessage RecievedMessage) {
             // Check to see if the message has been sent in the suggestion channel and is not a bot, least we return.
@@ -168,7 +168,7 @@ namespace Dexter.Services {
         /// This suggestion object is then sent back to the channel once deleted as a formatted embed for use to vote on.
         /// </summary>
         /// <param name="RecievedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         public async Task CreateSuggestion (SocketMessage RecievedMessage) {
             // Check to see if the embed message length is more than 1750, else will fail the embed from sending due to character limits.
@@ -267,7 +267,7 @@ namespace Dexter.Services {
         /// <param name="Method">The method is the method of which will be called once this command has been run.</param>
         /// <param name="Author">The author is the snowflake ID of the user who has suggested the proposal.</param>
         /// <param name="ProposedMessage">The proposed message is the content of the approval confirmation message.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         public async Task SendAdminConfirmation(string JSON, string Type, string Method, ulong Author, string ProposedMessage) {
             string Token = CreateToken();
@@ -468,7 +468,7 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="Proposal">The proposal object which has had the status applied to it.</param>
         /// <param name="ProposalStatus">The status of which you wish to apply to the proposal.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
         
         public async Task UpdateProposal(Proposal Proposal, ProposalStatus ProposalStatus) {
             Proposal.ProposalStatus = ProposalStatus;
@@ -509,7 +509,7 @@ namespace Dexter.Services {
         /// <param name="Proposal">The proposal you wish to set the embed of the message to.</param>
         /// <param name="Channel">The channel in which the message is located.</param>
         /// <param name="MessageID">The ID of the message you wish to change the embed of to update it properly.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
         
         public async Task UpdateSpecificProposal(Proposal Proposal, ulong Channel, ulong MessageID) {
             if (Channel == 0 || MessageID == 0)

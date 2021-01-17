@@ -63,7 +63,7 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="SocketMessage">The SocketMessage event is given as a parameter of MessageRecieved and
         /// is used to find and execute the command if the parameters have been met.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
         
         public async Task HandleCommandAsync(SocketMessage SocketMessage) {
             // We do not check the message if it is not an instance of a user message.
@@ -96,7 +96,7 @@ namespace Dexter.Services {
         /// <param name="CommandInfo">This gives information about the command that may have been run, such as its name.</param>
         /// <param name="CommandContext">The context command provides is with information about the message, including who sent it and the channel it was set in.</param>
         /// <param name="Result">The Result specifies the outcome of the attempted run of the command - whether it was successful or not and the error it may have run in to.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
         
         public async Task SendCommandError(Optional<CommandInfo> CommandInfo, ICommandContext CommandContext, IResult Result) {
             if (Result.IsSuccess)

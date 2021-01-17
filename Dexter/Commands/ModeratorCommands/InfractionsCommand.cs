@@ -21,7 +21,7 @@ namespace Dexter.Commands {
         /// </summary>
         /// <remarks>If the user is different from <code>Context.User</code>, it is Staff-only.</remarks>
         /// <param name="UserID">The target user to query.</param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("records")]
         [Summary("Returns a record of infractions for a set user or your own.")]
@@ -48,7 +48,7 @@ namespace Dexter.Commands {
         /// proceed to print out all the infractions of that specified member into the channel the command had been sent into.
         /// </summary>
         /// <param name="User">The User field specifies the user that you wish to get the infractions of.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         [Command("records")]
         [Summary("Returns a record of infractions for a set user or your own.")]

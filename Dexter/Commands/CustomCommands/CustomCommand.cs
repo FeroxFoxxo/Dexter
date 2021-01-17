@@ -21,7 +21,7 @@ namespace Dexter.Commands {
         /// <param name="ActionType">The ActionType specifies whether the action is to add or edit the command in the database.</param>
         /// <param name="CommandName">The CommandName specifies the command that you wish to add or edit from the database.</param>
         /// <param name="Reply">The Reply specifies the reply that you wish to given command to have.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         [Command("cc")]
         [Summary("Modifies a given customizeable command.\n" +
@@ -170,7 +170,7 @@ namespace Dexter.Commands {
         /// <param name="Parameters">The called back parameters:
         ///     CommandName = The name of the command you wish to add.
         ///     Reply = The reply of the given command.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         public void CreateCommandCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];
@@ -191,7 +191,7 @@ namespace Dexter.Commands {
         /// <param name="Parameters">The called back parameters:
         ///     CommandName = The name of the command you wish to edit.
         ///     Reply = The edited reply of the given command.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         public void EditCommandCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];
@@ -208,7 +208,7 @@ namespace Dexter.Commands {
         /// <param name="Parameters">The called back parameters:
         ///     CommandName = The name of the command you wish to remove.
         /// </param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         public void RemoveCommandCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];

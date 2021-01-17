@@ -10,7 +10,7 @@ namespace Dexter.Commands {
         /// Has a chance to muzzle Context.User.
         /// </summary>
         /// <remarks>The probability is set to 1 in 4 - 25%.</remarks>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("roulette")]
         [Summary("Test your luck with a 1 in 4 chance you get muzzled!")]

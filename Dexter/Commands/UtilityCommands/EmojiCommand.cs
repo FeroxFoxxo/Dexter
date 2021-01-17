@@ -8,6 +8,12 @@ namespace Dexter.Commands {
 
     public partial class UtilityCommands {
 
+        /// <summary>
+        /// Sends an emoji as a full-resolution image file.
+        /// </summary>
+        /// <param name="Emoji">A raw-format emoji, stringified.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("emote")]
         [Summary("Gets the full image of an emoji.")]
         [Alias("emoji")]

@@ -22,7 +22,7 @@ namespace Dexter.Commands {
         /// An optional parameter which will display extended information for a specific command if non-null.
         /// The information for this command is pulled from the "ExtendedSummary" attribute (default to "Summary").
         /// </param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("help")]
         [Summary("Displays all avaliable commands.")]

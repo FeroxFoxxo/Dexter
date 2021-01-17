@@ -19,7 +19,7 @@ namespace Dexter.Commands {
         /// This command has a 1-minute cooldown.
         /// </remarks>
         /// <param name="User">Optional parameter, indicates target user.</param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("muzzle")]
         [Summary("Issue the command, and s i l e n c e ,  T H O T-!")]

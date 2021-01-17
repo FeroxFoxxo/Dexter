@@ -28,7 +28,7 @@ namespace Dexter {
         /// <param name="Token">[OPTIONAL] The token of the bot. Defaults to the one specified in the BotCommands if not set.</param>
         /// <param name="ParsedVersion">[OPTIONAL] The version of the bot specified by the release pipeline, is 0 by default.</param>
         /// <param name="WorkingDirectory">[OPTIONAL] The directory you wish the databases and configurations to be in. By default this is the build directory.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
         
         public static async Task Main(string Token, int ParsedVersion, string WorkingDirectory) {
             // Set title to "Starting..."

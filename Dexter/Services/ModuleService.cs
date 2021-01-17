@@ -143,7 +143,7 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="ModuleName">The name of the module of which you wish to have enabled.</param>
         /// <param name="IsEnabed">A boolean of whether or not the module should be enabled.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
         
         public async Task SetModuleState(string ModuleName, bool IsEnabed) {
             ConfigurationDB.Configurations.Find(ModuleName).ConfigurationType = IsEnabed ? ConfigurationType.Enabled : ConfigurationType.Disabled;

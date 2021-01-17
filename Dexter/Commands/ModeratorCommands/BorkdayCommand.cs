@@ -21,7 +21,7 @@ namespace Dexter.Commands {
         /// </summary>
         /// <remarks>This command is staff-only.</remarks>
         /// <param name="User">The target user to give the role to.</param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("borkday")]
         [Summary("Gives a user the borkday role for 24 hours! Happy birthday. <3")]
@@ -74,7 +74,7 @@ namespace Dexter.Commands {
         /// Removes the "Happy Borkday" role ahead of schedule if necessary.
         /// </summary>
         /// <param name="Parameters">The target user whose role is to be removed.</param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task RemoveBorkday(Dictionary<string, string> Parameters) {
             ulong UserID = Convert.ToUInt64(Parameters["User"]);

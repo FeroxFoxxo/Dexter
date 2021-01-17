@@ -14,7 +14,7 @@ namespace Dexter.Commands {
         /// </summary>
         /// <remarks>This command has a 2-minute cooldown.</remarks>
         /// <param name="Command"></param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("topic")]
         [Summary("A topic starter command - perfect for when chat has died!\n" +
@@ -34,7 +34,7 @@ namespace Dexter.Commands {
         /// </summary>
         /// <remarks>This command has a 2-minute cooldown.</remarks>
         /// <param name="Command"></param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("wyr")]
         [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from." +

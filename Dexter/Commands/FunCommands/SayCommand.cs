@@ -12,7 +12,7 @@ namespace Dexter.Commands {
         /// </summary>
         /// <remarks>Staff-only command.</remarks>
         /// <param name="Message">The string message to send.</param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("say")]
         [Summary("I do have a voice! Use the ~say command to speak *through* me!")]

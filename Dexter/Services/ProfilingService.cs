@@ -110,7 +110,7 @@ namespace Dexter.Services {
         /// <summary>
         /// The GetRandomPFP method runs on Client.Ready and it simply gets a random PFP of the bot.
         /// </summary>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
 
         public FileStream GetRandomPFP() {
             if (string.IsNullOrEmpty(ProfilingConfiguration.PFPDirectory))

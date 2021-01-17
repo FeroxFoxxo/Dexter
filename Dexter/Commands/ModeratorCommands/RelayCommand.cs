@@ -21,7 +21,7 @@ namespace Dexter.Commands {
         /// <param name="MessageInterval">The amount of messages between each message sent by the relay.</param>
         /// <param name="Channel">The channel to target and configure in the database.</param>
         /// <param name="Message">The message to send when the interval condition is met.</param>
-        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("relay")]
         [Summary("Adds a relay in a channel to the database, sending a message every set amount of messages.")]

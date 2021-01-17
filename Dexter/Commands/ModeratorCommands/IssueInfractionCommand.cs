@@ -134,7 +134,7 @@ namespace Dexter.Commands {
             if (DexterProfile.InfractionAmount - PointsDeducted <= -4 && DexterProfile.InfractionAmount > -4)
                 await BuildEmbed(EmojiEnum.Wut)
                     .WithTitle($"Frequent Rulebreaker Inbound!!!")
-                    .WithDescription($"Haiya! It seems as though the user {User.GetUserInformation()} is currently standing on {DexterProfile.InfractionAmount - PointsDeducted}. Perhaps this is something the {ModerationConfiguration.AdministratorMention}s can dwell on. <3")
+                    .WithDescription($"Haiya! It seems as though the user {User.GetUserInformation()} is currently standing on {DexterProfile.InfractionAmount - PointsDeducted}. Perhaps this is something the <@{BotConfiguration.AdministratorRoleID}>s can dwell on. <3")
                     .WithCurrentTimestamp()
                     .SendEmbed(DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel);
 
@@ -200,7 +200,7 @@ namespace Dexter.Commands {
 
             if (Context.Channel.Id == ModerationConfiguration.StaffBotsChannel) {
                 Embed = BuildEmbed(EmojiEnum.Love)
-                   .WithTitle($"{Regex.Replace(InfractionType.ToString(), "([A-Z])([a-z]*)", " $1$2")} {InfractionID} Issued! Current Points: {DexterProfile.InfractionAmount}.")
+                   .WithTitle($"{Regex.Replace(InfractionType.ToString(), "([A-Z])([a-z]*)", " $1$2")} #{InfractionID} Issued! Current Points: {DexterProfile.InfractionAmount}.")
                    .WithDescription($"{(InfractionType == InfractionType.Warning ? "Warned" : "Muted")} {User.GetUserInformation()}" +
                        $"{(InfractionType == InfractionType.Mute ? $" for **{Time.Humanize(2)}**" : "")} who currently has **{TotalInfractions} " +
                        $"{(TotalInfractions == 1 ? "infraction" : "infractions")}** and has had **{PointsDeducted} {(PointsDeducted == 1 ? "point" : "points")} deducted.**")

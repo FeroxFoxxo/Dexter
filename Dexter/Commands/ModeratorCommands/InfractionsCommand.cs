@@ -17,8 +17,9 @@ namespace Dexter.Commands {
     public partial class ModeratorCommands {
 
         [Command("records")]
-        [Summary("Returns a record of infractions for a set user or your own.")]
+        [Summary("Returns a record of infractions for a set user based on their ID.")]
         [Alias("warnings", "record", "warns", "mutes")]
+        [RequireModerator]
         [BotChannel]
 
         public async Task InfractionsCommand(ulong UserID) {
@@ -32,7 +33,7 @@ namespace Dexter.Commands {
                 else
                     await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
             } else
-                InfractionsCommand(User);
+                await InfractionsCommand(User);
         }
 
         /// <summary>
@@ -52,9 +53,7 @@ namespace Dexter.Commands {
             bool IsUserSpecified = User != null;
 
             if (IsUserSpecified) {
-                if ((Context.User as IGuildUser).GetPermissionLevel(BotConfiguration)
-                    >= PermissionLevel.Moderator) {
-
+                if ((Context.User as IGuildUser).GetPermissionLevel(BotConfiguration) >= PermissionLevel.Moderator) {
                     EmbedBuilder[] Warnings = GetWarnings(User.Id, Context.User.Id, User.Mention, User.Username, true);
 
                     if (Warnings.Length > 1)
@@ -127,7 +126,7 @@ namespace Dexter.Commands {
                 DateTimeOffset Time = DateTimeOffset.FromUnixTimeSeconds(TimeOfIssue > 253402300799 ? TimeOfIssue / 1000 : TimeOfIssue);
 
                 EmbedFieldBuilder Field = new EmbedFieldBuilder()
-                    .WithName($"{(Infraction.InfrationTime == 0 ? "Warning" : $"{TimeSpan.FromSeconds(Infraction.InfrationTime).Humanize().Titleize()} Mute")} {Index + 1} (ID {Infraction.InfractionID}), {(Infraction.PointCost > 0 ? "-" : "")}{Infraction.PointCost} {(Infraction.PointCost == 1 ? "Point" : "Points")}.")
+                    .WithName($"{(Infraction.InfrationTime == 0 ? "Warning" : $"{TimeSpan.FromSeconds(Infraction.InfrationTime).Humanize().Titleize()} Mute")} #{Index + 1} (ID {Infraction.InfractionID}), {(Infraction.PointCost > 0 ? "-" : "")}{Infraction.PointCost} {(Infraction.PointCost == 1 ? "Point" : "Points")}.")
                     .WithValue($"{(ShowIssuer ? $":cop: {(Issuer != null ? Issuer.GetUserInformation() : $"Unknown ({Infraction.Issuer})")}\n" : "")}" +
                         $":calendar: {Time:M/d/yyyy h:mm:ss}\n" +
                         $":notepad_spiral: {Infraction.Reason}"

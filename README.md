@@ -33,10 +33,7 @@
       </p>
       <h2>Commemorations</h2>
       <p>
-         This bot is loosely based off of the bot from the guys over at
-         <a href="https://github.com/YilianSource/brackeys-bot">Brackey's Bot</a>. Although many key components of the bot have been changed to meet our own purposes, such as databases using Entity Framework Core and having switched from YAML to using Newtonsoft JSON serializer, this bot was a great learning resource.
-         </br></br>
-         This bot is also an adaption from the JS version of Dexter, written in JavaScript by <a href="https://github.com/Jakey-F">Jakey Floofle</a>. As such, many of commands have been adaptions from their original sources.
+         This bot is an adaption from the version of Dexter, written in JavaScript, by <a href="https://github.com/Jakey-F">Jakey Floofle</a>. As such, some commands have been adaptions from their original sources.
       </p>
    </body>
 </html>

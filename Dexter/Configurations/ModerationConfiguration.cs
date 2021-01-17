@@ -43,8 +43,6 @@ namespace Dexter.Configurations {
         
         public ulong StaffBotsChannel { get; set; }
 
-        public string AdministratorMention { get; set; }
-
     }
 
 }

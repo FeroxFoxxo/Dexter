@@ -5,9 +5,17 @@ using Google.Apis.Sheets.v4;
 
 namespace Dexter.Commands {
 
+    /// <summary>
+    /// The class containing all commands within the GreetFur module.
+    /// </summary>
+
     public partial class GreetFurCommands : DiscordModule {
 
         public LoggingService LoggingService { get; set; }
+
+        /// <summary>
+        /// Works as an interface between the configuration files attached to the GreetFur module and the commands.
+        /// </summary>
 
         public GreetFurConfiguration GreetFurConfiguration { get; set; }
 

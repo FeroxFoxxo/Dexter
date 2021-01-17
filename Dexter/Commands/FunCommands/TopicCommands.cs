@@ -8,6 +8,14 @@ namespace Dexter.Commands {
 
     public partial class FunCommands {
 
+        /// <summary>
+        /// Returns a random topic from the database if the command provided is an empty string or null object.
+        /// Otherwise, provides a list of options to suggest edits to the already-existing topics in the database.
+        /// </summary>
+        /// <remarks>This command has a 2-minute cooldown.</remarks>
+        /// <param name="Command"></param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+
         [Command("topic")]
         [Summary("A topic starter command - perfect for when chat has died!\n" +
                     "`ADD [TOPIC]` - adds a topic to the database.\n" +
@@ -19,6 +27,14 @@ namespace Dexter.Commands {
         public async Task TopicCommand([Optional][Remainder] string Command) {
             await RunTopic(Command, TopicType.Topic);
         }
+
+        /// <summary>
+        /// Returns a random would-you-rather from the database if the command provided is an empty string or null object.
+        /// Otherwise, provides a list of options to suggest edits to the already-existing would-you-rather questions in the database.
+        /// </summary>
+        /// <remarks>This command has a 2-minute cooldown.</remarks>
+        /// <param name="Command"></param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
 
         [Command("wyr")]
         [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from." +

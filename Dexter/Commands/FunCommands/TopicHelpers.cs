@@ -13,6 +13,14 @@ namespace Dexter.Commands {
 
     public partial class FunCommands {
 
+        /// <summary>
+        /// Manages the modular tasks pertaining to modification of the topic database(s).
+        /// Or alternatively runs the topic command as usual if no reasonable alias or syntax can be leveraged.
+        /// </summary>
+        /// <param name="Command">The entire list of arguments used for the command, stringified.</param>
+        /// <param name="TopicType">What type of topic database should be accessed. Either 'topic' or 'wyr'.</param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+
         public async Task RunTopic (string Command, TopicType TopicType) {
             string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", "$1$2");
 
@@ -61,6 +69,12 @@ namespace Dexter.Commands {
                 await SendTopic(TopicType);
         }
 
+        /// <summary>
+        /// Sends a randomly selected topic or wyr to chat.
+        /// </summary>
+        /// <param name="TopicType">Which type of topic database to access.</param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+
         public async Task SendTopic(TopicType TopicType) {
             FunTopic FunTopic = await FunTopicsDB.Topics.GetRandomTopic(TopicType);
 
@@ -88,6 +102,14 @@ namespace Dexter.Commands {
                     $"Add a {Name.ToLower()} using `{BotConfiguration.Prefix}{Name.ToLower()} add [TOPIC]`")
                 .SendEmbed(Context.Channel);
         }
+
+        /// <summary>
+        /// Launches a request to set up a new topic in the corresponding topic type database.
+        /// </summary>
+        /// <remarks>This process requires intermediary administrator approval before completion.</remarks>
+        /// <param name="TopicEntry">The string pertaining to the whole expression of the new suggested topic.</param>
+        /// <param name="TopicType">Which type of topic database to access.</param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
 
         public async Task AddTopic(string TopicEntry, TopicType TopicType) {
             TopicEntry = Regex.Replace(TopicEntry, @"[^\u0000-\u007F]+", "");
@@ -129,6 +151,14 @@ namespace Dexter.Commands {
                 .SendEmbed(Context.Channel);
         }
 
+        /// <summary>
+        /// Directly adds a new topic to the corresponding database.
+        /// </summary>
+        /// <param name="Parameters">
+        /// A string-string dictionary containing a definition for "Topic", "TopicType" and "Proposer".
+        /// These should be parsable to a <c>string</c>, <c>TopicType</c>, and <c>ulong</c> (IUser ID) respectively.
+        /// </param>
+
         public void CreateTopicCallback(Dictionary<string, string> Parameters) {
             string Topic = Parameters["Topic"];
             TopicType TopicType = (TopicType)int.Parse(Parameters["TopicType"]);
@@ -146,6 +176,14 @@ namespace Dexter.Commands {
 
             FunTopicsDB.SaveChanges();
         }
+
+        /// <summary>
+        /// Launches a request to remove an existing topic from the topic database by ID.
+        /// </summary>
+        /// <remarks>This process requires an intermediary administrator approval phase.</remarks>
+        /// <param name="TopicID">The numerical ID corresponding to the target topic.</param>
+        /// <param name="TopicType">Which type of topic database to access.</param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
 
         public async Task RemoveTopic(int TopicID, TopicType TopicType) {
             FunTopic FunTopic = FunTopicsDB.Topics
@@ -179,6 +217,14 @@ namespace Dexter.Commands {
                 .SendEmbed(Context.Channel);
         }
 
+        /// <summary>
+        /// Directly removes a topic from the corresponding database.
+        /// </summary>
+        /// <param name="Parameters">
+        /// A string-string dictionary containing a definition for "TopicID" and "TopicType".
+        /// These should be parsable to a <c>int</c> and <c>TopicType</c> respectively.
+        /// </param>
+
         public void RemoveTopicCallback(Dictionary<string, string> Parameters) {
             int TopicID = int.Parse(Parameters["TopicID"]);
             TopicType TopicType = (TopicType)int.Parse(Parameters["TopicType"]);
@@ -190,6 +236,13 @@ namespace Dexter.Commands {
 
             FunTopicsDB.SaveChanges();
         }
+
+        /// <summary>
+        /// Sends in an embed detailing a specific topic and its related data.
+        /// </summary>
+        /// <param name="TopicEntry">The exact text corresponding to the topic.</param>
+        /// <param name="TopicType">Which type of topic database to access.</param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
 
         public async Task GetTopic(string TopicEntry, TopicType TopicType) {
             FunTopic FunTopic = FunTopicsDB.Topics
@@ -212,6 +265,16 @@ namespace Dexter.Commands {
                 .AddField("Status:", $"{FunTopic.EntryType}d")
                 .SendEmbed(Context.Channel);
         }
+
+        /// <summary>
+        /// Sends in a request to edit the comment attached to a specified topic by ID.
+        /// </summary>
+        /// <remarks>This process requires intermediary admin approval before enaction.</remarks>
+        /// <param name="TopicID">The numerical ID of the target topic.</param>
+        /// <param name="EditedTopic">The new text expression for the target topic.</param>
+        /// <param name = "TopicType" > Which type of topic database to access.</param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+
 
         public async Task EditTopic(int TopicID, string EditedTopic, TopicType TopicType) {
             FunTopic FunTopic = FunTopicsDB.Topics
@@ -247,6 +310,14 @@ namespace Dexter.Commands {
                 .WithDescription($"Once it has passed admin approval, it will be edited in the database accordingly.")
                 .SendEmbed(Context.Channel);
         }
+
+        /// <summary>
+        /// Directly edits an already-existing topic in the corresponding database.
+        /// </summary>
+        /// <param name="Parameters">
+        /// A string-string dictionary containing a definition for "TopicID", "TopicType", and "EditedTopic".
+        /// These should be parsable to an <c>int</c>, <c>TopicType</c>, and <c>string</c> respectively.
+        /// </param>
 
         public void EditTopicCallback(Dictionary<string, string> Parameters) {
             int TopicID = int.Parse(Parameters["TopicID"]);

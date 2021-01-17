@@ -15,6 +15,15 @@ namespace Dexter.Commands {
 
     public partial class HelpCommands {
 
+        /// <summary>
+        /// Displays a navigable list of commands. This list is built from the "Summary" attributes on each command.
+        /// </summary>
+        /// <param name="Command">
+        /// An optional parameter which will display extended information for a specific command if non-null.
+        /// The information for this command is pulled from the "ExtendedSummary" attribute (default to "Summary").
+        /// </param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+
         [Command("help")]
         [Summary("Displays all avaliable commands.")]
         [Alias("commands")]

@@ -11,6 +11,11 @@ namespace Dexter.Commands {
 
     public partial class GreetFurCommands {
 
+        /// <summary>
+        /// Sets up the service and dependencies required to access the data on Google Sheets servers for use in other commands.
+        /// </summary>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+
         public async Task SetupGoogleSheets() {
             if (!File.Exists(GreetFurConfiguration.CredentialFile)) {
                 await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, GetType().Name,

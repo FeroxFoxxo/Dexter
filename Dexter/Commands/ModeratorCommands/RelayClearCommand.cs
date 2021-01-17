@@ -13,6 +13,13 @@ namespace Dexter.Commands {
 
     public partial class ModeratorCommands {
 
+        /// <summary>
+        /// Suggests the removal of a channel's relay from the relevant database.
+        /// </summary>
+        /// <remarks>This action requires administrator approval.</remarks>
+        /// <param name="Channel">The target channel where the relay is to be removed.</param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+
         [Command("clearrelay")]
         [Summary("Clears a channel's relay in the related database.")]
         [RequireAdministrator]
@@ -40,6 +47,14 @@ namespace Dexter.Commands {
                 .WithDescription($"Once it has passed admin approval, it will be removed from the database.")
                 .SendEmbed(Context.Channel);
         }
+
+        /// <summary>
+        /// Directly removes the target relay from a given channel's respective database.
+        /// </summary>
+        /// <param name="Parameters">
+        /// A string-string dictionary containing a defition for "ChannelID".
+        /// This value should be parsable to a <c>ulong</c> (Channel ID).
+        /// </param>
 
         public void RemoveRelayCallback(Dictionary<string, string> Parameters) {
             ulong ChannelID = ulong.Parse(Parameters["ChannelID"]);

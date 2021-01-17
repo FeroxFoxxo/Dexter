@@ -22,6 +22,7 @@ namespace Dexter.Commands {
         /// It attaches this warning with a reason, and then notifies the recipient of the warning having been applied.
         /// This command can only be used by a moderator or higher position in the server.
         /// </summary>
+        /// <param name="PointsDeducted">The number of points to deduct to the user's Dexter Profile for automoderation purposes.</param>
         /// <param name="User">The user of which you wish to warn.</param>
         /// <param name="Reason">The reason for the user having been warned.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
@@ -46,7 +47,9 @@ namespace Dexter.Commands {
         /// It attaches this warning with a reason, and then notifies the recipient of the warning having been applied.
         /// This command can only be used by a moderator or higher position in the server and will mute the user for the set time.
         /// </summary>
+        /// <param name="PointsDeducted">The number of points to subtract from the target user's Dexter Profile for automoderation purposes. Must be 0, 3 or 4.</param>
         /// <param name="User">The user of which you wish to mute.</param>
+        /// <param name="Time">The duration of the mute.</param>
         /// <param name="Reason">The reason for the user having been mute.</param>
         /// <returns>A task object, from which we can await until this method completes successfully.</returns>
 
@@ -56,7 +59,7 @@ namespace Dexter.Commands {
         [RequireModerator]
 
         public async Task IssueMute(short PointsDeducted, IGuildUser User, TimeSpan Time, [Remainder] string Reason) {
-            if (PointsDeducted == 3 || PointsDeducted == 4 || PointsDeducted == 0)
+            if (PointsDeducted is 3 or 4 or 0)
                 await IssueInfraction(PointsDeducted, User, Time, Reason);
             else
                 await BuildEmbed(EmojiEnum.Annoyed)
@@ -64,6 +67,15 @@ namespace Dexter.Commands {
                     .WithDescription($"Haiya! All mute commands should either have 3 or 4 points deducted. What we found was {PointsDeducted} {(PointsDeducted == 1 ? "point" : "points")}. <3")
                     .SendEmbed(Context.Channel);
         }
+
+        /// <summary>
+        /// Issues a mute to a specified user but does not add it to their records or affect their score.
+        /// </summary>
+        /// <remarks>This command should be used to issue non-punitive mutes only.</remarks>
+        /// <param name="User"></param>
+        /// <param name="Time"></param>
+        /// <param name="Reason"></param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
 
         [Command("mute")]
         [Summary("Issues a mute to a specified user. Does not add it to their records.")]
@@ -102,6 +114,14 @@ namespace Dexter.Commands {
             await Embed.SendEmbed(Context.Channel);
         }
 
+        /// <summary>
+        /// Issues an indefinite mute to a specified user.
+        /// </summary>
+        /// <param name="PointsDeducted">The number of points to remove from the user's Dexter profile. Must be set to 0.</param>
+        /// <param name="User">Target user to mute.</param>
+        /// <param name="Reason">A string description of the reason why the mute was issued.</param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+
         [Command("mute")]
         [Summary("Issues an infinite mute to a specified user given the point amount of 0.")]
         [Alias("muteUser")]
@@ -117,11 +137,21 @@ namespace Dexter.Commands {
                     .SendEmbed(Context.Channel);
         }
 
+        /// <summary>
+        /// Mutes a user for a specific amount of time and removes a specified number of points from their Dexter Profile.
+        /// This mute is recorded in the corresponding database.
+        /// </summary>
+        /// <param name="PointsDeducted">The amount of points to remove from the user's Dexter Profile for automoderation purposes.</param>
+        /// <param name="User">The target user.</param>
+        /// <param name="Time">The duration of the mute.</param>
+        /// <param name="Reason">A string description of the reason why the mute was issued.</param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+
         public async Task IssueInfraction(short PointsDeducted, IGuildUser User, TimeSpan Time, [Remainder] string Reason) {
             if (Reason.Length > 250) {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Reason too long.")
-                    .WithDescription($"Your reason should be around 250 characters, give or take-\nWe found {Reason.Length} instead.")
+                    .WithDescription($"Your reason should be at most 250 characters long. \nWe found {Reason.Length} instead.")
                     .SendEmbed(Context.Channel);
             }
 
@@ -232,6 +262,15 @@ namespace Dexter.Commands {
             await Embed.SendEmbed(Context.Channel);
         }
 
+        /// <summary>
+        /// Manually adds points to a user's Dexter Profile.
+        /// </summary>
+        /// <param name="Parameters">
+        /// A string-string dictionary containing a definition for "UserID".
+        /// This value should be parsable to a type of <c>ulong</c> (User ID).
+        /// </param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+
         public async Task IncrementPoints(Dictionary<string, string> Parameters) {
             ulong UserID = ulong.Parse(Parameters["UserID"]);
 
@@ -250,6 +289,15 @@ namespace Dexter.Commands {
 
             InfractionsDB.SaveChanges();
         }
+
+        /// <summary>
+        /// Manually removes points from a user's Dexter Profile.
+        /// </summary>
+        /// <param name="Parameters">
+        /// A string-string dictionary containing a definition for "UserID".
+        /// This value should be parsable to a type of <c>ulong</c> (User ID).
+        /// </param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
 
         public async Task RemoveMutedRole(Dictionary<string, string> Parameters) {
             ulong UserID = ulong.Parse(Parameters["UserID"]);

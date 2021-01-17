@@ -16,6 +16,13 @@ namespace Dexter.Commands {
 
     public partial class ModeratorCommands {
 
+        /// <summary>
+        /// Sends an embed with the records of infractions of a specified user.
+        /// </summary>
+        /// <remarks>If the user is different from <code>Context.User</code>, it is Staff-only.</remarks>
+        /// <param name="UserID">The target user to query.</param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+
         [Command("records")]
         [Summary("Returns a record of infractions for a set user or your own.")]
         [Alias("warnings", "record", "warns", "mutes")]
@@ -32,7 +39,7 @@ namespace Dexter.Commands {
                 else
                     await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
             } else
-                InfractionsCommand(User);
+                await InfractionsCommand(User);
         }
 
         /// <summary>
@@ -95,8 +102,10 @@ namespace Dexter.Commands {
         /// </summary>
         /// <param name="User">The user of whose warnings you wish to recieve.</param>
         /// <param name="RunBy">The user who has run the given warnings command.</param>
+        /// <param name="Mention">The stringified mention for the target user.</param>
+        /// <param name="Username">The target user's username in the given context.</param>
         /// <param name="ShowIssuer">Whether or not the moderators should be shown in the log. Enabled for moderators, disabled for DMed records.</param>
-        /// <returns>An array of embeds containing the given users warnings.</returns>
+        /// <returns>An array of embeds containing the given user's warnings.</returns>
         
         public EmbedBuilder[] GetWarnings(ulong User, ulong RunBy, string Mention, string Username, bool ShowIssuer) {
             Infraction[] Infractions = InfractionsDB.GetInfractions(User);

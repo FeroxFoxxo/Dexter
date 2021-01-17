@@ -9,6 +9,12 @@ namespace Dexter.Commands {
 
     public partial class FunCommands {
 
+        /// <summary>
+        /// Sends a reply from a predetermined list in a random fashion. The reply can be affirmative, negative, or hazy.
+        /// </summary>
+        /// <param name="Message">The text corresponding to the asked question.</param>
+        /// <returns>A <c>Task</c> object, which we can await until this method completes successfully.</returns>
+
         [Command("8ball")]
         [Summary("Ask the Magic 8-Ball a question and it'll reach into the future to find the answers-")]
         [Alias("8-ball")]

@@ -152,7 +152,7 @@ namespace Dexter.Commands {
             if (Notification.Length > 0) {
                 await BuildEmbed(EmojiEnum.Wut)
                     .WithTitle($"Frequent Rulebreaker Inbound!")
-                    .WithDescription($"Haiya!\n{Notification}Perhaps this is something the <@&{BotConfiguration.AdministratorRoleID}>s can dwell on. <3")
+                    .WithDescription($"Haiya!\n{Notification}Perhaps this is something the <@&{BotConfiguration.AdministratorRoleID}> can dwell on. <3")
                     .WithCurrentTimestamp()
                     .SendEmbed(DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel);
             }

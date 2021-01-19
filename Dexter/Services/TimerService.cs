@@ -168,7 +168,7 @@ namespace Dexter.Services {
         /// <summary>
         /// Removes a timer from the EventTimer database by its <paramref name="TimerTracker"/> token.
         /// </summary>
-        /// <remarks>This function doesn't remove the timer from the database completely, it instead sets its status to "Expired".</remarks>
+        /// <remarks>This function removes the timer given by its <paramref name="TimerTracker"/> from the database completely.</remarks>
         /// <param name="TimerTracker">The unique identifier of the target EventTimer.</param>
 
         public void RemoveTimer(string TimerTracker) {

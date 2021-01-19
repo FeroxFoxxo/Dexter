@@ -1,4 +1,5 @@
 ﻿using Dexter.Abstractions;
+using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
@@ -18,6 +19,8 @@ namespace Dexter.Commands {
         [Command("help")]
         [Summary("Displays all avaliable commands.")]
         [Alias("commands")]
+        [BotChannel]
+
         public async Task HelpCommand([Optional] [Remainder] string Command) {
             if(string.IsNullOrEmpty(Command)) {
                 List<EmbedBuilder> EmbedBuilders = new();

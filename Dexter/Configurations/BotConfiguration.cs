@@ -20,10 +20,12 @@ namespace Dexter.Configurations {
         
         public ulong ModeratorRoleID { get; set; }
 
+        public ulong AdministratorRoleID { get; set; }
+
         /// <summary>
         /// The GUILD ID is the snowflake ID of the main guild the bot is in.
         /// </summary>
-        
+
         public ulong GuildID { get; set; }
 
         /// <summary>

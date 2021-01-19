@@ -37,7 +37,7 @@ namespace Dexter.Commands {
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("wyr")]
-        [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from." +
+        [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from.\n" +
                     "`ADD [WYR]` - adds a wyr to the database.\n" +
                     "`GET [WYR]` - gets a wyr by name from the database.\n" +
                     "`EDIT [WYR ID] [WYR]` - edits a wyr in the database.\n" +

@@ -44,8 +44,8 @@ namespace Dexter.Commands {
             InfractionsDB.SaveChanges();
 
             await BuildEmbed(EmojiEnum.Love)
-                .WithTitle($"Infraction revoked! New Points: {DexterProfile.InfractionAmount}.")
-                .WithDescription($"Heya! I revoked an infraction issued to {(Warned == null ? $"Unknown ({Infraction.User})" : Warned.GetUserInformation())}")
+                .WithTitle($"Infraction Revoked! New Points: {DexterProfile.InfractionAmount}.")
+                .WithDescription($"Heya! I revoked an infraction issued from {(Warned == null ? $"Unknown ({Infraction.User})" : Warned.GetUserInformation())}")
                 .AddField("Issued by", Issuer == null ? $"Unknown ({Infraction.Issuer})" : Issuer.GetUserInformation())
                 .AddField("Revoked by", Context.User.GetUserInformation())
                 .AddField("Reason", Infraction.Reason)

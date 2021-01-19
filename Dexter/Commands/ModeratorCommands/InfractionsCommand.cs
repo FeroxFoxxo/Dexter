@@ -24,8 +24,9 @@ namespace Dexter.Commands {
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("records")]
-        [Summary("Returns a record of infractions for a set user or your own.")]
+        [Summary("Returns a record of infractions for a set user based on their ID.")]
         [Alias("warnings", "record", "warns", "mutes")]
+        [RequireModerator]
         [BotChannel]
 
         public async Task InfractionsCommand(ulong UserID) {
@@ -59,9 +60,7 @@ namespace Dexter.Commands {
             bool IsUserSpecified = User != null;
 
             if (IsUserSpecified) {
-                if ((Context.User as IGuildUser).GetPermissionLevel(BotConfiguration)
-                    >= PermissionLevel.Moderator) {
-
+                if ((Context.User as IGuildUser).GetPermissionLevel(BotConfiguration) >= PermissionLevel.Moderator) {
                     EmbedBuilder[] Warnings = GetWarnings(User.Id, Context.User.Id, User.Mention, User.Username, true);
 
                     if (Warnings.Length > 1)

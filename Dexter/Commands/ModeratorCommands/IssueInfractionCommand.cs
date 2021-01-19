@@ -12,6 +12,7 @@ using Humanizer;
 using Dexter.Databases.EventTimers;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Dexter.Configurations;
 
 namespace Dexter.Commands {
 
@@ -161,12 +162,30 @@ namespace Dexter.Commands {
 
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
 
-            if (DexterProfile.InfractionAmount - PointsDeducted <= -4 && DexterProfile.InfractionAmount > -4)
+            string Notification = string.Empty;
+
+            if (DexterProfile.InfractionAmount > ModerationConfiguration.InfractionNotification &&
+                    DexterProfile.InfractionAmount - PointsDeducted <= ModerationConfiguration.InfractionNotification)
+                Notification += $"It seems as though the user {User.GetUserInformation()} is currently standing on {DexterProfile.InfractionAmount - PointsDeducted}.\n";
+
+            foreach (Dictionary<string, int> Notifications in ModerationConfiguration.InfractionNotifications) {
+                int Points = 0;
+
+                InfractionsDB.GetInfractions(User.Id)
+                    .Where(Infraction => Infraction.TimeOfIssue > DateTimeOffset.UtcNow.ToUnixTimeSeconds() - Notifications["Days"] * 86400)
+                    .Select(Infraction => Infraction.PointCost).ToList().ForEach(Point => Points += Point);
+
+                if (DexterProfile.InfractionAmount < Notifications["Points"] && DexterProfile.InfractionAmount + PointsDeducted >= Notifications["Points"])
+                    Notification += $"It seems as though the user {User.GetUserInformation()} has had {Points + PointsDeducted} points deducted in {Notifications["Days"]} days.\n";
+            }
+
+            if (Notification.Length > 0) {
                 await BuildEmbed(EmojiEnum.Wut)
-                    .WithTitle($"Frequent Rulebreaker Inbound!!!")
-                    .WithDescription($"Haiya! It seems as though the user {User.GetUserInformation()} is currently standing on {DexterProfile.InfractionAmount - PointsDeducted}. Perhaps this is something the {ModerationConfiguration.AdministratorMention}s can dwell on. <3")
+                    .WithTitle($"Frequent Rulebreaker Inbound!")
+                    .WithDescription($"Haiya!\n{Notification}Perhaps this is something the <@&{BotConfiguration.AdministratorRoleID}>s can dwell on. <3")
                     .WithCurrentTimestamp()
                     .SendEmbed(DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel);
+            }
 
             DexterProfile.InfractionAmount -= PointsDeducted;
 
@@ -186,7 +205,7 @@ namespace Dexter.Commands {
             if (AdditionalTime.HasValue) {
                 Time = Time.Add(AdditionalTime.Value);
 
-                Reason += $"\n**Automatic mute of {AdditionalTime.Value.Humanize(2)} applied in addition by Dexter for frequent warnings and/or rulebreaks.**";
+                Reason += $"\n**Automatic mute of {AdditionalTime.Value.Humanize(2)} applied in addition by {DiscordSocketClient.CurrentUser.Username} for frequent warnings and/or rulebreaks.**";
             }
 
             if (Time.TotalSeconds > 0) {
@@ -201,7 +220,7 @@ namespace Dexter.Commands {
                 DexterProfile.CurrentMute = await CreateEventTimer(RemoveMutedRole, new() { { "UserID", User.Id.ToString() } }, Convert.ToInt32(Time.TotalSeconds), TimerType.Expire);
             }
 
-            if(PointsDeducted == 0) {
+            if (PointsDeducted == 0) {
                 IRole Role = Context.Guild.GetRole(ModerationConfiguration.MutedRoleID);
 
                 if (!User.RoleIds.Contains(ModerationConfiguration.MutedRoleID))
@@ -230,7 +249,7 @@ namespace Dexter.Commands {
 
             if (Context.Channel.Id == ModerationConfiguration.StaffBotsChannel) {
                 Embed = BuildEmbed(EmojiEnum.Love)
-                   .WithTitle($"{Regex.Replace(InfractionType.ToString(), "([A-Z])([a-z]*)", " $1$2")} {InfractionID} Issued! Current Points: {DexterProfile.InfractionAmount}.")
+                   .WithTitle($"{Regex.Replace(InfractionType.ToString(), "([A-Z])([a-z]*)", " $1$2")} #{InfractionID} Issued! Current Points: {DexterProfile.InfractionAmount}.")
                    .WithDescription($"{(InfractionType == InfractionType.Warning ? "Warned" : "Muted")} {User.GetUserInformation()}" +
                        $"{(InfractionType == InfractionType.Mute ? $" for **{Time.Humanize(2)}**" : "")} who currently has **{TotalInfractions} " +
                        $"{(TotalInfractions == 1 ? "infraction" : "infractions")}** and has had **{PointsDeducted} {(PointsDeducted == 1 ? "point" : "points")} deducted.**")
@@ -279,7 +298,7 @@ namespace Dexter.Commands {
             if (DexterProfile.InfractionAmount < ModerationConfiguration.MaxPoints) {
                 DexterProfile.InfractionAmount++;
                 if (DexterProfile.InfractionAmount < ModerationConfiguration.MaxPoints)
-                    await CreateEventTimer(IncrementPoints, new() { { "UserID", UserID.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
+                    DexterProfile.CurrentPointTimer = await CreateEventTimer(IncrementPoints, new() { { "UserID", UserID.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
             } else {
                 if (DexterProfile.InfractionAmount > ModerationConfiguration.MaxPoints)
                     DexterProfile.InfractionAmount = ModerationConfiguration.MaxPoints;
@@ -310,6 +329,12 @@ namespace Dexter.Commands {
 
             if (User != null)
                 await User.RemoveRoleAsync(Role);
+
+            DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(UserID);
+
+            DexterProfile.CurrentMute = string.Empty;
+
+            InfractionsDB.SaveChanges();
         }
     }
 

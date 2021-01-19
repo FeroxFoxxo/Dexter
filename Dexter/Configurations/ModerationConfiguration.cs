@@ -1,4 +1,5 @@
 ﻿using Dexter.Abstractions;
+using System.Collections.Generic;
 
 namespace Dexter.Configurations {
 
@@ -75,11 +76,9 @@ namespace Dexter.Configurations {
 
         public ulong StaffBotsChannel { get; set; }
 
-        /// <summary>
-        /// A stringified mention (or ping) "@Admin Team".
-        /// </summary>
+        public List<Dictionary<string, int>> InfractionNotifications { get; set; }
 
-        public string AdministratorMention { get; set; }
+        public short InfractionNotification { get; set; }
 
     }
 

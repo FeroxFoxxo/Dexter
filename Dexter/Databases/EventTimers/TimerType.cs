@@ -16,13 +16,7 @@
         /// Indicates that the timer is set to expire at some point in the future, but is currently active.
         /// </summary>
 
-        Expire,
-
-        /// <summary>
-        /// Indicates that the timer has expired and is no longer active.
-        /// </summary>
-
-        Expired
+        Expire
 
     }
 

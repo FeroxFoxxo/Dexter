@@ -10,6 +10,13 @@ namespace Dexter.Commands {
 
     public partial class UtilityCommands {
 
+        /// <summary>
+        /// Sends a direct message to a target user.
+        /// </summary>
+        /// <param name="User">The target user</param>
+        /// <param name="Message">The full message to send the target user</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("userdm")]
         [Summary("Sends a direct message to a user specified.")]
         [Alias("dm", "message")]

@@ -17,7 +17,7 @@ namespace Dexter.Commands {
         /// <param name="Tracker">The tracker is an alphanumeric identifier or the message ID of the suggestion.</param>
         /// <param name="Reason">The reason is the optional message that will be linked to the approval.
         /// This will be attached to the embed through the REASON field.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("approve")]
         [Summary("Approves a proposal from a tracker with an optional reason.")]

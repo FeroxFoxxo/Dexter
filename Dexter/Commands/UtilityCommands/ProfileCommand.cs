@@ -11,6 +11,13 @@ namespace Dexter.Commands {
 
     public partial class UtilityCommands {
 
+        /// <summary>
+        /// Sends information concerning the profile of a target user.
+        /// This information contains: Username, nickname, account creation and latest join date, and status.
+        /// </summary>
+        /// <param name="User">The target user</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("profile")]
         [Summary("Gets the profile of the user mentioned or yours.")]
         [Alias("userinfo")]

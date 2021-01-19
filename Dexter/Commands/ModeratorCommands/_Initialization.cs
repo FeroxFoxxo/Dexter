@@ -8,7 +8,7 @@ using Discord.WebSocket;
 namespace Dexter.Commands {
 
     /// <summary>
-    /// The ModeratorCommands module relates to recording of users in breach of rules and other, miscelaneous commands relating to the moderation of the server.
+    /// The ModeratorCommands module relates to recording of users in breach of rules and other, miscellaneous commands relating to the moderation of the server.
     /// </summary>
 
     public partial class ModeratorCommands : DiscordModule {
@@ -42,6 +42,10 @@ namespace Dexter.Commands {
         /// </summary>
         
         public CommissionCooldownConfiguration CommissionCooldownConfiguration { get; set; }
+
+        /// <summary>
+        /// Works as an interface between the configuration files attached to the Moderation module and its commands.
+        /// </summary>
 
         public ModerationConfiguration ModerationConfiguration { get; set; }
 

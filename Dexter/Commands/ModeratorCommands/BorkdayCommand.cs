@@ -16,6 +16,13 @@ namespace Dexter.Commands {
 
     public partial class ModeratorCommands {
 
+        /// <summary>
+        /// Gives a user the "Happy Borkday" role for 24 hours.
+        /// </summary>
+        /// <remarks>This command is staff-only.</remarks>
+        /// <param name="User">The target user to give the role to.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("borkday")]
         [Summary("Gives a user the borkday role for 24 hours! Happy birthday. <3")]
         [Alias("birthday")]
@@ -62,6 +69,12 @@ namespace Dexter.Commands {
 
             await Embed.SendEmbed(Context.Channel);
         }
+
+        /// <summary>
+        /// Removes the "Happy Borkday" role ahead of schedule if necessary.
+        /// </summary>
+        /// <param name="Parameters">The target user whose role is to be removed.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task RemoveBorkday(Dictionary<string, string> Parameters) {
             ulong UserID = Convert.ToUInt64(Parameters["User"]);

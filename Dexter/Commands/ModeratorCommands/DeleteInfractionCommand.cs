@@ -16,7 +16,7 @@ namespace Dexter.Commands {
         /// making it so that the record is thus removed from an individual and cannot be seen through the records command.
         /// </summary>
         /// <param name="InfractionID">The ID of the infraction that you wish to remove from the user.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("delrecord")]
         [Summary("Removes an infraction from a specified user based on the infraction's ID.")]

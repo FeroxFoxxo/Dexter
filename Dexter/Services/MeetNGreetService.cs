@@ -41,7 +41,7 @@ namespace Dexter.Services {
         /// <summary>
         /// The Create Webhook method runs on Ready and is what initializes our webhook.
         /// </summary>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task CreateWebhook() {
             DiscordWebhookClient = await CreateOrGetWebhook(MNGConfiguration.WebhookChannel, MNGConfiguration.WebhookName);
@@ -55,7 +55,7 @@ namespace Dexter.Services {
         /// <param name="OldMessage">An object of the previous message that had been edited.</param>
         /// <param name="NewMessage">The instance of the new, changed message.</param>
         /// <param name="SocketMessageChannel">The channel from which the message had been sent from.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task MNGMessageUpdated(Cacheable<IMessage, ulong> OldMessage, SocketMessage NewMessage, ISocketMessageChannel SocketMessageChannel) {
             if (SocketMessageChannel.Id != MNGConfiguration.MeetNGreetChannel)
@@ -87,7 +87,7 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="DeletedMessage">The message that has been cached from the sent channel.</param>
         /// <param name="Channel">The channel from which the message had been sent from.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task MNGMessageDeleted(Cacheable<IMessage, ulong> DeletedMessage, IChannel Channel) {
             if (Channel.Id != MNGConfiguration.MeetNGreetChannel)

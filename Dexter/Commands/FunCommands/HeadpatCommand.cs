@@ -16,6 +16,12 @@ namespace Dexter.Commands {
 
     public partial class FunCommands {
 
+        /// <summary>
+        /// Sends a specially generated animated emoji depicting a 'headpat' gif superposed over the target user's profile picture.
+        /// </summary>
+        /// <param name="User">The user whose profile picture is to be used as a base.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("headpat", RunMode = RunMode.Async)]
         [Summary("Ooh, you've been a good boy? *gives rapid headpats in an emoji*")]
         [Alias("headpats", "petpat", "petpats")]

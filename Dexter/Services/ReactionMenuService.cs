@@ -15,6 +15,10 @@ namespace Dexter.Services {
 
     public class ReactionMenuService : Service {
 
+        /// <summary>
+        /// A reference to the database holding dynamic ReactionMenu data, such as current active menus and CurrentPages attached to them.
+        /// </summary>
+
         public ReactionMenuDB ReactionMenuDB { get; set; }
 
         public override void Initialize() {
@@ -28,6 +32,14 @@ namespace Dexter.Services {
 
             ReactionMenuDB.Database.EnsureCreated();
         }
+
+        /// <summary>
+        /// Performs navigation of a specific ReactionMenu when a <paramref name="Reaction"/> is added onto any message, if the target <paramref name="CachedMessage"/> corresponds to a ReactionMenu.
+        /// </summary>
+        /// <param name="CachedMessage">The Chached Message entity for the message the <paramref name="Reaction"/> was added to.</param>
+        /// <param name="Channel">The Channel entity the caches message is in.</param>
+        /// <param name="Reaction">The reaction data attached to the new reaction added to the <paramref name="CachedMessage"/>.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task ReactionMenu(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel Channel, SocketReaction Reaction) {
             ReactionMenu ReactionMenu = ReactionMenuDB.ReactionMenus.Find(CachedMessage.Id);
@@ -54,6 +66,13 @@ namespace Dexter.Services {
 
             await Message.RemoveReactionAsync(Reaction.Emote, Reaction.User.Value);
         }
+
+        /// <summary>
+        /// Creates a reaction menu from an array of template embeds and sets up all required database fields, then sends the embed to the target <paramref name="Channel"/>.
+        /// </summary>
+        /// <param name="EmbedBuilders">The template for the set of pages the ReactionMenu may display.</param>
+        /// <param name="Channel">The channel to send the ReactionMenu into.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task CreateReactionMenu(EmbedBuilder[] EmbedBuilders, ISocketMessageChannel Channel) {
             RestUserMessage Message = await Channel.SendMessageAsync(
@@ -118,6 +137,12 @@ namespace Dexter.Services {
             await Message.AddReactionAsync(new Emoji("⬅️"));
             await Message.AddReactionAsync(new Emoji("➡️"));
         }
+
+        /// <summary>
+        /// Creates the embed corresponding to the currently displayed page of the target <paramref name="ReactionMenu"/>.
+        /// </summary>
+        /// <param name="ReactionMenu">A specific instance of a ReactionMenu to obtain the active embed from.</param>
+        /// <returns>An Embed object, which can be sent or replace a different message via editing.</returns>
 
         public Embed CreateMenuEmbed (ReactionMenu ReactionMenu) {
             EmbedBuilder[] Menus = JsonConvert.DeserializeObject<EmbedBuilder[]>

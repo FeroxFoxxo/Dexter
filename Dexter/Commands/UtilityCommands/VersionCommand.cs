@@ -11,6 +11,11 @@ namespace Dexter.Commands {
 
     public partial class UtilityCommands {
 
+        /// <summary>
+        /// Displays the current version Dexter is running on.
+        /// </summary>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("version")]
         [Summary("Displays the current version Dexter is running on.")]
         [Alias("v")]

@@ -12,4 +12,15 @@
   "SecondsTillPointIncrement": 30,
   "MaxPoints": 5,
   "StaffBotsChannel": 792657895014793246,
+  "InfractionNotifications": [
+    {
+      "Points": 10,
+      "Days": 7
+    },
+    {
+      "Points": 20,
+      "Days": 30
+    }
+  ],
+  "InfractionNotification": -4
 }

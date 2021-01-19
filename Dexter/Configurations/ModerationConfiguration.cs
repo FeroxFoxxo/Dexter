@@ -1,4 +1,5 @@
 ﻿using Dexter.Abstractions;
+using System.Collections.Generic;
 
 namespace Dexter.Configurations {
 
@@ -42,6 +43,10 @@ namespace Dexter.Configurations {
         public int SecondsTillPointIncrement { get; set; }
         
         public ulong StaffBotsChannel { get; set; }
+
+        public List<Dictionary<string, int>> InfractionNotifications { get; set; }
+
+        public short InfractionNotification { get; set; }
 
     }
 

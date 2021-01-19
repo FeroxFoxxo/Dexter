@@ -48,9 +48,9 @@ namespace Dexter.Services {
         /// The Initialize void hooks the Client.Ready event to the ChangePFP method.
         /// </summary>
         
-        public override void Initialize() {
+        public override async void Initialize() {
             if (TimerService.EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault() == null)
-                CreateEventTimer(ProfileCallback, new(), ProfilingConfiguration.SecTillProfiling, TimerType.Interval);
+                await CreateEventTimer(ProfileCallback, new(), ProfilingConfiguration.SecTillProfiling, TimerType.Interval);
         }
 
         public async Task ProfileCallback(Dictionary<string, string> Parameters) {
@@ -118,11 +118,22 @@ namespace Dexter.Services {
 
             FileInfo[] Files = GetProfilePictures();
 
-            FileInfo ProfilePicture = Files[Random.Next(0, Files.Length)];
+            if (Files.Length <= 0)
+                return null;
 
-            CurrentPFP = ProfilePicture.Name;
+            else if (Files.Length == 1)
+                return Files[0].OpenRead();
 
-            return ProfilePicture.OpenRead();
+            else {
+                FileInfo ProfilePicture = Files[Random.Next(0, Files.Length - 2)];
+
+                if (ProfilePicture.Name == CurrentPFP)
+                    ProfilePicture = Files[^1];
+
+                CurrentPFP = ProfilePicture.Name;
+
+                return ProfilePicture.OpenRead();
+            }
         }
 
         /// <summary>

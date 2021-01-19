@@ -53,7 +53,7 @@ namespace Dexter.Services {
         public async Task LoopThroughEvents() {
             long CurrentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-            await EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.ExpirationTime <= CurrentTime && Timer.TimerType != TimerType.Expired)
+            await EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.ExpirationTime <= CurrentTime)
                 .ForEachAsync(async (EventTimer Timer) => {
 
                     switch (Timer.TimerType) {
@@ -128,8 +128,6 @@ namespace Dexter.Services {
 
             if (Timer == null)
                 return false;
-            else if (Timer.TimerType == TimerType.Expired)
-                return false;
             else
                 return true;
         }
@@ -138,7 +136,7 @@ namespace Dexter.Services {
             EventTimer Timer = EventTimersDB.EventTimers.Find(TimerTracker);
 
             if (Timer != null)
-                Timer.TimerType = TimerType.Expired;
+                EventTimersDB.EventTimers.Remove(Timer);
 
             EventTimersDB.SaveChanges();
         }

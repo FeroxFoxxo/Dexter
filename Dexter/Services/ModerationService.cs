@@ -27,7 +27,15 @@ namespace Dexter.Services {
         
         public ModerationConfiguration ModerationConfiguration { get; set; }
 
+        /// <summary>
+        /// The InfractionsDB is a database holding all recorded infractions in the moderation logs.
+        /// </summary>
+
         public InfractionsDB InfractionsDB { get; set; }
+
+        /// <summary>
+        /// The ModeratorCommands references Dexter's moderation module and grants access to its commands.
+        /// </summary>
 
         public ModeratorCommands ModeratorCommands { get; set; }
 
@@ -48,6 +56,12 @@ namespace Dexter.Services {
             DiscordSocketClient.Ready += DexterProfileChecks;
         }
 
+        /// <summary>
+        /// <para>Checks that all users who do not have the maximum amount of points in their Dexter Profile have an EventTimer that increments one point in their Dexter Profile.</para>
+        /// <para>This serves as a way to allow slow-paced regeneration of Dexter Profile points.</para>
+        /// </summary>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         public async Task DexterProfileChecks() {
             await InfractionsDB.DexterProfiles.AsQueryable().ForEachAsync(
                 async DexterProfile => {
@@ -66,7 +80,7 @@ namespace Dexter.Services {
         /// <summary>
         /// The Create Webhook method runs on Ready and is what initializes our webhook.
         /// </summary>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task CreateWebhook() {
             DiscordWebhookClient = await CreateOrGetWebhook(ModerationConfiguration.WebhookChannel, ModerationConfiguration.WebhookName);
@@ -78,7 +92,7 @@ namespace Dexter.Services {
         /// <param name="UserMessage">An instance of the message the reaction has been removed from.</param>
         /// <param name="MessageChannel">The channel of which the reaction has been removed in - used to check if it's from a channel that is often removed from.</param>
         /// <param name="Reaction">An object containing the reaction that had been removed.</param>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task ReactionRemovedLog(Cacheable<IUserMessage, ulong> UserMessage, ISocketMessageChannel MessageChannel, SocketReaction Reaction) {
             if (ModerationConfiguration.DisabledReactionChannels.Contains(MessageChannel.Id))

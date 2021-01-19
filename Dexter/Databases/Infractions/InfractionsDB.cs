@@ -18,7 +18,15 @@ namespace Dexter.Databases.Infractions {
 
         public DbSet<Infraction> Infractions { get; set; }
 
+        /// <summary>
+        /// The set of Dexter Profiles in the corresponding database.
+        /// </summary>
+
         public DbSet<DexterProfile> DexterProfiles { get; set; }
+
+        /// <summary>
+        /// Represents the configured settings attached to the Moderation module.
+        /// </summary>
 
         public ModerationConfiguration ModerationConfiguration { get; set; }
 
@@ -33,6 +41,12 @@ namespace Dexter.Databases.Infractions {
             Infractions.AsQueryable()
             .Where(Warning => Warning.User == UserID && Warning.EntryType != EntryType.Revoke)
             .ToArray();
+
+        /// <summary>
+        /// Gets a user's assigned Dexter profile if it exists. Otherwise, it creates a new profile and links it to them for further use.
+        /// </summary>
+        /// <param name="UserID">The user attached to the target Dexter Profile.</param>
+        /// <returns>The corresponding Dexter Profile of the selected user.</returns>
 
         public DexterProfile GetOrCreateProfile(ulong UserID) {
             DexterProfile DexterProfile = DexterProfiles.Find(UserID);

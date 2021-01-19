@@ -43,7 +43,7 @@ namespace Dexter.Extensions {
         /// </summary>
         /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
         /// <param name="MessageChannel">The IMessageChannel you wish to send the embed to.</param>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, IMessageChannel MessageChannel) =>
             await MessageChannel.SendMessageAsync(embed: EmbedBuilder.Build());
@@ -53,7 +53,7 @@ namespace Dexter.Extensions {
         /// </summary>
         /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
         /// <param name="DiscordWebhookClient">The DiscordWebhookClient you wish to send the embed to.</param>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, DiscordWebhookClient DiscordWebhookClient) =>
             await DiscordWebhookClient.SendMessageAsync(embeds: new Embed[1] { EmbedBuilder.Build() });
@@ -64,7 +64,7 @@ namespace Dexter.Extensions {
         /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
         /// <param name="User">The IUser you wish to send the embed to.</param>
         /// <param name="Fallback">The Fallback is the channel it will send the embed to if the user has blocked DMs.</param>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, IUser User, ITextChannel Fallback) {
             try {

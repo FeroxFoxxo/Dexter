@@ -25,7 +25,7 @@ namespace Dexter.Commands {
         /// <param name="PointsDeducted">The number of points to deduct to the user's Dexter Profile for automoderation purposes.</param>
         /// <param name="User">The user of which you wish to warn.</param>
         /// <param name="Reason">The reason for the user having been warned.</param>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("warn")]
         [Summary("Issues a warning to a specified user.")]
@@ -51,7 +51,7 @@ namespace Dexter.Commands {
         /// <param name="User">The user of which you wish to mute.</param>
         /// <param name="Time">The duration of the mute.</param>
         /// <param name="Reason">The reason for the user having been mute.</param>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("mute")]
         [Summary("Issues a mute to a specified user.")]
@@ -219,7 +219,7 @@ namespace Dexter.Commands {
                 EntryType = EntryType.Issue,
                 TimeOfIssue = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                 PointCost = PointsDeducted,
-                InfrationTime = Time.TotalSeconds
+                InfractionTime = Time.TotalSeconds
             });
 
             InfractionsDB.SaveChanges();

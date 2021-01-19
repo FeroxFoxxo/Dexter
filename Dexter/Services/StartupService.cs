@@ -38,6 +38,10 @@ namespace Dexter.Services {
 
         public string Version;
 
+        /// <summary>
+        /// <see langword="true"/> if the bot has finished its startup process; <see langword="false"/> otherwise.
+        /// </summary>
+
         public bool HasStarted = false;
 
         /// <summary>
@@ -55,7 +59,7 @@ namespace Dexter.Services {
         /// <param name="Token">A string, containing the Token from the command line arguments.
         /// Returns false if does not exist and flows onto the token specified in the BotConfiguration.</param>
         /// <param name="Version">The current version of the bot, as parsed from the InitializeDependencies class.</param>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task StartAsync(string Token, string Version) {
             this.Version = Version;
@@ -70,7 +74,7 @@ namespace Dexter.Services {
         /// The Run Bot method logs into the bot using the token specified as a parameter and then starts the bot asynchronously.
         /// </summary>
         /// <param name="Token">A string containing the token from which we use to log into Discord.</param>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task RunBot(string Token) {
             LoggingService.LockedCMDOut = true;
@@ -82,7 +86,7 @@ namespace Dexter.Services {
         /// The Display Startup Version Async method runs on ready and is what attempts to log the initialization of the bot
         /// to a specified guild that the bot has sucessfully started and the versionings that it is running.
         /// </summary>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task DisplayStartupVersionAsync() {
             if (HasStarted)

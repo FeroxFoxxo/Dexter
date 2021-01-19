@@ -40,6 +40,13 @@ namespace Dexter.Extensions {
             return $"{User.Username}#{User.Discriminator} ({User.Mention}) ({User.Id})";
         }
 
+        /// <summary>
+        /// Returns the URL for a User's avatar, or the URL of the user's Default Discord avatar (Discord logo with a set background color) if they're using a default avatar.
+        /// </summary>
+        /// <param name="User">Target user whose avatar is being obtained.</param>
+        /// <param name="DefaultSize">The size of the image to return in. This can be any power of 2 in the range [16, 2048].</param>
+        /// <returns>A string holding the URL of the target user's avatar.</returns>
+
         public static string GetTrueAvatarUrl (this IUser User, ushort DefaultSize = 128) {
             return string.IsNullOrEmpty(User.GetAvatarUrl(size: DefaultSize)) ? User.GetDefaultAvatarUrl() : User.GetAvatarUrl(size: DefaultSize);
         }

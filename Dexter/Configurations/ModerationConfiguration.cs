@@ -27,21 +27,57 @@ namespace Dexter.Configurations {
         
         public string WebhookName { get; set; }
 
+        /// <summary>
+        /// The role ID for the "Happy Borkday" role.
+        /// </summary>
+
         public ulong BorkdayRoleID { get; set; }
+
+        /// <summary>
+        /// The role ID for the "Happy Borkday (Staff edition)" role.
+        /// </summary>
 
         public ulong StaffBorkdayRoleID { get; set; }
 
+        /// <summary>
+        /// Amount of time to grant the role for (generally 24 hours), in seconds.
+        /// </summary>
+
         public int SecondsOfBorkday { get; set; }
+
+        /// <summary>
+        /// The role ID for the "Muted" role.
+        /// </summary>
 
         public ulong MutedRoleID { get; set; }
 
+        /// <summary>
+        /// The numerical ID of the #rules-and-info channel.
+        /// </summary>
+
         public ulong RulesAndInfoChannel { get; set; }
+
+        /// <summary>
+        /// The maximum amount of points any Dexter Profile may hold at any given moment.
+        /// </summary>
 
         public short MaxPoints { get; set; }
 
+        /// <summary>
+        /// The amount of time to wait between each time a user would regain a point in the Dexter Profile.
+        /// </summary>
+
         public int SecondsTillPointIncrement { get; set; }
         
+        /// <summary>
+        /// The numerical ID of the #staff-bots channel.
+        /// </summary>
+
         public ulong StaffBotsChannel { get; set; }
+
+        /// <summary>
+        /// A stringified mention (or ping) "@Admin Team".
+        /// </summary>
 
         public string AdministratorMention { get; set; }
 

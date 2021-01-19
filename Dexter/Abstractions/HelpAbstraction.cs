@@ -2,6 +2,10 @@
 
 namespace Dexter.Abstractions {
 
+    /// <summary>
+    /// Encapsulates necessary components to deal with command management.
+    /// </summary>
+
     public class HelpAbstraction {
 
         /// <summary>

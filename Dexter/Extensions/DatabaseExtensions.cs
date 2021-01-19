@@ -17,6 +17,7 @@ namespace Dexter.Extensions {
         /// The GetRandomTopic command extends upon a database set and returns a random, valid entry.
         /// </summary>
         /// <param name="Topics">The topics field is the set of fun topics you wish to query from.</param>
+        /// <param name="TopicType">The type of topic to draw from. It may be a TOPIC or a WOULDYOURATHER.</param>
         /// <returns>A tasked result of an instance of a fun object.</returns>
         
         public static async Task<FunTopic> GetRandomTopic(this DbSet<FunTopic> Topics, TopicType TopicType) {

@@ -30,6 +30,10 @@ namespace Dexter.Services {
         
         public ProfilingConfiguration ProfilingConfiguration { get; set; }
 
+        /// <summary>
+        /// A reference to the global logging service used to log messages from both DiscordSocketClient and to the console for debugging purposes.
+        /// </summary>
+
         public LoggingService LoggingService { get; set; }
 
         /// <summary>
@@ -52,6 +56,12 @@ namespace Dexter.Services {
             if (TimerService.EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault() == null)
                 CreateEventTimer(ProfileCallback, new(), ProfilingConfiguration.SecTillProfiling, TimerType.Interval);
         }
+
+        /// <summary>
+        /// Randomly changes the bot's avatar, backs up the database to the configured channel, and measures the time elapsed in this process.
+        /// </summary>
+        /// <param name="Parameters">A string-string Dictionary containing no compulsory definitions.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task ProfileCallback(Dictionary<string, string> Parameters) {
             Stopwatch Stopwatch = new ();
@@ -110,7 +120,7 @@ namespace Dexter.Services {
         /// <summary>
         /// The GetRandomPFP method runs on Client.Ready and it simply gets a random PFP of the bot.
         /// </summary>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public FileStream GetRandomPFP() {
             if (string.IsNullOrEmpty(ProfilingConfiguration.PFPDirectory))

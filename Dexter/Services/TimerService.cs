@@ -17,7 +17,15 @@ namespace Dexter.Services {
 
     public class TimerService : Service {
 
+        /// <summary>
+        /// The database holding all dynamic data to reference and operate with Event Timers.
+        /// </summary>
+
         public EventTimersDB EventTimersDB { get; set; }
+
+        /// <summary>
+        /// The global service responsible for logging information into the DiscordSocketClient and console for debugging purposes.
+        /// </summary>
 
         public LoggingService LoggingService { get; set; }
 
@@ -28,6 +36,10 @@ namespace Dexter.Services {
         /// </summary>
 
         public Random Random { get; set; }
+
+        /// <summary>
+        /// <see langword="true"/> if the service has started; <see langword="false"/> otherwise.
+        /// </summary>
 
         public bool HasStarted = false;
 
@@ -49,6 +61,11 @@ namespace Dexter.Services {
                 HasStarted = true;
             }
         }
+
+        /// <summary>
+        /// Loops through all events and checks if any of them are set to be triggered (Interavl) or expire (Expire).
+        /// </summary>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task LoopThroughEvents() {
             long CurrentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -83,6 +100,16 @@ namespace Dexter.Services {
                     }
                 });
         }
+
+        /// <summary>
+        /// Creates a new timer object and adds it to the corresponding database.
+        /// </summary>
+        /// <param name="JSON">JSON-formatted string-string Dictionary codifying the parameters to pass to <paramref name="ClassName"/>.<paramref name="MethodName"/>()</param>
+        /// <param name="ClassName">The name of the class containing <paramref name="MethodName"/>.</param>
+        /// <param name="MethodName">The name of the method to call when the event is triggered.</param>
+        /// <param name="SecondsTillExpiration">Time until the event expires (Expire) or triggers (Interval).</param>
+        /// <param name="TimerType">Whether the timer is a single-trigger timer (Expire) or triggers every set number of <paramref name="SecondsTillExpiration"/> (Interval).</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task<string> AddTimer(string JSON, string ClassName, string MethodName, int SecondsTillExpiration, TimerType TimerType) {
             string Token = CreateToken();
@@ -123,6 +150,12 @@ namespace Dexter.Services {
                 return CreateToken();
         }
 
+        /// <summary>
+        /// Checks whether a timer exists in the database from a given <paramref name="TimerTracker"/> Token.
+        /// </summary>
+        /// <param name="TimerTracker">The unique identifier of the target EventTimer.</param>
+        /// <returns><see langword="true"/> if the timer exists; <see langword="false"/> otherwise.</returns>
+
         public bool TimerExists(string TimerTracker) {
             EventTimer Timer = EventTimersDB.EventTimers.Find(TimerTracker);
 
@@ -133,6 +166,12 @@ namespace Dexter.Services {
             else
                 return true;
         }
+
+        /// <summary>
+        /// Removes a timer from the EventTimer database by its <paramref name="TimerTracker"/> token.
+        /// </summary>
+        /// <remarks>This function doesn't remove the timer from the database completely, it instead sets its status to "Expired".</remarks>
+        /// <param name="TimerTracker">The unique identifier of the target EventTimer.</param>
 
         public void RemoveTimer(string TimerTracker) {
             EventTimer Timer = EventTimersDB.EventTimers.Find(TimerTracker);

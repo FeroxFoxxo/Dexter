@@ -70,7 +70,7 @@ namespace Dexter.Abstractions {
         /// <param name="CallbackParameters">The parameters you wish to callback with once approved.</param>
         /// <param name="Author">The author of the message who will be attached to the proposal.</param>
         /// <param name="Proposal">The message that will be attached to the proposal.</param>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task SendForAdminApproval(Action<Dictionary<string, string>> CallbackMethod,
                 Dictionary<string, string> CallbackParameters, ulong Author, string Proposal) {
@@ -131,7 +131,7 @@ namespace Dexter.Abstractions {
         /// </summary>
         /// <param name="EmbedBuilders">The embeds that you wish to create the reaction menu from.</param>
         /// <param name="Channel">The channel that the reaction menu should be sent to.</param>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task CreateReactionMenu(EmbedBuilder[] EmbedBuilders, ISocketMessageChannel Channel) {
             await ReactionMenuService.CreateReactionMenu(EmbedBuilders, Channel);

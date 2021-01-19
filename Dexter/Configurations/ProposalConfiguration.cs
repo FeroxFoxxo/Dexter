@@ -58,9 +58,21 @@ namespace Dexter.Configurations {
 
         public ulong StorageChannelID { get; set; }
 
+        /// <summary>
+        /// A list of commands which won't throw an exception of type "unknown command", but will also do nothing.
+        /// </summary>
+
         public List<string> CommandRemovals { get; set; }
 
+        /// <summary>
+        /// The maximum amount of time a suggestion is allowed to remain active before being automatically declined. 
+        /// </summary>
+
         public int IdleDeclineTime { get; set; }
+
+        /// <summary>
+        /// The absolute value of the difference in votes for a suggestion in the staff approval stage to be automatically accepted or declined.
+        /// </summary>
 
         public int StaffVotingThreshold { get; set; }
 

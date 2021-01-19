@@ -50,7 +50,7 @@ namespace Dexter.Databases.Proposals {
         public string Reason { get; set; }
 
         /// <summary>
-        /// The Message ID field is the snowflake ID of the embed that has been put forth in the #suggestion channel.
+        /// The Message ID field is the snowflake ID of the embed that has been put forth in the #suggestions channel.
         /// </summary>
         
         public ulong MessageID { get; set; }
@@ -61,7 +61,15 @@ namespace Dexter.Databases.Proposals {
         
         public string ProxyURL { get; set; }
 
+        /// <summary>
+        /// The true avatar URL of the user who first made the proposal.
+        /// </summary>
+
         public string AvatarURL { get; set; }
+
+        /// <summary>
+        /// The username of the user who first made the proposal.
+        /// </summary>
 
         public string Username { get; set; }
     }

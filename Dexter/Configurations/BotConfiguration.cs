@@ -77,7 +77,15 @@ namespace Dexter.Configurations {
 
         public int TrackerLength { get; set; }
         
+        /// <summary>
+        /// Stores the URL to the commits page in the relevant GIT repository.
+        /// </summary>
+
         public string CommitAPICall { get; set; }
+
+        /// <summary>
+        /// Configures whether periodic backups of all databases should be made.
+        /// </summary>
 
         public bool EnableDatabaseBackups { get; set; }
 

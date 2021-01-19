@@ -35,6 +35,10 @@ namespace Dexter.Databases.FunTopics {
         
         public EntryType EntryType { get; set; }
 
+        /// <summary>
+        /// [soon to be deprecated] Whether the topic is a "topic" or "wyr". 
+        /// </summary>
+
         public TopicType TopicType { get; set; }
     }
 

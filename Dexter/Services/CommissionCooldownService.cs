@@ -42,7 +42,7 @@ namespace Dexter.Services {
         /// a commission on an earlier period of time. If so, it deletes the commission if possible and warns the user of posting too quick commissions.
         /// </summary>
         /// <param name="SocketMessage">The SocketMessage contains information of the message that was sent, including the author, and can be used to remove the message.</param>
-        /// <returns>A task object, from which can be awaited until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task MessageRecieved(SocketMessage SocketMessage) {
             // We first check to see if the channel is in the commissions corner and not from a bot to continue.

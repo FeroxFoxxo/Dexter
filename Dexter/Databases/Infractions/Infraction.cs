@@ -55,7 +55,7 @@ namespace Dexter.Databases.Infractions {
         /// </summary>
         /// <remarks>All warning-type infractions should have an InfractionTime of 0.</remarks>
 
-        public double InfractionTime { get; set; }
+        public int InfractionTime { get; set; }
 
         /// <summary>
         /// The amount of points subtracted from a user's Dexter Profile as a result of the infraction.

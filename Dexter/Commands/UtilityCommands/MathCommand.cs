@@ -17,6 +17,8 @@ namespace Dexter.Commands {
 		/// <summary>
 		/// Evaluates a mathematical expression and gives a result or throws an error.
 		/// </summary>
+		/// <param name="expression">A properly formatted stringified math expression.</param>
+		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
 		[Command("math")]
 		[Summary("Evaluates a mathematical expression")]

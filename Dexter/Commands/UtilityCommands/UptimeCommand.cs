@@ -10,6 +10,11 @@ namespace Dexter.Commands {
 
     public partial class UtilityCommands {
 
+        /// <summary>
+        /// Displays the amount of time the bot's current instance has been running for.
+        /// </summary>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("uptime")]
         [Summary("Displays the amount of time that the bot has been running for.")]
         [Alias("runtime")]

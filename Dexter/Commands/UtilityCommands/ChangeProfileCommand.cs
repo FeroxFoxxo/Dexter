@@ -9,6 +9,11 @@ namespace Dexter.Commands {
 
     public partial class UtilityCommands {
 
+        /// <summary>
+        /// Changes the bot's profile picture to a randomly selected image from a configured list.
+        /// </summary>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("changepfp", RunMode = RunMode.Async)]
         [Summary("Changes the profile picture of the bot to a random image from a selection made for him.")]
         [RequireModerator]

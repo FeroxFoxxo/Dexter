@@ -11,7 +11,7 @@ namespace Dexter.Commands {
         /// <summary>
         /// The ListCommands method runs on CCLIST and will list all the custom commands in the database.
         /// </summary>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("cclist")]
         [Summary("Displays all avaliable custom commands in the database.")]

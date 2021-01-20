@@ -23,7 +23,15 @@ namespace Dexter.Configurations {
         
         public List<string> PFPExtensions { get; set; }
 
+        /// <summary>
+        /// The amount of seconds between each automatic profile picture switch.
+        /// </summary>
+
         public int SecTillProfiling { get; set; }
+
+        /// <summary>
+        /// The numerical ID of the channel database data is to be backed up to.
+        /// </summary>
 
         public ulong DatabaseBackupChannel { get; set; }
 

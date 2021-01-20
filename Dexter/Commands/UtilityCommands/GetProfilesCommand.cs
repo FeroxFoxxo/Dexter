@@ -8,6 +8,11 @@ namespace Dexter.Commands {
 
     public partial class UtilityCommands {
 
+        /// <summary>
+        /// Lists all available profile pictures from the configured directory by their file names.
+        /// </summary>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("getpfp")]
         [Summary("Gets all the given profile pictures in the pfp directory.")]
         [Alias("getpfps")]

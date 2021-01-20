@@ -49,7 +49,7 @@ namespace Dexter.Databases.Infractions {
         
         public long TimeOfIssue { get; set; }
 
-        public double InfrationTime { get; set; }
+        public int InfrationTime { get; set; }
 
         public short PointCost { get; set; }
 

@@ -208,7 +208,7 @@ namespace Dexter.Commands {
                 EntryType = EntryType.Issue,
                 TimeOfIssue = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                 PointCost = PointsDeducted,
-                InfrationTime = Time.TotalSeconds
+                InfrationTime = Convert.ToInt32(Time.TotalSeconds)
             });
 
             InfractionsDB.SaveChanges();

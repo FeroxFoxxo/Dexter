@@ -10,10 +10,17 @@ namespace Dexter.Commands {
 
     public static class LanguageHelper {
 
+        private enum ArticleType {
+            None,
+            Uppercase,
+            Lowercase
+        }
+
         /// <summary>
         /// Randomizes special groups of characters in <paramref name="Predicate"/> and fills them in with corresponding terms in <paramref name="TermBanks"/>.
         /// </summary>
-        /// <remarks>The way to mark an expression for randomization is to wrap it in braces ("{}"). The format of each expression must be as follows: {IDENTIFIERX}, where IDENTIFIER is a key in <paramref name="TermBanks"/> and X is a positive integer value, every expression with the same identifier and value will be swapped for the same term.</remarks>
+        /// <remarks><para>The way to mark an expression for randomization is to wrap it in braces ("{}"). The format of each expression must be as follows: {IDENTIFIERX}, where IDENTIFIER is a key in <paramref name="TermBanks"/> and X is a positive integer value, every expression with the same identifier and value will be swapped for the same term.</para>
+        /// <para>Special Identifiers exist, which do not run through terms: 'a' will try to guess the most probable expression of the indefinite article.</para></remarks>
         /// <param name="Predicate">The message whose terms are to be randomized.</param>
         /// <param name="TermBanks">A string-string[] dictionary where the keys are the explicit identifier of each TermClass and the values are list of terms those expressions can be substituted with.</param>
         /// <param name="RNG">A Random Number Generator used to extract random terms from <paramref name="TermBanks"/>.</param>
@@ -27,6 +34,8 @@ namespace Dexter.Commands {
             }
 
             StringBuilder NewPredicate = new StringBuilder(Predicate.Length * 2);
+
+            ArticleType ResolveArticle = ArticleType.None;
 
             while (Predicate.Length > 0) {
                 int InsertIndex = Predicate.IndexOf(INSERTION_INDICATOR);
@@ -44,15 +53,25 @@ namespace Dexter.Commands {
 
                 string CompareString = Predicate[(InsertIndex + 1)..EndIndex];
 
-                foreach (TermClass Term in Terms) {
-                    int Index = Term.CheckReplace(CompareString);
+                //SPECIAL CASES
+                if (CompareString is "a" or "A") {
+                    ResolveArticle = CompareString == "a" ? ArticleType.Lowercase : ArticleType.Uppercase;
+                } else { 
+                    //Default case
+                    foreach (TermClass Term in Terms) {
+                        int Index = Term.CheckReplace(CompareString);
 
-                    if (Index == ERROR_CODE_INVALID_NUMBER)
-                        throw new IndexOutOfRangeException($"There was an error parsing the number in term call \"{CompareString}\" within \"{Predicate}\". Please contact the developer team.");
+                        if (Index == ERROR_CODE_INVALID_NUMBER)
+                            throw new IndexOutOfRangeException($"There was an error parsing the number in term call \"{CompareString}\" within \"{Predicate}\". Please contact the developer team.");
 
-                    if (Index >= 0) {
-                        NewPredicate.Append(Term.GetOrGenerateCached(Index, RNG));
-                        break;
+                        if (Index >= 0) {
+                            string newTerm = Term.GetOrGenerateCached(Index, RNG);
+                            
+                            NewPredicate.Append((ResolveArticle != ArticleType.None ? $"{GuessIndefiniteArticle(newTerm, ResolveArticle == ArticleType.Uppercase)} " : "") 
+                                + newTerm);
+                            ResolveArticle = ArticleType.None;
+                            break;
+                        }
                     }
                 }
 
@@ -78,8 +97,9 @@ namespace Dexter.Commands {
             if (!Str.StartsWith(Term.Identifier))
                 return -1;
 
-            if (int.TryParse(Str[Term.Identifier.Length..], out int Index))
-                return Index > 0 ? Index : ERROR_CODE_INVALID_NUMBER;
+            if (int.TryParse(Str[Term.Identifier.Length..], out int Index)) {
+                return Index >= 0 ? Index : ERROR_CODE_INVALID_NUMBER;
+            }
 
             return ERROR_CODE_INVALID_NUMBER;
         }
@@ -121,6 +141,31 @@ namespace Dexter.Commands {
                 }
 
                 return Cache[Index];
+            }
+        }
+
+        /// <summary>
+        /// Will attempt to guess whether the indefinite article should be 'a' or 'an' based on <paramref name="NextWord"/>.
+        /// </summary>
+        /// <param name="NextWord">A string describing what follows the article.</param>
+        /// <param name="Capitalize">Whether to capitalize the first letter of the article.</param>
+        /// <returns>A string, either "a", "an", or "a(n)", where the character 'a' is capitalized if <paramref name="Capitalize"/> is set to <see langword="true"/>.</returns>
+
+        public static string GuessIndefiniteArticle(string NextWord, bool Capitalize = false) {
+            string Relevant = NextWord.Trim().Split(' ')[0].ToLower();
+
+            switch (Relevant[0]) {
+
+                case 'a':
+                case 'e':
+                case 'i':
+                case 'o':
+                    return Capitalize ? "An" : "an";
+                case 'h':
+                case 'u':
+                    return Capitalize ? "A(n)" : "a(n)";
+                default:
+                    return Capitalize ? "A" : "a";
             }
         }
     }

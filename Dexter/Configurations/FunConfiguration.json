@@ -47,5 +47,28 @@
     [ 30, 36, 64, 72 ]
   ],
   "HeadpatStorageGuild": 613441321751019550,
-  "HeadpatWebhookName": "HeadpatWebhook"
+  "HeadpatWebhookName": "HeadpatWebhook",
+  "WritingPromptTerms": {
+    "male_name": [
+      "Wyndilor"
+    ],
+    "female_name": [
+      "Lagartha"
+    ],
+    "noun": [
+      "fox"
+    ],
+    "adjective": [
+      "glamorous"
+    ]
+  },
+  "WritingPromptOpenings": [
+    "Once upon a time...",
+    "This tale starts in a land far, far away...",
+    "Everything fell into darkness."
+  ],
+  "WritingPromptPredicates": [
+    "{female_name0}, the {adjective0} {noun0}, was prowling around a lush field, when she found a rather {adjective1} {noun1}. She could not believe it! It was a surprising find, but that is when the irony of the situation landed on her...",
+    "It was a sunny day that {male_name0} decided to take a walk outside, {male_name0} was quite the {adjective0} {noun0}; his friends had always told him that he was very {adjective1}. Well, he was going to put an end to it very, very soon..."
+  ]
 }

@@ -154,19 +154,11 @@ namespace Dexter.Commands {
         public static string GuessIndefiniteArticle(string NextWord, bool Capitalize = false) {
             string Relevant = NextWord.Trim().Split(' ')[0].ToLower();
 
-            switch (Relevant[0]) {
-
-                case 'a':
-                case 'e':
-                case 'i':
-                case 'o':
-                    return Capitalize ? "An" : "an";
-                case 'h':
-                case 'u':
-                    return Capitalize ? "A(n)" : "a(n)";
-                default:
-                    return Capitalize ? "A" : "a";
-            }
+            return (Relevant[0]) switch {
+                'a' or 'e' or 'i' or 'o' => Capitalize ? "An" : "an",
+                'h' or 'u' => Capitalize ? "A(n)" : "a(n)",
+                _ => Capitalize ? "A" : "a",
+            };
         }
     }
 }

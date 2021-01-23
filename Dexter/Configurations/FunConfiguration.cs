@@ -58,6 +58,25 @@ namespace Dexter.Configurations {
 
         public string HeadpatWebhookName { get; set; }
 
+        /// <summary>
+        /// A list of generic openings to a writing prompt, something like "once upon a time,".
+        /// </summary>
+
+        public List<string> WritingPromptOpenings { get; set; }
+
+        /// <summary>
+        /// A string-string dictionary containing definitions for term classes which will be used as keys later on in order to randomly generate writing prompts.
+        /// </summary>
+
+        public Dictionary<string, string[]> WritingPromptTerms { get; set; }
+
+        /// <summary>
+        /// A list of writing prompts phrased after an opening, a few keywords can be used to generate random terms.
+        /// Using the keywords "{NOUNX}", "{NAMEX}", or "{ADJECTIVEX}" where 'X' is a number will replace them with a randomly generated term of that category.
+        /// </summary>
+
+        public List<string> WritingPromptPredicates { get; set; }
+
     }
 
 }

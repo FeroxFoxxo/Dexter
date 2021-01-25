@@ -73,7 +73,7 @@ namespace Dexter {
                 new DiscordSocketConfig {
                     MessageCacheSize = 1000,
                     GatewayIntents = GatewayIntents.GuildWebhooks | GatewayIntents.Guilds | GatewayIntents.GuildPresences | GatewayIntents.GuildMessages | GatewayIntents.GuildMessageReactions
-                                    | GatewayIntents.DirectMessages | GatewayIntents.DirectMessageReactions | GatewayIntents.GuildVoiceStates,
+                                    | GatewayIntents.DirectMessages | GatewayIntents.DirectMessageReactions | GatewayIntents.GuildVoiceStates | GatewayIntents.GuildMembers,
                     ExclusiveBulkDelete = false
                 }
             );

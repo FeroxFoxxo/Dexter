@@ -301,6 +301,8 @@ namespace Dexter.Commands {
                 DexterProfile.InfractionAmount++;
                 if (DexterProfile.InfractionAmount < ModerationConfiguration.MaxPoints)
                     DexterProfile.CurrentPointTimer = await CreateEventTimer(IncrementPoints, new() { { "UserID", UserID.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
+                else
+                    DexterProfile.CurrentPointTimer = string.Empty;
             } else {
                 if (DexterProfile.InfractionAmount > ModerationConfiguration.MaxPoints)
                     DexterProfile.InfractionAmount = ModerationConfiguration.MaxPoints;

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
 using Discord;
@@ -8,6 +7,12 @@ using Discord.Commands;
 namespace Dexter.Commands {
 
     public partial class FunCommands {
+
+        /// <summary>
+        /// Functions as an interface between the functions in this module and the JSON configuration file holding data for this module.
+        /// </summary>
+
+        public Configurations.LanguageConfiguration LanguageConfiguration { get; set; }
 
         /// <summary>
         /// Sends a randomly generated writing prompt. It draws from FunConfiguration.WritingPrompt* config items.
@@ -26,9 +31,10 @@ namespace Dexter.Commands {
             Random RNG = new Random();
 
             string Opening = FunConfiguration.WritingPromptOpenings[RNG.Next(FunConfiguration.WritingPromptOpenings.Count)];
-            string Predicate = LanguageHelper.RandomizePredicate(FunConfiguration.WritingPromptPredicates[RNG.Next(FunConfiguration.WritingPromptPredicates.Count)],
+            string Predicate = Helpers.LanguageHelper.RandomizePredicate(FunConfiguration.WritingPromptPredicates[RNG.Next(FunConfiguration.WritingPromptPredicates.Count)],
                 FunConfiguration.WritingPromptTerms,
-                RNG);
+                RNG,
+                LanguageConfiguration);
 
             return $"{Opening} {Predicate}";
         }

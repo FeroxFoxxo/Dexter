@@ -76,7 +76,15 @@ namespace Dexter.Configurations {
 
         public ulong StaffBotsChannel { get; set; }
 
+        /// <summary>
+        /// A list of different infraction notification times, each entry having a point and day keyvaluepair.
+        /// </summary>
+
         public List<Dictionary<string, int>> InfractionNotifications { get; set; }
+
+        /// <summary>
+        /// The infraction notification is the time at which the bot will notify the admin team of a large amount of infractions.
+        /// </summary>
 
         public short InfractionNotification { get; set; }
 

@@ -66,7 +66,7 @@ namespace Dexter.Services {
             await InfractionsDB.DexterProfiles.AsQueryable().ForEachAsync(
                 async DexterProfile => {
                     if (DexterProfile.InfractionAmount < ModerationConfiguration.MaxPoints)
-                        if (string.IsNullOrEmpty(DexterProfile.CurrentPointTimer))
+                        if (!TimerService.TimerExists(DexterProfile.CurrentPointTimer))
                             DexterProfile.CurrentPointTimer = await CreateEventTimer(
                                 ModeratorCommands.IncrementPoints,
                                 new() { { "UserID", DexterProfile.UserID.ToString() } },

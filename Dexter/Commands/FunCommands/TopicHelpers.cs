@@ -73,6 +73,7 @@ namespace Dexter.Commands {
         /// Sends a randomly selected topic or wyr to chat.
         /// </summary>
         /// <param name="TopicType">Which type of topic database to access.</param>
+        /// <param name="Name">The name of the type of topic, generated using regex.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task SendTopic(TopicType TopicType, string Name) {
@@ -107,6 +108,7 @@ namespace Dexter.Commands {
         /// <remarks>This process requires intermediary administrator approval before completion.</remarks>
         /// <param name="TopicEntry">The string pertaining to the whole expression of the new suggested topic.</param>
         /// <param name="TopicType">Which type of topic database to access.</param>
+        /// <param name="Name">The name of the type of topic, generated using regex.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task AddTopic(string TopicEntry, TopicType TopicType, string Name) {
@@ -182,6 +184,7 @@ namespace Dexter.Commands {
         /// <remarks>This process requires an intermediary administrator approval phase.</remarks>
         /// <param name="TopicID">The numerical ID corresponding to the target topic.</param>
         /// <param name="TopicType">Which type of topic database to access.</param>
+        /// <param name="Name">The name of the type of topic, generated using regex.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task RemoveTopic(int TopicID, TopicType TopicType, string Name) {
@@ -243,6 +246,7 @@ namespace Dexter.Commands {
         /// </summary>
         /// <param name="TopicEntry">The exact text corresponding to the topic.</param>
         /// <param name="TopicType">Which type of topic database to access.</param>
+        /// <param name="Name">The name of the type of topic, generated using regex.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task GetTopic(string TopicEntry, TopicType TopicType, string Name) {
@@ -274,6 +278,7 @@ namespace Dexter.Commands {
         /// <param name="TopicID">The numerical ID of the target topic.</param>
         /// <param name="EditedTopic">The new text expression for the target topic.</param>
         /// <param name = "TopicType" > Which type of topic database to access.</param>
+        /// <param name="Name">The name of the type of topic, generated using regex.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task EditTopic(int TopicID, string EditedTopic, TopicType TopicType, string Name) {

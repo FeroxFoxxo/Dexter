@@ -13,6 +13,10 @@ using System.Threading.Tasks;
 
 namespace Dexter.Services {
 
+    /// <summary>
+    /// The Reaction Menu service, which is used to create and update reaction menus.
+    /// </summary>
+
     public class ReactionMenuService : Service {
 
         /// <summary>
@@ -21,6 +25,11 @@ namespace Dexter.Services {
 
         public ReactionMenuDB ReactionMenuDB { get; set; }
 
+        /// <summary>
+        /// The Initialize method hooks the client ReactionAdded events and sets them to their related delegates.
+        /// It is also used to delete the previous database to save on space.
+        /// </summary>
+        
         public override void Initialize() {
             DiscordSocketClient.ReactionAdded += ReactionMenu;
 

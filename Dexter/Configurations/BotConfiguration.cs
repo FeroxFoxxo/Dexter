@@ -20,6 +20,10 @@ namespace Dexter.Configurations {
         
         public ulong ModeratorRoleID { get; set; }
 
+        /// <summary>
+        /// The ADMINISTRATOR ROLE ID is the snowflake ID of the role that the administrators have.
+        /// </summary>
+
         public ulong AdministratorRoleID { get; set; }
 
         /// <summary>

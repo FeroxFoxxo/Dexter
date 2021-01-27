@@ -30,6 +30,10 @@ namespace Dexter.Services {
         
         public LoggingService LoggingService { get; set; }
 
+        /// <summary>
+        /// The ServiceProvider is where our dependencies are stored - given to get an initialized class.
+        /// </summary>
+
         public ServiceProvider ServiceProvider { get; set; }
 
         /// <summary>
@@ -120,7 +124,7 @@ namespace Dexter.Services {
                             object Value = Property.GetValue(Service);
 
                             if (Value != null)
-                                if (!(string.IsNullOrEmpty(Value.ToString()) || Value.ToString().Equals("0")))
+                                if (!string.IsNullOrEmpty(Value.ToString()) && !Value.ToString().Equals("0"))
                                     return;
 
                             if (!NulledConfigurations.ContainsKey(Configuration.Name))

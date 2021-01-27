@@ -86,7 +86,7 @@ namespace Dexter.Commands {
         public async Task IssueMute(IGuildUser User, TimeSpan Time, [Remainder] string Reason) {
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
 
-            if (!string.IsNullOrEmpty(DexterProfile.CurrentMute))
+            if (TimerService.TimerExists(DexterProfile.CurrentMute))
                 TimerService.RemoveTimer(DexterProfile.CurrentMute);
 
             IRole Role = Context.Guild.GetRole(ModerationConfiguration.MutedRoleID);
@@ -211,7 +211,7 @@ namespace Dexter.Commands {
             }
 
             if (Time.TotalSeconds > 0) {
-                if (!string.IsNullOrEmpty(DexterProfile.CurrentMute))
+                if (TimerService.TimerExists(DexterProfile.CurrentMute))
                     TimerService.RemoveTimer(DexterProfile.CurrentMute);
 
                 IRole Role = Context.Guild.GetRole(ModerationConfiguration.MutedRoleID);
@@ -229,7 +229,7 @@ namespace Dexter.Commands {
                     await User.AddRoleAsync(Role);
             }
 
-            if (string.IsNullOrEmpty(DexterProfile.CurrentPointTimer))
+            if (!TimerService.TimerExists(DexterProfile.CurrentPointTimer))
                 DexterProfile.CurrentPointTimer = await CreateEventTimer(IncrementPoints, new() { { "UserID", User.Id.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
 
             InfractionsDB.Infractions.Add(new Infraction() {

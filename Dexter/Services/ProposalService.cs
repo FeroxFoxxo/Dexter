@@ -263,7 +263,7 @@ namespace Dexter.Services {
 
             Suggestion Suggestion = ProposalDB.Suggestions.Find(Token);
 
-            Suggestion.TimerToken = "";
+            Suggestion.TimerToken = string.Empty;
 
             await UpdateProposal(Proposal, ProposalStatus.Declined);
         }
@@ -459,7 +459,7 @@ namespace Dexter.Services {
 
             Proposal.Reason = "The staff team was too divided on this suggestion to make a confident judgement at this time.";
 
-            Suggestion.TimerToken = "";
+            Suggestion.TimerToken = string.Empty;
 
             await UpdateProposal(Proposal, ProposalStatus.Declined);
         }
@@ -497,9 +497,9 @@ namespace Dexter.Services {
                 case ProposalType.Suggestion:
                     Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
 
-                    if (Suggestion.TimerToken != "")
+                    if (!string.IsNullOrEmpty(Suggestion.TimerToken))
                         TimerService.RemoveTimer(Suggestion.TimerToken);
-
+                    
                     await UpdateSpecificProposal(Proposal, ProposalConfiguration.SuggestionsChannel, Proposal.MessageID);
                     await UpdateSpecificProposal(Proposal, ProposalConfiguration.StaffSuggestionsChannel, Suggestion.StaffMessageID);
                     break;

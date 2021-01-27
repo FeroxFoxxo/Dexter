@@ -166,7 +166,7 @@ namespace Dexter.Commands {
 
             if (DexterProfile.InfractionAmount > ModerationConfiguration.InfractionNotification &&
                     DexterProfile.InfractionAmount - PointsDeducted <= ModerationConfiguration.InfractionNotification)
-                Notification += $"It seems as though the user {User.GetUserInformation()} is currently standing on {DexterProfile.InfractionAmount - PointsDeducted}.\n";
+                Notification += $"It seems as though the user {User.GetUserInformation()} is currently standing on {DexterProfile.InfractionAmount - PointsDeducted} points.\n";
 
             foreach (Dictionary<string, int> Notifications in ModerationConfiguration.InfractionNotifications) {
                 int Points = 0;
@@ -180,11 +180,13 @@ namespace Dexter.Commands {
             }
 
             if (Notification.Length > 0) {
-                await BuildEmbed(EmojiEnum.Wut)
-                    .WithTitle($"Frequent Rulebreaker Inbound!")
-                    .WithDescription($"Haiya!\n{Notification}Perhaps this is something the <@&{BotConfiguration.AdministratorRoleID}> can dwell on. <3")
-                    .WithCurrentTimestamp()
-                    .SendEmbed(DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel);
+                await (DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
+                    .SendMessageAsync($"**Frequently Warned User >>>** <@&{BotConfiguration.AdministratorRoleID}>",
+                        embed: BuildEmbed(EmojiEnum.Wut)
+                        .WithTitle($"Frequent Rule Breaker Inbound!")
+                        .WithDescription($"Haiya!\n{Notification}Perhaps this is something the <@&{BotConfiguration.AdministratorRoleID}> can dwell on. <3")
+                        .WithCurrentTimestamp().Build()
+                );
             }
 
             DexterProfile.InfractionAmount -= PointsDeducted;
@@ -299,6 +301,8 @@ namespace Dexter.Commands {
                 DexterProfile.InfractionAmount++;
                 if (DexterProfile.InfractionAmount < ModerationConfiguration.MaxPoints)
                     DexterProfile.CurrentPointTimer = await CreateEventTimer(IncrementPoints, new() { { "UserID", UserID.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
+                else
+                    DexterProfile.CurrentPointTimer = string.Empty;
             } else {
                 if (DexterProfile.InfractionAmount > ModerationConfiguration.MaxPoints)
                     DexterProfile.InfractionAmount = ModerationConfiguration.MaxPoints;

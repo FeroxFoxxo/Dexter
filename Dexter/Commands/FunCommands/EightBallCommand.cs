@@ -23,11 +23,11 @@ namespace Dexter.Commands {
         public async Task EightBallCommand([Remainder] string Message) {
             string Result = new Random().Next(4) == 3 ? "uncertain" : new Random(Message.GetHash()).Next(2) == 0 ? "yes" : "no";
 
-            string[] Responces = FunConfiguration.EightBall[Result];
+            string[] Responses = FunConfiguration.EightBall[Result];
 
             Emote Emoji = await DiscordSocketClient.GetGuild(FunConfiguration.EmojiGuildID).GetEmoteAsync(FunConfiguration.EmojiIDs[FunConfiguration.EightBallEmoji[Result]]);
 
-            await Context.Channel.SendMessageAsync($"{Responces[new Random().Next(Responces.Length)]}, **{Context.User}** {Emoji}");
+            await Context.Channel.SendMessageAsync($"{Responses[new Random().Next(Responses.Length)]}, **{Context.User}** {Emoji}");
         }
 
     }

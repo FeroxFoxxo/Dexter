@@ -1,7 +1,7 @@
 <html>
    <body>
       <h1 align="center" style="position: relative;">
-         <img src="https://us-furries.com/Dexter/DexLove.png" width="200" style="border-radius: 50%;" align="center">
+         <img src="https://cdn.discordapp.com/attachments/781077443338960926/807479083297931264/DexLove.png" width="200" style="border-radius: 50%;" align="center">
          <br>
          Dexter .NET
       </h1>

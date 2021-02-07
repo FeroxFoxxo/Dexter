@@ -22,6 +22,8 @@ namespace Dexter.Extensions {
         public static PermissionLevel GetPermissionLevel(this IGuildUser GuildUser, BotConfiguration BotConfiguration) {
             if (GuildUser.RoleIds.Contains(BotConfiguration.AdministratorRoleID))
                 return PermissionLevel.Administrator;
+            else if (GuildUser.RoleIds.Contains(BotConfiguration.DeveloperRoleID))
+                return PermissionLevel.Moderator;
             else if (GuildUser.RoleIds.Contains(BotConfiguration.ModeratorRoleID))
                 return PermissionLevel.Moderator;
             else 

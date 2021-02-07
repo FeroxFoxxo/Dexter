@@ -22,5 +22,6 @@
       "Days": 30
     }
   ],
-  "InfractionNotification": -4
+  "InfractionNotification": -4,
+  "ModMailChannelID": 808106616557797394
 }

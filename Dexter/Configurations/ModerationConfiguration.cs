@@ -88,6 +88,12 @@ namespace Dexter.Configurations {
 
         public short InfractionNotification { get; set; }
 
+        /// <summary>
+        /// The channel that modmail messages should be sent to.
+        /// </summary>
+
+        public ulong ModMailChannelID { get; set; }
+
     }
 
 }

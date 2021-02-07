@@ -93,6 +93,8 @@ namespace Dexter.Services {
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task DisplayStartupVersionAsync() {
+            await DiscordSocketClient.SetActivityAsync(new Game(BotConfiguration.BotStatus));
+
             if (HasStarted)
                 return;
 

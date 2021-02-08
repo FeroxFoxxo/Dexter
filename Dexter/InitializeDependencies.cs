@@ -71,9 +71,7 @@ namespace Dexter {
             // Adds an instance of the DiscordSocketClient to the collection, specifying the cache it should retain should be 1000 messages in size.
             DiscordSocketClient DiscordSocketClient = new(
                 new DiscordSocketConfig {
-                    MessageCacheSize = 1000,
-                    GatewayIntents = GatewayIntents.GuildWebhooks | GatewayIntents.Guilds | GatewayIntents.GuildPresences | GatewayIntents.GuildMessages | GatewayIntents.GuildMessageReactions
-                                    | GatewayIntents.DirectMessages | GatewayIntents.DirectMessageReactions | GatewayIntents.GuildVoiceStates | GatewayIntents.GuildMembers,
+                    MessageCacheSize = 5000,
                     ExclusiveBulkDelete = false
                 }
             );

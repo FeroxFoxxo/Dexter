@@ -29,6 +29,10 @@ namespace Dexter.Services {
 
         public LoggingService LoggingService { get; set; }
 
+        /// <summary>
+        /// The ServiceProvider is where our dependencies are stored - used to execute an object when a timer is run.
+        /// </summary>
+        
         public ServiceProvider ServiceProvider { get; set; }
 
         /// <summary>
@@ -43,9 +47,18 @@ namespace Dexter.Services {
 
         public bool HasStarted = false;
 
+        /// <summary>
+        /// The Initialize method hooks the client Ready events and begins to loop through all timers.
+        /// </summary>
+        
         public override void Initialize() {
             DiscordSocketClient.Ready += HasTimerStarted;
         }
+
+        /// <summary>
+        /// The Has Timer Started method loops through all timers for the set amount of seconds if there has not been a timer
+        /// already created by creating a system timer that loops for a set amount of time.
+        /// </summary>
 
         public async Task HasTimerStarted () {
             // Runs the bot timer to loop through all events that may occur on a timer.

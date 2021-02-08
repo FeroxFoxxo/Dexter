@@ -7,6 +7,7 @@ using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
@@ -95,7 +96,11 @@ namespace Dexter.Commands {
 
                     if (MailMessage is IUserMessage MailMSG) {
                         await MailMessage.RemoveAllReactionsAsync();
-                        await MailMSG.ModifyAsync(MailMSGs => MailMSGs.Embed = MailMSGs.Embed.Value.ToEmbedBuilder().WithColor(Color.Green).Build());
+                        await MailMSG.ModifyAsync(MailMSGs => MailMSGs.Embed = MailMessage.Embeds.FirstOrDefault().ToEmbedBuilder()
+                            .WithColor(Color.Green)
+                            .AddField($"Replied By: {Context.User.Username}", Message.Length > 300 ? $"{Message.Substring(0, 300)} ..." : Message)
+                            .Build()
+                        );
                     } else
                         throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? ModMail Type: {MailMessage.GetType()}");
                 } else

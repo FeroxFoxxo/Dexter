@@ -27,7 +27,7 @@ namespace Dexter.Commands {
 
             IUserMessage UsrMessage = await (DiscordSocketClient.GetChannel(ModerationConfiguration.ModMailChannelID) as ITextChannel).SendMessageAsync(
                 embed: BuildEmbed(EmojiEnum.Unknown)
-                    .WithTitle($"Anonymous Modmail #{ModMailDB.ModMail.Count()}")
+                    .WithTitle($"Anonymous Modmail #{ModMailDB.ModMail.Count() + 1}")
                     .WithDescription(Message)
                     .WithCurrentTimestamp()
                     .WithFooter(Tracker)

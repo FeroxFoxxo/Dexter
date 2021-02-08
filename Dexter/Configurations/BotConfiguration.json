@@ -22,7 +22,7 @@
   "Help": "Dexter is the official USFurries Discord bot, used to moderate the server and provide useful tools. Made with love. <3\n\nFor more in depth help and information you should visit http://docs.us-furries.com.\n\nIf you wish to help in the bot's development, you can find his repository here: https://github.com/Frostrix/Dexter.",
   "TrackerLength": 6,
   "RandomCharacters": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-  "CommitAPICall": "https://api.github.com/repos/Frostrix/Dexter/commits",
+  "CommitAPICall": "https://api.github.com/repos/FeroxFoxxo/Dexter/commits",
   "EnableDatabaseBackups": false,
   "BotStatus": "use ~modmail in DMs to send the staff a message anonymously!",
   "PingDevelopers": false

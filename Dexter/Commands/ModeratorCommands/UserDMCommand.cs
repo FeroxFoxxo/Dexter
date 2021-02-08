@@ -5,6 +5,8 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
+using Discord.WebSocket;
+using System;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
@@ -72,7 +74,7 @@ namespace Dexter.Commands {
                     .SendEmbed(Context.Channel);
             } else {
                 EmbedBuilder Embed = BuildEmbed(EmojiEnum.Unknown)
-                    .WithTitle("ModMail User DM")
+                    .WithTitle("Mod Mail User DM")
                     .WithDescription(Message)
                     .AddField("Sent By", Context.User.GetUserInformation());
 
@@ -85,6 +87,19 @@ namespace Dexter.Commands {
                     Embed.BuildEmbed(EmojiEnum.Annoyed, BotConfiguration)
                         .AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
                 }
+
+                SocketChannel SocketChannel = DiscordSocketClient.GetChannel(ModerationConfiguration.ModMailChannelID);
+
+                if (SocketChannel is SocketTextChannel TextChannel) {
+                    IMessage MailMessage = await TextChannel.GetMessageAsync(ModMail.MessageID);
+
+                    if (MailMessage is IUserMessage MailMSG) {
+                        await MailMessage.RemoveAllReactionsAsync();
+                        await MailMSG.ModifyAsync(MailMSGs => MailMSGs.Embed = MailMSGs.Embed.Value.ToEmbedBuilder().WithColor(Color.Green).Build());
+                    } else
+                        throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? ModMail Type: {MailMessage.GetType()}");
+                } else
+                    throw new Exception($"Eek! The given channel of {SocketChannel} turned out *not* to be an instance of SocketTextChannel, rather {SocketChannel.GetType().Name}!");
 
                 await Embed.SendEmbed(Context.Channel);
             }

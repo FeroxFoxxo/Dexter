@@ -29,6 +29,12 @@ namespace Dexter.Databases.Mail {
 
         public string Message { get; set; }
 
+        /// <summary>
+        /// The Message ID field is the ID of the embed that has been sent into the modmail channel.
+        /// </summary>
+
+        public ulong MessageID { get; set; }
+
     }
 
 }

@@ -543,7 +543,7 @@ namespace Dexter.Services {
                     await ProposalMessage.RemoveAllReactionsAsync();
                     await ProposalMSG.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildProposal(Proposal).Build());
                 } else
-                    throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? TopicType: {ProposalMessage.GetType()}");
+                    throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? ProposalType: {ProposalMessage.GetType()}");
             } else
                 throw new Exception($"Eek! The given channel of {SocketChannel} turned out *not* to be an instance of SocketTextChannel, rather {SocketChannel.GetType().Name}!");
         }

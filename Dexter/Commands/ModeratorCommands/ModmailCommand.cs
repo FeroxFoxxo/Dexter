@@ -23,22 +23,27 @@ namespace Dexter.Commands {
                 return;
             }
 
+            string Tracker = CreateToken();
+
+            IUserMessage UsrMessage = await (DiscordSocketClient.GetChannel(ModerationConfiguration.ModMailChannelID) as ITextChannel).SendMessageAsync(
+                embed: BuildEmbed(EmojiEnum.Unknown)
+                    .WithTitle($"Anonymous Modmail #{ModMailDB.ModMail.Count()}")
+                    .WithDescription(Message)
+                    .WithCurrentTimestamp()
+                    .WithFooter(Tracker)
+                    .Build()
+            );
+
             ModMail ModMail = new() {
                 Message = Message,
                 UserID = Context.User.Id,
-                Tracker = CreateToken()
+                MessageID = UsrMessage.Id,
+                Tracker = Tracker
             };
 
             ModMailDB.ModMail.Add(ModMail);
 
             ModMailDB.SaveChanges();
-
-            await BuildEmbed(EmojiEnum.Unknown)
-                .WithTitle($"Anonymous Modmail #{ModMailDB.ModMail.Count()}")
-                .WithDescription(ModMail.Message)
-                .WithCurrentTimestamp()
-                .WithFooter($"{ModMail.Tracker}")
-                .SendEmbed(DiscordSocketClient.GetChannel(ModerationConfiguration.ModMailChannelID) as ITextChannel);
 
             await Context.Channel.SendMessageAsync($"Haiya! Your message has been sent to the staff team. Your modmail token is: `{ModMail.Tracker}`. Thank you~! <3");
         }

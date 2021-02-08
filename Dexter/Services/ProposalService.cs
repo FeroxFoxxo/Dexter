@@ -562,9 +562,9 @@ namespace Dexter.Services {
 
             string Token = new (TokenArray);
 
-            if (ProposalDB.Suggestions.Find(Token) == null) {
+            if (ProposalDB.Suggestions.Find(Token) == null)
                 return Token;
-            } else
+            else
                 return CreateToken();
         }
 

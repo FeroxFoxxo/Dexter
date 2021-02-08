@@ -77,18 +77,8 @@ namespace Dexter.Services {
             int ArgumentPosition = 0;
 
             // We do not parse the message if it does not have the prefix or it is from a bot.
-            if (!Message.HasStringPrefix(BotConfiguration.Prefix, ref ArgumentPosition) || Message.Author.IsBot)
+            if (!Message.HasStringPrefix(BotConfiguration.Prefix, ref ArgumentPosition) || Message.Author.IsBot || BotConfiguration.DisallowedChannels.Contains(Message.Channel.Id))
                 return;
-
-            // We check to see if the channel is a DM channel (i.e. it is not a guild channel) and, if so, we return.
-            if (!(Message.Channel is IGuildChannel)) {
-                await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle($"{DiscordSocketClient.CurrentUser.Username} is not avaliable in DMs!")
-                    .WithDescription($"Heya! I'm not avaliable in DMs at the moment, " +
-                        $"please use `{DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Name}` to communicate with me! Preferably in a bot channel. <3")
-                    .SendEmbed(Message.Channel);
-                return;
-            }
 
             // Finally, if all prerequesites have returned correctly, we run and parse the command with an instance of our socket command context and our services.
             await CommandService.ExecuteAsync(new SocketCommandContext(DiscordSocketClient, Message), ArgumentPosition, ServiceProvider);
@@ -194,12 +184,11 @@ namespace Dexter.Services {
                                 .WithDescription(Result.ErrorReason);
 
                         // Finally, we send the error into the channel with a ping to the developers to take notice of.
-                        await CommandContext.Channel.SendMessageAsync($"Unknown error! I'll tell the developers.\n{BotConfiguration.DeveloperMention}", embed: CommandErrorEmbed.Build());
-
+                        await CommandContext.Channel.SendMessageAsync($"Unknown error!{(BotConfiguration.PingDevelopers ? $"I'll tell the developers.\n<&@{BotConfiguration.DeveloperRoleID}>" : string.Empty)}", embed: CommandErrorEmbed.Build());
                         break;
                 }
             } catch (HttpException) {
-                await CommandContext.Channel.SendMessageAsync($"Haiya {BotConfiguration.DeveloperMention}, it seems as though the bot does not have the correct permissions to send embeds into this channel!\n" +
+                await CommandContext.Channel.SendMessageAsync($"Haiya <&@{BotConfiguration.DeveloperRoleID}>, it seems as though the bot does not have the correct permissions to send embeds into this channel!\n" +
                     $"Command errored out on the {Result.Error.Value} error.");
             }
 

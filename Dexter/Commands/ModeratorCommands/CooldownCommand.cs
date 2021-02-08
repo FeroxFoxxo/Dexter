@@ -50,7 +50,7 @@ namespace Dexter.Commands {
                         }
 
                     Cooldown NewCooldown = new () {
-                        Token = $"{User.Id}{CommissionCooldownConfiguration.CommissionCornerCooldown}",
+                        Token = $"{User.Id}{CommissionCooldownConfiguration.CommissionsCornerID}",
                         TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                     };
 
@@ -82,7 +82,7 @@ namespace Dexter.Commands {
 
                     break;
                 case EntryType.Revoke:
-                    Cooldown RevokeCooldown = CooldownDB.Cooldowns.Find($"{User.Id}{CommissionCooldownConfiguration.CommissionCornerCooldown}");
+                    Cooldown RevokeCooldown = CooldownDB.Cooldowns.Find($"{User.Id}{CommissionCooldownConfiguration.CommissionsCornerID}");
 
                     if (RevokeCooldown != null) {
                         CooldownDB.Cooldowns.Remove(RevokeCooldown);

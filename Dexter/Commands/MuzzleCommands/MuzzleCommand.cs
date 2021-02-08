@@ -1,5 +1,4 @@
 ﻿using Dexter.Attributes.Methods;
-using Dexter.Attributes.Parameters;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;

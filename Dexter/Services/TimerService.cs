@@ -43,6 +43,8 @@ namespace Dexter.Services {
 
         public bool HasStarted = false;
 
+        private int Countdown = 1000;
+
         public override void Initialize() {
             DiscordSocketClient.Ready += HasTimerStarted;
         }
@@ -68,6 +70,11 @@ namespace Dexter.Services {
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task LoopThroughEvents() {
+            if(Countdown > 0) {
+                Countdown--;
+                return;
+            } 
+
             long CurrentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             await EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.ExpirationTime <= CurrentTime)

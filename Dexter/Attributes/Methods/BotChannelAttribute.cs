@@ -1,5 +1,6 @@
 ﻿using Dexter.Configurations;
 using Discord.Commands;
+using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace Dexter.Attributes.Methods {
                 return Task.FromResult(PreconditionResult.FromSuccess());
 
             return Task.FromResult(
-                ServiceProvider.GetRequiredService<BotConfiguration>().BotChannels.Contains(CommandContext.Channel.Id) ?
+                ServiceProvider.GetRequiredService<BotConfiguration>().BotChannels.Contains(CommandContext.Channel.Id) || CommandContext.Channel.GetType() == typeof (SocketDMChannel) ?
                     PreconditionResult.FromSuccess() :
                     PreconditionResult.FromError($"Heya! You're not permitted to use the command `{CommandInfo.Name}` " +
                     $"in the channel `#{CommandContext.Channel}`. Please use a designated bot channel instead <3"));

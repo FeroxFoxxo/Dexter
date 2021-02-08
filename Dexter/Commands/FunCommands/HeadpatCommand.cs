@@ -24,7 +24,7 @@ namespace Dexter.Commands {
 
         [Command("headpat", RunMode = RunMode.Async)]
         [Summary("Ooh, you've been a good boy? *gives rapid headpats in an emoji*")]
-        [Alias("headpats", "petpat", "petpats")]
+        [Alias("headpats", "petpat", "petpats", "pet", "pat")]
 
         public async Task HeadpatCommand([Optional] IGuildUser User) {
             if (User == null)

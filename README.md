@@ -21,8 +21,8 @@
       <p align="center">
          <a href="#built-with">Libraries</a> •
          <a href="#commemorations">Commemorations</a> •
-         <a href="https://github.com/Frostrix/Dexter/blob/master/LICENSE">License</a> •
-         <a href="https://github.com/Frostrix/Dexter/wiki">Documentation</a>
+         <a href="https://github.com/FeroxFoxxo/Dexter/blob/master/LICENSE">License</a> •
+         <a href="https://github.com/FeroxFoxxo/Dexter/wiki">Documentation</a>
       </p>
       <h2>Built With</h2>
       <p>

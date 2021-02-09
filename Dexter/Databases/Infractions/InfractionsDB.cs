@@ -60,6 +60,7 @@ namespace Dexter.Databases.Infractions {
             return DexterProfile;
         }
 
+
     }
 
 }

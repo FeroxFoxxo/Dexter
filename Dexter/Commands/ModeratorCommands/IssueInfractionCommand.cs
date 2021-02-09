@@ -2,6 +2,7 @@
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Databases.Infractions;
+using Dexter.Databases.FinalWarns;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -185,6 +186,16 @@ namespace Dexter.Commands {
                         embed: BuildEmbed(EmojiEnum.Wut)
                         .WithTitle($"Frequent Rule Breaker Inbound!")
                         .WithDescription($"Haiya!\n{Notification}Perhaps this is something the <@&{BotConfiguration.AdministratorRoleID}> can dwell on. <3")
+                        .WithCurrentTimestamp().Build()
+                );
+            }
+
+            if (FinalWarnsDB.IsUserFinalWarned(User) && PointsDeducted >= ModerationConfiguration.FinalWarnNotificationThreshold) {
+                await (DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
+                    .SendMessageAsync($"**Final Warned User Infraction >>>** <@&{BotConfiguration.AdministratorRoleID}> <@{Context.User.Id}>",
+                        embed: BuildEmbed(EmojiEnum.Wut)
+                        .WithTitle($"Final Warned User has been {(Time.TotalSeconds > 0 ? "muted" : "warned")}!")
+                        .WithDescription($"Haiya! User <@{User.Id}> has been {(Time.TotalSeconds > 0 ? "muted" : "warned")} for {Reason} and has lost {PointsDeducted} points. They currently have {DexterProfile.InfractionAmount - PointsDeducted} points.")
                         .WithCurrentTimestamp().Build()
                 );
             }

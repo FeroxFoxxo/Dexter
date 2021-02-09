@@ -23,5 +23,6 @@
     }
   ],
   "InfractionNotification": -4,
-  "ModMailChannelID": 808106616557797394
+  "ModMailChannelID": 808106616557797394,
+  "FinalWarnNotificationThreshold": 1
 }

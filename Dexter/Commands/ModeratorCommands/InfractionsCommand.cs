@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Linq;
 using Humanizer;
+using Discord.WebSocket;
 
 namespace Dexter.Commands {
 
@@ -79,6 +80,9 @@ namespace Dexter.Commands {
                 try {
                     foreach (EmbedBuilder Embed in Embeds)
                         await Embed.SendEmbed(await Context.User.GetOrCreateDMChannelAsync());
+
+                    if (Context.Channel.GetType() == typeof(SocketDMChannel))
+                        return;
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Sent infractions log.")

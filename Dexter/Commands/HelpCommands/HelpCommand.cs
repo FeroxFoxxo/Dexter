@@ -52,7 +52,8 @@ namespace Dexter.Commands {
                     ServiceCollection ServiceCollection = new();
 
                     HelpAbstraction HelpAbstraction = new() {
-                        BotConfiguration = BotConfiguration
+                        BotConfiguration = BotConfiguration,
+                        DiscordSocketClient = DiscordSocketClient
                     };
 
                     ServiceCollection.AddSingleton(HelpAbstraction);

@@ -51,11 +51,16 @@ namespace Dexter.Attributes.Methods {
 
             if (ServiceProvider.GetService<HelpAbstraction>() != null)
                 BotConfiguration = ServiceProvider.GetService<HelpAbstraction>().BotConfiguration;
-            
+
+            DiscordSocketClient DiscordSocketClient = ServiceProvider.GetService<DiscordSocketClient>();
+
+            if (ServiceProvider.GetService<HelpAbstraction>() != null)
+                DiscordSocketClient = ServiceProvider.GetService<HelpAbstraction>().DiscordSocketClient;
+
             if (BotConfiguration == null)
                 return Task.FromResult(PreconditionResult.FromSuccess());
 
-            return Task.FromResult((CommandContext.User as IGuildUser).GetPermissionLevel(ServiceProvider.GetRequiredService<DiscordSocketClient>(), BotConfiguration) >= PermissionLevel
+            return Task.FromResult(CommandContext.User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel
                 ? PreconditionResult.FromSuccess()
                 : PreconditionResult.FromError($"Haiya! To run the `{CommandInfo.Name}` command you need to have the " +
                 $"`{PermissionLevel}` role! Are you sure you're a `{PermissionLevel.ToString().ToLower()}`? <3"));

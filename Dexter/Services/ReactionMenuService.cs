@@ -2,6 +2,7 @@
 using Dexter.Databases.ReactionMenus;
 using Dexter.Enums;
 using Discord;
+using Discord.Net;
 using Discord.Rest;
 using Discord.WebSocket;
 using Newtonsoft.Json;
@@ -73,7 +74,9 @@ namespace Dexter.Services {
 
             await Message.ModifyAsync(MessageP => MessageP.Embed = CreateMenuEmbed(ReactionMenu));
 
-            await Message.RemoveReactionAsync(Reaction.Emote, Reaction.User.Value);
+            try {
+                await Message.RemoveReactionAsync(Reaction.Emote, Reaction.User.Value);
+            } catch (HttpException) { }
         }
 
         /// <summary>
@@ -111,7 +114,6 @@ namespace Dexter.Services {
                     }
                 );
             }
-            Console.WriteLine(EmbedMenuID);
 
             int ColorMenuID;
             string ColorMenuJSON = JsonConvert.SerializeObject(Colors.ToArray());

@@ -13,16 +13,16 @@
         Default,
 
         /// <summary>
-        /// The MODERATOR value is given to a user who holds the moderator role specified in the bot configuration.
+        /// The GREETFUR value is given to a user who hold the greetfur role specified in the bot configuration.
         /// </summary>
-        
-        Moderator,
+
+        GreetFur,
 
         /// <summary>
-        /// The ADMINISTRATOR value is given to a user who holds the administrator role specified in the bot configuration.
+        /// The MODERATOR value is given to a user who holds the moderator role specified in the bot configuration.
         /// </summary>
 
-        Administrator,
+        Moderator,
 
         /// <summary>
         /// The DEVELOPER value is given to a user who hold the development team role specified in the bot configuration.
@@ -31,10 +31,10 @@
         Developer,
 
         /// <summary>
-        /// The GREETFUR value is given to a user who hold the greetfur role specified in the bot configuration.
+        /// The ADMINISTRATOR value is given to a user who holds the administrator role specified in the bot configuration.
         /// </summary>
 
-        GreetFur
+        Administrator
 
     }
 

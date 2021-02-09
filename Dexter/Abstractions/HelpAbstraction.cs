@@ -1,4 +1,5 @@
 ﻿using Dexter.Configurations;
+using Discord.WebSocket;
 
 namespace Dexter.Abstractions {
 
@@ -13,6 +14,12 @@ namespace Dexter.Abstractions {
         /// </summary>
 
         public BotConfiguration BotConfiguration { get; set; }
+
+        /// <summary>
+        /// Serves as an interface between the command and the guild.
+        /// </summary>
+
+        public DiscordSocketClient DiscordSocketClient { get; set; }
 
     }
 

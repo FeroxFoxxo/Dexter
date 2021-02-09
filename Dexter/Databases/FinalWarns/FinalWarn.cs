@@ -39,7 +39,7 @@ namespace Dexter.Databases.FinalWarns
         /// The amount of time - in seconds - that the user was muted for immediately as a result of the final warning.
         /// </summary>
 
-        public int MuteDuration { get; set; }
+        public double MuteDuration { get; set; }
 
         /// <summary>
         /// Holds either EntryType.Issue - if the final warning is active - or EntryType.Revoke - if the final warning has been revoked.

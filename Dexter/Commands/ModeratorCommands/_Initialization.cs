@@ -5,6 +5,7 @@ using Dexter.Databases.Relays;
 using Dexter.Databases.Infractions;
 using Discord.WebSocket;
 using Dexter.Databases.Mail;
+using Dexter.Databases.FinalWarns;
 using System;
 
 namespace Dexter.Commands {
@@ -54,8 +55,14 @@ namespace Dexter.Commands {
         /// <summary>
         /// The ModMailDB stores the mail to be sent to the moderators.
         /// </summary>
-        /// 
+         
         public ModMailDB ModMailDB { get; set; }
+
+        /// <summary>
+        /// Stores information regarding final warns issued in the server.
+        /// </summary>
+
+        public FinalWarnsDB FinalWarnsDB { get; set; }
 
         /// <summary>
         /// The Random instance is used to pick a set number of random characters from the configuration to create a token.

@@ -18,7 +18,7 @@ namespace Dexter.Commands {
         public FunConfiguration FunConfiguration { get; set; }
 
         /// <summary>
-        /// Loads the database containing topics for the <code>~topic</code> command.
+        /// Loads the database containing topics for the <c>~topic</c> command.
         /// </summary>
 
         public FunTopicsDB FunTopicsDB { get; set; }

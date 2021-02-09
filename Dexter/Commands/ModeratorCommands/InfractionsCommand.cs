@@ -19,7 +19,7 @@ namespace Dexter.Commands {
         /// <summary>
         /// Sends an embed with the records of infractions of a specified user.
         /// </summary>
-        /// <remarks>If the user is different from <code>Context.User</code>, it is Staff-only.</remarks>
+        /// <remarks>If the user is different from <c>Context.User</c>, it is Staff-only.</remarks>
         /// <param name="UserID">The target user to query.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 

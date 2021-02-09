@@ -116,10 +116,28 @@ namespace Dexter.Abstractions {
         /// <param name="CallbackParameters">The parameters you wish to callback with once expired.</param>
         /// <param name="SecondsTillExpiration">The count in seconds until the timer will expire.</param>
         /// <param name="TimerType">The given type of the timer, specifying if it should be removed after the set time (EXPIRE) or continue in the set interval.</param>
-        /// <returns>The token assosiated with the timed event for use to refer to.</returns>
+        /// <returns>The token associated with the timed event for future reference.</returns>
 
         public async Task<string> CreateEventTimer(Func<Dictionary<string, string>, Task> CallbackMethod,
                 Dictionary<string, string> CallbackParameters, int SecondsTillExpiration, TimerType TimerType) {
+
+            return await CreateEventTimer(CallbackMethod, CallbackParameters, SecondsTillExpiration, TimerType, TimerService);
+        }
+
+        /// <summary>
+        /// The Create Event Timer method is a generic method that will await for an expiration time to be reached
+        /// before continuing execution of the code set in the CallbackMethod parameter.
+        /// </summary>
+        /// <param name="CallbackMethod">The method you wish to callback once expired.</param>
+        /// <param name="CallbackParameters">The parameters you wish to callback with once expired.</param>
+        /// <param name="SecondsTillExpiration">The count in seconds until the timer will expire.</param>
+        /// <param name="TimerType">The given type of the timer, specifying if it should be removed after the set time (EXPIRE) or continue in the set interval.</param>
+        /// <param name="TimerService">The service used to access the database and related infrastructure to store the mute.</param>
+        /// <returns>The token associated with the timed event for future reference.</returns>
+
+        public static async Task<string> CreateEventTimer(Func<Dictionary<string, string>, Task> CallbackMethod,
+                Dictionary<string, string> CallbackParameters, int SecondsTillExpiration, TimerType TimerType, TimerService TimerService)
+        {
 
             string JSON = JsonConvert.SerializeObject(CallbackParameters);
 

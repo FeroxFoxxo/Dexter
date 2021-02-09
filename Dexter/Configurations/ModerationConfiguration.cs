@@ -94,6 +94,12 @@ namespace Dexter.Configurations {
 
         public ulong ModMailChannelID { get; set; }
 
+        /// <summary>
+        /// The minimum amount of points deducted for an infraction on a final warned user to trigger a notification to the infraction Issuer and Admin Team.
+        /// </summary>
+
+        public short FinalWarnNotificationThreshold { get; set; }
+
     }
 
 }

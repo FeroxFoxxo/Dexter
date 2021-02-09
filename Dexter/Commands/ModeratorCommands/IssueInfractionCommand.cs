@@ -32,7 +32,7 @@ namespace Dexter.Commands {
         [Command("warn")]
         [Summary("Issues a warning to a specified user.")]
         [Alias("warnUser")]
-        //[RequireModerator]
+        [RequireModerator]
 
         public async Task IssueWarning(short PointsDeducted, IGuildUser User, [Remainder] string Reason) {
             if (PointsDeducted == 1 || PointsDeducted == 2)

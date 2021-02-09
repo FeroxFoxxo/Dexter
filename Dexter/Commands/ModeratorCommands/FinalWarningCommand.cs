@@ -24,7 +24,7 @@ namespace Dexter.Commands {
         [Command("finalwarn")]
         [Summary("Issues a final warning to a user, mutes them and records the final warn.")]
         [Alias("warnfinal")]
-        //[RequireModerator]
+        [RequireModerator]
         [BotChannel]
 
         public async Task IssueFinalWarn(IGuildUser User, TimeSpan MuteDuration, [Remainder] string Reason) {
@@ -75,7 +75,7 @@ namespace Dexter.Commands {
         [Command("delfinalwarn")]
         [Summary("Revokes a user's final warn, though it remains in records.")]
         [Alias("revokefinalwarn", "deletefinalwarn", "removefinalwarn")]
-        //[RequireModerator]
+        [RequireModerator]
         [BotChannel]
 
         public async Task RevokeFinalWarn(IGuildUser User, [Remainder] string Reason = "") {
@@ -112,7 +112,7 @@ namespace Dexter.Commands {
         [Command("getfinalwarn")]
         [Summary("Gets the relevant information for a user's final warn.")]
         [Alias("queryfinalwarn")]
-        //[RequireModerator]
+        [RequireModerator]
         [BotChannel]
 
         public async Task GetFinalWarn(IGuildUser User) {

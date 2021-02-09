@@ -30,7 +30,7 @@ namespace Dexter.Commands {
 
             IGuildUser MuzzledUser = Context.Guild.GetUser(Context.User.Id);
 
-            if (IsUserSpecified && (Context.User as IGuildUser).GetPermissionLevel(BotConfiguration) >= PermissionLevel.Moderator)
+            if (IsUserSpecified && (Context.User as IGuildUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator)
                 MuzzledUser = User;
             
             await Muzzle(MuzzledUser);

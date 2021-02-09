@@ -399,13 +399,13 @@ namespace Dexter.Services {
                             case "Upvote":
                             case "Downvote":
                                 // If an upvote or downvote has been applied by the suggestor, remove it.
-                                if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(BotConfiguration) >= PermissionLevel.Moderator)
+                                if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator)
                                     return true;
                                 else
                                     return false;
                             case "Bin":
                                 // If the suggestion has had the bin icon applied by the user, set the status of the suggestion to "deleted" and delete the message.
-                                if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(BotConfiguration) >= PermissionLevel.Moderator) {
+                                if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator) {
                                     await UpdateProposal(Proposal, ProposalStatus.Deleted);
                                     await UserMessage.DeleteAsync();
                                     return false;

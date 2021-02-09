@@ -60,7 +60,7 @@ namespace Dexter.Commands {
             bool IsUserSpecified = User != null;
 
             if (IsUserSpecified) {
-                if ((Context.User as IGuildUser).GetPermissionLevel(BotConfiguration) >= PermissionLevel.Moderator) {
+                if ((Context.User as IGuildUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator) {
                     EmbedBuilder[] Warnings = GetWarnings(User.Id, Context.User.Id, User.Mention, User.Username, true);
 
                     if (Warnings.Length > 1)

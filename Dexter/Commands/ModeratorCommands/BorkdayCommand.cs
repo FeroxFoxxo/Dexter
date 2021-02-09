@@ -33,7 +33,7 @@ namespace Dexter.Commands {
                 User = Context.Guild.GetUser(Context.User.Id);
 
             IRole Role = Context.Guild.GetRole(
-                User.GetPermissionLevel(BotConfiguration) >= PermissionLevel.Moderator ?
+                User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator ?
                     ModerationConfiguration.StaffBorkdayRoleID : ModerationConfiguration.BorkdayRoleID
             );
 

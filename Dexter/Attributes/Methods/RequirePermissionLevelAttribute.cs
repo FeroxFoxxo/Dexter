@@ -4,6 +4,7 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
@@ -54,7 +55,7 @@ namespace Dexter.Attributes.Methods {
             if (BotConfiguration == null)
                 return Task.FromResult(PreconditionResult.FromSuccess());
 
-            return Task.FromResult((CommandContext.User as IGuildUser).GetPermissionLevel(BotConfiguration) >= PermissionLevel
+            return Task.FromResult((CommandContext.User as IGuildUser).GetPermissionLevel(ServiceProvider.GetRequiredService<DiscordSocketClient>(), BotConfiguration) >= PermissionLevel
                 ? PreconditionResult.FromSuccess()
                 : PreconditionResult.FromError($"Haiya! To run the `{CommandInfo.Name}` command you need to have the " +
                 $"`{PermissionLevel}` role! Are you sure you're a `{PermissionLevel.ToString().ToLower()}`? <3"));

@@ -114,12 +114,12 @@ namespace Dexter.Commands {
                         },
                         Context.User.Id,
                         $"{Context.User.GetUserInformation()} has suggested that the command {BotConfiguration.Prefix}{CommandName} should be " +
-                        $"edited from from `{Command.Reply}` to `{Reply}`");
+                        $"edited from `{Command.Reply}` to `{Reply}`");
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"The edit to `{BotConfiguration.Prefix}{CommandName}` was suggested!")
                         .WithDescription($"Once it has passed admin approval, " +
-                            $"The command `{BotConfiguration.Prefix}{CommandName}` will be changed to have the reply of `{Reply}` rahter than `{Command.Reply}`.")
+                            $"The command `{BotConfiguration.Prefix}{CommandName}` will be changed to have the reply of `{Reply}` rather than `{Command.Reply}`.")
                         .SendEmbed(Context.Channel);
 
                     break;

@@ -21,6 +21,7 @@ namespace Dexter.Commands {
         [Command("gfactivity")]
         [Summary("Gets the GreetFur's Activity for the fortnight.")]
         [BotChannel]
+        [RequireGreetFur]
 
         public async Task GreetFurActivity () {
             if (SheetsService == null)

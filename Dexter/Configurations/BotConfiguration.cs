@@ -27,10 +27,16 @@ namespace Dexter.Configurations {
         public ulong AdministratorRoleID { get; set; }
 
         /// <summary>
-        /// The DEVELOPER ROLE ID is the snowflake ID of the role that the administrators have.
+        /// The DEVELOPER ROLE ID is the snowflake ID of the role that the developers have.
         /// </summary>
 
         public ulong DeveloperRoleID { get; set; }
+
+        /// <summary>
+        /// The GREETFUR ROLE ID is the snowflake ID of the role that the greetfurs have.
+        /// </summary>
+
+        public ulong GreetFurRoleID { get; set; }
 
         /// <summary>
         /// The GUILD ID is the snowflake ID of the main guild the bot is in.

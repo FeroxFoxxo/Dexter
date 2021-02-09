@@ -25,10 +25,18 @@ namespace Dexter.Commands {
 
             string Tracker = CreateToken();
 
+            Attachment Attachment = Context.Message.Attachments.FirstOrDefault();
+
+            string ProxyURL = string.Empty;
+
+            if (Attachment != null)
+                ProxyURL = await Attachment.ProxyUrl.GetProxiedImage(Tracker, DiscordSocketClient, ProposalService.ProposalConfiguration);
+
             IUserMessage UsrMessage = await (DiscordSocketClient.GetChannel(ModerationConfiguration.ModMailChannelID) as ITextChannel).SendMessageAsync(
                 embed: BuildEmbed(EmojiEnum.Unknown)
                     .WithTitle($"Anonymous Modmail #{ModMailDB.ModMail.Count() + 1}")
                     .WithDescription(Message)
+                    .WithImageUrl(ProxyURL)
                     .WithCurrentTimestamp()
                     .WithFooter(Tracker)
                     .Build()

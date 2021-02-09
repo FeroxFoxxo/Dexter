@@ -28,7 +28,13 @@
         /// The DEVELOPER value is given to a user who hold the development team role specified in the bot configuration.
         /// </summary>
 
-        Developer
+        Developer,
+
+        /// <summary>
+        /// The GREETFUR value is given to a user who hold the greetfur role specified in the bot configuration.
+        /// </summary>
+
+        GreetFur
 
     }
 

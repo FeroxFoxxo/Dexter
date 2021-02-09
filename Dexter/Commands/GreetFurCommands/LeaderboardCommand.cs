@@ -20,8 +20,9 @@ namespace Dexter.Commands {
 
         [Command("gflevels")]
         [Summary("Returns a leaderboard of all the GreetFurs and their activity levels.")]
-        [BotChannel]
         [Alias("gfleaderboard")]
+        [BotChannel]
+        [RequireGreetFur]
 
         public async Task GreetFurLeaderboard () {
             if (SheetsService == null)

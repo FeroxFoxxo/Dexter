@@ -15,7 +15,7 @@ namespace Dexter.Commands {
         [Command("logfile")]
         [Summary("Provides the logfile for the current instance of the bot.")]
         [Alias("log")]
-        [RequireModerator]
+        [RequireDeveloper]
 
         public async Task LogfileCommand() {
             if (!File.Exists(LoggingService.LogFile))

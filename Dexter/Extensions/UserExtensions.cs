@@ -1,6 +1,7 @@
 ﻿using Dexter.Configurations;
 using Dexter.Enums;
 using Discord;
+using Discord.WebSocket;
 using System;
 using System.Linq;
 
@@ -15,18 +16,25 @@ namespace Dexter.Extensions {
         /// <summary>
         /// The GetPermissionLevel returns the highest permission the user has access to for commands.
         /// </summary>
-        /// <param name="GuildUser">The GuildUser of which you want to get the permission level of.</param>
+        /// <param name="User">The User of which you want to get the permission level of.</param>
+        /// <param name="DiscordSocketClient">The instance of the DiscordSocketUser which is used to get the main guild.</param>
         /// <param name="BotConfiguration">The instance of the bot configuration which is used to get the role ID for roles.</param>
         /// <returns>What permission level the user has, in the form from the PermissionLevel enum.</returns>
-        
-        public static PermissionLevel GetPermissionLevel(this IGuildUser GuildUser, BotConfiguration BotConfiguration) {
-            if (GuildUser.RoleIds.Contains(BotConfiguration.AdministratorRoleID))
+
+        public static PermissionLevel GetPermissionLevel(this IUser User, DiscordSocketClient DiscordSocketClient, BotConfiguration BotConfiguration) {
+            IGuildUser GuildUser = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(User.Id);
+
+            if (GuildUser == null)
+                return PermissionLevel.Default;
+            else if (GuildUser.RoleIds.Contains(BotConfiguration.AdministratorRoleID))
                 return PermissionLevel.Administrator;
             else if (GuildUser.RoleIds.Contains(BotConfiguration.DeveloperRoleID))
-                return PermissionLevel.Moderator;
+                return PermissionLevel.Developer;
             else if (GuildUser.RoleIds.Contains(BotConfiguration.ModeratorRoleID))
                 return PermissionLevel.Moderator;
-            else 
+            else if (GuildUser.RoleIds.Contains(BotConfiguration.GreetFurRoleID))
+                return PermissionLevel.GreetFur;
+            else
                 return PermissionLevel.Default;
         }
 

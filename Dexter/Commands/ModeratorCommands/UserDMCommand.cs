@@ -54,7 +54,7 @@ namespace Dexter.Commands {
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("userdm")]
-        [Summary("Sends a direct message to a user specified.")]
+        [Summary("Sends a direct message to a modmail token specified.")]
         [Alias("dm", "message")]
         [RequireModerator]
 

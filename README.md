@@ -12,10 +12,10 @@
          <img alt="Discord" src="https://img.shields.io/discord/336243033416794118?color=%237289DA&label=Discord">
          </a>
          <a href="https://dev.azure.com/frostrixz/Dexter">
-         <img alt="Azure Pipelines" src="https://dev.azure.com/frostrixz/Dexter/_apis/build/status/Frostrix.Dexter?branchName=master">
+         <img alt="Azure Pipelines" src="https://dev.azure.com/frostrixz/Dexter/_apis/build/status/FeroxFoxxo.Dexter?branchName=master">
          </a>
-         <a href="https://github.com/Frostrix/Dexter/blob/master/LICENSE">
-         <img alt="GitHub" src="https://img.shields.io/github/license/frostrix/dexter?label=License">
+         <a href="https://github.com/FeroxFoxxo/Dexter/blob/master/LICENSE">
+         <img alt="GitHub" src="https://img.shields.io/github/license/feroxfoxxo/dexter?label=License">
          </a>
       </p>
       <p align="center">

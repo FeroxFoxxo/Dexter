@@ -15,12 +15,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="AnimatedGif" Version="1.0.5" />
-		<PackageReference Include="Discord.Net" Version="2.3.0-dev-20201223.7" />
+		<PackageReference Include="Discord.Net" Version="2.3.1-dev-20210210.1" />
 		<PackageReference Include="Figgle" Version="0.4.0" />
-		<PackageReference Include="Google.Apis.Sheets.v4" Version="1.49.0.2175" />
+		<PackageReference Include="Google.Apis.Sheets.v4" Version="1.50.0.2175" />
 		<PackageReference Include="Humanizer.Core" Version="2.8.26" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.2" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.2">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

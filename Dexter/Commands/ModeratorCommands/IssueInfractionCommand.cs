@@ -195,7 +195,7 @@ namespace Dexter.Commands {
                     .SendMessageAsync($"**Final Warned User Infraction >>>** <@&{BotConfiguration.AdministratorRoleID}> <@{Context.User.Id}>",
                         embed: BuildEmbed(EmojiEnum.Wut)
                         .WithTitle($"Final Warned User has been {(Time.TotalSeconds > 0 ? "muted" : "warned")}!")
-                        .WithDescription($"Haiya! User <@{User.Id}> has been {(Time.TotalSeconds > 0 ? "muted" : "warned")} for {Reason} and has lost {PointsDeducted} points. They currently have {DexterProfile.InfractionAmount - PointsDeducted} points.")
+                        .WithDescription($"Haiya! User <@{User.Id}> has been {(Time.TotalSeconds > 0 ? "muted" : "warned")} for `{Reason}` and has lost {PointsDeducted} point{(PointsDeducted != 1 ? "s" : "")}. They currently have {DexterProfile.InfractionAmount - PointsDeducted} point{(DexterProfile.InfractionAmount - PointsDeducted != 1 ? "s" : "")}.")
                         .WithCurrentTimestamp().Build()
                 );
             }

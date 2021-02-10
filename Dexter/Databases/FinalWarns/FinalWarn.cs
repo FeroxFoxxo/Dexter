@@ -47,5 +47,17 @@ namespace Dexter.Databases.FinalWarns
 
         public EntryType EntryType { get; set; }
 
+        /// <summary>
+        /// The ID of the message within the final-warnings log channel that specifies the information about this final warning.
+        /// </summary>
+
+        public ulong MessageID { get; set; }
+
+        /// <summary>
+        /// The amount of Dexter Profile points deducted due to the infraction.
+        /// </summary>
+
+        public short PointsDeducted { get; set; }
+
     }
 }

@@ -100,6 +100,18 @@ namespace Dexter.Configurations {
 
         public short FinalWarnNotificationThreshold { get; set; }
 
+        /// <summary>
+        /// The channel that final warning messages should be logged in.
+        /// </summary>
+
+        public ulong FinalWarningsChannelID { get; set; }
+
+        /// <summary>
+        /// <see langword="true"/> if Dexter should send and delete messages in #final-warnings to automate the record-keeping system, <see langword="false"/> to disable this functionality.
+        /// </summary>
+
+        public bool FinalWarningsManageRecords { get; set; }
+
     }
 
 }

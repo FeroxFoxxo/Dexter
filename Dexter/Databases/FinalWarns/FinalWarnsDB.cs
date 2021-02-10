@@ -40,13 +40,15 @@ namespace Dexter.Databases.FinalWarns
         /// <summary>
         /// Looks for a final warn entry for the target <paramref name="User"/>. If none are found, it creates one. If one is found, it is overwritten by the new parameters.
         /// </summary>
+        /// <param name="PointsDeducted">The amounts of points deducted from the <paramref name="User"/>'s profile when the final warn was issued.</param>
         /// <param name="Issuer">The staff member who issued the final warning.</param>
         /// <param name="User">The user who is to receive a final warn.</param>
         /// <param name="MuteDuration">The duration of the mute attached to the final warn.</param>
         /// <param name="Reason">The whole reason behind the final warn for <paramref name="User"/>.</param>
+        /// <param name="MessageID">The ID of the message within #final-warnings which records this final warn instance.</param>
         /// <returns>The <c>FinalWarn</c> object added to the database.</returns>
 
-        public FinalWarn SetOrCreateFinalWarn(IGuildUser Issuer, IGuildUser User, TimeSpan MuteDuration, string Reason) {
+        public FinalWarn SetOrCreateFinalWarn(short PointsDeducted, IGuildUser Issuer, IGuildUser User, TimeSpan MuteDuration, string Reason, ulong MessageID) {
             FinalWarn Warn = FinalWarns.Find(User.Id);
 
             FinalWarn NewWarn = new FinalWarn() {
@@ -55,7 +57,9 @@ namespace Dexter.Databases.FinalWarns
                 MuteDuration = MuteDuration.TotalSeconds,
                 Reason = Reason,
                 EntryType = EntryType.Issue,
-                IssueTime = DateTimeOffset.Now.ToUnixTimeSeconds()
+                IssueTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                MessageID = MessageID,
+                PointsDeducted = PointsDeducted
             };
 
             if (Warn == null) {
@@ -74,10 +78,11 @@ namespace Dexter.Databases.FinalWarns
         /// Sets the status of a <paramref name="User"/>'s final warn to Revoked, but doesn't remove it from the database.
         /// </summary>
         /// <param name="User">The user whose final warn is to be revoked.</param>
+        /// <param name="Warn">The warn found in the database, or <see langword="null"/> if no warn is found.</param>
         /// <returns><see langword="true"/> if an active final warn was found for the <paramref name="User"/>, whose status was changed to revoked; otherwise <see langword="false"/>.</returns>
 
-        public bool TryRevokeFinalWarn(IGuildUser User) {
-            FinalWarn Warn = FinalWarns.Find(User.Id);
+        public bool TryRevokeFinalWarn(IGuildUser User, out FinalWarn Warn) {
+            Warn = FinalWarns.Find(User.Id);
 
             if (Warn == null || Warn.EntryType == EntryType.Revoke) return false;
 
@@ -85,6 +90,16 @@ namespace Dexter.Databases.FinalWarns
 
             SaveChanges();
             return true;
+        }
+
+        /// <summary>
+        /// Sets the status of a <paramref name="User"/>'s final warn to Revoked, but doesn't remove it from the database.
+        /// </summary>
+        /// <param name="User">The user whose final warn is to be revoked.</param>
+        /// <returns><see langword="true"/> if an active final warn was found for the <paramref name="User"/>, whose status was changed to revoked; otherwise <see langword="false"/>.</returns>
+
+        public bool TryRevokeFinalWarn(IGuildUser User) {
+            return TryRevokeFinalWarn(User, out _);
         }
 
     }

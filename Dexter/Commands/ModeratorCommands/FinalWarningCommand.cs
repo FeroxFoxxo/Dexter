@@ -1,5 +1,8 @@
 ﻿using Dexter.Attributes.Methods;
+using Dexter.Databases.EventTimers;
 using Dexter.Databases.FinalWarns;
+using Dexter.Databases.Infractions;
+using Dexter.Services;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Helpers;
@@ -16,6 +19,7 @@ namespace Dexter.Commands {
         /// <summary>
         /// Issues a final warning to a target <paramref name="User"/>, mutes then for <paramref name="MuteDuration"/>, and adds a detailed entry about the final warn to the Final Warns database.
         /// </summary>
+        /// <param name="PointsDeducted">The amount of points to deduct from the user's Dexter Profile on final warn.</param>
         /// <param name="User">The target user to final warn.</param>
         /// <param name="MuteDuration">The duration of the mute attached to the final warn.</param>
         /// <param name="Reason">The reason behind the final warn.</param>
@@ -27,42 +31,66 @@ namespace Dexter.Commands {
         [RequireModerator]
         [BotChannel]
 
-        public async Task IssueFinalWarn(IGuildUser User, TimeSpan MuteDuration, [Remainder] string Reason) {
-            
-            if(FinalWarnsDB.IsUserFinalWarned(User)) {
+        public async Task IssueFinalWarn(short PointsDeducted, IGuildUser User, TimeSpan MuteDuration, [Remainder] string Reason) {
+
+            if (FinalWarnsDB.IsUserFinalWarned(User)) {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("User is already final warned!")
-                    .WithDescription($"The target user, <@{User.Id}> ({User.Id}), already has an active final warn. If you wish to overwrite this final warn, first remove the already existing one.")
+                    .WithDescription($"The target user, {User.GetUserInformation()}, already has an active final warn. If you wish to overwrite this final warn, first remove the already existing one.")
                     .SendEmbed(Context.Channel);
 
                 return;
             }
 
-            FinalWarnsDB.SetOrCreateFinalWarn(Context.User as IGuildUser, User, MuteDuration, Reason);
+            DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
+
+            DexterProfile.InfractionAmount -= PointsDeducted;
+
+            if (!TimerService.TimerExists(DexterProfile.CurrentPointTimer))
+                DexterProfile.CurrentPointTimer = await CreateEventTimer(IncrementPoints, new() { { "UserID", User.Id.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
+
+
+            ulong WarningLogID = 0;
+
+            if (ModerationConfiguration.FinalWarningsManageRecords) {
+                WarningLogID = (await (DiscordSocketClient.GetChannel(ModerationConfiguration.FinalWarningsChannelID) as ITextChannel).SendMessageAsync(
+                    $"**Final Warning Issued >>>** <@&{BotConfiguration.ModeratorRoleID}>\n" +
+                    $"**User**: {User.GetUserInformation()}\n" +
+                    $"**Issued on**: {DateTime.Now:MM/dd/yyyy}\n" +
+                    $"**Reason**: {Reason}")).Id;
+            }
+
+            FinalWarnsDB.SetOrCreateFinalWarn(PointsDeducted, Context.User as IGuildUser, User, MuteDuration, Reason, WarningLogID);
 
             await this.MuteUser(User, MuteDuration);
 
             try {
-                await BuildEmbed(EmojiEnum.Sign)
-                    .WithTitle($"You were issued a **final warning** from {Context.Guild.Name}!")
-                    .WithDescription($"As part of the final warning, you were muted for {MuteDuration.Humanize()}.")
-                    .AddField("Reason", Reason)
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle($"🚨 You were issued a **FINAL WARNING** from {Context.Guild.Name}! 🚨")
+                    .WithDescription(Reason)
+                    .AddField("Points Deducted:", PointsDeducted, true)
+                    .AddField("Mute Duration:", MuteDuration.Humanize(), true)
                     .WithCurrentTimestamp()
                     .SendEmbed(await User.GetOrCreateDMChannelAsync());
 
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Message sent successfully!")
-                    .WithDescription($"The target user, <@{User.Id}> ({User.Id}), has been informed of their current status.")
-                    .AddField("Mute Duration", MuteDuration.Humanize())
-                    .AddField("Reason", Reason)
+                    .WithDescription($"The target user, {User.GetUserInformation()}, has been informed of their current status.")
+                    .AddField("Mute Duration:", MuteDuration.Humanize(), true)
+                    .AddField("Points Deducted:", PointsDeducted, true)
+                    .AddField("Issued By:", Context.User.GetUserInformation())
+                    .AddField("Reason:", Reason)
+                    .WithCurrentTimestamp()
                     .SendEmbed(Context.Channel);
             }
             catch (HttpException) {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Message failed!")
-                    .WithDescription($"The target user, <@{User.Id}> ({User.Id}), might have DMs disabled or might have blocked me... :c\nThe final warning has been recorded to the database regardless.")
+                    .WithDescription($"The target user, {User.GetUserInformation()}, might have DMs disabled or might have blocked me... :c\nThe final warning has been recorded to the database regardless.")
                     .SendEmbed(Context.Channel);
             }
+
+            InfractionsDB.SaveChanges();
         }
 
         /// <summary>
@@ -79,28 +107,37 @@ namespace Dexter.Commands {
         [BotChannel]
 
         public async Task RevokeFinalWarn(IGuildUser User, [Remainder] string Reason = "") {
-            if(!FinalWarnsDB.TryRevokeFinalWarn(User)) {
+            
+            if(!FinalWarnsDB.TryRevokeFinalWarn(User, out FinalWarn Warn)) {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("No active final warn found!")
-                    .WithDescription($"Wasn't able to revoke final warning for user <@{User.Id}> ({User.Id}), since no active warn exists.")
+                    .WithDescription($"Wasn't able to revoke final warning for user {User.GetUserInformation()}, since no active warn exists.")
                     .SendEmbed(Context.Channel);
 
                 return;
             }
 
+            if(Warn.MessageID != 0)
+                await (await (DiscordSocketClient.GetChannel(ModerationConfiguration.FinalWarningsChannelID) as ITextChannel).GetMessageAsync(Warn.MessageID))?.DeleteAsync();
+
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Final warn successfully revoked.")
-                .WithDescription($"Successfully revoked final warning for user <@{User.Id}> ({User.Id}). You can still query records about this final warn.")
+                .WithDescription($"Successfully revoked final warning for user {User.GetUserInformation()}. You can still query records about this final warning.")
                 .AddField(Reason.Length > 0, "Reason:", Reason)
                 .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
 
-            await BuildEmbed(EmojiEnum.Love)
-                .WithTitle("Your final warn has been revoked!")
-                .WithDescription("The staff team has convened and decided to revoke your final warn. Be careful, you can't receive more than two final warns! A third final warn is an automatic ban.")
-                .AddField(Reason.Length > 0, "Reason:", Reason)
-                .WithCurrentTimestamp()
-                .SendEmbed(await User.GetOrCreateDMChannelAsync());
+            try {
+                await BuildEmbed(EmojiEnum.Love)
+                    .WithTitle("Your final warning has been revoked!")
+                    .WithDescription("The staff team has convened and decided to revoke your final warning. Be careful, you can't receive more than two final warnings! A third one is an automatic ban.")
+                    .AddField(Reason.Length > 0, "Reason:", Reason)
+                    .WithCurrentTimestamp()
+                    .SendEmbed(await User.GetOrCreateDMChannelAsync());
+            }
+            catch(HttpException) {
+                await Context.Channel.SendMessageAsync("This user either has closed DMs or has me blocked! I wasn't able to inform them of this.");
+            }
         }
 
         /// <summary>
@@ -120,19 +157,20 @@ namespace Dexter.Commands {
 
             if (Warn == null) {
                 await BuildEmbed(EmojiEnum.Wut)
-                    .WithTitle("Target user is not final warned!")
-                    .WithDescription($"User <@{User.Id}> ({User.Id}) has no final warns to their name!")
+                    .WithTitle("Target user is not under a final warning!")
+                    .WithDescription($"User {User.GetUserInformation()} has no final warnings to their name!")
                     .SendEmbed(Context.Channel);
 
                 return;
             }
 
             await BuildEmbed(EmojiEnum.Sign)
-                .WithTitle("Final warn found!")
-                .WithDescription($"User <@{User.Id}> ({User.Id}) has {(Warn.EntryType == EntryType.Revoke ? "a **revoked**" : "an **active**")} final warn!")
+                .WithTitle("Final warning found!")
+                .WithDescription($"User {User.GetUserInformation()} has {(Warn.EntryType == EntryType.Revoke ? "a **revoked**" : "an **active**")} final warning!")
                 .AddField("Reason:", Warn.Reason)
-                .AddField("Issued by:", $"<@{Warn.IssuerID}> ({Warn.IssuerID})")
-                .AddField("Mute Duration:", TimeSpan.FromSeconds(Warn.MuteDuration).Humanize())
+                .AddField("Issued by:", DiscordSocketClient.GetUser(Warn.IssuerID).GetUserInformation())
+                .AddField("Mute Duration:", TimeSpan.FromSeconds(Warn.MuteDuration).Humanize(), true)
+                .AddField("Points Deducted:", Warn.PointsDeducted, true)
                 .AddField("Issued on:", DateTimeOffset.FromUnixTimeSeconds(Warn.IssueTime).Humanize())
                 .SendEmbed(Context.Channel);
         }

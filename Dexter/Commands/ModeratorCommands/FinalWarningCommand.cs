@@ -19,7 +19,6 @@ namespace Dexter.Commands {
         /// <summary>
         /// Issues a final warning to a target <paramref name="User"/>, mutes then for <paramref name="MuteDuration"/>, and adds a detailed entry about the final warn to the Final Warns database.
         /// </summary>
-        /// <param name="PointsDeducted">The amount of points to deduct from the user's Dexter Profile on final warn.</param>
         /// <param name="User">The target user to final warn.</param>
         /// <param name="MuteDuration">The duration of the mute attached to the final warn.</param>
         /// <param name="Reason">The reason behind the final warn.</param>
@@ -31,7 +30,9 @@ namespace Dexter.Commands {
         [RequireModerator]
         [BotChannel]
 
-        public async Task IssueFinalWarn(short PointsDeducted, IGuildUser User, TimeSpan MuteDuration, [Remainder] string Reason) {
+        public async Task IssueFinalWarn(/*short PointsDeducted, */IGuildUser User, TimeSpan MuteDuration, [Remainder] string Reason) {
+
+            short PointsDeducted = ModerationConfiguration.FinalWarningPointsDeducted;
 
             if (FinalWarnsDB.IsUserFinalWarned(User)) {
                 await BuildEmbed(EmojiEnum.Annoyed)
@@ -171,7 +172,7 @@ namespace Dexter.Commands {
                 .AddField("Issued by:", DiscordSocketClient.GetUser(Warn.IssuerID).GetUserInformation())
                 .AddField("Mute Duration:", TimeSpan.FromSeconds(Warn.MuteDuration).Humanize(), true)
                 .AddField("Points Deducted:", Warn.PointsDeducted, true)
-                .AddField("Issued on:", DateTimeOffset.FromUnixTimeSeconds(Warn.IssueTime).Humanize())
+                .AddField("Issued on:", DateTimeOffset.FromUnixTimeSeconds(Warn.IssueTime).Humanize(), true)
                 .SendEmbed(Context.Channel);
         }
     }

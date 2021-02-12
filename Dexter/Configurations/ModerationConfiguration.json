@@ -26,5 +26,6 @@
   "ModMailChannelID": 808106616557797394,
   "FinalWarnNotificationThreshold": 1,
   "FinalWarningsChannelID": 808850069788426311,
-  "FinalWarningsManageRecords": true
+  "FinalWarningsManageRecords": true,
+  "FinalWarningPointsDeducted": 4
 }

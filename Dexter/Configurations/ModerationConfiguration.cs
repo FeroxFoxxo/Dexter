@@ -112,6 +112,12 @@ namespace Dexter.Configurations {
 
         public bool FinalWarningsManageRecords { get; set; }
 
+        /// <summary>
+        /// The amount of points to deduct from a user's Dexter Profile when they get a final warning.
+        /// </summary>
+
+        public short FinalWarningPointsDeducted { get; set; }
+
     }
 
 }

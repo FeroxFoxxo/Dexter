@@ -6,10 +6,39 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord;
 
 namespace Dexter.Commands {
 
     public partial class ModeratorCommands {
+
+        /// <summary>
+        /// The Delete Infraction method runs on UNMUTE. It sets a record to a revoked status,
+        /// making it so that the record is thus removed from an individual and cannot be seen through the records command.
+        /// </summary>
+        /// <param name="User">The ID user you want the infraction removed from.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
+        [Command("unmute")]
+        [Summary("Removes an infraction from a specified user based on the infraction's ID.")]
+        [Alias("delmute")]
+        [RequireModerator]
+
+        public async Task DeleteInfraction(IGuildUser User) {
+            DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
+
+            DexterProfile.CurrentPointTimer = string.Empty;
+
+            await User.RemoveRoleAsync(Context.Guild.GetRole(ModerationConfiguration.MutedRoleID));
+
+            InfractionsDB.SaveChanges();
+
+            await BuildEmbed(EmojiEnum.Love)
+                .WithTitle($"Successfully Unmuted {User.Username}.")
+                .WithDescription($"Heya! I have successfully unmuted {User.GetUserInformation()}. Give them a headpat. <3")
+                .WithCurrentTimestamp()
+                .SendEmbed(Context.Channel);
+        }
 
         /// <summary>
         /// The Delete Infraction method runs on DELRECORD. It sets a record to a revoked status,

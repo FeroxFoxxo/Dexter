@@ -256,7 +256,7 @@ namespace Dexter.Commands {
 
             InfractionsDB.SaveChanges();
 
-            InfractionType InfractionType = PointsDeducted == 0 ? InfractionType.IndefiniteMute : Time.TotalSeconds > 0 ? InfractionType.Mute : InfractionType.Warning;
+            InfractionType InfractionType = PointsDeducted == 0 && Time.TotalSeconds == 0 ? InfractionType.IndefiniteMute : Time.TotalSeconds > 0 ? InfractionType.Mute : InfractionType.Warning;
 
             EmbedBuilder Embed = null;
 

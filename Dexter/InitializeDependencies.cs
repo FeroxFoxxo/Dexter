@@ -72,8 +72,7 @@ namespace Dexter {
             DiscordSocketClient DiscordSocketClient = new(
                 new DiscordSocketConfig {
                     MessageCacheSize = 5000,
-                    ExclusiveBulkDelete = false,
-                    GatewayIntents = (GatewayIntents?) (Enum.GetValues(typeof(GatewayIntents)).Cast<int>().Max() * 2 - 1),
+                    ExclusiveBulkDelete = false
                 }
             );
 

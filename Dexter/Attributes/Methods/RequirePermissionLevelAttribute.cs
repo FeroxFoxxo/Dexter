@@ -2,6 +2,7 @@
 using Dexter.Configurations;
 using Dexter.Enums;
 using Dexter.Extensions;
+using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -63,7 +64,8 @@ namespace Dexter.Attributes.Methods {
             return Task.FromResult(CommandContext.User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel
                 ? PreconditionResult.FromSuccess()
                 : PreconditionResult.FromError($"Haiya! To run the `{CommandInfo.Name}` command you need to have the " +
-                $"`{PermissionLevel}` role! Are you sure you're a `{PermissionLevel.ToString().ToLower()}`? <3"));
+                $"`{PermissionLevel}` role! Are you sure you're {LanguageHelper.GuessIndefiniteArticle(PermissionLevel.ToString())} " +
+                $"`{PermissionLevel.ToString().ToLower()}`? <3"));
         }
 
     }

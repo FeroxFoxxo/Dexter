@@ -19,7 +19,7 @@ namespace Dexter.Commands {
         [Command("fetch")]
         [Summary("Fetches a proposal from the tracker or a message ID.")]
         [Alias("find")]
-        [RequireAdministrator]
+        [RequireModerator]
 
         public async Task FetchProposal(string Tracker) {
             Proposal Proposal = ProposalDB.GetProposalByNameOrID(Tracker);

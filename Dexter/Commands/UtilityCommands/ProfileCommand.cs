@@ -6,6 +6,7 @@ using System;
 using System.Threading.Tasks;
 using Dexter.Extensions;
 using System.Runtime.InteropServices;
+using Dexter.Databases.Borkdays;
 
 namespace Dexter.Commands {
 
@@ -28,15 +29,17 @@ namespace Dexter.Commands {
 
             IGuildUser GuildUser = await DiscordSocketClient.Rest.GetGuildUserAsync(Context.Guild.Id, User.Id);
 
+            Borkday Borkday = BorkdayDB.Borkdays.Find(User.Id);
+
             await BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle($"User Profile For {GuildUser.Username}#{GuildUser.Discriminator}")
                 .WithThumbnailUrl(GuildUser.GetTrueAvatarUrl())
                 .AddField("Username", GuildUser.Username)
                 .AddField(!string.IsNullOrEmpty(GuildUser.Nickname), "Nickname", GuildUser.Nickname)
-                .AddField("Created", $"{GuildUser.CreatedAt:MM/dd/yyyy HH:mm:ss} ({GuildUser.CreatedAt.Humanize()})")
+                .AddField("Created", $"{GuildUser.CreatedAt:MM/dd/yyyy HH:mm:ss} ({GuildUser.CreatedAt.Offset.Humanize(2)})")
                 .AddField(GuildUser.JoinedAt.HasValue, "Joined", !GuildUser.JoinedAt.HasValue ? string.Empty : 
-                    $"{(DateTimeOffset)GuildUser.JoinedAt:MM/dd/yyyy HH:mm:ss} ({GuildUser.JoinedAt.Humanize()})")
-                .AddField("User Status", GuildUser.Status.Humanize())
+                    $"{(DateTimeOffset)GuildUser.JoinedAt:MM/dd/yyyy HH:mm:ss} ({GuildUser.JoinedAt.Value.Offset.Humanize(2)})")
+                .AddField(Borkday != null, "Last Birthday", new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Borkday.BorkdayTime).ToLongDateString())
                 .SendEmbed(Context.Channel);
         }
 

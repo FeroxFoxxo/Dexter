@@ -1,5 +1,6 @@
 ﻿using Dexter.Attributes.Methods;
 using Dexter.Configurations;
+using Dexter.Databases.Borkdays;
 using Dexter.Databases.EventTimers;
 using Dexter.Enums;
 using Dexter.Extensions;
@@ -28,9 +29,35 @@ namespace Dexter.Commands {
         [Alias("birthday")]
         [RequireModerator]
 
-        public async Task GiveBorkday ([Optional] IGuildUser User) {
+        public async Task GiveBorkday([Optional] IGuildUser User) {
             if (User == null)
                 User = Context.Guild.GetUser(Context.User.Id);
+
+            Borkday Borkday = BorkdayDB.Borkdays.Find(User.Id);
+
+            if (Borkday == null)
+                BorkdayDB.Borkdays.Add(
+                    new Borkday() {
+                        BorkdayTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                        UserID = User.Id
+                    }
+                );
+            else {
+                if (Borkday.BorkdayTime + TimeSpan.FromDays(364).Seconds > DateTimeOffset.Now.ToUnixTimeSeconds()) {
+                    await BuildEmbed(EmojiEnum.Love)
+                        .WithTitle("Unable To Give Borkday Role!")
+                        .WithDescription($"Haiya! I was unable to give the borkday role as this user's last borkday was on " +
+                            $"{new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Borkday.BorkdayTime).ToLongDateString()}."
+                        )
+                        .WithCurrentTimestamp()
+                        .SendEmbed(Context.Channel);
+
+                    return;
+                } else
+                    Borkday.BorkdayTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+            }
+
+            BorkdayDB.SaveChanges();
 
             IRole Role = Context.Guild.GetRole(
                 User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator ?

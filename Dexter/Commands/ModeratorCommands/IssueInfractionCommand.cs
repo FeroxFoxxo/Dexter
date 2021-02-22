@@ -150,11 +150,12 @@ namespace Dexter.Commands {
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task IssueInfraction(short PointsDeducted, IGuildUser User, TimeSpan Time, [Remainder] string Reason) {
-            if (Reason.Length > 250) {
+            if (Reason.Length > 750) {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Reason too long.")
-                    .WithDescription($"Your reason should be at most 250 characters long. \nWe found {Reason.Length} instead.")
+                    .WithDescription($"Your reason should be at most 750 characters long. \nWe found {Reason.Length} instead.")
                     .SendEmbed(Context.Channel);
+                return;
             }
 
             int InfractionID = InfractionsDB.Infractions.Any() ? InfractionsDB.Infractions.Max(Warning => Warning.InfractionID) + 1 : 1;

@@ -16,6 +16,12 @@ namespace Dexter.Commands {
         public LoggingService LoggingService { get; set; }
 
         /// <summary>
+        /// The BorkdayDB stores information regarding a user's birthday.
+        /// </summary>
+
+        public BorkdayDB BorkdayDB { get; set; }
+
+        /// <summary>
         /// Coordinates the initialization of all necessary infrastructure upon startup.
         /// </summary>
 

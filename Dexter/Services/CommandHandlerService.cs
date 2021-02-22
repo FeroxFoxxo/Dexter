@@ -140,10 +140,19 @@ namespace Dexter.Services {
                             else if (CommandContext.Message.Content.Count(Character => Character == '~') > 1 ||
                                     ProposalConfiguration.CommandRemovals.Contains(CommandContext.Message.Content.Split(' ')[0]))
                                 return;
-                            else await BuildEmbed(EmojiEnum.Annoyed)
-                                .WithTitle("Unknown Command.")
-                                .WithDescription($"Oopsies! It seems as if the command **{CustomCommandArgs[0].SanitizeMarkdown()}** doesn't exist!")
-                                .SendEmbed(CommandContext.Channel);
+                            else {
+                                IMessage Message = await CommandContext.Channel.SendMessageAsync(
+                                    embed: BuildEmbed(EmojiEnum.Annoyed)
+                                        .WithTitle("Unknown Command.")
+                                        .WithDescription($"Oopsies! It seems as if the command **{CustomCommandArgs[0].SanitizeMarkdown()}** doesn't exist!")
+                                        .Build()
+                                );
+
+                                _ = Task.Run(async () => {
+                                    await Task.Delay(5000);
+                                    await Message.DeleteAsync();
+                                });
+                            }
                         }
                         break;
 

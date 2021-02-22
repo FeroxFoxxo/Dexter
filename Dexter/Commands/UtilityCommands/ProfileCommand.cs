@@ -37,9 +37,9 @@ namespace Dexter.Commands {
                 .WithThumbnailUrl(GuildUser.GetTrueAvatarUrl())
                 .AddField("Username", GuildUser.Username)
                 .AddField(!string.IsNullOrEmpty(GuildUser.Nickname), "Nickname", GuildUser.Nickname)
-                .AddField("Created", $"{GuildUser.CreatedAt:MM/dd/yyyy HH:mm:ss} ({(GuildUser.CreatedAt.DateTime - DateTime.Now).Humanize(2, maxUnit: TimeUnit.Year)})")
+                .AddField("Created", $"{GuildUser.CreatedAt:MM/dd/yyyy HH:mm:ss} ({(DateTime.Now - GuildUser.CreatedAt.DateTime).Humanize(2, maxUnit: TimeUnit.Year)})")
                 .AddField(GuildUser.JoinedAt.HasValue, "Joined", !GuildUser.JoinedAt.HasValue ? string.Empty : 
-                    $"{(DateTimeOffset)GuildUser.JoinedAt:MM/dd/yyyy HH:mm:ss} ({(GuildUser.JoinedAt.Value.DateTime - DateTime.Now).Humanize(2, maxUnit: TimeUnit.Year)})")
+                    $"{(DateTimeOffset)GuildUser.JoinedAt:MM/dd/yyyy HH:mm:ss} ({(DateTime.Now - GuildUser.JoinedAt.Value.DateTime).Humanize(2, maxUnit: TimeUnit.Year)})")
                 .AddField(Borkday != null, "Last Birthday", new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Borkday != null ? Borkday.BorkdayTime : 0).ToLongDateString())
                 .SendEmbed(Context.Channel);
         }

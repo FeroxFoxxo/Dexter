@@ -8,6 +8,8 @@ using Dexter.Extensions;
 using System.Runtime.InteropServices;
 using Dexter.Databases.Borkdays;
 using Humanizer.Localisation;
+using Discord.WebSocket;
+using System.Linq;
 
 namespace Dexter.Commands {
 
@@ -41,6 +43,7 @@ namespace Dexter.Commands {
                 .AddField(GuildUser.JoinedAt.HasValue, "Joined", !GuildUser.JoinedAt.HasValue ? string.Empty : 
                     $"{(DateTimeOffset)GuildUser.JoinedAt:MM/dd/yyyy HH:mm:ss} ({(DateTime.Now - GuildUser.JoinedAt.Value.DateTime).Humanize(2, maxUnit: TimeUnit.Year)})")
                 .AddField(Borkday != null, "Last Birthday", new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Borkday != null ? Borkday.BorkdayTime : 0).ToLongDateString())
+                .AddField("Top Role", Context.Guild.Roles.Where(Role => Role.Position == Context.Guild.GetUser(User.Id).Hierarchy).FirstOrDefault().Name)
                 .SendEmbed(Context.Channel);
         }
 

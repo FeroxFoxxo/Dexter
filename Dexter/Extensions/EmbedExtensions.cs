@@ -59,13 +59,41 @@ namespace Dexter.Extensions {
             await DiscordWebhookClient.SendMessageAsync(embeds: new Embed[1] { EmbedBuilder.Build() });
 
         /// <summary>
+        /// Builds an EmbedBuilder and sends it to the specified IMessageChannel and sends an embed to the user specified.
+        /// </summary>
+        /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
+        /// <param name="MessageChannel">The IMessageChannel you wish to send the embed to.</param>
+        /// <param name="BotConfiguration">The BotConfiguration which is used to find the thumbnail of the embed.</param>
+        /// <param name="User">The IUser you wish to send the DM embed to.</param>
+        /// <param name="DMEmbedBuilder">The Embed you wish to send to the user.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
+        public static async Task SendDMAttachedEmbed(this EmbedBuilder EmbedBuilder, IMessageChannel MessageChannel,
+                BotConfiguration BotConfiguration, IUser User, EmbedBuilder DMEmbedBuilder) {
+
+            if (User == null)
+                EmbedBuilder.AddField("Failed", "I cannot notify this fluff as they have left the server!");
+            else {
+                try {
+                    IMessageChannel DMChannel = await User.GetOrCreateDMChannelAsync();
+                    await DMChannel.SendMessageAsync(embed: DMEmbedBuilder.Build());
+                } catch {
+                    EmbedBuilder.BuildEmbed(EmojiEnum.Annoyed, BotConfiguration);
+                    EmbedBuilder.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
+                }
+            }
+
+            await EmbedBuilder.SendEmbed(MessageChannel);
+        }
+
+        /// <summary>
         /// Builds an EmbedBuilder and sends it to the specified IUser.
         /// </summary>
         /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
         /// <param name="User">The IUser you wish to send the embed to.</param>
         /// <param name="Fallback">The Fallback is the channel it will send the embed to if the user has blocked DMs.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-        
+
         public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, IUser User, ITextChannel Fallback) {
             try {
                 await User.SendMessageAsync(embed: EmbedBuilder.Build());

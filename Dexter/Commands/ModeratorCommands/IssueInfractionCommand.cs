@@ -97,23 +97,15 @@ namespace Dexter.Commands {
 
             DexterProfile.CurrentMute = await CreateEventTimer(RemoveMutedRole, new() { { "UserID", User.Id.ToString() } }, Convert.ToInt32(Time.TotalSeconds), TimerType.Expire);
 
-            EmbedBuilder Embed = BuildEmbed(EmojiEnum.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Unrecorded Mute Issued!")
-                .WithDescription($"Warned {User.GetUserInformation()} for **{Time.Humanize(2)}** due to `{Reason}`. Please note that as this mute has not had a point count attached to it, it has not been recorded.");
-            
-            try {
-                await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle($"Unrecorded Mute Applied!")
-                    .WithDescription($"You have been muted in `{Context.Guild.Name}` for `{Reason}` for a time of `{Time.Humanize(2)}`. We hope you enjoy your time. <3")
-                    .WithCurrentTimestamp()
-                    .SendEmbed(await User.GetOrCreateDMChannelAsync());
-
-                Embed.AddField("Success", $"The user has been successfully alerted of this unrecorded mute!");
-            } catch (HttpException) {
-                Embed.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
-            }
-
-            await Embed.SendEmbed(Context.Channel);
+                .WithDescription($"Warned {User.GetUserInformation()} for **{Time.Humanize(2)}** due to `{Reason}`. Please note that as this mute has not had a point count attached to it, it has not been recorded.")
+                .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,
+                    BuildEmbed(EmojiEnum.Love)
+                        .WithTitle($"Unrecorded Mute Applied!")
+                        .WithDescription($"You have been muted in `{Context.Guild.Name}` for `{Reason}` for a time of `{Time.Humanize(2)}`. We hope you enjoy your time. <3")
+                        .WithCurrentTimestamp()
+                );
         }
 
         /// <summary>
@@ -158,12 +150,10 @@ namespace Dexter.Commands {
                 return;
             }
 
-            int InfractionID = InfractionsDB.Infractions.Any() ? InfractionsDB.Infractions.Max(Warning => Warning.InfractionID) + 1 : 1;
-
-            int TotalInfractions = InfractionsDB.GetInfractions(User.Id).Length + 1;
+            // Dexter Notifications if the user has been in breach of a parameter.
 
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
-
+            
             string Notification = string.Empty;
 
             if (DexterProfile.InfractionAmount > ModerationConfiguration.InfractionNotification &&
@@ -200,6 +190,8 @@ namespace Dexter.Commands {
                         .WithCurrentTimestamp().Build()
                 );
             }
+
+            // Apply point deductions and possible mutes.
 
             DexterProfile.InfractionAmount -= PointsDeducted;
 
@@ -244,6 +236,12 @@ namespace Dexter.Commands {
             if (!TimerService.TimerExists(DexterProfile.CurrentPointTimer))
                 DexterProfile.CurrentPointTimer = await CreateEventTimer(IncrementPoints, new() { { "UserID", User.Id.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
 
+            // Add the infraction to the database.
+
+            int InfractionID = InfractionsDB.Infractions.Any() ? InfractionsDB.Infractions.Max(Warning => Warning.InfractionID) + 1 : 1;
+
+            int TotalInfractions = InfractionsDB.GetInfractions(User.Id).Length + 1;
+
             InfractionsDB.Infractions.Add(new Infraction() {
                 Issuer = Context.User.Id,
                 Reason = Reason,
@@ -259,10 +257,11 @@ namespace Dexter.Commands {
 
             InfractionType InfractionType = PointsDeducted == 0 && Time.TotalSeconds == 0 ? InfractionType.IndefiniteMute : Time.TotalSeconds > 0 ? InfractionType.Mute : InfractionType.Warning;
 
-            EmbedBuilder Embed = null;
+            // Send the embed of the infraction to the moderation channel.
+            await (Context.Channel.Id == ModerationConfiguration.StaffBotsChannel ?
 
-            if (Context.Channel.Id == ModerationConfiguration.StaffBotsChannel) {
-                Embed = BuildEmbed(EmojiEnum.Love)
+                // If we are in the staff bots channel, send the embed with all the user's info aswell.
+                BuildEmbed(EmojiEnum.Love)
                    .WithTitle($"{Regex.Replace(InfractionType.ToString(), "([A-Z])([a-z]*)", " $1$2")} #{InfractionID} Issued! Current Points: {DexterProfile.InfractionAmount}.")
                    .WithDescription($"{(InfractionType == InfractionType.Warning ? "Warned" : "Muted")} {User.GetUserInformation()}" +
                        $"{(InfractionType == InfractionType.Mute ? $" for **{Time.Humanize(2)}**" : "")} who currently has **{TotalInfractions} " +
@@ -270,29 +269,27 @@ namespace Dexter.Commands {
                    .AddField("Issued By", Context.User.GetUserInformation())
                    .AddField(Time.TotalSeconds > 0, "Total Mute Time", $"{Time.Humanize(2)}.")
                    .AddField("Reason", Reason)
-                   .WithCurrentTimestamp();
-            } else
-                Embed = BuildEmbed(EmojiEnum.Love)
+                   .WithCurrentTimestamp() :
+
+                // If we are in a public channel we don't want the user's warnings public.
+                BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"{InfractionType.ToString().Humanize()} issued!")
-                    .WithDescription($"{(InfractionType == InfractionType.Warning ? "Warned" : "Muted")} {User.GetUserInformation()} {(InfractionType == InfractionType.Mute ? $" for **{Time.Humanize(2)}**" : "")} due to `{Reason}`");
-            try {
-                await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle($"You were issued a {(InfractionType == InfractionType.Warning ? "warning" : $"mute{(InfractionType == InfractionType.Mute ? $" of {Time.Humanize(2)}" : "")}")} from {Context.Guild.Name}.")
-                    .WithDescription($"You have had a total of {TotalInfractions} {(TotalInfractions == 1 ? "infraction" : "infractions")} and are on {DexterProfile.InfractionAmount} {(DexterProfile.InfractionAmount == 1 ? "point" : "points")}, you regain one point every 24 hours. " +
-                        ( InfractionType == InfractionType.Warning ?
-                        "Please note that whenever we warn you verbally, you will recieve a logged warning. This is not indicative of a mute or ban." :
-                        $"Please read over the <#{ModerationConfiguration.RulesAndInfoChannel}> channel if you have not already done so, even if it's just for a refresher, as to make sure your behaviour meets the standards of the server. <3")
-                    )
-                    .AddField("Reason", Reason)
-                    .WithCurrentTimestamp()
-                    .SendEmbed(await User.GetOrCreateDMChannelAsync());
+                    .WithDescription($"{(InfractionType == InfractionType.Warning ? "Warned" : "Muted")} {User.GetUserInformation()} {(InfractionType == InfractionType.Mute ? $" for **{Time.Humanize(2)}**" : "")} due to `{Reason}`"))
 
-                Embed.AddField("Success", $"The user has been successfully alerted of the {InfractionType.ToString().Humanize().ToLower()}!");
-            } catch (HttpException) {
-                Embed.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
-            }
+                // Send the embed into the channel.
+                .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,
 
-            await Embed.SendEmbed(Context.Channel);
+                    // Send the warning notification to the user.
+                    BuildEmbed(EmojiEnum.Love)
+                        .WithTitle($"You were issued a {(InfractionType == InfractionType.Warning ? "warning" : $"mute{(InfractionType == InfractionType.Mute ? $" of {Time.Humanize(2)}" : "")}")} from {Context.Guild.Name}.")
+                        .WithDescription($"You have had a total of {TotalInfractions} {(TotalInfractions == 1 ? "infraction" : "infractions")} and are on {DexterProfile.InfractionAmount} {(DexterProfile.InfractionAmount == 1 ? "point" : "points")}, you regain one point every 24 hours. " +
+                            ( InfractionType == InfractionType.Warning ?
+                            "Please note that whenever we warn you verbally, you will recieve a logged warning. This is not indicative of a mute or ban." :
+                            $"Please read over the <#{ModerationConfiguration.RulesAndInfoChannel}> channel if you have not already done so, even if it's just for a refresher, as to make sure your behaviour meets the standards of the server. <3")
+                        )
+                        .AddField("Reason", Reason)
+                        .WithCurrentTimestamp()
+                );
         }
 
         /// <summary>

@@ -23,27 +23,21 @@ namespace Dexter.Commands {
 
         [Command("userdm")]
         [Summary("Sends a direct message to a user specified.")]
-        [Alias("dm", "message")]
+        [Alias("dm", "message", "mail")]
         [RequireModerator]
 
         public async Task UserDMCommand(IUser User, [Remainder] string Message) {
-            EmbedBuilder Embed = BuildEmbed(EmojiEnum.Unknown)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("User DM")
                 .WithDescription(Message)
                 .AddField("Recipient", User.GetUserInformation())
-                .AddField("Sent By", Context.User.GetUserInformation());
-
-            try {
-                await User.SendMessageAsync($"**__Message From {Context.Guild.Name}__**\n{Message}");
-
-                Embed.BuildEmbed(EmojiEnum.Love, BotConfiguration)
-                    .AddField("Success", "The DM was successfully sent!");
-            } catch (HttpException) {
-                Embed.BuildEmbed(EmojiEnum.Annoyed, BotConfiguration)
-                    .AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
-            }
-
-            await Embed.SendEmbed(Context.Channel);
+                .AddField("Sent By", Context.User.GetUserInformation())
+                .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,
+                    BuildEmbed(EmojiEnum.Unknown)
+                    .WithTitle($"Message From {Context.Guild.Name}")
+                    .WithDescription(Message)
+                    .WithCurrentTimestamp()
+                );
         }
 
         /// <summary>
@@ -74,21 +68,6 @@ namespace Dexter.Commands {
                     .WithCurrentTimestamp()
                     .SendEmbed(Context.Channel);
             } else {
-                EmbedBuilder Embed = BuildEmbed(EmojiEnum.Unknown)
-                    .WithTitle("Mod Mail User DM")
-                    .WithDescription(Message)
-                    .AddField("Sent By", Context.User.GetUserInformation());
-
-                try {
-                    await User.SendMessageAsync($"**__Message From {Context.Guild.Name}__**\n{Message}");
-
-                    Embed.BuildEmbed(EmojiEnum.Love, BotConfiguration)
-                        .AddField("Success", "The DM was successfully sent!");
-                } catch (HttpException) {
-                    Embed.BuildEmbed(EmojiEnum.Annoyed, BotConfiguration)
-                        .AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
-                }
-
                 SocketChannel SocketChannel = DiscordSocketClient.GetChannel(ModerationConfiguration.ModMailChannelID);
 
                 if (SocketChannel is SocketTextChannel TextChannel) {
@@ -106,7 +85,17 @@ namespace Dexter.Commands {
                 } else
                     throw new Exception($"Eek! The given channel of {SocketChannel} turned out *not* to be an instance of SocketTextChannel, rather {SocketChannel.GetType().Name}!");
 
-                await Embed.SendEmbed(Context.Channel);
+                await BuildEmbed(EmojiEnum.Love)
+                    .WithTitle("Modmail User DM")
+                    .WithDescription(Message)
+                    .AddField("Sent By", Context.User.GetUserInformation())
+                    .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,
+                        BuildEmbed(EmojiEnum.Unknown)
+                        .WithTitle($"Modmail From {Context.Guild.Name}")
+                        .WithDescription(Message)
+                        .WithCurrentTimestamp()
+                        .WithFooter(Token)
+                    );
             }
         }
 

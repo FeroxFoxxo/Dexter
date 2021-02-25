@@ -76,25 +76,17 @@ namespace Dexter.Commands {
                 TimerType.Expire
             );
 
-            EmbedBuilder Embed = BuildEmbed(EmojiEnum.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Borkday role given!")
                 .WithDescription($"Haiya! I have given {User.GetUserInformation()} the `{Role.Name}` role!\nWish them a good one <3")
-                .WithCurrentTimestamp();
-
-            try {
-                await BuildEmbed(EmojiEnum.Love)
+                .WithCurrentTimestamp()
+                .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,
+                    BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"Happy Borkday!")
                     .WithDescription($"Haiya! You have been given the {Role.Name} role on {Context.Guild.Name}. " +
                         $"Have a splendid birthday filled with lots of love and cheer!\n - {Context.Guild.Name} Staff <3")
                     .WithCurrentTimestamp()
-                    .SendEmbed(await User.GetOrCreateDMChannelAsync());
-
-                Embed.AddField("Success", "The DM was successfully sent!");
-            } catch (HttpException) {
-                Embed.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
-            }
-
-            await Embed.SendEmbed(Context.Channel);
+                );
         }
 
         /// <summary>

@@ -2,7 +2,6 @@
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
-using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using System;
@@ -60,25 +59,17 @@ namespace Dexter.Commands {
 
                     DateTime NewCooldownTime = DateTime.UnixEpoch.AddSeconds(NewCooldown.TimeOfCooldown);
 
-                    EmbedBuilder IssueEmbed = BuildEmbed(EmojiEnum.Love)
+                    await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Added Commission Cooldown!")
                         .WithDescription($"Successfully added commission cooldown to {User.GetUserInformation()} " +
                             $"at {NewCooldownTime.ToLongTimeString()}, {NewCooldownTime.ToLongDateString()}.")
-                        .WithCurrentTimestamp();
-
-                    try {
-                        await BuildEmbed(EmojiEnum.Love)
-                            .WithTitle("Cooldown Issued.")
-                            .WithDescription($"Haiya! We've given you a commission cooldown, set at {NewCooldownTime.ToLongTimeString()}, {NewCooldownTime.ToLongDateString()}. <3")
-                            .WithCurrentTimestamp()
-                            .SendEmbed(await User.GetOrCreateDMChannelAsync());
-
-                        IssueEmbed.AddField("Successfully notified.", "The DM was successfully sent!");
-                    } catch (HttpException) {
-                        IssueEmbed.AddField("Failed to notify.", "This fluff may have either blocked DMs from the server or me!");
-                    }
-
-                    await IssueEmbed.SendEmbed(Context.Channel);
+                        .WithCurrentTimestamp()
+                        .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,
+                            BuildEmbed(EmojiEnum.Love)
+                                .WithTitle("Cooldown Issued.")
+                                .WithDescription($"Haiya! We've given you a commission cooldown, set at {NewCooldownTime.ToLongTimeString()}, {NewCooldownTime.ToLongDateString()}. <3")
+                                .WithCurrentTimestamp()
+                        );
 
                     break;
                 case EntryType.Revoke:
@@ -90,26 +81,17 @@ namespace Dexter.Commands {
 
                         DateTime CooldownTime = DateTime.UnixEpoch.AddSeconds(RevokeCooldown.TimeOfCooldown);
 
-                        EmbedBuilder RevokeEmbed = BuildEmbed(EmojiEnum.Unknown)
+                        await BuildEmbed(EmojiEnum.Unknown)
                             .WithTitle("Removed Commission Cooldown!")
                             .WithDescription($"Successfully removed commission cooldown from {User.GetUserInformation()}, " +
                                 $"of whose cooldown used to be {CooldownTime.ToLongTimeString()}, {CooldownTime.ToLongDateString()}.")
-                            .WithCurrentTimestamp();
-
-                        try {
-                            await BuildEmbed(EmojiEnum.Love)
+                            .WithCurrentTimestamp()
+                            .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User, BuildEmbed(EmojiEnum.Love)
                                 .WithTitle("Cooldown Revoked.")
                                 .WithDescription($"Haiya! We've revoked your commission cooldown set at {CooldownTime.ToLongTimeString()}, " +
                                 $"{CooldownTime.ToLongDateString()}. You should now be able to re-send your commission informtion into the channel. <3")
                                 .WithCurrentTimestamp()
-                                .SendEmbed(await User.GetOrCreateDMChannelAsync());
-
-                            RevokeEmbed.AddField("Successfully notified.", "The DM was successfully sent!");
-                        } catch (HttpException) {
-                            RevokeEmbed.AddField("Failed to notify.", "This fluff may have either blocked DMs from the server or me!");
-                        }
-
-                        await RevokeEmbed.SendEmbed(Context.Channel);
+                        );
                     } else {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable to remove cooldown.")

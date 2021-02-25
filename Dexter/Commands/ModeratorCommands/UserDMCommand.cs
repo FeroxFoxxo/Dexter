@@ -69,7 +69,7 @@ namespace Dexter.Commands {
             if (ModMail == null || User == null) {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Could Not Find Token!")
-                    .WithDescription("Haiya! I couldn't find the modmail for the given token. Are you sure this exists in the database?" +
+                    .WithDescription("Haiya! I couldn't find the modmail for the given token. Are you sure this exists in the database? " +
                         "The token should be given as the footer of the embed. Make sure this is the token and not the modmail number.")
                     .WithCurrentTimestamp()
                     .SendEmbed(Context.Channel);

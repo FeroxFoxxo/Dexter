@@ -83,26 +83,12 @@ namespace Dexter.Services {
 
                 await UpdateProposal(Proposal, ProposalStatus);
 
-                EmbedBuilder Builder = BuildEmbed(ProposalStatus == ProposalStatus.Declined ? EmojiEnum.Annoyed : EmojiEnum.Love)
+                await BuildEmbed(ProposalStatus == ProposalStatus.Declined ? EmojiEnum.Annoyed : EmojiEnum.Love)
                     .WithTitle($"{Proposal.ProposalType.ToString().Prettify()} {Proposal.ProposalStatus}.")
                     .WithDescription($"The {Proposal.ProposalType.ToString().Prettify().ToLower()} `{Proposal.Tracker}` was successfully {Proposal.ProposalStatus.ToString().ToLower()} by {Approver.Mention}.")
                     .AddField(!string.IsNullOrEmpty(Reason), "Reason", Reason)
-                    .WithCurrentTimestamp();
-
-                IUser User = DiscordSocketClient.GetUser(Proposal.Proposer);
-
-                if (User == null)
-                    Builder.AddField("Failed", "I cannot notify this fluff as they have left the server!");
-                else
-                    try {
-                        await BuildProposal(Proposal).SendEmbed(await User.GetOrCreateDMChannelAsync());
-
-                        Builder.AddField("Success", "The DM was successfully sent!");
-                    } catch (HttpException) {
-                        Builder.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
-                    }
-
-                await Builder.SendEmbed(MessageChannel);
+                    .WithCurrentTimestamp()
+                    .SendDMAttachedEmbed(MessageChannel, BotConfiguration, DiscordSocketClient.GetUser(Proposal.Proposer), BuildProposal(Proposal));
             }
         }
 

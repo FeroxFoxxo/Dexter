@@ -1,5 +1,6 @@
 ﻿using Dexter.Attributes.Methods;
 using Dexter.Configurations;
+using Dexter.Databases.Borkdays;
 using Dexter.Databases.EventTimers;
 using Dexter.Enums;
 using Dexter.Extensions;
@@ -28,9 +29,35 @@ namespace Dexter.Commands {
         [Alias("birthday")]
         [RequireModerator]
 
-        public async Task GiveBorkday ([Optional] IGuildUser User) {
+        public async Task GiveBorkday([Optional] IGuildUser User) {
             if (User == null)
                 User = Context.Guild.GetUser(Context.User.Id);
+
+            Borkday Borkday = BorkdayDB.Borkdays.Find(User.Id);
+
+            if (Borkday == null)
+                BorkdayDB.Borkdays.Add(
+                    new Borkday() {
+                        BorkdayTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                        UserID = User.Id
+                    }
+                );
+            else {
+                if (Borkday.BorkdayTime + TimeSpan.FromDays(364).Seconds > DateTimeOffset.Now.ToUnixTimeSeconds()) {
+                    await BuildEmbed(EmojiEnum.Love)
+                        .WithTitle("Unable To Give Borkday Role!")
+                        .WithDescription($"Haiya! I was unable to give the borkday role as this user's last borkday was on " +
+                            $"{new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Borkday.BorkdayTime).ToLongDateString()}."
+                        )
+                        .WithCurrentTimestamp()
+                        .SendEmbed(Context.Channel);
+
+                    return;
+                } else
+                    Borkday.BorkdayTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+            }
+
+            BorkdayDB.SaveChanges();
 
             IRole Role = Context.Guild.GetRole(
                 User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator ?
@@ -49,25 +76,17 @@ namespace Dexter.Commands {
                 TimerType.Expire
             );
 
-            EmbedBuilder Embed = BuildEmbed(EmojiEnum.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Borkday role given!")
                 .WithDescription($"Haiya! I have given {User.GetUserInformation()} the `{Role.Name}` role!\nWish them a good one <3")
-                .WithCurrentTimestamp();
-
-            try {
-                await BuildEmbed(EmojiEnum.Love)
+                .WithCurrentTimestamp()
+                .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,
+                    BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"Happy Borkday!")
                     .WithDescription($"Haiya! You have been given the {Role.Name} role on {Context.Guild.Name}. " +
                         $"Have a splendid birthday filled with lots of love and cheer!\n - {Context.Guild.Name} Staff <3")
                     .WithCurrentTimestamp()
-                    .SendEmbed(await User.GetOrCreateDMChannelAsync());
-
-                Embed.AddField("Success", "The DM was successfully sent!");
-            } catch (HttpException) {
-                Embed.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
-            }
-
-            await Embed.SendEmbed(Context.Channel);
+                );
         }
 
         /// <summary>

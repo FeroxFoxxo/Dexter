@@ -1,4 +1,5 @@
 ﻿using Dexter.Abstractions;
+using Dexter.Databases.Borkdays;
 using Dexter.Services;
 
 namespace Dexter.Commands {
@@ -14,6 +15,12 @@ namespace Dexter.Commands {
         /// </summary>
 
         public LoggingService LoggingService { get; set; }
+
+        /// <summary>
+        /// The BorkdayDB stores information regarding a user's birthday.
+        /// </summary>
+
+        public BorkdayDB BorkdayDB { get; set; }
 
         /// <summary>
         /// Coordinates the initialization of all necessary infrastructure upon startup.

@@ -53,7 +53,15 @@ namespace Dexter.Commands {
 
             ModMailDB.SaveChanges();
 
-            await Context.Channel.SendMessageAsync($"Haiya! Your message has been sent to the staff team. Your modmail token is: `{ModMail.Tracker}`. Thank you~! <3");
+            await BuildEmbed(EmojiEnum.Love)
+                .WithTitle("Successfully Sent Modmail")
+                .WithDescription($"Haiya! Your message has been sent to the staff team.\n\n" +
+                    $"Your modmail token is: `{ModMail.Tracker}`, which is what the moderators use to reply to you. " +
+                    $"Only give this out to a moderator if you wish to be identified.\n\n" +
+                    $"Thank you~! - {DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Name} Staff Team <3")
+                .WithFooter(ModMail.Tracker)
+                .WithCurrentTimestamp()
+                .SendEmbed(Context.Channel);
         }
 
         /// <summary>

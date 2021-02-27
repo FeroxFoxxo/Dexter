@@ -7,6 +7,7 @@ using Discord.WebSocket;
 using Dexter.Databases.Mail;
 using Dexter.Databases.FinalWarns;
 using System;
+using Dexter.Databases.Borkdays;
 
 namespace Dexter.Commands {
 
@@ -57,6 +58,12 @@ namespace Dexter.Commands {
         /// </summary>
          
         public ModMailDB ModMailDB { get; set; }
+
+        /// <summary>
+        /// The BorkdayDB stores information regarding a user's birthday.
+        /// </summary>
+
+        public BorkdayDB BorkdayDB { get; set; }
 
         /// <summary>
         /// Stores information regarding final warns issued in the server.

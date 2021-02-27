@@ -197,7 +197,7 @@ namespace Dexter.Services {
                         break;
                 }
             } catch (HttpException) {
-                await CommandContext.Channel.SendMessageAsync($"Haiya <&@{BotConfiguration.DeveloperRoleID}>, it seems as though the bot does not have the correct permissions to send embeds into this channel!\n" +
+                await CommandContext.Channel.SendMessageAsync($"Haiya <@&{BotConfiguration.DeveloperRoleID}>, it seems as though the bot does not have the correct permissions to send embeds into this channel!\n" +
                     $"Command errored out on the {Result.Error.Value} error.");
             }
 

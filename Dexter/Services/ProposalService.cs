@@ -530,7 +530,7 @@ namespace Dexter.Services {
 
                     try {
                         await ProposalMSG.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildProposal(Proposal).Build());
-                    } catch (HttpException) {
+                    } catch (InvalidOperationException) {
                         await ProposalMSG.DeleteAsync();
 
                         RestMessage Message = await TextChannel.SendMessageAsync(embed: BuildProposal(Proposal).Build());

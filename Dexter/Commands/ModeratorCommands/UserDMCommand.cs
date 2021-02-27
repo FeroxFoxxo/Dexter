@@ -80,7 +80,7 @@ namespace Dexter.Commands {
                                 .AddField($"Replied By: {Context.User.Username}", Message.Length > 300 ? $"{Message.Substring(0, 300)} ..." : Message)
                                 .Build()
                             );
-                        } catch (HttpException) {
+                        } catch (InvalidOperationException) {
                             IMessage Messaged = await MailMSG.Channel.SendMessageAsync(embed: MailMSG.Embeds.FirstOrDefault().ToEmbedBuilder().Build());
                             ModMail.MessageID = Messaged.Id;
                             ModMailDB.SaveChanges();

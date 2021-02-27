@@ -98,7 +98,7 @@ namespace Dexter.Extensions {
             try {
                 await User.SendMessageAsync(embed: EmbedBuilder.Build());
             } catch (HttpException) {
-                IUserMessage Message = await Fallback.SendMessageAsync(embed: EmbedBuilder
+                IUserMessage Message = await Fallback.SendMessageAsync(User.Mention, embed: EmbedBuilder
                     .WithAuthor($"Psst, {User.Username}! Please unblock me or allow direct messages from {Fallback.Guild.Name}. <3")
                     .Build());
                 _ = Task.Run(async () => {

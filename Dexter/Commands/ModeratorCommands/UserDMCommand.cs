@@ -95,12 +95,17 @@ namespace Dexter.Commands {
                     IMessage MailMessage = await TextChannel.GetMessageAsync(ModMail.MessageID);
 
                     if (MailMessage is IUserMessage MailMSG) {
-                        await MailMessage.RemoveAllReactionsAsync();
-                        await MailMSG.ModifyAsync(MailMSGs => MailMSGs.Embed = MailMessage.Embeds.FirstOrDefault().ToEmbedBuilder()
-                            .WithColor(Color.Green)
-                            .AddField($"Replied By: {Context.User.Username}", Message.Length > 300 ? $"{Message.Substring(0, 300)} ..." : Message)
-                            .Build()
-                        );
+                        try {
+                            await MailMSG.ModifyAsync(MailMSGs => MailMSGs.Embed = MailMessage.Embeds.FirstOrDefault().ToEmbedBuilder()
+                                .WithColor(Color.Green)
+                                .AddField($"Replied By: {Context.User.Username}", Message.Length > 300 ? $"{Message.Substring(0, 300)} ..." : Message)
+                                .Build()
+                            );
+                        } catch (HttpException) {
+                            IMessage Messaged = await MailMSG.Channel.SendMessageAsync(embed: MailMSG.Embeds.FirstOrDefault().ToEmbedBuilder().Build());
+                            ModMail.MessageID = Messaged.Id;
+                            ModMailDB.SaveChanges();
+                        }
                     } else
                         throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? ModMail Type: {MailMessage.GetType()}");
                 } else

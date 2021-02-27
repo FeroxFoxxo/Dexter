@@ -541,7 +541,22 @@ namespace Dexter.Services {
 
                 if (ProposalMessage is IUserMessage ProposalMSG) {
                     await ProposalMessage.RemoveAllReactionsAsync();
-                    await ProposalMSG.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildProposal(Proposal).Build());
+
+                    try {
+                        await ProposalMSG.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildProposal(Proposal).Build());
+                    } catch (HttpException) {
+                        await ProposalMSG.DeleteAsync();
+
+                        RestMessage Message = await TextChannel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
+
+                        if (Proposal.MessageID == MessageID)
+                            Proposal.MessageID = Message.Id;
+                        else if (Proposal.ProposalType == ProposalType.Suggestion)
+                            if (ProposalDB.Suggestions.Find(Proposal.Tracker).StaffMessageID == MessageID)
+                                Proposal.MessageID = Message.Id;
+
+                        ProposalDB.SaveChanges();
+                    }
                 } else
                     throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? ProposalType: {ProposalMessage.GetType()}");
             } else

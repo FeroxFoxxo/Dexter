@@ -2,6 +2,7 @@
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
 using Dexter.Databases.Levels;
+using Discord;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Dexter.Services {
 
-    public class VoiceLevelingService : Service {
+    public class LevelingService : Service {
 
         public LevelingConfiguration LevelingConfiguration { get; set; }
 
@@ -24,10 +25,12 @@ namespace Dexter.Services {
             if (Timer != null)
                 TimerService.EventTimersDB.EventTimers.Remove(Timer);
 
-            await CreateEventTimer(AddVoiceLevels, new(), LevelingConfiguration.XPIncrementTime, TimerType.Interval);
+            await CreateEventTimer(AddLevels, new(), LevelingConfiguration.XPIncrementTime, TimerType.Interval);
         }
 
-        public async Task AddVoiceLevels(Dictionary<string, string> Parameters) {
+        public async Task AddLevels(Dictionary<string, string> Parameters) {
+            // Voice leveling up.
+
             DiscordSocketClient.GetGuild(LevelingConfiguration.GuildID).VoiceChannels.ToList().ForEach(
                 VoiceChannel => VoiceChannel.Users.ToList().ForEach(
                     UserVC => {
@@ -35,12 +38,16 @@ namespace Dexter.Services {
                             LevelDatabase.IncrementUserXP(
                                 Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven),
                                 UserVC,
-                                DiscordSocketClient
+                                DiscordSocketClient.GetChannel(LevelingConfiguration.VoiceTextChannel) as ITextChannel,
+                                false
                             );
                         }
                     }
                 )
             );
+
+            // TODO: Text leveling up.
+
         }
 
     }

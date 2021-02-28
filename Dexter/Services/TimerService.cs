@@ -100,17 +100,20 @@ namespace Dexter.Services {
                     Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Timer.CallbackParameters);
                     Type Class = Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.Name.Equals(Timer.CallbackClass)).FirstOrDefault();
 
-                    if (Class.GetMethod(Timer.CallbackMethod) == null)
-                        throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
+                    if (Class != null) {
+                        if (Class.GetMethod(Timer.CallbackMethod) == null)
+                            throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
 
-                    try {
-                        await (Task) Class.GetMethod(Timer.CallbackMethod)
-                            .Invoke(ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
-                    } catch (Exception Exception) {
-                        await LoggingService.LogMessageAsync(
-                            new LogMessage(LogSeverity.Error, GetType().Name, Exception.Message, exception: Exception)
-                        );
-                    }
+                        try {
+                            await (Task)Class.GetMethod(Timer.CallbackMethod)
+                                .Invoke(ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
+                        } catch (Exception Exception) {
+                            await LoggingService.LogMessageAsync(
+                                new LogMessage(LogSeverity.Error, GetType().Name, Exception.Message, exception: Exception)
+                            );
+                        }
+                    } else if (Timer.TimerType == TimerType.Interval)
+                        EventTimersDB.EventTimers.Remove(Timer);
                 });
         }
 

@@ -31,20 +31,23 @@ namespace Dexter.Services {
         public async Task AddLevels(Dictionary<string, string> Parameters) {
             // Voice leveling up.
 
-            DiscordSocketClient.GetGuild(LevelingConfiguration.GuildID).VoiceChannels.ToList().ForEach(
-                VoiceChannel => VoiceChannel.Users.ToList().ForEach(
-                    UserVC => {
-                        if (!(UserVC.IsMuted || UserVC.IsDeafened || UserVC.IsSelfMuted || UserVC.IsSelfDeafened || UserVC.IsBot)) {
-                            LevelDatabase.IncrementUserXP(
-                                Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven),
-                                UserVC,
-                                DiscordSocketClient.GetChannel(LevelingConfiguration.VoiceTextChannel) as ITextChannel,
-                                false
-                            );
-                        }
+            foreach (IVoiceChannel VoiceChannel in DiscordSocketClient.GetGuild(LevelingConfiguration.GuildID).VoiceChannels) {
+                IAsyncEnumerable<IReadOnlyCollection<IGuildUser>> Users = VoiceChannel.GetUsersAsync();
+
+                if (await Users.CountAsync() <= 1)
+                    continue;
+
+                await foreach (IGuildUser UserVC in Users) {
+                    if (!(UserVC.IsMuted || UserVC.IsDeafened || UserVC.IsSelfMuted || UserVC.IsSelfDeafened || UserVC.IsBot)) {
+                        await LevelDatabase.IncrementUserXP(
+                            Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven),
+                            UserVC,
+                            DiscordSocketClient.GetChannel(LevelingConfiguration.VoiceTextChannel) as ITextChannel,
+                            false
+                        );
                     }
-                )
-            );
+                }
+            }
 
             // TODO: Text leveling up.
 

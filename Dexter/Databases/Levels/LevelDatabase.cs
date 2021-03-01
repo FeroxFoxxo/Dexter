@@ -6,6 +6,7 @@ using Discord;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Dexter.Databases.Levels {
     
@@ -17,7 +18,7 @@ namespace Dexter.Databases.Levels {
 
         public DbSet<UserLevel> Levels { get; set; }
 
-        public async void IncrementUserXP (int XPIncreased, IGuildUser User, ITextChannel Fallback, bool SendLevelUp) {
+        public async Task IncrementUserXP (int XPIncreased, IGuildUser User, ITextChannel Fallback, bool SendLevelUp) {
             if (Levels.Find(User.Id) == null) {
                 Levels.Add(new UserLevel() { UserID = User.Id, CurrentUserLevel = 0, UserXP = 0 });
                 await SaveChangesAsync();

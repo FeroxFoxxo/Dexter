@@ -15,6 +15,11 @@ using System.Timers;
 
 namespace Dexter.Services {
 
+    /// <summary>
+    /// The Timer Service module loops through all the event timers in the EventTimerDatabase and runs them.
+    /// Timers that expire will be removed but interval timers will loop at set intervals of time.
+    /// </summary>
+
     public class TimerService : Service {
 
         /// <summary>

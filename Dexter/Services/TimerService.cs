@@ -76,7 +76,7 @@ namespace Dexter.Services {
         }
 
         /// <summary>
-        /// Loops through all events and checks if any of them are set to be triggered (Interavl) or expire (Expire).
+        /// Loops through all events and checks if any of them are set to be triggered once (Expire) or periodically (Interval).
         /// </summary>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 

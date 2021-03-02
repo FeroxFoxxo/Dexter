@@ -35,7 +35,19 @@
         /// The GET field returns the ID of an entry from the database.
         /// </summary>
         
-        Get
+        Get,
+
+        /// <summary>
+        /// The DECLINE action is used to set a Proposal's status to declined.
+        /// </summary>
+
+        Decline,
+
+        /// <summary>
+        /// The APPROVE action is used to set a Proposal's status to approved.
+        /// </summary>
+
+        Approve
 
     }
 

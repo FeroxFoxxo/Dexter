@@ -198,6 +198,7 @@ namespace Dexter.Services {
                         .WithTitle("Your attachment is too big!")
                         .WithDescription("Please keep attachments under 8MB due to Discord's size limitations and our caching of data! <3")
                         .SendEmbed(RecievedMessage.Author, RecievedMessage.Channel as ITextChannel);
+                    await RecievedMessage.DeleteAsync();
                     return;
                 }
 

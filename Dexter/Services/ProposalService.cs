@@ -192,9 +192,18 @@ namespace Dexter.Services {
 
             Attachment Attachment = RecievedMessage.Attachments.FirstOrDefault();
 
-            if (Attachment != null)
+            if (Attachment != null) {
+                if (Attachment.Size > 8 * (10 ^ 6)) {
+                    await BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Your attachment is too big!")
+                        .WithDescription("Please keep attachments under 8MB due to Discord's size limitations and our caching of data! <3")
+                        .SendEmbed(RecievedMessage.Author, RecievedMessage.Channel as ITextChannel);
+                    return;
+                }
+
                 Proposal.ProxyURL = await Attachment.ProxyUrl.GetProxiedImage($"{Proposal.Tracker}", DiscordSocketClient, ProposalConfiguration);
-            
+            }
+
             RestUserMessage Embed = await RecievedMessage.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
 
             // Set the message ID in the suggestion object to the ID of the embed.

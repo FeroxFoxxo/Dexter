@@ -31,13 +31,8 @@ namespace Dexter.Services {
         public async Task AddLevels(Dictionary<string, string> Parameters) {
             // Voice leveling up.
 
-            foreach (IVoiceChannel VoiceChannel in DiscordSocketClient.GetGuild(LevelingConfiguration.GuildID).VoiceChannels) {
-                IAsyncEnumerable<IReadOnlyCollection<IGuildUser>> Users = VoiceChannel.GetUsersAsync();
-
-                if (await Users.CountAsync() <= 1)
-                    continue;
-
-                await foreach (IGuildUser UserVC in Users) {
+            foreach (SocketVoiceChannel VoiceChannel in DiscordSocketClient.GetGuild(LevelingConfiguration.GuildID).VoiceChannels) {
+                foreach (IGuildUser UserVC in VoiceChannel.Users)
                     if (!(UserVC.IsMuted || UserVC.IsDeafened || UserVC.IsSelfMuted || UserVC.IsSelfDeafened || UserVC.IsBot)) {
                         await LevelDatabase.IncrementUserXP(
                             Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven),
@@ -46,7 +41,6 @@ namespace Dexter.Services {
                             false
                         );
                     }
-                }
             }
 
             // TODO: Text leveling up.

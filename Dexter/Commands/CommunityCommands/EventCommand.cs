@@ -62,7 +62,22 @@ namespace Dexter.Commands {
             switch (ActionType) {
                 case Enums.ActionType.Add:
                     string ReleaseArg = Params.Split(TimeEventSeparator)[0];
-                    DateTimeOffset ReleaseTime = DateTimeOffset.Parse(ReleaseArg.Trim());
+                    if(!DateTimeOffset.TryParse(ReleaseArg.Trim(), out DateTimeOffset ReleaseTime)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Unable to parse time!")
+                            .WithDescription($"I was unable to parse the time: `{ReleaseArg}`\n Make sure it follows the format: `(dd/mm/yyyy) hh:mm(:ss) (<am/pm>) <+/->tz`! For more info, check out `~help event`")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+
+                    if(ReleaseArg.Length == Params.Length) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Unable to parse event!")
+                            .WithDescription($"I found event parameters: `{Params}`. \nYou must separate time and description with a semicolon ({TimeEventSeparator})!")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+
                     string Description = Params[(ReleaseArg.Length + TimeEventSeparator.Length)..].Trim();
 
                     await AddEvent(EventType.UserHosted, Context.User as IGuildUser, ReleaseTime, Description);

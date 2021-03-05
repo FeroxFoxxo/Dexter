@@ -37,8 +37,6 @@ namespace Dexter.Commands {
             int ID = CommunityEventsDB.GenerateToken();
             EventStatus Status = EventType == EventType.UserHosted ? EventStatus.Pending : EventStatus.Approved;
 
-            Console.Out.WriteLine($"NEW ID PICKED FOR EVENT #{ID}");
-
             string ReleaseTimer = await CreateEventTimer(ReleaseEventCallback,
                 new Dictionary<string, string> { { "ID", ID.ToString() } },
                 (int) Release.Subtract(DateTimeOffset.Now).TotalSeconds,
@@ -85,13 +83,13 @@ namespace Dexter.Commands {
                     .WithTitle($"Event #{ID} Successfully Programmed!")
                     .WithDescription($"The official server event has been successfully added to the database and will be displayed in <#{CommunityConfiguration.OfficialEventsChannel}> when its release time comes. \n" +
                         $"You can always check the information of this event with the command `{BotConfiguration.Prefix}events get id {ID}`")
-                    .AddField("Release Time: ", $"{Release:ddd', 'MMM d 'at' hh:mm 'UTC'z}")
+                    .AddField("Release Time: ", $"{Release:ddd', 'MMM d 'at' hh:mm 'UTC'z} ({Release.Humanize()})")
                     .SendEmbed(Context.Channel);
             } else {
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"Event #{ID} Successfully Suggested!")
                     .WithDescription($"Your suggestion went through! You will be informed when it is approved or declined. You can always check the status with `{BotConfiguration.Prefix}event get id {ID}`")
-                    .AddField("Release Time: ", $"{Release:ddd', 'MMM d 'at' hh:mm 'UTC'z}")
+                    .AddField("Release Time: ", $"{Release:ddd', 'MMM d 'at' hh:mm 'UTC'z} ({Release.Humanize()})")
                     .WithCurrentTimestamp()
                     .SendEmbed(Context.Channel);
             }
@@ -132,7 +130,7 @@ namespace Dexter.Commands {
 
             }
 
-            DateTimeOffset Release = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease);
+            DateTimeOffset Release = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(CommunityConfiguration.StandardTimeZone));
 
             if (!TimerService.TimerExists(Event.ReleaseTimer))
                 Event.ReleaseTimer = await CreateEventTimer(ReleaseEventCallback,
@@ -301,10 +299,10 @@ namespace Dexter.Commands {
             }
 
             if (Event.EventType != EventType.Official) {
-                if (Event.Status is EventStatus.Approved or EventStatus.Denied or EventStatus.Released) {
+                if (Event.Status is EventStatus.Approved or EventStatus.Denied or EventStatus.Removed or EventStatus.Released) {
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Event is not pending!")
-                        .WithDescription($"This event has already been reviewed by the admin team; and thus can't be edited. \nYou can remove this event and propose a new one if you wish to change it.")
+                        .WithDescription($"This event has already been {Event.Status}; and thus can't be edited. \nYou can remove this event and propose a new one if you wish to change it.")
                         .WithCurrentTimestamp()
                         .SendEmbed(Context.Channel);
                     return;
@@ -370,8 +368,6 @@ namespace Dexter.Commands {
             if (Event == null) return;
 
             if (Event.EventType == EventType.Official) return;
-
-            Console.WriteLine($"Found Message ID {Event.EventProposal}");
 
             SocketChannel ProposalChannel = DiscordSocketClient.GetChannel(CommunityConfiguration.EventsNotificationsChannel);
 
@@ -440,8 +436,6 @@ namespace Dexter.Commands {
 
         public CommunityEvent GetEvent(int EventID) {
             CommunityEvent Event = CommunityEventsDB.Events.Find(EventID);
-
-            Console.Out.WriteLine($"Found event {Event} given ID {EventID}");
 
             return Event;
         }

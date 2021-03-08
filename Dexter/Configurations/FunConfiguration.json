@@ -48,6 +48,7 @@
   ],
   "HeadpatStorageGuild": 613441321751019550,
   "HeadpatWebhookName": "HeadpatWebhook",
+  "MaxCoinFlips": 1000000,
   "WritingPromptTerms": {
     "living_adjective": [
       "all-powerful",

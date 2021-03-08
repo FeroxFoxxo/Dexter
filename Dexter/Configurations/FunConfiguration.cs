@@ -77,6 +77,11 @@ namespace Dexter.Configurations {
 
         public List<string> WritingPromptPredicates { get; set; }
 
+        /// <summary>
+        /// The maximum allowed number of coin flips using the coinflip command
+        /// </summary>
+
+        public int MaxCoinFlips { get; set; }
     }
 
 }

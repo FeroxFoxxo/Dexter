@@ -39,7 +39,11 @@ namespace Dexter.Configurations {
 
         public uint ErrorCodeInvalidArgument { get; set; }
 
+        /// <summary>
+        /// Correlates time zone abbreviations (such as EST) to their corresponding UTC offset.
+        /// </summary>
 
+        public Dictionary<string, float> TimeZoneAbbreviations { get; set; }
     }
 
 }

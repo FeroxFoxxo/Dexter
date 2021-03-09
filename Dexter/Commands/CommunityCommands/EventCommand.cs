@@ -31,7 +31,7 @@ namespace Dexter.Commands {
             ">`REMOVE [EVENT ID]` - remove an event (proposer or admin only)\n" +
             ">`EDIT [EVENT ID] [NEW EVENT]` - edit an event's description (proposer or admin only)\n" +
             ">`[APPROVE/DECLINE] [EVENT ID] (REASON)` - approve or decline an event and optionally give a reason (staff only)\n" +
-            ">`GET [PARAMTYPE] [PARAM]` - shows description, proposer, and time remaining until an event is released.\n")]
+            ">`GET [PARAMTYPE] [PARAM]` - shows description, proposer, and time remaining until an event is released.")]
         [ExtendedSummary("Create and manage user-hosted events!\n" +
             ">`ADD [TIME] " + TimeEventSeparator + " [EVENT]` - create a new event!\n" +
             ">`REMOVE [EVENT ID]` - remove an event (proposer or admin only)\n" +
@@ -42,7 +42,7 @@ namespace Dexter.Commands {
             "-->`GET USER [USER]` - gets a set of topics by proposer\n" +
             "-->`GET <DESC or DESCRIPTION> [DESCRIPTION]` - gets a topic by its text output\n" +
             "Notes: \n" +
-            "\tTime must be given as follows: `(dd/mm/yyyy) hh:mm(:ss) (<am/pm>) <+/->tz`, elements in parentheses are optional, if am/pm isn't provided, 24h is used. tz is the time zone (e.g. -4:00 for EDT or +1:00 for CET)\n")]
+            "\tTime must be given as follows: `(dd/mm/yyyy) hh:mm(:ss) (<am/pm>) <+/->tz`, elements in parentheses are optional, if am/pm isn't provided, 24h is used. tz is the time zone (e.g. -4:00 for EDT or +1:00 for CET)")]
         [Alias("communityevent", "events")]
         [BotChannel]
 
@@ -186,7 +186,8 @@ namespace Dexter.Commands {
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         [Command("officialevent", RunMode = RunMode.Async)]
-        [Summary("Creates an official server event!")]
+        [Summary("Creates an official server event!\n
+            "Syntax: `officialevent [TIME] " + TimeEventSeparator + " [DESCRIPTION]`")]
         [ExtendedSummary("Creates an official server event! \n" + 
             "Syntax: `officialevent [TIME] " + TimeEventSeparator + " [DESCRIPTION]` \n" +
             "Notes: Time must be given as follows: `(dd/mm/yyyy) hh:mm(:ss) (<am/pm>) <+/->tz`, elements in parentheses are optional, if am/pm isn't provided, 24h is used. tz is the time zone (e.g. -4:00 for EDT or +1:00 for CET)")]

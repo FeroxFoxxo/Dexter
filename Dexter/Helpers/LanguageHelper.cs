@@ -384,7 +384,7 @@ namespace Dexter.Helpers {
 
             if (string.IsNullOrEmpty(TimeSegment)) return false;
 
-            string[] hmsf = TimeSegment.Split(":");
+            string[] hmsf = TimeSegment.Split(" ")[0].Split(":");
             Hour = int.Parse(hmsf[0]);
             Minute = int.Parse(hmsf[1]);
 
@@ -439,7 +439,7 @@ namespace Dexter.Helpers {
 
             for (int i = 0; i < CultureInfo.DateTimeFormat.MonthNames.Length; i++) {
                 if(Input == CultureInfo.DateTimeFormat.MonthNames[i].ToLower() || Input == CultureInfo.DateTimeFormat.AbbreviatedMonthNames[i].ToLower()) {
-                    return i;
+                    return i + 1;
                 }
             }
 

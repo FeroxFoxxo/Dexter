@@ -3,10 +3,9 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord.Commands;
+using Humanizer;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Globalization;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
@@ -89,6 +88,33 @@ namespace Dexter.Commands {
                         .WithTitle("Found time zone!")
                         .WithDescription($"{FirstArg}: {LanguageConfiguration.TimeZones[FirstArg]}")
                         .SendEmbed(Context.Channel);
+                    return;
+
+                case "when":
+                case "until":
+                case "till":
+                    if (string.IsNullOrEmpty(FirstArg)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Invalid number of arguments!")
+                                .WithDescription("You must provide a Date and Time to compare to!")
+                                .SendEmbed(Context.Channel);
+                        return;
+                    }
+
+                    string DateStr = $"{FirstArg} {RestArgs ?? ""}";
+
+                    if(!LanguageHelper.TryParseTime(DateStr, CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset Time)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Failed to parse date!")
+                            .WithDescription($"Make sure you follow the format `Month dd(, yyyy) hh:mm(:ss) (<am/pm>) (TZ)` or `{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} hh:mm(:ss) (<am/pm>) (TZ))`.")
+                            .SendEmbed(Context.Channel);
+                    }
+
+                    await BuildEmbed(EmojiEnum.Love)
+                        .WithTitle("Found Time!")
+                        .WithDescription($"{Time:MMM dd, yyyy hh:mm tt 'UTC'zzz} {(Time.CompareTo(DateTimeOffset.Now) < 0 ? "happened" : "will happen")} {Time.Humanize()}.")
+                        .SendEmbed(Context.Channel);
+
                     return;
             }
         }

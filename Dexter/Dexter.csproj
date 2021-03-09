@@ -30,6 +30,9 @@
 		<None Update="Configurations\CommissionCooldownConfiguration.json">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="Configurations\CommunityConfiguration.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Configurations\GreetFurConfiguration.json">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

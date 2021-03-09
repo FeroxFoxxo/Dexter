@@ -1,5 +1,6 @@
 ﻿using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
+using Dexter.Databases.Proposals;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Services;
@@ -70,15 +71,19 @@ namespace Dexter.Abstractions {
         /// <param name="CallbackParameters">The parameters you wish to callback with once approved.</param>
         /// <param name="Author">The author of the message who will be attached to the proposal.</param>
         /// <param name="Proposal">The message that will be attached to the proposal.</param>
-        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+        /// <param name="DenyCallbackMethod">Optional method you wish to callback if denied.</param>
+        /// <param name="DenyCallbackParameters">Optional parameters for the <paramref name="DenyCallbackMethod"/>, must be set if <paramref name="DenyCallbackMethod"/> is set.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully. The Task holds the <c>string</c> token of the created <c>Proposal</c>.</returns>
         
-        public async Task SendForAdminApproval(Action<Dictionary<string, string>> CallbackMethod,
-                Dictionary<string, string> CallbackParameters, ulong Author, string Proposal) {
+        public async Task<Proposal> SendForAdminApproval(Action<Dictionary<string, string>> CallbackMethod,
+                Dictionary<string, string> CallbackParameters, ulong Author, string Proposal, Action<Dictionary<string, string>> DenyCallbackMethod = null, Dictionary<string, string> DenyCallbackParameters = null) {
 
             string JSON = JsonConvert.SerializeObject(CallbackParameters);
+            string DenyJSON = "";
+            if(DenyCallbackParameters != null) DenyJSON = JsonConvert.SerializeObject(DenyCallbackParameters);
 
-            await ProposalService.SendAdminConfirmation(JSON, CallbackMethod.Target.GetType().Name,
-                CallbackMethod.Method.Name, Author, Proposal);
+            return await ProposalService.SendAdminConfirmation(JSON, CallbackMethod.Target.GetType().Name,
+                CallbackMethod.Method.Name, Author, Proposal, DenyJSON, DenyCallbackMethod.Target.GetType().Name, DenyCallbackMethod.Method.Name);
         }
 
         /// <summary>

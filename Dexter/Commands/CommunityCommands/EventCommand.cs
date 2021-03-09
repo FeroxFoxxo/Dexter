@@ -186,7 +186,7 @@ namespace Dexter.Commands {
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         [Command("officialevent", RunMode = RunMode.Async)]
-        [Summary("Creates an official server event!\n
+        [Summary("Creates an official server event!\n" +
             "Syntax: `officialevent [TIME] " + TimeEventSeparator + " [DESCRIPTION]`")]
         [ExtendedSummary("Creates an official server event! \n" + 
             "Syntax: `officialevent [TIME] " + TimeEventSeparator + " [DESCRIPTION]` \n" +

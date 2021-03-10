@@ -272,9 +272,12 @@ namespace Dexter.Services {
         /// <param name="Method">The method is the method of which will be called once this command has been run.</param>
         /// <param name="Author">The author is the snowflake ID of the user who has suggested the proposal.</param>
         /// <param name="ProposedMessage">The proposed message is the content of the approval confirmation message.</param>
-        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+        /// <param name="DenyJSON">The JSON string containing optional parameters for the <paramref name="DenyMethod"/>.</param>
+        /// <param name="DenyMethod">The system name for the method to be run if the confirmation is declined.</param>
+        /// <param name="DenyType">The type/class of <paramref name="DenyMethod"/>.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully. The task holds the string token attached to the proposal.</returns>
 
-        public async Task SendAdminConfirmation(string JSON, string Type, string Method, ulong Author, string ProposedMessage) {
+        public async Task<Proposal> SendAdminConfirmation(string JSON, string Type, string Method, ulong Author, string ProposedMessage, string DenyJSON = null, string DenyType = null, string DenyMethod = null) {
             string Token = CreateToken();
 
             // Creates a new Proposal object with the related fields.
@@ -292,7 +295,10 @@ namespace Dexter.Services {
                 Tracker = Proposal.Tracker,
                 CallbackClass = Type,
                 CallbackMethod = Method,
-                CallbackParameters = JSON
+                CallbackParameters = JSON,
+                DenyCallbackClass = DenyType,
+                DenyCallbackMethod = DenyMethod,
+                DenyCallbackParameters = DenyJSON
             };
 
             RestUserMessage Embed = await (DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as SocketTextChannel).SendMessageAsync(embed: BuildProposal(Proposal).Build());
@@ -305,6 +311,8 @@ namespace Dexter.Services {
             ProposalDB.AdminConfirmations.Add(Confirmation);
 
             ProposalDB.SaveChanges();
+
+            return Proposal;
         }
 
         /// <summary>
@@ -505,17 +513,28 @@ namespace Dexter.Services {
                     if (ProposalStatus == ProposalStatus.Approved) {
                         AdminConfirmation Confirmation = ProposalDB.AdminConfirmations.Find(Proposal.Tracker);
 
-                        Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Confirmation.CallbackParameters);
-                        Type Class = Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.Name.Equals(Confirmation.CallbackClass)).FirstOrDefault();
+                        InvokeStringifiedMethod(Confirmation.CallbackClass, Confirmation.CallbackMethod, Confirmation.CallbackParameters);
+                    } else if (ProposalStatus == ProposalStatus.Declined) {
+                        AdminConfirmation Confirmation = ProposalDB.AdminConfirmations.Find(Proposal.Tracker);
 
-                        if (Class.GetMethod(Confirmation.CallbackMethod) == null)
-                            throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
+                        if (Confirmation.DenyCallbackClass == null || Confirmation.DenyCallbackMethod == null || Confirmation.DenyCallbackParameters == null) break;
+                        if (Confirmation.DenyCallbackClass.Length == 0 || Confirmation.DenyCallbackMethod.Length == 0 || Confirmation.DenyCallbackParameters.Length == 0) break;
 
-                        Class.GetMethod(Confirmation.CallbackMethod).Invoke(ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
+                        InvokeStringifiedMethod(Confirmation.DenyCallbackClass, Confirmation.DenyCallbackMethod, Confirmation.DenyCallbackParameters);
                     }
 
                     break;
             }
+        }
+
+        private void InvokeStringifiedMethod(string Type, string Method, string Params) {
+            Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Params);
+            Type Class = Assembly.GetExecutingAssembly().GetTypes().Where(T => T.Name.Equals(Type)).FirstOrDefault();
+
+            if (Class.GetMethod(Method) == null)
+                throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
+
+            Class.GetMethod(Method).Invoke(ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
         }
 
         /// <summary>

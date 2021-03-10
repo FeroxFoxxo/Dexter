@@ -677,5 +677,67 @@ namespace Dexter.Helpers {
 
             return Result;
         }
+        
+        /// Extracts substrings that fit a given url schema from an <paramref name="Input"/> string.
+        /// </summary>
+        /// <remarks>All potential links in the string must be encapsulated in parentheses or spaces.</remarks>
+        /// <param name="Input">The string to analyze and extracts urls from.</param>
+        /// <returns>A <c>string[]</c> array containing a collection of substrings that matched the url pattern in <paramref name="Input"/>.</returns>
+
+        public static string[] GetHyperLinks(this string Input) {
+            List<string> Matches = new List<string>();
+
+            Input = ' ' + Input + ' ';
+
+            List<int> Openers = new List<int>();
+            List<int> Closers = new List<int>();
+            for (int i = 0; i < Input.Length; i++) {
+                switch (Input[i]) {
+                    case ' ':
+                        Closers.Add(i);
+                        Matches.AddRange(Input.CheckForLinks(Openers, Closers));
+
+                        Openers.Clear();
+                        Closers.Clear();
+                        Openers.Add(i);
+                        break;
+                    case ')':
+                        Closers.Add(i);
+                        break;
+                    case '(':
+                        Openers.Add(i);
+                        break;
+                }
+            }
+
+            return Matches.ToArray();
+        }
+
+        private static string[] CheckForLinks(this string Input, IEnumerable<int> Openers, IEnumerable<int> Closers) {
+            List<string> Result = new List<string>();
+
+            foreach(int o in Openers) {
+                foreach(int c in Closers) {
+                    if(c > o) {
+                        string s = Input[(o + 1)..c];
+                        if (s.IsHyperLink()) {
+                            Result.Add(s);
+                        }
+                    }
+                }
+            }
+
+            return Result.ToArray();
+        }
+
+        /// <summary>
+        /// Checks whether a given <paramref name="Input"/> string is a url.
+        /// </summary>
+        /// <param name="Input">The string to check.</param>
+        /// <returns><see langword="true"/> if the given string is a url; otherwise <see langword="false"/>.</returns>
+
+        public static bool IsHyperLink(this string Input) {
+            return Regex.IsMatch(Input, @"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&%\$#_=]*)?$");
+        }
     }
 }

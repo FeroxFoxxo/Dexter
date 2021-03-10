@@ -67,7 +67,7 @@ namespace Dexter.Commands {
                     if(!LanguageHelper.TryParseTime(ReleaseArg.Trim(), CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset ReleaseTime)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable to parse time!")
-                            .WithDescription($"I was unable to parse the time: `{ReleaseArg}`\n Make sure it follows the format: `(dd/mm/yyyy) hh:mm(:ss) (<am/pm>) tz`! For more info, check out `~help event`")
+                            .WithDescription($"I was unable to parse the time: `{ReleaseArg}`\n Make sure it follows the correct format! For more info, check out `{BotConfiguration.Prefix}checktime`")
                             .SendEmbed(Context.Channel);
                         return;
                     }

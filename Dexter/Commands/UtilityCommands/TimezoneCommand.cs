@@ -24,7 +24,7 @@ namespace Dexter.Commands {
             "`timezone SEARCH [TERM]` - Looks for similar timezone names and gives information about each one.\n" +
             "`timezone SPAN [TIMEZONE]` - Looks for time zones with similar or exactly the same offsets as given.\n" +
             "`timezone GET [ABBREVIATION]` - Gets information about one specific time zone.\n" +
-            "`timezone WHEN (DATE) [TIME] (ZONE)` - Gets the time difference between now and the specified date & time in the given time zone." +
+            "`timezone WHEN (DATE) [TIME] (ZONE)` - Gets the time difference between now and the specified date & time in the given time zone.\n" +
             "`timezone NOW [TIMEZONE]` - Gets the current time in a given time zone.")]
         [BotChannel]
 
@@ -155,6 +155,12 @@ namespace Dexter.Commands {
                         .WithDescription($"{Time:MMM dd, yyyy hh:mm tt 'UTC'zzz} {(Time.CompareTo(DateTimeOffset.Now) < 0 ? "happened" : "will happen")} {Time.Humanize()}.")
                         .SendEmbed(Context.Channel);
 
+                    return;
+                default:
+                    await BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Unrecognized action!")
+                        .WithDescription($"Unable to parse action \"`{Action}`\"! \nFor more information on accepted actions, check out the `help timezone` command.")
+                        .SendEmbed(Context.Channel);
                     return;
             }
         }

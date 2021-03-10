@@ -347,8 +347,7 @@ namespace Dexter.Helpers {
             int Minute = DateTime.Now.Minute;
             float Second = DateTime.Now.Second + DateTime.Now.Millisecond / 1000f;
 
-            int HoursOffset = DateTimeOffset.Now.Offset.Hours;
-            int MinutesOffset = DateTimeOffset.Now.Offset.Minutes;
+            TimeSpan TimeZoneOffset = DateTimeOffset.Now.Offset;
 
             string DateStrSegment = Regex.Match(Input, @"([A-Za-z]+\s)([0-9]{1,2})(,\s?[0-9]{2,4})?").Value;
             string DateNumSegment = Regex.Match(Input, @"[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,4})?").Value;
@@ -394,33 +393,14 @@ namespace Dexter.Helpers {
             if (TimeSegment.ToLower().EndsWith("pm") && Hour != 12) Hour += 12;
 
             if(!string.IsNullOrEmpty(TimeZoneSegment)) {
-                int Sign = 1;
+                if(TimeZoneSegment.Contains("+") || TimeZoneSegment.Contains("-") || LanguageConfiguration.TimeZones.ContainsKey(TimeZoneSegment)) {
+                    TimeZoneData TimeZone = TimeZoneData.Parse(TimeZoneSegment, LanguageConfiguration);
 
-                int SignPos = TimeZoneSegment.IndexOf("+");
-                if (SignPos < 0) {
-                    Sign = -1;
-                    SignPos = TimeZoneSegment.IndexOf("-");
-                }
-
-                string TZString = SignPos < 0 ? TimeZoneSegment : TimeZoneSegment[..SignPos];
-                if(!string.IsNullOrEmpty(TZString)) {
-                    if (TryParseTimeZone(TZString, LanguageConfiguration, out TimeSpan Offset)) {
-                        HoursOffset = Offset.Hours;
-                        MinutesOffset = Offset.Minutes;
-                    }
-                } else {
-                    HoursOffset = 0;
-                    MinutesOffset = 0;
-                }
-
-                if(SignPos >= 0) {
-                    string[] Mods = TimeZoneSegment[(SignPos + 1)..].Split(":");
-                    HoursOffset += int.Parse(Mods[0]) * Sign;
-                    if (Mods.Length > 1) MinutesOffset += int.Parse(Mods[1]);
+                    TimeZoneOffset = TimeZone.TimeOffset;
                 }
             }
 
-            Time = new DateTimeOffset(new DateTime(Year, Month, Day, Hour, Minute, (int)Second, (int)(Second % 1 * 1000)), new TimeSpan(HoursOffset, MinutesOffset, 0));
+            Time = new DateTimeOffset(new DateTime(Year, Month, Day, Hour, Minute, (int)Second, (int)(Second % 1 * 1000)), TimeZoneOffset);
 
             return true;
         }
@@ -465,11 +445,11 @@ namespace Dexter.Helpers {
         }
 
         /// <summary>
-        /// Returns .
+        /// Searches the list of static time zone abbreviations in <paramref name="LanguageConfiguration"/> to find the closest expressions to <paramref name="Input"/>.
         /// </summary>
         /// <param name="Input">The search term.</param>
         /// <param name="LanguageConfiguration">The global language configuration from which to draw time zone abbreviations.</param>
-        /// <returns>A <c>string[]</c> array of time zone abbreviations from <paramref name="LanguageConfiguration"/> which are most similar to <paramref name="Input"/>, sorted by relevance</returns>
+        /// <returns>A <c>string[]</c> array of time zone abbreviations from <paramref name="LanguageConfiguration"/> which are most similar to <paramref name="Input"/>, sorted by relevance.</returns>
 
         public static string[] SearchTimeZone(this string Input, LanguageConfiguration LanguageConfiguration) {
             Dictionary<string, int> SearchWeight = new();
@@ -504,6 +484,39 @@ namespace Dexter.Helpers {
 
             string[] SortedResults = new string[WeightedList.Count];
             for(int i = 0; i < WeightedList.Count; i++) {
+                SortedResults[i] = WeightedList[i].Key;
+            }
+            return SortedResults;
+        }
+
+        /// <summary>
+        /// Searches the list of static time zone data in <paramref name="LanguageConfiguration"/> to find timezones whose offset is closest to <paramref name="Offset"/>.
+        /// </summary>
+        /// <param name="Offset">A TimeSpan representing the difference between UTC and a given time zone.</param>
+        /// <param name="LanguageConfiguration">The configuration required to parse time zone data.</param>
+        /// <param name="ExactMatches">The number of matches in the results that have the exact <paramref name="Offset"/> provided.</param>
+        /// <returns>A <c>string[]</c> array of time zone abbreviations from <paramref name="LanguageConfiguration"/> which are most similar in offset to <paramref name="Offset"/>, sorted by relevance.</returns>
+
+        public static string[] SearchTimeZone(this TimeSpan Offset, LanguageConfiguration LanguageConfiguration, out int ExactMatches) {
+            Dictionary<string, int> SearchWeight = new();
+            ExactMatches = 0;
+
+            foreach (KeyValuePair<string, TimeZoneData> k in LanguageConfiguration.TimeZones) {
+                int Weight = (int) Math.Abs(k.Value.TimeOffset.Subtract(Offset).TotalMinutes);
+
+                if (Weight == 0) ExactMatches++;
+
+                SearchWeight.Add(k.Key, Weight);
+            }
+
+            List<KeyValuePair<string, int>> WeightedList = SearchWeight.ToList();
+            WeightedList.Sort((pair1, pair2) => {
+                if (pair1.Value.CompareTo(pair2.Value) != 0) return pair1.Value.CompareTo(pair2.Value);
+                else return pair1.Key.CompareTo(pair2.Key);
+                });
+
+            string[] SortedResults = new string[WeightedList.Count];
+            for (int i = 0; i < WeightedList.Count; i++) {
                 SortedResults[i] = WeightedList[i].Key;
             }
             return SortedResults;
@@ -562,6 +575,44 @@ namespace Dexter.Helpers {
 
         public static string ToTimeZoneExpression(TimeSpan Offset) {
             return ToTimeZoneExpression(Offset.Hours + Offset.Minutes / 60f);
+        }
+
+        /// <summary>
+        /// Attempts to Parse a TimeZone data from given information.
+        /// </summary>
+        /// <param name="Str">The string to parse into TimeZone data.</param>
+        /// <param name="LanguageConfiguration">The Configuration data containing static time zone definitions.</param>
+        /// <returns>A <c>TimeZoneData</c> object whose name is <paramref name="Str"/> and Offset is obtained by parsing <paramref name="Str"/>.</returns>
+
+        public static TimeZoneData Parse(string Str, LanguageConfiguration LanguageConfiguration) {
+            TimeZoneData Result = new();
+            
+            Result.Offset = 0;
+            Result.Name = Str;
+
+            int Sign = 1;
+
+            int SignPos = Str.IndexOf("+");
+            if (SignPos < 0) {
+                Sign = -1;
+                SignPos = Str.IndexOf("-");
+            }
+
+            string TZString = SignPos < 0 ? Str : Str[..SignPos];
+            if (!string.IsNullOrEmpty(TZString)) {
+                if (LanguageHelper.TryParseTimeZone(TZString.Trim(), LanguageConfiguration, out TimeSpan Offset)) {
+                    Result.Offset = Offset.Hours;
+                    Result.Offset += Offset.Minutes / 60f;
+                }
+            }
+
+            if (SignPos >= 0) {
+                string[] Mods = Str[(SignPos + 1)..].Split(":");
+                Result.Offset += int.Parse(Mods[0]) * Sign;
+                if (Mods.Length > 1) Result.Offset += int.Parse(Mods[1]) / 60f;
+            }
+
+            return Result;
         }
     }
 }

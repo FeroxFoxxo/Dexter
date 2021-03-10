@@ -23,6 +23,7 @@ namespace Dexter.Commands {
         [Summary("Gives information about time zones or searches for a specific one.")]
         [ExtendedSummary("Gives information about time zones or searches for a specific one.\n" +
             "`timezone SEARCH [TERM]` - Looks for similar timezone names and gives information about each one.\n" +
+            "`timezone SPAN [TIMEZONE]` - Looks for time zones with similar or exactly the same offsets as given.\n" +
             "`timezone GET [ABBREVIATION]` - Gets information about one specific time zone")]
         [BotChannel]
 
@@ -48,18 +49,44 @@ namespace Dexter.Commands {
                             .WithDescription("You must provide a Time Zone Abbreviation to search for!")
                             .SendEmbed(Context.Channel);
                         return;
+                    } 
+
+                    {
+                        string[] Results = LanguageHelper.SearchTimeZone(FirstArg, LanguageConfiguration);
+                        string[] ResultsHumanized = new string[Math.Min(10, Results.Length)];
+
+                        for (int i = 0; i < ResultsHumanized.Length; i++)
+                            ResultsHumanized[i] = $"{Results[i]}: {LanguageConfiguration.TimeZones[Results[i]]}";
+
+                        await BuildEmbed(EmojiEnum.Love)
+                            .WithTitle("Top 10 Results")
+                            .WithDescription(string.Join("\n", ResultsHumanized))
+                            .SendEmbed(Context.Channel);
+                    }
+                    return;
+                case "span":
+                    if(string.IsNullOrEmpty(FirstArg)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Invalid number of arguments!")
+                            .WithDescription("You must provide a Time Zone Expression to search for!")
+                            .SendEmbed(Context.Channel);
                     }
 
-                    string[] Results = LanguageHelper.SearchTimeZone(FirstArg, LanguageConfiguration);
-                    string[] ResultsHumanized = new string[Math.Min(10, Results.Length)];
+                    {
+                        string TimeZoneStr = $"{FirstArg} {RestArgs ?? ""}";
+                        TimeZoneData TimeZone = TimeZoneData.Parse(TimeZoneStr, LanguageConfiguration);
 
-                    for(int i = 0; i < ResultsHumanized.Length; i++)
-                        ResultsHumanized[i] = $"{Results[i]}: {LanguageConfiguration.TimeZones[Results[i]]}";
+                        string[] Results = LanguageHelper.SearchTimeZone(TimeZone.TimeOffset, LanguageConfiguration, out int Exact);
+                        string[] ResultsHumanized = new string[Math.Min(Math.Max(Exact, 10), Results.Length)];
 
-                    await BuildEmbed(EmojiEnum.Love)
-                        .WithTitle("Top 10 Results")
-                        .WithDescription(string.Join("\n", ResultsHumanized))
-                        .SendEmbed(Context.Channel);
+                        for (int i = 0; i < ResultsHumanized.Length; i++)
+                            ResultsHumanized[i] = $"{Results[i]}: {LanguageConfiguration.TimeZones[Results[i]]}";
+
+                        await BuildEmbed(EmojiEnum.Love)
+                            .WithTitle($"Top {ResultsHumanized.Length} Results similar to {TimeZoneData.ToTimeZoneExpression(TimeZone.Offset)}")
+                            .WithDescription(string.Join("\n", ResultsHumanized))
+                            .SendEmbed(Context.Channel);
+                    }
                     return;
                 case "get":
                     if (string.IsNullOrEmpty(FirstArg)) {
@@ -71,15 +98,15 @@ namespace Dexter.Commands {
                     }
                     
                     if(!LanguageConfiguration.TimeZones.ContainsKey(FirstArg)) {
-                        string[] ProbableSubstitutes = LanguageHelper.SearchTimeZone(FirstArg, LanguageConfiguration);
-                        string[] ProbableSubstitutesHumanized = new string[Math.Min(3, ProbableSubstitutes.Length)];
+                        string[] Results = LanguageHelper.SearchTimeZone(FirstArg, LanguageConfiguration);
+                        string[] ResultsHumanized = new string[Math.Min(3, Results.Length)];
 
-                        for (int i = 0; i < ProbableSubstitutesHumanized.Length; i++)
-                            ProbableSubstitutesHumanized[i] = $"{ProbableSubstitutes[i]}: {LanguageConfiguration.TimeZones[ProbableSubstitutes[i]]}";
+                        for (int i = 0; i < ResultsHumanized.Length; i++)
+                            ResultsHumanized[i] = $"{Results[i]}: {LanguageConfiguration.TimeZones[Results[i]]}";
 
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable to find time zone!")
-                            .WithDescription($"Did you mean...\n{string.Join("\n", ProbableSubstitutesHumanized)}")
+                            .WithDescription($"Did you mean...\n{string.Join("\n", ResultsHumanized)}")
                             .SendEmbed(Context.Channel);
                         return;
                     }
@@ -89,7 +116,6 @@ namespace Dexter.Commands {
                         .WithDescription($"{FirstArg}: {LanguageConfiguration.TimeZones[FirstArg]}")
                         .SendEmbed(Context.Channel);
                     return;
-
                 case "when":
                 case "until":
                 case "till":

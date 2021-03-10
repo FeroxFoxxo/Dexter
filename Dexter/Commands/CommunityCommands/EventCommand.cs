@@ -2,12 +2,14 @@
 using Dexter.Databases.CommunityEvents;
 using Dexter.Enums;
 using Dexter.Extensions;
+using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Humanizer;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,7 +44,7 @@ namespace Dexter.Commands {
             "-->`GET USER [USER]` - gets a set of topics by proposer\n" +
             "-->`GET <DESC or DESCRIPTION> [DESCRIPTION]` - gets a topic by its text output\n" +
             "Notes: \n" +
-            "\tTime must be given as follows: `(dd/mm/yyyy) hh:mm(:ss) (<am/pm>) <+/->tz`, elements in parentheses are optional, if am/pm isn't provided, 24h is used. tz is the time zone (e.g. -4:00 for EDT or +1:00 for CET)")]
+            "\tTime must be given as follows: `(date) [time] [time zone]` where date = `mm/dd(/year)` or `month dd(, year)`; time = `hh:mm(:ss)`; and time zone is an expression such as \"EDT\" or an offset to UTC (e.g. -4:00 or +1:00), elements in parentheses are optional, if am/pm isn't provided, 24h is used.")]
         [Alias("communityevent", "events")]
         [BotChannel]
 
@@ -62,10 +64,10 @@ namespace Dexter.Commands {
             switch (ActionType) {
                 case Enums.ActionType.Add:
                     string ReleaseArg = Params.Split(TimeEventSeparator)[0];
-                    if(!DateTimeOffset.TryParse(ReleaseArg.Trim(), out DateTimeOffset ReleaseTime)) {
+                    if(!LanguageHelper.TryParseTime(ReleaseArg.Trim(), CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset ReleaseTime)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable to parse time!")
-                            .WithDescription($"I was unable to parse the time: `{ReleaseArg}`\n Make sure it follows the format: `(dd/mm/yyyy) hh:mm(:ss) (<am/pm>) <+/->tz`! For more info, check out `~help event`")
+                            .WithDescription($"I was unable to parse the time: `{ReleaseArg}`\n Make sure it follows the format: `(dd/mm/yyyy) hh:mm(:ss) (<am/pm>) tz`! For more info, check out `~help event`")
                             .SendEmbed(Context.Channel);
                         return;
                     }

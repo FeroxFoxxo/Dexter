@@ -14,7 +14,7 @@ namespace Dexter.Commands {
 
         [Command("logfile")]
         [Summary("Provides the logfile for the current instance of the bot.")]
-        [Alias("log")]
+        [Alias("log", "logs")]
         [RequireDeveloper]
 
         public async Task LogfileCommand() {

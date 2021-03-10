@@ -1,4 +1,5 @@
 ﻿using Dexter.Abstractions;
+using Dexter.Helpers;
 using System.Collections.Generic;
 
 namespace Dexter.Configurations {
@@ -39,7 +40,11 @@ namespace Dexter.Configurations {
 
         public uint ErrorCodeInvalidArgument { get; set; }
 
+        /// <summary>
+        /// Correlates time zone abbreviations (such as EST) to their corresponding UTC offset.
+        /// </summary>
 
+        public SortedDictionary<string, TimeZoneData> TimeZones { get; set; }
     }
 
 }

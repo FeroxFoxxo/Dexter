@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Dexter.Configurations;
@@ -260,7 +262,7 @@ namespace Dexter.Helpers {
         public static string MatchCase(this string Input, string Case) {
             int Match = Input.Length < Case.Length ? Input.Length : Case.Length;
 
-            StringBuilder SB = new StringBuilder(Input.Length);
+            StringBuilder SB = new(Input.Length);
 
             for (int i = 0; i < Match; i++) {
                 SB.Append(Input[i].MatchCase(Case[i]));
@@ -357,9 +359,9 @@ namespace Dexter.Helpers {
         private static string[] CheckForLinks(this string Input, IEnumerable<int> Openers, IEnumerable<int> Closers) {
             List<string> Result = new List<string>();
 
-            foreach(int o in Openers) {
-                foreach(int c in Closers) {
-                    if(c > o) {
+            foreach (int o in Openers) {
+                foreach (int c in Closers) {
+                    if (c > o) {
                         string s = Input[(o + 1)..c];
                         if (s.IsHyperLink()) {
                             Result.Add(s);
@@ -379,6 +381,301 @@ namespace Dexter.Helpers {
 
         public static bool IsHyperLink(this string Input) {
             return Regex.IsMatch(Input, @"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&%\$#_=]*)?$");
+        }
+
+        /// <summary>
+        /// Attempts to parse a string expressing a date, time, and offset. All elements except for the hour and minute are optional.
+        /// </summary>
+        /// <param name="Input">The stringified expression of the date to be parsed into <paramref name="Time"/>.</param>
+        /// <param name="CultureInfo">The Cultural Context with which to parse the date given in <paramref name="Input"/>.</param>
+        /// <param name="LanguageConfiguration">The Configuration related to parsing linguistic humanized information like time zone abbreviations.</param>
+        /// <param name="Time">The parsed <c>DateTimeOffset</c> extracted from <paramref name="Input"/>.</param>
+        /// <returns><see langword="true"/> if the parsing was successful; otherwise <see langword="false"/>.</returns>
+
+        public static bool TryParseTime(this string Input, CultureInfo CultureInfo, LanguageConfiguration LanguageConfiguration, out DateTimeOffset Time) {
+
+            Input = Input.Trim();
+            Time = DateTimeOffset.Now;
+
+            switch (Input.ToLower()) {
+                case "now":
+                    Time = DateTimeOffset.Now;
+                    return true;
+            }
+
+            int Year = DateTime.Now.Year;
+            int Month = DateTime.Now.Month;
+            int Day = DateTime.Now.Day;
+            int Hour = DateTime.Now.Hour;
+            int Minute = DateTime.Now.Minute;
+            float Second = DateTime.Now.Second + DateTime.Now.Millisecond / 1000f;
+
+            TimeSpan TimeZoneOffset = DateTimeOffset.Now.Offset;
+
+            string DateStrSegment = Regex.Match(Input, @"([A-Za-z]+\s)([0-9]{1,2})(,\s?[0-9]{2,4})?").Value;
+            string DateNumSegment = Regex.Match(Input, @"[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,4})?").Value;
+            string TimeSegment = Regex.Match(Input, @"[0-9]{1,2}:[0-9]{1,2}(:[0-9]{1,2}(.[0-9]+)?)?(\s(a|p)m)?", RegexOptions.IgnoreCase).Value;
+            string TimeZoneSegment = Regex.Match(Input, @"(((UTC|GMT|Z)?[+-][0-9]{1,2}(:[0-9]{2})?)|([A-Z][A-Za-z0-9]*))$").Value;
+
+            if(!string.IsNullOrEmpty(DateStrSegment)) {
+                string MMM = DateStrSegment.Split(" ")[0];
+                Month = ParseMonth(MMM);
+                if(Month < 0) {
+                    return false;
+                }
+
+                string[] dy = DateStrSegment.Split(",");
+                string dd = dy[0][MMM.Length..];
+                if (!int.TryParse(dd, out Day)) return false;
+                if (Day < 0 || Day > 31) return false;
+
+                if(dy.Length > 1) {
+                    if (!int.TryParse(dy[1], out Year)) return false;
+                    if (Year < 1970) Year += 2000;
+                    if (Year < 1970 || Year > 3000) return false;
+                }
+            } else if (!string.IsNullOrEmpty(DateNumSegment)) {
+                if(DateNumSegment.Split("/").Length < 3) {
+                    DateNumSegment += $"/{Year}";
+                }
+                DateTime Subparse = DateTime.Parse(DateNumSegment, CultureInfo);
+                Day = Subparse.Day;
+                Month = Subparse.Month;
+                Year = Subparse.Year;
+            }
+
+            if (string.IsNullOrEmpty(TimeSegment)) return false;
+
+            string[] hmsf = TimeSegment.Split(" ")[0].Split(":");
+            Hour = int.Parse(hmsf[0]);
+            Minute = int.Parse(hmsf[1]);
+
+            if (hmsf.Length > 2) Second = float.Parse(hmsf[2]);
+
+            if (TimeSegment.ToLower().EndsWith("am") && Hour == 12) Hour = 0;
+            if (TimeSegment.ToLower().EndsWith("pm") && Hour != 12) Hour += 12;
+
+            if(!string.IsNullOrEmpty(TimeZoneSegment)) {
+                if(TimeZoneSegment.Contains("+") || TimeZoneSegment.Contains("-") || LanguageConfiguration.TimeZones.ContainsKey(TimeZoneSegment)) {
+                    TimeZoneData TimeZone = TimeZoneData.Parse(TimeZoneSegment, LanguageConfiguration);
+
+                    TimeZoneOffset = TimeZone.TimeOffset;
+                }
+            }
+
+            Time = new DateTimeOffset(new DateTime(Year, Month, Day, Hour, Minute, (int)Second, (int)(Second % 1 * 1000)), TimeZoneOffset);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Attempts to parse a Month given a CultureInfo for Month Names and Abbreviated Month Names.
+        /// </summary>
+        /// <param name="Input">An abbreviated or complete month name in accordance to <paramref name="CultureInfo"/>, case-insensitive.</param>
+        /// <param name="CultureInfo">The contextual CultureInfo containing the calendar information and month names.</param>
+        /// <returns></returns>
+
+        public static int ParseMonth(this string Input, CultureInfo CultureInfo = null) {
+            if (CultureInfo == null) CultureInfo = CultureInfo.InvariantCulture;
+
+            Input = Input.ToLower();
+
+            for (int i = 0; i < CultureInfo.DateTimeFormat.MonthNames.Length; i++) {
+                if(Input == CultureInfo.DateTimeFormat.MonthNames[i].ToLower() || Input == CultureInfo.DateTimeFormat.AbbreviatedMonthNames[i].ToLower()) {
+                    return i + 1;
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// Attempts to find a time zone by the abbreviated name of <paramref name="Input"/> and returns it as a TimeSpan to be used as an Offset. 
+        /// </summary>
+        /// <param name="Input">The abbreviation of the time zone as it appears in <paramref name="LanguageConfiguration"/>.</param>
+        /// <param name="LanguageConfiguration">The Config file containing data on Time Zone names and their respective offsets.</param>
+        /// <param name="TimeSpan">The output value of the parsed <paramref name="Input"/>, or <c>TimeSpan.Zero</c> if it can't be parsed.</param>
+        /// <returns><see langword="true"/> if the parsing was successful; otherwise <see langword="false"/>.</returns>
+
+        public static bool TryParseTimeZone(this string Input, LanguageConfiguration LanguageConfiguration, out TimeSpan TimeSpan) {
+            if(LanguageConfiguration.TimeZones.ContainsKey(Input)) {
+                TimeSpan = LanguageConfiguration.TimeZones[Input].TimeOffset;
+                return true;
+            }
+
+            TimeSpan = TimeSpan.Zero;
+            return false;
+        }
+
+        /// <summary>
+        /// Searches the list of static time zone abbreviations in <paramref name="LanguageConfiguration"/> to find the closest expressions to <paramref name="Input"/>.
+        /// </summary>
+        /// <param name="Input">The search term.</param>
+        /// <param name="LanguageConfiguration">The global language configuration from which to draw time zone abbreviations.</param>
+        /// <returns>A <c>string[]</c> array of time zone abbreviations from <paramref name="LanguageConfiguration"/> which are most similar to <paramref name="Input"/>, sorted by relevance.</returns>
+
+        public static string[] SearchTimeZone(this string Input, LanguageConfiguration LanguageConfiguration) {
+            Dictionary<string, int> SearchWeight = new();
+
+            foreach(KeyValuePair<string, TimeZoneData> k in LanguageConfiguration.TimeZones) {
+                int Weight = 0;
+                for(int i = 0; i < k.Key.Length; i++) {
+                    if(i < Input.Length) {
+                        if (Input[i] == k.Key[i]) Weight += 10;
+                        else if (char.ToUpper(Input[i]) == char.ToUpper(k.Key[i])) Weight += 9;
+                    }
+                    if (Input.Contains(k.Key[i])) Weight += 3;
+                }
+
+                if(Input.Length >= 2 && Input[^2] == 'S') {
+                    if (k.Key.Length >= 2 && k.Key[^2] == 'D') Weight += 8;
+                    else if (k.Key.Length + 1 == Input.Length) Weight += 4;
+                }
+
+                if(k.Key.Length >= 2 && k.Key[^2] == 'S') {
+                    if (Input.Length >= 2 && Input[^2] == 'D') Weight += 8;
+                    else if (Input.Length + 1 == k.Key.Length) Weight += 4;
+                }
+
+                if (Input.ToUpper() == k.Key.ToUpper()) Weight += 100;
+
+                SearchWeight.Add(k.Key, Weight);
+            }
+            
+            List<KeyValuePair<string, int>> WeightedList = SearchWeight.ToList();
+            WeightedList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
+
+            string[] SortedResults = new string[WeightedList.Count];
+            for(int i = 0; i < WeightedList.Count; i++) {
+                SortedResults[i] = WeightedList[i].Key;
+            }
+            return SortedResults;
+        }
+
+        /// <summary>
+        /// Searches the list of static time zone data in <paramref name="LanguageConfiguration"/> to find timezones whose offset is closest to <paramref name="Offset"/>.
+        /// </summary>
+        /// <param name="Offset">A TimeSpan representing the difference between UTC and a given time zone.</param>
+        /// <param name="LanguageConfiguration">The configuration required to parse time zone data.</param>
+        /// <param name="ExactMatches">The number of matches in the results that have the exact <paramref name="Offset"/> provided.</param>
+        /// <returns>A <c>string[]</c> array of time zone abbreviations from <paramref name="LanguageConfiguration"/> which are most similar in offset to <paramref name="Offset"/>, sorted by relevance.</returns>
+
+        public static string[] SearchTimeZone(this TimeSpan Offset, LanguageConfiguration LanguageConfiguration, out int ExactMatches) {
+            Dictionary<string, int> SearchWeight = new();
+            ExactMatches = 0;
+
+            foreach (KeyValuePair<string, TimeZoneData> k in LanguageConfiguration.TimeZones) {
+                int Weight = (int) Math.Abs(k.Value.TimeOffset.Subtract(Offset).TotalMinutes);
+
+                if (Weight == 0) ExactMatches++;
+
+                SearchWeight.Add(k.Key, Weight);
+            }
+
+            List<KeyValuePair<string, int>> WeightedList = SearchWeight.ToList();
+            WeightedList.Sort((pair1, pair2) => {
+                if (pair1.Value.CompareTo(pair2.Value) != 0) return pair1.Value.CompareTo(pair2.Value);
+                else return pair1.Key.CompareTo(pair2.Key);
+                });
+
+            string[] SortedResults = new string[WeightedList.Count];
+            for (int i = 0; i < WeightedList.Count; i++) {
+                SortedResults[i] = WeightedList[i].Key;
+            }
+            return SortedResults;
+        }
+    }
+
+    /// <summary>
+    /// Represents a time zone for comparison as an offset to UTC.
+    /// </summary>
+
+    [Serializable]
+    public class TimeZoneData {
+
+        /// <summary>
+        /// The Full name of the time zone.
+        /// </summary>
+
+        public string Name { get; set; }
+
+        /// <summary>
+        /// The offset to UTC of the time zone, in hours.
+        /// </summary>
+
+        public float Offset { get; set; }
+
+        /// <summary>
+        /// The offset to UTC of the time zone, as a <c>TimeSpan</c>.
+        /// </summary>
+
+        public TimeSpan TimeOffset { get { return TimeSpan.FromHours(Offset); } }
+
+        /// <summary>
+        /// Stringifies the given timezone
+        /// </summary>
+        /// <returns>A string expression of the time zone, with critical information.</returns>
+
+        public override string ToString() {
+            return $"{Name} | {ToTimeZoneExpression(Offset)}";
+        }
+
+        /// <summary>
+        /// Gives a human-readable form of the <paramref name="Offset"/> relative to UTC.
+        /// </summary>
+        /// <param name="Offset">The number of hours offset from UTC.</param>
+        /// <returns>A string expressing a human-readable form of the offset relative to UTC.</returns>
+
+        public static string ToTimeZoneExpression(float Offset) {
+            return $"UTC{(Offset >= 0 ? "+" : "")}{(int)Offset}:{Math.Abs(Offset % 1 * 60):00}";
+        }
+
+        /// <summary>
+        /// Gives a human-readable form of the <paramref name="Offset"/> TimeSpan relative to UTC.
+        /// </summary>
+        /// <param name="Offset">The TimeSpan object representing the offset of hours relative to UTC.</param>
+        /// <returns>A string expressing a human-readable form of the offset relative to UTC.</returns>
+
+        public static string ToTimeZoneExpression(TimeSpan Offset) {
+            return ToTimeZoneExpression(Offset.Hours + Offset.Minutes / 60f);
+        }
+
+        /// <summary>
+        /// Attempts to Parse a TimeZone data from given information.
+        /// </summary>
+        /// <param name="Str">The string to parse into TimeZone data.</param>
+        /// <param name="LanguageConfiguration">The Configuration data containing static time zone definitions.</param>
+        /// <returns>A <c>TimeZoneData</c> object whose name is <paramref name="Str"/> and Offset is obtained by parsing <paramref name="Str"/>.</returns>
+
+        public static TimeZoneData Parse(string Str, LanguageConfiguration LanguageConfiguration) {
+            TimeZoneData Result = new();
+            
+            Result.Offset = 0;
+            Result.Name = Str;
+
+            int Sign = 1;
+
+            int SignPos = Str.IndexOf("+");
+            if (SignPos < 0) {
+                Sign = -1;
+                SignPos = Str.IndexOf("-");
+            }
+
+            string TZString = SignPos < 0 ? Str : Str[..SignPos];
+            if (!string.IsNullOrEmpty(TZString)) {
+                if (LanguageHelper.TryParseTimeZone(TZString.Trim(), LanguageConfiguration, out TimeSpan Offset)) {
+                    Result.Offset = Offset.Hours;
+                    Result.Offset += Offset.Minutes / 60f;
+                }
+            }
+
+            if (SignPos >= 0) {
+                string[] Mods = Str[(SignPos + 1)..].Split(":");
+                Result.Offset += int.Parse(Mods[0]) * Sign;
+                if (Mods.Length > 1) Result.Offset += int.Parse(Mods[1]) / 60f;
+            }
+
+            return Result;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Dexter.Abstractions;
+using Dexter.Configurations;
 using Dexter.Databases.Borkdays;
 using Dexter.Services;
 
@@ -27,6 +28,12 @@ namespace Dexter.Commands {
         /// </summary>
 
         public StartupService StartupService { get; set; }
+
+        /// <summary>
+        /// Contains information relative to organic language management and time zones.
+        /// </summary>
+
+        public LanguageConfiguration LanguageConfiguration { get; set; }
 
     }
 

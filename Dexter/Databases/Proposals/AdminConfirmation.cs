@@ -37,6 +37,24 @@ namespace Dexter.Databases.AdminConfirmations {
 
         public string CallbackParameters { get; set; }
 
+        /// <summary>
+        /// Specifies the class of the callback method to be called if the proposal is denied.
+        /// </summary>
+
+        public string DenyCallbackClass { get; set; }
+
+        /// <summary>
+        /// Specifies the name of the method to be called if the proposal is denied.
+        /// </summary>
+
+        public string DenyCallbackMethod { get; set; }
+
+        /// <summary>
+        /// Specifies the parameters field to call the DenyCallbackMethod with if the proposal is denied.
+        /// </summary>
+
+        public string DenyCallbackParameters { get; set; }
+
     }
 
 }

@@ -75,7 +75,13 @@ namespace Dexter.Commands {
                     }
 
                     {
-                        TimeZoneData TimeZone = TimeZoneData.Parse(Argument, LanguageConfiguration);
+                        if(!TimeZoneData.TryParse(Argument, LanguageConfiguration, out TimeZoneData TimeZone)) {
+                            await BuildEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Couldn't find time zone!")
+                                .WithDescription($"Time Zone {Argument} doesn't exist. Use `{BotConfiguration.Prefix}timezone search {Argument}` to look for similar ones.")
+                                .SendEmbed(Context.Channel);
+                            return;
+                        }
 
                         string[] Results = LanguageHelper.SearchTimeZone(TimeZone.TimeOffset, LanguageConfiguration, out int Exact);
                         string[] ResultsHumanized = new string[Math.Min(Math.Max(Exact, 10), Results.Length)];
@@ -99,9 +105,15 @@ namespace Dexter.Commands {
                     } 
                     
                     {
-                        TimeZoneData TimeZone = TimeZoneData.Parse(Argument, LanguageConfiguration);
+                        if (!TimeZoneData.TryParse(Argument, LanguageConfiguration, out TimeZoneData TimeZone)) {
+                            await BuildEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Couldn't find time zone!")
+                                .WithDescription($"Time Zone {Argument} doesn't exist. Use `{BotConfiguration.Prefix}timezone search {Argument}` to look for similar ones.")
+                                .SendEmbed(Context.Channel);
+                            return;
+                        }
 
-                        await Context.Channel.SendMessageAsync($"It is currently **{DateTimeOffset.Now.ToOffset(TimeZone.TimeOffset):dddd',' MMMM d',' hh:mm tt}** in {TimeZoneData.ToTimeZoneExpression(TimeZone.Offset)}.");
+                        await Context.Channel.SendMessageAsync($"It is currently **{DateTimeOffset.Now.ToOffset(TimeZone.TimeOffset):dddd',' MMMM d',' hh:mm tt}** in {TimeZoneData.ToTimeZoneExpression(TimeZone.Offset)} ({TimeZone.Name}).");
                     }
                     return;
                 case "get":
@@ -143,11 +155,12 @@ namespace Dexter.Commands {
                         return;
                     }
 
-                    if (!LanguageHelper.TryParseTime(Argument, CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset Time)) {
+                    if (!LanguageHelper.TryParseTime(Argument, CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset Time, out _)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Failed to parse date!")
-                            .WithDescription($"Make sure you follow the format `Month dd(, yyyy) hh:mm(:ss) (<am/pm>) (TZ)` or `{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} hh:mm(:ss) (<am/pm>) (TZ))`.")
+                            .WithDescription($"I was unable to parse the time: `{Argument}`\n Make sure it follows the correct format! For more info, check out `{BotConfiguration.Prefix}checktime [Your Date]`")
                             .SendEmbed(Context.Channel);
+                        return;
                     }
 
                     await BuildEmbed(EmojiEnum.Love)

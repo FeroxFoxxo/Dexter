@@ -64,15 +64,15 @@ namespace Dexter.Commands {
             switch (ActionType) {
                 case Enums.ActionType.Add:
                     string ReleaseArg = Params.Split(TimeEventSeparator)[0];
-                    if(!LanguageHelper.TryParseTime(ReleaseArg.Trim(), CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset ReleaseTime)) {
+                    if(!LanguageHelper.TryParseTime(ReleaseArg.Trim(), CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset ReleaseTime, out _)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable to parse time!")
-                            .WithDescription($"I was unable to parse the time: `{ReleaseArg}`\n Make sure it follows the correct format! For more info, check out `{BotConfiguration.Prefix}checktime`")
+                            .WithDescription($"I was unable to parse the time: `{ReleaseArg}`\n Make sure it follows the correct format! For more info, check out `{BotConfiguration.Prefix}checktime [Your Date]`")
                             .SendEmbed(Context.Channel);
                         return;
                     }
 
-                    if(ReleaseArg.Length == Params.Length) {
+                    if(ReleaseArg.Length + 1 >= Params.Length) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable to parse event!")
                             .WithDescription($"I found event parameters: `{Params}`. \nYou must separate time and description with a semicolon ({TimeEventSeparator})!")

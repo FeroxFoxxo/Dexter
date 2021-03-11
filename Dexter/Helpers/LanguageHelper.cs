@@ -384,16 +384,37 @@ namespace Dexter.Helpers {
         }
 
         /// <summary>
+        /// Indicates the ways to express a date that will be parsed successfully.
+        /// </summary>
+
+        public const string DEFAULT_DATE_FORMAT_INFO = "`Month dd((,) year)`  __*OR*__  `dd Month((,) year)`  __*OR*__  `(MM/dd(/year)`";
+
+        /// <summary>
+        /// Indicates the ways to express a time that will be parsed successfully.
+        /// </summary>
+
+        public const string DEFAULT_TIME_FORMAT_INFO = "`hh:mm(:ss(.ffff)) (<AM/PM>)`";
+
+        /// <summary>
+        /// Indicates the ways to express a TimeSpan Offset for a time zone that will be parsed successfully.
+        /// </summary>
+
+        public const string DEFAULT_OFFSET_FORMAT_INFO = "`TZA`  __*OR*__  `(<UTC/GMT/Z>)<+/->h(:mm)`";
+
+
+        /// <summary>
         /// Attempts to parse a string expressing a date, time, and offset. All elements except for the hour and minute are optional.
         /// </summary>
         /// <param name="Input">The stringified expression of the date to be parsed into <paramref name="Time"/>.</param>
         /// <param name="CultureInfo">The Cultural Context with which to parse the date given in <paramref name="Input"/>.</param>
         /// <param name="LanguageConfiguration">The Configuration related to parsing linguistic humanized information like time zone abbreviations.</param>
         /// <param name="Time">The parsed <c>DateTimeOffset</c> extracted from <paramref name="Input"/>.</param>
+        /// <param name="Error">The reason the parsing failed if it did.</param>
         /// <returns><see langword="true"/> if the parsing was successful; otherwise <see langword="false"/>.</returns>
 
-        public static bool TryParseTime(this string Input, CultureInfo CultureInfo, LanguageConfiguration LanguageConfiguration, out DateTimeOffset Time) {
+        public static bool TryParseTime(this string Input, CultureInfo CultureInfo, LanguageConfiguration LanguageConfiguration, out DateTimeOffset Time, out string Error) {
 
+            Error = "";
             Input = Input.Trim();
             Time = DateTimeOffset.Now;
 
@@ -408,64 +429,116 @@ namespace Dexter.Helpers {
             int Day = DateTime.Now.Day;
             int Hour = DateTime.Now.Hour;
             int Minute = DateTime.Now.Minute;
-            float Second = DateTime.Now.Second + DateTime.Now.Millisecond / 1000f;
+            float Second = 0;
 
             TimeSpan TimeZoneOffset = DateTimeOffset.Now.Offset;
 
-            string DateStrSegment = Regex.Match(Input, @"([A-Za-z]+\s)([0-9]{1,2})(,\s?[0-9]{2,4})?").Value;
-            string DateNumSegment = Regex.Match(Input, @"[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,4})?").Value;
-            string TimeSegment = Regex.Match(Input, @"[0-9]{1,2}:[0-9]{1,2}(:[0-9]{1,2}(.[0-9]+)?)?(\s(a|p)m)?", RegexOptions.IgnoreCase).Value;
+            string DateStrSegment = Regex.Match(Input, @"(^|\s)(([A-Za-z]+\s[0-9]{1,2})|([0-9]{1,2}\s[A-Za-z]+))((,|\s)\s?[0-9]{2,5}(\s|$))?").Value.Trim();
+            string DateNumSegment = Regex.Match(Input, @"[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,5})?").Value;
+            string TimeSegment = Regex.Match(Input, @"[0-9]{1,2}:[0-9]{1,2}(:[0-9]{1,2}(.[0-9]+)?)?(\s?(a|p)m)?", RegexOptions.IgnoreCase).Value;
             string TimeZoneSegment = Regex.Match(Input, @"(((UTC|GMT|Z)?[+-][0-9]{1,2}(:[0-9]{2})?)|([A-Z][A-Za-z0-9]*))$").Value;
 
             if(!string.IsNullOrEmpty(DateStrSegment)) {
-                string MMM = DateStrSegment.Split(" ")[0];
-                Month = ParseMonth(MMM);
+                DateStrSegment = DateStrSegment.Replace(", ", " ").Replace(",", " ");
+
+                string[] MDY = DateStrSegment.Split(" ");
+                string dd;
+
+                Month = ParseMonth(MDY[0]);
                 if(Month < 0) {
+                    Month = ParseMonth(MDY[1]);
+                    if (Month < 0) {
+                        Error = $"Failed to parse \"{MDY[0]}\" OR \"{MDY[1]}\" into a valid Month.";
+                        return false;
+                    }
+                    dd = MDY[0];
+                } else {
+                    dd = MDY[1];
+                }
+
+                if (!int.TryParse(dd, out Day)) {
+                    Error = $"Failed to parse {dd} into a valid Day of the Month.";
                     return false;
                 }
 
-                string[] dy = DateStrSegment.Split(",");
-                string dd = dy[0][MMM.Length..];
-                if (!int.TryParse(dd, out Day)) return false;
-                if (Day < 0 || Day > 31) return false;
+                if (Day < 0 || Day > 31) { return false; }
 
-                if(dy.Length > 1) {
-                    if (!int.TryParse(dy[1], out Year)) return false;
-                    if (Year < 1970) Year += 2000;
-                    if (Year < 1970 || Year > 3000) return false;
+                if(MDY.Length > 2) {
+                    if (!int.TryParse(MDY[2], out Year)) {
+                        Error = $"Failed to parse {MDY[2]} into a valid year!";
+                        return false;
+                    }
+                    if (Year < 1970) Year += 2000; //YY parsing
+                    if (Year > 10000) Year -= 10000; //Human Era Parsing
+                    if (Year < 1970 || Year > 3000) {
+                        Error = $"Year {Year} is outside the range of valid accepted years (must be between 1970 and 3000)";
+                        return false;
+                    }
                 }
             } else if (!string.IsNullOrEmpty(DateNumSegment)) {
                 if(DateNumSegment.Split("/").Length < 3) {
                     DateNumSegment += $"/{Year}";
                 }
-                DateTime Subparse = DateTime.Parse(DateNumSegment, CultureInfo);
+
+                DateTime Subparse;
+                try {
+                    Subparse = DateTime.Parse(DateNumSegment, CultureInfo);
+                } catch (FormatException e) {
+                    Error = e.Message;
+                    return false;
+                } 
+                
                 Day = Subparse.Day;
                 Month = Subparse.Month;
                 Year = Subparse.Year;
             }
 
-            if (string.IsNullOrEmpty(TimeSegment)) return false;
+            if (string.IsNullOrEmpty(TimeSegment)) {
+                Error = "A time must be provided! Time segments are formatted as: `hh:mm(:ss) (<am/pm>))`";
+                return false; 
+            }
 
-            string[] hmsf = TimeSegment.Split(" ")[0].Split(":");
+            TimeMeridianDiscriminator TMD = TimeMeridianDiscriminator.H24;
+            if(TimeSegment[^1] is 'm' or 'M') {
+                TMD = TimeSegment[^2] is 'p' or 'P' ? TimeMeridianDiscriminator.PM : TimeMeridianDiscriminator.AM;
+                TimeSegment = TimeSegment[..^2];
+            }
+
+            string[] hmsf = TimeSegment.Trim().Split(":");
             Hour = int.Parse(hmsf[0]);
             Minute = int.Parse(hmsf[1]);
 
             if (hmsf.Length > 2) Second = float.Parse(hmsf[2]);
 
-            if (TimeSegment.ToLower().EndsWith("am") && Hour == 12) Hour = 0;
-            if (TimeSegment.ToLower().EndsWith("pm") && Hour != 12) Hour += 12;
+            if (TMD == TimeMeridianDiscriminator.AM && Hour == 12) Hour = 0;
+            else if (TMD == TimeMeridianDiscriminator.PM && Hour != 12) Hour += 12;
 
-            if(!string.IsNullOrEmpty(TimeZoneSegment)) {
+            TimeZoneData TimeZone = null;
+
+            if (!string.IsNullOrEmpty(TimeZoneSegment)) {
                 if(TimeZoneSegment.Contains("+") || TimeZoneSegment.Contains("-") || LanguageConfiguration.TimeZones.ContainsKey(TimeZoneSegment)) {
-                    TimeZoneData TimeZone = TimeZoneData.Parse(TimeZoneSegment, LanguageConfiguration);
-
-                    TimeZoneOffset = TimeZone.TimeOffset;
+                    if(TimeZoneData.TryParse(TimeZoneSegment, LanguageConfiguration, out TimeZone)) {
+                        TimeZoneOffset = TimeZone.TimeOffset;
+                    }
                 }
             }
 
-            Time = new DateTimeOffset(new DateTime(Year, Month, Day, Hour, Minute, (int)Second, (int)(Second % 1 * 1000)), TimeZoneOffset);
+            try {
+                Time = new DateTimeOffset(new DateTime(Year, Month, Day, Hour, Minute, (int)Second, (int)(Second % 1 * 1000)), TimeZoneOffset);
+            } catch (ArgumentOutOfRangeException e) {
+                Error = $"Impossible to parse to a valid time! Are you sure the month you chose has enough days?\n" +
+                    $"Selected numbers are Year: {Year}, Month: {Month}, Day: {Day}, Hour: {Hour}, Minute: {Minute}, Second: {Second}, Time Zone: {TimeZone?.ToString() ?? TimeZoneData.ToTimeZoneExpression(TimeZoneOffset)}.\n[{e.Message}]";
+                return false;
+            }
+
 
             return true;
+        }
+
+        private enum TimeMeridianDiscriminator {
+            H24,
+            AM,
+            PM
         }
 
         /// <summary>
@@ -494,16 +567,16 @@ namespace Dexter.Helpers {
         /// </summary>
         /// <param name="Input">The abbreviation of the time zone as it appears in <paramref name="LanguageConfiguration"/>.</param>
         /// <param name="LanguageConfiguration">The Config file containing data on Time Zone names and their respective offsets.</param>
-        /// <param name="TimeSpan">The output value of the parsed <paramref name="Input"/>, or <c>TimeSpan.Zero</c> if it can't be parsed.</param>
+        /// <param name="TimeZone">The output value of the parsed <paramref name="Input"/>, or <see langword="null"/> if it can't be parsed.</param>
         /// <returns><see langword="true"/> if the parsing was successful; otherwise <see langword="false"/>.</returns>
 
-        public static bool TryParseTimeZone(this string Input, LanguageConfiguration LanguageConfiguration, out TimeSpan TimeSpan) {
+        public static bool TryParseTimeZone(this string Input, LanguageConfiguration LanguageConfiguration, out TimeZoneData TimeZone) {
             if(LanguageConfiguration.TimeZones.ContainsKey(Input)) {
-                TimeSpan = LanguageConfiguration.TimeZones[Input].TimeOffset;
+                TimeZone = LanguageConfiguration.TimeZones[Input];
                 return true;
             }
 
-            TimeSpan = TimeSpan.Zero;
+            TimeZone = null;
             return false;
         }
 
@@ -645,13 +718,16 @@ namespace Dexter.Helpers {
         /// </summary>
         /// <param name="Str">The string to parse into TimeZone data.</param>
         /// <param name="LanguageConfiguration">The Configuration data containing static time zone definitions.</param>
+        /// <param name="Result">A <c>TimeZoneData</c> object whose name is <paramref name="Str"/> or the name attached to the abbreviation and Offset is obtained by parsing <paramref name="Str"/></param>
         /// <returns>A <c>TimeZoneData</c> object whose name is <paramref name="Str"/> and Offset is obtained by parsing <paramref name="Str"/>.</returns>
 
-        public static TimeZoneData Parse(string Str, LanguageConfiguration LanguageConfiguration) {
-            TimeZoneData Result = new();
-            
-            Result.Offset = 0;
-            Result.Name = Str;
+        public static bool TryParse(string Str, LanguageConfiguration LanguageConfiguration, out TimeZoneData Result) {
+
+            bool Success = false;
+            Result = new TimeZoneData() {
+                Offset = 0,
+                Name = Str
+            };
 
             int Sign = 1;
 
@@ -663,19 +739,24 @@ namespace Dexter.Helpers {
 
             string TZString = SignPos < 0 ? Str : Str[..SignPos];
             if (!string.IsNullOrEmpty(TZString)) {
-                if (LanguageHelper.TryParseTimeZone(TZString.Trim(), LanguageConfiguration, out TimeSpan Offset)) {
-                    Result.Offset = Offset.Hours;
-                    Result.Offset += Offset.Minutes / 60f;
+                if (LanguageHelper.TryParseTimeZone(TZString.Trim(), LanguageConfiguration, out TimeZoneData TimeZone)) {
+                    Result.Name = TimeZone.Name;
+                    Result.Offset = TimeZone.Offset;
+                    Success = true;
                 }
+            } else {
+                Result.Name = "UTC";
             }
 
             if (SignPos >= 0) {
                 string[] Mods = Str[(SignPos + 1)..].Split(":");
+                Result.Name += Str[SignPos] + Str[(SignPos + 1)..];
                 Result.Offset += int.Parse(Mods[0]) * Sign;
                 if (Mods.Length > 1) Result.Offset += int.Parse(Mods[1]) / 60f;
+                Success = true;
             }
 
-            return Result;
+            return Success;
         }
     }
 }

@@ -83,13 +83,13 @@ namespace Dexter.Commands {
                     .WithTitle($"Event #{ID} Successfully Programmed!")
                     .WithDescription($"The official server event has been successfully added to the database and will be displayed in <#{CommunityConfiguration.OfficialEventsChannel}> when its release time comes. \n" +
                         $"You can always check the information of this event with the command `{BotConfiguration.Prefix}events get id {ID}`")
-                    .AddField("Release Time: ", $"{Release:ddd', 'MMM d 'at' hh:mm 'UTC'z} ({Release.Humanize()})")
+                    .AddField("Release Time: ", $"{Release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z} ({Release.Humanize()})")
                     .SendEmbed(Context.Channel);
             } else {
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"Event #{ID} Successfully Suggested!")
                     .WithDescription($"Your suggestion went through! You will be informed when it is approved or declined. You can always check the status with `{BotConfiguration.Prefix}event get id {ID}`")
-                    .AddField("Release Time: ", $"{Release:ddd', 'MMM d 'at' hh:mm 'UTC'z} ({Release.Humanize()})")
+                    .AddField("Release Time: ", $"{Release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z} ({Release.Humanize()})")
                     .WithCurrentTimestamp()
                     .SendEmbed(Context.Channel);
             }
@@ -144,14 +144,14 @@ namespace Dexter.Commands {
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Event approved for release!")
-                .WithDescription($"Event #{Event.ID} will be released at {Release:ddd', 'MMM d 'at' hh:mm 'UTC'z} ({Release.Humanize()}).")
+                .WithDescription($"Event #{Event.ID} will be released at {Release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z} ({Release.Humanize()}).")
                 .WithCurrentTimestamp()
                 .SendDMAttachedEmbed(Context.Channel, BotConfiguration, Proposer, 
                     BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Your Event has been Approved!")
                     .WithDescription(Event.Description)
                     .AddField(Reason.Length > 0, "Reason: ", Reason)
-                    .AddField("Release Time:", $"{Release:ddd', 'MMM d 'at' hh:mm 'UTC'z}"));
+                    .AddField("Release Time:", $"{Release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z}"));
 
             CommunityEventsDB.SaveChanges();
         }

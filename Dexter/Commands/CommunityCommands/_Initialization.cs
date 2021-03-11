@@ -20,6 +20,12 @@ namespace Dexter.Commands {
         public CommunityConfiguration CommunityConfiguration { get; set; }
 
         /// <summary>
+        /// Includes important data used in parsing certain humanized terms like dates and times.
+        /// </summary>
+
+        public LanguageConfiguration LanguageConfiguration { get; set; }
+
+        /// <summary>
         /// Loads the database containing events for the <c>~event</c> command.
         /// </summary>
 

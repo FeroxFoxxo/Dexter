@@ -15,19 +15,20 @@ namespace Dexter.Commands {
         /// Gives general information about time zones, or compares them, or searches for one, depending on <paramref name="Action"/>.
         /// </summary>
         /// <param name="Action">The action to take respective to other arguments. Leave empty for general information.</param>
-        /// <param name="FirstArg"></param>
-        /// <param name="RestArgs"></param>
-        /// <returns></returns>
+        /// <param name="Argument">Everything that comes after the <paramref name="Action"/> when the command is run, generally a date or time zone.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         [Command("timezone")]
         [Summary("Gives information about time zones or searches for a specific one.")]
         [ExtendedSummary("Gives information about time zones or searches for a specific one.\n" +
             "`timezone SEARCH [TERM]` - Looks for similar timezone names and gives information about each one.\n" +
             "`timezone SPAN [TIMEZONE]` - Looks for time zones with similar or exactly the same offsets as given.\n" +
-            "`timezone GET [ABBREVIATION]` - Gets information about one specific time zone")]
+            "`timezone GET [ABBREVIATION]` - Gets information about one specific time zone.\n" +
+            "`timezone WHEN (DATE) [TIME] (ZONE)` - Gets the time difference between now and the specified date & time in the given time zone.\n" +
+            "`timezone NOW [TIMEZONE]` - Gets the current time in a given time zone.")]
         [BotChannel]
 
-        public async Task TimezoneCommand(string Action = "", string FirstArg = "", [Remainder] string RestArgs = "") {
+        public async Task TimezoneCommand(string Action = "", [Remainder] string Argument = "") {
             
             if(string.IsNullOrEmpty(Action) || Action.ToLower() == "info") {
                 await BuildEmbed(EmojiEnum.Sign)
@@ -43,7 +44,7 @@ namespace Dexter.Commands {
 
             switch(Action.ToLower()) {
                 case "search":
-                    if(string.IsNullOrEmpty(FirstArg)) {
+                    if(string.IsNullOrEmpty(Argument)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid number of arguments!")
                             .WithDescription("You must provide a Time Zone Abbreviation to search for!")
@@ -52,7 +53,7 @@ namespace Dexter.Commands {
                     } 
 
                     {
-                        string[] Results = LanguageHelper.SearchTimeZone(FirstArg, LanguageConfiguration);
+                        string[] Results = LanguageHelper.SearchTimeZone(Argument, LanguageConfiguration);
                         string[] ResultsHumanized = new string[Math.Min(10, Results.Length)];
 
                         for (int i = 0; i < ResultsHumanized.Length; i++)
@@ -65,16 +66,16 @@ namespace Dexter.Commands {
                     }
                     return;
                 case "span":
-                    if(string.IsNullOrEmpty(FirstArg)) {
+                    if(string.IsNullOrEmpty(Argument)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid number of arguments!")
                             .WithDescription("You must provide a Time Zone Expression to search for!")
                             .SendEmbed(Context.Channel);
+                        return;
                     }
 
                     {
-                        string TimeZoneStr = $"{FirstArg} {RestArgs ?? ""}";
-                        TimeZoneData TimeZone = TimeZoneData.Parse(TimeZoneStr, LanguageConfiguration);
+                        TimeZoneData TimeZone = TimeZoneData.Parse(Argument, LanguageConfiguration);
 
                         string[] Results = LanguageHelper.SearchTimeZone(TimeZone.TimeOffset, LanguageConfiguration, out int Exact);
                         string[] ResultsHumanized = new string[Math.Min(Math.Max(Exact, 10), Results.Length)];
@@ -88,8 +89,23 @@ namespace Dexter.Commands {
                             .SendEmbed(Context.Channel);
                     }
                     return;
+                case "now":
+                    if (string.IsNullOrEmpty(Argument)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Invalid number of arguments!")
+                            .WithDescription("You must provide a Time Zone Expression to search for!")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    } 
+                    
+                    {
+                        TimeZoneData TimeZone = TimeZoneData.Parse(Argument, LanguageConfiguration);
+
+                        await Context.Channel.SendMessageAsync($"It is currently **{DateTimeOffset.Now.ToOffset(TimeZone.TimeOffset):dddd',' MMMM d',' hh:mm tt}** in {TimeZoneData.ToTimeZoneExpression(TimeZone.Offset)}.");
+                    }
+                    return;
                 case "get":
-                    if (string.IsNullOrEmpty(FirstArg)) {
+                    if (string.IsNullOrEmpty(Argument)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Invalid number of arguments!")
                                 .WithDescription("You must provide a Time Zone Abbreviation to search for!")
@@ -97,8 +113,8 @@ namespace Dexter.Commands {
                         return;
                     }
                     
-                    if(!LanguageConfiguration.TimeZones.ContainsKey(FirstArg)) {
-                        string[] Results = LanguageHelper.SearchTimeZone(FirstArg, LanguageConfiguration);
+                    if(!LanguageConfiguration.TimeZones.ContainsKey(Argument)) {
+                        string[] Results = LanguageHelper.SearchTimeZone(Argument, LanguageConfiguration);
                         string[] ResultsHumanized = new string[Math.Min(3, Results.Length)];
 
                         for (int i = 0; i < ResultsHumanized.Length; i++)
@@ -113,13 +129,13 @@ namespace Dexter.Commands {
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Found time zone!")
-                        .WithDescription($"{FirstArg}: {LanguageConfiguration.TimeZones[FirstArg]}")
+                        .WithDescription($"{Argument}: {LanguageConfiguration.TimeZones[Argument]}")
                         .SendEmbed(Context.Channel);
                     return;
                 case "when":
                 case "until":
                 case "till":
-                    if (string.IsNullOrEmpty(FirstArg)) {
+                    if (string.IsNullOrEmpty(Argument)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Invalid number of arguments!")
                                 .WithDescription("You must provide a Date and Time to compare to!")
@@ -127,9 +143,7 @@ namespace Dexter.Commands {
                         return;
                     }
 
-                    string DateStr = $"{FirstArg} {RestArgs ?? ""}";
-
-                    if(!LanguageHelper.TryParseTime(DateStr, CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset Time)) {
+                    if (!LanguageHelper.TryParseTime(Argument, CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset Time)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Failed to parse date!")
                             .WithDescription($"Make sure you follow the format `Month dd(, yyyy) hh:mm(:ss) (<am/pm>) (TZ)` or `{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} hh:mm(:ss) (<am/pm>) (TZ))`.")
@@ -141,6 +155,12 @@ namespace Dexter.Commands {
                         .WithDescription($"{Time:MMM dd, yyyy hh:mm tt 'UTC'zzz} {(Time.CompareTo(DateTimeOffset.Now) < 0 ? "happened" : "will happen")} {Time.Humanize()}.")
                         .SendEmbed(Context.Channel);
 
+                    return;
+                default:
+                    await BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Unrecognized action!")
+                        .WithDescription($"Unable to parse action \"`{Action}`\"! \nFor more information on accepted actions, check out the `help timezone` command.")
+                        .SendEmbed(Context.Channel);
                     return;
             }
         }

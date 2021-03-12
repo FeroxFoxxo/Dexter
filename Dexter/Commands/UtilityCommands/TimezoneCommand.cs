@@ -25,6 +25,7 @@ namespace Dexter.Commands {
             "`timezone SPAN [TIMEZONE]` - Looks for time zones with similar or exactly the same offsets as given.\n" +
             "`timezone GET [ABBREVIATION]` - Gets information about one specific time zone.\n" +
             "`timezone WHEN (DATE) [TIME] (ZONE)` - Gets the time difference between now and the specified date & time in the given time zone.\n" +
+            "`timezone DIFF [ZONE1] [ZONE2]` - Compares two time zones" +
             "`timezone NOW [TIMEZONE]` - Gets the current time in a given time zone.")]
         [BotChannel]
 
@@ -168,6 +169,51 @@ namespace Dexter.Commands {
                         .WithDescription($"{Time:MMM dd, yyyy hh:mm tt 'UTC'zzz} {(Time.CompareTo(DateTimeOffset.Now) < 0 ? "happened" : "will happen")} {Time.Humanize()}.")
                         .SendEmbed(Context.Channel);
 
+                    return;
+                case "diff":
+                case "difference":
+                case "comp":
+                case "compare":
+                    if (string.IsNullOrEmpty(Argument)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Invalid number of arguments!")
+                                .WithDescription("You must provide two time zones to compare!")
+                                .SendEmbed(Context.Channel);
+                        return;
+                    } 
+                    
+                    {
+                        string[] Args = Argument.Split(" ");
+                        if(Args.Length < 2) {
+                            await BuildEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Invalid number of arguments!")
+                                .WithDescription("You haven't provided enough time zones to compare! You must provide two.")
+                                .SendEmbed(Context.Channel);
+                            return;
+                        }
+
+                        TimeZoneData[] TimeZones = new TimeZoneData[2];
+                        
+                        for(int i = 0; i < TimeZones.Length; i++) {
+                            if (!TimeZoneData.TryParse(Args[i], LanguageConfiguration, out TimeZones[i])) {
+                                await BuildEmbed(EmojiEnum.Annoyed)
+                                    .WithTitle("Couldn't find time zone!")
+                                    .WithDescription($"Time Zone {Args[i]} doesn't exist. Use `{BotConfiguration.Prefix}timezone search {Args[i]}` to look for similar ones.")
+                                    .SendEmbed(Context.Channel);
+                                return;
+                            }
+                        }
+
+                        float Diff = TimeZones[0].Offset - TimeZones[1].Offset;
+
+                        string Message;
+                        if (Diff != 0) Message = $"{Args[0]} ({TimeZones[0].Name}) is " +
+                                 $"**{LanguageHelper.HumanizeSexagesimalUnits(Math.Abs(Diff), new string[] { "hour", "hours" }, new string[] { "minute", "minutes" }, out _)} " +
+                                 $"{(Diff < 0 ? "behind" : "ahead of")}** {Args[1]} ({TimeZones[1].Name}).";
+                        else Message = $"{Args[0]} ({TimeZones[0].Name}) is **in sync with** {Args[1]} ({TimeZones[1].Name}).";
+
+                        await Context.Channel.SendMessageAsync(Message);
+                    }
                     return;
                 default:
                     await BuildEmbed(EmojiEnum.Annoyed)

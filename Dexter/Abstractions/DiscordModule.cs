@@ -79,11 +79,14 @@ namespace Dexter.Abstractions {
                 Dictionary<string, string> CallbackParameters, ulong Author, string Proposal, Action<Dictionary<string, string>> DenyCallbackMethod = null, Dictionary<string, string> DenyCallbackParameters = null) {
 
             string JSON = JsonConvert.SerializeObject(CallbackParameters);
+
             string DenyJSON = "";
-            if(DenyCallbackParameters != null) DenyJSON = JsonConvert.SerializeObject(DenyCallbackParameters);
+            if(DenyCallbackParameters != null)
+                DenyJSON = JsonConvert.SerializeObject(DenyCallbackParameters);
 
             return await ProposalService.SendAdminConfirmation(JSON, CallbackMethod.Target.GetType().Name,
-                CallbackMethod.Method.Name, Author, Proposal, DenyJSON, DenyCallbackMethod.Target.GetType().Name, DenyCallbackMethod.Method.Name);
+                CallbackMethod.Method.Name, Author, Proposal, DenyJSON, DenyCallbackMethod != null ? DenyCallbackMethod.Target.GetType().Name : null,
+                DenyCallbackMethod != null ? DenyCallbackMethod.Method.Name : null);
         }
 
         /// <summary>

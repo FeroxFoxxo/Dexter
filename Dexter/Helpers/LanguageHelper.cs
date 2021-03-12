@@ -321,6 +321,45 @@ namespace Dexter.Helpers {
         }
 
         /// <summary>
+        /// Creates a human-readable expression of a hexagesimal-base system (such as hours and minutes).
+        /// </summary>
+        /// <param name="Value">The decimal value corresponding to the <paramref name="LargeUnit"/>.</param>
+        /// <param name="LargeUnit">The names of the larger unit, [0] is singular and [1] is plural.</param>
+        /// <param name="SmallUnit">The names of the smaller unit, [0] is singular and [1] is plural.</param>
+        /// <param name="Remainder">The decimal value that was disregarded after comparing the units.</param>
+        /// <returns>A humanized expression of <paramref name="Value"/> <paramref name="LargeUnit"/>.</returns>
+
+        public static string HumanizeSexagesimalUnits(float Value, string[] LargeUnit, string[] SmallUnit, out float Remainder) {
+            return HumanizeOffbaseUnits(60, Value, LargeUnit, SmallUnit, out Remainder);
+        }
+
+        /// <summary>
+        /// Creates a human-readable expression of a value in an arbitrary base with multiple Units. (Like feet and inches or degrees and arcminutes)
+        /// </summary>
+        /// <param name="Base">The base of the counting system used to differentiate <paramref name="LargeUnit"/> and <paramref name="SmallUnit"/>.</param>
+        /// <param name="Value">The decimal value corresponding to the <paramref name="LargeUnit"/>.</param>
+        /// <param name="LargeUnit">The names of the larger unit, [0] is singular and [1] is plural.</param>
+        /// <param name="SmallUnit">The names of the smaller unit, [0] is singular and [1] is plural.</param>
+        /// <param name="Remainder">The decimal value that was disregarded after comparing the units.</param>
+        /// <returns>A humanized expression of <paramref name="Value"/> <paramref name="LargeUnit"/>.</returns>
+
+        public static string HumanizeOffbaseUnits(int Base, float Value, string[] LargeUnit, string[] SmallUnit, out float Remainder) {
+            List<string> Result = new List<string>();
+
+            int LargeValue = (int)Value;
+            int SmallValue = (int)Math.Round(Value % 1 * Base);
+
+            Remainder = Value - LargeValue - (float) SmallValue / Base;
+
+            if (LargeValue != 0) Result.Add($"{LargeValue} {LargeUnit[LargeValue == 1 ? 0 : 1]}");
+            if (SmallValue != 0) Result.Add($"{SmallValue} {SmallUnit[SmallValue == 1 ? 0 : 1]}");
+
+            if (Result.Count == 0) return $"0 {LargeUnit[1]}";
+
+            return string.Join(" and ", Result);
+        }
+
+        /// <summary>
         /// Extracts substrings that fit a given url schema from an <paramref name="Input"/> string.
         /// </summary>
         /// <remarks>All potential links in the string must be encapsulated in parentheses or spaces.</remarks>

@@ -53,6 +53,19 @@ namespace Dexter.Commands {
             CommunityEvent Event;
             string EventParam;
 
+            IGuildUser User = Context.User as IGuildUser;
+            if(Context.Channel is IDMChannel) {
+                User = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id);
+
+                if(User == null) {
+                    await BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Couldn't find you in the server!")
+                        .WithDescription($"Are you sure you are in USF? If this continues to fail, consider running this command in <#{BotConfiguration.BotChannels[0]}> instead.")
+                        .SendEmbed(Context.Channel);
+                    return;
+                }
+            }
+
             if (!Enum.TryParse(Action.ToLower().Pascalize(), out Enums.ActionType ActionType)) {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Action Parse Error!")
@@ -82,13 +95,13 @@ namespace Dexter.Commands {
 
                     string Description = Params[(ReleaseArg.Length + TimeEventSeparator.Length)..].Trim();
 
-                    await AddEvent(EventType.UserHosted, Context.User as IGuildUser, ReleaseTime, Description);
+                    await AddEvent(EventType.UserHosted, User, ReleaseTime, Description);
                     break;
                 case Enums.ActionType.Remove: 
                     Event = await ValidateCommunityEventByID(Params);
                     if (Event == null) return;
 
-                    if (!(Context.User.Id == Event.ProposerID || (Context.User as IUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) == PermissionLevel.Administrator)) {
+                    if (!(User.Id == Event.ProposerID || User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) == PermissionLevel.Administrator)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Missing permissions!")
                             .WithDescription("Only administrators or the proposer of the event can remove the event.")
@@ -102,7 +115,7 @@ namespace Dexter.Commands {
                     Event = await ValidateCommunityEventByID(EventParam);
                     if (Event == null) return;
 
-                    if (!(Context.User.Id == Event.ProposerID || (Context.User as IUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) == PermissionLevel.Administrator)) {
+                    if (!(User.Id == Event.ProposerID || User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) == PermissionLevel.Administrator)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Missing permissions!")
                             .WithDescription("Only administrators or the proposer of the event can edit the event.")
@@ -116,7 +129,7 @@ namespace Dexter.Commands {
                     Event = await ValidateCommunityEventByID(EventParam);
                     if (Event == null) return;
 
-                    if ((Context.User as IUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) < PermissionLevel.Moderator) {
+                    if (User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) < PermissionLevel.Moderator) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Oop! Don't go there~")
                             .WithDescription("Only staff can modify the status of an event suggestion!")

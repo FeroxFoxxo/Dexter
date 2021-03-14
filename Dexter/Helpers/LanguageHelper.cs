@@ -463,7 +463,7 @@ namespace Dexter.Helpers {
                     return true;
             }
 
-            string DateStrSegment = Regex.Match(Input, @"(^|\s)(([A-Za-z]+\s[0-9]{1,2})|([0-9]{1,2}\s[A-Za-z]+))((,|\s)\s?[0-9]{2,5}(\s|$))?").Value.Trim();
+            string DateStrSegment = Regex.Match(Input, @"(^|\s)(([A-Za-z]{3,}\s[0-9]{1,2})|([0-9]{1,2}\s[A-Za-z]{3,}))((,|\s)\s?[0-9]{2,5}(\s|$))?").Value.Trim();
             string DateNumSegment = Regex.Match(Input, @"[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,5})?").Value;
             string TimeSimplifiedSegment = Regex.Match(Input, @"(^|\s)[0-9]{1,2}\s?[pa]m(\s|$)", RegexOptions.IgnoreCase).Value;
             string TimeSegment = Regex.Match(Input, @"[0-9]{1,2}:[0-9]{1,2}(:[0-9]{1,2}(.[0-9]+)?)?(\s?(a|p)m)?", RegexOptions.IgnoreCase).Value;

@@ -432,7 +432,7 @@ namespace Dexter.Helpers {
         /// Indicates the ways to express a time that will be parsed successfully.
         /// </summary>
 
-        public const string DEFAULT_TIME_FORMAT_INFO = "`hh:mm(:ss(.ffff)) (<AM/PM>)`";
+        public const string DEFAULT_TIME_FORMAT_INFO = "`hh:mm(:ss(.ffff)) (<AM/PM>)`  __*OR*__  `hh <AM/PM>`";
 
         /// <summary>
         /// Indicates the ways to express a TimeSpan Offset for a time zone that will be parsed successfully.
@@ -463,21 +463,33 @@ namespace Dexter.Helpers {
                     return true;
             }
 
-            int Year = DateTime.Now.Year;
-            int Month = DateTime.Now.Month;
-            int Day = DateTime.Now.Day;
-            int Hour = DateTime.Now.Hour;
-            int Minute = DateTime.Now.Minute;
-            float Second = 0;
-
-            TimeSpan TimeZoneOffset = DateTimeOffset.Now.Offset;
-
-            string DateStrSegment = Regex.Match(Input, @"(^|\s)(([A-Za-z]+\s[0-9]{1,2})|([0-9]{1,2}\s[A-Za-z]+))((,|\s)\s?[0-9]{2,5}(\s|$))?").Value.Trim();
+            string DateStrSegment = Regex.Match(Input, @"(^|\s)(([A-Za-z]{3,}\s[0-9]{1,2})|([0-9]{1,2}\s[A-Za-z]{3,}))((,|\s)\s?[0-9]{2,5}(\s|$))?").Value.Trim();
             string DateNumSegment = Regex.Match(Input, @"[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,5})?").Value;
+            string TimeSimplifiedSegment = Regex.Match(Input, @"(^|\s)[0-9]{1,2}\s?[pa]m(\s|$)", RegexOptions.IgnoreCase).Value;
             string TimeSegment = Regex.Match(Input, @"[0-9]{1,2}:[0-9]{1,2}(:[0-9]{1,2}(.[0-9]+)?)?(\s?(a|p)m)?", RegexOptions.IgnoreCase).Value;
             string TimeZoneSegment = Regex.Match(Input, @"(((UTC|GMT|Z)?[+-][0-9]{1,2}(:[0-9]{2})?)|([A-Z][A-Za-z0-9]*))$").Value;
 
-            if(!string.IsNullOrEmpty(DateStrSegment)) {
+            TimeZoneData TimeZone = null;
+            TimeSpan TimeZoneOffset = DateTimeOffset.Now.Offset;
+
+            if (!string.IsNullOrEmpty(TimeZoneSegment)) {
+                if (TimeZoneSegment.Contains("+") || TimeZoneSegment.Contains("-") || LanguageConfiguration.TimeZones.ContainsKey(TimeZoneSegment)) {
+                    if (TimeZoneData.TryParse(TimeZoneSegment, LanguageConfiguration, out TimeZone)) {
+                        TimeZoneOffset = TimeZone.TimeOffset;
+                    }
+                }
+            }
+
+            DateTimeOffset OffsetNow = DateTimeOffset.Now.ToOffset(TimeZoneOffset);
+
+            int Year = OffsetNow.Year;
+            int Month = OffsetNow.Month;
+            int Day = OffsetNow.Day;
+            int Hour = OffsetNow.Hour;
+            int Minute = OffsetNow.Minute;
+            float Second = 0;
+
+            if (!string.IsNullOrEmpty(DateStrSegment)) {
                 DateStrSegment = DateStrSegment.Replace(", ", " ").Replace(",", " ");
 
                 string[] MDY = DateStrSegment.Split(" ");
@@ -532,35 +544,32 @@ namespace Dexter.Helpers {
                 Year = Subparse.Year;
             }
 
-            if (string.IsNullOrEmpty(TimeSegment)) {
-                Error = "A time must be provided! Time segments are formatted as: `hh:mm(:ss) (<am/pm>))`";
-                return false; 
-            }
-
             TimeMeridianDiscriminator TMD = TimeMeridianDiscriminator.H24;
-            if(TimeSegment[^1] is 'm' or 'M') {
-                TMD = TimeSegment[^2] is 'p' or 'P' ? TimeMeridianDiscriminator.PM : TimeMeridianDiscriminator.AM;
-                TimeSegment = TimeSegment[..^2];
+
+            if (!string.IsNullOrEmpty(TimeSimplifiedSegment)) {
+                TMD = TimeSimplifiedSegment.Trim()[^2] is 'p' or 'P' ? TimeMeridianDiscriminator.PM : TimeMeridianDiscriminator.AM;
+                Hour = int.Parse(TimeSimplifiedSegment.Trim()[..^2]);
+                Minute = 0;
+            } else {
+                if (string.IsNullOrEmpty(TimeSegment)) {
+                    Error = "A time must be provided! Time segments are formatted as: `hh:mm(:ss) (<am/pm>))`";
+                    return false;
+                }
+
+                if (TimeSegment[^1] is 'm' or 'M') {
+                    TMD = TimeSegment[^2] is 'p' or 'P' ? TimeMeridianDiscriminator.PM : TimeMeridianDiscriminator.AM;
+                    TimeSegment = TimeSegment[..^2];
+                }
+
+                string[] hmsf = TimeSegment.Trim().Split(":");
+                Hour = int.Parse(hmsf[0]);
+                Minute = int.Parse(hmsf[1]);
+
+                if (hmsf.Length > 2) Second = float.Parse(hmsf[2]);
             }
-
-            string[] hmsf = TimeSegment.Trim().Split(":");
-            Hour = int.Parse(hmsf[0]);
-            Minute = int.Parse(hmsf[1]);
-
-            if (hmsf.Length > 2) Second = float.Parse(hmsf[2]);
 
             if (TMD == TimeMeridianDiscriminator.AM && Hour == 12) Hour = 0;
             else if (TMD == TimeMeridianDiscriminator.PM && Hour != 12) Hour += 12;
-
-            TimeZoneData TimeZone = null;
-
-            if (!string.IsNullOrEmpty(TimeZoneSegment)) {
-                if(TimeZoneSegment.Contains("+") || TimeZoneSegment.Contains("-") || LanguageConfiguration.TimeZones.ContainsKey(TimeZoneSegment)) {
-                    if(TimeZoneData.TryParse(TimeZoneSegment, LanguageConfiguration, out TimeZone)) {
-                        TimeZoneOffset = TimeZone.TimeOffset;
-                    }
-                }
-            }
 
             try {
                 Time = new DateTimeOffset(new DateTime(Year, Month, Day, Hour, Minute, (int)Second, (int)(Second % 1 * 1000)), TimeZoneOffset);
@@ -569,7 +578,6 @@ namespace Dexter.Helpers {
                     $"Selected numbers are Year: {Year}, Month: {Month}, Day: {Day}, Hour: {Hour}, Minute: {Minute}, Second: {Second}, Time Zone: {TimeZone?.ToString() ?? TimeZoneData.ToTimeZoneExpression(TimeZoneOffset)}.\n[{e.Message}]";
                 return false;
             }
-
 
             return true;
         }

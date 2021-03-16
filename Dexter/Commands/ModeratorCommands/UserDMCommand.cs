@@ -49,7 +49,7 @@ namespace Dexter.Commands {
 
         [Command("userdm")]
         [Summary("Sends a direct message to a modmail token specified.")]
-        [Alias("dm", "message")]
+        [Alias("dm", "message", "mail")]
         [RequireModerator]
 
         public async Task UserDMCommand(string Token, [Remainder] string Message) {

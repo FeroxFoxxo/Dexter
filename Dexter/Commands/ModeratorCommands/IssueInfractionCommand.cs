@@ -5,7 +5,6 @@ using Dexter.Databases.Infractions;
 using Dexter.Databases.FinalWarns;
 using Discord;
 using Discord.Commands;
-using Discord.Net;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -85,17 +84,7 @@ namespace Dexter.Commands {
         [RequireModerator]
 
         public async Task IssueMute(IGuildUser User, TimeSpan Time, [Remainder] string Reason) {
-            DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
-
-            if (TimerService.TimerExists(DexterProfile.CurrentMute))
-                TimerService.RemoveTimer(DexterProfile.CurrentMute);
-
-            IRole Role = Context.Guild.GetRole(ModerationConfiguration.MutedRoleID);
-
-            if (!User.RoleIds.Contains(ModerationConfiguration.MutedRoleID))
-                await User.AddRoleAsync(Role);
-
-            DexterProfile.CurrentMute = await CreateEventTimer(RemoveMutedRole, new() { { "UserID", User.Id.ToString() } }, Convert.ToInt32(Time.TotalSeconds), TimerType.Expire);
+            await MuteUser(User, Time);
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Unrecorded Mute Issued!")
@@ -214,17 +203,8 @@ namespace Dexter.Commands {
                 Reason += $"\n**Automatic mute of {AdditionalTime.Value.Humanize(2)} applied in addition by {DiscordSocketClient.CurrentUser.Username} for frequent warnings and/or rulebreaks.**";
             }
 
-            if (Time.TotalSeconds > 0) {
-                if (TimerService.TimerExists(DexterProfile.CurrentMute))
-                    TimerService.RemoveTimer(DexterProfile.CurrentMute);
-
-                IRole Role = Context.Guild.GetRole(ModerationConfiguration.MutedRoleID);
-
-                if (!User.RoleIds.Contains(ModerationConfiguration.MutedRoleID))
-                    await User.AddRoleAsync(Role);
-
-                DexterProfile.CurrentMute = await CreateEventTimer(RemoveMutedRole, new() { { "UserID", User.Id.ToString() } }, Convert.ToInt32(Time.TotalSeconds), TimerType.Expire);
-            }
+            if (Time.TotalSeconds > 0)
+                await MuteUser(User, Time);
 
             if (PointsDeducted == 0) {
                 IRole Role = Context.Guild.GetRole(ModerationConfiguration.MutedRoleID);
@@ -349,6 +329,41 @@ namespace Dexter.Commands {
 
             InfractionsDB.SaveChanges();
         }
+
+        /// <summary>
+        /// Issues a mute to a target <paramref name="User"/> for a duration of <paramref name="Time"/>; but doesn't save it to the user's records.
+        /// </summary>
+        /// <param name="User">The user to be muted.</param>
+        /// <param name="Time">The duration of the mute.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method finishes successfully.</returns>
+
+        public async Task MuteUser(IGuildUser User, TimeSpan Time) {
+            DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
+
+            if (TimerService.TimerExists(DexterProfile.CurrentMute))
+                TimerService.RemoveTimer(DexterProfile.CurrentMute);
+
+            IRole Role = User.Guild.GetRole(ModerationConfiguration.MutedRoleID);
+
+            try {
+                Console.WriteLine("APPLY " + ModerationConfiguration.MutedRoleID + " TO " + User.Username);
+
+                if (!User.RoleIds.Contains(ModerationConfiguration.MutedRoleID))
+                    await User.AddRoleAsync(Role);
+            } catch (Discord.Net.HttpException Error) {
+                await (DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
+                    .SendMessageAsync($"**Missing Role Management Permissions >>>** <@&{BotConfiguration.AdministratorRoleID}>",
+                        embed: BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Error!")
+                        .WithDescription($"Couldn't mute user <@{User.Id}> ({User.Id}) for {Time.Humanize()}.")
+                        .AddField("Error:", Error.Message)
+                        .WithCurrentTimestamp().Build()
+                );
+            }
+
+            DexterProfile.CurrentMute = await CreateEventTimer(RemoveMutedRole, new() { { "UserID", User.Id.ToString() } }, Convert.ToInt32(Time.TotalSeconds), TimerType.Expire);
+        }
+
     }
 
 }

@@ -5,7 +5,6 @@ using Dexter.Databases.Infractions;
 using Dexter.Services;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -63,7 +62,7 @@ namespace Dexter.Commands {
 
             FinalWarnsDB.SetOrCreateFinalWarn(PointsDeducted, Context.User as IGuildUser, User, MuteDuration, Reason, WarningLogID);
 
-            await this.MuteUser(User, MuteDuration);
+            await MuteUser(User, MuteDuration);
 
             try {
                 await BuildEmbed(EmojiEnum.Annoyed)

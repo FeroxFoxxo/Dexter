@@ -193,7 +193,7 @@ namespace Dexter.Services {
             Attachment Attachment = RecievedMessage.Attachments.FirstOrDefault();
 
             if (Attachment != null) {
-                if (Attachment.Size > 8 * (10 ^ 6)) {
+                if (Attachment.Size > 8000000) {
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Your attachment is too big!")
                         .WithDescription("Please keep attachments under 8MB due to Discord's size limitations and our caching of data! <3")

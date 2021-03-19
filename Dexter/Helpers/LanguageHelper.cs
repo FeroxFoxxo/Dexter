@@ -234,6 +234,22 @@ namespace Dexter.Helpers {
         }
 
         /// <summary>
+        /// Limits the given string <paramref name="s"/> to a length <paramref name="MaxLength"/>.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="MaxLength"></param>
+        /// <returns>A substring of <paramref name="s"/> ending in "..." if its length is greater than <paramref name="MaxLength"/>, otherwise <paramref name="s"/></returns>
+
+        public static string Truncate(this string s, int MaxLength) {
+            if(s.Length > MaxLength) {
+                if (MaxLength < 3) return "...";
+                return s[..^(MaxLength - 3)] + "...";
+            }
+
+            return s;
+        }
+
+        /// <summary>
         /// Checks whether a character is a vowel in the Latin alphabet
         /// </summary>
         /// <param name="c">The character to check</param>

@@ -1,5 +1,6 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Databases.Borkdays;
+using Dexter.Databases.Mail;
 using Dexter.Services;
 
 namespace Dexter.Commands {
@@ -21,6 +22,12 @@ namespace Dexter.Commands {
         /// </summary>
 
         public BorkdayDB BorkdayDB { get; set; }
+
+        /// <summary>
+        /// The ModmailDB stores information about the mailing service and mailed messages.
+        /// </summary>
+
+        public ModMailDB ModMailDB { get; set; }
 
         /// <summary>
         /// Coordinates the initialization of all necessary infrastructure upon startup.

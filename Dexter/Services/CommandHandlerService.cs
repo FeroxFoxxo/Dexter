@@ -127,9 +127,14 @@ namespace Dexter.Services {
                         CustomCommand CustomCommand = CustomCommandDB.GetCommandByNameOrAlias(CustomCommandArgs[0].ToLower());
 
                         if (CustomCommand != null) {
-                            if (CustomCommand.Reply.Length > 0)
+                            if (CustomCommand.Reply.Length > 0) {
+                                string Reply = CustomCommand.Reply;
+
+                                Reply = Reply.Replace("USER", CommandContext.Message.MentionedUserIds.Count > 0 ? $"<@{CommandContext.Message.MentionedUserIds.First()}>" : CommandContext.User.Mention);
+                                Reply = Reply.Replace("AUTHOR", CommandContext.User.Mention);
+
                                 await CommandContext.Channel.SendMessageAsync(CustomCommand.Reply.Replace("USER", CommandContext.Message.MentionedUserIds.Count > 0 ? $"<@{CommandContext.Message.MentionedUserIds.First()}>" : CommandContext.User.Mention));
-                            else
+                            } else
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Misconfigured command!")
                                     .WithDescription($"`{CustomCommand.CommandName}` has not been configured! Please contact a moderator about this. <3")

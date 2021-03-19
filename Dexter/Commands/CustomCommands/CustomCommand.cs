@@ -75,7 +75,8 @@ namespace Dexter.Commands {
                         .WithDescription($"Once it has passed admin approval, " +
                             $"use `{BotConfiguration.Prefix}ccalias add` to add an alias to the command! \n" +
                             "Please note, to make the command ping a user if mentioned, add `USER` to the reply~! \n" +
-                            $"To modify the reply at any time, use `{BotConfiguration.Prefix}ccedit`")
+                            "To make the command ping a user if mentioned, add `AUTHOR` to the reply. \n" +
+                            $"To modify the reply at any time, use `{BotConfiguration.Prefix}ccedit`.")
                         .SendEmbed(Context.Channel);
 
                     break;

@@ -188,11 +188,14 @@ namespace Dexter.Commands {
             Reminder.Status = ReminderStatus.Released;
             ReminderDB.SaveChanges();
 
-            await BuildEmbed(EmojiEnum.Sign)
-                .WithTitle("🎗Dexter Reminder!🎗")
-                .WithDescription(Reminder.Message)
-                .WithCurrentTimestamp()
-                .SendEmbed(await Issuer.GetOrCreateDMChannelAsync());
+            try {
+                await BuildEmbed(EmojiEnum.Sign)
+                    .WithTitle("🎗Dexter Reminder!🎗")
+                    .WithDescription(Reminder.Message)
+                    .WithCurrentTimestamp()
+                    .SendEmbed(await Issuer.GetOrCreateDMChannelAsync());
+            }
+            catch { }
         }
 
         private EmbedBuilder[] BuildReminderEmbeds(IEnumerable<Reminder> Reminders) {

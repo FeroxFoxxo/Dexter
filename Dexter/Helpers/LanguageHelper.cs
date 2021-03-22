@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Dexter.Configurations;
+using Humanizer;
 
 namespace Dexter.Helpers {
 
@@ -719,6 +720,22 @@ namespace Dexter.Helpers {
                 SortedResults[i] = WeightedList[i].Key;
             }
             return SortedResults;
+        }
+
+        /// <summary>
+        /// Creates a standard expression of a specific time, both absolute and relative to present.
+        /// </summary>
+        /// <param name="Time">The DateTimeOffset object to parse.</param>
+        /// <param name="BotConfiguration">The Configuration file holding the StandardTimeZone variable, only required if <paramref name="StandardizeTime"/> is <see langword="true"/>.</param>
+        /// <param name="StandardizeTime">Whether to standardize the time to <paramref name="BotConfiguration"/><c>.StandardTimeZone</c>.</param>
+        /// <returns>A stringified expression of <paramref name="Time"/>.</returns>
+
+        public static string HumanizeExtended(this DateTimeOffset Time, BotConfiguration BotConfiguration = null, bool StandardizeTime = false) {
+            if(BotConfiguration != null && StandardizeTime) {
+                Time = Time.ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
+            }
+            
+            return $"{Time:ddd dd MMM yyy 'at' hh:mm tt 'UTC'zzz} ({Time.Humanize()})";
         }
     }
 

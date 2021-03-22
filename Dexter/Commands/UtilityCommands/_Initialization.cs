@@ -2,6 +2,7 @@
 using Dexter.Configurations;
 using Dexter.Databases.Borkdays;
 using Dexter.Databases.Mail;
+using Dexter.Databases.Reminders;
 using Dexter.Services;
 
 namespace Dexter.Commands {
@@ -19,6 +20,12 @@ namespace Dexter.Commands {
         public LoggingService LoggingService { get; set; }
 
         /// <summary>
+        /// Holds all relevant settings and configuration for the Utility Commands Module.
+        /// </summary>
+        
+        public UtilityConfiguration UtilityConfiguration { get; set; }
+
+        /// <summary>
         /// The BorkdayDB stores information regarding a user's birthday.
         /// </summary>
 
@@ -31,6 +38,12 @@ namespace Dexter.Commands {
         public ModMailDB ModMailDB { get; set; }
 
         /// <summary>
+        /// Stores information relevant to the Reminder system.
+        /// </summary>
+
+        public ReminderDB ReminderDB { get; set; }
+
+        /// <summary>
         /// Coordinates the initialization of all necessary infrastructure upon startup.
         /// </summary>
 
@@ -41,7 +54,6 @@ namespace Dexter.Commands {
         /// </summary>
 
         public LanguageConfiguration LanguageConfiguration { get; set; }
-
     }
 
 }

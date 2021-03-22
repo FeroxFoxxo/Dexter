@@ -26,5 +26,6 @@
   "CommitAPICall": "https://api.github.com/repos/FeroxFoxxo/Dexter/commits",
   "EnableDatabaseBackups": false,
   "BotStatus": "use ~modmail in DMs to send the staff a message anonymously!",
-  "PingDevelopers": false
+  "PingDevelopers": false,
+  "StandardTimeZone": -4
 }

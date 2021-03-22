@@ -301,6 +301,10 @@
       "Name": "Cuba Standard Time",
       "Offset": -5
     },
+    "CST4": {
+      "Name": "Chamorro Standard Time",
+      "Offset": 10
+    },
     "CT": {
       "Name": "Central Time",
       "Offset": -6

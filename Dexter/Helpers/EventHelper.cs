@@ -52,7 +52,7 @@ namespace Dexter.Commands {
             ulong ProposalMessage = 0;
             if (EventType == EventType.UserHosted) { 
                 IMessageChannel MessageChannel = DiscordSocketClient.GetChannel(CommunityConfiguration.EventsNotificationsChannel) as IMessageChannel;
-                Embed EventInfo = CreateEventProposalEmbed(ID, Status, Proposer, Release.ToOffset(TimeSpan.FromHours(CommunityConfiguration.StandardTimeZone)), Description).Build();
+                Embed EventInfo = CreateEventProposalEmbed(ID, Status, Proposer, Release.ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone)), Description).Build();
                 IMessage Proposal = await MessageChannel.SendMessageAsync(
                     text: ProposalText,
                     embed: EventInfo);
@@ -130,7 +130,7 @@ namespace Dexter.Commands {
 
             }
 
-            DateTimeOffset Release = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(CommunityConfiguration.StandardTimeZone));
+            DateTimeOffset Release = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
 
             if (!TimerService.TimerExists(Event.ReleaseTimer))
                 Event.ReleaseTimer = await CreateEventTimer(ReleaseEventCallback,
@@ -388,7 +388,7 @@ namespace Dexter.Commands {
 
             string ProposalText = Event.Status switch {
                 EventStatus.Pending => $"**New Event Proposal >>>** {CommunityConfiguration.EventsNotificationMention}",
-                EventStatus.Approved => $"**Upcoming Event [{DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(CommunityConfiguration.StandardTimeZone)):MMM M 'at' h:mm tt}] >>>**",
+                EventStatus.Approved => $"**Upcoming Event [{DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone)):MMM M 'at' h:mm tt}] >>>**",
                 EventStatus.Released => $"**Released Event**",
                 _ => $"**{Event.Status} Event Proposal >>>**"
             };
@@ -414,7 +414,7 @@ namespace Dexter.Commands {
                 .WithTitle(Status.ToString().ToUpper())
                 .WithAuthor(Author)
                 .WithDescription(Description)
-                .AddField("Release Date:", $"{Release.ToOffset(TimeSpan.FromHours(CommunityConfiguration.StandardTimeZone)):ddd', 'MMM d 'at' hh:mm tt 'UTC'z}")
+                .AddField("Release Date:", $"{Release.ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone)):ddd', 'MMM d 'at' hh:mm tt 'UTC'z}")
                 .AddField(IncludeResolutionInfo, "Resolution:", $"{BotConfiguration.Prefix}event [approve/decline] {ID}")
                 .AddField(ResolveReason.Length > 0, "Reason:", ResolveReason)
                 .WithFooter(ID.ToString())
@@ -423,7 +423,7 @@ namespace Dexter.Commands {
 
         private EmbedBuilder CreateEventProposalEmbed(CommunityEvent Event) {
             IUser Author = DiscordSocketClient.GetUser(Event.ProposerID);
-            DateTimeOffset Release = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(CommunityConfiguration.StandardTimeZone));
+            DateTimeOffset Release = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
 
             return CreateEventProposalEmbed(Event.ID, Event.Status, Author, Release, Event.Description, Event.ResolveReason);
         }
@@ -508,8 +508,8 @@ namespace Dexter.Commands {
         /// <returns>An EmbedFieldBuilder which can be used as an argument for <c>EmbedBuilder.AddField(FieldEmbedBuilder)</c>.</returns>
 
         public EmbedFieldBuilder GenerateEventField(CommunityEvent Event) {
-            DateTimeOffset Release = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(CommunityConfiguration.StandardTimeZone));
-            DateTimeOffset ProposeTime = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeProposed).ToOffset(TimeSpan.FromHours(CommunityConfiguration.StandardTimeZone));
+            DateTimeOffset Release = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
+            DateTimeOffset ProposeTime = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeProposed).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
 
             string TimeInfo = Event.Status switch {
                 EventStatus.Expired => $"**Proposed:** {ProposeTime:G} \n**Expired:** {Release:G}",

@@ -83,7 +83,7 @@ namespace Dexter.Commands {
                     await CreateEventTimer(ReminderCallback, new Dictionary<string, string> { { "ID", Reminder.ID.ToString() } }, (int) Date.Subtract(DateTimeOffset.Now).TotalSeconds, Databases.EventTimers.TimerType.Expire);
 
                     await BuildEmbed(EmojiEnum.Love)
-                        .WithTitle($"Created Reminder #{Reminder.ID}")
+                        .WithTitle($"🎗Created Reminder #{Reminder.ID}🎗")
                         .WithDescription($"The reminder will be released on {Date.HumanizeExtended()}")
                         .WithCurrentTimestamp()
                         .SendEmbed(Context.Channel);
@@ -186,7 +186,7 @@ namespace Dexter.Commands {
             ReminderDB.SaveChanges();
 
             await BuildEmbed(EmojiEnum.Sign)
-                .WithTitle("Dexter Reminder!")
+                .WithTitle("🎗Dexter Reminder!🎗")
                 .WithDescription(Reminder.Message)
                 .WithCurrentTimestamp()
                 .SendEmbed(await Issuer.GetOrCreateDMChannelAsync());
@@ -202,9 +202,9 @@ namespace Dexter.Commands {
                 int LastExcluded = p * UtilityConfiguration.ReminderMaxItemsPerPage;
                 if (LastExcluded > Reminders.Length) LastExcluded = Reminders.Length;
                 
-                Embeds[p] = BuildReminderPage(Reminders[First..LastExcluded]);
+                Embeds[p - 1] = BuildReminderPage(Reminders[First..LastExcluded]);
 
-                Embeds[p].WithTitle($"Reminders - Page {p}/{TotalPages}").WithFooter($"{p}/{TotalPages}");
+                Embeds[p - 1].WithTitle($"Reminders - Page {p}/{TotalPages}").WithFooter($"{p}/{TotalPages}");
             }
 
             return Embeds;
@@ -216,8 +216,8 @@ namespace Dexter.Commands {
                 .WithCurrentTimestamp();
 
             foreach(Reminder r in Reminders) {
-                Builder.AddField($"Reminder #{r.ID}:", $"{r.Message.Truncate(UtilityConfiguration.ReminderMaxCharactersPerItem)}\n " +
-                    $"**Release:** {DateTimeOffset.FromUnixTimeSeconds(r.DateTimeRelease).HumanizeExtended(BotConfiguration, true)}");
+                Builder.AddField($"🎗Reminder #{r.ID}🎗", $"{r.Message.Truncate(UtilityConfiguration.ReminderMaxCharactersPerItem)}\n " +
+                    $"- **Release:** {DateTimeOffset.FromUnixTimeSeconds(r.DateTimeRelease).HumanizeExtended(BotConfiguration, true)}");
             }
 
             return Builder;

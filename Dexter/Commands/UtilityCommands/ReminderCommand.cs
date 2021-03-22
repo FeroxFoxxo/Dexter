@@ -142,17 +142,20 @@ namespace Dexter.Commands {
                     await BuildReminderInfo(Reminder).SendEmbed(Context.Channel);
                     return;
                 case "upcoming":
-                    Reminder[] Reminders = ReminderDB.GetRemindersByUser(Context.User).Where(r => r.Status == ReminderStatus.Pending).ToArray(); 
-                    if(Reminders.Length == 0) {
+                    List<Reminder> Reminders = ReminderDB.GetRemindersByUser(Context.User)
+                        .Where(r => r.Status == ReminderStatus.Pending)
+                        .ToList();
+                    Reminders.Sort((a1, a2) => a1.DateTimeRelease.CompareTo(a2.DateTimeRelease));
+                    if(Reminders.Count == 0) {
                         await BuildEmbed(EmojiEnum.Wut)
                             .WithTitle("No upcoming reminders!")
                             .WithDescription("It seems as though you need no assistance with your mental storage allocation process for now!")
                             .WithCurrentTimestamp()
                             .SendEmbed(Context.Channel);
-                    } else if(Reminders.Length == 1) {
+                    } else if(Reminders.Count == 1) {
                         await BuildReminderInfo(Reminders[0])
                             .SendEmbed(Context.Channel);
-                    } else if(Reminders.Length <= UtilityConfiguration.ReminderMaxItemsPerPage) {
+                    } else if(Reminders.Count <= UtilityConfiguration.ReminderMaxItemsPerPage) {
                         await BuildReminderPage(Reminders)
                             .SendEmbed(Context.Channel);
                     } else {
@@ -192,17 +195,20 @@ namespace Dexter.Commands {
                 .SendEmbed(await Issuer.GetOrCreateDMChannelAsync());
         }
 
-        private EmbedBuilder[] BuildReminderEmbeds(Reminder[] Reminders) {
-            int TotalPages = (Reminders.Length - 1) / UtilityConfiguration.ReminderMaxItemsPerPage + 1;
+        private EmbedBuilder[] BuildReminderEmbeds(IEnumerable<Reminder> Reminders) {
+            Reminder[] ReminderArray = Reminders.ToArray();
+            int TotalPages = (ReminderArray.Length - 1) / UtilityConfiguration.ReminderMaxItemsPerPage + 1;
 
             EmbedBuilder[] Embeds = new EmbedBuilder[TotalPages];
+
+            int counter = 1;
 
             for(int p = 1; p <= TotalPages; p++) {
                 int First = (p - 1) * UtilityConfiguration.ReminderMaxItemsPerPage;
                 int LastExcluded = p * UtilityConfiguration.ReminderMaxItemsPerPage;
-                if (LastExcluded > Reminders.Length) LastExcluded = Reminders.Length;
-                
-                Embeds[p - 1] = BuildReminderPage(Reminders[First..LastExcluded]);
+                if (LastExcluded > ReminderArray.Length) LastExcluded = ReminderArray.Length;
+
+                Embeds[p - 1] = BuildReminderPage(ReminderArray[First..LastExcluded], ref counter);
 
                 Embeds[p - 1].WithTitle($"Reminders - Page {p}/{TotalPages}").WithFooter($"{p}/{TotalPages}");
             }
@@ -210,13 +216,18 @@ namespace Dexter.Commands {
             return Embeds;
         }
 
-        private EmbedBuilder BuildReminderPage(Reminder[] Reminders) {
+        private EmbedBuilder BuildReminderPage(IEnumerable<Reminder> Reminders) {
+            int count = 1;
+            return BuildReminderPage(Reminders, ref count);
+        }
+
+        private EmbedBuilder BuildReminderPage(IEnumerable<Reminder> Reminders, ref int counter) {
             EmbedBuilder Builder = BuildEmbed(EmojiEnum.Sign)
                 .WithTitle("Reminders")
                 .WithCurrentTimestamp();
 
             foreach(Reminder r in Reminders) {
-                Builder.AddField($"🎗Reminder #{r.ID}🎗", $"{r.Message.Truncate(UtilityConfiguration.ReminderMaxCharactersPerItem)}\n " +
+                Builder.AddField($"🎗Reminder {counter++} (ID {r.ID})🎗", $"{r.Message.Truncate(UtilityConfiguration.ReminderMaxCharactersPerItem)}\n " +
                     $"- **Release:** {DateTimeOffset.FromUnixTimeSeconds(r.DateTimeRelease).HumanizeExtended(BotConfiguration, true)}");
             }
 

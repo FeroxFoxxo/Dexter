@@ -26,7 +26,6 @@ namespace Dexter.Commands {
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes execution successfully.</returns>
 
         [Command("reminder")]
-        [Alias("remindme")]
         [Summary("Creates and manages reminders.\n" +
             "`ADD [Time] ; [Reminder]` - Creates a new reminder for the target date and time.\n" +
             "`REMOVE [Reminder ID]` - Removes a previously created reminder by its ID.\n" +
@@ -164,9 +163,28 @@ namespace Dexter.Commands {
                     }
                     return;
                 default:
-                    await ReminderCommand("add", $"{Action} {Arguments}");
+                    await BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Action Parse Error!")
+                        .WithDescription($"Action \"{Action}\" not found! Please use `ADD`, `REMOVE`, `EDIT`, or `UPCOMING`")
+                        .SendEmbed(Context.Channel);
                     return;
             }
+        }
+
+        /// <summary>
+        /// Shorthand of the reminder command used to add a new reminder.
+        /// </summary>
+        /// <param name="Arguments">The date and time separated from the reminder body by a DateArgSeparator.</param>
+        /// <returns>A <c>Task</c> object, that can be awaited until the method completes successfully.</returns>
+
+        [Command("remindme")]
+        [Summary("Adds a reminder given a date and a reminder body")]
+        [ExtendedSummary("Adds a reminder given a date and a reminder body separated by a semicolon\n" +
+            "SYNTAX: `remindme [DATE];[REMINDER]`")]
+        [BotChannel]
+
+        public async Task RemindMeShorthandCommand([Remainder] string Arguments) {
+            await ReminderCommand("add", Arguments);
         }
 
         /// <summary>

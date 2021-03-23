@@ -164,10 +164,7 @@ namespace Dexter.Commands {
                     }
                     return;
                 default:
-                    await BuildEmbed(EmojiEnum.Annoyed)
-                        .WithTitle("Action Parse Error!")
-                        .WithDescription($"Action \"{Action}\" not found! Please use `ADD`, `REMOVE`, `EDIT`, or `UPCOMING`")
-                        .SendEmbed(Context.Channel);
+                    await ReminderCommand("add", $"{Action} {Arguments}");
                     return;
             }
         }

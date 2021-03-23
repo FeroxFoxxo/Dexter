@@ -245,7 +245,7 @@ namespace Dexter.Helpers {
         /// <returns>A substring of <paramref name="s"/> ending in "..." if its length is greater than <paramref name="MaxLength"/>, otherwise <paramref name="s"/></returns>
 
         public static string Truncate(this string s, int MaxLength) {
-            if(s.Length > MaxLength) {
+            if (s.Length > MaxLength) {
                 if (MaxLength < 3) return "...";
                 return s[..^(MaxLength - 3)] + "...";
             }
@@ -366,7 +366,7 @@ namespace Dexter.Helpers {
             int LargeValue = (int)Value;
             int SmallValue = (int)Math.Round(Value % 1 * Base);
 
-            Remainder = Value - LargeValue - (float) SmallValue / Base;
+            Remainder = Value - LargeValue - (float)SmallValue / Base;
 
             if (LargeValue != 0) Result.Add($"{LargeValue} {LargeUnit[LargeValue == 1 ? 0 : 1]}");
             if (SmallValue != 0) Result.Add($"{SmallValue} {SmallUnit[SmallValue == 1 ? 0 : 1]}");
@@ -474,17 +474,16 @@ namespace Dexter.Helpers {
             Input = Input.Trim();
             Time = DateTimeOffset.Now;
 
-            switch (Input.ToLower()) {
+            string LowerInput = Input.ToLower();
+
+            switch (LowerInput) {
                 case "now":
                     Time = DateTimeOffset.Now;
                     return true;
             }
 
-            string DateStrSegment = Regex.Match(Input, @"(^|\s)(([A-Za-z]{3,}\s[0-9]{1,2})|([0-9]{1,2}\s[A-Za-z]{3,}))((,|\s)\s?[0-9]{2,5}(\s|$))?").Value.Trim();
-            string DateNumSegment = Regex.Match(Input, @"[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,5})?").Value;
-            string TimeSimplifiedSegment = Regex.Match(Input, @"(^|\s)[0-9]{1,2}\s?[pa]m(\s|$)", RegexOptions.IgnoreCase).Value;
-            string TimeSegment = Regex.Match(Input, @"[0-9]{1,2}:[0-9]{1,2}(:[0-9]{1,2}(.[0-9]+)?)?(\s?(a|p)m)?", RegexOptions.IgnoreCase).Value;
-            string TimeZoneSegment = Regex.Match(Input, @"(((UTC|GMT|Z)?[+-][0-9]{1,2}(:[0-9]{2})?)|([A-Z][A-Za-z0-9]*))$").Value;
+            string TimeZoneMatcher = @"(((UTC|GMT|Z)?[+-][0-9]{1,2}(:[0-9]{2})?)|([A-Z][A-Za-z0-9]*))$";
+            string TimeZoneSegment = Regex.Match(Input, TimeZoneMatcher).Value;
 
             TimeZoneData TimeZone = null;
             TimeSpan TimeZoneOffset = DateTimeOffset.Now.Offset;
@@ -497,6 +496,27 @@ namespace Dexter.Helpers {
                 }
             }
 
+            if (Regex.IsMatch(LowerInput, @$"(^in)|(from now\s*{TimeZoneMatcher}[\s.]*$)", RegexOptions.IgnoreCase)) {
+                if(!TryParseSpan(Input, out TimeSpan Span, out string NewError)) {
+                    Error = NewError;
+                    return false;
+                }
+                Time = Time.Add(Span).Add(TimeSpan.FromMilliseconds(100)).ToOffset(TimeZoneOffset);
+                return true;
+            } else if (Regex.IsMatch(LowerInput, @$"ago\s*{TimeZoneMatcher}[\s.]*$", RegexOptions.IgnoreCase)) {
+                if (!TryParseSpan(Input, out TimeSpan Span, out string NewError)) {
+                    Error = NewError;
+                    return false;
+                }
+                Time = Time.Subtract(Span).Subtract(TimeSpan.FromMilliseconds(100)).ToOffset(TimeZoneOffset);
+                return true;
+            }
+
+            string DateStrSegment = Regex.Match(Input, @"(^|\s)(([A-Za-z]{3,}\s[0-9]{1,2})|([0-9]{1,2}\s[A-Za-z]{3,}))((,|\s)\s?[0-9]{2,5}(\s|$))?").Value.Trim();
+            string DateNumSegment = Regex.Match(Input, @"[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,5})?").Value;
+            string TimeSimplifiedSegment = Regex.Match(Input, @"(^|\s)[0-9]{1,2}\s?[pa]m(\s|$)", RegexOptions.IgnoreCase).Value;
+            string TimeSegment = Regex.Match(Input, @"[0-9]{1,2}:[0-9]{1,2}(:[0-9]{1,2}(.[0-9]+)?)?(\s?(a|p)m)?", RegexOptions.IgnoreCase).Value;
+            
             DateTimeOffset OffsetNow = DateTimeOffset.Now.ToOffset(TimeZoneOffset);
 
             int Year = OffsetNow.Year;
@@ -513,7 +533,7 @@ namespace Dexter.Helpers {
                 string dd;
 
                 Month = ParseMonth(MDY[0]);
-                if(Month < 0) {
+                if (Month < 0) {
                     Month = ParseMonth(MDY[1]);
                     if (Month < 0) {
                         Error = $"Failed to parse \"{MDY[0]}\" OR \"{MDY[1]}\" into a valid Month.";
@@ -531,7 +551,7 @@ namespace Dexter.Helpers {
 
                 if (Day < 0 || Day > 31) { return false; }
 
-                if(MDY.Length > 2) {
+                if (MDY.Length > 2) {
                     if (!int.TryParse(MDY[2], out Year)) {
                         Error = $"Failed to parse {MDY[2]} into a valid year!";
                         return false;
@@ -544,7 +564,7 @@ namespace Dexter.Helpers {
                     }
                 }
             } else if (!string.IsNullOrEmpty(DateNumSegment)) {
-                if(DateNumSegment.Split("/").Length < 3) {
+                if (DateNumSegment.Split("/").Length < 3) {
                     DateNumSegment += $"/{Year}";
                 }
 
@@ -554,8 +574,8 @@ namespace Dexter.Helpers {
                 } catch (FormatException e) {
                     Error = e.Message;
                     return false;
-                } 
-                
+                }
+
                 Day = Subparse.Day;
                 Month = Subparse.Month;
                 Year = Subparse.Year;
@@ -618,7 +638,7 @@ namespace Dexter.Helpers {
             Input = Input.ToLower();
 
             for (int i = 0; i < CultureInfo.DateTimeFormat.MonthNames.Length; i++) {
-                if(Input == CultureInfo.DateTimeFormat.MonthNames[i].ToLower() || Input == CultureInfo.DateTimeFormat.AbbreviatedMonthNames[i].ToLower()) {
+                if (Input == CultureInfo.DateTimeFormat.MonthNames[i].ToLower() || Input == CultureInfo.DateTimeFormat.AbbreviatedMonthNames[i].ToLower()) {
                     return i + 1;
                 }
             }
@@ -635,7 +655,7 @@ namespace Dexter.Helpers {
         /// <returns><see langword="true"/> if the parsing was successful; otherwise <see langword="false"/>.</returns>
 
         public static bool TryParseTimeZone(this string Input, LanguageConfiguration LanguageConfiguration, out TimeZoneData TimeZone) {
-            if(LanguageConfiguration.TimeZones.ContainsKey(Input)) {
+            if (LanguageConfiguration.TimeZones.ContainsKey(Input)) {
                 TimeZone = LanguageConfiguration.TimeZones[Input];
                 return true;
             }
@@ -643,6 +663,111 @@ namespace Dexter.Helpers {
             TimeZone = null;
             return false;
         }
+
+        /// <summary>
+        /// Attempts to parse a timespan out of humanized terms
+        /// </summary>
+        /// <param name="Input">A stringified time expression consisting of a series of numbers followed by units.</param>
+        /// <param name="Span">The output span resulting from the parsing of <paramref name="Input"/>.</param>
+        /// <param name="Error">Empty string if there are no errors, otherwise describes why it failed.</param>
+        /// <returns><see langword="true"/> if the parsing was successful, otherwise <see langword="false"/>.</returns>
+
+        public static bool TryParseSpan(this string Input, out TimeSpan Span, out string Error) {
+            Error = "";
+            Span = TimeSpan.Zero;
+
+            Dictionary<TimeUnit, string> RegExps = new Dictionary<TimeUnit, string> {
+                { TimeUnit.Millisecond, "(ms)|((milli)(second)?s?)" },
+                { TimeUnit.Second, "s(ec(ond)?s?)?" },
+                { TimeUnit.Minute, "m(in(ute)?s?)?" },
+                { TimeUnit.Hour, "h(ours?)"},
+                { TimeUnit.Day, "d(ays?)?" },
+                { TimeUnit.Week, "w(eeks?)?" },
+                { TimeUnit.Month, "mon(ths?)?"},
+                { TimeUnit.Year, "y(ears?)?"},
+                { TimeUnit.Century, "centur(y|ies)"},
+                { TimeUnit.Millenium, "milleni(um|a)"}
+            };
+
+            foreach(KeyValuePair<TimeUnit, string> Unit in RegExps) {
+                string Parsable = Regex.Match(Input, $@"[0-9.]+\s*({Unit.Value})(([0-9]+)|\s|$)", RegexOptions.IgnoreCase).Value;
+                if (string.IsNullOrEmpty(Parsable)) continue;
+                for(int i = 0; i < Parsable.Length; i++) {
+                    if(!char.IsDigit(Parsable[i])) {
+                        if(!double.TryParse(Parsable[..i], out double Factor)) {
+                            Error = $"Failed to parse number \"${Parsable[..i]}\" for unit ${Unit.Key}.";
+                            return false;
+                        }
+                        Span = Span.Add(Factor * UnitToTime[Unit.Key]);
+                        break;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Represents a range of time units ranging from MILLISECOND to MILLENIUM.
+        /// </summary>
+        public enum TimeUnit {
+            /// <summary>
+            /// Represents a thousandth of a second
+            /// </summary>
+            Millisecond,
+            /// <summary>
+            /// Represents a second
+            /// </summary>
+            Second,
+            /// <summary>
+            /// Represents a minute (60 seconds)
+            /// </summary>
+            Minute,
+            /// <summary>
+            /// Represents an hour (60 minutes)
+            /// </summary>
+            Hour,
+            /// <summary>
+            /// Represents a day (24 hours)
+            /// </summary>
+            Day,
+            /// <summary>
+            /// Represents a week (7 days)
+            /// </summary>
+            Week,
+            /// <summary>
+            /// Represents a month (30 days)
+            /// </summary>
+            Month,
+            /// <summary>
+            /// Represents a year (365.24 days)
+            /// </summary>
+            Year,
+            /// <summary>
+            /// Represents a century (100 years)
+            /// </summary>
+            Century,
+            /// <summary>
+            /// Represents a millenium (1000 years)
+            /// </summary>
+            Millenium
+        }
+
+        /// <summary>
+        /// Gets the appropriate TimeSpan from a given TimeUnit.
+        /// </summary>
+        public static Dictionary<TimeUnit, TimeSpan> UnitToTime = new Dictionary<TimeUnit, TimeSpan> {
+            { TimeUnit.Millisecond, TimeSpan.FromMilliseconds(1)},
+            { TimeUnit.Second, TimeSpan.FromSeconds(1)},
+            { TimeUnit.Minute, TimeSpan.FromMinutes(1)},
+            { TimeUnit.Hour, TimeSpan.FromHours(1)},
+            { TimeUnit.Day, TimeSpan.FromDays(1)},
+            { TimeUnit.Week, TimeSpan.FromDays(7)},
+            { TimeUnit.Month, TimeSpan.FromDays(30)},
+            { TimeUnit.Year, TimeSpan.FromDays(365.24)},
+            { TimeUnit.Century, TimeSpan.FromDays(36524)},
+            { TimeUnit.Millenium, TimeSpan.FromDays(365240)}
+        };
 
         /// <summary>
         /// Searches the list of static time zone abbreviations in <paramref name="LanguageConfiguration"/> to find the closest expressions to <paramref name="Input"/>.

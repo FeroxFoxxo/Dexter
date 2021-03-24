@@ -496,14 +496,14 @@ namespace Dexter.Helpers {
                 }
             }
 
-            if (Regex.IsMatch(LowerInput, @$"(^in)|(from now\s*{TimeZoneMatcher}[\s.]*$)", RegexOptions.IgnoreCase)) {
+            if (Regex.IsMatch(LowerInput, @$"(^in)|(from now\s*{TimeZoneMatcher}?[\s.]*$)", RegexOptions.IgnoreCase)) {
                 if(!TryParseSpan(Input, out TimeSpan Span, out string NewError)) {
                     Error = NewError;
                     return false;
                 }
                 Time = Time.Add(Span).Add(TimeSpan.FromMilliseconds(100)).ToOffset(TimeZoneOffset);
                 return true;
-            } else if (Regex.IsMatch(LowerInput, @$"ago\s*{TimeZoneMatcher}[\s.]*$", RegexOptions.IgnoreCase)) {
+            } else if (Regex.IsMatch(LowerInput, @$"ago\s*{TimeZoneMatcher}?[\s.]*$", RegexOptions.IgnoreCase)) {
                 if (!TryParseSpan(Input, out TimeSpan Span, out string NewError)) {
                     Error = NewError;
                     return false;

@@ -103,7 +103,7 @@ namespace Dexter.Commands {
         /// <summary>
         /// The GetWarnings method returns an array of embeds detailing the user's warnings, time of warning, and moderator (if enabled).
         /// </summary>
-        /// <param name="User">The user of whose warnings you wish to recieve.</param>
+        /// <param name="User">The user whose warnings you wish to receive.</param>
         /// <param name="RunBy">The user who has run the given warnings command.</param>
         /// <param name="Mention">The stringified mention for the target user.</param>
         /// <param name="Username">The target user's username in the given context.</param>

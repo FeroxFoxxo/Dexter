@@ -264,7 +264,7 @@ namespace Dexter.Commands {
                         .WithTitle($"You were issued a {(InfractionType == InfractionType.Warning ? "warning" : $"mute{(InfractionType == InfractionType.Mute ? $" of {Time.Humanize(2)}" : "")}")} from {Context.Guild.Name}.")
                         .WithDescription($"You have had a total of {TotalInfractions} {(TotalInfractions == 1 ? "infraction" : "infractions")} and are on {DexterProfile.InfractionAmount} {(DexterProfile.InfractionAmount == 1 ? "point" : "points")}, you regain one point every 24 hours. " +
                             ( InfractionType == InfractionType.Warning ?
-                            "Please note that whenever we warn you verbally, you will recieve a logged warning. This is not indicative of a mute or ban." :
+                            "Please note that whenever we warn you verbally, you will receive a logged warning. This is not indicative of a mute or ban." :
                             $"Please read over the <#{ModerationConfiguration.RulesAndInfoChannel}> channel if you have not already done so, even if it's just for a refresher, as to make sure your behaviour meets the standards of the server. <3")
                         )
                         .AddField("Reason", Reason)

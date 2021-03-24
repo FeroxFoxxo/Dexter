@@ -57,6 +57,8 @@ namespace Dexter.Commands {
                         return;
                     }
 
+                    RestrictionsDB.SaveChanges();
+
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Success!")
                         .WithDescription($"User {User.GetUserInformation()} has had the following permissions revoked: \n" +
@@ -80,6 +82,8 @@ namespace Dexter.Commands {
                             .SendEmbed(Context.Channel);
                         return;
                     }
+
+                    RestrictionsDB.SaveChanges();
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Success!")
@@ -150,7 +154,7 @@ namespace Dexter.Commands {
         [BotChannel]
 
         public async Task ListBannableServicesCommand() {
-            await Context.Message.ReplyAsync($"Valid expressions are: ***{string.Join("***, ***", Enum.GetNames<Restriction>())}***.");
+            await Context.Message.ReplyAsync($"Valid expressions are: ***{string.Join("***, ***", Enum.GetNames<Restriction>())}***, ***All***.");
         }
 
     }

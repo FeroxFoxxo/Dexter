@@ -698,7 +698,12 @@ namespace Dexter.Helpers {
                             Error = $"Failed to parse number \"${Parsable[..i]}\" for unit ${Unit.Key}.";
                             return false;
                         }
-                        Span = Span.Add(Factor * UnitToTime[Unit.Key]);
+                        try {
+                            Span = Span.Add(Factor * UnitToTime[Unit.Key]);
+                        } catch (OverflowException e) {
+                            Error = $"Unable to create time! The duration you specified is too long.\n[{e.Message}]";
+                            return false;
+                        }
                         break;
                     }
                 }

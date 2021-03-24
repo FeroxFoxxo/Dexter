@@ -677,16 +677,16 @@ namespace Dexter.Helpers {
             Span = TimeSpan.Zero;
 
             Dictionary<TimeUnit, string> RegExps = new Dictionary<TimeUnit, string> {
-                { TimeUnit.Millisecond, "(ms)|((milli)(second)?s?)" },
-                { TimeUnit.Second, "s(ec(ond)?s?)?" },
-                { TimeUnit.Minute, "m(in(ute)?s?)?" },
-                { TimeUnit.Hour, "h(ours?)?"},
-                { TimeUnit.Day, "d(ays?)?" },
-                { TimeUnit.Week, "w(eeks?)?" },
-                { TimeUnit.Month, "mon(ths?)?"},
-                { TimeUnit.Year, "y(ears?)?"},
-                { TimeUnit.Century, "centur(y|ies)"},
-                { TimeUnit.Millenium, "millenn?i(um|a)"}
+                { TimeUnit.Millisecond, @"(ms)|((milli)(second)?s?)" },
+                { TimeUnit.Second, @"s(ec(ond)?s?)?" },
+                { TimeUnit.Minute, @"m(in(ute)?s?)?" },
+                { TimeUnit.Hour, @"h(ours?)?" },
+                { TimeUnit.Day, @"d(ays?)?" },
+                { TimeUnit.Week, @"w(eeks?)?" },
+                { TimeUnit.Month, @"mon(ths?)?" },
+                { TimeUnit.Year, @"y(ears?)?" },
+                { TimeUnit.Century, @"centur(y|ies)" },
+                { TimeUnit.Millenium, @"millenn?i(um|a)" }
             };
 
             foreach(KeyValuePair<TimeUnit, string> Unit in RegExps) {
@@ -698,7 +698,12 @@ namespace Dexter.Helpers {
                             Error = $"Failed to parse number \"${Parsable[..i]}\" for unit ${Unit.Key}.";
                             return false;
                         }
-                        Span = Span.Add(Factor * UnitToTime[Unit.Key]);
+                        try {
+                            Span = Span.Add(Factor * UnitToTime[Unit.Key]);
+                        } catch (OverflowException e) {
+                            Error = $"Unable to create time! The duration you specified is too long.\n[{e.Message}]";
+                            return false;
+                        }
                         break;
                     }
                 }

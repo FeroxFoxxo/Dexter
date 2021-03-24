@@ -119,6 +119,12 @@ namespace Dexter.Configurations {
 
         public bool PingDevelopers { get; set; }
 
+        /// <summary>
+        /// The standardized timezone to parse timezone-sensitive DateTimeOffsets to.
+        /// </summary>
+
+        public short StandardTimeZone { get; set; }
+
     }
 
 }

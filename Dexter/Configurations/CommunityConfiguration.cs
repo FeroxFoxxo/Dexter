@@ -69,11 +69,5 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public bool IncludeEventResolutionInfo { get; set; }
-
-        /// <summary>
-        /// Sets the standard timezone to show events with after fetching from the database or being updated.
-        /// </summary>
-
-        public short StandardTimeZone { get; set; }
     }
 }

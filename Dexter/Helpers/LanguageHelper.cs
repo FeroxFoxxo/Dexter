@@ -496,14 +496,14 @@ namespace Dexter.Helpers {
                 }
             }
 
-            if (Regex.IsMatch(LowerInput, @$"(^in)|(from now\s*{TimeZoneMatcher}[\s.]*$)", RegexOptions.IgnoreCase)) {
+            if (Regex.IsMatch(LowerInput, @$"(^in)|(from now\s*{TimeZoneMatcher}?[\s.]*$)", RegexOptions.IgnoreCase)) {
                 if(!TryParseSpan(Input, out TimeSpan Span, out string NewError)) {
                     Error = NewError;
                     return false;
                 }
                 Time = Time.Add(Span).Add(TimeSpan.FromMilliseconds(100)).ToOffset(TimeZoneOffset);
                 return true;
-            } else if (Regex.IsMatch(LowerInput, @$"ago\s*{TimeZoneMatcher}[\s.]*$", RegexOptions.IgnoreCase)) {
+            } else if (Regex.IsMatch(LowerInput, @$"ago\s*{TimeZoneMatcher}?[\s.]*$", RegexOptions.IgnoreCase)) {
                 if (!TryParseSpan(Input, out TimeSpan Span, out string NewError)) {
                     Error = NewError;
                     return false;
@@ -686,7 +686,7 @@ namespace Dexter.Helpers {
                 { TimeUnit.Month, "mon(ths?)?"},
                 { TimeUnit.Year, "y(ears?)?"},
                 { TimeUnit.Century, "centur(y|ies)"},
-                { TimeUnit.Millenium, "milleni(um|a)"}
+                { TimeUnit.Millenium, "millenn?i(um|a)"}
             };
 
             foreach(KeyValuePair<TimeUnit, string> Unit in RegExps) {
@@ -698,7 +698,12 @@ namespace Dexter.Helpers {
                             Error = $"Failed to parse number \"${Parsable[..i]}\" for unit ${Unit.Key}.";
                             return false;
                         }
-                        Span = Span.Add(Factor * UnitToTime[Unit.Key]);
+                        try {
+                            Span = Span.Add(Factor * UnitToTime[Unit.Key]);
+                        } catch (OverflowException e) {
+                            Error = $"Unable to create time! The duration you specified is too long.\n[{e.Message}]";
+                            return false;
+                        }
                         break;
                     }
                 }

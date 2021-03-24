@@ -27,7 +27,7 @@ namespace Dexter.Commands {
 
         [Command("reminder")]
         [Summary("Creates and manages reminders.\n" +
-            "`ADD [Time] ; [Reminder]` - Creates a new reminder for the target date and time.\n" +
+            "`ADD [Time] <;|to> [Reminder]` - Creates a new reminder for the target date and time.\n" +
             "`REMOVE [Reminder ID]` - Removes a previously created reminder by its ID.\n" +
             "`EDIT [Reminder ID] [New Text]` - Edits the text attached to an existing reminder.\n" +
             "`GET [Reminder ID]` - Gets the relevant information about a reminder." +
@@ -41,14 +41,20 @@ namespace Dexter.Commands {
 
             switch (Action) { 
                 case "add":
-                    int SeparatorIndex = Arguments.IndexOf(";");
+                    int SeparatorIndex = Arguments.IndexOf(DateArgSeparator);
 
                     if (SeparatorIndex == -1) {
-                        await BuildEmbed(EmojiEnum.Annoyed)
-                            .WithTitle("Unable to parse arguments!")
-                            .WithDescription($"Make sure to separate your time and reminder with {DateArgSeparatorName} ({DateArgSeparator})")
-                            .SendEmbed(Context.Channel);
-                        return;
+                        System.Text.RegularExpressions.Match Match = System.Text.RegularExpressions.Regex.Match(Arguments, @"\sto\s");
+                        if (Match.Success) {
+                            SeparatorIndex = Match.Index;
+                            Arguments = $"{Arguments[..Match.Index]};{Arguments[(Match.Index + Match.Length)..]}";
+                        } else {
+                            await BuildEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Unable to parse arguments!")
+                                .WithDescription($"Make sure to separate your time and reminder with {DateArgSeparatorName} ({DateArgSeparator}) or \" to \".")
+                                .SendEmbed(Context.Channel);
+                            return;
+                        }
                     }
 
                     string DateSection = Arguments[..SeparatorIndex];
@@ -180,7 +186,11 @@ namespace Dexter.Commands {
         [Command("remindme")]
         [Summary("Adds a reminder given a date and a reminder body")]
         [ExtendedSummary("Adds a reminder given a date and a reminder body separated by a semicolon\n" +
-            "SYNTAX: `remindme [DATE];[REMINDER]`")]
+            "SYNTAX: `remindme [DATE] <;|to> [REMINDER]`\n" +
+            "Examples:\n" +
+            "    `remindme in 20 minutes to bathe Roxy (my cat)`\n" +
+            "    `remindme June 11 2021 8:00 CDT to congratulate my friend for their birthday!`\n" +
+            "    `remindme in 1d 4h; Gotta go to the dentist.`\n")]
         [BotChannel]
 
         public async Task RemindMeShorthandCommand([Remainder] string Arguments) {

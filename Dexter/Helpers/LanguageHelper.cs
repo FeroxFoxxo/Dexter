@@ -680,7 +680,7 @@ namespace Dexter.Helpers {
                 { TimeUnit.Millisecond, "(ms)|((milli)(second)?s?)" },
                 { TimeUnit.Second, "s(ec(ond)?s?)?" },
                 { TimeUnit.Minute, "m(in(ute)?s?)?" },
-                { TimeUnit.Hour, "h(ours?)"},
+                { TimeUnit.Hour, "h(ours?)?"},
                 { TimeUnit.Day, "d(ays?)?" },
                 { TimeUnit.Week, "w(eeks?)?" },
                 { TimeUnit.Month, "mon(ths?)?"},

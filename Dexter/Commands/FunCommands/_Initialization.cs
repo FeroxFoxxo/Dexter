@@ -2,6 +2,7 @@
 using Dexter.Abstractions;
 using Discord.WebSocket;
 using Dexter.Databases.FunTopics;
+using Dexter.Databases.UserRestrictions;
 
 namespace Dexter.Commands {
 
@@ -22,6 +23,12 @@ namespace Dexter.Commands {
         /// </summary>
 
         public FunTopicsDB FunTopicsDB { get; set; }
+
+        /// <summary>
+        /// Holds relevant information about permissions and restrictions for specific users and services.
+        /// </summary>
+
+        public RestrictionsDB RestrictionsDB { get; set; }
 
     }
 

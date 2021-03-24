@@ -76,6 +76,14 @@ namespace Dexter.Commands {
 
             switch (ActionType) {
                 case Enums.ActionType.Add:
+                    if (RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.Events)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("You aren't permitted to create events!")
+                            .WithDescription("You have been blacklisted from using this service. If you think this is a mistake, feel free to personally contact an administrator.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+
                     string ReleaseArg = Params.Split(TimeEventSeparator)[0];
                     if(!LanguageHelper.TryParseTime(ReleaseArg.Trim(), CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset ReleaseTime, out _)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
@@ -110,7 +118,14 @@ namespace Dexter.Commands {
 
                     await RemoveEvent(Event.ID);
                     break;
-                case Enums.ActionType.Edit: 
+                case Enums.ActionType.Edit:
+                    if (RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.Events)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("You aren't permitted to modify events!")
+                            .WithDescription("You have been blacklisted from using this service. If you think this is a mistake, feel free to personally contact an administrator.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
                     EventParam = Params.Split(" ")[0];
                     Event = await ValidateCommunityEventByID(EventParam);
                     if (Event == null) return;

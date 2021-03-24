@@ -8,6 +8,7 @@ using Dexter.Databases.Mail;
 using Dexter.Databases.FinalWarns;
 using System;
 using Dexter.Databases.Borkdays;
+using Dexter.Databases.UserRestrictions;
 
 namespace Dexter.Commands {
 
@@ -70,6 +71,12 @@ namespace Dexter.Commands {
         /// </summary>
 
         public FinalWarnsDB FinalWarnsDB { get; set; }
+
+        /// <summary>
+        /// Stores information regarding user restrictions in terms of using certain commands.
+        /// </summary>
+
+        public RestrictionsDB RestrictionsDB { get; set; }
 
         /// <summary>
         /// The Random instance is used to pick a set number of random characters from the configuration to create a token.

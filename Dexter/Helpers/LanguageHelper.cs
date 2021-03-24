@@ -686,7 +686,7 @@ namespace Dexter.Helpers {
                 { TimeUnit.Month, "mon(ths?)?"},
                 { TimeUnit.Year, "y(ears?)?"},
                 { TimeUnit.Century, "centur(y|ies)"},
-                { TimeUnit.Millenium, "milleni(um|a)"}
+                { TimeUnit.Millenium, "millenn?i(um|a)"}
             };
 
             foreach(KeyValuePair<TimeUnit, string> Unit in RegExps) {

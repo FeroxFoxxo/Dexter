@@ -106,6 +106,7 @@ namespace Dexter.Commands {
                             .WithTitle("Missing permissions!")
                             .WithDescription("Only administrators or the proposer of the event can remove the event.")
                             .SendEmbed(Context.Channel);
+                        return;
                     }
 
                     await RemoveEvent(Event.ID);
@@ -120,6 +121,7 @@ namespace Dexter.Commands {
                             .WithTitle("Missing permissions!")
                             .WithDescription("Only administrators or the proposer of the event can edit the event.")
                             .SendEmbed(Context.Channel);
+                        return;
                     }
                     await EditEvent(Event.ID, Params[EventParam.Length..].Trim());
                     break;
@@ -171,13 +173,15 @@ namespace Dexter.Commands {
                                 .SendEmbed(Context.Channel);
                             break;
                     }
-                    
-                    if(Events.Count == 0) {
+
+                    if (Events.Count == 0) {
                         await BuildEmbed(EmojiEnum.Wut)
                             .WithTitle("No Events Found!")
                             .WithDescription("No events are compatible with the filters you set for the search.")
                             .SendEmbed(Context.Channel);
-                    } else if(Events.Count == 1) {
+                        return;
+                    }
+                    else if (Events.Count == 1) {
                         await BuildEmbed(EmojiEnum.Love)
                             .WithTitle("1 Event Found!")
                             .WithDescription($"**{(Events[0].EventType == EventType.Official ? "Official" : "Community")} Event #{Events[0].ID}:** \n{Events[0].Description}")
@@ -186,11 +190,12 @@ namespace Dexter.Commands {
                             .AddField("Status:", Events[0].Status.ToString(), true)
                             .AddField("Release Time:", DateTimeOffset.FromUnixTimeSeconds(Events[0].DateTimeRelease).Humanize(), true)
                             .SendEmbed(Context.Channel);
-                    } else {
-                        await CreateReactionMenu(GenerateUserEventsMenu(Events.ToArray()), Context.Channel);
+                        return;
                     }
-
-                    break;
+                    else {
+                        await CreateReactionMenu(GenerateUserEventsMenu(Events.ToArray()), Context.Channel);
+                        return;
+                    }
             }
         }
 

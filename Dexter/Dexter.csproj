@@ -15,18 +15,19 @@
 
 	<ItemGroup>
 		<PackageReference Include="AnimatedGif" Version="1.0.5" />
-		<PackageReference Include="Discord.Net" Version="2.3.1-dev-20210210.1" />
+		<PackageReference Include="Discord.Net" Version="2.3.1" />
 		<PackageReference Include="Figgle" Version="0.4.0" />
-		<PackageReference Include="Google.Apis.Sheets.v4" Version="1.50.0.2231" />
+		<PackageReference Include="Google.Apis.Sheets.v4" Version="1.51.0.2259" />
 		<PackageReference Include="Humanizer.Core" Version="2.8.26" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0-preview.1.21102.2" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0-preview.1.21102.2">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0-preview.2.21154.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0-preview.2.21154.2">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0-preview.1.21102.12" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0-preview.2.21154.6" />
 		<PackageReference Include="System.CommandLine.DragonFruit" Version="0.3.0-alpha.20574.7" />
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
+    
 		<None Update="Configurations\CommissionCooldownConfiguration.json">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

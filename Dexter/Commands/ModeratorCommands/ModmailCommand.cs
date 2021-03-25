@@ -28,11 +28,12 @@ namespace Dexter.Commands {
                 return;
             }
 
-            if (Message.Length > 1500) {
+            if (Message.Length > 1250) {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Your modmail message is too big!")
                     .WithDescription("Please try to summarise your modmail a touch! If you are unable to, try send it in two different messages! " +
-                        $"This count should be under 1500 characters. The current modmail message character count is {Message.Length}.")
+                        $"This character count should be under 1250 characters. This is due to how Discord handles embeds and the added information we need to apply to the embed. " +
+                        $"The current modmail message character count is {Message.Length}.")
                     .SendEmbed(Context.Channel);
                 return;
             }

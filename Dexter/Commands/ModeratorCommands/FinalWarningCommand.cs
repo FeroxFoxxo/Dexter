@@ -29,8 +29,7 @@ namespace Dexter.Commands {
         [RequireModerator]
         [BotChannel]
 
-        public async Task IssueFinalWarn(/*short PointsDeducted, */IGuildUser User, TimeSpan MuteDuration, [Remainder] string Reason) {
-
+        public async Task IssueFinalWarn(IGuildUser User, TimeSpan MuteDuration, [Remainder] string Reason) {
             short PointsDeducted = ModerationConfiguration.FinalWarningPointsDeducted;
 
             if (FinalWarnsDB.IsUserFinalWarned(User)) {

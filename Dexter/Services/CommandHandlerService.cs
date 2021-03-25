@@ -198,7 +198,7 @@ namespace Dexter.Services {
                                 .WithDescription(Result.ErrorReason);
 
                         // Finally, we send the error into the channel with a ping to the developers to take notice of.
-                        await CommandContext.Channel.SendMessageAsync($"Unknown error!{(BotConfiguration.PingDevelopers ? $"I'll tell the developers.\n<@&{BotConfiguration.DeveloperRoleID}>" : string.Empty)}", embed: CommandErrorEmbed.Build());
+                        await CommandContext.Channel.SendMessageAsync($"Unknown error!{(BotConfiguration.PingDevelopers ? $" I'll tell the developers.\n<@&{BotConfiguration.DeveloperRoleID}>" : string.Empty)}", embed: CommandErrorEmbed.Build());
                         break;
                 }
             } catch (HttpException) {

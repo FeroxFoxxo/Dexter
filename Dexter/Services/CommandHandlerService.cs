@@ -53,7 +53,7 @@ namespace Dexter.Services {
         public ProposalConfiguration ProposalConfiguration { get; set; }
 
         /// <summary>
-        /// The Initialize override hooks into both the Client's MessageRecieved event and the CommandService's CommandExecuted event.
+        /// The Initialize override hooks into both the Client's MessageReceived event and the CommandService's CommandExecuted event.
         /// </summary>
 
         public override void Initialize() {
@@ -65,7 +65,7 @@ namespace Dexter.Services {
         /// The HandleCommandAsync runs on MessageReceived and will check for if the message has the bot's prefix,
         /// if the author is a bot and if we're in a guild, if so - execute!
         /// </summary>
-        /// <param name="SocketMessage">The SocketMessage event is given as a parameter of MessageRecieved and
+        /// <param name="SocketMessage">The SocketMessage event is given as a parameter of MessageReceived and
         /// is used to find and execute the command if the parameters have been met.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         

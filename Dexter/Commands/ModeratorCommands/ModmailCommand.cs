@@ -10,10 +10,24 @@ namespace Dexter.Commands {
 
     public partial class ModeratorCommands {
 
+        /// <summary>
+        /// Sends an anonymous message to the moderators in a specific channel prepared for this.
+        /// </summary>
+        /// <param name="Message">The string message to send to the channel as a modmail.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
+
         [Command("modmail")]
         [Summary("Sends an anonymous message to the moderators. This should be used in DMs.")]
 
         public async Task SendModMail([Remainder] string Message) {
+            if (RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.Modmail)) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("You aren't permitted to send modmails!")
+                    .WithDescription("You have been blacklisted from using this service. If you think this is a mistake, feel free to personally contact an administrator")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+
             if (Message.Length > 1500) {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Your modmail message is too big!")

@@ -17,6 +17,7 @@ using Newtonsoft.Json;
 using Microsoft.Extensions.DependencyInjection;
 using System.Data;
 using Dexter.Databases.EventTimers;
+using Dexter.Databases.UserRestrictions;
 
 namespace Dexter.Services {
 
@@ -44,6 +45,12 @@ namespace Dexter.Services {
         public ProposalDB ProposalDB { get; set; }
 
         /// <summary>
+        /// Holds relevant information about users who are restricted from using this service.
+        /// </summary>
+
+        public RestrictionsDB RestrictionsDB { get; set; }
+
+        /// <summary>
         /// The Random instance is used to pick a set number of random characters from the configuration to create a token.
         /// </summary>
         
@@ -54,7 +61,7 @@ namespace Dexter.Services {
         /// </summary>
 
         public override void Initialize() {
-            DiscordSocketClient.MessageReceived += MessageRecieved;
+            DiscordSocketClient.MessageReceived += MessageReceived;
             DiscordSocketClient.ReactionAdded += ReactionAdded;
             DiscordSocketClient.ReactionRemoved += ReactionRemoved;
         }
@@ -134,17 +141,17 @@ namespace Dexter.Services {
         }
 
         /// <summary>
-        /// The MessageRecieved method runs when a message is sent in the suggestions channel, and runs checks to see if the message is a suggestion.
+        /// The MessageReceived method runs when a message is sent in the suggestions channel, and runs checks to see if the message is a suggestion.
         /// </summary>
-        /// <param name="RecievedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
+        /// <param name="ReceivedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
-        public Task MessageRecieved(SocketMessage RecievedMessage) {
+        public Task MessageReceived(SocketMessage ReceivedMessage) {
             // Check to see if the message has been sent in the suggestion channel and is not a bot, least we return.
-            if (RecievedMessage.Channel.Id != ProposalConfiguration.SuggestionsChannel || RecievedMessage.Author.IsBot)
+            if (ReceivedMessage.Channel.Id != ProposalConfiguration.SuggestionsChannel || ReceivedMessage.Author.IsBot)
                 return Task.CompletedTask;
 
-            _ = Task.Run(async () => await CreateSuggestion(RecievedMessage));
+            _ = Task.Run(async () => await CreateSuggestion(ReceivedMessage));
 
             return Task.CompletedTask;
         }
@@ -153,26 +160,36 @@ namespace Dexter.Services {
         /// The CreateSuggestion method converts the message to a proposal and suggestion object.
         /// This suggestion object is then sent back to the channel once deleted as a formatted embed for use to vote on.
         /// </summary>
-        /// <param name="RecievedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
+        /// <param name="ReceivedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task CreateSuggestion (SocketMessage RecievedMessage) {
+        public async Task CreateSuggestion (SocketMessage ReceivedMessage) {
+            if (RestrictionsDB.IsUserRestricted(ReceivedMessage.Author, Restriction.Suggestions)) {
+                await ReceivedMessage.DeleteAsync();
+
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("You aren't permitted to make suggestions!")
+                    .WithDescription("You have been blacklisted from using this service. If you think this is a mistake, feel free to personally contact an administrator")
+                    .SendEmbed(ReceivedMessage.Author, ReceivedMessage.Channel as ITextChannel);
+                return;
+            }
+
             // Check to see if the embed message length is more than 1750, else will fail the embed from sending due to character limits.
-            if (RecievedMessage.Content.Length > 1750) {
-                await RecievedMessage.DeleteAsync();
+            if (ReceivedMessage.Content.Length > 1750) {
+                await ReceivedMessage.DeleteAsync();
 
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Your suggestion is too big!")
                     .WithDescription("Please try to summarise your suggestion a little! " +
                     "Keep in mind that emoji add a lot of characters to your suggestion - even if it doesn't seem like it - " +
                     "as Discord handles emoji differently to text, so if you're using a lot of emoji try to cut down on those! <3")
-                    .SendEmbed(RecievedMessage.Author, RecievedMessage.Channel as ITextChannel);
+                    .SendEmbed(ReceivedMessage.Author, ReceivedMessage.Channel as ITextChannel);
                 return;
             }
 
             // Remove content from suggestion from people who do not realise that a command is not needed to run the bot.
 
-            string Content = RecievedMessage.Content;
+            string Content = ReceivedMessage.Content;
 
             if (ProposalConfiguration.CommandRemovals.Contains(Content.Split(' ')[0].ToLower()))
                 Content = Content[(Content.IndexOf(" ") + 1)..];
@@ -184,28 +201,28 @@ namespace Dexter.Services {
                 Tracker = CreateToken(),
                 Content = Content,
                 ProposalStatus = ProposalStatus.Suggested,
-                Proposer = RecievedMessage.Author.Id,
+                Proposer = ReceivedMessage.Author.Id,
                 ProposalType = ProposalType.Suggestion,
-                Username = RecievedMessage.Author.Username,
-                AvatarURL = await RecievedMessage.Author.GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordSocketClient, ProposalConfiguration)
+                Username = ReceivedMessage.Author.Username,
+                AvatarURL = await ReceivedMessage.Author.GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordSocketClient, ProposalConfiguration)
             };
 
-            Attachment Attachment = RecievedMessage.Attachments.FirstOrDefault();
+            Attachment Attachment = ReceivedMessage.Attachments.FirstOrDefault();
 
             if (Attachment != null) {
                 if (Attachment.Size > 8000000) {
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Your attachment is too big!")
                         .WithDescription("Please keep attachments under 8MB due to Discord's size limitations and our caching of data! <3")
-                        .SendEmbed(RecievedMessage.Author, RecievedMessage.Channel as ITextChannel);
-                    await RecievedMessage.DeleteAsync();
+                        .SendEmbed(ReceivedMessage.Author, ReceivedMessage.Channel as ITextChannel);
+                    await ReceivedMessage.DeleteAsync();
                     return;
                 }
 
                 Proposal.ProxyURL = await Attachment.ProxyUrl.GetProxiedImage($"{Proposal.Tracker}", DiscordSocketClient, ProposalConfiguration);
             }
 
-            RestUserMessage Embed = await RecievedMessage.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
+            RestUserMessage Embed = await ReceivedMessage.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
 
             // Set the message ID in the suggestion object to the ID of the embed.
             Proposal.MessageID = Embed.Id;
@@ -230,7 +247,7 @@ namespace Dexter.Services {
             ProposalDB.SaveChanges();
 
             // Delete the message sent by the user.
-            await RecievedMessage.DeleteAsync();
+            await ReceivedMessage.DeleteAsync();
 
             // Add the related emoji specified in the ProposalConfiguration to the suggestion.
             SocketGuild Guild = DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild);

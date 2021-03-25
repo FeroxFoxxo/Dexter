@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Dexter.Databases.CommunityEvents;
 using Dexter.Databases.EventTimers;
 using System.Linq;
+using Dexter.Databases.UserRestrictions;
 
 namespace Dexter.Commands {
 
@@ -30,6 +31,12 @@ namespace Dexter.Commands {
         /// </summary>
 
         public CommunityEventsDB CommunityEventsDB { get; set; }
+
+        /// <summary>
+        /// Holds information about users who have been forbidden from using this service.
+        /// </summary>
+
+        public RestrictionsDB RestrictionsDB { get; set; } 
    
     }
 

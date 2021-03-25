@@ -26,6 +26,14 @@ namespace Dexter.Commands {
 
             if (!string.IsNullOrEmpty(Command)) {
                 if (Enum.TryParse(Command.Split(" ")[0].ToLower().Pascalize(), out Enums.ActionType ActionType)) {
+                    if(RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.TopicManagement) && ActionType != Enums.ActionType.Get) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("You aren't permitted to manage topics!")
+                            .WithDescription("You have been blacklisted from using this service. If you think this is a mistake, feel free to personally contact an administrator")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+
                     string Topic = Command[(Command.Split(" ")[0].Length + 1)..];
 
                     switch (ActionType) {

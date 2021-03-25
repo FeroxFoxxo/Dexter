@@ -677,16 +677,16 @@ namespace Dexter.Helpers {
             Span = TimeSpan.Zero;
 
             Dictionary<TimeUnit, string> RegExps = new Dictionary<TimeUnit, string> {
-                { TimeUnit.Millisecond, "(ms)|((milli)(second)?s?)" },
-                { TimeUnit.Second, "s(ec(ond)?s?)?" },
-                { TimeUnit.Minute, "m(in(ute)?s?)?" },
-                { TimeUnit.Hour, "h(ours?)?"},
-                { TimeUnit.Day, "d(ays?)?" },
-                { TimeUnit.Week, "w(eeks?)?" },
-                { TimeUnit.Month, "mon(ths?)?"},
-                { TimeUnit.Year, "y(ears?)?"},
-                { TimeUnit.Century, "centur(y|ies)"},
-                { TimeUnit.Millenium, "millenn?i(um|a)"}
+                { TimeUnit.Millisecond, @"(ms)|((milli)(second)?s?)" },
+                { TimeUnit.Second, @"s(ec(ond)?s?)?" },
+                { TimeUnit.Minute, @"m(in(ute)?s?)?" },
+                { TimeUnit.Hour, @"h(ours?)?" },
+                { TimeUnit.Day, @"d(ays?)?" },
+                { TimeUnit.Week, @"w(eeks?)?" },
+                { TimeUnit.Month, @"mon(ths?)?" },
+                { TimeUnit.Year, @"y(ears?)?" },
+                { TimeUnit.Century, @"centur(y|ies)" },
+                { TimeUnit.Millenium, @"millenn?i(um|a)" }
             };
 
             foreach(KeyValuePair<TimeUnit, string> Unit in RegExps) {

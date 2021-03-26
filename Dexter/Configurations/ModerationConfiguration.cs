@@ -53,6 +53,12 @@ namespace Dexter.Configurations {
         public ulong MutedRoleID { get; set; }
 
         /// <summary>
+        /// The role ID for the "VC Muted" role.
+        /// </summary>
+
+        public ulong VCMutedRoleID { get; set; }
+
+        /// <summary>
         /// The numerical ID of the #rules-and-info channel.
         /// </summary>
 

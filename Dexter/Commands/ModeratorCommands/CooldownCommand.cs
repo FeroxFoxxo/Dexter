@@ -13,35 +13,36 @@ namespace Dexter.Commands {
     public partial class ModeratorCommands {
 
         /// <summary>
-        /// The Cooldown Command method runs on COMCOOLDOWN. It takes in the type of entry of cooldown you'd like to apply and sets the cooldown accordingly.
+        /// The Cooldown Command method runs on COOLDOWN. It takes in the type of entry of cooldown you'd like to apply and sets the cooldown accordingly.
         /// </summary>
         /// <param name="EntryType">The action you wish to apply for the cooldown, either ISSUE or REVOKE.</param>
         /// <param name="User">The user you wish to remove the cooldown from.</param>
+        /// <param name="TextChannel">The text channel you want to have the cooldown removed from.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        [Command("commCooldown")]
+        [Command("cooldown")]
         [Summary("Applies a specified action to a user's commission cooldown.\n" +
-            "`ISSUE [USER]` - issues a cooldown to the user.\n" +
-            "`REVOKE [USER]` - removes a cooldown from a user.")]
+            "`ISSUE [USER] [CHANNELID]` - issues a cooldown to the user.\n" +
+            "`REVOKE [USER] [CHANNELID]` - removes a cooldown from a user.")]
         [Alias("commCooldown", "cooldown")]
         [RequireModerator]
 
-        public async Task CooldownCommand (EntryType EntryType, IUser User) {
+        public async Task CooldownCommand (EntryType EntryType, IUser User, ITextChannel TextChannel) {
             switch (EntryType) {
                 case EntryType.Issue:
-                    Cooldown IssueCooldown = CooldownDB.Cooldowns.Find($"{User.Id}{CommissionCooldownConfiguration.CommissionsCornerID}");
+                    Cooldown IssueCooldown = CooldownDB.Cooldowns.Find($"{User.Id}{TextChannel.Id}");
 
                     if (IssueCooldown != null)
-                        if (IssueCooldown.TimeOfCooldown + CommissionCooldownConfiguration.CommissionCornerCooldown < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
+                        if (IssueCooldown.TimeOfCooldown + CommissionCooldownConfiguration.ChannelCooldowns[TextChannel.Id]["CooldownTime"] < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
                             CooldownDB.Cooldowns.Remove(IssueCooldown);
                             CooldownDB.SaveChanges();
                         } else {
                             DateTime CooldownTime = DateTime.UnixEpoch.AddSeconds(IssueCooldown.TimeOfCooldown);
 
                             await BuildEmbed(EmojiEnum.Love)
-                                .WithTitle("Unable to issue cooldown.")
+                                .WithTitle($"Unable To Issue {TextChannel} Cooldown.")
                                 .WithDescription($"Haiya! The user {User.GetUserInformation()} seems to already be on cooldown. " +
-                                    $"This cooldown was applied on {CooldownTime.ToLongDateString()} at {CooldownTime.ToLongTimeString()}.")
+                                    $"This cooldown in was applied on {CooldownTime.ToLongDateString()} at {CooldownTime.ToLongTimeString()}.")
                                 .WithCurrentTimestamp()
                                 .SendEmbed(Context.Channel);
 
@@ -49,7 +50,7 @@ namespace Dexter.Commands {
                         }
 
                     Cooldown NewCooldown = new () {
-                        Token = $"{User.Id}{CommissionCooldownConfiguration.CommissionsCornerID}",
+                        Token = $"{User.Id}{TextChannel.Id}",
                         TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                     };
 
@@ -60,20 +61,20 @@ namespace Dexter.Commands {
                     DateTime NewCooldownTime = DateTime.UnixEpoch.AddSeconds(NewCooldown.TimeOfCooldown);
 
                     await BuildEmbed(EmojiEnum.Love)
-                        .WithTitle("Added Commission Cooldown!")
-                        .WithDescription($"Successfully added commission cooldown to {User.GetUserInformation()} " +
+                        .WithTitle($"Added {TextChannel} Cooldown!")
+                        .WithDescription($"Successfully added cooldown to {User.GetUserInformation()} " +
                             $"at {NewCooldownTime.ToLongTimeString()}, {NewCooldownTime.ToLongDateString()}.")
                         .WithCurrentTimestamp()
                         .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,
                             BuildEmbed(EmojiEnum.Love)
-                                .WithTitle("Cooldown Issued.")
-                                .WithDescription($"Haiya! We've given you a commission cooldown, set at {NewCooldownTime.ToLongTimeString()}, {NewCooldownTime.ToLongDateString()}. <3")
+                                .WithTitle($"{TextChannel} Cooldown Issued.")
+                                .WithDescription($"Haiya! We've given you a cooldown set at {NewCooldownTime.ToLongTimeString()}, {NewCooldownTime.ToLongDateString()}. <3")
                                 .WithCurrentTimestamp()
                         );
 
                     break;
                 case EntryType.Revoke:
-                    Cooldown RevokeCooldown = CooldownDB.Cooldowns.Find($"{User.Id}{CommissionCooldownConfiguration.CommissionsCornerID}");
+                    Cooldown RevokeCooldown = CooldownDB.Cooldowns.Find($"{User.Id}{TextChannel.Id}");
 
                     if (RevokeCooldown != null) {
                         CooldownDB.Cooldowns.Remove(RevokeCooldown);
@@ -82,21 +83,21 @@ namespace Dexter.Commands {
                         DateTime CooldownTime = DateTime.UnixEpoch.AddSeconds(RevokeCooldown.TimeOfCooldown);
 
                         await BuildEmbed(EmojiEnum.Unknown)
-                            .WithTitle("Removed Commission Cooldown!")
-                            .WithDescription($"Successfully removed commission cooldown from {User.GetUserInformation()}, " +
+                            .WithTitle($"Removed {TextChannel} Cooldown!")
+                            .WithDescription($"Successfully removed cooldown from {User.GetUserInformation()}, " +
                                 $"of whose cooldown used to be {CooldownTime.ToLongTimeString()}, {CooldownTime.ToLongDateString()}.")
                             .WithCurrentTimestamp()
                             .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User, BuildEmbed(EmojiEnum.Love)
-                                .WithTitle("Cooldown Revoked.")
-                                .WithDescription($"Haiya! We've revoked your commission cooldown set at {CooldownTime.ToLongTimeString()}, " +
-                                $"{CooldownTime.ToLongDateString()}. You should now be able to re-send your commission informtion into the channel. <3")
+                                .WithTitle($"{TextChannel} Cooldown Revoked.")
+                                .WithDescription($"Haiya! We've revoked your cooldown set at {CooldownTime.ToLongTimeString()}, " +
+                                $"{CooldownTime.ToLongDateString()}. You should now be able to re-send your informtion into the channel. <3")
                                 .WithCurrentTimestamp()
                         );
                     } else {
                         await BuildEmbed(EmojiEnum.Annoyed)
-                            .WithTitle("Unable to remove cooldown.")
+                            .WithTitle($"Unable To Remove {TextChannel} Cooldown.")
                             .WithDescription($"Haiya! I was unable to remove the cooldown from {User.GetUserInformation()}. " +
-                                $"Are you sure this is the correct ID or that they have a commission cooldown lain against them?")
+                                $"Are you sure this is the correct ID or that they have a cooldown lain against them?")
                             .WithCurrentTimestamp()
                             .SendEmbed(Context.Channel);
                     }
@@ -104,7 +105,7 @@ namespace Dexter.Commands {
                     break;
                 default:
                     await BuildEmbed(EmojiEnum.Annoyed)
-                        .WithTitle("Unable To Modify Cooldown")
+                        .WithTitle($"Unable To Modify {TextChannel} Cooldown")
                         .WithDescription($"The argument {EntryType} does not exist as an option to use on this command!")
                         .SendEmbed(Context.Channel);
                     break;

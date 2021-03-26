@@ -43,10 +43,10 @@ namespace Dexter.Commands {
         public DiscordSocketClient Client { get; set; }
 
         /// <summary>
-        /// The CommissionCooldownConfiguration stores the length of time a commission cooldown lasts for.
+        /// The ChannelCooldownConfiguration stores the length of time a commission cooldown lasts for.
         /// </summary>
 
-        public CommissionCooldownConfiguration CommissionCooldownConfiguration { get; set; }
+        public ChannelCooldownConfiguration CommissionCooldownConfiguration { get; set; }
 
         /// <summary>
         /// Works as an interface between the configuration files attached to the Moderation module and its commands.

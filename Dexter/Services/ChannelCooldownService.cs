@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 namespace Dexter.Services {
 
     /// <summary>
-    /// The CommissionCooldownService checks to see if a user has posted multiple commissions in the given channel in a quicker period of 
-    /// time than otherwise allowed and, if so, attempts to remove the commission posting and warns the user of the event.
+    /// The ChannelCooldownService checks to see if a user has posted multiple commissions in the given channel in a quicker period of 
+    /// time than otherwise allowed and, if so, attempts to remove the posting and warns the user of the event.
     /// </summary>
     
-    public class CommissionCooldownService : Service {
+    public class ChannelCooldownService : Service {
 
         /// <summary>
         /// The CooldownDB contains all the current cooldowns in the database.
@@ -24,10 +24,10 @@ namespace Dexter.Services {
         public CooldownDB CooldownDB { get; set; }
 
         /// <summary>
-        /// The CommissionCooldownConfiguration contains information regarding the channel in which the commission is in, aswell as how long cooldowns should last.
+        /// The ChannelCooldownConfiguration contains information regarding the channel in which the commission is in, aswell as how long cooldowns should last.
         /// </summary>
         
-        public CommissionCooldownConfiguration CommissionCooldownConfiguration { get; set; }
+        public ChannelCooldownConfiguration ChannelCooldownConfiguration { get; set; }
 
         /// <summary>
         /// The Initialize override hooks into the MessageReceived event to run the related method.
@@ -46,7 +46,7 @@ namespace Dexter.Services {
         
         public async Task MessageReceived(SocketMessage SocketMessage) {
             // We first check to see if the channel is in the commissions corner and not from a bot to continue.
-            if (SocketMessage.Channel.Id != CommissionCooldownConfiguration.CommissionsCornerID || SocketMessage.Author.IsBot)
+            if (!ChannelCooldownConfiguration.ChannelCooldowns.ContainsKey(SocketMessage.Channel.Id) || SocketMessage.Author.IsBot)
                 return;
 
             // We then try pull the cooldown from the database to see if the user and channel ID both exist as a token.
@@ -55,10 +55,10 @@ namespace Dexter.Services {
             if (Cooldown != null) {
 
                 // We then check to see if the cooldown is expired. If so, we set the new time.
-                if (Cooldown.TimeOfCooldown + CommissionCooldownConfiguration.CommissionCornerCooldown > DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
+                if (Cooldown.TimeOfCooldown + ChannelCooldownConfiguration.ChannelCooldowns[SocketMessage.Id]["CooldownTime"] > DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
 
                     // We then check to see if the cooldown is in the grace-period. This is a period of time where the user can send multiple messages. Once this cooldown has ended we warn the user.
-                    if (Cooldown.TimeOfCooldown + CommissionCooldownConfiguration.GracePeriod < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
+                    if (Cooldown.TimeOfCooldown + ChannelCooldownConfiguration.ChannelCooldowns[SocketMessage.Id]["GracePeriod"] < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
                         DateTime CooldownTime = DateTime.UnixEpoch.AddSeconds(Cooldown.TimeOfCooldown);
 
                         // We first attempt to delete the message. This may throw an error.
@@ -67,10 +67,10 @@ namespace Dexter.Services {
                         // We then warn the user that they are not allowed to post a commission, as they have reached their maximum allotted time.
                         await BuildEmbed(EmojiEnum.Love)
                             .WithTitle($"Haiya, {SocketMessage.Author.Username}.")
-                            .WithDescription($"Just a friendly reminder you are only allowed to post commissions every" +
-                                $" {TimeSpan.FromSeconds(CommissionCooldownConfiguration.CommissionCornerCooldown).TotalDays} days. " +
+                            .WithDescription($"Just a friendly reminder you are only allowed to post in this channel every" +
+                                $" {TimeSpan.FromSeconds(ChannelCooldownConfiguration.ChannelCooldowns[SocketMessage.Id]["CooldownTime"]).TotalDays} days. " +
                                 $"Please take a lookie over the channel pins regarding the regulations of this channel if you haven't already <3")
-                            .AddField("Last Commission Sent:", $"{CooldownTime.ToLongTimeString()}, {CooldownTime.ToLongDateString()}")
+                            .AddField("Last Message Sent:", $"{CooldownTime.ToLongTimeString()}, {CooldownTime.ToLongDateString()}")
                             .WithFooter($"Times are in {(TimeZoneInfo.Local.IsDaylightSavingTime(CooldownTime) ? TimeZoneInfo.Local.DaylightName : TimeZoneInfo.Local.StandardName)}.")
                             .WithCurrentTimestamp()
                             .SendEmbed(SocketMessage.Author, SocketMessage.Channel as ITextChannel);

@@ -1,6 +1,6 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Configurations;
-using Dexter.Databases.Borkdays;
+using Dexter.Databases.UserProfiles;
 using Dexter.Databases.Mail;
 using Dexter.Databases.Reminders;
 using Dexter.Services;
@@ -26,10 +26,10 @@ namespace Dexter.Commands {
         public UtilityConfiguration UtilityConfiguration { get; set; }
 
         /// <summary>
-        /// The BorkdayDB stores information regarding a user's birthday.
+        /// Stores information regarding a user's birthday, usernames, nicknames, and other relevant data.
         /// </summary>
 
-        public BorkdayDB BorkdayDB { get; set; }
+        public ProfilesDB ProfilesDB { get; set; }
 
         /// <summary>
         /// The ModmailDB stores information about the mailing service and mailed messages.
@@ -42,6 +42,12 @@ namespace Dexter.Commands {
         /// </summary>
 
         public ReminderDB ReminderDB { get; set; }
+
+        /// <summary>
+        /// Stores relevant information about certain users' historical records.
+        /// </summary>
+
+        public UserRecordsService UserRecordsService { get; set; }
 
         /// <summary>
         /// Coordinates the initialization of all necessary infrastructure upon startup.

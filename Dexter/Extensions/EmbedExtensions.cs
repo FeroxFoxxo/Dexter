@@ -115,11 +115,12 @@ namespace Dexter.Extensions {
         /// <param name="Condition">The condition which must be true to add the field.</param>
         /// <param name="Name">The name of the field you wish to add.</param>
         /// <param name="Value">The description of the field you wish to add.</param>
+        /// <param name="InLine">Sets the inline parameter of the Embed Field.</param>
         /// <returns>The embed with the field added to it if true.</returns>
         
-        public static EmbedBuilder AddField(this EmbedBuilder EmbedBuilder, bool Condition, string Name, object Value) {
+        public static EmbedBuilder AddField(this EmbedBuilder EmbedBuilder, bool Condition, string Name, object Value, bool InLine = false) {
             if (Condition)
-                EmbedBuilder.AddField(Name, Value);
+                EmbedBuilder.AddField(Name, Value, InLine);
 
             return EmbedBuilder;
         }

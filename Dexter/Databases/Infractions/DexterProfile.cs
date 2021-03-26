@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.Infractions {
     
@@ -32,7 +33,6 @@ namespace Dexter.Databases.Infractions {
         /// </summary>
 
         public string CurrentPointTimer { get; set; }
-
     }
 
 }

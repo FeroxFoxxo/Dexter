@@ -41,16 +41,34 @@ namespace Dexter.Commands {
 
             UserProfile Profile = ProfilesDB.Profiles.Find(User.Id);
 
+            string[] LastNicknames = GetLastNameRecords(UserRecordsService.GetNameRecords(User, NameType.Nickname), 5);
+            string[] LastUsernames = GetLastNameRecords(UserRecordsService.GetNameRecords(User, NameType.Username), 5);
+
             await BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle($"User Profile For {GuildUser.Username}#{GuildUser.Discriminator}")
                 .WithThumbnailUrl(GuildUser.GetTrueAvatarUrl())
-                .AddField("Username", GuildUser.GetUserInformation())
-                .AddField(!string.IsNullOrEmpty(GuildUser.Nickname), "Nickname", GuildUser.Nickname)
+                .AddField("Username", GuildUser.GetUserInformation(), true)
+                .AddField(!string.IsNullOrEmpty(GuildUser.Nickname), "Nickname", GuildUser.Nickname, true)
                 .AddField("Created", $"{GuildUser.CreatedAt:MM/dd/yyyy HH:mm:ss} ({(DateTime.Now - GuildUser.CreatedAt.DateTime).Humanize(2, maxUnit: TimeUnit.Year)} ago)")
                 .AddField(Joined != default, "Joined", $"{Joined:MM/dd/yyyy HH:mm:ss} ({DateTimeOffset.Now.Subtract(Joined).Humanize(2, maxUnit: TimeUnit.Year)} ago)")
                 .AddField(Profile != null && Profile.BorkdayTime != default, "Last Birthday", new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Profile != null ? Profile.BorkdayTime : 0).ToLongDateString())
                 .AddField("Top Role", Context.Guild.Roles.Where(Role => Role.Position == Context.Guild.GetUser(User.Id).Hierarchy).FirstOrDefault().Name)
+                .AddField(LastNicknames.Length > 1, $"Last {LastNicknames.Length} Nicknames:", string.Join(", ", LastNicknames))
+                .AddField(LastUsernames.Length > 1, $"Last {LastUsernames.Length} Usernames:", string.Join(", ", LastUsernames))
                 .SendEmbed(Context.Channel);
+        }
+
+        private string[] GetLastNameRecords(NameRecord[] FullArray, int MaxCount) {
+            List<NameRecord> List = FullArray.ToList();
+            List.Sort((a, b) => b.SetTime.CompareTo(a.SetTime));
+
+            string[] Result = new string[Math.Min(List.Count, MaxCount)];
+
+            for (int i = 0; i < Result.Length; i++) {
+                Result[i] = List[i].Name;
+            }
+
+            return Result;
         }
 
         /// <summary>
@@ -88,11 +106,35 @@ namespace Dexter.Commands {
             List<NameRecord> Names = UserRecordsService.GetNameRecords(User, NameType).ToList();
             Names.Sort((a, b) => b.SetTime.CompareTo(a.SetTime));
 
-            await BuildEmbed(EmojiEnum.Unknown)
-                .WithTitle($"{NameType}s History for User {User.Username}#{User.Discriminator}")
-                .WithThumbnailUrl(User.GetTrueAvatarUrl())
-                .WithDescription(LanguageHelper.Truncate(string.Join(", ", Names), 2000))
-                .SendEmbed(Context.Channel);
+            EmbedBuilder[] Menu = BuildNicknameEmbeds(Names.ToArray(), $"{NameType} Record for User {User.Username}#{User.Discriminator}");
+
+            if (Menu.Length == 1) {
+                await Menu[0].SendEmbed(Context.Channel);
+            } else {
+                await CreateReactionMenu(Menu, Context.Channel);
+            }
+        }
+
+        private const int MaxRowsPerEmbed = 16;
+
+        private EmbedBuilder[] BuildNicknameEmbeds(NameRecord[] Names, string Title = "Names:") {
+            int Count = Names.Length;
+            EmbedBuilder[] Result = new EmbedBuilder[(Count - 1) / MaxRowsPerEmbed + 1];
+
+            for(int p = 0; p < Result.Length; p++) {
+                StringBuilder Content = new StringBuilder();
+
+                foreach(NameRecord n in Names[(p * MaxRowsPerEmbed) .. ((p + 1) * MaxRowsPerEmbed > Count ? Count : (p + 1) * MaxRowsPerEmbed)]) {
+                    Content.Append(n.Expression() + "\n");
+                }
+
+                Result[p] = BuildEmbed(EmojiEnum.Sign)
+                    .WithTitle($"{Title} Page {p + 1}/{Result.Length}")
+                    .WithDescription(Content.Length == 0 ? "Nothing to see here, folks." : Content.Remove(Content.Length - 1, 1).ToString())
+                    .WithFooter($"{p + 1}/{Result.Length}");
+            }
+
+            return Result;
         }
 
         /// <summary>

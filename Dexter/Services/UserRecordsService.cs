@@ -22,7 +22,7 @@ namespace Dexter.Services {
         /// Holds all information used in the module for management.
         /// </summary>
 
-        public ProfilesDB ProfilesDB { get; set; }  
+        public ProfilesDB ProfilesDB { get; set; }
 
         /// <summary>
         /// This method is called after all dependencies are initialized and serves to hook the appropriate events to this service's methods.
@@ -43,30 +43,34 @@ namespace Dexter.Services {
         public async Task RecordNameChange(SocketGuildUser Before, SocketGuildUser After) {
 
             if (Before.Username != After.Username && !string.IsNullOrEmpty(After.Username)) {
-                string[] Usernames = GetNames(After, NameType.Username);
-                
-                if (Usernames.Contains(After.Username)) return;
+                NameRecord Record = ProfilesDB.Names.AsQueryable().Where(n => n.Name == After.Username && n.UserID == After.Id && n.Type == NameType.Username).FirstOrDefault();
 
-                ProfilesDB.Names.Add(new() {
-                    UserID = After.Id,
-                    Name = After.Username,
-                    SetTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
-                    Type = NameType.Username
-                });
+                if (Record != null)
+                    Record.SetTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+                else {
+                    ProfilesDB.Names.Add(new() {
+                        UserID = After.Id,
+                        Name = After.Username,
+                        SetTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                        Type = NameType.Username
+                    });
+                }
                 await ProfilesDB.SaveChangesAsync();
             }
 
             if (Before.Nickname != After.Nickname && !string.IsNullOrEmpty(After.Nickname)) {
-                string[] Nicknames = GetNames(After, NameType.Nickname);
+                NameRecord Record = ProfilesDB.Names.AsQueryable().Where(n => n.Name == After.Username && n.UserID == After.Id && n.Type == NameType.Nickname).FirstOrDefault();
 
-                if (Nicknames.Contains(After.Nickname)) return;
-
-                ProfilesDB.Names.Add(new() {
-                    UserID = After.Id,
-                    Name = After.Nickname,
-                    SetTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
-                    Type = NameType.Nickname
-                });
+                if (Record != null)
+                    Record.SetTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+                else {
+                    ProfilesDB.Names.Add(new() {
+                        UserID = After.Id,
+                        Name = After.Nickname,
+                        SetTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                        Type = NameType.Nickname
+                    });
+                }
                 await ProfilesDB.SaveChangesAsync();
             }
 

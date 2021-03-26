@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.UserProfiles {
 
@@ -42,7 +43,6 @@ namespace Dexter.Databases.UserProfiles {
         /// <summary>
         /// Copies a record to avoid issues with deletion of data.
         /// </summary>
-        /// <param name="Base">The record to copy.</param>
 
         public NameRecord Clone() {
             return new NameRecord() {
@@ -61,6 +61,15 @@ namespace Dexter.Databases.UserProfiles {
 
         public override string ToString() {
             return Name;
+        }
+
+        /// <summary>
+        /// Formats the NameRecord as a listable expression with the time it was last used.
+        /// </summary>
+        /// <returns>A string containing the time the name was last used followed by the Name.</returns>
+
+        public string Expression() {
+            return $"{DateTimeOffset.FromUnixTimeSeconds(SetTime):MM/dd/yyy HH:mm 'UTC'z}: **{Name}**";
         }
     }
 }

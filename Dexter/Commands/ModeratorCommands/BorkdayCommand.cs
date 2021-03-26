@@ -1,6 +1,6 @@
 ﻿using Dexter.Attributes.Methods;
 using Dexter.Configurations;
-using Dexter.Databases.Borkdays;
+using Dexter.Databases.UserProfiles;
 using Dexter.Databases.EventTimers;
 using Dexter.Enums;
 using Dexter.Extensions;
@@ -33,11 +33,11 @@ namespace Dexter.Commands {
             if (User == null)
                 User = Context.Guild.GetUser(Context.User.Id);
 
-            Borkday Borkday = BorkdayDB.Borkdays.Find(User.Id);
+            UserProfile Borkday = BorkdayDB.Profiles.Find(User.Id);
 
             if (Borkday == null)
-                BorkdayDB.Borkdays.Add(
-                    new Borkday() {
+                BorkdayDB.Profiles.Add(
+                    new UserProfile() {
                         BorkdayTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
                         UserID = User.Id
                     }

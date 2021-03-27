@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Dexter.Databases.Reminders {
 
-namespace Dexter.Databases.Reminders {
-    
     /// <summary>
     /// Gives information about the status of a reminder relative to the reminder release system.
     /// It can be PENDING, REMOVED, or RELEASED.

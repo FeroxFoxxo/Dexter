@@ -1,9 +1,6 @@
 ﻿using Dexter.Configurations;
 using Dexter.Abstractions;
-using Discord.WebSocket;
 using Dexter.Databases.CommunityEvents;
-using Dexter.Databases.EventTimers;
-using System.Linq;
 using Dexter.Databases.UserRestrictions;
 
 namespace Dexter.Commands {

@@ -4,7 +4,6 @@ using Dexter.Extensions;
 using Dexter.Databases.Infractions;
 using Discord.Commands;
 using Discord.WebSocket;
-using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 

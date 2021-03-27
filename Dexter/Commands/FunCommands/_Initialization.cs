@@ -1,6 +1,5 @@
 ﻿using Dexter.Configurations;
 using Dexter.Abstractions;
-using Discord.WebSocket;
 using Dexter.Databases.FunTopics;
 using Dexter.Databases.UserRestrictions;
 

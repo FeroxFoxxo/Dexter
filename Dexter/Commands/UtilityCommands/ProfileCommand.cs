@@ -12,7 +12,6 @@ using Discord.WebSocket;
 using System.Linq;
 using Dexter.Attributes.Methods;
 using Dexter.Helpers;
-using Dexter.Databases.Infractions;
 using System.Collections.Generic;
 using System.Text;
 

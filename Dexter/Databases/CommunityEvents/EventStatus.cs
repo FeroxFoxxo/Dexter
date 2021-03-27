@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Dexter.Databases.CommunityEvents {
 
-namespace Dexter.Databases.CommunityEvents {
-    
     /// <summary>
     /// Keeps track of what stage of approval an event submission is in. It can be PENDING, APPROVED, DENIED, or RELEASED.
     /// </summary>

@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Dexter.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dexter.Databases.Reminders {
-    
+
     /// <summary>
     /// Contains all reminders and relevant management methods for the Reminder System.
     /// </summary>

@@ -1,5 +1,4 @@
-﻿using Dexter.Configurations;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Attributes.Classes;
 using Dexter.Services;
 
@@ -9,7 +8,7 @@ namespace Dexter.Commands {
     /// The ConfigurationCommands module relates to the enabling and disabling of a command module.
     /// It is an EssentialModule and, as such, it will not be able to be disabled. 
     /// </summary>
-    
+
     [EssentialModule]
 
     public partial class ConfigurationCommands : DiscordModule {

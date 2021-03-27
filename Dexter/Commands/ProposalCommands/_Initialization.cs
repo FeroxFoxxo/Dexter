@@ -1,13 +1,12 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Databases.Proposals;
-using Dexter.Services;
 
 namespace Dexter.Commands {
 
     /// <summary>
     /// The ProposalCommands module relates to the approval, denial and fetching of a suggested proposal.
     /// </summary>
-    
+
     public partial class ProposalCommands : DiscordModule {
 
         /// <summary>

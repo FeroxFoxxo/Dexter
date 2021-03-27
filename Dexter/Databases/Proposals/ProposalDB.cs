@@ -1,7 +1,6 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Databases.AdminConfirmations;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Linq;
 
 namespace Dexter.Databases.Proposals {
@@ -9,7 +8,7 @@ namespace Dexter.Databases.Proposals {
     /// <summary>
     /// The SuggestionDB contains a set of proposals that require confirmation stages.
     /// </summary>
-    
+
     public class ProposalDB : Database {
 
         /// <summary>

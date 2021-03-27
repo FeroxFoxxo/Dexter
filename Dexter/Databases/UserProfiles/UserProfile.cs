@@ -33,31 +33,7 @@ namespace Dexter.Databases.UserProfiles {
         /// </summary>
 
         public long DateJoined { get; set; }
-    /*
-        /// <summary>
-        /// A collection of all nicknames a given user has used throughout their presence in the server.
-        /// </summary>
 
-        public DbSet<string> Nicknames { get; set; }
-
-        /// <summary>
-        /// A collection of all usernames (tags) a given user has used throughout their presence in the server.
-        /// </summary>
-
-        public DbSet<string> Usernames { get; set; }
-    
-        /// <summary>
-        /// Contains stringified JSON information about Nicknames.
-        /// </summary>
-
-        public string NicknamesData { get; set; }
-
-        /// <summary>
-        /// Contains stringified JSON information about Usernames 
-        /// </summary>
-
-        public string UsernamesData { get; set; }
-    */
     }
 
 }

@@ -254,7 +254,8 @@ namespace Dexter.Commands {
                 // If we are in a public channel we don't want the user's warnings public.
                 BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"{InfractionType.ToString().Humanize()} issued!")
-                    .WithDescription($"{(InfractionType == InfractionType.Warning ? "Warned" : "Muted")} {User.GetUserInformation()} {(InfractionType == InfractionType.Mute ? $" for **{Time.Humanize(2)}**" : "")} due to `{Reason}`"))
+                    .WithDescription($"{(InfractionType == InfractionType.Warning ? "Warned" : "Muted")} {User.GetUserInformation()} {(InfractionType == InfractionType.Mute ? $" for **{Time.Humanize(2)}**" : "")}."))
+                    .AddField("Reason", Reason)
 
                 // Send the embed into the channel.
                 .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,

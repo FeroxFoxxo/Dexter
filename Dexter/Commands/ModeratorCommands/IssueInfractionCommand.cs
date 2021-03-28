@@ -245,14 +245,14 @@ namespace Dexter.Commands {
                        $"{(TotalInfractions == 1 ? "infraction" : "infractions")}** and has had **{PointsDeducted} {(PointsDeducted == 1 ? "point" : "points")} deducted.**")
                    .AddField("Issued By", Context.User.GetUserInformation())
                    .AddField(Time.TotalSeconds > 0, "Total Mute Time", $"{Time.Humanize(2)}.")
-                   .AddField("Reason", Reason)
                    .WithCurrentTimestamp() :
 
                 // If we are in a public channel we don't want the user's warnings public.
                 BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"{InfractionType.ToString().Humanize()} issued!")
                     .WithDescription($"{(InfractionType == InfractionType.Warning ? "Warned" : "Muted")} {User.GetUserInformation()} {(InfractionType == InfractionType.Mute ? $" for **{Time.Humanize(2)}**" : "")}."))
-                    .AddField("Reason", Reason)
+                
+                .AddField("Reason", Reason)
 
                 // Send the embed into the channel.
                 .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,

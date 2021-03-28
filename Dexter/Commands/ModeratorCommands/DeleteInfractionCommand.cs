@@ -28,7 +28,7 @@ namespace Dexter.Commands {
 
             DexterProfile.CurrentPointTimer = string.Empty;
 
-            await User.RemoveRoleAsync(Context.Guild.GetRole(ModerationConfiguration.MutedRoleID));
+            await RemoveMutedRole(new() { { "UserID", User.Id.ToString() } });
 
             InfractionsDB.SaveChanges();
 
@@ -67,7 +67,7 @@ namespace Dexter.Commands {
                 DexterProfile.InfractionAmount = ModerationConfiguration.MaxPoints;
 
             if (Infraction.PointCost > 2)
-                await Warned.RemoveRoleAsync(Context.Guild.GetRole(ModerationConfiguration.MutedRoleID));
+                await RemoveMutedRole(new() { { "UserID", Infraction.User.ToString() } });
 
             InfractionsDB.SaveChanges();
 

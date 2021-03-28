@@ -49,6 +49,7 @@
   "HeadpatStorageGuild": 613441321751019550,
   "HeadpatWebhookName": "HeadpatWebhook",
   "MaxCoinFlips": 1000000,
+  "GamesChannel": 792657895014793246,
   "WritingPromptTerms": {
     "living_adjective": [
       "all-powerful",

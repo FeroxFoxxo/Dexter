@@ -82,6 +82,12 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public int MaxCoinFlips { get; set; }
+    
+        /// <summary>
+        /// The unique channel ID of the channel designated for the games submodule.
+        /// </summary>
+
+        public ulong GamesChannel { get; set; }
     }
 
 }

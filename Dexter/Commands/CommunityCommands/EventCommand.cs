@@ -185,7 +185,7 @@ namespace Dexter.Commands {
                                 .WithTitle("Parameter Parse Error!")
                                 .WithDescription($"Search Parameter \"{SearchParam}\" is invalid! Use `ID`, `USER`, or `DESCRIPTION`.")
                                 .SendEmbed(Context.Channel);
-                            break;
+                            return;
                     }
 
                     if (Events.Count == 0) {
@@ -203,6 +203,7 @@ namespace Dexter.Commands {
                             .AddField("Time Proposed:", DateTimeOffset.FromUnixTimeSeconds(Events[0].DateTimeProposed).Humanize(), true)
                             .AddField("Status:", Events[0].Status.ToString(), true)
                             .AddField("Release Time:", DateTimeOffset.FromUnixTimeSeconds(Events[0].DateTimeRelease).Humanize(), true)
+                            .AddField("Exact Release:", $"{DateTimeOffset.FromUnixTimeSeconds(Events[0].DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone)):dddd, MMM dd yyyy 'at' hh:mmtt 'UTC'zzz}.")
                             .SendEmbed(Context.Channel);
                         return;
                     }

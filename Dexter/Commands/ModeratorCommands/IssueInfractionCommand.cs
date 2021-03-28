@@ -184,33 +184,30 @@ namespace Dexter.Commands {
 
             DexterProfile.InfractionAmount -= PointsDeducted;
 
-            TimeSpan? AdditionalTime = null;
-
-            if (DexterProfile.InfractionAmount == 0)
-                AdditionalTime = TimeSpan.FromMinutes(30);
-            else if (DexterProfile.InfractionAmount == -1)
-                AdditionalTime = TimeSpan.FromMinutes(45);
-            else if (DexterProfile.InfractionAmount == -2)
-                AdditionalTime = TimeSpan.FromHours(1);
-            else if (DexterProfile.InfractionAmount == -3)
-                AdditionalTime = TimeSpan.FromHours(2);
-            else if (DexterProfile.InfractionAmount <= -4)
-                AdditionalTime = TimeSpan.FromHours(3);
-
-            if (AdditionalTime.HasValue) {
-                Time = Time.Add(AdditionalTime.Value);
-
-                Reason += $"\n**Automatic mute of {AdditionalTime.Value.Humanize(2)} applied in addition by {DiscordSocketClient.CurrentUser.Username} for frequent warnings and/or rulebreaks.**";
-            }
-
-            if (Time.TotalSeconds > 0)
-                await MuteUser(User, Time);
-
             if (PointsDeducted == 0) {
-                IRole Role = Context.Guild.GetRole(ModerationConfiguration.MutedRoleID);
+                await MuteUser(User, Time);
+            } else {
+                TimeSpan? AdditionalTime = null;
 
-                if (!User.RoleIds.Contains(ModerationConfiguration.MutedRoleID))
-                    await User.AddRoleAsync(Role);
+                if (DexterProfile.InfractionAmount == 0)
+                    AdditionalTime = TimeSpan.FromMinutes(30);
+                else if (DexterProfile.InfractionAmount == -1)
+                    AdditionalTime = TimeSpan.FromMinutes(45);
+                else if (DexterProfile.InfractionAmount == -2)
+                    AdditionalTime = TimeSpan.FromHours(1);
+                else if (DexterProfile.InfractionAmount == -3)
+                    AdditionalTime = TimeSpan.FromHours(2);
+                else if (DexterProfile.InfractionAmount <= -4)
+                    AdditionalTime = TimeSpan.FromHours(3);
+
+                if (AdditionalTime.HasValue) {
+                    Time = Time.Add(AdditionalTime.Value);
+
+                    Reason += $"\n**Automatic mute of {AdditionalTime.Value.Humanize(2)} applied in addition by {DiscordSocketClient.CurrentUser.Username} for frequent warnings and/or rulebreaks.**";
+                }
+
+                if (Time.TotalSeconds > 0)
+                    await MuteUser(User, Time);
             }
 
             if (!TimerService.TimerExists(DexterProfile.CurrentPointTimer))
@@ -316,16 +313,13 @@ namespace Dexter.Commands {
             if (TimerService.TimerExists(DexterProfile.CurrentMute))
                 TimerService.RemoveTimer(DexterProfile.CurrentMute);
 
-            IRole Muted = User.Guild.GetRole(ModerationConfiguration.MutedRoleID);
-
-            IRole VCMuted = User.Guild.GetRole(ModerationConfiguration.VCMutedRoleID);
-
             try {
-                if (!User.RoleIds.Contains(ModerationConfiguration.MutedRoleID))
-                    await User.AddRoleAsync(Muted);
+                foreach (ulong MutedRole in ModerationConfiguration.MutedRoles) {
+                    IRole Muted = User.Guild.GetRole(MutedRole);
 
-                if (!User.RoleIds.Contains(ModerationConfiguration.VCMutedRoleID))
-                    await User.AddRoleAsync(VCMuted);
+                    if (!User.RoleIds.Contains(MutedRole))
+                        await User.AddRoleAsync(Muted);
+                }
             } catch (Discord.Net.HttpException Error) {
                 await (DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
                     .SendMessageAsync($"**Missing Role Management Permissions >>>** <@&{BotConfiguration.AdministratorRoleID}>",
@@ -354,15 +348,13 @@ namespace Dexter.Commands {
 
             IGuild Guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
 
-            IRole MutedRole = Guild.GetRole(ModerationConfiguration.MutedRoleID);
-
-            IRole VCMutedRole = Guild.GetRole(ModerationConfiguration.MutedRoleID);
-
             IGuildUser User = await Guild.GetUserAsync(UserID);
 
-            if (User != null) {
-                await User.RemoveRoleAsync(MutedRole);
-                await User.RemoveRoleAsync(VCMutedRole);
+            foreach (ulong MutedRole in ModerationConfiguration.MutedRoles) {
+                IRole Muted = User.Guild.GetRole(MutedRole);
+
+                if (User.RoleIds.Contains(MutedRole))
+                    await User.RemoveRoleAsync(Muted);
             }
 
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(UserID);

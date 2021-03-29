@@ -1,0 +1,20 @@
+﻿{
+  "EventsNotificationMention": "<@&815926474443456542> <@&796371963811332107>",
+  "EventsNotificationsChannel": 792657959192231976,
+  "CommunityEventsNotifiedRole": 815566404480663572,
+  "CommunityEventsChannel": 815762135312498698,
+  "OfficialEventsNotifiedRole": 815566407081132032,
+  "OfficialEventsChannel": 815762162379259936,
+  "FailOnOverdueApproval": true,
+  "MaxEventsPerMenu": 5,
+  "EventStatusColor": {
+    "0": "0xff9900", 
+    "1": "0x00ff00", 
+    "2": "0xff0000", 
+    "3": "0xa06020", 
+    "4": "0x880000", 
+    "5": "0xc000ff"  
+  },
+  "IncludeEventResolutionInfo": false,
+  "StandardTimeZone": -5
+}

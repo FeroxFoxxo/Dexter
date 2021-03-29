@@ -13,9 +13,15 @@ namespace Dexter.Commands {
 
     public partial class GreetFurCommands {
 
+        /// <summary>
+        /// Displays the information from the Google Sheets database corresponding to the context user.
+        /// </summary>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("gfactivity")]
         [Summary("Gets the GreetFur's Activity for the fortnight.")]
         [BotChannel]
+        [RequireGreetFur]
 
         public async Task GreetFurActivity () {
             if (SheetsService == null)
@@ -81,6 +87,12 @@ namespace Dexter.Commands {
                 .SendEmbed(Context.Channel);
         }
 
+        /// <summary>
+        /// Turns an integer value into a base-26 representation using uppercase letters.
+        /// </summary>
+        /// <param name="Value">A numerical value to be converted.</param>
+        /// <returns>A string of uppercase letters.</returns>
+        
         public static string IntToLetters(int? Value) {
             string Result = string.Empty;
             while (--Value >= 0) {

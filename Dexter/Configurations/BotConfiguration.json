@@ -1,23 +1,31 @@
 {
+  "AdministratorRoleID": 796371963811332107,
+  "DeveloperRoleID": 795545764909678593,
   "ModeratorRoleID": 679632649807069232,
+  "GreetFurRoleID": 808587693881688064,
   "GuildID": 613441321751019550,
   "ModerationLogChannelID": 792657959192231976,
   "Prefix": "~",
-  "DeveloperMention": " ",
   "ThumbnailURLs": [
     "",
-    "https://us-furries.com/Dexter/DexAnnoyed.png",
-    "https://us-furries.com/Dexter/DexLove.png",
-    "https://us-furries.com/Dexter/DexWut.png",
-    "https://us-furries.com/Dexter/DexSignOwO.png"
+    "https://cdn.discordapp.com/attachments/781077443338960926/808664878977646602/DexAnnoyed.png",
+    "https://cdn.discordapp.com/attachments/781077443338960926/807479083297931264/DexLove.png",
+    "https://cdn.discordapp.com/attachments/781077443338960926/808664061440294933/DexterWut.png",
+    "https://cdn.discordapp.com/attachments/781077443338960926/808664325014290462/DexterSignAwesome.png"
   ],
   "EnableStartupAlert": false,
   "BotChannels": [
     792657895014793246
   ],
-  "Help": "Dexter is the official USFurries Discord bot, used to moderate the server and provide useful tools. Made with love. <3\n\nFor more in depth help and information you should visit http://docs.usfurries.com.\n\nIf you wish to help in the bot's development, you can find his repository here: https://github.com/Frostrix/Dexter.",
+  "DisallowedChannels": [
+    792657918309695498
+  ],
+  "Help": "Dexter is the official USFurries Discord bot, used to moderate the server and provide useful tools. Made with love. <3\n\nFor more in depth help and information you should visit: http://docs.us-furries.com.\n\nIf you wish to help in the bot's development, you can find his repository here: https://github.com/Frostrix/Dexter.",
   "TrackerLength": 6,
   "RandomCharacters": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-  "CommitAPICall": "https://api.github.com/repos/Frostrix/Dexter/commits",
-  "EnableDatabaseBackups": false
+  "CommitAPICall": "https://api.github.com/repos/FeroxFoxxo/Dexter/commits",
+  "EnableDatabaseBackups": false,
+  "BotStatus": "use ~modmail in DMs to send the staff a message anonymously!",
+  "PingDevelopers": false,
+  "StandardTimeZone": -4
 }

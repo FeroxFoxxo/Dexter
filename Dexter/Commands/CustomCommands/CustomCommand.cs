@@ -4,7 +4,6 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Databases.CustomCommands;
 using Discord.Commands;
-using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json;
@@ -21,7 +20,7 @@ namespace Dexter.Commands {
         /// <param name="ActionType">The ActionType specifies whether the action is to add or edit the command in the database.</param>
         /// <param name="CommandName">The CommandName specifies the command that you wish to add or edit from the database.</param>
         /// <param name="Reply">The Reply specifies the reply that you wish to given command to have.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("cc")]
         [Summary("Modifies a given customizeable command.\n" +
@@ -75,7 +74,8 @@ namespace Dexter.Commands {
                         .WithDescription($"Once it has passed admin approval, " +
                             $"use `{BotConfiguration.Prefix}ccalias add` to add an alias to the command! \n" +
                             "Please note, to make the command ping a user if mentioned, add `USER` to the reply~! \n" +
-                            $"To modify the reply at any time, use `{BotConfiguration.Prefix}ccedit`")
+                            "To make the command ping a user if mentioned, add `AUTHOR` to the reply. \n" +
+                            $"To modify the reply at any time, use `{BotConfiguration.Prefix}ccedit`.")
                         .SendEmbed(Context.Channel);
 
                     break;
@@ -114,12 +114,12 @@ namespace Dexter.Commands {
                         },
                         Context.User.Id,
                         $"{Context.User.GetUserInformation()} has suggested that the command {BotConfiguration.Prefix}{CommandName} should be " +
-                        $"edited from from `{Command.Reply}` to `{Reply}`");
+                        $"edited from `{Command.Reply}` to `{Reply}`");
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"The edit to `{BotConfiguration.Prefix}{CommandName}` was suggested!")
                         .WithDescription($"Once it has passed admin approval, " +
-                            $"The command `{BotConfiguration.Prefix}{CommandName}` will be changed to have the reply of `{Reply}` rahter than `{Command.Reply}`.")
+                            $"The command `{BotConfiguration.Prefix}{CommandName}` will be changed to have the reply of `{Reply}` rather than `{Command.Reply}`.")
                         .SendEmbed(Context.Channel);
 
                     break;
@@ -170,7 +170,7 @@ namespace Dexter.Commands {
         /// <param name="Parameters">The called back parameters:
         ///     CommandName = The name of the command you wish to add.
         ///     Reply = The reply of the given command.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public void CreateCommandCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];
@@ -191,7 +191,7 @@ namespace Dexter.Commands {
         /// <param name="Parameters">The called back parameters:
         ///     CommandName = The name of the command you wish to edit.
         ///     Reply = The edited reply of the given command.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public void EditCommandCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];
@@ -208,7 +208,7 @@ namespace Dexter.Commands {
         /// <param name="Parameters">The called back parameters:
         ///     CommandName = The name of the command you wish to remove.
         /// </param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public void RemoveCommandCallback(Dictionary<string, string> Parameters) {
             string CommandName = Parameters["CommandName"];

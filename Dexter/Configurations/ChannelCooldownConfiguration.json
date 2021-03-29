@@ -1,0 +1,8 @@
+{
+  "ChannelCooldowns": {
+    "793681593327812618" : {
+	  "CooldownTime": 432000,
+	  "GracePeriod": 600
+    }
+  }
+}

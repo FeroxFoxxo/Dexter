@@ -30,6 +30,10 @@ namespace Dexter.Services {
         
         public LoggingService LoggingService { get; set; }
 
+        /// <summary>
+        /// The ServiceProvider is where our dependencies are stored - given to get an initialized class.
+        /// </summary>
+
         public ServiceProvider ServiceProvider { get; set; }
 
         /// <summary>
@@ -37,6 +41,10 @@ namespace Dexter.Services {
         /// </summary>
 
         public string Version;
+
+        /// <summary>
+        /// <see langword="true"/> if the bot has finished its startup process; <see langword="false"/> otherwise.
+        /// </summary>
 
         public bool HasStarted = false;
 
@@ -55,7 +63,7 @@ namespace Dexter.Services {
         /// <param name="Token">A string, containing the Token from the command line arguments.
         /// Returns false if does not exist and flows onto the token specified in the BotConfiguration.</param>
         /// <param name="Version">The current version of the bot, as parsed from the InitializeDependencies class.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task StartAsync(string Token, string Version) {
             this.Version = Version;
@@ -70,7 +78,7 @@ namespace Dexter.Services {
         /// The Run Bot method logs into the bot using the token specified as a parameter and then starts the bot asynchronously.
         /// </summary>
         /// <param name="Token">A string containing the token from which we use to log into Discord.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task RunBot(string Token) {
             LoggingService.LockedCMDOut = true;
@@ -82,9 +90,11 @@ namespace Dexter.Services {
         /// The Display Startup Version Async method runs on ready and is what attempts to log the initialization of the bot
         /// to a specified guild that the bot has sucessfully started and the versionings that it is running.
         /// </summary>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task DisplayStartupVersionAsync() {
+            await DiscordSocketClient.SetActivityAsync(new Game(BotConfiguration.BotStatus));
+
             if (HasStarted)
                 return;
 
@@ -116,7 +126,7 @@ namespace Dexter.Services {
                             object Value = Property.GetValue(Service);
 
                             if (Value != null)
-                                if (!(string.IsNullOrEmpty(Value.ToString()) || Value.ToString().Equals("0")))
+                                if (!string.IsNullOrEmpty(Value.ToString()) && !Value.ToString().Equals("0"))
                                     return;
 
                             if (!NulledConfigurations.ContainsKey(Configuration.Name))

@@ -2,11 +2,23 @@
 
 namespace Dexter.Databases.EventTimers {
 
+    /// <summary>
+    /// Database-compatible class to deal with calling time-based or time-limited events when required.
+    /// </summary>
+
     public class EventTimer {
+
+        /// <summary>
+        /// Unique identifier for the EventTimer object.
+        /// </summary>
 
         [Key]
         public string Token { get; set; }
         
+        /// <summary>
+        /// The delta-time since the event is created until it expires, in seconds.
+        /// </summary>
+
         public int ExpirationLength { get; set; }
 
         /// <summary>
@@ -32,6 +44,10 @@ namespace Dexter.Databases.EventTimers {
         /// </summary>
         
         public string CallbackParameters { get; set; }
+
+        /// <summary>
+        /// Specifies whether the timer is an interval, is set to expire, or has expired.
+        /// </summary>
 
         public TimerType TimerType { get; set; }
 

@@ -4,8 +4,8 @@ using System;
 namespace Dexter.Attributes.Methods {
 
     /// <summary>
-    /// The Require Administrator attribute checks to see if a user has the Administrative permission.
-    /// If they have the permission, they are sactioned to run the command. Else, the commands errors
+    /// The Require Administrator attribute checks to see if a user has the Administrator role.
+    /// If they have the role, they are sactioned to run the command. Else, the commands errors
     /// out to the user that they do not have the required permissions to run the set command.
     /// </summary>
     

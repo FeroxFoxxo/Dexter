@@ -2,8 +2,9 @@
 using Dexter.Configurations;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Discord;
+using Dexter.Helpers;
 using Discord.Commands;
+using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace Dexter.Attributes.Methods {
     /// precondition attribute. This will run a check to see if the user meets the required permission
     /// level specified by the class that extends this, and if so to run the command. It is applied to methods.
     /// </summary>
-    
+
     [AttributeUsage(AttributeTargets.Method)]
 
     public abstract class RequirePermissionLevelAttribute : PreconditionAttribute {
@@ -50,14 +51,20 @@ namespace Dexter.Attributes.Methods {
 
             if (ServiceProvider.GetService<HelpAbstraction>() != null)
                 BotConfiguration = ServiceProvider.GetService<HelpAbstraction>().BotConfiguration;
-            
+
+            DiscordSocketClient DiscordSocketClient = ServiceProvider.GetService<DiscordSocketClient>();
+
+            if (ServiceProvider.GetService<HelpAbstraction>() != null)
+                DiscordSocketClient = ServiceProvider.GetService<HelpAbstraction>().DiscordSocketClient;
+
             if (BotConfiguration == null)
                 return Task.FromResult(PreconditionResult.FromSuccess());
 
-            return Task.FromResult((CommandContext.User as IGuildUser).GetPermissionLevel(BotConfiguration) >= PermissionLevel
+            return Task.FromResult(CommandContext.User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel
                 ? PreconditionResult.FromSuccess()
                 : PreconditionResult.FromError($"Haiya! To run the `{CommandInfo.Name}` command you need to have the " +
-                $"`{PermissionLevel}` role! Are you sure you're a `{PermissionLevel.ToString().ToLower()}`? <3"));
+                $"`{PermissionLevel}` role! Are you sure you're {LanguageHelper.GuessIndefiniteArticle(PermissionLevel.ToString())} " +
+                $"`{PermissionLevel.ToString().ToLower()}`? <3"));
         }
 
     }

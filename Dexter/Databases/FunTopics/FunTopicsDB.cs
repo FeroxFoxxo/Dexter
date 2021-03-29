@@ -15,12 +15,6 @@ namespace Dexter.Databases.FunTopics {
         
         public DbSet<FunTopic> Topics { get; set; }
 
-        /// <summary>
-        /// A table of the would-you-rathers in the FunTopicsDB database.
-        /// </summary>
-        
-        public DbSet<FunTopic> WouldYouRather { get; set; }
-
     }
 
 }

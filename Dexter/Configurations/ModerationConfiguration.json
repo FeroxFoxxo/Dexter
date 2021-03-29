@@ -8,9 +8,27 @@
   "StaffBorkdayRoleID": 793682190835515463,
   "SecondsOfBorkday": 86400,
   "RulesAndInfoChannel": 795538176709230613,
-  "MutedRoleID": 795545764909678593,
+  "MutedRoles": [
+    821232960468025344,
+    825105041463443497
+  ],
   "SecondsTillPointIncrement": 30,
   "MaxPoints": 5,
   "StaffBotsChannel": 792657895014793246,
-  "AdministratorMention": "<@796371963811332107>"
+  "InfractionNotifications": [
+    {
+      "Points": 10,
+      "Days": 7
+    },
+    {
+      "Points": 20,
+      "Days": 30
+    }
+  ],
+  "InfractionNotification": -4,
+  "ModMailChannelID": 808106616557797394,
+  "FinalWarnNotificationThreshold": 1,
+  "FinalWarningsChannelID": 808850069788426311,
+  "FinalWarningsManageRecords": true,
+  "FinalWarningPointsDeducted": 4
 }

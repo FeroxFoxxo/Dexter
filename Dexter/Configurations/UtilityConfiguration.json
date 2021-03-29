@@ -1,0 +1,5 @@
+﻿{
+  "ReminderMaxItemsPerPage": 3,
+  "ReminderMaxCharactersPerItem": 400,
+  "WolframAppAPI": ""
+}

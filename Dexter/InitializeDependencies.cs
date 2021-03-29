@@ -28,7 +28,7 @@ namespace Dexter {
         /// <param name="Token">[OPTIONAL] The token of the bot. Defaults to the one specified in the BotCommands if not set.</param>
         /// <param name="ParsedVersion">[OPTIONAL] The version of the bot specified by the release pipeline, is 0 by default.</param>
         /// <param name="WorkingDirectory">[OPTIONAL] The directory you wish the databases and configurations to be in. By default this is the build directory.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public static async Task Main(string Token, int ParsedVersion, string WorkingDirectory) {
             // Set title to "Starting..."
@@ -71,9 +71,7 @@ namespace Dexter {
             // Adds an instance of the DiscordSocketClient to the collection, specifying the cache it should retain should be 1000 messages in size.
             DiscordSocketClient DiscordSocketClient = new(
                 new DiscordSocketConfig {
-                    MessageCacheSize = 1000,
-                    GatewayIntents = GatewayIntents.GuildWebhooks | GatewayIntents.Guilds | GatewayIntents.GuildPresences | GatewayIntents.GuildMessages | GatewayIntents.GuildMessageReactions
-                                    | GatewayIntents.DirectMessages | GatewayIntents.DirectMessageReactions | GatewayIntents.GuildVoiceStates,
+                    MessageCacheSize = 5000,
                     ExclusiveBulkDelete = false
                 }
             );
@@ -97,6 +95,8 @@ namespace Dexter {
 
             ServiceCollection.AddSingleton(LoggingService);
 
+            bool HasErrored = false;
+
             // Finds all JSON configurations and initializes them from their respective files.
             // If a JSON file is not created, a new one is initialized in its place.
             Assembly.GetExecutingAssembly().GetTypes()
@@ -115,16 +115,29 @@ namespace Dexter {
                             await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Warning, "Initialization",
                                 $" This application does not have a configuration file for {Type.Name}! " +
                                 $"A mock JSON class has been created in its place..."));
-                        } else
-                            ServiceCollection.AddSingleton(
-                                Type,
-                                JsonSerializer.Deserialize(
+                        } else {
+                            try {
+                                object JSON = JsonSerializer.Deserialize(
                                     File.ReadAllText($"Configurations/{Type.Name}.json"),
                                     Type,
                                     new JsonSerializerOptions() { WriteIndented = true }
-                                )
-                            );
+                                );
+
+                                ServiceCollection.AddSingleton(
+                                    Type,
+                                    JSON
+                                );
+                            } catch (JsonException Exception) {
+                                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Initialization",
+                                    $" Unable to initialize {Type.Name}! Ran into: {Exception.InnerException}."));
+
+                                HasErrored = true;
+                            }
+                        }
                     });
+
+            if (HasErrored)
+                return;
 
             // Adds all commands, databases and services that can be initialized to the service collection.
             Assembly.GetExecutingAssembly().GetTypes()

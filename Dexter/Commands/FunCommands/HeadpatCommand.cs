@@ -3,9 +3,11 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Discord.Webhook;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -16,9 +18,15 @@ namespace Dexter.Commands {
 
     public partial class FunCommands {
 
+        /// <summary>
+        /// Sends a specially generated animated emoji depicting a 'headpat' gif superposed over the target user's profile picture.
+        /// </summary>
+        /// <param name="User">The user whose profile picture is to be used as a base.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("headpat", RunMode = RunMode.Async)]
         [Summary("Ooh, you've been a good boy? *gives rapid headpats in an emoji*")]
-        [Alias("headpats", "petpat", "petpats")]
+        [Alias("headpats", "petpat", "petpats", "pet", "pat")]
 
         public async Task HeadpatCommand([Optional] IGuildUser User) {
             if (User == null)
@@ -26,7 +34,7 @@ namespace Dexter.Commands {
 
             string NameOfUser = Regex.Replace(User.Username, "[^a-zA-Z]", "", RegexOptions.Compiled);
 
-            if (string.IsNullOrEmpty(NameOfUser))
+            if (NameOfUser.Length < 2)
                 NameOfUser = "Unknown";
 
             string ImageCacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
@@ -61,6 +69,14 @@ namespace Dexter.Commands {
 
             using (Discord.Image EmoteImage = new (FilePath)) {
                 IGuild Guild = DiscordSocketClient.GetGuild(FunConfiguration.HeadpatStorageGuild);
+
+                Console.WriteLine(NameOfUser.Length);
+                Console.WriteLine(EmoteImage);
+
+                GuildEmote PrevEmote = Guild.Emotes.Where(Emote => Emote.Name == NameOfUser).FirstOrDefault();
+
+                if (PrevEmote != null)
+                    await Guild.DeleteEmoteAsync(PrevEmote);
 
                 GuildEmote Emote = await Guild.CreateEmoteAsync(NameOfUser, EmoteImage);
 

@@ -1,5 +1,6 @@
 ﻿using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
+using Dexter.Databases.Proposals;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Services;
@@ -70,15 +71,22 @@ namespace Dexter.Abstractions {
         /// <param name="CallbackParameters">The parameters you wish to callback with once approved.</param>
         /// <param name="Author">The author of the message who will be attached to the proposal.</param>
         /// <param name="Proposal">The message that will be attached to the proposal.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <param name="DenyCallbackMethod">Optional method you wish to callback if denied.</param>
+        /// <param name="DenyCallbackParameters">Optional parameters for the <paramref name="DenyCallbackMethod"/>, must be set if <paramref name="DenyCallbackMethod"/> is set.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully. The Task holds the <c>string</c> token of the created <c>Proposal</c>.</returns>
         
-        public async Task SendForAdminApproval(Action<Dictionary<string, string>> CallbackMethod,
-                Dictionary<string, string> CallbackParameters, ulong Author, string Proposal) {
+        public async Task<Proposal> SendForAdminApproval(Action<Dictionary<string, string>> CallbackMethod,
+                Dictionary<string, string> CallbackParameters, ulong Author, string Proposal, Action<Dictionary<string, string>> DenyCallbackMethod = null, Dictionary<string, string> DenyCallbackParameters = null) {
 
             string JSON = JsonConvert.SerializeObject(CallbackParameters);
 
-            await ProposalService.SendAdminConfirmation(JSON, CallbackMethod.Target.GetType().Name,
-                CallbackMethod.Method.Name, Author, Proposal);
+            string DenyJSON = "";
+            if(DenyCallbackParameters != null)
+                DenyJSON = JsonConvert.SerializeObject(DenyCallbackParameters);
+
+            return await ProposalService.SendAdminConfirmation(JSON, CallbackMethod.Target.GetType().Name,
+                CallbackMethod.Method.Name, Author, Proposal, DenyJSON, DenyCallbackMethod != null ? DenyCallbackMethod.Target.GetType().Name : null,
+                DenyCallbackMethod != null ? DenyCallbackMethod.Method.Name : null);
         }
 
         /// <summary>
@@ -116,10 +124,28 @@ namespace Dexter.Abstractions {
         /// <param name="CallbackParameters">The parameters you wish to callback with once expired.</param>
         /// <param name="SecondsTillExpiration">The count in seconds until the timer will expire.</param>
         /// <param name="TimerType">The given type of the timer, specifying if it should be removed after the set time (EXPIRE) or continue in the set interval.</param>
-        /// <returns>The token assosiated with the timed event for use to refer to.</returns>
+        /// <returns>The token associated with the timed event for future reference.</returns>
 
         public async Task<string> CreateEventTimer(Func<Dictionary<string, string>, Task> CallbackMethod,
                 Dictionary<string, string> CallbackParameters, int SecondsTillExpiration, TimerType TimerType) {
+
+            return await CreateEventTimer(CallbackMethod, CallbackParameters, SecondsTillExpiration, TimerType, TimerService);
+        }
+
+        /// <summary>
+        /// The Create Event Timer method is a generic method that will await for an expiration time to be reached
+        /// before continuing execution of the code set in the CallbackMethod parameter.
+        /// </summary>
+        /// <param name="CallbackMethod">The method you wish to callback once expired.</param>
+        /// <param name="CallbackParameters">The parameters you wish to callback with once expired.</param>
+        /// <param name="SecondsTillExpiration">The count in seconds until the timer will expire.</param>
+        /// <param name="TimerType">The given type of the timer, specifying if it should be removed after the set time (EXPIRE) or continue in the set interval.</param>
+        /// <param name="TimerService">The service used to access the database and related infrastructure to store the mute.</param>
+        /// <returns>The token associated with the timed event for future reference.</returns>
+
+        public static async Task<string> CreateEventTimer(Func<Dictionary<string, string>, Task> CallbackMethod,
+                Dictionary<string, string> CallbackParameters, int SecondsTillExpiration, TimerType TimerType, TimerService TimerService)
+        {
 
             string JSON = JsonConvert.SerializeObject(CallbackParameters);
 
@@ -131,7 +157,7 @@ namespace Dexter.Abstractions {
         /// </summary>
         /// <param name="EmbedBuilders">The embeds that you wish to create the reaction menu from.</param>
         /// <param name="Channel">The channel that the reaction menu should be sent to.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task CreateReactionMenu(EmbedBuilder[] EmbedBuilders, ISocketMessageChannel Channel) {
             await ReactionMenuService.CreateReactionMenu(EmbedBuilders, Channel);

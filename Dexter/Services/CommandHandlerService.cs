@@ -46,10 +46,14 @@ namespace Dexter.Services {
         
         public LoggingService LoggingService { get; set; }
 
+        /// <summary>
+        /// The ProposalConfiguration is used to operate the suggestion service and confugure voting thresholds.
+        /// </summary>
+
         public ProposalConfiguration ProposalConfiguration { get; set; }
 
         /// <summary>
-        /// The Initialize override hooks into both the Client's MessageRecieved event and the CommandService's CommandExecuted event.
+        /// The Initialize override hooks into both the Client's MessageReceived event and the CommandService's CommandExecuted event.
         /// </summary>
 
         public override void Initialize() {
@@ -61,9 +65,9 @@ namespace Dexter.Services {
         /// The HandleCommandAsync runs on MessageReceived and will check for if the message has the bot's prefix,
         /// if the author is a bot and if we're in a guild, if so - execute!
         /// </summary>
-        /// <param name="SocketMessage">The SocketMessage event is given as a parameter of MessageRecieved and
+        /// <param name="SocketMessage">The SocketMessage event is given as a parameter of MessageReceived and
         /// is used to find and execute the command if the parameters have been met.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task HandleCommandAsync(SocketMessage SocketMessage) {
             // We do not check the message if it is not an instance of a user message.
@@ -73,18 +77,8 @@ namespace Dexter.Services {
             int ArgumentPosition = 0;
 
             // We do not parse the message if it does not have the prefix or it is from a bot.
-            if (!Message.HasStringPrefix(BotConfiguration.Prefix, ref ArgumentPosition) || Message.Author.IsBot)
+            if (!Message.HasStringPrefix(BotConfiguration.Prefix, ref ArgumentPosition) || Message.Author.IsBot || BotConfiguration.DisallowedChannels.Contains(Message.Channel.Id))
                 return;
-
-            // We check to see if the channel is a DM channel (i.e. it is not a guild channel) and, if so, we return.
-            if (!(Message.Channel is IGuildChannel)) {
-                await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle($"{DiscordSocketClient.CurrentUser.Username} is not avaliable in DMs!")
-                    .WithDescription($"Heya! I'm not avaliable in DMs at the moment, " +
-                        $"please use `{DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Name}` to communicate with me! Preferably in a bot channel. <3")
-                    .SendEmbed(Message.Channel);
-                return;
-            }
 
             // Finally, if all prerequesites have returned correctly, we run and parse the command with an instance of our socket command context and our services.
             await CommandService.ExecuteAsync(new SocketCommandContext(DiscordSocketClient, Message), ArgumentPosition, ServiceProvider);
@@ -96,7 +90,7 @@ namespace Dexter.Services {
         /// <param name="CommandInfo">This gives information about the command that may have been run, such as its name.</param>
         /// <param name="CommandContext">The context command provides is with information about the message, including who sent it and the channel it was set in.</param>
         /// <param name="Result">The Result specifies the outcome of the attempted run of the command - whether it was successful or not and the error it may have run in to.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task SendCommandError(Optional<CommandInfo> CommandInfo, ICommandContext CommandContext, IResult Result) {
             if (Result.IsSuccess)
@@ -133,9 +127,14 @@ namespace Dexter.Services {
                         CustomCommand CustomCommand = CustomCommandDB.GetCommandByNameOrAlias(CustomCommandArgs[0].ToLower());
 
                         if (CustomCommand != null) {
-                            if (CustomCommand.Reply.Length > 0)
+                            if (CustomCommand.Reply.Length > 0) {
+                                string Reply = CustomCommand.Reply;
+
+                                Reply = Reply.Replace("USER", CommandContext.Message.MentionedUserIds.Count > 0 ? $"<@{CommandContext.Message.MentionedUserIds.First()}>" : CommandContext.User.Mention);
+                                Reply = Reply.Replace("AUTHOR", CommandContext.User.Mention);
+
                                 await CommandContext.Channel.SendMessageAsync(CustomCommand.Reply.Replace("USER", CommandContext.Message.MentionedUserIds.Count > 0 ? $"<@{CommandContext.Message.MentionedUserIds.First()}>" : CommandContext.User.Mention));
-                            else
+                            } else
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Misconfigured command!")
                                     .WithDescription($"`{CustomCommand.CommandName}` has not been configured! Please contact a moderator about this. <3")
@@ -146,10 +145,19 @@ namespace Dexter.Services {
                             else if (CommandContext.Message.Content.Count(Character => Character == '~') > 1 ||
                                     ProposalConfiguration.CommandRemovals.Contains(CommandContext.Message.Content.Split(' ')[0]))
                                 return;
-                            else await BuildEmbed(EmojiEnum.Annoyed)
-                                .WithTitle("Unknown Command.")
-                                .WithDescription($"Oopsies! It seems as if the command **{CustomCommandArgs[0].SanitizeMarkdown()}** doesn't exist!")
-                                .SendEmbed(CommandContext.Channel);
+                            else {
+                                IMessage Message = await CommandContext.Channel.SendMessageAsync(
+                                    embed: BuildEmbed(EmojiEnum.Annoyed)
+                                        .WithTitle("Unknown Command.")
+                                        .WithDescription($"Oopsies! It seems as if the command **{CustomCommandArgs[0].SanitizeMarkdown()}** doesn't exist!")
+                                        .Build()
+                                );
+
+                                _ = Task.Run(async () => {
+                                    await Task.Delay(5000);
+                                    await Message.DeleteAsync();
+                                });
+                            }
                         }
                         break;
 
@@ -190,12 +198,11 @@ namespace Dexter.Services {
                                 .WithDescription(Result.ErrorReason);
 
                         // Finally, we send the error into the channel with a ping to the developers to take notice of.
-                        await CommandContext.Channel.SendMessageAsync($"Unknown error! I'll tell the developers.\n{BotConfiguration.DeveloperMention}", embed: CommandErrorEmbed.Build());
-
+                        await CommandContext.Channel.SendMessageAsync($"Unknown error!{(BotConfiguration.PingDevelopers ? $" I'll tell the developers.\n<@&{BotConfiguration.DeveloperRoleID}>" : string.Empty)}", embed: CommandErrorEmbed.Build());
                         break;
                 }
             } catch (HttpException) {
-                await CommandContext.Channel.SendMessageAsync($"Haiya {BotConfiguration.DeveloperMention}, it seems as though the bot does not have the correct permissions to send embeds into this channel!\n" +
+                await CommandContext.Channel.SendMessageAsync($"Haiya <@&{BotConfiguration.DeveloperRoleID}>, it seems as though the bot does not have the correct permissions to send embeds into this channel!\n" +
                     $"Command errored out on the {Result.Error.Value} error.");
             }
 

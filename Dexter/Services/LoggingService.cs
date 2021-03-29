@@ -61,7 +61,7 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="LogMessage">The LogMessage field which gives us information about the message, for example the type of
         /// exception we have run into, the severity of the exception and the message of the exception to log.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async Task LogMessageAsync(LogMessage LogMessage) {
             // If the CMD is locked we add the message to a backlog of messages and log it to the console, not writing to the file.
@@ -103,7 +103,7 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="LogMessage">The LogMessage field which gives us information about the message, for example the type of
         /// exception we have run into, the severity of the exception and the message of the exception to log.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         private async Task LogToFile(LogMessage LogMessage) {
             // We first get the log directory and check to see if the file and folder exist. If not, create.
@@ -128,7 +128,7 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="LogMessage">The LogMessage field which gives us information about the message, for example the type of
         /// exception we have run into, the severity of the exception and the message of the exception to log.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         private static async Task LogToConsole (LogMessage LogMessage) {
             // Firstly we switch the log message based on the severity of the error.

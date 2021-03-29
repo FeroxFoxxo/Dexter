@@ -7,6 +7,13 @@ namespace Dexter.Commands {
 
     public partial class FunCommands {
 
+        /// <summary>
+        /// Prompts the bot to send the exact message referenced in the command.
+        /// </summary>
+        /// <remarks>Staff-only command.</remarks>
+        /// <param name="Message">The string message to send.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("say")]
         [Summary("I do have a voice! Use the ~say command to speak *through* me!")]
         [Alias("speak")]

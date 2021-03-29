@@ -11,14 +11,23 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Linq;
 using Humanizer;
+using Discord.WebSocket;
 
 namespace Dexter.Commands {
 
     public partial class ModeratorCommands {
 
+        /// <summary>
+        /// Sends an embed with the records of infractions of a specified user.
+        /// </summary>
+        /// <remarks>If the user is different from <c>Context.User</c>, it is Staff-only.</remarks>
+        /// <param name="UserID">The target user to query.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("records")]
-        [Summary("Returns a record of infractions for a set user or your own.")]
+        [Summary("Returns a record of infractions for a set user based on their ID.")]
         [Alias("warnings", "record", "warns", "mutes")]
+        [RequireModerator]
         [BotChannel]
 
         public async Task InfractionsCommand(ulong UserID) {
@@ -32,7 +41,7 @@ namespace Dexter.Commands {
                 else
                     await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
             } else
-                InfractionsCommand(User);
+                await InfractionsCommand(User);
         }
 
         /// <summary>
@@ -41,7 +50,7 @@ namespace Dexter.Commands {
         /// proceed to print out all the infractions of that specified member into the channel the command had been sent into.
         /// </summary>
         /// <param name="User">The User field specifies the user that you wish to get the infractions of.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("records")]
         [Summary("Returns a record of infractions for a set user or your own.")]
@@ -52,9 +61,7 @@ namespace Dexter.Commands {
             bool IsUserSpecified = User != null;
 
             if (IsUserSpecified) {
-                if ((Context.User as IGuildUser).GetPermissionLevel(BotConfiguration)
-                    >= PermissionLevel.Moderator) {
-
+                if ((Context.User as IGuildUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator) {
                     EmbedBuilder[] Warnings = GetWarnings(User.Id, Context.User.Id, User.Mention, User.Username, true);
 
                     if (Warnings.Length > 1)
@@ -73,6 +80,9 @@ namespace Dexter.Commands {
                 try {
                     foreach (EmbedBuilder Embed in Embeds)
                         await Embed.SendEmbed(await Context.User.GetOrCreateDMChannelAsync());
+
+                    if (Context.Channel.GetType() == typeof(SocketDMChannel))
+                        return;
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Sent infractions log.")
@@ -93,10 +103,12 @@ namespace Dexter.Commands {
         /// <summary>
         /// The GetWarnings method returns an array of embeds detailing the user's warnings, time of warning, and moderator (if enabled).
         /// </summary>
-        /// <param name="User">The user of whose warnings you wish to recieve.</param>
+        /// <param name="User">The user whose warnings you wish to receive.</param>
         /// <param name="RunBy">The user who has run the given warnings command.</param>
+        /// <param name="Mention">The stringified mention for the target user.</param>
+        /// <param name="Username">The target user's username in the given context.</param>
         /// <param name="ShowIssuer">Whether or not the moderators should be shown in the log. Enabled for moderators, disabled for DMed records.</param>
-        /// <returns>An array of embeds containing the given users warnings.</returns>
+        /// <returns>An array of embeds containing the given user's warnings.</returns>
         
         public EmbedBuilder[] GetWarnings(ulong User, ulong RunBy, string Mention, string Username, bool ShowIssuer) {
             Infraction[] Infractions = InfractionsDB.GetInfractions(User);
@@ -127,7 +139,7 @@ namespace Dexter.Commands {
                 DateTimeOffset Time = DateTimeOffset.FromUnixTimeSeconds(TimeOfIssue > 253402300799 ? TimeOfIssue / 1000 : TimeOfIssue);
 
                 EmbedFieldBuilder Field = new EmbedFieldBuilder()
-                    .WithName($"{(Infraction.InfrationTime == 0 ? "Warning" : $"{TimeSpan.FromSeconds(Infraction.InfrationTime).Humanize()} Mute")} {Index + 1} (ID {Infraction.InfractionID}), {(Infraction.PointCost > 0 ? "-" : "")}{Infraction.PointCost} {(Infraction.PointCost == 1 ? "Point" : "Points")}.")
+                    .WithName($"{(Infraction.InfractionTime == 0 ? "Warning" : $"{TimeSpan.FromSeconds(Infraction.InfractionTime).Humanize().Titleize()} Mute")} {Index + 1} (ID {Infraction.InfractionID}), {(Infraction.PointCost > 0 ? "-" : "")}{Infraction.PointCost} {(Infraction.PointCost == 1 ? "Point" : "Points")}.")
                     .WithValue($"{(ShowIssuer ? $":cop: {(Issuer != null ? Issuer.GetUserInformation() : $"Unknown ({Infraction.Issuer})")}\n" : "")}" +
                         $":calendar: {Time:M/d/yyyy h:mm:ss}\n" +
                         $":notepad_spiral: {Infraction.Reason}"

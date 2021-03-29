@@ -1,4 +1,5 @@
 ﻿using Dexter.Abstractions;
+using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
@@ -15,9 +16,20 @@ namespace Dexter.Commands {
 
     public partial class HelpCommands {
 
+        /// <summary>
+        /// Displays a navigable list of commands. This list is built from the "Summary" attributes on each command.
+        /// </summary>
+        /// <param name="Command">
+        /// An optional parameter which will display extended information for a specific command if non-null.
+        /// The information for this command is pulled from the "ExtendedSummary" attribute (default to "Summary").
+        /// </param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("help")]
         [Summary("Displays all avaliable commands.")]
         [Alias("commands")]
+        [BotChannel]
+
         public async Task HelpCommand([Optional] [Remainder] string Command) {
             if(string.IsNullOrEmpty(Command)) {
                 List<EmbedBuilder> EmbedBuilders = new();
@@ -40,7 +52,8 @@ namespace Dexter.Commands {
                     ServiceCollection ServiceCollection = new();
 
                     HelpAbstraction HelpAbstraction = new() {
-                        BotConfiguration = BotConfiguration
+                        BotConfiguration = BotConfiguration,
+                        DiscordSocketClient = DiscordSocketClient
                     };
 
                     ServiceCollection.AddSingleton(HelpAbstraction);

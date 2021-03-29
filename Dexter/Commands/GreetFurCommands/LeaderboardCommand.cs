@@ -12,10 +12,17 @@ namespace Dexter.Commands {
 
     public partial class GreetFurCommands {
 
+        /// <summary>
+        /// Displays list in descending order of the GreetFurs in The Big Picture spreadsheet database.
+        /// </summary>
+        /// <remarks>GreetFur count limit: 20</remarks>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("gflevels")]
         [Summary("Returns a leaderboard of all the GreetFurs and their activity levels.")]
-        [BotChannel]
         [Alias("gfleaderboard")]
+        [BotChannel]
+        [RequireGreetFur]
 
         public async Task GreetFurLeaderboard () {
             if (SheetsService == null)

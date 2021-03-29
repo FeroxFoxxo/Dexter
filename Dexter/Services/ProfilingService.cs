@@ -30,6 +30,10 @@ namespace Dexter.Services {
         
         public ProfilingConfiguration ProfilingConfiguration { get; set; }
 
+        /// <summary>
+        /// A reference to the global logging service used to log messages from both DiscordSocketClient and to the console for debugging purposes.
+        /// </summary>
+
         public LoggingService LoggingService { get; set; }
 
         /// <summary>
@@ -48,10 +52,16 @@ namespace Dexter.Services {
         /// The Initialize void hooks the Client.Ready event to the ChangePFP method.
         /// </summary>
         
-        public override void Initialize() {
+        public override async void Initialize() {
             if (TimerService.EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault() == null)
-                CreateEventTimer(ProfileCallback, new(), ProfilingConfiguration.SecTillProfiling, TimerType.Interval);
+                await CreateEventTimer(ProfileCallback, new(), ProfilingConfiguration.SecTillProfiling, TimerType.Interval);
         }
+
+        /// <summary>
+        /// Randomly changes the bot's avatar, backs up the database to the configured channel, and measures the time elapsed in this process.
+        /// </summary>
+        /// <param name="Parameters">A string-string Dictionary containing no compulsory definitions.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task ProfileCallback(Dictionary<string, string> Parameters) {
             Stopwatch Stopwatch = new ();
@@ -110,7 +120,7 @@ namespace Dexter.Services {
         /// <summary>
         /// The GetRandomPFP method runs on Client.Ready and it simply gets a random PFP of the bot.
         /// </summary>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public FileStream GetRandomPFP() {
             if (string.IsNullOrEmpty(ProfilingConfiguration.PFPDirectory))
@@ -118,11 +128,22 @@ namespace Dexter.Services {
 
             FileInfo[] Files = GetProfilePictures();
 
-            FileInfo ProfilePicture = Files[Random.Next(0, Files.Length)];
+            if (Files.Length <= 0)
+                return null;
 
-            CurrentPFP = ProfilePicture.Name;
+            else if (Files.Length == 1)
+                return Files[0].OpenRead();
 
-            return ProfilePicture.OpenRead();
+            else {
+                FileInfo ProfilePicture = Files[Random.Next(0, Files.Length - 2)];
+
+                if (ProfilePicture.Name == CurrentPFP)
+                    ProfilePicture = Files[^1];
+
+                CurrentPFP = ProfilePicture.Name;
+
+                return ProfilePicture.OpenRead();
+            }
         }
 
         /// <summary>

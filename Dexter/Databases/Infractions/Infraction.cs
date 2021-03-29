@@ -49,7 +49,17 @@ namespace Dexter.Databases.Infractions {
         
         public long TimeOfIssue { get; set; }
 
-        public double InfrationTime { get; set; }
+        /// <summary>
+        /// The amount of time associated with the infraction, in seconds.
+        /// For mutes, this indicates the mute duration.
+        /// </summary>
+        /// <remarks>All warning-type infractions should have an InfractionTime of 0.</remarks>
+
+        public int InfractionTime { get; set; }
+
+        /// <summary>
+        /// The amount of points subtracted from a user's Dexter Profile as a result of the infraction.
+        /// </summary>
 
         public short PointCost { get; set; }
 

@@ -14,12 +14,12 @@ namespace Dexter.Commands {
         /// The Fetch Proposal method runs on FETCH. It simply builds a proposal based on the tracker that is parsed to it.
         /// </summary>
         /// <param name="Tracker">The tracker the proposal is linked to, whether this be the alphanumeric token or the message ID.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("fetch")]
         [Summary("Fetches a proposal from the tracker or a message ID.")]
         [Alias("find")]
-        [RequireAdministrator]
+        [RequireModerator]
 
         public async Task FetchProposal(string Tracker) {
             Proposal Proposal = ProposalDB.GetProposalByNameOrID(Tracker);

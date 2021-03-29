@@ -43,7 +43,7 @@ namespace Dexter.Extensions {
         /// </summary>
         /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
         /// <param name="MessageChannel">The IMessageChannel you wish to send the embed to.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, IMessageChannel MessageChannel) =>
             await MessageChannel.SendMessageAsync(embed: EmbedBuilder.Build());
@@ -53,10 +53,38 @@ namespace Dexter.Extensions {
         /// </summary>
         /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
         /// <param name="DiscordWebhookClient">The DiscordWebhookClient you wish to send the embed to.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, DiscordWebhookClient DiscordWebhookClient) =>
             await DiscordWebhookClient.SendMessageAsync(embeds: new Embed[1] { EmbedBuilder.Build() });
+
+        /// <summary>
+        /// Builds an EmbedBuilder and sends it to the specified IMessageChannel and sends an embed to the user specified.
+        /// </summary>
+        /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
+        /// <param name="MessageChannel">The IMessageChannel you wish to send the embed to.</param>
+        /// <param name="BotConfiguration">The BotConfiguration which is used to find the thumbnail of the embed.</param>
+        /// <param name="User">The IUser you wish to send the DM embed to.</param>
+        /// <param name="DMEmbedBuilder">The Embed you wish to send to the user.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
+        public static async Task SendDMAttachedEmbed(this EmbedBuilder EmbedBuilder, IMessageChannel MessageChannel,
+                BotConfiguration BotConfiguration, IUser User, EmbedBuilder DMEmbedBuilder) {
+
+            if (User == null)
+                EmbedBuilder.AddField("Failed", "I cannot notify this fluff as they have left the server!");
+            else {
+                try {
+                    IMessageChannel DMChannel = await User.GetOrCreateDMChannelAsync();
+                    await DMChannel.SendMessageAsync(embed: DMEmbedBuilder.Build());
+                } catch {
+                    EmbedBuilder.BuildEmbed(EmojiEnum.Annoyed, BotConfiguration);
+                    EmbedBuilder.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
+                }
+            }
+
+            await EmbedBuilder.SendEmbed(MessageChannel);
+        }
 
         /// <summary>
         /// Builds an EmbedBuilder and sends it to the specified IUser.
@@ -64,13 +92,13 @@ namespace Dexter.Extensions {
         /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
         /// <param name="User">The IUser you wish to send the embed to.</param>
         /// <param name="Fallback">The Fallback is the channel it will send the embed to if the user has blocked DMs.</param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
-        
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, IUser User, ITextChannel Fallback) {
             try {
                 await User.SendMessageAsync(embed: EmbedBuilder.Build());
             } catch (HttpException) {
-                IUserMessage Message = await Fallback.SendMessageAsync(embed: EmbedBuilder
+                IUserMessage Message = await Fallback.SendMessageAsync(User.Mention, embed: EmbedBuilder
                     .WithAuthor($"Psst, {User.Username}! Please unblock me or allow direct messages from {Fallback.Guild.Name}. <3")
                     .Build());
                 _ = Task.Run(async () => {
@@ -87,11 +115,12 @@ namespace Dexter.Extensions {
         /// <param name="Condition">The condition which must be true to add the field.</param>
         /// <param name="Name">The name of the field you wish to add.</param>
         /// <param name="Value">The description of the field you wish to add.</param>
+        /// <param name="InLine">Sets the inline parameter of the Embed Field.</param>
         /// <returns>The embed with the field added to it if true.</returns>
         
-        public static EmbedBuilder AddField(this EmbedBuilder EmbedBuilder, bool Condition, string Name, object Value) {
+        public static EmbedBuilder AddField(this EmbedBuilder EmbedBuilder, bool Condition, string Name, object Value, bool InLine = false) {
             if (Condition)
-                EmbedBuilder.AddField(Name, Value);
+                EmbedBuilder.AddField(Name, Value, InLine);
 
             return EmbedBuilder;
         }

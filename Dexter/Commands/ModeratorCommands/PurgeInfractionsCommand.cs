@@ -51,7 +51,7 @@ namespace Dexter.Commands {
         /// <param name="CallbackInformation">The callback information is a dictionary of parameters parsed to the original callback statement.
         ///     UserID = Specifies the UserID who will have their warnings purged.
         /// </param>
-        /// <returns>A task object, from which we can await until this method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
         
         public async void PurgeWarningsCallback(Dictionary<string, string> CallbackInformation) {
             ulong UserID = Convert.ToUInt64(CallbackInformation["UserID"]);

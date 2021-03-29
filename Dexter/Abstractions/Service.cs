@@ -4,6 +4,7 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Services;
 using Discord;
+using Discord.Net;
 using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;
@@ -56,22 +57,26 @@ namespace Dexter.Abstractions {
         /// <returns>The DiscordWebhookClient of the webhook that has been gotten or created.</returns>
 
         public async Task<DiscordWebhookClient> CreateOrGetWebhook(ulong ChannelID, string WebhookName) {
-            if (ChannelID <= 0)
-                return null;
+            if (ChannelID > 0)
 
-            SocketChannel Channel = DiscordSocketClient.GetChannel(ChannelID);
+                try {
+                    SocketChannel Channel = DiscordSocketClient.GetChannel(ChannelID);
 
-            if (Channel is SocketTextChannel TextChannel) {
-                foreach (RestWebhook RestWebhook in await TextChannel.GetWebhooksAsync())
-                    if (RestWebhook.Name.Equals(WebhookName))
-                        return new DiscordWebhookClient(RestWebhook.Id, RestWebhook.Token);
+                    if (Channel is SocketTextChannel TextChannel) {
+                        foreach (RestWebhook RestWebhook in await TextChannel.GetWebhooksAsync())
+                            if (RestWebhook.Name.Equals(WebhookName))
+                                return new DiscordWebhookClient(RestWebhook.Id, RestWebhook.Token);
 
-                RestWebhook Webhook = await TextChannel.CreateWebhookAsync(WebhookName, ProfileService.GetRandomPFP());
+                        RestWebhook Webhook = await TextChannel.CreateWebhookAsync(WebhookName, ProfileService.GetRandomPFP());
 
-                return new DiscordWebhookClient(Webhook.Id, Webhook.Token);
-            }
+                        return new DiscordWebhookClient(Webhook.Id, Webhook.Token);
+                    }
 
-            throw new Exception($"The webhook {WebhookName} could not be initialized in the given channel {Channel} due to it being of type {Channel.GetType().Name}.");
+                    throw new Exception($"The webhook {WebhookName} could not be initialized in the given channel {Channel} due to it being of type {Channel.GetType().Name}.");
+
+                } catch (HttpException) { }
+
+            return null;
         }
 
         /// <summary>

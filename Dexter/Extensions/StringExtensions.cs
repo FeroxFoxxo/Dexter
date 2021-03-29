@@ -50,13 +50,22 @@ namespace Dexter.Extensions {
             return Text;
         }
 
+        /// <summary>
+        /// Obtains a Proxied URL from a given Image URL.
+        /// </summary>
+        /// <param name="ImageURL">The URL of the target image.</param>
+        /// <param name="ImageName">The Name to give the image once downloaded.</param>
+        /// <param name="DiscordSocketClient">A Discord Socket Client service to parse the storage channel.</param>
+        /// <param name="ProposalConfiguration">Configuration holding the storage channel ID.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         public static async Task<string> GetProxiedImage (this string ImageURL, string ImageName, DiscordSocketClient DiscordSocketClient, ProposalConfiguration ProposalConfiguration) {
             string ImageCacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
 
             if (!Directory.Exists(ImageCacheDir))
                 Directory.CreateDirectory(ImageCacheDir);
 
-            string FilePath = Path.Combine(ImageCacheDir, $"{ImageName}{Path.GetExtension(ImageURL.Split("size")[0])}");
+            string FilePath = Path.Combine(ImageCacheDir, $"{ImageName}{Path.GetExtension(ImageURL.Split("?")[0])}");
 
             using WebClient WebClient = new();
 
@@ -70,6 +79,12 @@ namespace Dexter.Extensions {
 
             return AttachmentMSG.Attachments.FirstOrDefault().ProxyUrl;
         }
+
+        /// <summary>
+        /// Hashes an object into an <c>int</c> using the MD5 algorithm.
+        /// </summary>
+        /// <param name="HashingString">The object to Hash.</param>
+        /// <returns>The hashed value as an Int32.</returns>
 
         public static int GetHash(this object HashingString) {
             return BitConverter.ToInt32(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(HashingString.ToString())));

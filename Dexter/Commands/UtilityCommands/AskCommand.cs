@@ -38,6 +38,8 @@ namespace Dexter.Commands {
 
 			Response = Response.Replace("Wolfram Alpha", Context.Client.CurrentUser.Username);
 			Response = Response.Replace("Wolfram|Alpha", Context.Client.CurrentUser.Username);
+			Response = Response.Replace("Stephen Wolfram", "the goat overloads");
+			Response = Response.Replace("and his team", "and their team");
 
 			if (Response == "Error 1: Invalid appid")
 				WolframAlphaClient = null;

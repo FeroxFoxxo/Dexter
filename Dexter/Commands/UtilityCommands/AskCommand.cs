@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Dexter.Enums;
 using Dexter.Extensions;
+using Discord;
 using Discord.Commands;
 using Genbox.WolframAlpha;
 
@@ -35,13 +36,15 @@ namespace Dexter.Commands {
 
 			string Response = await WolframAlphaClient.SpokenResultAsync(Question);
 
-			if (Response == "Error 1: Invalid appid")
-				WolframAlphaClient = null;
-
 			Response = Response.Replace("Wolfram Alpha", Context.Client.CurrentUser.Username);
 			Response = Response.Replace("Wolfram|Alpha", Context.Client.CurrentUser.Username);
 
-			await Context.Channel.SendMessageAsync(Response);
+			if (Response == "Error 1: Invalid appid")
+				WolframAlphaClient = null;
+			else if (Response == "DexterBot did not understand your input")
+				await Context.Message.AddReactionAsync(new Emoji("❓"));
+			else 
+				await Context.Channel.SendMessageAsync(Response);
 		}
 
 	}

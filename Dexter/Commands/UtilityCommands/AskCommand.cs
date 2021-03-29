@@ -33,13 +33,10 @@ namespace Dexter.Commands {
 			if (WolframAlphaClient == null)
 				WolframAlphaClient = new WolframAlphaClient(UtilityConfiguration.WolframAppAPI);
 
-			string Response = await WolframAlphaClient.ShortAnswerAsync(Question);
+			string Response = await WolframAlphaClient.SpokenResultAsync(Question);
 
 			if (Response == "Error 1: Invalid appid")
 				WolframAlphaClient = null;
-
-			if (Response.Length > 500)
-				Response = $"{Response.Substring(0, 500)}...";
 
 			Response = Response.Replace("Wolfram Alpha", Context.User.Username);
 			Response = Response.Replace("Wolfram|Alpha", Context.User.Username);

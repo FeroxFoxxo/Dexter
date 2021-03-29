@@ -39,6 +39,9 @@ namespace Dexter.Commands {
 
 			string Response = await WolframAlphaClient.ShortAnswerAsync(Question);
 
+			if (Response == "Error 1: Invalid appid")
+				WolframAlphaClient = null;
+
 			if (Response.Length > 500)
 				Response = $"{Response.Substring(0, 500)}...";
 

@@ -23,7 +23,11 @@ namespace Dexter.Commands {
 
         public GreetFurConfiguration GreetFurConfiguration { get; set; }
 
-        private SheetsService SheetsService;
+        /// <summary>
+        /// The sheets service allows the bot to interface with the GreetFur spreadsheets.
+        /// </summary>
+
+        public SheetsService SheetsService;
 
     }
 

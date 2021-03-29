@@ -1,15 +1,11 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+﻿using System.Threading.Tasks;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
 using Genbox.WolframAlpha;
-using Genbox.WolframAlpha.Objects;
-using Genbox.WolframAlpha.Responses;
 
 namespace Dexter.Commands {
-	public partial class UtilityCommands {
+    public partial class UtilityCommands {
 
 		/// <summary>
 		/// Evaluates a mathematical expression and gives a result or throws an error.
@@ -18,7 +14,7 @@ namespace Dexter.Commands {
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
 		[Command("ask", RunMode = RunMode.Async)]
-		[Summary("Evaluates a mathematical expression")]
+		[Summary("Evaluates mathematical expressions and answers questions!")]
 		[Alias("math", "calc", "calculate")]
 
 		public async Task WolframCommand([Remainder] string Question) {
@@ -44,6 +40,9 @@ namespace Dexter.Commands {
 
 			if (Response.Length > 500)
 				Response = $"{Response.Substring(0, 500)}...";
+
+			Response = Response.Replace("Wolfram Alpha", Context.User.Username);
+			Response = Response.Replace("Wolfram|Alpha", Context.User.Username);
 
 			await Context.Channel.SendMessageAsync(Response);
 		}

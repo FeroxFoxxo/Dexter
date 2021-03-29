@@ -38,8 +38,8 @@ namespace Dexter.Commands {
 			if (Response == "Error 1: Invalid appid")
 				WolframAlphaClient = null;
 
-			Response = Response.Replace("Wolfram Alpha", Context.User.Username);
-			Response = Response.Replace("Wolfram|Alpha", Context.User.Username);
+			Response = Response.Replace("Wolfram Alpha", Context.Client.CurrentUser.Username);
+			Response = Response.Replace("Wolfram|Alpha", Context.Client.CurrentUser.Username);
 
 			await Context.Channel.SendMessageAsync(Response);
 		}

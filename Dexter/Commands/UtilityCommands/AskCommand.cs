@@ -19,7 +19,7 @@ namespace Dexter.Commands {
 		[Alias("math", "calc", "calculate")]
 
 		public async Task WolframCommand([Remainder] string Question) {
-			if (string.IsNullOrEmpty(UtilityConfiguration.WolframAppAPI)) {
+			if (string.IsNullOrEmpty(UtilityConfiguration.WolframAppAPI) || UtilityConfiguration == "NOTSET") {
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Whoops! This is on us. <3")
 					.WithDescription("It looks like one of our developers forgot to set an API key to use this service. " +

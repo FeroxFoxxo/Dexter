@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dexter.Abstractions;
 using Dexter.Databases.UserProfiles;
-using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
 

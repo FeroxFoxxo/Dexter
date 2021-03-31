@@ -4,7 +4,6 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Databases.CustomCommands;
 using Discord.Commands;
-using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json;

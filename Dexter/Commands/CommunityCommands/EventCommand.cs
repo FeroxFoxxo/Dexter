@@ -11,11 +11,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
-    
+
     public partial class CommunityCommands {
 
         const string TimeEventSeparator = ";";

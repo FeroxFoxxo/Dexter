@@ -4,7 +4,6 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;

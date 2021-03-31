@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.UserRestrictions {
-    
+
     /// <summary>
     /// Represents a set of restrictions that prevents a specific user from accessing certain Dexter Features.
     /// </summary>
-    
+
     public class UserRestriction {
 
         /// <summary>

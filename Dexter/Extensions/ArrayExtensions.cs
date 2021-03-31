@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Dexter.Extensions {
+﻿namespace Dexter.Extensions {
 
     /// <summary>
     /// Contains a few methods that allow for treatment of arrays similarly to lists, with a few limitations.

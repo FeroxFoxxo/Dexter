@@ -7,8 +7,6 @@ using Dexter.Extensions;
 using System.Collections.Generic;
 using Discord;
 using Discord.WebSocket;
-using System;
-using Discord.Rest;
 using System.Linq;
 
 namespace Dexter.Commands {

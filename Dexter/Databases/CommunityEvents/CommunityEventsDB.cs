@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dexter.Databases.CommunityEvents {
-    
+
     /// <summary>
     /// Holds and manages the events suggested by members of the community for approval, modification, and release.
     /// </summary>

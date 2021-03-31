@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Databases.Proposals;
-using Discord.Net;
 using Dexter.Databases.AdminConfirmations;
 using System.Reflection;
 using Newtonsoft.Json;
@@ -24,7 +23,7 @@ namespace Dexter.Services {
     /// <summary>
     /// The Proposal service, which is used to create and update proposals on the change of a reaction.
     /// </summary>
-    
+
     public class ProposalService : Service {
 
         /// <summary>

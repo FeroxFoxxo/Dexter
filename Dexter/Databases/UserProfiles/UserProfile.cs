@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.UserProfiles {
 
@@ -33,6 +28,7 @@ namespace Dexter.Databases.UserProfiles {
         /// </summary>
 
         public long DateJoined { get; set; }
+      
     }
 
 }

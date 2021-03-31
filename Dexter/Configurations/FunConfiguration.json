@@ -50,6 +50,7 @@
   "HeadpatWebhookName": "HeadpatWebhook",
   "MaxCoinFlips": 1000000,
   "GamesChannel": 792657895014793246,
+  "HangmanDefaultLives": 6,
   "WritingPromptTerms": {
     "living_adjective": [
       "all-powerful",

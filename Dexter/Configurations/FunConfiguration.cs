@@ -88,6 +88,12 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public ulong GamesChannel { get; set; }
+
+        /// <summary>
+        /// Sets the lives a default game of hangman is set to on reset and creation.
+        /// </summary>
+
+        public int HangmanDefaultLives { get; set; }
     }
 
 }

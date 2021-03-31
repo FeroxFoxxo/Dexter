@@ -6,10 +6,15 @@ using System.Threading.Tasks;
 using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Games;
+using Dexter.Helpers.Games;
 using Discord;
 using Discord.WebSocket;
 
 namespace Dexter.Services {
+
+    /// <summary>
+    /// This service manages the Dexter Games subsystem and sends events to the appropriate data structures.
+    /// </summary>
 
     public class GamesService : Service {
 
@@ -35,12 +40,22 @@ namespace Dexter.Services {
 
         private async Task HandleMessage(SocketMessage Message) {
             if (Message.Channel.Id != FunConfiguration.GamesChannel) return;
+            if (Message.Content.StartsWith(BotConfiguration.Prefix)) return;
 
             Player Player = GamesDB.Players.Find(Message.Author.Id);
 
             if (Player is null) return;
             if (Player.Playing < 1) return;
 
+            GameInstance Instance = GamesDB.Games.Find(Player.Playing);
+
+            if (Instance is null) return;
+
+            IGameTemplate Game = Instance.ToGameProper();
+
+            if (Game is null) return;
+
+            await Game.HandleMessage(Message, GamesDB, DiscordSocketClient, FunConfiguration);
         }
     }
 }

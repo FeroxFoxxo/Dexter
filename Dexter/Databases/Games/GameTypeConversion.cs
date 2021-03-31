@@ -22,5 +22,12 @@ namespace Dexter.Databases.Games {
             {"shiritori", GameType.Shiritori}
         };
 
+        public static readonly Dictionary<GameType, string> GameEmoji = new Dictionary<GameType, string>() {
+            {GameType.Unselected, "❓"},
+            {GameType.Hangman, "💀"},
+            {GameType.Shiritori, "⛓"},
+            {GameType.Charades, "🎭"},
+        };
+
     }
 }

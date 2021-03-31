@@ -29,8 +29,9 @@ namespace Dexter.Helpers.Games {
         /// Resets the game, setting it on a default status.
         /// </summary>
         /// <param name="FunConfiguration">The general module configuration, if required.</param>
+        /// <param name="GamesDB">The Games database, used to reset scores if appropriate.</param>
 
-        public abstract void Reset(FunConfiguration FunConfiguration);
+        public abstract void Reset(FunConfiguration FunConfiguration, GamesDB GamesDB);
 
         /// <summary>
         /// Handles a message given by the event manager when a player that is in this game sends a message in the appropriate channel.

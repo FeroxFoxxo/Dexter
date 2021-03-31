@@ -5,6 +5,7 @@ using Dexter.Databases.CommunityEvents;
 using Dexter.Databases.EventTimers;
 using System.Linq;
 using Dexter.Databases.UserRestrictions;
+using Dexter.Databases.Games;
 
 namespace Dexter.Commands {
 
@@ -36,8 +37,14 @@ namespace Dexter.Commands {
         /// Holds information about users who have been forbidden from using this service.
         /// </summary>
 
-        public RestrictionsDB RestrictionsDB { get; set; } 
-   
+        public RestrictionsDB RestrictionsDB { get; set; }
+
+        /// <summary>
+        /// Holds all relevant data about games being played on Dexter.
+        /// </summary>
+
+        public GamesDB GamesDB { get; set; }
+
     }
 
 }

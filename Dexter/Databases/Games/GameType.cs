@@ -25,10 +25,15 @@ namespace Dexter.Databases.Games {
         Hangman,
 
         /// <summary>
-        /// An instance game of Shiritori, a game about coming up with words that start by which whatever the previous person's word ends.
+        /// An instance game of Shiritori, a game about coming up with words that start by whatever the previous person's word ends.
         /// </summary>
 
-        Shiritori
+        Shiritori,
 
+        /// <summary>
+        /// An instance game of Charades, a game about guessing what a person is trying to nonverbally communicate.
+        /// </summary>
+
+        Charades
     }
 }

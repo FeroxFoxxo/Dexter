@@ -31,7 +31,7 @@ namespace Dexter.Commands {
             "`LEAVE` - Leaves the game, if you're the master, this will also delete the session and kick all players.\n" +
             "`GET (GameID)` - Gets general info about a game session or yours.\n" +
             "`LEADERBOARD` - Displays the game leaderboard.\n" +
-            "`LIST` - Displays a list of available games" +
+            "`LIST` - Displays a list of available games\n" +
             "`RESET` - Resets the game state.\n" +
             "`SAVE` - Forces a database save of the Dexter Games system.\n" +
             "`SET [Field] [Value]` - Sets a value for your game. \n" +
@@ -197,7 +197,7 @@ namespace Dexter.Commands {
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    Game.ToGameProper().Reset(FunConfiguration);
+                    Game.ToGameProper().Reset(FunConfiguration, GamesDB);
                     GamesDB.SaveChanges();
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Game successfully reset!")
@@ -284,7 +284,7 @@ namespace Dexter.Commands {
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Ban Registered")
                         .WithDescription($"Player {User.Mention} has been banned from {Game.Title}.")
-                        .AddField("Banned Players", Game.BannedMentions.Truncate(500))
+                        .AddField("Banned Players", Game.BannedMentions.TruncateTo(500))
                         .SendEmbed(Context.Channel);
                     return;
                 case "unban":
@@ -295,7 +295,7 @@ namespace Dexter.Commands {
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Unbanned Player")
                         .WithDescription($"Player {User.Mention} has been unbanned from {Game.Title}.")
-                        .AddField(!string.IsNullOrWhiteSpace(Game.Banned), "Banned Players", Game.BannedMentions.Truncate(500))
+                        .AddField(!string.IsNullOrWhiteSpace(Game.Banned), "Banned Players", Game.BannedMentions.TruncateTo(500))
                         .SendEmbed(Context.Channel);
                     return;
                 case "kick":
@@ -341,17 +341,6 @@ namespace Dexter.Commands {
                     }
                     return;
             }
-        }
-
-        /// <summary>
-        /// Gets all the players who are currently active in a given instance.
-        /// </summary>
-        /// <param name="InstanceID">The unique ID of the game instance to fetch from.</param>
-        /// <returns>An array of Players who are currently playing the instance identified by <paramref name="InstanceID"/>.</returns>
-
-        public Player[] GetPlayersFromInstance(int InstanceID) {
-            if (InstanceID <= 0) return Array.Empty<Player>();
-            return GamesDB.Players.AsQueryable().Where(p => p.Playing == InstanceID).ToArray();
         }
 
         private void RemovePlayer(ulong PlayerID) {
@@ -404,7 +393,7 @@ namespace Dexter.Commands {
         }
 
         private void CloseSession(GameInstance Instance) {
-            Player[] Players = GetPlayersFromInstance(Instance.GameID);
+            Player[] Players = GamesDB.GetPlayersFromInstance(Instance.GameID);
 
             foreach(Player p in Players) {
                 RemovePlayer(p);
@@ -434,7 +423,7 @@ namespace Dexter.Commands {
             GamesDB.SaveChanges();
 
             IGameTemplate Game = Result.ToGameProper();
-            if (Game is not null) Game.Reset(FunConfiguration);
+            if (Game is not null) Game.Reset(FunConfiguration, GamesDB);
             return Result;
         }
 
@@ -506,13 +495,13 @@ namespace Dexter.Commands {
 
         private EmbedBuilder Leaderboard(GameInstance Instance) {
             StringBuilder Board = new StringBuilder();
-            List<Player> Players = GetPlayersFromInstance(Instance.GameID).ToList();
+            List<Player> Players = GamesDB.GetPlayersFromInstance(Instance.GameID).ToList();
             Players.Sort((a, b) => b.Score.CompareTo(a.Score));
 
             foreach (Player p in Players) {
                 IUser User = DiscordSocketClient.GetUser(p.UserID);
                 if (User is null) continue;
-                Board.Append($"{(Board.Length > 0 ? "\n" : "")}{User.Username.Truncate(16),-16}| {p.Score:G4}, ♥×{p.Lives}");
+                Board.Append($"{(Board.Length > 0 ? "\n" : "")}{User.Username.TruncateTo(16),-16}| {p.Score:G4}, ♥×{p.Lives}");
             }
 
             return new EmbedBuilder()

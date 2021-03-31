@@ -56,5 +56,16 @@ namespace Dexter.Databases.Games {
 
             return Count;
         }
+
+        /// <summary>
+        /// Gets all the players who are currently active in a given instance.
+        /// </summary>
+        /// <param name="InstanceID">The unique ID of the game instance to fetch from.</param>
+        /// <returns>An array of Players who are currently playing the instance identified by <paramref name="InstanceID"/>.</returns>
+
+        public Player[] GetPlayersFromInstance(int InstanceID) {
+            if (InstanceID <= 0) return Array.Empty<Player>();
+            return Players.AsQueryable().Where(p => p.Playing == InstanceID).ToArray();
+        }
     }
 }

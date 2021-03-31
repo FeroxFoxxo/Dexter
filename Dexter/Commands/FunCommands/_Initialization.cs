@@ -1,6 +1,5 @@
 ﻿using Dexter.Configurations;
 using Dexter.Abstractions;
-using Discord.WebSocket;
 using Dexter.Databases.FunTopics;
 using Dexter.Databases.UserRestrictions;
 using Dexter.Databases.Games;
@@ -32,7 +31,7 @@ namespace Dexter.Commands {
         public RestrictionsDB RestrictionsDB { get; set; }
 
         /// <summary>
-        /// Holds all relevant data about games being player on Dexter.
+        /// Holds all relevant data about games being played on Dexter.
         /// </summary>
 
         public GamesDB GamesDB { get; set; }

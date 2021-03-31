@@ -214,7 +214,7 @@ namespace Dexter.Commands {
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Names successfully deleted!")
                     .WithDescription($"This user had {Removed.Count} name{(Removed.Count != 1 ? "s" : "")} following this pattern:\n" +
-                        $"{LanguageHelper.Truncate(string.Join(", ", Removed).ToString(), 2000)}")
+                        $"{LanguageHelper.TruncateTo(string.Join(", ", Removed).ToString(), 2000)}")
                     .SendEmbed(Context.Channel);
                 return;
             }

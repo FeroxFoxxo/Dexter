@@ -117,7 +117,7 @@ namespace Dexter.Helpers.Games {
                 .AddField("Lives", LivesExpression(), true)
                 .AddField("Wrong Guesses", MistakesExpression(), true)
                 .AddField("Master", Client.GetUser(Game.Master).GetUserInformation())
-                .AddField(Game.Banned.Length > 0, "Banned Players", Game.BannedMentions.Truncate(500));
+                .AddField(Game.Banned.Length > 0, "Banned Players", Game.BannedMentions.TruncateTo(500));
         }
 
         private void RegisterMistake(char c) {
@@ -159,11 +159,18 @@ namespace Dexter.Helpers.Games {
         /// Resets the game state to its initial default value.
         /// </summary>
         /// <param name="FunConfiguration">Settings related to the fun module, which contain the default lives parameter.</param>
+        /// <param name="GamesDB">The database containing player information, set to <see langword="null"/> to avoid resetting scores.</param>
 
-        public void Reset(FunConfiguration FunConfiguration) {
+        public void Reset(FunConfiguration FunConfiguration, GamesDB GamesDB) {
             Game.Data = EmptyData;
             Game.LastUserInteracted = Game.Master;
             Lives = MaxLives = FunConfiguration.HangmanDefaultLives;
+            if (GamesDB is null) return;
+            Player[] Players = GamesDB.GetPlayersFromInstance(Game.GameID);
+            foreach(Player p in Players) {
+                p.Score = 0;
+                p.Lives = 0;
+            }
         }
 
         const int MAX_LIVES_ALLOWED = 20;
@@ -192,7 +199,7 @@ namespace Dexter.Helpers.Games {
                         Feedback = "The term is too long!";
                         return false;
                     }
-                    Reset(FunConfiguration);
+                    Reset(FunConfiguration, null);
                     Term = Value;
                     Guess = ObscureTerm(Value);
                     Feedback = $"Success! Term = {Value}, Guess = \"{DiscordifyGuess()}\"";
@@ -255,6 +262,7 @@ namespace Dexter.Helpers.Games {
                 .WithDescription("**Step 1**: Set a TERM! The master can choose a term in DMs with the `game SET TERM [Term]` command.\n" +
                     "**Step 2**: Any player can say `guess` at any moment to see the current status of the guess.\n" +
                     "**Step 3**: Start guessing letters! type `guess [letter]` to guess a letter (you can't guess twice in a row!).\n" +
+                    "Feeling brave? Guess the whole term with `guess [term]`, it doesn't cost lives, but it does cost a turn.\n" +
                     "If you'd like to forego your turn, type `pass`. To check misguessed letters, type `mistakes`.\n" +
                     "Keep guessing until you run out of lives or you complete the word! (Type `lives` to see how many lives you have left)");
         }
@@ -291,6 +299,8 @@ namespace Dexter.Helpers.Games {
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         public async Task HandleMessage(IMessage Message, GamesDB GamesDB, DiscordSocketClient Client, FunConfiguration FunConfiguration) {
+
+            Player Player = GamesDB.GetOrCreatePlayer(Message.Author.Id);
 
             string Msg = Message.Content;
             if(Msg.ToLower() == "pass") {
@@ -332,6 +342,10 @@ namespace Dexter.Helpers.Games {
                     await Message.Channel.SendMessageAsync($"The term was already guessed! You're late to the party. Waiting for the Game Master to change it.");
                     return;
                 }
+                if (Lives < 1) {
+                    await Message.Channel.SendMessageAsync($"You're out of lives! Choose a new term before continuing.");
+                    return;
+                }
                 string newGuess = string.Join(' ', Args[1..]);
                 if (newGuess.Length == 1) {
                     char c = newGuess[0];
@@ -347,8 +361,16 @@ namespace Dexter.Helpers.Games {
                     Game.LastUserInteracted = Message.Author.Id;
                     int Count = GuessChar(c);
                     if (Count > 0) {
+                        int Score = 0;
+                        string ScoreExpression = "";
+                        if(ScorePerLetter.ContainsKey(char.ToUpper(c))) {
+                            Score = Count * ScorePerLetter[char.ToUpper(c)];
+                            ScoreExpression = $" (+{Score}P)";
+                            Player.Score += Score;
+                        }
+
                         await Message.Channel.SendMessageAsync($"{Message.Author.Mention} guessed letter {char.ToUpper(c)}!\n" +
-                            $"**The term has {Count} {char.ToUpper(c)}{(Count > 1 ? "s" : "")}!** {DiscordifyGuess()}");
+                            $"**The term has {Count} {char.ToUpper(c)}{(Count > 1 ? "s" : "")}{ScoreExpression}!** {DiscordifyGuess()}");
                         await Message.DeleteAsync();
 
                         if(!Guess.Contains('_')) {
@@ -375,22 +397,65 @@ namespace Dexter.Helpers.Games {
                     return;
                 }
                 if (newGuess.Length > 1) {
+                    Game.LastUserInteracted = Message.Author.Id;
                     if (newGuess.ToLower() != Term.ToLower()) {
                         await Message.Channel.SendMessageAsync($"{Message.Author.Mention} guessed the term to be \"{newGuess}\"!\n" +
                             $"It seems as though that isn't the word, though!");
-                        Game.LastUserInteracted = Message.Author.Id;
                         return;
                     }
 
+                    int Score = ValueDifference(Guess, Term);
+                    Player.Score += Score;
                     Guess = Term;
                     await new EmbedBuilder()
                         .WithColor(Color.Green)
-                        .WithTitle("Correct!")
-                        .WithDescription($"The term was {Term}! \nThe master can now choose a new term or offer their position to another player with the `game set master [Player]` command.")
+                        .WithTitle($"Correct! (+{Score} Point{(Score > 1 ? "s" : "")})")
+                        .WithDescription($"The term was {Term}! \nThe master can now choose a new term or offer their position to another player with the `game set master [Player]` command.\n")
                         .SendEmbed(Message.Channel);
                     return;
                 }
             }
         }
+
+        private static int ValueDifference(string Current, string Target) {
+            int Result = 0;
+            
+            for(int i = 0; i < Math.Min(Current.Length, Target.Length); i++) {
+                if (Current[i] == '_' && ScorePerLetter.ContainsKey(char.ToUpper(Target[i]))) {
+                    Result += ScorePerLetter[char.ToUpper(Target[i])];
+                }
+            }
+
+            return Result;
+        }
+
+        private static Dictionary<char, int> ScorePerLetter = new Dictionary<char, int>() {
+            {'A', 1},
+            {'B', 3},
+            {'C', 3},
+            {'D', 2},
+            {'E', 1},
+            {'F', 4},
+            {'G', 2},
+            {'H', 4},
+            {'I', 1},
+            {'J', 8},
+            {'K', 5},
+            {'L', 1},
+            {'M', 3},
+            {'N', 1},
+            {'O', 1},
+            {'P', 3},
+            {'Q', 10},
+            {'R', 1},
+            {'S', 1},
+            {'T', 1},
+            {'U', 1},
+            {'V', 4},
+            {'W', 4},
+            {'X', 8},
+            {'Y', 4},
+            {'Z', 10}
+        };
     }
 }

@@ -28,7 +28,6 @@ namespace Dexter.Databases.UserProfiles {
         /// </summary>
 
         public long DateJoined { get; set; }
-
     }
 
 }

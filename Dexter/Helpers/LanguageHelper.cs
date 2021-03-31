@@ -244,10 +244,10 @@ namespace Dexter.Helpers {
         /// <param name="MaxLength"></param>
         /// <returns>A substring of <paramref name="s"/> ending in "..." if its length is greater than <paramref name="MaxLength"/>, otherwise <paramref name="s"/></returns>
 
-        public static string Truncate(this string s, int MaxLength) {
+        public static string TruncateTo(this string s, int MaxLength) {
             if (s.Length > MaxLength) {
                 if (MaxLength < 3) return "...";
-                return s[..^(MaxLength - 3)] + "...";
+                return s[..(MaxLength - 3)] + "...";
             }
 
             return s;

@@ -36,6 +36,14 @@ namespace Dexter.Commands {
             Restriction Apply;
             bool[] Success;
             List<string> Errored = new();
+
+            if(string.IsNullOrEmpty(Restrictions)) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("No restrictions provided!")
+                    .WithDescription("You must provide at least one restriction to apply or remove.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
             
             switch(Action.ToLower()) {
                 case "add":
@@ -126,6 +134,10 @@ namespace Dexter.Commands {
                         case "topics":
                         case "wyr":
                             Result |= Restriction.TopicManagement;
+                            Success[i] = true;
+                            break;
+                        case "game":
+                            Result |= Restriction.Games;
                             Success[i] = true;
                             break;
                         case "all":

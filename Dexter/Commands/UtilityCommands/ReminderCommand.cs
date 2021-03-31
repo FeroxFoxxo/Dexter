@@ -254,7 +254,7 @@ namespace Dexter.Commands {
                 .WithCurrentTimestamp();
 
             foreach(Reminder r in Reminders) {
-                Builder.AddField($"🎗Reminder {counter++} (ID {r.ID})🎗", $"{r.Message.Truncate(UtilityConfiguration.ReminderMaxCharactersPerItem)}\n " +
+                Builder.AddField($"🎗Reminder {counter++} (ID {r.ID})🎗", $"{r.Message.TruncateTo(UtilityConfiguration.ReminderMaxCharactersPerItem)}\n " +
                     $"- **Release:** {DateTimeOffset.FromUnixTimeSeconds(r.DateTimeRelease).HumanizeExtended(BotConfiguration, true)}");
             }
 

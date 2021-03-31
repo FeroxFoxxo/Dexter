@@ -2,6 +2,7 @@
 using Dexter.Abstractions;
 using Dexter.Databases.FunTopics;
 using Dexter.Databases.UserRestrictions;
+using Dexter.Databases.Games;
 
 namespace Dexter.Commands {
 
@@ -28,6 +29,12 @@ namespace Dexter.Commands {
         /// </summary>
 
         public RestrictionsDB RestrictionsDB { get; set; }
+
+        /// <summary>
+        /// Holds all relevant data about games being played on Dexter.
+        /// </summary>
+
+        public GamesDB GamesDB { get; set; }
 
     }
 

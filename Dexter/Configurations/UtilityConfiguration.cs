@@ -20,5 +20,7 @@ namespace Dexter.Configurations {
 
         public int ReminderMaxCharactersPerItem { get; set; }
 
+        public string WolframAppAPI { get; set; }
+
     }
 }

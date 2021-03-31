@@ -43,7 +43,6 @@ namespace Dexter.Databases.Games {
                     Lives = 0,
                     Score = 0
                 };
-                Console.Out.WriteLine($"Creating new player: #{ID}");
                 Players.Add(p);
             }
             return p;

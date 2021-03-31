@@ -27,6 +27,10 @@ namespace Dexter.Databases.UserRestrictions {
         /// <summary>
         /// Prevents users from suggesting new topics.
         /// </summary>
-        TopicManagement = 8
+        TopicManagement = 8,
+        /// <summary>
+        /// Prevents users from managing or joining games.
+        /// </summary>
+        Games = 16
     }
 }

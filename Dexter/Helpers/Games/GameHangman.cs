@@ -316,7 +316,7 @@ namespace Dexter.Helpers.Games {
             }
 
             if(Msg.ToLower() == "mistakes") {
-                await Message.Channel.SendMessageAsync($"Mitakes: {MistakesExpression()}");
+                await Message.Channel.SendMessageAsync($"Mistakes: {MistakesExpression()}");
                 return;
             }
             if(Msg.ToLower() == "lives") {
@@ -369,8 +369,8 @@ namespace Dexter.Helpers.Games {
                             Player.Score += Score;
                         }
 
-                        await Message.Channel.SendMessageAsync($"{Message.Author.Mention} guessed letter {char.ToUpper(c)}!\n" +
-                            $"**The term has {Count} {char.ToUpper(c)}{(Count > 1 ? "s" : "")}{ScoreExpression}!** {DiscordifyGuess()}");
+                        await Message.Channel.SendMessageAsync($"{Message.Author.Mention} guessed letter {char.ToUpper(c)}! **The term has {Count} {char.ToUpper(c)}{(Count > 1 ? "s" : "")}{ScoreExpression}!**" +
+                            $"\n{DiscordifyGuess()}");
                         await Message.DeleteAsync();
 
                         if(!Guess.Contains('_')) {
@@ -398,7 +398,7 @@ namespace Dexter.Helpers.Games {
                 }
                 if (newGuess.Length > 1) {
                     Game.LastUserInteracted = Message.Author.Id;
-                    if (newGuess.ToLower() != Term.ToLower()) {
+                    if (!ConsiderEqual(newGuess, Term)) {
                         await Message.Channel.SendMessageAsync($"{Message.Author.Mention} guessed the term to be \"{newGuess}\"!\n" +
                             $"It seems as though that isn't the word, though!");
                         return;
@@ -427,6 +427,20 @@ namespace Dexter.Helpers.Games {
             }
 
             return Result;
+        }
+
+        private static bool ConsiderEqual(string a, string b) {
+            a = a.ToLower();
+            b = b.ToLower();
+            StringBuilder aStr = new StringBuilder();
+            StringBuilder bStr = new StringBuilder();
+            foreach(char c in a.ToCharArray()) {
+                if (char.IsLetter(c)) aStr.Append(c);
+            }
+            foreach (char c in b.ToCharArray()) {
+                if (char.IsLetter(c)) bStr.Append(c);
+            }
+            return aStr.ToString() == bStr.ToString();
         }
 
         private static Dictionary<char, int> ScorePerLetter = new Dictionary<char, int>() {

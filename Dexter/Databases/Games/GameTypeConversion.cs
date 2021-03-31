@@ -17,16 +17,20 @@ namespace Dexter.Databases.Games {
         /// </summary>
 
         public static readonly Dictionary<string, GameType> GameNames = new Dictionary<string, GameType>() {
-            {"hangman", GameType.Hangman },
-            {"wordchain", GameType.Shiritori},
-            {"shiritori", GameType.Shiritori}
+            {"hangman", GameType.Hangman }
+            //{"wordchain", GameType.Shiritori},
+            //{"shiritori", GameType.Shiritori}
         };
+
+        /// <summary>
+        /// Correlates each GameType with an emoji for a very small representation.
+        /// </summary>
 
         public static readonly Dictionary<GameType, string> GameEmoji = new Dictionary<GameType, string>() {
             {GameType.Unselected, "❓"},
-            {GameType.Hangman, "💀"},
-            {GameType.Shiritori, "⛓"},
-            {GameType.Charades, "🎭"},
+            {GameType.Hangman, "💀"}
+            //{GameType.Shiritori, "⛓"},
+            //{GameType.Charades, "🎭"},
         };
 
     }

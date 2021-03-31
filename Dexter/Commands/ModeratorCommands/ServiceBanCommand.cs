@@ -130,6 +130,10 @@ namespace Dexter.Commands {
                             Result |= Restriction.TopicManagement;
                             Success[i] = true;
                             break;
+                        case "game":
+                            Result |= Restriction.Games;
+                            Success[i] = true;
+                            break;
                         case "all":
                             foreach(ulong r in Enum.GetValues<Restriction>()) {
                                 Result |= (Restriction) r;

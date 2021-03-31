@@ -41,6 +41,14 @@ namespace Dexter.Commands {
         [BotChannel]
 
         public async Task GameCommand(string Action, [Remainder] string Arguments = "") {
+            if (RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.Games) && Action.ToLower() != "leave") {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("You aren't permitted to manage or join games!")
+                    .WithDescription("You have been blacklisted from using this service. If you think this is a mistake, feel free to personally contact an administrator.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+            
             string Feedback;
 
             Player Player = GamesDB.GetOrCreatePlayer(Context.User.Id);
@@ -341,6 +349,37 @@ namespace Dexter.Commands {
                     }
                     return;
             }
+        }
+
+        /// <summary>
+        /// Forcefully removes a game instance.
+        /// </summary>
+        /// <param name="GameID">The gameID of the game instance to remove.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
+
+        [Command("killgame")]
+        [Summary("Forces a game session to be closed by ID - Syntax `killgame [ID]`")]
+        [RequireModerator]
+
+        public async Task KillGameCommand(int GameID) {
+            GameInstance Game = GamesDB.Games.Find(GameID);
+            if (Game is null) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Unable to find game!")
+                    .WithDescription($"No game exists with ID {GameID}.")
+                    .WithCurrentTimestamp()
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+
+            CloseSession(Game);
+            GamesDB.SaveChanges();
+            await BuildEmbed(EmojiEnum.Love)
+                .WithTitle("Game removed!")
+                .WithDescription($"Game #{GameID} was successfully removed and all players in it were kicked.")
+                .WithCurrentTimestamp()
+                .SendEmbed(Context.Channel);
+            return;
         }
 
         private void RemovePlayer(ulong PlayerID) {

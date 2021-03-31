@@ -22,18 +22,20 @@ namespace Dexter.Databases.Games {
         /// An instance game of Hangman, a game about guessing an obscured word by guessing individual letters.
         /// </summary>
 
-        Hangman,
+        Hangman
 
         /// <summary>
         /// An instance game of Shiritori, a game about coming up with words that start by whatever the previous person's word ends.
         /// </summary>
 
-        Shiritori,
+        //[NotImplemented]
+        //Shiritori,
 
         /// <summary>
         /// An instance game of Charades, a game about guessing what a person is trying to nonverbally communicate.
         /// </summary>
 
-        Charades
+        //[NotImplemented]
+        //Charades
     }
 }

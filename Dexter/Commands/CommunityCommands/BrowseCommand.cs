@@ -19,7 +19,7 @@ namespace Dexter.Commands {
         [Command("browse")]
         [Summary("Browse for games or events: `browse [Type] (Filters)`")]
         [ExtendedSummary("Browse for games or events!\n" +
-            "`browse GAMES (Gametype)` - Browse for open game sessions, with an optional gametype." +
+            "`browse GAMES (Gametype)` - Browse for open game sessions, with an optional gametype.\n" +
             "`browse EVENTS (<OFFICIAL|COMMUNITY>)` - Browse for upcoming scheduled events!")]
         [BotChannel]
 

@@ -3,7 +3,6 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using Discord.Net;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {

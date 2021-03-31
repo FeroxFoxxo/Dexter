@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 
 namespace Dexter.Configurations {
-    
+
     /// <summary>
     /// Configures the relevant aspects of the Utility Commands Module.
     /// </summary>
@@ -24,6 +19,8 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public int ReminderMaxCharactersPerItem { get; set; }
+
+        public string WolframAppAPI { get; set; }
 
     }
 }

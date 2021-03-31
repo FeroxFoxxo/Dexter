@@ -8,8 +8,10 @@
   "StaffBorkdayRoleID": 793682190835515463,
   "SecondsOfBorkday": 86400,
   "RulesAndInfoChannel": 795538176709230613,
-  "MutedRoleID": 821232960468025344,
-  "VCMutedRoleID": 825105041463443497,
+  "MutedRoles": [
+    821232960468025344,
+    825105041463443497
+  ],
   "SecondsTillPointIncrement": 30,
   "MaxPoints": 5,
   "StaffBotsChannel": 792657895014793246,

@@ -3,7 +3,6 @@ using Dexter.Configurations;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Helpers;
-using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +16,7 @@ namespace Dexter.Attributes.Methods {
     /// precondition attribute. This will run a check to see if the user meets the required permission
     /// level specified by the class that extends this, and if so to run the command. It is applied to methods.
     /// </summary>
-    
+
     [AttributeUsage(AttributeTargets.Method)]
 
     public abstract class RequirePermissionLevelAttribute : PreconditionAttribute {

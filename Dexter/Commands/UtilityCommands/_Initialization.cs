@@ -4,6 +4,7 @@ using Dexter.Databases.UserProfiles;
 using Dexter.Databases.Mail;
 using Dexter.Databases.Reminders;
 using Dexter.Services;
+using Genbox.WolframAlpha;
 
 namespace Dexter.Commands {
 
@@ -22,7 +23,7 @@ namespace Dexter.Commands {
         /// <summary>
         /// Holds all relevant settings and configuration for the Utility Commands Module.
         /// </summary>
-        
+
         public UtilityConfiguration UtilityConfiguration { get; set; }
 
         /// <summary>
@@ -60,6 +61,13 @@ namespace Dexter.Commands {
         /// </summary>
 
         public LanguageConfiguration LanguageConfiguration { get; set; }
+
+        /// <summary>
+        /// Allows interface with the WolframAlpha servers for the math command.
+        /// </summary>
+
+        public WolframAlphaClient WolframAlphaClient;
+
     }
 
 }

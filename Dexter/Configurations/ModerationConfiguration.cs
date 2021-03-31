@@ -47,16 +47,10 @@ namespace Dexter.Configurations {
         public int SecondsOfBorkday { get; set; }
 
         /// <summary>
-        /// The role ID for the "Muted" role.
+        /// A list of role IDs for the muted roles.
         /// </summary>
 
-        public ulong MutedRoleID { get; set; }
-
-        /// <summary>
-        /// The role ID for the "VC Muted" role.
-        /// </summary>
-
-        public ulong VCMutedRoleID { get; set; }
+        public List<ulong> MutedRoles { get; set; }
 
         /// <summary>
         /// The numerical ID of the #rules-and-info channel.

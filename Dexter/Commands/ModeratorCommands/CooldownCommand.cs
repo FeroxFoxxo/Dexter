@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Discord;
 using System;
 using Dexter.Databases.Cooldowns;
-using Discord.Net;
 
 namespace Dexter.Commands {
 

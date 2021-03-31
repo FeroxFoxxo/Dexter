@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Dexter.Databases.CommunityEvents {
+﻿namespace Dexter.Databases.CommunityEvents {
     public enum EventType {
 
         /// <summary>

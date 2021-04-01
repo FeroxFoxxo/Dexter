@@ -127,7 +127,7 @@ namespace Dexter.Commands {
                     if (string.IsNullOrEmpty(Arguments)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("No Arguments Provided!")
-                            .WithDescription("You must provide a field and a value to set.")
+                            .WithDescription("You must provide, at least, an instance ID to join!")
                             .SendEmbed(Context.Channel);
                         return;
                     }

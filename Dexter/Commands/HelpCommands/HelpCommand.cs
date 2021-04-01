@@ -73,7 +73,8 @@ namespace Dexter.Commands {
                         }
                     }
 
-                    Embeds.Add(CurrentBuilder);
+                    if(!string.IsNullOrEmpty(CurrentBuilder.Description))
+                        Embeds.Add(CurrentBuilder);
                 }
 
                 List<string> Pages = new ();

@@ -23,7 +23,7 @@ namespace Dexter.Commands {
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         [Command("game")]
-        [Summary("Creates and manages game sessions. To create a game session use `~game <NEW|CREATE> [Game] [Title] ; [Description]`")]
+        [Summary("Used to create, manage and join games! Refer to the extended summary for use of this command by using `~help game`.")]
         [ExtendedSummary("Creates and manages game sessions.\n" +
             "`<NEW|CREATE> [Game] [Title] (; [Description])` - Creates a new game instance and joins it as a Master.\n" +
             "`<HELP|INFO>` - Shows information for the game you're currently in.\n" +

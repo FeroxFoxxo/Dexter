@@ -116,6 +116,7 @@ namespace Dexter.Helpers.Games {
                 .WithDescription($"{Game.Description}\n**Term**: {DiscordifyGuess()}")
                 .AddField("Lives", LivesExpression(), true)
                 .AddField("Wrong Guesses", MistakesExpression(), true)
+                .AddField("Available Guesses", MissingLettersExpression(), true)
                 .AddField("Master", Client.GetUser(Game.Master).GetUserInformation())
                 .AddField(Game.Banned.Length > 0, "Banned Players", Game.BannedMentions.TruncateTo(500));
         }
@@ -153,6 +154,22 @@ namespace Dexter.Helpers.Games {
             string Missed = string.Join(", ", LettersMissed);
             if (Missed.Length == 0) return "-";
             return Missed.ToString();
+        }
+
+        private string MissingLettersExpression() {
+            HashSet<char> Missing = new HashSet<char>();
+            foreach(char c in ScorePerLetter.Keys) {
+                Missing.Add(c);
+            }
+
+            foreach(char c in LettersMissed.ToCharArray()) {
+                if (Missing.Contains(c)) Missing.Remove(c);
+            }
+            foreach (char c in Guess.ToUpper().ToCharArray()) {
+                if (Missing.Contains(c)) Missing.Remove(c);
+            }
+
+            return string.Join("", Missing);
         }
 
         /// <summary>

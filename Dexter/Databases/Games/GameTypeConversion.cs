@@ -17,7 +17,8 @@ namespace Dexter.Databases.Games {
         /// </summary>
 
         public static readonly Dictionary<string, GameType> GameNames = new Dictionary<string, GameType>() {
-            {"hangman", GameType.Hangman }
+            {"hangman", GameType.Hangman },
+            {"tictactoe", GameType.TicTacToe}
             //{"wordchain", GameType.Shiritori},
             //{"shiritori", GameType.Shiritori}
         };
@@ -28,7 +29,8 @@ namespace Dexter.Databases.Games {
 
         public static readonly Dictionary<GameType, string> GameEmoji = new Dictionary<GameType, string>() {
             {GameType.Unselected, "❓"},
-            {GameType.Hangman, "💀"}
+            {GameType.Hangman, "💀"},
+            {GameType.TicTacToe, "⭕"}
             //{GameType.Shiritori, "⛓"},
             //{GameType.Charades, "🎭"},
         };

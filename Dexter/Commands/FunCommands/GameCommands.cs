@@ -209,7 +209,7 @@ namespace Dexter.Commands {
                     GamesDB.SaveChanges();
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Game successfully reset!")
-                        .WithDescription($"Reset Game ${Game.Title} (#{Game.GameID}) to its default state.")
+                        .WithDescription($"Reset Game {Game.Title} (#{Game.GameID}) to its default state.")
                         .SendEmbed(Context.Channel);
                     return;
                 case "save":

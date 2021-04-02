@@ -101,6 +101,7 @@ namespace Dexter.Databases.Games {
         public IGameTemplate ToGameProper() {
             return (Type) switch {
                 GameType.Hangman => new GameHangman(this),
+                GameType.TicTacToe => new GameTicTacToe(this),
                 _ => null
             };
         }

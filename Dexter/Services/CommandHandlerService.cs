@@ -130,8 +130,10 @@ namespace Dexter.Services {
                             if (CustomCommand.Reply.Length > 0) {
                                 string Reply = CustomCommand.Reply;
 
-                                Reply = Reply.Replace("USER", CommandContext.Message.MentionedUserIds.Count > 0 ? $"<@{CommandContext.Message.MentionedUserIds.First()}>" : CommandContext.User.Mention);
-                                Reply = Reply.Replace("AUTHOR", CommandContext.User.Mention);
+                                ulong MentionedID = CommandContext.Message.MentionedUserIds.FirstOrDefault();
+
+                                Reply = Reply.Replace("USER", MentionedID > 0 ? $"<@{MentionedID}>" : CommandContext.User.Mention);
+                                Reply = Reply.Replace("AUTHOR", MentionedID > 0 && MentionedID != CommandContext.User.Id ? $"<@{MentionedID}>" : CommandContext.Client.CurrentUser.Mention);
 
                                 await CommandContext.Channel.SendMessageAsync(Reply);
                             } else

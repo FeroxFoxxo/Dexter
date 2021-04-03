@@ -22,7 +22,13 @@ namespace Dexter.Databases.Games {
         /// An instance game of Hangman, a game about guessing an obscured word by guessing individual letters.
         /// </summary>
 
-        Hangman
+        Hangman,
+
+        /// <summary>
+        /// An instance of a game of TicTacToe, a game about placing a token in a 3x3 board to make a line.
+        /// </summary>
+
+        TicTacToe
 
         /// <summary>
         /// An instance game of Shiritori, a game about coming up with words that start by whatever the previous person's word ends.

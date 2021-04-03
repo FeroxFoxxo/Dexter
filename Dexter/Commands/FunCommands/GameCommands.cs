@@ -127,7 +127,7 @@ namespace Dexter.Commands {
                     if (string.IsNullOrEmpty(Arguments)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("No Arguments Provided!")
-                            .WithDescription("You must provide a field and a value to set.")
+                            .WithDescription("You must provide, at least, an instance ID to join!")
                             .SendEmbed(Context.Channel);
                         return;
                     }
@@ -209,7 +209,7 @@ namespace Dexter.Commands {
                     GamesDB.SaveChanges();
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Game successfully reset!")
-                        .WithDescription($"Reset Game ${Game.Title} (#{Game.GameID}) to its default state.")
+                        .WithDescription($"Reset Game {Game.Title} (#{Game.GameID}) to its default state.")
                         .SendEmbed(Context.Channel);
                     return;
                 case "save":
@@ -258,7 +258,7 @@ namespace Dexter.Commands {
             "`UNBAN [PLAYER]` - Removes a ban for a player.\n" +
             "`KICK [PLAYER]` - Kicks a player from your game, they can rejoin afterwards if they so desire.\n" +
             "`PROMOTE [PLAYER]` - Promotes a player to game master.\n" +
-            "`SET [FIELD] [VALUE]` - Sets a field for a player to a given value\n" +
+            "`SET [PLAYER] [FIELD] [VALUE]` - Sets a field for a player to a given value\n" +
             "-  Common fields are `score` and `lives`.")]
         [BotChannel]
 
@@ -344,7 +344,7 @@ namespace Dexter.Commands {
                         case "score":
                         case "points":
                             Player.Score = Value;
-                            await Context.Message.ReplyAsync($"Player {User.Mention} not has a score of {Value:G3}!");
+                            await Context.Message.ReplyAsync($"Player {User.Mention} now has a score of {Value:G3}!");
                             return;
                     }
                     return;

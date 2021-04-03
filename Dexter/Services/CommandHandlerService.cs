@@ -133,7 +133,7 @@ namespace Dexter.Services {
                                 Reply = Reply.Replace("USER", CommandContext.Message.MentionedUserIds.Count > 0 ? $"<@{CommandContext.Message.MentionedUserIds.First()}>" : CommandContext.User.Mention);
                                 Reply = Reply.Replace("AUTHOR", CommandContext.User.Mention);
 
-                                await CommandContext.Channel.SendMessageAsync(CustomCommand.Reply.Replace("USER", CommandContext.Message.MentionedUserIds.Count > 0 ? $"<@{CommandContext.Message.MentionedUserIds.First()}>" : CommandContext.User.Mention));
+                                await CommandContext.Channel.SendMessageAsync(Reply);
                             } else
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Misconfigured command!")

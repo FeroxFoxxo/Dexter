@@ -29,19 +29,12 @@ namespace Dexter.Services {
         /// </summary>
 
         public override void Initialize() {
-            DiscordSocketClient.GuildMemberUpdated += RecordNameChange;
+            DiscordSocketClient.GuildMemberUpdated += RecordNicknameChange;
+            DiscordSocketClient.UserUpdated += RecordUserNameChange;
             DiscordSocketClient.UserJoined += RecordUserJoin;
         }
 
-        /// <summary>
-        /// Adds a new nickname to the User's profile nicknames tracker if <paramref name="Before"/> and <paramref name="After"/> have different nicknames and the nickname isn't already recorded.
-        /// </summary>
-        /// <param name="Before">The information of the user before the modification.</param>
-        /// <param name="After">The information of the user after the modification.</param>
-        /// <returns>A completed <c>Task</c> object.</returns>
-
-        public async Task RecordNameChange(SocketGuildUser Before, SocketGuildUser After) {
-
+        private async Task RecordUserNameChange(SocketUser Before, SocketUser After) {
             if (Before.Username != After.Username && !string.IsNullOrEmpty(After.Username)) {
                 NameRecord Record = ProfilesDB.Names.AsQueryable().Where(n => n.Name == After.Username && n.UserID == After.Id && n.Type == NameType.Username).FirstOrDefault();
 
@@ -57,7 +50,16 @@ namespace Dexter.Services {
                 }
                 await ProfilesDB.SaveChangesAsync();
             }
+        }
 
+        /// <summary>
+        /// Adds a new nickname to the User's profile nicknames tracker if <paramref name="Before"/> and <paramref name="After"/> have different nicknames and the nickname isn't already recorded.
+        /// </summary>
+        /// <param name="Before">The information of the user before the modification.</param>
+        /// <param name="After">The information of the user after the modification.</param>
+        /// <returns>A completed <c>Task</c> object.</returns>
+
+        public async Task RecordNicknameChange(SocketGuildUser Before, SocketGuildUser After) {
             if (Before.Nickname != After.Nickname && !string.IsNullOrEmpty(After.Nickname)) {
                 NameRecord Record = ProfilesDB.Names.AsQueryable().Where(n => n.Name == After.Username && n.UserID == After.Id && n.Type == NameType.Nickname).FirstOrDefault();
 

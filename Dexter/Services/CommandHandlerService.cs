@@ -132,8 +132,8 @@ namespace Dexter.Services {
 
                                 ulong MentionedID = CommandContext.Message.MentionedUserIds.FirstOrDefault();
 
-                                Reply = Reply.Replace("USER", MentionedID > 0 ? $"<@{MentionedID}>" : CommandContext.User.Mention);
-                                Reply = Reply.Replace("AUTHOR", MentionedID > 0 && MentionedID != CommandContext.User.Id ? $"<@{MentionedID}>" : CommandContext.Client.CurrentUser.Mention);
+                                Reply = Reply.Replace("USER", MentionedID != default ? $"<@{MentionedID}>" : CommandContext.User.Mention);
+                                Reply = Reply.Replace("AUTHOR", MentionedID != default && MentionedID != CommandContext.User.Id ? CommandContext.User.Mention : CommandContext.Client.CurrentUser.Mention);
 
                                 await CommandContext.Channel.SendMessageAsync(Reply);
                             } else

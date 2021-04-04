@@ -205,11 +205,12 @@ namespace Dexter.Helpers.Games {
                     "**Step 3:** `Y` starts! type `[POS]` to drop your token at a given position.\n" +
                     "Positions are the following:\n" +
                     "```\n" +
-                    "1 2 3 4 5 6 7 8 9\n" +
-                    ". . . . . . . . .\n" +
+                    "1 2 3 4 5 6 7\n" +
+                    "↓ ↓ ↓ ↓ ↓ ↓ ↓\n" +
                     "```\n" +
                     "Keep playing until you fill the board or get a line of four.\n" +
-                    "You can pass the token by typing `pass <Y|R> [Player]` to give control of a token to another player (only the master or the player with that token can do this).");
+                    "You can pass the token by typing `pass <Y|R> [Player]` to give control of a token to another player (only the master or the player with that token can do this).\n" +
+                    "Alternatively, the master can type `swap` to swap player tokens, essentially exchanging turns.");
         }
 
         private bool PlaceToken(int x, char token) {
@@ -250,8 +251,8 @@ namespace Dexter.Helpers.Games {
                 }
                 count = 0;
             }
-            for (int basex = -2; basex < 4; basex++) {
-                int x = basex;
+            for (int xbase = -2; xbase < 4; xbase++) {
+                int x = xbase;
                 for (int y = 0; y < 6; y++) {
                     if (x < 0 || x >= 7) { x++; continue; }
                     if (state[y, x] == pattern) count++;
@@ -264,8 +265,8 @@ namespace Dexter.Helpers.Games {
                 }
                 count = 0;
             }
-            for (int basex = -2; basex < 4; basex++) {
-                int x = basex;
+            for (int xbase = -2; xbase < 4; xbase++) {
+                int x = xbase;
                 for (int y = 5; y >= 0; y--) {
                     if (x < 0 || x >= 7) { x++; continue; }
                     if (state[y, x] == pattern) count++;

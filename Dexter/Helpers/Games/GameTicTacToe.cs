@@ -175,7 +175,7 @@ namespace Dexter.Helpers.Games {
         /// <summary>
         /// Sets a local <paramref name="field"/> to a given <paramref name="value"/>.
         /// </summary>
-        /// <remarks>Valid <paramref name="field"/> values are: TERM, LIVES, MAXLIVES, and MISTAKES.</remarks>
+        /// <remarks>No Valid values for <paramref name="field"/>.</remarks>
         /// <param name="field">The name of the field to modify.</param>
         /// <param name="value">The value to set the field to.</param>
         /// <param name="funConfiguration">The Fun Configuration settings file, which holds relevant data such as default lives.</param>

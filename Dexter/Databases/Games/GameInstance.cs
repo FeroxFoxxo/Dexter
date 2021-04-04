@@ -102,6 +102,7 @@ namespace Dexter.Databases.Games {
             return (Type) switch {
                 GameType.Hangman => new GameHangman(this),
                 GameType.TicTacToe => new GameTicTacToe(this),
+                GameType.Connect4 => new GameConnect4(this),
                 _ => null
             };
         }

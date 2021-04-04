@@ -17,7 +17,7 @@ namespace Dexter.Helpers.Games {
     /// Represents an instance of a tic tac toe game.
     /// </summary>
 
-    public class GameTicTacToe : IGameTemplate {
+    public class GameConnect4 : IGameTemplate {
 
         /// <summary>
         /// The game instance that this specific game is attached to.
@@ -30,7 +30,7 @@ namespace Dexter.Helpers.Games {
         /// </summary>
         /// <param name="Game">The generic game instance to inherit from.</param>
 
-        public GameTicTacToe(GameInstance Game) {
+        public GameConnect4(GameInstance Game) {
             this.game = Game;
             if(string.IsNullOrWhiteSpace(Game.Data)) Game.Data = EmptyData;
         }
@@ -199,7 +199,7 @@ namespace Dexter.Helpers.Games {
                 .WithTitle("How To Play: TicTacToe")
                 .WithDescription("**Step 1:** Create a new board by typing `board`.\n" +
                     "**Step 2:** Claim your token, type `claim <O|X>` to claim circles or crosses respectively.\n" +
-                    "**Step 3:** `O` starts! type `(<O|X>) [POS]` to draw your token at a given position.\n" +
+                    "**Step 3:** `O` starts! type `<O|X> [POS]` to draw your token at a given position.\n" +
                     "Positions are the following:\n" +
                     "```\n" +
                     "A3 B3 C3\n" +
@@ -207,8 +207,7 @@ namespace Dexter.Helpers.Games {
                     "A1 B1 C1\n" +
                     "```\n" +
                     "Keep playing until you fill the board or get a line of three.\n" +
-                    "You can pass the token by typing `pass <O|X> [Player]` to give control of a token to another player (only the master or the player with that token can do this).\n" +
-                    "Alternatively, the master can type `swap` to swap player tokens.");
+                    "You can pass the token by typing `pass <O|X> [Player]` to give control of a token to another player (only the master or the player with that token can do this).");
         }
 
         private bool PlaceToken(int x, int y, char token) {
@@ -297,14 +296,7 @@ namespace Dexter.Helpers.Games {
                 return;
             }
 
-            if (args.Length > 0 && Positions.ContainsKey(args[0])) {
-                args = new string[] {
-                    Turn.ToString(),
-                    args[0]
-                };
-            }
-
-            if (args.Length > 1 && args[0] is "O" or "X") {
+            if(args.Length > 1 && args[0] is "O" or "X") {
                 if (board is null) {
                     await message.Channel.SendMessageAsync($"You must create a board first! Type `board`");
                     return;
@@ -404,9 +396,9 @@ namespace Dexter.Helpers.Games {
                 return;
             }
 
-            if(args[0] == "SWAP") {
-                if(message.Author.Id != game.Master) {
-                    await message.Channel.SendMessageAsync("Only the game master can swap the tokens!");                    
+            if (args[0] == "SWAP") {
+                if (message.Author.Id != game.Master) {
+                    await message.Channel.SendMessageAsync("Only the game master can swap the tokens!");
                     return;
                 }
 

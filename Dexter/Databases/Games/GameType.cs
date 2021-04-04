@@ -28,7 +28,13 @@ namespace Dexter.Databases.Games {
         /// An instance of a game of TicTacToe, a game about placing a token in a 3x3 board to make a line.
         /// </summary>
 
-        TicTacToe
+        TicTacToe,
+
+        /// <summary>
+        /// An instance of a game of Connect 4, a game about placing tokens on a 9x6 vertical, gravity-affected grid to make a line of 4.
+        /// </summary>
+
+        Connect4
 
         /// <summary>
         /// An instance game of Shiritori, a game about coming up with words that start by whatever the previous person's word ends.

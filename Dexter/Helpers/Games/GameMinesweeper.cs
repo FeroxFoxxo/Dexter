@@ -198,6 +198,65 @@ namespace Dexter.Helpers.Games {
             return true;
         }
 
+        private bool CheckNew(char[,] state) {
+            for (int i = 0; i < state.GetLength(0); i++) {
+                for (int j = 0; j < state.GetLength(1); j++) {
+                    if (state[i, j] is not '?' and not 'F') return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool SmartProbe() {
+            char[,] newState = State;
+            HashSet<Tuple<int, int>> toProbe = new HashSet<Tuple<int, int>>();
+            for (int x = 0; x < newState.GetLength(1); x++)
+                for (int y = 0; y < newState.GetLength(0); y++)
+                    if (newState[y, x] > '0' && newState[y, x] < '8') {
+                        foreach (Tuple<int, int> cell in SmartProbe(newState, x, y)) {
+                            toProbe.Add(cell);
+                        }
+                    }
+
+            char[,] board = Board;
+            foreach(Tuple<int, int> cell in toProbe) {
+                ProbeCellRecursive(ref newState, board, cell.Item1, cell.Item2);
+            }
+
+            if (toProbe.Count > 0) {
+                State = newState;
+                return true;
+            }
+
+            return false;
+        }
+
+        private HashSet<Tuple<int, int>> SmartProbe(char[,] state, int x, int y) {
+            int flags = 0;
+            int goal = int.Parse(state[y, x].ToString());
+
+            for (int dx = -1; dx <= 1; dx++) {
+                if (x + dx < 0 || x + dx >= state.GetLength(1)) continue;
+                for (int dy = -1; dy <= 1; dy++) {
+                    if (y + dy < 0 || y + dy >= state.GetLength(0)) continue;
+                    if (state[y + dy, x + dx] == 'F') flags++;
+                }
+            }
+
+            HashSet<Tuple<int, int>> toProbe = new();
+            if (flags == goal) {
+                for (int dx = -1; dx <= 1; dx++) {
+                    if (x + dx < 0 || x + dx >= state.GetLength(1)) continue;
+                    for (int dy = -1; dy <= 1; dy++) {
+                        if (y + dy < 0 || y + dy >= state.GetLength(0)) continue;
+                        if (state[y + dy, x + dx] == '?') toProbe.Add(new Tuple<int, int>(x + dx, y + dy));
+                    }
+                }
+            }
+            return toProbe;
+        }
+
         private bool ProbeCell(int x, int y) {
             if (State[y, x] != '?') return false;
 
@@ -479,7 +538,8 @@ namespace Dexter.Helpers.Games {
                     "**Step 2**: Create the board view by typing `board` into the game chat.\n" +
                     "**Step 3**: Begin probing cells! Type the name of a cell (such as `C3` or `G12`) to probe it. Or type `flag [Cell]` to toggle a flag in a cell.)\n" +
                     "Since this game is singleplayer, only the game master can interact with it. The number on each cell tells you how many mines are on its immediate surroundings, anywhere from 0 to 8. If you probe a mine, it's game over!\n" +
-                    "You win once there are no more cells to probe that do not contain a mine.");
+                    "You win once there are no more cells to probe that do not contain a mine.\n" +
+                    "PRO TIP! Type `auto` to automatically probe any cells deemed safe by surrounding flags and danger levels.");
         }
 
         public string ToEmoji(char c) {
@@ -558,6 +618,7 @@ namespace Dexter.Helpers.Games {
                 IUserMessage newBoard = await message.Channel.SendFileAsync(filepath);
                 BoardID = newBoard.Id;
                 await message.DeleteAsync();
+                return;
             }
 
             if (msg == "reset") {
@@ -565,6 +626,15 @@ namespace Dexter.Helpers.Games {
                 Board = GenerateBoard(Height, Width, Mines < MaxMines ? Mines : MaxMines, new Random());
                 State = GenerateNewState(Height, Width);
                 await message.Channel.SendMessageAsync($"Reset your {Width} by {Height} board!");
+                return;
+            }
+
+            if (msg == "auto") {
+                if (!SmartProbe()) {
+                    await message.Channel.SendMessageAsync("Couldn't find any safe cells, are you missing flags?");
+                    return;
+                }
+                toRender = true;
             }
 
             if (msg.StartsWith("flag") || msg.StartsWith("unflag")) {
@@ -577,7 +647,7 @@ namespace Dexter.Helpers.Games {
                     return;
                 }
                 flagpos = ToRealPos(flagpos);
-                if (State[flagpos.Item2, flagpos.Item1] is not '?' or 'F') {
+                if (State[flagpos.Item2, flagpos.Item1] is not '?' and not 'F') {
                     await message.Channel.SendMessageAsync($"Unable to toggle flag at this location, it has already been probed!");
                     return;
                 }
@@ -589,13 +659,26 @@ namespace Dexter.Helpers.Games {
                 toRender = true;
             }
 
+            bool isLoss = false;
             if (TryParsePos(msg, out Tuple<int, int> pos)) {
                 pos = ToRealPos(pos);
-                if (!ProbeCell(pos.Item1, pos.Item2)) {
-                    await message.Channel.SendMessageAsync($"That cell has already been probed!");
-                    return;
+                if (Board[pos.Item2, pos.Item1] == 'X') {
+                    if (CheckNew(State)) {
+                        Random rnd = new Random();
+                        char[,] newBoard = GenerateBoard(Height, Width, Math.Min(Mines, MaxMines), rnd);
+                        while (newBoard[pos.Item2, pos.Item1] is 'X') {
+                            newBoard = GenerateBoard(Height, Width, Math.Min(Mines, MaxMines), rnd);
+                        }
+                        Board = newBoard;
+                    }
+                    else
+                        isLoss = true;
                 }
 
+                if (!ProbeCell(pos.Item1, pos.Item2)) {
+                    await message.Channel.SendMessageAsync($"That cell has already been probed or is flagged!");
+                    return;
+                }
                 toRender = true;
             }
 
@@ -608,6 +691,32 @@ namespace Dexter.Helpers.Games {
                 IUserMessage newBoard = await message.Channel.SendFileAsync(filepath);
                 BoardID = newBoard.Id;
                 await message.DeleteAsync();
+            }
+
+            if (isLoss) {
+                int mines = Mines > MaxMines ? MaxMines : Mines;
+                await new EmbedBuilder()
+                    .WithColor(Discord.Color.Red)
+                    .WithTitle("Defeat!")
+                    .WithDescription($"Whoops! You probed a mine! Better luck next time.")
+                    .SendEmbed(message.Channel);
+                BoardID = 0;
+                Board = GenerateBoard(Height, Width, Mines < MaxMines ? Mines : MaxMines, new Random());
+                State = GenerateNewState(Height, Width);
+                return;
+            }
+
+            if (CheckWin(State, Board)) {
+                int mines = Mines > MaxMines ? MaxMines : Mines;
+                await new EmbedBuilder()
+                    .WithColor(Discord.Color.Green)
+                    .WithTitle("Victory!")
+                    .WithDescription($"Cleared the board! ({Width}x{Height}) with {mines} mine{(mines != 1 ? "s" : "")}!")
+                    .SendEmbed(message.Channel);
+                BoardID = 0;
+                Board = GenerateBoard(Height, Width, Mines < MaxMines ? Mines : MaxMines, new Random());
+                State = GenerateNewState(Height, Width);
+                return;
             }
         }
     }

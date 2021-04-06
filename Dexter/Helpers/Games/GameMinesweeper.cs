@@ -330,7 +330,7 @@ namespace Dexter.Helpers.Games {
             }
         }
 
-        const int cellSize = 16;
+        const int cellSize = 32;
         private Bitmap RenderMatrixImage(char[,] matrix) {
             Bitmap result = new Bitmap(cellSize * (matrix.GetLength(1) + 2), cellSize * (matrix.GetLength(0) + 2));
             

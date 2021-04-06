@@ -303,34 +303,7 @@ namespace Dexter.Helpers.Games {
             }
         }
 
-        private int CountMatrix(char[,] matrix, char c) {
-            int count = 0;
-            for (int i = 0; i < matrix.GetLength(0); i++) {
-                for (int j = 0; j < matrix.GetLength(1); j++) {
-                    if (matrix[i, j] == c) count++;
-                }
-            }
-            return count;
-        }
-
-        private string RenderMatrix(char[,] matrix) {
-            StringBuilder builder = new StringBuilder();
-            builder.Append(LetterLabel(matrix.GetLength(1)) + '\n');
-
-            for (int i = 0; i < matrix.GetLength(0); i++) {
-                builder.Append($"`{matrix.GetLength(0) - i:D2}`");
-                for (int j = 0; j < matrix.GetLength(1); j++) {
-                    builder.Append(ToEmoji(matrix[i, j]));
-                }
-                builder.Append($"`{matrix.GetLength(0) - i:D2}`\n");
-            }
-
-            builder.Append(LetterLabel(matrix.GetLength(1)));
-            return builder.ToString();
-        }
-
         const int cellSize = 16;
-
         private Bitmap RenderMatrixImage(char[,] matrix) {
             Bitmap result = new Bitmap(cellSize * (matrix.GetLength(1) + 2), cellSize * (matrix.GetLength(0) + 2));
             
@@ -415,46 +388,6 @@ namespace Dexter.Helpers.Games {
             return result;
         }
 
-        private string LetterLabel(int length) {
-            StringBuilder builder = new StringBuilder();
-            builder.Append("`  `");
-
-            for (int i = 0; i < length; i++) {
-                builder.Append($"{Indicators[i]}{ZWSP}");
-            }
-
-            return builder.ToString();
-        }
-
-        private Dictionary<int, string> Indicators = new Dictionary<int, string>() {
-            {0, "🇦"},
-            {1, "🇧"},
-            {2, "🇨"},
-            {3, "🇩"},
-            {4, "🇪"},
-            {5, "🇫"},
-            {6, "🇬"},
-            {7, "🇭"},
-            {8, "🇮"},
-            {9, "🇯"},
-            {10, "🇰"},
-            {11, "🇱"},
-            {12, "🇲"},
-            {13, "🇳"},
-            {14, "🇴"},
-            {15, "🇵"},
-            {16, "🇶"},
-            {17, "🇷"},
-            {18, "🇸"},
-            {19, "🇹"},
-            {20, "🇺"},
-            {21, "🇻"},
-            {22, "🇼"},
-            {23, "🇽"},
-            {24, "🇾"},
-            {25, "🇿"}
-        };
-
         public EmbedBuilder GetStatus(DiscordSocketClient client) {
             return new EmbedBuilder()
                 .WithColor(Discord.Color.Blue)
@@ -478,16 +411,16 @@ namespace Dexter.Helpers.Games {
         }
 
         public bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback) {
-            if (!int.TryParse(value, out int number)) {
-                feedback = $"\nAll fields for this game are numeric, unable to parse \"{value}\" into an integer value.\n" +
+            bool nonNumeric = false;
+            string nonNumericFeedback = $"This field is numeric, unable to parse \"{value}\" into an integer value.\n" +
                     $"Did you mean to use a default field instead?";
-                return false;
-            }
+            if (!int.TryParse(value, out int number)) nonNumeric = true;
 
             int mines = Mines;
             
             switch(field.ToLower()) {
                 case "width":
+                    if (nonNumeric) { feedback = nonNumericFeedback; return false; }
                     if (number > MaxWidth || number < MinWidth) {
                         feedback = $"Invalid width! The width must be between {MinWidth} and {MaxWidth}.";
                         return false;
@@ -499,6 +432,7 @@ namespace Dexter.Helpers.Games {
                     feedback = $"Set \"width\" to {number} and regenerated game board [{Width}x{Height}]. Maximum mine count for this size is {MaxMines}.";
                     return true;
                 case "height":
+                    if (nonNumeric) { feedback = nonNumericFeedback; return false; }
                     if (number > MaxHeight || number < MinHeight) {
                         feedback = $"Invalid height! The height must be between {MinHeight} and {MaxHeight}.";
                         return false;
@@ -510,6 +444,7 @@ namespace Dexter.Helpers.Games {
                     feedback = $"Set \"height\" to {number} and regenerated game board [{Width}x{Height}]. Maximum mine count for this size is {MaxMines}.";
                     return true;
                 case "mines":
+                    if (nonNumeric) { feedback = nonNumericFeedback; return false; }
                     if (number < 0) {
                         feedback = $"Invalid value! Number of mines can't be a negative number.";
                         return false;
@@ -520,9 +455,39 @@ namespace Dexter.Helpers.Games {
                     Board = GenerateBoard(Height, Width, mines, new Random());
                     State = GenerateNewState(Height, Width);
                     return true;
+                case "size":
+                    string[] toParse = value.Split(" ");
+                    List<int> numbers = new List<int>();
+                    foreach (string s in toParse) {
+                        if (int.TryParse(s, out int n)) numbers.Add(n); 
+                    }
+                    if (numbers.Count < 2) {
+                        feedback = $"You didn't provide enough numbers, please use the field-value syntax `size [WIDTH] [HEIGHT] (MINES)`.";
+                        return false;
+                    }
+                    if (numbers[0] > MaxWidth || numbers[0] < MinWidth) {
+                        feedback = $"Invalid width! The width must be between {MinWidth} and {MaxWidth}.";
+                        return false;
+                    }
+                    if (numbers[1] > MaxHeight || numbers[1] < MinHeight) {
+                        feedback = $"Invalid height! The height must be between {MinHeight} and {MaxHeight}.";
+                        return false;
+                    }
+
+                    Width = numbers[0];
+                    Height = numbers[1];
+                    if (numbers.Count > 2) Mines = mines = numbers[2];
+                    else mines = Mines;
+
+                    if (mines > MaxMines) mines = MaxMines;
+                    feedback = $"Set board size to [{Width}x{Height}] with a maximum mine count of {Mines}, current size can hold up to {MaxMines} mines.";
+                    Board = GenerateBoard(Height, Width, mines, new Random());
+                    State = GenerateNewState(Height, Width);
+                    return true;
+                    
             }
 
-            feedback = $"Invalid field: \"{field}\" is not a default field nor \"width\", \"height\", or \"mines\".";
+            feedback = $"Invalid field: \"{field}\" is not a default field nor \"width\", \"height\", \"mines\", or \"size\".";
             return false;
         }
 

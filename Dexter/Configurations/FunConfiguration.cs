@@ -84,10 +84,10 @@ namespace Dexter.Configurations {
         public int MaxCoinFlips { get; set; }
     
         /// <summary>
-        /// The unique channel ID of the channel designated for the games submodule.
+        /// The unique channel ID of the channels designated for the games submodule.
         /// </summary>
 
-        public ulong GamesChannel { get; set; }
+        public ulong[] GamesChannels { get; set; }
 
         /// <summary>
         /// Sets the lives a default game of hangman is set to on reset and creation.

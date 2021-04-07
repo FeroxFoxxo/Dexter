@@ -49,7 +49,10 @@
   "HeadpatStorageGuild": 613441321751019550,
   "HeadpatWebhookName": "HeadpatWebhook",
   "MaxCoinFlips": 1000000,
-  "GamesChannel": 792657895014793246,
+  "GamesChannels": [
+    792657895014793246,
+    829137462404055082
+  ],
   "HangmanDefaultLives": 6,
   "WritingPromptTerms": {
     "living_adjective": [

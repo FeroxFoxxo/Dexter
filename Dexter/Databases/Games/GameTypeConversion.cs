@@ -22,7 +22,8 @@ namespace Dexter.Databases.Games {
             {"tic-tac-toe", GameType.TicTacToe },
             {"tic", GameType.TicTacToe },
             {"connect4", GameType.Connect4 },
-            {"connectfour", GameType.Connect4 }
+            {"connectfour", GameType.Connect4 },
+            {"minesweeper", GameType.Minesweeper }
             //{"wordchain", GameType.Shiritori},
             //{"shiritori", GameType.Shiritori}
         };
@@ -35,7 +36,8 @@ namespace Dexter.Databases.Games {
             {GameType.Unselected, "❓"},
             {GameType.Hangman, "💀"},
             {GameType.TicTacToe, "⭕"},
-            {GameType.Connect4, "4️⃣" }
+            {GameType.Connect4, "4️⃣" },
+            {GameType.Minesweeper, "💣" }
             //{GameType.Shiritori, "⛓"},
             //{GameType.Charades, "🎭"},
         };

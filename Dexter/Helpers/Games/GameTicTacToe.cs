@@ -249,7 +249,7 @@ namespace Dexter.Helpers.Games {
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         public async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration) {
-
+            if (message.Channel is IDMChannel) return;
             Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
 
             string msg = message.Content.ToUpper();

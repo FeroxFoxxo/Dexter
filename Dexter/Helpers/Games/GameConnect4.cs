@@ -304,7 +304,7 @@ namespace Dexter.Helpers.Games {
             if (message.Channel is IDMChannel) return;
             Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
 
-            string msg = message.Content.ToUpper();
+            string msg = message.Content.ToUpper().Replace("@", "@-");
             IUserMessage board = null;
             if (BoardID != 0) board = await message.Channel.GetMessageAsync(BoardID) as IUserMessage;
 

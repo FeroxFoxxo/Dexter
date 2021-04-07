@@ -573,7 +573,7 @@ namespace Dexter.Helpers.Games {
             bool deletePerms = message.Channel is not IDMChannel;
             if (message.Author.Id != game.Master) return;
 
-            string msg = message.Content.ToLower();
+            string msg = message.Content.ToLower().Replace("@", "@-");
             string[] args = msg.Split(' ');
 
             IUserMessage board = null;

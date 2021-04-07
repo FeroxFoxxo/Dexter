@@ -210,9 +210,14 @@ namespace Dexter.Helpers.Games {
                 case "word":
                 case "term":
                     if(value.Contains('_')) {
-                        feedback = "The term cannot contains underscores!";
+                        feedback = "The term cannot contain underscores!";
                         return false;
-                    } else if (value.Length > 256) {
+                    }
+                    else if (value.Contains('@')) {
+                        feedback = "The term cannot contain the at symbol (@)!";
+                        return false;
+                    }
+                    else if (value.Length > 256) {
                         feedback = "The term is too long!";
                         return false;
                     }
@@ -319,8 +324,8 @@ namespace Dexter.Helpers.Games {
             if (message.Channel is IDMChannel) return;
             Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
 
-            string msg = message.Content;
-            if(msg.ToLower() == "pass") {
+            string msg = message.Content.Replace("@", "@-");
+            if (msg.ToLower() == "pass") {
                 if (game.LastUserInteracted == message.Author.Id) {
                     await message.Channel.SendMessageAsync($"It's not your turn, {message.Author.Mention}!");
                     return;

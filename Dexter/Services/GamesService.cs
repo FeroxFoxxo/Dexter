@@ -39,7 +39,7 @@ namespace Dexter.Services {
         }
 
         private async Task HandleMessage(SocketMessage Message) {
-            if (Message.Channel.Id != FunConfiguration.GamesChannel) return;
+            if (!FunConfiguration.GamesChannels.Contains(Message.Channel.Id) && Message.Channel is not IDMChannel) return;
             if (Message.Content.StartsWith(BotConfiguration.Prefix)) return;
 
             Player Player = GamesDB.Players.Find(Message.Author.Id);

@@ -511,10 +511,17 @@ namespace Dexter.Helpers.Games {
                     Board = GenerateBoard(Height, Width, mines, new Random());
                     State = GenerateNewState(Height, Width);
                     return true;
-                    
+                case "difficulty":
+                    value = value.ToLower();
+                    if (!Difficulties.ContainsKey(value)) {
+                        feedback = $"\"{value}\" is not a valid difficulty! Available difficulties are: {string.Join(", ", Difficulties.Keys)}";
+                        return false;
+                    }
+                    Set("size", Difficulties[value], funConfiguration, out feedback);
+                    return true;
             }
 
-            feedback = $"Invalid field: \"{field}\" is not a default field nor \"width\", \"height\", \"mines\", or \"size\".";
+            feedback = $"Invalid field: \"{field}\" is not a default field nor \"width\", \"height\", \"mines\", \"size\", or \"difficulty\".";
             return false;
         }
 
@@ -533,6 +540,12 @@ namespace Dexter.Helpers.Games {
                     "You win once there are no more cells to probe that do not contain a mine.\n" +
                     "PRO TIP! Type `auto` to automatically probe any cells deemed safe by surrounding flags and danger levels.");
         }
+
+        Dictionary<string, string> Difficulties = new Dictionary<string, string> {
+            {"beginner", "10 10 10"},
+            {"intermediate", "16 16 40"},
+            {"advanced", "28 18 99"}
+        };
 
         private bool TryParsePos(string input, out Tuple<int, int> result) {
             result = new Tuple<int, int>(0, 0);
@@ -557,6 +570,7 @@ namespace Dexter.Helpers.Games {
         }
 
         public async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration) {
+            bool deletePerms = message.Channel is not IDMChannel;
             if (message.Author.Id != game.Master) return;
 
             string msg = message.Content.ToLower();
@@ -579,7 +593,7 @@ namespace Dexter.Helpers.Games {
                 image.Save(filepath);
                 IUserMessage newBoard = await message.Channel.SendFileAsync(filepath);
                 BoardID = newBoard.Id;
-                await message.DeleteAsync();
+                if (deletePerms) await message.DeleteAsync();
                 return;
             }
 
@@ -667,7 +681,7 @@ namespace Dexter.Helpers.Games {
                 image.Save(filepath);
                 IUserMessage newBoard = await message.Channel.SendFileAsync(filepath);
                 BoardID = newBoard.Id;
-                await message.DeleteAsync();
+                if (deletePerms) await message.DeleteAsync();
             }
 
             if (isLoss) {

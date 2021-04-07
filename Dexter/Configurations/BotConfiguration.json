@@ -15,7 +15,8 @@
   ],
   "EnableStartupAlert": false,
   "BotChannels": [
-    792657895014793246
+    792657895014793246,
+    829137462404055082
   ],
   "DisallowedChannels": [
     792657918309695498

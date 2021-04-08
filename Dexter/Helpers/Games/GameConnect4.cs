@@ -120,7 +120,7 @@ namespace Dexter.Helpers.Games {
         }
 
         /// <summary>
-        /// Represents the general status and data of a Hangman Game.
+        /// Represents the general status and data of a Connect 4 Game.
         /// </summary>
         /// <param name="client">SocketClient used to parse UserIDs.</param>
         /// <returns>An Embed detailing the various aspects of the game in its current instance.</returns>

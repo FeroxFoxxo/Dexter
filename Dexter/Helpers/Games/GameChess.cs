@@ -11,6 +11,7 @@ using Dexter.Databases.Games;
 using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
+using Google.Apis.Sheets.v4.Data;
 
 namespace Dexter.Helpers.Games {
 
@@ -610,7 +611,34 @@ namespace Dexter.Helpers.Games {
             public bool isCheckMate;
             public char promote;
 
-            public bool IsLegal(Board board, out string error) {
+            public bool IsLegal(Board boardOriginal, out string error) {
+                error = "";
+                Board board = (Board) boardOriginal.Clone();
+                char[,] grid = board.squares;
+                char candidateName = grid[origin % 8, origin / 8];
+                Piece candidate = Piece.FromRepresentation(candidateName);
+                if (!candidate.isValid(origin, target, board)) {
+                    error = "Piece cannot make move! Direction invalid or obstruction present!";
+                    return false;
+                }
+                grid[origin % 8, origin / 8] = '-';
+                grid[target % 8, target / 8] = candidateName;
+                if (isEnPassant) grid[board.enPassant % 8, board.enPassant / 8] = '-';
+                if (isCastle) {
+                    grid[(target - origin) > 0 ? 7 : 0, origin / 8] = '-';
+                    grid[(target % 8 + origin % 8) / 2, target / 8] = 'r'.MatchCase(candidateName);
+                }
+                board.squares = grid;
+                if (!isCastle) {
+                    error = "King will be under attack - invalid move!";
+                    int kingPosition = board.isWhitesTurn ? board.whiteKing : board.blackKing;
+                    if (board.IsThreatened(kingPosition)) return false;
+                } else {
+                    error = "King or rook will be under attack - invalid castle!";
+                    for (int moveSquare = origin; moveSquare/8 == origin/8; moveSquare += (target-origin)>0?1:-1){
+                        if (board.IsThreatened(moveSquare)) return false;
+                    }
+                }
                 error = "";
                 return true;
             }
@@ -946,6 +974,22 @@ namespace Dexter.Helpers.Games {
                 builder.Append($"{enPassantExpression} {halfmoves} {fullmoves}");
 
                 return builder.ToString();
+            }
+
+            public object Clone() {
+                return this.MemberwiseClone();
+            }
+
+            public bool IsThreatened(int square, bool flipThreat = false) { 
+                for (int position = 0; position < 64; position++) {
+                    char pieceName = squares[position % 8, position / 8];
+                    if (!char.IsLetter(pieceName)) continue;
+                    if (char.IsUpper(pieceName) ^ isWhitesTurn ^ flipThreat) {
+                        Piece attacker = Piece.FromRepresentation(pieceName);
+                        if (attacker.isValid(position, square, this)) return true;
+                    }
+                }
+                return false;
             }
 
         }

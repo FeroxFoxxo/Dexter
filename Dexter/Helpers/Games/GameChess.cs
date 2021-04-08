@@ -623,7 +623,7 @@ namespace Dexter.Helpers.Games {
                 }
                 grid[origin % 8, origin / 8] = '-';
                 grid[target % 8, target / 8] = candidateName;
-                if (isEnPassant) grid[board.enPassant % 8, board.enPassant / 8] = '-';
+                if (isEnPassant) grid[board.enPassant % 8, board.enPassant / 8 + (board.isWhitesTurn?1:-1)] = '-';
                 if (isCastle) {
                     grid[(target - origin) > 0 ? 7 : 0, origin / 8] = '-';
                     grid[(target % 8 + origin % 8) / 2, target / 8] = 'r'.MatchCase(candidateName);
@@ -635,7 +635,7 @@ namespace Dexter.Helpers.Games {
                     if (board.IsThreatened(kingPosition)) return false;
                 } else {
                     error = "King or rook will be under attack - invalid castle!";
-                    for (int moveSquare = origin; moveSquare/8 == origin/8; moveSquare += (target-origin)>0?1:-1){
+                    for (int moveSquare = origin; moveSquare != (origin + (target - origin) > 0 ? 3 : -3); moveSquare += (target-origin)>0?1:-1){
                         if (board.IsThreatened(moveSquare)) return false;
                     }
                 }

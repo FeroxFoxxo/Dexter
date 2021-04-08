@@ -896,7 +896,8 @@ namespace Dexter.Helpers.Games {
         private enum Outcome {
             Playing,
             Draw,
-            Checkmate
+            Checkmate,
+            Check
         }
 
         private class Board {
@@ -1021,9 +1022,20 @@ namespace Dexter.Helpers.Games {
 
             public Outcome GetOutcome() {
                 // if halfmoves >= 100 => draw
+                if (halfmoves >= 100) return Outcome.Draw;
                 // if insufficient material => draw
                 // if checkmate => Checkmate
-                throw new NotImplementedException();
+                bool check = IsThreatened(isWhitesTurn ? whiteKing : blackKing);
+                bool noMove = false;
+
+                if (check && noMove) {
+                    return Outcome.Checkmate;
+                } else if (check) {
+                    return Outcome.Check;
+                } else if (noMove) {
+                    return Outcome.Draw;
+                }
+                return Outcome.Playing;
             }
 
             public char GetSquare(int value) {

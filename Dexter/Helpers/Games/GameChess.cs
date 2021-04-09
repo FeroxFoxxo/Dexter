@@ -1141,7 +1141,22 @@ namespace Dexter.Helpers.Games {
             }
 
             public object Clone() {
-                return this.MemberwiseClone();
+                Board output = new Board();
+
+                for (int i = 0; i < 64; i++) {
+                    output.squares.SetValue((Char) squares[i/8, i%8], new int[] { i / 8,i % 8});
+                }
+                output.isWhitesTurn = (bool)isWhitesTurn;
+                for (int i = 0; i < 4; i++) {
+                    output.castling.SetValue((bool) castling[i], i);
+                }
+                output.enPassant = (int)enPassant;
+                output.halfmoves = (int)halfmoves;
+                output.fullmoves = (int)fullmoves;
+                output.whiteKing = (int)whiteKing;
+                output.blackKing = (int)blackKing;
+
+                return output;
             }
 
             public bool IsThreatened(int square, bool flipThreat = false) { 

@@ -21,7 +21,8 @@ namespace Dexter.Helpers.Games {
 
     public class GameChess : IGameTemplate {
 
-        private const string EmptyData = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1, -, 0, 0, 0, 0, NN, standard";
+        private const string EmptyData = StartingPos + ", -, 0, 0, 0, 0, NN, standard";
+        private const string StartingPos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
         private string BoardRaw {
             get {
@@ -170,9 +171,11 @@ namespace Dexter.Helpers.Games {
         public void Reset(FunConfiguration funConfiguration, GamesDB gamesDB) {
             ulong white = PlayerWhite;
             ulong black = PlayerBlack;
+            ulong dumpID = DumpID;
             game.Data = EmptyData;
             PlayerWhite = white;
             PlayerBlack = black;
+            DumpID = dumpID;
             if (gamesDB is not null) {
                 foreach (Player p in gamesDB.GetPlayersFromInstance(game.GameID)) {
                     p.Score = 0;
@@ -293,6 +296,66 @@ namespace Dexter.Helpers.Games {
                 }
                 await message.Channel.SendMessageAsync("You need to specify what color you'd like to claim!");
                 return;
+            }
+
+            if (msg == "resign") {
+                if (BoardRaw == StartingPos) return;
+                bool resign = false;
+                bool isWhite = false;
+                if (message.Author.Id == PlayerWhite) {
+                    resign = true;
+                    isWhite = true;
+                    gamesDB.GetOrCreatePlayer(PlayerBlack).Score++;
+                } else if (message.Author.Id == PlayerBlack) {
+                    resign = true;
+                    isWhite = false;
+                    gamesDB.GetOrCreatePlayer(PlayerWhite).Score++;
+                }
+                if (resign) {
+                    await new EmbedBuilder()
+                        .WithColor(Discord.Color.Gold)
+                        .WithTitle($"{(isWhite ? "White" : "Black")} resigns!")
+                        .WithDescription($"The victory goes for {(isWhite ? "Black" : "White")}! The board has been reset, you can play again by typing `board`. The game master can swap colors by typing `swap`.")
+                        .SendEmbed(message.Channel);
+                    Reset(funConfiguration, gamesDB);
+                    gamesDB.SaveChanges();
+                }
+            }
+
+            if (msg == "draw") {
+                if (BoardRaw == StartingPos) return;
+                bool draw = false;
+                bool isWhite = false;
+                bool retracted = false;
+                if (message.Author.Id == PlayerWhite) {
+                    draw = true;
+                    isWhite = true;
+                    if (Agreements[0] == 'D') { Agreements = $"N{Agreements[1]}"; retracted = true; }
+                    else Agreements = $"D{Agreements[1]}";
+                }
+                else if (message.Author.Id == PlayerBlack) {
+                    draw = true;
+                    isWhite = false;
+                    if (Agreements[1] == 'D') { Agreements = $"{Agreements[0]}N"; retracted = true; }
+                    else Agreements = $"{Agreements[0]}D";
+                }
+                if (draw) {
+                    if (Agreements == "DD") {
+                        await new EmbedBuilder()
+                            .WithColor(Discord.Color.Orange)
+                            .WithTitle($"Draw!")
+                            .WithDescription($"No winners this game, but also no losers! The board has been reset, you can play again by typing `board`. The game master can swap colors by typing `swap`.")
+                            .SendEmbed(message.Channel);
+                        Reset(funConfiguration, gamesDB);
+                        gamesDB.SaveChanges();
+                    } else {
+                        if (retracted) {
+                            await message.Channel.SendMessageAsync($"{(isWhite ? "White" : "Black")} retracts their offer to draw the game!");
+                        } else {
+                            await message.Channel.SendMessageAsync($"{(isWhite ? "White" : "Black")} is offering a draw, to accept it; type \"draw\"!");
+                        }
+                    }
+                }
             }
 
             if (Move.TryParse(msgRaw, board, out Move move, out string error)) {

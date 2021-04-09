@@ -847,7 +847,7 @@ namespace Dexter.Helpers.Games {
                 if (move.origin >= 0 && move.target >= 0) {
                     if (((move.target / 8 == 0 && board.isWhitesTurn) || (move.target / 8 == 7 && !board.isWhitesTurn))
                         && (toMove == Piece.Pawn)) {
-                        if (move.promote == default) move.promote = Piece.Queen.representation;
+                        if (move.promote == ' ') move.promote = Piece.Queen.representation;
                     }
                     else
                         move.promote = ' ';
@@ -1046,6 +1046,7 @@ namespace Dexter.Helpers.Games {
                     enPassant = (move.target + move.origin) / 2;
                 else
                     enPassant = -1;
+                if (isPawn && move.promote != ' ') squares[xf, yf] = move.promote.MatchCase(representation);
 
                 isWhitesTurn = !isWhitesTurn;
                 if (isWhitesTurn) fullmoves++;

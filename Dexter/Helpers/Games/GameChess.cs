@@ -673,24 +673,10 @@ namespace Dexter.Helpers.Games {
             public bool IsLegal(Board boardOriginal, out string error) {
                 error = "";
                 Board board = (Board) boardOriginal.Clone();
-                char[,] grid = board.squares;
-                char candidateName = grid[origin % 8, origin / 8];
-                Piece candidate = Piece.FromRepresentation(candidateName);
-                if (!candidate.isValid(origin, target, board)) {
-                    error = "Piece cannot make move! Direction invalid or obstruction present!";
-                    return false;
-                }
-                grid[origin % 8, origin / 8] = '-';
-                grid[target % 8, target / 8] = candidateName;
-                if (isEnPassant) grid[board.enPassant % 8, board.enPassant / 8 + (board.isWhitesTurn?1:-1)] = '-';
-                if (isCastle) {
-                    grid[(target - origin) > 0 ? 7 : 0, origin / 8] = '-';
-                    grid[(target % 8 + origin % 8) / 2, target / 8] = 'r'.MatchCase(candidateName);
-                }
-                board.squares = grid;
+                board.ExecuteMove(this);
                 if (!isCastle) {
                     error = "King will be under attack - invalid move!";
-                    int kingPosition = board.isWhitesTurn ? board.whiteKing : board.blackKing;
+                    int kingPosition = board.isWhitesTurn ? board.blackKing : board.whiteKing;
                     if (board.IsThreatened(kingPosition)) return false;
                 } else {
                     error = "King or rook will be under attack - invalid castle!";
@@ -1076,6 +1062,11 @@ namespace Dexter.Helpers.Games {
                 else
                     enPassant = -1;
                 if (isPawn && move.promote != ' ') squares[xf, yf] = move.promote.MatchCase(representation);
+                
+                if (char.ToUpper(representation) == Piece.King.representation) {
+                    if (char.IsUpper(representation)) whiteKing = move.target;
+                    else blackKing = move.target;
+                }
 
                 isWhitesTurn = !isWhitesTurn;
                 if (isWhitesTurn) fullmoves++;
@@ -1143,10 +1134,12 @@ namespace Dexter.Helpers.Games {
             public object Clone() {
                 Board output = new Board();
 
+                output.squares = new char[8, 8];
                 for (int i = 0; i < 64; i++) {
                     output.squares.SetValue((Char) squares[i/8, i%8], new int[] { i / 8,i % 8});
                 }
                 output.isWhitesTurn = (bool)isWhitesTurn;
+                output.castling = new bool[4];
                 for (int i = 0; i < 4; i++) {
                     output.castling.SetValue((bool) castling[i], i);
                 }
@@ -1163,8 +1156,9 @@ namespace Dexter.Helpers.Games {
                 for (int position = 0; position < 64; position++) {
                     char pieceName = squares[position % 8, position / 8];
                     if (!char.IsLetter(pieceName)) continue;
-                    if (char.IsUpper(pieceName) ^ isWhitesTurn ^ flipThreat) {
+                    if ((char.IsUpper(pieceName) == isWhitesTurn) ^ flipThreat) {
                         Piece attacker = Piece.FromRepresentation(pieceName);
+                        //Console.Out.WriteLine($"Checking whether {attacker.name} at {ToSquareName(ToMatrixCoords(position))} is threatening square {ToSquareName(ToMatrixCoords(square))}");
                         if (attacker.isValid(position, square, this)) return true;
                     }
                 }

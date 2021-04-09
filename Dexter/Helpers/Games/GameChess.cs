@@ -249,6 +249,10 @@ namespace Dexter.Helpers.Games {
                 bool lastMoveValid = Move.TryParseMock(LastMove, board, out Move lastMove, out string lastMoveError);
                 if (!lastMoveValid) lastMove = null;
 
+                Outcome checkCalc = board.GetOutcome();
+                if (checkCalc is Outcome.Check) lastMove.isCheck = true;
+                if (checkCalc is Outcome.Checkmate) lastMove.isCheckMate = true;
+
                 if (boardMsg is not null) await boardMsg.DeleteAsync();
                 IUserMessage newBoard = await message.Channel.SendMessageAsync(await CreateBoardDisplay(board, lastMove, client, funConfiguration));
                 BoardID = newBoard.Id;
@@ -506,13 +510,13 @@ namespace Dexter.Helpers.Games {
         private class Piece {
             public char representation;
             public string name;
-            public Func<int, int, Board, bool> isValid;
+            public Func<int, int, Board, bool, bool> isValid;
 
             public static readonly Piece Rook = new Piece() {
                 representation = 'R',
                 name = "Rook",
-                isValid = (origin, target, board) => {
-                    if (!BasicValidate(Rook, origin, target, board)) return false;
+                isValid = (origin, target, board, flip) => {
+                    if (!BasicValidate(Rook, origin, target, board, flip)) return false;
                     return OrthogonalValidate(origin, target, board);
                 }
             };
@@ -520,8 +524,8 @@ namespace Dexter.Helpers.Games {
             public static readonly Piece Knight = new Piece() {
                 representation = 'N',
                 name = "Knight",
-                isValid = (origin, target, board) => {
-                    if (!BasicValidate(Knight, origin, target, board)) return false;
+                isValid = (origin, target, board, flip) => {
+                    if (!BasicValidate(Knight, origin, target, board, flip)) return false;
                     int xdiff = Math.Abs(target % 8 - origin % 8);
                     int ydiff = Math.Abs(target / 8 - origin / 8);
                     if (xdiff >= 3 || ydiff >= 3) return false;
@@ -532,8 +536,8 @@ namespace Dexter.Helpers.Games {
             public static readonly Piece Bishop = new Piece() {
                 representation = 'B',
                 name = "Bishop",
-                isValid = (origin, target, board) => {
-                    if (!BasicValidate(Bishop, origin, target, board)) return false;
+                isValid = (origin, target, board, flip) => {
+                    if (!BasicValidate(Bishop, origin, target, board, flip)) return false;
                     return DiagonalValidate(origin, target, board);
                 }
             };
@@ -541,8 +545,8 @@ namespace Dexter.Helpers.Games {
             public static readonly Piece King = new Piece() {
                 representation = 'K',
                 name = "King",
-                isValid = (origin, target, board) => {
-                    if (!BasicValidate(King, origin, target, board)) return false;
+                isValid = (origin, target, board, flip) => {
+                    if (!BasicValidate(King, origin, target, board, flip)) return false;
                     int xdiff = Math.Abs(target % 8 - origin % 8);
                     int ydiff = Math.Abs(target / 8 - origin / 8);
                     return xdiff <= 1 && ydiff <= 1;
@@ -552,8 +556,8 @@ namespace Dexter.Helpers.Games {
             public static readonly Piece Queen = new Piece() {
                 representation = 'Q',
                 name = "Queen",
-                isValid = (origin, target, board) => {
-                    if (!BasicValidate(Queen, origin, target, board)) return false;
+                isValid = (origin, target, board, flip) => {
+                    if (!BasicValidate(Queen, origin, target, board, flip)) return false;
                     return OrthogonalValidate(origin, target, board) || DiagonalValidate(origin, target, board);
                 }
             };
@@ -561,9 +565,9 @@ namespace Dexter.Helpers.Games {
             public static readonly Piece Pawn = new Piece() {
                 representation = 'P',
                 name = "Pawn",
-                isValid = (origin, target, board) => {
-                    if (!BasicValidate(Pawn, origin, target, board)) return false;
-                    int yAdv = board.isWhitesTurn ? -1 : 1;
+                isValid = (origin, target, board, flip) => {
+                    if (!BasicValidate(Pawn, origin, target, board, flip)) return false;
+                    int yAdv = (board.isWhitesTurn ^ flip) ? -1 : 1;
                     int x0 = origin % 8;
                     int y0 = origin / 8;
                     int xf = target % 8;
@@ -573,17 +577,17 @@ namespace Dexter.Helpers.Games {
                     } else {
                         if (xf != x0) return false;
                         if (yf == y0 + yAdv) return true;
-                        int initialRank = board.isWhitesTurn ? 6 : 1;
+                        int initialRank = (board.isWhitesTurn ^ flip) ? 6 : 1;
                         return y0 == initialRank && yf == y0 + 2 * yAdv && board.squares[x0, y0 + yAdv] == '-';
                     }
                 }
             };
 
-            private static bool BasicValidate(Piece p, int origin, int target, Board board) {
+            private static bool BasicValidate(Piece p, int origin, int target, Board board, bool flip) {
                 if (origin == target) return false;
                 if (char.ToUpper(board.GetSquare(origin)) != p.representation) return false;
                 char piecef = board.GetSquare(target);
-                if (piecef != '-' && (char.IsLower(piecef) ^ board.isWhitesTurn)) return false;
+                if (piecef != '-' && (char.IsLower(piecef) ^ board.isWhitesTurn ^ flip)) return false;
                 return true;
             }
 
@@ -683,8 +687,10 @@ namespace Dexter.Helpers.Games {
                     if (board.IsThreatened(kingPosition)) return false;
                 } else {
                     error = "King or rook will be under attack - invalid castle!";
-                    for (int moveSquare = origin; moveSquare != (origin + (target - origin) > 0 ? 3 : -3); moveSquare += (target-origin)>0?1:-1){
+                    bool targetReached = false;
+                    for (int moveSquare = origin; !targetReached; moveSquare += (target - origin) > 0 ? 1 : -1){
                         if (board.IsThreatened(moveSquare)) return false;
+                        if (moveSquare == target) targetReached = true;
                     }
                 }
                 error = "";
@@ -794,7 +800,7 @@ namespace Dexter.Helpers.Games {
                         error = $"The specified target square ({explicitFormMatch.Value[^2..]}) is invalid!";
                         return true;
                     }
-                    if (!toMove.isValid(move.origin, move.target, board)) {
+                    if (!toMove.isValid(move.origin, move.target, board, false)) {
                         error = "The targeted piece cannot move to the desired square!";
                         return true;
                     }
@@ -835,7 +841,7 @@ namespace Dexter.Helpers.Games {
 
                         List<int> validOrigins = new();
                         foreach (int origin in potentialOrigins) {
-                            if (toMove.isValid(origin, move.target, board)) {
+                            if (toMove.isValid(origin, move.target, board, false)) {
                                 validOrigins.Add(origin);
                             }
                         }
@@ -1162,7 +1168,7 @@ namespace Dexter.Helpers.Games {
                     if ((char.IsUpper(pieceName) == isWhitesTurn) ^ flipThreat) {
                         Piece attacker = Piece.FromRepresentation(pieceName);
                         Console.Out.WriteLine($"Checking whether {attacker.name} at {ToSquareName(ToMatrixCoords(position))} is threatening square {ToSquareName(ToMatrixCoords(square))}");
-                        if (attacker.isValid(position, square, this)) return true;
+                        if (attacker.isValid(position, square, this, flipThreat)) return true;
                     }
                 }
                 return false;

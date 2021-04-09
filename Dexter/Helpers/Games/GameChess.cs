@@ -314,6 +314,7 @@ namespace Dexter.Helpers.Games {
 
                 board.ExecuteMove(move);
                 Outcome outcome = board.GetOutcome();
+                Console.Out.WriteLine(outcome);
                 if (outcome is Outcome.Check) move.isCheck = true;
                 if (outcome is Outcome.Checkmate) move.isCheckMate = true;
                 BoardRaw = board.ToString();
@@ -1081,7 +1082,7 @@ namespace Dexter.Helpers.Games {
                 if (halfmoves >= 100) return Outcome.Draw;
                 // if insufficient material => draw
                 // if checkmate => Checkmate
-                bool check = IsThreatened(isWhitesTurn ? whiteKing : blackKing);
+                bool check = IsThreatened(isWhitesTurn ? whiteKing : blackKing, true);
                 bool noMove = false;
 
                 if (check && noMove) {
@@ -1160,7 +1161,7 @@ namespace Dexter.Helpers.Games {
                     if (!char.IsLetter(pieceName)) continue;
                     if ((char.IsUpper(pieceName) == isWhitesTurn) ^ flipThreat) {
                         Piece attacker = Piece.FromRepresentation(pieceName);
-                        //Console.Out.WriteLine($"Checking whether {attacker.name} at {ToSquareName(ToMatrixCoords(position))} is threatening square {ToSquareName(ToMatrixCoords(square))}");
+                        Console.Out.WriteLine($"Checking whether {attacker.name} at {ToSquareName(ToMatrixCoords(position))} is threatening square {ToSquareName(ToMatrixCoords(square))}");
                         if (attacker.isValid(position, square, this)) return true;
                     }
                 }

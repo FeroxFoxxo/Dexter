@@ -21,7 +21,7 @@ namespace Dexter.Helpers.Games {
 
     public class GameChess : IGameTemplate {
 
-        private const string EmptyData = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1, -, 0, 0, 0, NN, standard";
+        private const string EmptyData = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1, -, 0, 0, 0, 0, NN, standard";
 
         private string BoardRaw {
             get {
@@ -40,7 +40,7 @@ namespace Dexter.Helpers.Games {
             }
             set {
                 string[] newValue = game.Data.Split(", ");
-                newValue[0] = value;
+                newValue[1] = value;
                 game.Data = string.Join(", ", newValue);
             }
         }
@@ -56,7 +56,7 @@ namespace Dexter.Helpers.Games {
             }
         }
 
-        private ulong PlayerWhite {
+        private ulong DumpID {
             get {
                 return ulong.Parse(game.Data.Split(", ")[3]);
             }
@@ -67,7 +67,7 @@ namespace Dexter.Helpers.Games {
             }
         }
 
-        private ulong PlayerBlack {
+        private ulong PlayerWhite {
             get {
                 return ulong.Parse(game.Data.Split(", ")[4]);
             }
@@ -78,24 +78,35 @@ namespace Dexter.Helpers.Games {
             }
         }
 
-        private string Agreements {
+        private ulong PlayerBlack {
             get {
-                return game.Data.Split(", ")[5];
+                return ulong.Parse(game.Data.Split(", ")[5]);
             }
             set {
                 string[] newValue = game.Data.Split(", ");
-                newValue[5] = value;
+                newValue[5] = value.ToString();
                 game.Data = string.Join(", ", newValue);
             }
         }
 
-        private string Theme {
+        private string Agreements {
             get {
                 return game.Data.Split(", ")[6];
             }
             set {
                 string[] newValue = game.Data.Split(", ");
                 newValue[6] = value;
+                game.Data = string.Join(", ", newValue);
+            }
+        }
+
+        private string Theme {
+            get {
+                return game.Data.Split(", ")[7];
+            }
+            set {
+                string[] newValue = game.Data.Split(", ");
+                newValue[7] = value;
                 game.Data = string.Join(", ", newValue);
             }
         }
@@ -218,7 +229,8 @@ namespace Dexter.Helpers.Games {
             if (message.Channel is IDMChannel) return;
             Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
 
-            string msg = message.Content.ToLower().Replace("@", "@-");
+            string msgRaw = message.Content.Replace("@", "@-");
+            string msg = msgRaw.ToLower();
             IUserMessage boardMsg = null;
             if (BoardID != 0) boardMsg = await message.Channel.GetMessageAsync(BoardID) as IUserMessage;
 
@@ -230,10 +242,11 @@ namespace Dexter.Helpers.Games {
                         $"{boardCorruptedError}\n" +
                         $"Feel free to reset the game using the `game reset` command or by setting a new board state in FEN notation with the `game set board [FEN]` command.")
                     .SendEmbed(message.Channel);
+                return;
             }
 
             if (msg == "board") {
-                bool lastMoveValid = Move.TryParse(LastMove, board, out Move lastMove, out string lastMoveError);
+                bool lastMoveValid = Move.TryParseMock(LastMove, board, out Move lastMove, out string lastMoveError);
                 if (!lastMoveValid) lastMove = null;
 
                 if (boardMsg is not null) await boardMsg.DeleteAsync();
@@ -278,7 +291,7 @@ namespace Dexter.Helpers.Games {
                 return;
             }
 
-            if (Move.TryParse(args[0], board, out Move move, out string error)) {
+            if (Move.TryParse(msgRaw, board, out Move move, out string error)) {
                 if (boardMsg is null) {
                     await message.Channel.SendMessageAsync($"You must create a board first! Type `board`.");
                     return;
@@ -289,7 +302,7 @@ namespace Dexter.Helpers.Games {
                     return;
                 }
 
-                if ((board.isWhitesTurn && message.Author.Id != PlayerBlack) || (!board.isWhitesTurn && message.Author.Id != PlayerBlack)) {
+                if ((board.isWhitesTurn && message.Author.Id != PlayerWhite) || (!board.isWhitesTurn && message.Author.Id != PlayerBlack)) {
                     await message.Channel.SendMessageAsync($"You don't control the {(board.isWhitesTurn ? "white" : "black")} pieces!");
                     return;
                 }
@@ -300,8 +313,12 @@ namespace Dexter.Helpers.Games {
                 }
 
                 board.ExecuteMove(move);
+                BoardRaw = board.ToString();
+                LastMove = move.ToString();
                 await message.DeleteAsync();
-                //EDIT MESSAGE AND SEND TO NEW BOARD
+
+                string link = await CreateBoardDisplay(board, move, client, funConfiguration);
+                await boardMsg.ModifyAsync(m => m.Content = link);
 
                 Outcome outcome = board.GetOutcome();
                 if (outcome == Outcome.Checkmate) {
@@ -393,7 +410,12 @@ namespace Dexter.Helpers.Games {
             string filepath = Path.Join(imageChacheDir, $"Chess{game.Master}.png");
             System.Drawing.Image image = RenderBoard(board, lastMove);
             image.Save(filepath);
+            if (DumpID != 0) { 
+                IMessage prevDump = await (client.GetChannel(funConfiguration.GamesImageDumpsChannel) as ITextChannel).GetMessageAsync(DumpID);
+                if (prevDump is not null) await prevDump.DeleteAsync(); 
+            }
             IUserMessage cacheMessage = await (client.GetChannel(funConfiguration.GamesImageDumpsChannel) as ITextChannel).SendFileAsync(filepath);
+            DumpID = cacheMessage.Id;
 
             return cacheMessage.Attachments.First().ProxyUrl;
         }
@@ -453,7 +475,7 @@ namespace Dexter.Helpers.Games {
         }
 
         private static string ToSquareName(Tuple<int, int> coord) {
-            return $"{(char)('a' + coord.Item1)}{(char)('8' - coord.Item1)}";
+            return $"{(char)('a' + coord.Item1)}{(char)('8' - coord.Item2)}";
         }
 
         private static bool TryParseSquare(string input, out int pos) {
@@ -680,6 +702,33 @@ namespace Dexter.Helpers.Games {
                 return true;
             }
 
+            public static bool TryParseMock(string input, Board board, out Move move, out string error) {
+                move = new Move(-1, -1);
+                error = "";
+                if (Regex.IsMatch(input.ToUpper(), @"^[O0]\-[O0]([+#!?.\s]|$)")) {
+                    move.origin = !board.isWhitesTurn ? 60 : 4;
+                    move.target = !board.isWhitesTurn ? 62 : 6;
+                    move.isCastle = true;
+                    return true;
+                }
+                else if (Regex.IsMatch(input.ToUpper(), @"^[O0]\-[O0]\-[O0]([+#!?.\s]|$)")) {
+                    move.origin = !board.isWhitesTurn ? 60 : 4;
+                    move.target = !board.isWhitesTurn ? 58 : 2;
+                    move.isCastle = true;
+                    return true;
+                }
+                else if (input.Length != 4) { error = "wrong format"; return false; }
+
+                if (!TryParseSquare(input[..2], out move.origin)) {
+                    error = "wrong format on origin"; return false;
+                }
+                if (!TryParseSquare(input[^2..], out move.target)) {
+                    error = "wrong format on target"; return false;
+                }
+
+                return true;
+            }
+
             public static bool TryParse(string input, Board board, out Move move, out string error) {
                 move = new(-1, -1);
                 error = "";
@@ -746,19 +795,18 @@ namespace Dexter.Helpers.Games {
                         return true;
                     }
                     potentialOrigins.Add(move.origin);
-                    if (!Piece.PieceCharacters.Contains(board.GetSquare(move.origin))) {
+                    if (!Piece.PieceCharacters.Contains(char.ToUpper(board.GetSquare(move.origin)))) {
                         error = $"The specified origin square ({explicitFormMatch.Value[..2]}) doesn't contain a valid piece";
                         return true;
                     }
-                    toMove = Piece.FromRepresentation(char.ToUpper(board.GetSquare(move.origin)));
-
-                    if (!toMove.isValid(move.origin, move.target, board)) {
-                        error = $"The targeted piece cannot move to the desired square!";
-                        return true;
-                    }
+                    toMove = Piece.FromRepresentation(board.GetSquare(move.origin));
 
                     if (!TryParseSquare(explicitFormMatch.Value[^2..].ToLower(), out move.target)) {
                         error = $"The specified target square ({explicitFormMatch.Value[^2..]}) is invalid!";
+                        return true;
+                    }
+                    if (!toMove.isValid(move.origin, move.target, board)) {
+                        error = "The targeted piece cannot move to the desired square!";
                         return true;
                     }
                 } else {
@@ -767,8 +815,8 @@ namespace Dexter.Helpers.Games {
                     if (basicFormMatch.Success) {
                         string basicForm = basicFormMatch.Value;
 
-                        if (!TryParseSquare(explicitFormMatch.Value[^2..].ToLower(), out move.target)) {
-                            error = $"The specified target square ({explicitFormMatch.Value[^2..]}) is invalid!";
+                        if (!TryParseSquare(basicForm[^2..].ToLower(), out move.target)) {
+                            error = $"The specified target square ({basicForm[^2..]}) is invalid!";
                             return true;
                         }
 
@@ -836,8 +884,7 @@ namespace Dexter.Helpers.Games {
                 if (move.target == board.enPassant && toMove == Piece.Pawn && board.GetSquare(move.target) == '-' && (move.target - move.origin) % 8 != 0) { move.isEnPassant = true; move.isCapture = true; }
                 if (board.GetSquare(move.target) != '-') move.isCapture = true;
 
-                move = null;
-                return false;
+                return true;
             }
 
             public Move(int origin, int target, bool isCastle = false, bool isCapture = false, bool isEnPassant = false, bool isCheck = false, bool isCheckMate = false, char promote = ' ') {
@@ -1010,14 +1057,29 @@ namespace Dexter.Helpers.Games {
             }
 
             public void ExecuteMove(Move move) {
-                //move piece from origin to target
-                //if en passant, remove pawn (rank = origin / 8, file = origin % 8)
-                //if isCastle, move rook
-                
-                //swap isWhitesTurn
-                //if isWhitesTurn, fullmoves + 1
-                //if !isCapture and the moved piece isn't a pawn, halfmoves + 1 else halfmoves = 0
-                throw new NotImplementedException();
+                int x0 = move.origin % 8;
+                int y0 = move.origin / 8;
+                int xf = move.target % 8;
+                int yf = move.target / 8;
+                char representation = squares[x0, y0];
+                squares[x0, y0] = '-';
+                squares[xf, yf] = representation;
+
+                if (move.isEnPassant) squares[xf, y0] = '-';
+                if (move.isCastle) {
+                    squares[xf < 4 ? 0 : 7, yf] = '-';
+                    squares[(x0 + xf) / 2, yf] = 'r'.MatchCase(representation);
+                }
+                bool isPawn = char.ToUpper(representation) == Piece.Pawn.representation;
+                if (isPawn && Math.Abs(yf - y0) == 2)
+                    enPassant = (move.target + move.origin) / 2;
+                else
+                    enPassant = -1;
+
+                isWhitesTurn = !isWhitesTurn;
+                if (isWhitesTurn) fullmoves++;
+                if (isPawn || move.isCapture) halfmoves = 0;
+                else halfmoves++;
             }
 
             public Outcome GetOutcome() {

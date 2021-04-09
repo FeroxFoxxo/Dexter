@@ -313,6 +313,9 @@ namespace Dexter.Helpers.Games {
                 }
 
                 board.ExecuteMove(move);
+                Outcome outcome = board.GetOutcome();
+                if (outcome is Outcome.Check) move.isCheck = true;
+                if (outcome is Outcome.Checkmate) move.isCheckMate = true;
                 BoardRaw = board.ToString();
                 LastMove = move.ToString();
                 await message.DeleteAsync();
@@ -320,7 +323,6 @@ namespace Dexter.Helpers.Games {
                 string link = await CreateBoardDisplay(board, move, client, funConfiguration);
                 await boardMsg.ModifyAsync(m => m.Content = link);
 
-                Outcome outcome = board.GetOutcome();
                 if (outcome == Outcome.Checkmate) {
                     BoardID = 0;
                     player.Score += 1;

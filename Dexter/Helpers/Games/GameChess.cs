@@ -159,7 +159,15 @@ namespace Dexter.Helpers.Games {
             return new EmbedBuilder()
                 .WithColor(Discord.Color.Magenta)
                 .WithTitle("How to Play: Chess")
-                .WithDescription("owo");
+                .WithDescription("**Step 1.** Create a board by typing `board` in chat.\n" +
+                    "**Step 2.** Claim your colors! Type `claim <black|white>` to claim the pieces of a given color.\n" +
+                    "**Step 3.** White starts! Type your moves in chat to take them. There are two ways to phrase a move.\n" +
+                    "-  `[origin](x)[target]` will move a piece from an origin square to a target square.\n" +
+                    "-  standard notation `(piece)(disambiguation)(x)[target]` will move a piece by its abbreviation to a target square.\n" +
+                    "Examples: `b1c3`, `Nc3`; `d2d4`, `d4`; `a1e1`, `Rae1`; `c4d6`, `N4xd6`...\n" +
+                    "Special moves: Short castling `O-O`, Long castling `O-O-O`.\n" +
+                    "Standard rules of chess apply, you can resign with `resign` or offer a draw by typing `draw` in chat.\n" +
+                    "Once the game is complete, you can type `swap` to swap colors, or `pass [color] [player]` to give control of your pieces to someone else.");
         }
 
         /// <summary>
@@ -202,6 +210,7 @@ namespace Dexter.Helpers.Games {
                 case "board":
                     if (!Board.TryParseBoard(value, out Board board, out feedback)) return false;
                     BoardRaw = board.ToString();
+                    LastMove = "-";
                     feedback = "Successfully set the value of board to the given value, type `board` to see the updated position.";
                     return true;
                 case "theme":
@@ -253,6 +262,7 @@ namespace Dexter.Helpers.Games {
                 if (!lastMoveValid) lastMove = null;
 
                 Outcome checkCalc = board.GetOutcome();
+                Console.Out.WriteLine($"Result on previous board is {checkCalc}");
                 if (checkCalc is Outcome.Check) lastMove.isCheck = true;
                 if (checkCalc is Outcome.Checkmate) lastMove.isCheckMate = true;
 
@@ -396,7 +406,7 @@ namespace Dexter.Helpers.Games {
                     player.Score += 1;
                     await new EmbedBuilder()
                         .WithColor(Discord.Color.Green)
-                        .WithTitle($"{(board.isWhitesTurn ? "White" : "Black")} wins!")
+                        .WithTitle($"{(!board.isWhitesTurn ? "White" : "Black")} wins!")
                         .WithDescription("Create a new board if you wish to play again, or pass your color control to a different player.")
                         .SendEmbed(message.Channel);
                     Reset(funConfiguration, null);
@@ -503,19 +513,22 @@ namespace Dexter.Helpers.Games {
 
             using (Graphics g = Graphics.FromImage(img)) {
                 using (System.Drawing.Image boardImg = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{BoardImgName}.png"))) {
+                    if (!board.isWhitesTurn) boardImg.RotateFlip(RotateFlipType.Rotate180FlipNone);
                     g.DrawImage(boardImg, 0, 0, 2 * Offset + 8 * CellSize, 2 * Offset + 8 * CellSize);
                 }
 
                 if (lastMove != null) {
                     using (System.Drawing.Image highlight = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{HighlightImage}.png"))) {
                         foreach(int n in lastMove.ToHighlight()) {
-                            g.DrawImage(highlight, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
+                            if (board.isWhitesTurn) g.DrawImage(highlight, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
+                            else g.DrawImage(highlight, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
                         }
                     }
 
                     using (System.Drawing.Image danger = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{DangerImage}.png"))) {
                         foreach (int n in lastMove.ToDanger(board)) {
-                            g.DrawImage(danger, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
+                            if (board.isWhitesTurn) g.DrawImage(danger, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
+                            else g.DrawImage(danger, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
                         }
                     }
                 }
@@ -523,7 +536,8 @@ namespace Dexter.Helpers.Games {
                 for (int x = 0; x < 8; x++) {
                     for (int y = 0; y < 8; y++) {
                         if (board.squares[x, y] != '-') {
-                            g.DrawImage(pieceImages[board.squares[x, y]], Offset + CellSize * x, Offset + CellSize * y, CellSize, CellSize);
+                            if (board.isWhitesTurn) g.DrawImage(pieceImages[board.squares[x, y]], Offset + CellSize * x, Offset + CellSize * y, CellSize, CellSize);
+                            else g.DrawImage(pieceImages[board.squares[x, y]], Offset + (7 - x) * CellSize, Offset + (7 - y) * CellSize, CellSize, CellSize);
                         }
                     }
                 }
@@ -573,61 +587,92 @@ namespace Dexter.Helpers.Games {
         private class Piece {
             public char representation;
             public string name;
+            public bool canPin;
             public Func<int, int, Board, bool, bool> isValid;
+            public Func<int, Board, bool, bool> hasValidMoves;
 
             public static readonly Piece Rook = new Piece() {
                 representation = 'R',
                 name = "Rook",
+                canPin = true,
                 isValid = (origin, target, board, flip) => {
                     if (!BasicValidate(Rook, origin, target, board, flip)) return false;
                     return OrthogonalValidate(origin, target, board);
-                }
+                },
+                hasValidMoves = (origin, board, flip) => HasOrthogonalValidMoves(origin, board, flip)
             };
 
             public static readonly Piece Knight = new Piece() {
                 representation = 'N',
                 name = "Knight",
+                canPin = false,
                 isValid = (origin, target, board, flip) => {
+                    Console.Out.WriteLine($"Checking whether knight at {origin} can move to {target}");
                     if (!BasicValidate(Knight, origin, target, board, flip)) return false;
                     int xdiff = Math.Abs(target % 8 - origin % 8);
                     int ydiff = Math.Abs(target / 8 - origin / 8);
-                    if (xdiff >= 3 || ydiff >= 3) return false;
+                    Console.Out.WriteLine(xdiff + ydiff);
+                    if (xdiff == 0 || ydiff == 0) return false;
                     return xdiff + ydiff == 3;
+                },
+                hasValidMoves = (origin, board, flip) => {
+                    int x0 = origin % 8;
+                    int y0 = origin / 8;
+                    for (int dx = 1; dx <= 2; dx++) {
+                        for (int xsign = -1; xsign <= 1; xsign += 2) {
+                            int x = x0 + dx * xsign;
+                            if (x < 0 || x >= 8) continue;
+                            for (int ysign = -1; ysign <= 1; ysign += 2) {
+                                int y = y0 + (3 - dx) * ysign;
+                                if (y < 0 || y >= 8) continue;
+                                Console.Out.WriteLine($"Checking for valid moves: Knight {origin}->{x + y * 8}");
+                                if (board.squares[x, y] == '-' || (char.IsUpper(board.squares[x, y]) ^ board.isWhitesTurn ^ flip)) return true;
+                            }
+                        }
+                    }
+                    return false;
                 }
             };
 
             public static readonly Piece Bishop = new Piece() {
                 representation = 'B',
                 name = "Bishop",
+                canPin = true,
                 isValid = (origin, target, board, flip) => {
                     if (!BasicValidate(Bishop, origin, target, board, flip)) return false;
                     return DiagonalValidate(origin, target, board);
-                }
+                },
+                hasValidMoves = (origin, board, flip) => HasDiagonalValidMoves(origin, board, flip)
             };
 
             public static readonly Piece King = new Piece() {
                 representation = 'K',
                 name = "King",
+                canPin = false,
                 isValid = (origin, target, board, flip) => {
                     if (!BasicValidate(King, origin, target, board, flip)) return false;
                     int xdiff = Math.Abs(target % 8 - origin % 8);
                     int ydiff = Math.Abs(target / 8 - origin / 8);
                     return xdiff <= 1 && ydiff <= 1;
-                }
+                },
+                hasValidMoves = (origin, board, flip) => HasDiagonalValidMoves(origin, board, flip, true) || HasOrthogonalValidMoves(origin, board, flip, true)
             };
 
             public static readonly Piece Queen = new Piece() {
                 representation = 'Q',
                 name = "Queen",
+                canPin = true,
                 isValid = (origin, target, board, flip) => {
                     if (!BasicValidate(Queen, origin, target, board, flip)) return false;
                     return OrthogonalValidate(origin, target, board) || DiagonalValidate(origin, target, board);
-                }
+                },
+                hasValidMoves = (origin, board, flip) => HasDiagonalValidMoves(origin, board, flip) || HasOrthogonalValidMoves(origin, board, flip)
             };
 
             public static readonly Piece Pawn = new Piece() {
                 representation = 'P',
                 name = "Pawn",
+                canPin = false,
                 isValid = (origin, target, board, flip) => {
                     if (!BasicValidate(Pawn, origin, target, board, flip)) return false;
                     int yAdv = (board.isWhitesTurn ^ flip) ? -1 : 1;
@@ -643,6 +688,20 @@ namespace Dexter.Helpers.Games {
                         int initialRank = (board.isWhitesTurn ^ flip) ? 6 : 1;
                         return y0 == initialRank && yf == y0 + 2 * yAdv && board.squares[x0, y0 + yAdv] == '-';
                     }
+                },
+                hasValidMoves = (origin, board, flip) => {
+                    int yAdv = (board.isWhitesTurn ^ flip) ? -1 : 1;
+                    int x0 = origin % 8;
+                    int y0 = origin / 8;
+                    if (y0 + yAdv < 0 || y0 + yAdv >= 8) return false;
+                    if (board.squares[x0, y0 + yAdv] == '-') return true;
+                    for (int x = x0 - 1; x <= x0 + 1; x += 2) {
+                        if (x < 0 || x >= 8) continue;
+                        if (board.enPassant == x + (y0 + yAdv) * 8) return true;
+                        if (board.squares[x, y0 + yAdv] == '-') continue;
+                        if (char.IsUpper(board.squares[x, y0 + yAdv]) ^ board.isWhitesTurn ^ flip) return true;
+                    }
+                    return false;
                 }
             };
 
@@ -705,6 +764,44 @@ namespace Dexter.Helpers.Games {
                 }
 
                 return true;
+            }
+
+            private static bool HasOrthogonalValidMoves(int origin, Board board, bool flip, bool mustBeSafe = false) {
+                int x0 = origin % 8;
+                int y0 = origin / 8;
+                Console.Out.WriteLine($"Looking for orthogonal movements from {origin}");
+                char p;
+                for (int x = x0 - 1; x <= x0 + 1; x += 2) {
+                    if (x < 0 || x >= 8) continue;
+                    p = board.squares[x, y0];
+                    if (p != '-' && !(char.IsUpper(p) ^ board.isWhitesTurn ^ flip)) continue;
+                    if (!mustBeSafe || !board.IsControlled(x + y0 * 8, !flip)) { Console.Out.WriteLine($"Possible orth. move to: {x + y0 * 8}"); return true; }
+                }
+                for (int y = y0 - 1; y <= y0 + 1; y += 2) {
+                    if (y < 0 || y >= 8) continue;
+                    p = board.squares[x0, y];
+                    if (p != '-' && !(char.IsUpper(p) ^ board.isWhitesTurn ^ flip)) continue;
+                    if (!mustBeSafe || !board.IsControlled(x0 + y * 8, !flip)) { Console.Out.WriteLine($"Possible orth. move to: {x0 + y * 8}"); return true; }
+                }
+                return false;
+            }
+
+            private static bool HasDiagonalValidMoves(int origin, Board board, bool flip, bool mustBeSafe = false) {
+                int x0 = origin % 8;
+                int y0 = origin / 8;
+                Console.Out.WriteLine($"Looking for diagonal movements from {origin}");
+                char p;
+                for (int x = x0 - 1; x <= x0 + 1; x += 2) {
+                    if (x < 0 || x >= 8) continue;
+                    for (int y = y0 - 1; y <= y0 + 1; y += 2) {
+                        if (y < 0 || y >= 8) continue;
+                        p = board.squares[x, y];
+                        if (p != '-' && !(char.IsUpper(p) ^ board.isWhitesTurn ^ flip)) continue;
+                        Console.Out.WriteLine($"{ToSquareName(ToMatrixCoords(x + y * 8))} is {(board.IsControlled(x + y * 8, !flip) ? "" : "NOT ")}under control.");
+                        if (!mustBeSafe || !board.IsControlled(x + y * 8, !flip)) { Console.Out.WriteLine($"Possible diag. move to: {x + y * 8}"); return true; }
+                    }
+                }
+                return false;
             }
 
             public static readonly Piece[] pieces = new Piece[] { Rook, Knight, Bishop, King, Queen, Pawn };
@@ -1147,12 +1244,11 @@ namespace Dexter.Helpers.Games {
             }
 
             public Outcome GetOutcome() {
-                // if halfmoves >= 100 => draw
                 if (halfmoves >= 100) return Outcome.Draw;
                 // if insufficient material => draw
-                // if checkmate => Checkmate
-                bool check = IsThreatened(isWhitesTurn ? whiteKing : blackKing, true);
-                bool noMove = false;
+                bool check = IsThreatenedVerbose(isWhitesTurn ? whiteKing : blackKing, true, out bool doubleAttack, out int attacker);
+                Console.Out.WriteLine($"Current board seems {(check ? "" : "NOT ")}to present a check;");
+                bool noMove = !HasLegalMoves(check, doubleAttack, attacker);
 
                 if (check && noMove) {
                     return Outcome.Checkmate;
@@ -1162,6 +1258,84 @@ namespace Dexter.Helpers.Games {
                     return Outcome.Draw;
                 }
                 return Outcome.Playing;
+            }
+
+            public bool HasLegalMoves(bool inCheck, bool doubleAttack, int attackerPos) {
+                HashSet<int> pinned = new();
+                int kingPos = isWhitesTurn ? whiteKing : blackKing;
+
+                if (!inCheck) {
+                    for (int pos = 0; pos < 64; pos++) {
+                        Console.Out.Write(GetSquare(pos));
+                        if (pos == kingPos) continue;
+                        char piecechar = GetSquare(pos);
+                        if (piecechar == '-' || char.IsLower(piecechar) == isWhitesTurn) continue;
+                        if (IsPiecePinned(pos, kingPos)) { pinned.Add(pos); Console.Out.WriteLine($"Piece at {pos} is pinned!"); }
+                        else {
+                            Piece piece = Piece.FromRepresentation(piecechar);
+                            Console.Out.WriteLine($"Checking if {piece.name} at {ToSquareName(ToMatrixCoords(pos))} can move!");
+                            if (piece.hasValidMoves(pos, this, false)) {
+                                Console.Out.WriteLine($"{ToSquareName(ToMatrixCoords(pos))} has legal moves!"); return true;
+                            }
+                        }
+                    }
+                    int kx = kingPos % 8;
+                    int ky = kingPos / 8;
+                    foreach (int pos in pinned) {
+                        char piecechar = GetSquare(pos);
+                        Piece piece = Piece.FromRepresentation(piecechar);
+
+                        int x0 = pos % 8;
+                        int y0 = pos / 8;
+                        int dx = Math.Sign(kx - x0);
+                        int dy = Math.Sign(ky - y0);
+                        for (int sign = -1; sign <= 1; sign += 2) {
+                            if (piece.isValid(pos, pos + dx * sign + dy * sign * 8, this, false)) {
+                                Console.Out.WriteLine($"{ToSquareName(ToMatrixCoords(pos))} has legal moves!"); return true; }
+                        }
+                    }
+                    if (Piece.King.hasValidMoves(kingPos, this, false)) { Console.Out.WriteLine($"{ToSquareName(ToMatrixCoords(kingPos))} has legal moves!"); return true; }
+                }
+                else {
+                    Piece attacker = Piece.FromRepresentation(GetSquare(attackerPos));
+                    HashSet<int> blockSquares = new();
+
+                    if (attacker.canPin && !doubleAttack) {
+                        int px = attackerPos % 8;
+                        int py = attackerPos / 8;
+                        int kx = kingPos % 8;
+                        int ky = kingPos / 8;
+
+                        int dx = px - kx;
+                        int dy = py - ky;
+
+                        int adv = Math.Sign(dx) + Math.Sign(dy) * 8;
+                        int newPos = kingPos + adv;
+                        while (newPos != attackerPos) {
+                            blockSquares.Add(newPos);
+                            newPos += adv;
+                        }
+                    }
+
+                    for (int pos = 0; pos < 64; pos++) {
+                        if (pos == kingPos) continue;
+                        char piecechar = GetSquare(pos);
+                        if (piecechar == '-' || char.IsLower(piecechar) == isWhitesTurn) continue;
+                        if (IsPiecePinned(pos, kingPos)) pinned.Add(pos);
+                        else if (!doubleAttack) { //If it is not pinned AND can capture only attacker, legal.
+                            Piece piece = Piece.FromRepresentation(piecechar);
+                            Console.Out.WriteLine($"Checking if {piece.name} at {ToSquareName(ToMatrixCoords(pos))} can capture {attackerPos}!");
+                            if (piece.isValid(pos, attackerPos, this, false)) { Console.Out.WriteLine($"{ToSquareName(ToMatrixCoords(pos))} has legal moves!"); return true; };
+
+                            foreach (int sq in blockSquares) { //If a piece can block the attack, legal.
+                                if (piece.isValid(pos, sq, this, false)) { Console.Out.WriteLine($"{ToSquareName(ToMatrixCoords(pos))} has legal moves!"); return true; };
+                            }
+                        }
+                    }
+                    //If the king can move, legal.
+                    if (Piece.King.hasValidMoves(kingPos, this, false)) { Console.Out.WriteLine($"{ToSquareName(ToMatrixCoords(kingPos))} has legal moves!"); return true; };
+                }
+                return false;
             }
 
             public char GetSquare(int value) {
@@ -1233,6 +1407,81 @@ namespace Dexter.Helpers.Games {
                         Console.Out.WriteLine($"Checking whether {attacker.name} at {ToSquareName(ToMatrixCoords(position))} is threatening square {ToSquareName(ToMatrixCoords(square))}");
                         if (attacker.isValid(position, square, this, flipThreat)) return true;
                     }
+                }
+                return false;
+            }
+
+            public bool IsControlled(int square, bool flipThreat = false) {
+                for (int position = 0; position < 64; position++) {
+                    char pieceName = squares[position % 8, position / 8];
+                    if (!char.IsLetter(pieceName)) continue;
+                    if ((char.IsUpper(pieceName) == isWhitesTurn) ^ flipThreat) {
+                        Piece attacker = Piece.FromRepresentation(pieceName);
+                        Console.Out.WriteLine($"Checking whether {attacker.name} at {ToSquareName(ToMatrixCoords(position))} is controlling square {ToSquareName(ToMatrixCoords(square))}");
+                        char temp = squares[square % 8, square / 8];
+                        squares[square % 8, square / 8] = '-';
+                        if (attacker.isValid(position, square, this, flipThreat)) {
+                            squares[square % 8, square / 8] = temp;
+                            return true;
+                        } else {
+                            squares[square % 8, square / 8] = temp;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            public bool IsThreatenedVerbose(int square, bool flipThreat, out bool multipleAttackers, out int firstAttacker) {
+                multipleAttackers = false;
+                firstAttacker = -1;
+                for (int position = 0; position < 64; position++) {
+                    char pieceName = squares[position % 8, position / 8];
+                    if (!char.IsLetter(pieceName)) continue;
+                    if ((char.IsUpper(pieceName) == isWhitesTurn) ^ flipThreat) {
+                        Piece attacker = Piece.FromRepresentation(pieceName);
+                        //Console.Out.WriteLine($"[V] Checking whether {attacker.name} at {ToSquareName(ToMatrixCoords(position))} is threatening square {ToSquareName(ToMatrixCoords(square))}");
+                        if (attacker.isValid(position, square, this, flipThreat)) {
+                            if (firstAttacker >= 0) {
+                                multipleAttackers = true;
+                                return true;
+                            } else {
+                                firstAttacker = position;
+                            }
+                        }
+                    }
+                }
+                return firstAttacker >= 0;
+            }
+
+            public bool IsPiecePinned(int piecePosition, int kingLocation) {
+                if (piecePosition == kingLocation) return false;
+                int px = piecePosition % 8;
+                int py = piecePosition / 8;
+                int kx = kingLocation % 8;
+                int ky = kingLocation / 8;
+
+                int dx = px - kx;
+                int dy = py - ky;
+
+                if (dx != 0 && dy != 0 && dx != dy && dx != -dy) return false;
+
+                int xAdv = Math.Sign(dx);
+                int yAdv = Math.Sign(dy);
+                int x = kx + xAdv;
+                int y = ky + yAdv;
+                bool beforePiece = true;
+                Console.Out.WriteLine($"{ToSquareName(new Tuple<int, int>(kx, ky))}");
+                while (x >= 0 && x < 8 && y >= 0 && y < 8) {
+                    Console.Out.Write($"=>{ToSquareName(new Tuple<int, int>(x, y))}");
+                    if (x == px && y == py) { beforePiece = false; x += xAdv; y += yAdv; continue; }
+                    if (squares[x, y] != '-') {
+                        if (beforePiece) return false;
+                        Piece p = Piece.FromRepresentation(squares[x, y]);
+                        Console.Out.Write($"=>{p.representation} ({p.canPin} & {p.isValid(x * 8 + y, piecePosition, this, true)})");
+                        return p.canPin && p.isValid(x * 8 + y, piecePosition, this, true);
+                    }
+                    x += xAdv;
+                    y += yAdv;
                 }
                 return false;
             }

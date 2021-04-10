@@ -417,10 +417,28 @@ namespace Dexter.Helpers.Games {
                     await new EmbedBuilder()
                         .WithColor(Discord.Color.LightOrange)
                         .WithTitle("Draw!")
-                        .WithDescription("Stalemate reached! Create a new board if you wish to play again, or pass your color control to a different player.")
+                        .WithDescription($"Stalemate reached {(board.isWhitesTurn ? "White" : "Black")} has no legal moves but isn't in check. Create a new board if you wish to play again, or pass your color control to a different player.")
                         .SendEmbed(message.Channel);
                     Reset(funConfiguration, null);
                     return;
+                }
+
+                if (outcome == Outcome.FiftyMoveRule) {
+                    await new EmbedBuilder()
+                        .WithColor(Discord.Color.LightOrange)
+                        .WithTitle("Draw!")
+                        .WithDescription("50 moves went by without advancing a pawn or capturing a piece, the game is declared a draw. \nCreate a new board if you wish to play again, or pass your color control to a different player.")
+                        .SendEmbed(message.Channel);
+                    Reset(funConfiguration, null);
+                }
+
+                if (outcome == Outcome.InsufficientMaterial) {
+                    await new EmbedBuilder()
+                        .WithColor(Discord.Color.LightOrange)
+                        .WithTitle("Draw!")
+                        .WithDescription("Neither player has sufficient material to deliver checkmate, the game is declared a draw. \nCreate a new board if you wish to play again, or pass your color control to a different player.")
+                        .SendEmbed(message.Channel);
+                    Reset(funConfiguration, null);
                 }
 
                 return;
@@ -1098,6 +1116,8 @@ namespace Dexter.Helpers.Games {
         private enum Outcome {
             Playing,
             Draw,
+            FiftyMoveRule,
+            InsufficientMaterial,
             Checkmate,
             Check
         }
@@ -1244,8 +1264,9 @@ namespace Dexter.Helpers.Games {
             }
 
             public Outcome GetOutcome() {
-                if (halfmoves >= 100) return Outcome.Draw;
-                // if insufficient material => draw
+                if (halfmoves >= 100) return Outcome.FiftyMoveRule;
+                if (InsufficientMaterial()) return Outcome.InsufficientMaterial;
+
                 bool check = IsThreatenedVerbose(isWhitesTurn ? whiteKing : blackKing, true, out bool doubleAttack, out int attacker);
                 Console.Out.WriteLine($"Current board seems {(check ? "" : "NOT ")}to present a check;");
                 bool noMove = !HasLegalMoves(check, doubleAttack, attacker);
@@ -1258,6 +1279,29 @@ namespace Dexter.Helpers.Games {
                     return Outcome.Draw;
                 }
                 return Outcome.Playing;
+            }
+
+            public bool InsufficientMaterial() {
+                Dictionary<char, int> pieceCounts = new Dictionary<char, int>();
+                foreach (char p in Piece.PieceCharacters) {
+                    pieceCounts.Add(p, 0);
+                    pieceCounts.Add(char.ToLower(p), 0);
+                }
+                for (int x = 0; x < 8; x++) {
+                    for (int y = 0; y < 8; y++) {
+                        char c = squares[x, y];
+                        if (c == '-') continue;
+                        else pieceCounts[c]++;
+                    }
+                }
+                for (int i = 0; i <= 1; i++) {
+                    char color = i == 0 ? 'a' : 'A';
+                    if (pieceCounts[Piece.Queen.representation.MatchCase(color)] > 0) return false;
+                    if (pieceCounts[Piece.Rook.representation.MatchCase(color)] > 0) return false;
+                    if (pieceCounts[Piece.Pawn.representation.MatchCase(color)] > 0) return false;
+                    if (pieceCounts[Piece.Bishop.representation.MatchCase(color)] + pieceCounts[Piece.Knight.representation.MatchCase(color)] > 1) return false;
+                }
+                return true;
             }
 
             public bool HasLegalMoves(bool inCheck, bool doubleAttack, int attackerPos) {

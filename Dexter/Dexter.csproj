@@ -164,6 +164,9 @@
 		<None Update="Images\Games\Chess\standard\BR.png">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="Images\Games\Chess\standard\SquareCapture.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Images\Games\Chess\standard\SquareDanger.png">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

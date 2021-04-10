@@ -536,10 +536,25 @@ namespace Dexter.Helpers.Games {
                 }
 
                 if (lastMove != null) {
-                    using (System.Drawing.Image highlight = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{HighlightImage}.png"))) {
-                        foreach(int n in lastMove.ToHighlight()) {
-                            if (board.isWhitesTurn) g.DrawImage(highlight, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
-                            else g.DrawImage(highlight, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
+                    if (lastMove.isEnPassant) {
+                        using (System.Drawing.Image highlight = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{HighlightImage}.png"))) {
+                            foreach(int n in lastMove.ToHighlight()) {
+                                if (board.isWhitesTurn) g.DrawImage(highlight, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
+                                else g.DrawImage(highlight, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
+                            }
+                        }
+                        using (System.Drawing.Image highlight = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{CaptureImage}.png"))) {
+                            foreach(int n in lastMove.ToEnPassant()) {
+                                if (board.isWhitesTurn) g.DrawImage(highlight, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
+                                else g.DrawImage(highlight, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
+                            }
+                        }
+                    } else { 
+                        using (System.Drawing.Image highlight = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{(lastMove.isCapture ? CaptureImage : HighlightImage)}.png"))) {
+                            foreach(int n in lastMove.ToHighlight()) {
+                                if (board.isWhitesTurn) g.DrawImage(highlight, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
+                                else g.DrawImage(highlight, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
+                            }
                         }
                     }
 
@@ -569,6 +584,7 @@ namespace Dexter.Helpers.Games {
         private const string ChessPath = "Images/Games/Chess";
         private const string BoardImgName = "Board";
         private const string HighlightImage = "SquareHighlight";
+        private const string CaptureImage = "SquareCapture";
         private const string DangerImage = "SquareDanger";
         private readonly string[] PiecePrefixes = new string[] {"W", "B"};
 
@@ -1087,6 +1103,14 @@ namespace Dexter.Helpers.Games {
                         result.Add(target + 1);
                     }
                 }
+                return result;
+            }
+
+            public List<int> ToEnPassant() {
+                List<int> result = new();
+
+                result.Add((origin/8)*8 + target%8);
+
                 return result;
             }
 

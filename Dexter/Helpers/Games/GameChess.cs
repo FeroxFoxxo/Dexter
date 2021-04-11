@@ -536,24 +536,25 @@ namespace Dexter.Helpers.Games {
                 }
 
                 if (lastMove != null) {
-                    if (lastMove.isEnPassant) {
-                        using (System.Drawing.Image highlight = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{HighlightImage}.png"))) {
-                            foreach(int n in lastMove.ToHighlight()) {
-                                if (board.isWhitesTurn) g.DrawImage(highlight, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
-                                else g.DrawImage(highlight, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
+                    using (System.Drawing.Image highlight = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{HighlightImage}.png"))) {
+                        foreach (int n in lastMove.ToHighlight()) {
+                            if (board.isWhitesTurn) g.DrawImage(highlight, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
+                            else g.DrawImage(highlight, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
+                        }
+                    }
+                    if (lastMove.isCapture) {
+                        if (lastMove.isEnPassant) {
+                            using (System.Drawing.Image captureMark = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{CaptureImage}.png"))) {
+                                foreach (int n in lastMove.ToEnPassant()) {
+                                    if (board.isWhitesTurn) g.DrawImage(captureMark, (n % 8) * CellSize, (n / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
+                                    else g.DrawImage(captureMark, (7 - n % 8) * CellSize, (7 - n / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
+                                }
                             }
                         }
-                        using (System.Drawing.Image highlight = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{CaptureImage}.png"))) {
-                            foreach(int n in lastMove.ToEnPassant()) {
-                                if (board.isWhitesTurn) g.DrawImage(highlight, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
-                                else g.DrawImage(highlight, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
-                            }
-                        }
-                    } else { 
-                        using (System.Drawing.Image highlight = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{(lastMove.isCapture ? CaptureImage : HighlightImage)}.png"))) {
-                            foreach(int n in lastMove.ToHighlight()) {
-                                if (board.isWhitesTurn) g.DrawImage(highlight, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
-                                else g.DrawImage(highlight, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
+                        else {
+                            using (System.Drawing.Image captureMark = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{CaptureImage}.png"))) {
+                                if (board.isWhitesTurn) g.DrawImage(captureMark, (lastMove.target % 8) * CellSize, (lastMove.target / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
+                                else g.DrawImage(captureMark, (7 - lastMove.target % 8) * CellSize, (7 - lastMove.target / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
                             }
                         }
                     }
@@ -584,7 +585,7 @@ namespace Dexter.Helpers.Games {
         private const string ChessPath = "Images/Games/Chess";
         private const string BoardImgName = "Board";
         private const string HighlightImage = "SquareHighlight";
-        private const string CaptureImage = "SquareCapture";
+        private const string CaptureImage = "CaptureMarker";
         private const string DangerImage = "SquareDanger";
         private readonly string[] PiecePrefixes = new string[] {"W", "B"};
 

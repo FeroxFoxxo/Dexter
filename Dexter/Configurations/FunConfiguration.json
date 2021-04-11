@@ -57,7 +57,8 @@
   "HangmanDefaultLives": 6,
   "ChessThemes": [
     "standard",
-    "red"
+    "red",
+    "template"
   ],
   "WritingPromptTerms": {
     "living_adjective": [

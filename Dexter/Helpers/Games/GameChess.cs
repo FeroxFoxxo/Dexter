@@ -1528,15 +1528,15 @@ namespace Dexter.Helpers.Games {
                         if (IsPiecePinned(pos, kingPos)) pinned.Add(pos);
                         else if (!doubleAttack) { //If it is not pinned AND can capture only attacker, legal.
                             Piece piece = Piece.FromRepresentation(piecechar);
-                            if (piece.isValid(pos, attackerPos, this, false)) { return true; };
+                            if (piece.isValid(pos, attackerPos, this, false)) { Console.Out.WriteLine($"Piece at {pos} can capture the attacker"); return true; };
 
                             foreach (int sq in blockSquares) { //If a piece can block the attack, legal.
-                                if (piece.isValid(pos, sq, this, false)) { return true; };
+                                if (piece.isValid(pos, sq, this, false)) { Console.Out.WriteLine($"Piece at {pos} can block the check"); return true; };
                             }
                         }
                     }
                     //If the king can move, legal.
-                    if (Piece.King.hasValidMoves(kingPos, this, false)) { return true; };
+                    if (Piece.King.hasValidMoves(kingPos, this, false)) { Console.Out.WriteLine($"King can move");  return true; };
                 }
                 return false;
             }

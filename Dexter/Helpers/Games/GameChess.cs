@@ -188,7 +188,8 @@ namespace Dexter.Helpers.Games {
 
         const string AuxiliaryInfo = "> *moves* => Information about phrasing moves that can be understood by the engine.\n" +
             "> *view* => Information about changing the way the game is viewed graphically.\n" +
-            "> *chess* => Information about how to play chess and useful resources for learning the game.";
+            "> *chess* => Information about how to play chess and useful resources for learning the game.\n" +
+            "> *positions* => Information about additional custom starting positions that can be set using the `game set board [position]` command.";
 
         /// <summary>
         /// Resets all data, except player color control, if given a <paramref name="gamesDB"/>, it will also reset their score and lives.
@@ -228,6 +229,11 @@ namespace Dexter.Helpers.Games {
                 case "position":
                 case "state":
                 case "board":
+                    if (funConfiguration.ChessPositions.ContainsKey(value.ToLower())) {
+                        BoardRaw = funConfiguration.ChessPositions[value.ToLower()];
+                        feedback = $"Successfully reset the board to custom position: `{value}`.";
+                        return true;
+                    }
                     if (!Board.TryParseBoard(value, out Board board, out feedback)) return false;
                     BoardRaw = board.ToString();
                     LastMove = "-";
@@ -360,6 +366,15 @@ namespace Dexter.Helpers.Games {
                                 "The **knight** (N) moves in an L-shape, two squares in one direction, one in another. The knight is the only piece which can jump over other pieces\n" +
                                 "The **pawn** (P) is weird! It generally moves forward one square (except in the first move where it can move two), but it can ONLY capture diagonally. This means a pawn can't move if a piece is in front of it, unless it can capture a piece next to it.\n" +
                                 "Chess has a couple special moves, such as **castling** and **en passant**, these moves are a bit complicated, here are guides on [castling](https://www.youtube.com/watch?v=FcLYgXCkucc) and [en passant](https://www.youtube.com/watch?v=c_KRIH0wnhE).")
+                            .SendEmbed(message.Channel);
+                        return;
+                    case "positions":
+                        await new EmbedBuilder()
+                            .WithColor(Discord.Color.Blue)
+                            .WithTitle("Auxiliary Information: Chess Positions")
+                            .WithDescription("Here are a couple predefined custom chess positions you can play.\n" +
+                                "To set your game to these positions, use the `game set board [position name]` command!\n" +
+                                $"Custom positions: **{string.Join("**, **", funConfiguration.ChessPositions.Keys)}**.")
                             .SendEmbed(message.Channel);
                         return;
                     default:

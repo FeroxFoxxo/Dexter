@@ -106,6 +106,12 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public string[] ChessThemes { get; set; }
+
+        /// <summary>
+        /// Gets a set of custom positions that can be set in chess instead of a position in FEN notation.
+        /// </summary>
+
+        public Dictionary<string, string> ChessPositions { get; set; }
     }
 
 }

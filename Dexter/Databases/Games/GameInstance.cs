@@ -104,6 +104,7 @@ namespace Dexter.Databases.Games {
                 GameType.TicTacToe => new GameTicTacToe(this),
                 GameType.Connect4 => new GameConnect4(this),
                 GameType.Minesweeper => new GameMinesweeper(this),
+                GameType.Chess => new GameChess(this),
                 _ => null
             };
         }

@@ -386,7 +386,7 @@ namespace Dexter.Helpers.Games {
 
         private const string MinesweeperPath = "Images/Games/Minesweeper";
         private const string LabelsDirectory = "Labels";
-        private readonly string Corner = "GridCorner";
+        private const string Corner = "GridCorner";
         private readonly string[] NumLabels = new string[] {"NumberLabelLeft", "NumberLabelRight"};
         private readonly string[] LetterLabels = new string[] {"LetterLabelTop", "LetterLabelBottom"};
         private readonly Dictionary<char, string> CellImageNames = new Dictionary<char, string>() {

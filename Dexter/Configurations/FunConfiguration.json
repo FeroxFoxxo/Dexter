@@ -53,7 +53,13 @@
     792657895014793246,
     829137462404055082
   ],
+  "GamesImageDumpsChannel": 792661500182790174,
   "HangmanDefaultLives": 6,
+  "ChessThemes": [
+    "standard",
+    "red",
+    "template"
+  ],
   "WritingPromptTerms": {
     "living_adjective": [
       "all-powerful",

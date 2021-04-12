@@ -40,7 +40,13 @@ namespace Dexter.Databases.Games {
         /// An instance of a game of Minesweeper, a game about probing different cells in a board filled with mines without triggering them.
         /// </summary>
 
-        Minesweeper
+        Minesweeper,
+
+        /// <summary>
+        /// An instance of a game of Chess, a game about putting the enemy in checkmate while avoiding the same.
+        /// </summary>
+
+        Chess
 
         /// <summary>
         /// An instance game of Shiritori, a game about coming up with words that start by whatever the previous person's word ends.

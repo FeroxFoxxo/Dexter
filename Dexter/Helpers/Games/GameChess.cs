@@ -906,17 +906,30 @@ namespace Dexter.Helpers.Games {
                 int x0 = origin % 8;
                 int y0 = origin / 8;
                 char p;
+                char thisPiece = board.squares[x0, y0];
                 for (int x = x0 - 1; x <= x0 + 1; x += 2) {
                     if (x < 0 || x >= 8) continue;
                     p = board.squares[x, y0];
                     if (p != '-' && !(char.IsUpper(p) ^ board.isWhitesTurn ^ flip)) continue;
-                    if (!mustBeSafe || !board.IsControlled(x + y0 * 8, !flip)) { return true; }
+                    if (!mustBeSafe) return true;
+                    board.squares[x0, y0] = '-';
+                    if (!board.IsControlled(x + y0 * 8, !flip)) { 
+                        board.squares[x0, y0] = thisPiece; 
+                        return true; 
+                    }
+                    board.squares[x0, y0] = thisPiece;
                 }
                 for (int y = y0 - 1; y <= y0 + 1; y += 2) {
                     if (y < 0 || y >= 8) continue;
                     p = board.squares[x0, y];
                     if (p != '-' && !(char.IsUpper(p) ^ board.isWhitesTurn ^ flip)) continue;
-                    if (!mustBeSafe || !board.IsControlled(x0 + y * 8, !flip)) { return true; }
+                    if (!mustBeSafe) return true;
+                    board.squares[x0, y0] = '-';
+                    if (!board.IsControlled(x0 + y * 8, !flip)) { 
+                        board.squares[x0, y0] = thisPiece; 
+                        return true; 
+                    }
+                    board.squares[x0, y0] = thisPiece;
                 }
                 return false;
             }
@@ -925,13 +938,21 @@ namespace Dexter.Helpers.Games {
                 int x0 = origin % 8;
                 int y0 = origin / 8;
                 char p;
+                char thisPiece = board.squares[x0, y0];
                 for (int x = x0 - 1; x <= x0 + 1; x += 2) {
                     if (x < 0 || x >= 8) continue;
                     for (int y = y0 - 1; y <= y0 + 1; y += 2) {
                         if (y < 0 || y >= 8) continue;
                         p = board.squares[x, y];
                         if (p != '-' && !(char.IsUpper(p) ^ board.isWhitesTurn ^ flip)) continue;
-                        if (!mustBeSafe || !board.IsControlled(x + y * 8, !flip)) { return true; }
+                        if (!mustBeSafe)
+                            return true;
+                        board.squares[x0, y0] = '-';
+                        if (!board.IsControlled(x + y * 8, !flip)) {
+                            board.squares[x0, y0] = thisPiece;
+                            return true;
+                        }
+                        board.squares[x0, y0] = thisPiece;
                     }
                 }
                 return false;

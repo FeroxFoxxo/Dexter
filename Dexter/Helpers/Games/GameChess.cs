@@ -507,6 +507,7 @@ namespace Dexter.Helpers.Games {
             string imageChacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
             string filepath = Path.Join(imageChacheDir, $"Chess{game.Master}.png");
             System.Drawing.Image image = RenderBoard(board, lastMove);
+            Console.Out.WriteLine(filepath);
             image.Save(filepath);
             if (DumpID != 0) { 
                 IMessage prevDump = await (client.GetChannel(funConfiguration.GamesImageDumpsChannel) as ITextChannel).GetMessageAsync(DumpID);
@@ -907,13 +908,18 @@ namespace Dexter.Helpers.Games {
                     move.isCastle = true;
                     return true;
                 }
-                else if (input.Length != 4) { error = "wrong format"; return false; }
+                else if (input.Length != 4 && (input.Length != 5 || input[^1] != 'x') && (input.Length != 6 || input[^2..] != "xp")) { error = "wrong format"; return false; }
 
                 if (!TryParseSquare(input[..2], out move.origin)) {
                     error = "wrong format on origin"; return false;
                 }
-                if (!TryParseSquare(input[^2..], out move.target)) {
+                if (!TryParseSquare(input[2..4], out move.target)) {
                     error = "wrong format on target"; return false;
+                }
+                if (input[^1] == 'x') move.isCapture = true;
+                if (input[^2..] == "xp") {
+                    move.isCapture = true;
+                    move.isEnPassant = true;
                 }
 
                 return true;
@@ -1134,7 +1140,7 @@ namespace Dexter.Helpers.Games {
                 }
                 Tuple<int, int> originpos = ToMatrixCoords(origin);
                 Tuple<int, int> finalpos = ToMatrixCoords(target);
-                return $"{ToSquareName(originpos)}{ToSquareName(finalpos)}";
+                return $"{ToSquareName(originpos)}{ToSquareName(finalpos)}{(isCapture?"x":"")}{(isEnPassant?"p":"")}";
             }
         }
 

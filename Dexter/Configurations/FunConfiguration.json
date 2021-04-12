@@ -60,6 +60,18 @@
     "red",
     "template"
   ],
+  "ChessPositions": {
+    "reset": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "trans": "rnbkqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR w - - 0 1",
+    "rook checkmate": "8/8/8/4k3/8/8/8/R2K4 w - - 0 1",
+    "queen chechmate": "8/8/8/4k3/8/8/8/Q2K4 w - - 0 1",
+    "bishops checkmate": "8/8/8/4k3/8/8/8/2BK1B2 w - - 0 1",
+    "knight and bishop checkmate": "8/8/8/4k3/8/8/8/1N1K1B2 w - - 0 1",
+    "queenless": "rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR w - - 0 1",
+    "pawn endgame": "4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1",
+    "queen odds": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR w KQkq - 0 1",
+    "horde": "rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPKPPP w - - 0 1"
+  },
   "WritingPromptTerms": {
     "living_adjective": [
       "all-powerful",

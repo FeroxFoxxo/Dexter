@@ -1525,18 +1525,20 @@ namespace Dexter.Helpers.Games {
                         if (pos == kingPos) continue;
                         char piecechar = GetSquare(pos);
                         if (piecechar == '-' || char.IsLower(piecechar) == isWhitesTurn) continue;
-                        if (IsPiecePinned(pos, kingPos)) pinned.Add(pos);
+                        if (IsPiecePinned(pos, kingPos)) {
+                            pinned.Add(pos);
+                        }
                         else if (!doubleAttack) { //If it is not pinned AND can capture only attacker, legal.
                             Piece piece = Piece.FromRepresentation(piecechar);
-                            if (piece.isValid(pos, attackerPos, this, false)) { Console.Out.WriteLine($"Piece at {pos} can capture the attacker"); return true; };
+                            if (piece.isValid(pos, attackerPos, this, false)) return true;
 
                             foreach (int sq in blockSquares) { //If a piece can block the attack, legal.
-                                if (piece.isValid(pos, sq, this, false)) { Console.Out.WriteLine($"Piece at {pos} can block the check"); return true; };
+                                if (piece.isValid(pos, sq, this, false)) return true;
                             }
                         }
                     }
                     //If the king can move, legal.
-                    if (Piece.King.hasValidMoves(kingPos, this, false)) { Console.Out.WriteLine($"King can move");  return true; };
+                    if (Piece.King.hasValidMoves(kingPos, this, false)) return true;
                 }
                 return false;
             }
@@ -1675,7 +1677,7 @@ namespace Dexter.Helpers.Games {
                     if (squares[x, y] != '-') {
                         if (beforePiece) return false;
                         Piece p = Piece.FromRepresentation(squares[x, y]);
-                        return p.canPin && p.isValid(x * 8 + y, piecePosition, this, true);
+                        return p.canPin && p.isValid(x + y * 8, piecePosition, this, true);
                     }
                     x += xAdv;
                     y += yAdv;

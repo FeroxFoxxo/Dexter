@@ -7,6 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Dexter.Commands {
@@ -60,6 +61,9 @@ namespace Dexter.Commands {
                 User = DiscordSocketClient.GetUser(ModMail.UserID);
 
             if (ModMail == null || User == null) {
+                if (Regex.IsMatch(Token, @"<@!?[0-9]{18}>")) {
+                    Token = Token[^18..^1];
+                }
                 if (ulong.TryParse(Token, out ulong UserID) && UserID != 0) {
                     User = DiscordSocketClient.GetUser(UserID);
 

@@ -1622,7 +1622,8 @@ namespace Dexter.Helpers.Games {
                     if ((char.IsUpper(pieceName) == isWhitesTurn) ^ flipThreat) {
                         Piece attacker = Piece.FromRepresentation(pieceName);
                         char temp = squares[square % 8, square / 8];
-                        squares[square % 8, square / 8] = '-';
+                        char enemyPiece = isWhitesTurn ^ flipThreat ? char.ToLower(Piece.Pawn.representation) : char.ToUpper(Piece.Pawn.representation);
+                        squares[square % 8, square / 8] = enemyPiece;
                         if (attacker.isValid(position, square, this, flipThreat)) {
                             squares[square % 8, square / 8] = temp;
                             return true;

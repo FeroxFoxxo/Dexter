@@ -60,6 +60,14 @@ namespace Dexter.Commands {
                 User = DiscordSocketClient.GetUser(ModMail.UserID);
 
             if (ModMail == null || User == null) {
+                if (ulong.TryParse(Token, out ulong UserID) && UserID != 0) {
+                    User = DiscordSocketClient.GetUser(UserID);
+
+                    if (User is not null) {
+                        await UserDMCommand(User, Message);
+                        return;
+                    }
+                }
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Could Not Find Token!")
                     .WithDescription("Haiya! I couldn't find the modmail for the given token. Are you sure this exists in the database? " +

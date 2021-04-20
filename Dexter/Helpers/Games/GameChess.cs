@@ -162,7 +162,7 @@ namespace Dexter.Helpers.Games {
                 .AddField("Black", $"<@{PlayerBlack}>", true)
                 .AddField("Turn", $"{(IsWhitesTurn ? "White" : "Black")}", true)
                 .AddField("FEN Expression", BoardRaw)
-                .AddField("Master", client.GetUser(game.Master).GetUserInformation())
+                .AddField("Master", client.GetUser(game.Master)?.GetUserInformation() ?? "<N/A>")
                 .AddField(game.Banned.Length > 0, "Banned Players", game.BannedMentions.TruncateTo(500));
         }
 

@@ -422,7 +422,7 @@ namespace Dexter.Helpers.Games {
                 .WithDescription($"{game.Description}")
                 .AddField("Dimensions", $"{Width}×{Height}", true)
                 .AddField("Mines", $"{Mines}💣", true)
-                .AddField("Master", client.GetUser(game.Master).GetUserInformation())
+                .AddField("Master", client.GetUser(game.Master)?.GetUserInformation() ?? "<N/A>")
                 .AddField(game.Banned.Length > 0, "Banned Players", game.BannedMentions.TruncateTo(500));
         }
 

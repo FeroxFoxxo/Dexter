@@ -133,7 +133,7 @@ namespace Dexter.Helpers.Games {
                 .AddField($"{YellowChar} Player", $"{(PlayerYellow == default ? "-" : $"<@{PlayerYellow}>")}", true)
                 .AddField($"{RedChar} Player", $"{(PlayerRed == default ? "-" : $"<@{PlayerRed}>")}", true)
                 .AddField($"Turn", $"{ToEmoji[Turn]}", true)
-                .AddField("Master", client.GetUser(game.Master).GetUserInformation())
+                .AddField("Master", client.GetUser(game.Master)?.GetUserInformation() ?? "<N/A>")
                 .AddField(game.Banned.Length > 0, "Banned Players", game.BannedMentions.TruncateTo(500));
         }
 

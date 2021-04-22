@@ -17,7 +17,7 @@ namespace Dexter.Commands {
 		[Command("ask", RunMode = RunMode.Async)]
 		[Summary("Evaluates mathematical expressions and answers questions!")]
 		[Alias("math", "calc", "calculate")]
-
+                [BotCommand] 
 		public async Task WolframCommand([Remainder] string Question) {
 			if (string.IsNullOrEmpty(UtilityConfiguration.WolframAppAPI) || UtilityConfiguration.WolframAppAPI == "NOTSET") {
 				await BuildEmbed(EmojiEnum.Annoyed)

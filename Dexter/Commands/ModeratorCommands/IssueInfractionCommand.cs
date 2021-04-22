@@ -313,6 +313,9 @@ namespace Dexter.Commands {
             if (TimerService.TimerExists(DexterProfile.CurrentMute))
                 TimerService.RemoveTimer(DexterProfile.CurrentMute);
 
+            if (Time == TimeSpan.FromSeconds(0))
+                return;
+
             try {
                 foreach (ulong MutedRole in ModerationConfiguration.MutedRoles) {
                     IRole Muted = User.Guild.GetRole(MutedRole);

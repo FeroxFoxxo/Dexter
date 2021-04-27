@@ -867,6 +867,25 @@ namespace Dexter.Helpers {
             
             return $"{Time:ddd dd MMM yyy 'at' hh:mm tt 'UTC'zzz} ({Time.Humanize()})";
         }
+
+        /// <summary>
+        /// Disables all here, everyone, and role mentions from a given message string, keeping the message mostly identical.
+        /// </summary>
+        /// <param name="input">The base string to sanitize.</param>
+        /// <returns>A modified string where all instances of mass mentions have a zero-width space inserted after the @ symbol to disable them.</returns>
+
+        public static string SanitizeMentions(this string input) {
+            input = Regex.Replace(input, @"@here", $"@{ZWSP}here", RegexOptions.IgnoreCase);
+            input = Regex.Replace(input, @"@everyone", $"@{ZWSP}everyone", RegexOptions.IgnoreCase);
+            input = Regex.Replace(input, @"<@&", $"<@{ZWSP}&");
+            return input;
+        }
+
+        /// <summary>
+        /// A zero-width space character.
+        /// </summary>
+
+        public const char ZWSP = '​';
     }
 
     /// <summary>

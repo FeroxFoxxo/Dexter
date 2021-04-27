@@ -112,6 +112,30 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public Dictionary<string, string> ChessPositions { get; set; }
+
+        /// <summary>
+        /// The maximum amount of additional rolls that can be performed due to die explosions when rolling.
+        /// </summary>
+
+        public int MaxDieRollExplosions { get; set; }
+
+        /// <summary>
+        /// The maximum number of dice that can be rolled at once.
+        /// </summary>
+
+        public int MaxDieRolls { get; set; }
+
+        /// <summary>
+        /// The maximum length of an individual roll expression.
+        /// </summary>
+
+        public int MaxDieRollExpressionLength { get; set; }
+
+        /// <summary>
+        /// The maximum number of roll expressions that can be printed due to roll modifiers applied to the roll.
+        /// </summary>
+
+        public int MaxDieRollExpressionCount { get; set; }
     }
 
 }

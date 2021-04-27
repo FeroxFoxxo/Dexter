@@ -49,6 +49,10 @@
   "HeadpatStorageGuild": 613441321751019550,
   "HeadpatWebhookName": "HeadpatWebhook",
   "MaxCoinFlips": 1000000,
+  "MaxDieRolls": 1000,
+  "MaxDieRollExplosions": 500,
+  "MaxDieRollExpressionLength": 40,
+  "MaxDieRollExpressionCount": 3,
   "GamesChannels": [
     792657895014793246,
     829137462404055082

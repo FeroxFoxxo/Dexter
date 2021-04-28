@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
@@ -17,7 +18,8 @@ namespace Dexter.Commands {
 		[Command("ask", RunMode = RunMode.Async)]
 		[Summary("Evaluates mathematical expressions and answers questions!")]
 		[Alias("math", "calc", "calculate")]
-                [BotChannel] 
+        [CommandCooldown(15)]
+		
 		public async Task WolframCommand([Remainder] string Question) {
 			if (string.IsNullOrEmpty(UtilityConfiguration.WolframAppAPI) || UtilityConfiguration.WolframAppAPI == "NOTSET") {
 				await BuildEmbed(EmojiEnum.Annoyed)

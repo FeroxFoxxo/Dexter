@@ -238,19 +238,79 @@ namespace Dexter.Helpers {
         }
 
         /// <summary>
-        /// Limits the given string <paramref name="s"/> to a length <paramref name="MaxLength"/>.
+        /// Limits the given string <paramref name="s"/> to a length <paramref name="maxLength"/>.
         /// </summary>
         /// <param name="s"></param>
-        /// <param name="MaxLength"></param>
-        /// <returns>A substring of <paramref name="s"/> ending in "..." if its length is greater than <paramref name="MaxLength"/>, otherwise <paramref name="s"/></returns>
+        /// <param name="maxLength"></param>
+        /// <returns>A substring of <paramref name="s"/> ending in "..." if its length is greater than <paramref name="maxLength"/>, otherwise <paramref name="s"/></returns>
 
-        public static string TruncateTo(this string s, int MaxLength) {
-            if (s.Length > MaxLength) {
-                if (MaxLength < 3) return "...";
-                return s[..(MaxLength - 3)] + "...";
+        public static string TruncateTo(this string s, int maxLength) {
+            if (s.Length > maxLength) {
+                if (maxLength < 3) return "...";
+                return s[..(maxLength - 3)] + "...";
             }
 
             return s;
+        }
+
+        /// <summary>
+        /// A set of characters that discord uses for formatting.
+        /// </summary>
+
+        public static readonly HashSet<char> DiscordRichTextChars = new HashSet<char>() { '*', '_', '`', '|' };
+
+        /// <summary>
+        /// Truncates a string to a given length similar to the <see cref="TruncateTo"/> method, but ignores characters marked in <paramref name="ignoreChars"/>.
+        /// </summary>
+        /// <param name="s">The original string to truncate.</param>
+        /// <param name="maxLength">The maximum length to truncate <paramref name="s"/> to.</param>
+        /// <param name="ignoreChars">The set of characters to ignore for counting.</param>
+        /// <returns></returns>
+
+        public static string TruncateToSpecial(this string s, int maxLength, HashSet<char> ignoreChars) {
+            StringBuilder b = new(maxLength);
+            int counter = 0;
+            foreach(char c in s) {
+                if (ignoreChars.Contains(c)) b.Append(c);
+                else {
+                    if (++counter > maxLength - 3) {
+                        b.Append("...");
+                        break;
+                    }
+                    b.Append(c);
+                }
+            }
+            return b.ToString();           
+        }
+
+        /// <summary>
+        /// Computes the length of a string ignoring all characters in <paramref name="ignoreChars"/>.
+        /// </summary>
+        /// <param name="s">The string whose length is to be computed.</param>
+        /// <param name="ignoreChars">The set of characters which will not contribute towards length.</param>
+        /// <returns>The length of the given string <paramref name="s"/> if all characters in <paramref name="ignoreChars"/> were removed from it.</returns>
+
+        public static int LengthSpecial(this IReadOnlyCollection<char> s, HashSet<char> ignoreChars) {
+            int result = 0;
+            foreach (char c in s) {
+                if (!ignoreChars.Contains(c)) result++;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Computes the length of a <see cref="StringBuilder"/> ignoring all characters in <paramref name="ignoreChars"/>.
+        /// </summary>
+        /// <param name="b">The <see cref="StringBuilder"/> whose length is to be computed.</param>
+        /// <param name="ignoreChars">The set of characters which will not contribute towards length.</param>
+        /// <returns>The length of the given string represented by <paramref name="b"/> if all characters in <paramref name="ignoreChars"/> were removed from it.</returns>
+
+        public static int LengthSpecial(this StringBuilder b, HashSet<char> ignoreChars) {
+            int result = 0;
+            for(int i = 0; i < b.Length; i++) {
+                if (!ignoreChars.Contains(b[i])) result++;
+            }
+            return result;
         }
 
         /// <summary>

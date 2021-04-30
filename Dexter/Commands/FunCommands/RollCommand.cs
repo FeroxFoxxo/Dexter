@@ -58,7 +58,7 @@ namespace Dexter.Commands {
             if (!int.TryParse(baseRoll[(dIndex + 1)..], out int d)) {
                 await BuildEmbed(Enums.EmojiEnum.Annoyed)
                     .WithTitle("Invalid Face Count!")
-                    .WithDescription($"You entered number \"{baseRoll[(dIndex + 1)..]}\", make sure you use an input that is compatible with a 32-bit integer. (≤{int.MaxValue})")
+                    .WithDescription($"You entered number \"{baseRoll[(dIndex + 1)..]}\", make sure you use an input that is compatible with a 32-bit integer. (<{int.MaxValue})")
                     .SendEmbed(Context.Channel);
                 return;
             }
@@ -149,7 +149,15 @@ namespace Dexter.Commands {
                         break;
                     };
                 }
-                return $"(**{title}**) {{{sb}}} = **{rolls.Sum()}**";
+                string total;
+                try {
+                    total = rolls.Sum().ToString();
+                } catch (OverflowException) {
+                    total = $"Infinity (>{int.MaxValue})";
+                } catch (Exception e) {
+                    total = $"Error: {e.Message}";
+                }
+                return $"(**{title}**) {{{sb}}} = **{total}**";
             }
 
             public void ResetHighlights() {

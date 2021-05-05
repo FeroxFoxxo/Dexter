@@ -943,10 +943,10 @@ namespace Dexter.Helpers {
             return result;
         }
 
-        private const double LengthWeight = 0.01;
+        private const double LengthWeight = 0.015;
         private const double MaxSubstringWeight = 0.9;
         private const double PositionalCorrelationWeight = 0.05;
-        private const double CountCorrelationWeight = 0.03;
+        private const double CountCorrelationWeight = 0.035;
 
         /// <summary>
         /// Obtains an index detailing how closely related <paramref name="a"/> and <paramref name="b"/> are based on a series of parameters.
@@ -991,7 +991,7 @@ namespace Dexter.Helpers {
             }
             double pPos = posCount / n;
 
-            return pLength * LengthWeight + pMaxSubstr * pMaxSubstr + pPos * PositionalCorrelationWeight + pCounts * CountCorrelationWeight;
+            return pLength * LengthWeight + pMaxSubstr * MaxSubstringWeight + pPos * PositionalCorrelationWeight + pCounts * CountCorrelationWeight;
         }
 
         internal class PairwiseCounter {

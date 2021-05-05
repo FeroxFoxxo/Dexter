@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dexter.Abstractions;
 using Dexter.Attributes.Methods;
 using Dexter.Databases.CommunityEvents;
+using Dexter.Databases.FunTopics;
 using Dexter.Databases.Games;
 using Dexter.Enums;
 using Dexter.Extensions;
@@ -16,49 +18,59 @@ using Humanizer;
 namespace Dexter.Commands {
     public partial class CommunityCommands {
 
-        [Command("browse")]
+        private const int MaxFieldContentsLength = 2000;
+
+        /// <summary>
+        /// Displays a list of related items of the given <paramref name="type"/> modified by <paramref name="filters"/>.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="filters"></param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the program completes successfully.</returns>
+
+        [Command("browse", RunMode = RunMode.Async)]
         [Summary("Browse for games or events: `browse [Type] (Filters)`")]
         [ExtendedSummary("Browse for games or events!\n" +
             "`browse GAMES (Gametype)` - Browse for open game sessions, with an optional gametype.\n" +
-            "`browse EVENTS (<OFFICIAL|COMMUNITY>)` - Browse for upcoming scheduled events!")]
+            "`browse EVENTS (<OFFICIAL|COMMUNITY>)` - Browse for upcoming scheduled events!\n" +
+            "`browse TOPICS [Expression]` - Browse topics similar to the given expression.")]
         [BotChannel]
 
-        public async Task BrowseCommand(string Type, [Remainder] string Filters = "") {
-            EmbedBuilder[] Embeds;
+        public async Task BrowseCommand(string type, [Remainder] string filters = "") {
+            EmbedBuilder[] embeds;
 
-            switch (Type.ToLower()) {
+            switch (type.ToLower()) {
                 case "games":
-                    GameInstance[] Games;
+                    GameInstance[] games;
 
-                    if (string.IsNullOrEmpty(Filters)) {
-                        Games = GamesDB.Games.ToArray();
+                    if (string.IsNullOrEmpty(filters)) {
+                        games = GamesDB.Games.ToArray();
                     }
                     else {
-                        if (!GameTypeConversion.GameNames.ContainsKey(Type.ToLower())) {
+                        if (!GameTypeConversion.GameNames.ContainsKey(type.ToLower())) {
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Unable to find game type")
-                                .WithDescription($"I wasn't able to parse \"{Filters}\" into a valid game type.\n" +
+                                .WithDescription($"I wasn't able to parse \"{filters}\" into a valid game type.\n" +
                                     $"Valid game types are {string.Join(", ", Enum.GetNames<GameType>()[1..])}")
                                 .SendEmbed(Context.Channel);
                             return;
                         }
-                        Games = GamesDB.Games.AsQueryable().Where(g =>
-                            g.Type == GameTypeConversion.GameNames[Type.ToLower()]).ToArray();
+                        games = GamesDB.Games.AsQueryable().Where(g =>
+                            g.Type == GameTypeConversion.GameNames[type.ToLower()]).ToArray();
                     }
 
-                    Embeds = BuildGamesEmbeds(Games);
+                    embeds = BuildGamesEmbeds(games);
                     break;
                 case "events":
-                    CommunityEvent[] Events;
+                    CommunityEvent[] events;
 
-                    if (string.IsNullOrEmpty(Filters)) {
-                        Events = CommunityEventsDB.Events.AsQueryable().Where(e =>
+                    if (string.IsNullOrEmpty(filters)) {
+                        events = CommunityEventsDB.Events.AsQueryable().Where(e =>
                             e.Status == EventStatus.Approved).ToArray();
                     } 
                     else {
-                        switch (Filters.ToLower()) {
+                        switch (filters.ToLower()) {
                             case "official":
-                                Events = CommunityEventsDB.Events.AsQueryable().Where(e =>
+                                events = CommunityEventsDB.Events.AsQueryable().Where(e =>
                                     e.EventType == EventType.Official
                                     && e.Status == EventStatus.Approved).ToArray();
                                 break;
@@ -66,40 +78,59 @@ namespace Dexter.Commands {
                             case "userhosted":
                             case "user hosted":
                             case "user-hosted":
-                                Events = CommunityEventsDB.Events.AsQueryable().Where(e =>
+                                events = CommunityEventsDB.Events.AsQueryable().Where(e =>
                                     e.EventType == EventType.UserHosted
                                     && e.Status == EventStatus.Approved).ToArray();
                                 break;
                             default:
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Invalid Filter Parameter!")
-                                    .WithDescription($"Unable to parse \"{Filters}\" into an event type. " +
+                                    .WithDescription($"Unable to parse \"{filters}\" into an event type. " +
                                         $"\nMake sure you use either \"official\" or \"community\".")
                                     .SendEmbed(Context.Channel);
                                 return;
                         }
                     }
 
-                    Embeds = BuildEventsEmbeds(Events);
+                    embeds = BuildEventsEmbeds(events);
+                    break;
+                case "topics":
+                    if(string.IsNullOrEmpty(filters)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Insufficient parameters!")
+                            .WithDescription("Missing `filters` parameter; you must provide a term to search for!")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+                    List<WeightedObject<FunTopic>> topics = new();
+                    foreach(FunTopic t in FunTopicsDB.Topics) {
+                        topics.Add(new WeightedObject<FunTopic>(t, LanguageHelper.GetCorrelationIndex(t.Topic.ToLower(), filters.ToLower())));
+                    }
+                    WeightedObject<FunTopic>.SortByWeightInPlace(topics, true);
+                    embeds = BuildTopicsEmbeds(topics, filters);
                     break;
                 default:
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Invalid Type Parameter!")
-                        .WithDescription($"Unable to parse \"{Type}\" into a valid type." +
+                        .WithDescription($"Unable to parse \"{type}\" into a valid type." +
                             "\nPlease include what you're browsing for in the command, information about valid types can be found in the `help browse` command.")
                         .SendEmbed(Context.Channel);
                     return;
             }
 
-            if(Embeds.Length == 0) {
+            await DisplayEmbeds(type, embeds);
+        }
+
+        private async Task DisplayEmbeds(string type, EmbedBuilder[] embeds) {
+            if (embeds.Length == 0) {
                 await BuildEmbed(EmojiEnum.Wut)
-                    .WithTitle($"No {Type.ToLower()} found!")
+                    .WithTitle($"No {type.ToLower()} found!")
                     .WithDescription("No items match your search criteria!")
                     .SendEmbed(Context.Channel);
-            } else if (Embeds.Length == 1) {
-                await Embeds[0].SendEmbed(Context.Channel);
+            } else if (embeds.Length == 1) {
+                await embeds[0].SendEmbed(Context.Channel);
             } else {
-                await CreateReactionMenu(Embeds, Context.Channel);
+                await CreateReactionMenu(embeds, Context.Channel);
             }
         }
 
@@ -179,6 +210,31 @@ namespace Dexter.Commands {
             }
 
             return Embeds;
+        }
+
+        private EmbedBuilder[] BuildTopicsEmbeds(List<WeightedObject<FunTopic>> topics, string filters) {
+            int maxDescLength = MaxFieldContentsLength / CommunityConfiguration.BrowseTopicsPerPage;
+            EmbedBuilder[] embeds = new EmbedBuilder[CommunityConfiguration.BrowseTopicsMaxPages];
+
+            for(int p = 0; p < CommunityConfiguration.BrowseTopicsMaxPages; p++) {
+                int initial = p * CommunityConfiguration.BrowseTopicsPerPage;
+                EmbedBuilder embed = new EmbedBuilder()
+                    .WithColor(Color.Magenta)
+                    .WithTitle($"Filtered Topics - Page {p + 1}/{embeds.Length}")
+                    .WithDescription($"Displaying topics similar to `{filters.TruncateTo(128)}`")
+                    .WithFooter($"{p + 1}/{embeds.Length}")
+                    .WithCurrentTimestamp();
+                for(int i = initial; i < initial + CommunityConfiguration.BrowseTopicsPerPage; i++) {
+                    if (i >= topics.Count) break;
+                    FunTopic t = topics[i].obj;
+                    IUser topicProvider = DiscordSocketClient.GetUser(t.ProposerID);
+                    string userStr = topicProvider is null ? "Unknown" : topicProvider.Username;
+                    embed.AddField($"{t.TopicType} #{t.TopicID} by {userStr} ({Math.Round(topics[i].weight * 10000) / 100}%)", t.Topic.TruncateTo(maxDescLength));
+                }
+                embeds[p] = embed;
+            }
+
+            return embeds;
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Dexter.Commands {
         /// <param name="filters"></param>
         /// <returns>A <c>Task</c> object, which can be awaited until the program completes successfully.</returns>
 
-        [Command("browse")]
+        [Command("browse", RunMode = RunMode.Async)]
         [Summary("Browse for games or events: `browse [Type] (Filters)`")]
         [ExtendedSummary("Browse for games or events!\n" +
             "`browse GAMES (Gametype)` - Browse for open game sessions, with an optional gametype.\n" +
@@ -102,12 +102,12 @@ namespace Dexter.Commands {
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    List<WeightedObject> topics = new List<WeightedObject>();
+                    List<WeightedObject<FunTopic>> topics = new();
                     foreach(FunTopic t in FunTopicsDB.Topics) {
-                        topics.Add(new WeightedObject(t, LanguageHelper.GetCorrelationIndex(t.Topic, filters)));
+                        topics.Add(new WeightedObject<FunTopic>(t, LanguageHelper.GetCorrelationIndex(t.Topic.ToLower(), filters.ToLower())));
                     }
-                    WeightedObject.SortByWeightInPlace(topics, true);
-                    embeds = new EmbedBuilder[0];
+                    WeightedObject<FunTopic>.SortByWeightInPlace(topics, true);
+                    embeds = BuildTopicsEmbeds(topics, filters);
                     break;
                 default:
                     await BuildEmbed(EmojiEnum.Annoyed)
@@ -212,8 +212,29 @@ namespace Dexter.Commands {
             return Embeds;
         }
 
-        private EmbedBuilder[] BuildTopicsEmbeds(List<FunTopic> topics) {
+        private EmbedBuilder[] BuildTopicsEmbeds(List<WeightedObject<FunTopic>> topics, string filters) {
+            int maxDescLength = MaxFieldContentsLength / CommunityConfiguration.BrowseTopicsPerPage;
+            EmbedBuilder[] embeds = new EmbedBuilder[CommunityConfiguration.BrowseTopicsMaxPages];
 
+            for(int p = 0; p < CommunityConfiguration.BrowseTopicsMaxPages; p++) {
+                int initial = p * CommunityConfiguration.BrowseTopicsPerPage;
+                EmbedBuilder embed = new EmbedBuilder()
+                    .WithColor(Color.Magenta)
+                    .WithTitle($"Filtered Topics - Page {p + 1}/{embeds.Length}")
+                    .WithDescription($"Displaying topics similar to `{filters.TruncateTo(128)}`")
+                    .WithFooter($"{p + 1}/{embeds.Length}")
+                    .WithCurrentTimestamp();
+                for(int i = initial; i < initial + CommunityConfiguration.BrowseTopicsPerPage; i++) {
+                    if (i >= topics.Count) break;
+                    FunTopic t = topics[i].obj;
+                    IUser topicProvider = DiscordSocketClient.GetUser(t.ProposerID);
+                    string userStr = topicProvider is null ? "Unknown" : topicProvider.Username;
+                    embed.AddField($"{t.TopicType} #{t.TopicID} by {userStr} ({Math.Round(topics[i].weight * 10000) / 100}%)", t.Topic.TruncateTo(maxDescLength));
+                }
+                embeds[p] = embed;
+            }
+
+            return embeds;
         }
     }
 }

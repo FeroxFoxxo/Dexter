@@ -943,10 +943,10 @@ namespace Dexter.Helpers {
             return result;
         }
 
-        private const double LengthWeight = 0.1;
-        private const double MaxSubstringWeight = 0.5;
-        private const double PositionalCorrelationWeight = 0.2;
-        private const double CountCorrelationWeight = 0.2;
+        private const double LengthWeight = 0.01;
+        private const double MaxSubstringWeight = 0.9;
+        private const double PositionalCorrelationWeight = 0.05;
+        private const double CountCorrelationWeight = 0.03;
 
         /// <summary>
         /// Obtains an index detailing how closely related <paramref name="a"/> and <paramref name="b"/> are based on a series of parameters.
@@ -959,7 +959,11 @@ namespace Dexter.Helpers {
             double n = Math.Max(a.Length, b.Length);
 
             double pLength = Math.Min(a.Length, b.Length) / n;
-            double pMaxSubstr = LongestCommonSubstr(a, b) / n;
+            int LCSS = LongestCommonSubstr(a, b);
+            double pMaxSubstr = LCSS * LCSS / n;
+            if (pMaxSubstr > 0.9) {
+                pMaxSubstr = 0.9 + 0.1 * (LCSS / n);
+            }
 
             Dictionary<char, PairwiseCounter> counts = new Dictionary<char, PairwiseCounter>();
             for(int i = 0; i < a.Length; i++) {

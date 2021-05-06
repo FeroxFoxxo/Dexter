@@ -27,7 +27,7 @@ namespace Dexter.Commands {
         /// <param name="filters"></param>
         /// <returns>A <c>Task</c> object, which can be awaited until the program completes successfully.</returns>
 
-        [Command("browse", RunMode = RunMode.Async)]
+        [Command("browse")]
         [Summary("Browse for games or events: `browse [Type] (Filters)`")]
         [ExtendedSummary("Browse for games or events!\n" +
             "`browse GAMES (Gametype)` - Browse for open game sessions, with an optional gametype.\n" +

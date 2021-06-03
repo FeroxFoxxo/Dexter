@@ -3,6 +3,7 @@ using Dexter.Abstractions;
 using Dexter.Databases.CommunityEvents;
 using Dexter.Databases.UserRestrictions;
 using Dexter.Databases.Games;
+using Dexter.Databases.FunTopics;
 
 namespace Dexter.Commands {
 
@@ -41,6 +42,12 @@ namespace Dexter.Commands {
         /// </summary>
 
         public GamesDB GamesDB { get; set; }
+
+        /// <summary>
+        /// Holds all relevant data about topics loaded into Dexter's database.
+        /// </summary>
+
+        public FunTopicsDB FunTopicsDB { get; set; }
 
     }
 

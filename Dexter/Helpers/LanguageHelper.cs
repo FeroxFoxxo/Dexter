@@ -913,6 +913,101 @@ namespace Dexter.Helpers {
         }
 
         /// <summary>
+        /// Finds the longest common substring between <paramref name="a"/> and <paramref name="b"/>.
+        /// </summary>
+        /// <param name="a">The first string.</param>
+        /// <param name="b">The second string.</param>
+        /// <returns>The length of the longest common substring found.</returns>
+
+        public static int LongestCommonSubstr(string a, string b) {
+            return LongestCommonSubstr(a, b, a.Length, b.Length);
+        }
+
+        private static int LongestCommonSubstr(string a, string b, int aimax, int bimax) {
+            int[,] LCSuffix = new int[aimax + 1, bimax + 1];
+            int result = 0;
+
+            for (int i = 0; i <= aimax; i++) {
+                for (int j = 0; j <= bimax; j++) {
+                    if (i == 0 || j == 0)
+                        LCSuffix[i, j] = 0;
+                    else if (a[i - 1] == b[j - 1]) {
+                        LCSuffix[i, j] = LCSuffix[i - 1, j - 1] + 1;
+
+                        if(LCSuffix[i, j] > result) result = LCSuffix[i, j];
+                    } else
+                        LCSuffix[i, j] = 0;
+                }
+            }
+
+            return result;
+        }
+
+        private const double LengthWeight = 0.015;
+        private const double MaxSubstringWeight = 0.9;
+        private const double PositionalCorrelationWeight = 0.05;
+        private const double CountCorrelationWeight = 0.035;
+
+        /// <summary>
+        /// Obtains an index detailing how closely related <paramref name="a"/> and <paramref name="b"/> are based on a series of parameters.
+        /// </summary>
+        /// <param name="a">The first string to compare</param>
+        /// <param name="b">The second string to compare</param>
+        /// <returns>A decimal number in the range [0..1] indicating how closely correlated <paramref name="a"/> and <paramref name="b"/> are.</returns>
+
+        public static double GetCorrelationIndex(string a, string b) {
+            double n = Math.Max(a.Length, b.Length);
+
+            double pLength = Math.Min(a.Length, b.Length) / n;
+            int LCSS = LongestCommonSubstr(a, b);
+            double pMaxSubstr = LCSS * LCSS / n;
+            if (pMaxSubstr > 0.9) {
+                pMaxSubstr = 0.9 + 0.1 * (LCSS / n);
+            }
+
+            Dictionary<char, PairwiseCounter> counts = new Dictionary<char, PairwiseCounter>();
+            for(int i = 0; i < a.Length; i++) {
+                if(!counts.ContainsKey(a[i])) {
+                    counts.Add(a[i], new PairwiseCounter());
+                }
+                counts[a[i]].count1++;
+            }
+            for(int j = 0; j < b.Length; j++) {
+                if (!counts.ContainsKey(b[j])) {
+                    counts.Add(b[j], new PairwiseCounter());
+                }
+                counts[b[j]].count2++;
+            }
+            double pCounts = 0;
+            foreach(PairwiseCounter c in counts.Values) {
+                pCounts += c.GetCorrelationStrength();
+            }
+            pCounts /= counts.Count;
+
+            int posCount = 0;
+            for(int i = 0; i < Math.Min(a.Length, b.Length); i++) {
+                if (a[i] == b[i])
+                    posCount++;
+            }
+            double pPos = posCount / n;
+
+            return pLength * LengthWeight + pMaxSubstr * MaxSubstringWeight + pPos * PositionalCorrelationWeight + pCounts * CountCorrelationWeight;
+        }
+
+        internal class PairwiseCounter {
+            public int count1 = 0;
+            public int count2 = 0;
+            public double GetCorrelationStrength() {
+                return Math.Min(count1, count2) / (double)Math.Max(count1, count2);
+            }
+
+            public PairwiseCounter(int count1 = 0, int count2 = 0) {
+                this.count1 = count1;
+                this.count2 = count2;
+            }
+        }
+
+        /// <summary>
         /// Creates a standard expression of a specific time, both absolute and relative to present.
         /// </summary>
         /// <param name="Time">The DateTimeOffset object to parse.</param>

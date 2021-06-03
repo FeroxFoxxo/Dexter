@@ -313,9 +313,6 @@ namespace Dexter.Commands {
             if (TimerService.TimerExists(DexterProfile.CurrentMute))
                 TimerService.RemoveTimer(DexterProfile.CurrentMute);
 
-            if (Time == TimeSpan.FromSeconds(0))
-                return;
-
             try {
                 foreach (ulong MutedRole in ModerationConfiguration.MutedRoles) {
                     IRole Muted = User.Guild.GetRole(MutedRole);
@@ -333,6 +330,9 @@ namespace Dexter.Commands {
                         .WithCurrentTimestamp().Build()
                 );
             }
+
+            if (Time == TimeSpan.FromSeconds(0))
+                return;
 
             DexterProfile.CurrentMute = await CreateEventTimer(RemoveMutedRole, new() { { "UserID", User.Id.ToString() } }, Convert.ToInt32(Time.TotalSeconds), TimerType.Expire);
         }

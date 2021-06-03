@@ -59,6 +59,18 @@ namespace Dexter.Configurations {
         public short MaxEventsPerMenu { get; set; }
 
         /// <summary>
+        /// The maximum number of pages that will appear when users browse for topics.
+        /// </summary>
+
+        public int BrowseTopicsMaxPages { get; set; }
+
+        /// <summary>
+        /// The amount of topics that will appear in each EmbedMenu page.
+        /// </summary>
+
+        public int BrowseTopicsPerPage { get; set; }
+
+        /// <summary>
         /// Sets a different embed color for a given event status. The values are 24-bit colors formatted in hexadecimal and stringified.
         /// </summary>
 

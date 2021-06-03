@@ -16,6 +16,7 @@ namespace Dexter.Commands {
         [Summary("Test your luck with a 1 in 4 chance you get muzzled!")]
         [Alias("testmyluck")]
         [CommandCooldown(45)]
+        [GameChannelRestricted]
 
         public async Task RouletteCommand() {
             if (Random.Next(4) == 1)

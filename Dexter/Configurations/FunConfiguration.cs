@@ -90,6 +90,12 @@ namespace Dexter.Configurations {
         public ulong[] GamesChannels { get; set; }
 
         /// <summary>
+        /// The unique channel IDs of the channels wherein GameChannelRestricted methods should not be possible to run.
+        /// </summary>
+
+        public ulong[] GamesOnlyChannels { get; set; }
+
+        /// <summary>
         /// Sets the lives a default game of hangman is set to on reset and creation.
         /// </summary>
 

@@ -740,11 +740,11 @@ namespace Dexter.Helpers {
                 { TimeUnit.Millisecond, @"(ms)|((milli)(second)?s?)" },
                 { TimeUnit.Second, @"s(ec(ond)?s?)?" },
                 { TimeUnit.Minute, @"m(in(ute)?s?)?" },
-                { TimeUnit.Hour, @"h(ours?)?" },
+                { TimeUnit.Hour, @"h((ou)?rs?)?" },
                 { TimeUnit.Day, @"d(ays?)?" },
-                { TimeUnit.Week, @"w(eeks?)?" },
+                { TimeUnit.Week, @"w((ee)?ks?)?" },
                 { TimeUnit.Month, @"mon(ths?)?" },
-                { TimeUnit.Year, @"y(ears?)?" },
+                { TimeUnit.Year, @"y((ea)?rs?)?" },
                 { TimeUnit.Century, @"centur(y|ies)" },
                 { TimeUnit.Millenium, @"millenn?i(um|a)" }
             };

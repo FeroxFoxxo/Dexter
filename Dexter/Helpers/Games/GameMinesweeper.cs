@@ -631,7 +631,8 @@ namespace Dexter.Helpers.Games {
                 char[,] state = State;
                 foreach(Tuple<int, int> cell in toFlag) {
                     if(state[cell.Item2, cell.Item1] is not '?' and not 'F') {
-                        await message.Channel.SendMessageAsync($"Unable to toggle flag at ({(char) (cell.Item2 + 'A')}{cell.Item1 + 1}), it has already been probed!");
+                        await message.Channel.SendMessageAsync($"Unable to toggle flag at ({(char) (cell.Item1 + 'A')}{cell.Item2 + 1}), it has already been probed!");
+                        return;
                     } else {
                         state[cell.Item2, cell.Item1] = state[cell.Item2, cell.Item1] == 'F' ? '?' : 'F';
                     }

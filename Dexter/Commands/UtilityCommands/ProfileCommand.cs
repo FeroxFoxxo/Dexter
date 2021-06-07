@@ -53,7 +53,7 @@ namespace Dexter.Commands {
                 .AddField("Created", $"{GuildUser.CreatedAt:MM/dd/yyyy HH:mm:ss} ({(DateTime.Now - GuildUser.CreatedAt.DateTime).Humanize(2, maxUnit: TimeUnit.Year)} ago)")
                 .AddField(Joined != default, "Joined", $"{Joined:MM/dd/yyyy HH:mm:ss} ({DateTimeOffset.Now.Subtract(Joined).Humanize(2, maxUnit: TimeUnit.Year)} ago)")
                 .AddField(Profile != null && Profile.BorkdayTime != default, "Last Birthday", new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Profile != null ? Profile.BorkdayTime : 0).ToLongDateString())
-                .AddField(Role != null, "Top Role", Role.Name)
+                .AddField(!string.IsNullOrEmpty(Role.Name), "Top Role", Role.Name)
                 .AddField(LastNicknames.Length > 1, $"Last {LastNicknames.Length} Nicknames:", string.Join(", ", LastNicknames))
                 .AddField(LastUsernames.Length > 1, $"Last {LastUsernames.Length} Usernames:", string.Join(", ", LastUsernames))
                 .SendEmbed(Context.Channel);

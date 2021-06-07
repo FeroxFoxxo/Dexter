@@ -49,7 +49,7 @@ namespace Dexter.Commands {
                 .AddField("Username", GuildUser.GetUserInformation(), true)
                 .AddField(!string.IsNullOrEmpty(GuildUser.Nickname), "Nickname", GuildUser.Nickname, true)
                 .AddField("Created", $"{GuildUser.CreatedAt:MM/dd/yyyy HH:mm:ss} ({(DateTime.Now - GuildUser.CreatedAt.DateTime).Humanize(2, maxUnit: TimeUnit.Year)} ago)")
-                .AddField(Joined != default, "Joined", $"{Joined:MM/dd/yyyy HH:mm:ss} ({DateTimeOffset.Now.Subtract(Joined).Humanize(2, maxUnit: TimeUnit.Year)} ago)")
+                //.AddField(Joined != default, "Joined", $"{Joined:MM/dd/yyyy HH:mm:ss} ({DateTimeOffset.Now.Subtract(Joined).Humanize(2, maxUnit: TimeUnit.Year)} ago)")
                 .AddField(Profile != null && Profile.BorkdayTime != default, "Last Birthday", new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Profile != null ? Profile.BorkdayTime : 0).ToLongDateString())
                 .AddField("Top Role", Context.Guild.Roles.Where(Role => Role.Position == Context.Guild.GetUser(User.Id).Hierarchy).FirstOrDefault().Name)
                 //.AddField(LastNicknames.Length > 1, $"Last {LastNicknames.Length} Nicknames:", string.Join(", ", LastNicknames))

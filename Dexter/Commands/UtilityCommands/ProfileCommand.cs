@@ -43,7 +43,9 @@ namespace Dexter.Commands {
             string[] LastNicknames = GetLastNameRecords(UserRecordsService.GetNameRecords(User, NameType.Nickname), 5);
             string[] LastUsernames = GetLastNameRecords(UserRecordsService.GetNameRecords(User, NameType.Username), 5);
 
-            string Role = Context.Guild.Roles.Where(Role => Role.Position == Context.Guild.GetUser(User.Id).Hierarchy).FirstOrDefault().Name;
+            SocketRole RoleInst = Context.Guild.Roles.Where(Role => Role.Position == Context.Guild.GetUser(User.Id).Hierarchy).FirstOrDefault();
+            
+            string Role = RoleInst != null ? RoleInst.Name : "";
             
             await BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle($"User Profile For {GuildUser.Username}#{GuildUser.Discriminator}")

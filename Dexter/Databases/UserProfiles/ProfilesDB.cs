@@ -31,7 +31,11 @@ namespace Dexter.Databases.UserProfiles {
             UserProfile Profile = Profiles.Find(UserID);
 
             if (Profile is null) {
-                Profile = new() { UserID = UserID };
+                Profile = new() {
+                    UserID = UserID,
+                    TimeZone = "GMT",
+                    TimeZoneDST = "GMT"
+                };
 
                 Profiles.Add(Profile);
                 SaveChanges();

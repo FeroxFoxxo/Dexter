@@ -4,6 +4,7 @@ using Dexter.Databases.CommunityEvents;
 using Dexter.Databases.UserRestrictions;
 using Dexter.Databases.Games;
 using Dexter.Databases.FunTopics;
+using Dexter.Databases.UserProfiles;
 
 namespace Dexter.Commands {
 
@@ -24,6 +25,12 @@ namespace Dexter.Commands {
         /// </summary>
 
         public LanguageConfiguration LanguageConfiguration { get; set; }
+
+        /// <summary>
+        /// The moderation commands configuration containing data about the borkday role.
+        /// </summary>
+
+        public ModerationConfiguration ModerationConfiguration { get; set; }
 
         /// <summary>
         /// Loads the database containing events for the <c>~event</c> command.
@@ -48,6 +55,12 @@ namespace Dexter.Commands {
         /// </summary>
 
         public FunTopicsDB FunTopicsDB { get; set; }
+
+        /// <summary>
+        /// Holds all relevant data about user profiles.
+        /// </summary>
+
+        public ProfilesDB ProfilesDB { get; set; }
 
     }
 

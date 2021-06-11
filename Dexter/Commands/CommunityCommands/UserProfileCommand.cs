@@ -1,19 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Databases.UserProfiles;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
+using Discord.Net;
 using Humanizer;
 
 namespace Dexter.Commands {
     
     public partial class CommunityCommands {
+        private const string AttributeNames = "Gender, Sexuality, Timezone, TimeZoneDST, DSTRules, Birthday, Birthyear, Nation, Languages and Miscellaneous.";
 
         /// <summary>
         /// Edits or queries data from a user's personal user profile.
@@ -24,31 +28,32 @@ namespace Dexter.Commands {
 
         [Command("me")]
         [Alias("myprofile")]
+        [Summary("View, edit, and configure your Social Dexter profile, everything from borkdays, timezones and custom user information.")]
+        [ExtendedSummary("Usage: me ([action] [attribute] [value])\n" +
+            "-  SET [attribute] [value]: Set one of your profile attributes to a given value.\n" +
+            "-    Attributes are the following: " + AttributeNames + "\n" +
+            "-    For Timezone attributes, the value should be a timezone abbreviation (use `~timezone search [abbr]` to check out similar abbreviations and meanings)\n" +
+            "-    For TimeZone rules, follow the syntax `(from) [N]th (Weekday) (of) [Month] to [N]th (Weekday) (of) [Month]\n" +
+            "-  CONFIG [field] [value]: Configures your social profile preferences, such as privacy and friend requests.\n" +
+            "-    To see all configuration fields, don't specify a field or value\n" +
+            "-    To see values for a field, don't specify a value")]
 
         public async Task MyProfileCommand(string action = "get", [Remainder] string parameters = "") {
+
+            if (RestrictionsDB.IsUserRestricted(Context.User.Id, Databases.UserRestrictions.Restriction.Social)) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("User Restricted!")
+                    .WithDescription("You don't have permissions to use the social module, if you think this is a mistake, please contact a moderator.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
 
             UserProfile profile = ProfilesDB.GetOrCreateProfile(Context.User.Id);
 
             switch(action.ToLower()) {
                 case "get":
                 case "profile":
-                    bool TZSuccess = LanguageHelper.TryParseTimeZone(profile.TimeZone, LanguageConfiguration, out TimeZoneData TZ);
-                    bool TZDSTSuccess = LanguageHelper.TryParseTimeZone(profile.TimeZoneDST, LanguageConfiguration, out TimeZoneData TZDST);
-
-                    await new EmbedBuilder()
-                        .WithColor(Color.DarkPurple)
-                        .WithThumbnailUrl(Context.User.GetTrueAvatarUrl())
-                        .WithTitle($"{((Context.User as IGuildUser)?.Nickname ?? Context.User.Username).Possessive()} Profile")
-                        .WithDescription($"Custom user profile for user: {Context.User.GetUserInformation()}")
-                        .AddField(!string.IsNullOrEmpty(profile.Gender), "Gender", profile.Gender, true)
-                        .AddField(!string.IsNullOrEmpty(profile.Orientation), "Sexuality", profile.Orientation, true)
-                        .AddField(profile.Borkday != default, "Borkday", $"{profile.Borkday}" + (profile.BirthYear > 0 ? $", {profile.BirthYear} (**Age**: {GetAge(profile, out _)})" : ""))
-                        .AddField(TZSuccess, "Time Zone", TZ.ToString() + ((profile.TimeZone != profile.TimeZoneDST && TZDSTSuccess) ? $" ({TZDST} during Daylight Savings. [{profile.DSTRules?.ToString() ?? "Never"}])" : ""))
-                        .AddField(!string.IsNullOrEmpty(profile.Nationality), "Nationality", profile.Nationality, true)
-                        .AddField(!string.IsNullOrEmpty(profile.Languages), "Languages", profile.Languages, true)
-                        .AddField(!string.IsNullOrEmpty(profile.SonaInfo), "Sona", profile.SonaInfo)
-                        .AddField(!string.IsNullOrEmpty(profile.Info), "Info", profile.Info)
-                        .SendEmbed(Context.Channel);
+                    await DisplayProfileInformation(profile);
                     break;
                 case "set":
                 case "edit":
@@ -75,7 +80,7 @@ namespace Dexter.Commands {
                     switch(attribute.ToLower()) {
                         case "timezone":
                         case "tz":
-                            if (!LanguageHelper.TryParseTimeZone(value, LanguageConfiguration, out TimeZoneData timeZone)) {
+                            if (!TimeZoneData.TryParse(value, LanguageConfiguration, out TimeZoneData timeZone)) {
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Unable to find time zone")
                                     .WithDescription($"Couldn't find time zone {value}. Make sure you capitalize it correctly. You can use the `~timezone search [abbreviation]` command to look for similar recognized time zones.")
@@ -282,20 +287,635 @@ namespace Dexter.Commands {
                         default:
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Unknown Attribute")
-                                .WithDescription($"Unknown attribute: \"{attribute}\". Currently valid attributes are: Gender, Sexuality, Timezone, TimeZoneDST, DSTRules, Birthday, Birthyear, Gender, Sexuality, Nation, Languages and Miscellaneous.")
+                                .WithDescription($"Unknown attribute: \"{attribute}\". Currently valid attributes are: " + AttributeNames)
                                 .SendEmbed(Context.Channel);
                             break;
                     }
                     ProfilesDB.SaveChanges();
                     return;
+                case "settings":
+                case "config":
+                case "configuration":
+                    if (string.IsNullOrEmpty(parameters)) {
+                        if(profile.Settings is null) {
+                            profile.Settings = new();
+                            ProfilesDB.SaveChanges();
+                        }
+
+                        await BuildEmbed(EmojiEnum.Sign)
+                            .WithTitle("Profile Settings")
+                            .WithDescription(
+                            $"**Privacy** [*privacy*]: {profile.Settings.Privacy}\n" +
+                            $"**Get Borkday Role on Borkday** [*borkdayrole*]: {(profile.Settings.GiveBorkdayRole ? "Yes" : "No")}")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+
+                    separatorIndex = parameters.IndexOf(' ');
+                    if (separatorIndex < 0) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Invalid Number of Parameters")
+                            .WithDescription("You must provide at least an attribute name to change and a new value for it.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+                    attribute = parameters[..separatorIndex];
+                    value = parameters[separatorIndex..].Trim();
+
+                    if (value.Length > CommunityConfiguration.MaxProfileAttributeLength) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Excessively long value")
+                            .WithDescription($"Keep your profile fields under a maximum length of {CommunityConfiguration.MaxProfileAttributeLength}")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+
+                    ProfilePreferences prefs = profile.Settings;
+
+                    switch (attribute.ToLower()) {
+                        case "privacy":
+                        case "access":
+                            switch(value.ToLower()) {
+                                case "public":
+                                case "everyone":
+                                case "everybody":
+                                    prefs.Privacy = ProfilePreferences.PrivacyMode.Public;
+                                    await GenericSuccessInfo("Privacy", "Public; anyone will be able to view your profile.");
+                                    break;
+                                case "friends":
+                                case "friends-only":
+                                case "friendsonly":
+                                    prefs.Privacy = ProfilePreferences.PrivacyMode.Friends;
+                                    await GenericSuccessInfo("Privacy", "Friends-only; only your friends will be able to view your profile.");
+                                    break;
+                                case "private":
+                                case "me":
+                                    prefs.Privacy = ProfilePreferences.PrivacyMode.Private;
+                                    await GenericSuccessInfo("Privacy", "Private; server members won't have access to your profile.");
+                                    break;
+                                default:
+                                    await BuildEmbed(EmojiEnum.Sign)
+                                        .WithTitle("Information about Privacy")
+                                        .WithDescription("This setting dictates who can access your profile information by using the ~social command")
+                                        .AddField("Possible Values",
+                                        "Public: Anyone in the server can view your profile.\n" +
+                                        "Friends: Only people you have friended with Dexter can view your profile.\n" +
+                                        "Private: Your profile isn't accessible by members.")
+                                        .SendEmbed(Context.Channel);
+                                    return;
+                            }
+                            break;
+                        case "borkdayrole":
+                        case "birthdayrole":
+                            switch (value.ToLower()) {
+                                case "yes":
+                                case "true":
+                                    prefs.GiveBorkdayRole = true;
+                                    await CreateBirthdayTimer(profile);
+                                    await GenericSuccessInfo("Receive Borkday Role", "True");
+                                    break;
+                                case "no":
+                                case "false":
+                                    prefs.GiveBorkdayRole = false;
+                                    await GenericSuccessInfo("Receive Borkday Role", "False");
+                                    break;
+                                default:
+                                    await BuildEmbed(EmojiEnum.Sign)
+                                        .WithTitle("Information about \"Receive Borkday Role\"")
+                                        .WithDescription("This setting dictates whether you get the borkday role once your birthday is calculated to be in effect.")
+                                        .AddField("Possible Values",
+                                        "True: Activate the service.\n" +
+                                        "False: Deactivate the service.")
+                                        .SendEmbed(Context.Channel);
+                                    return;
+                            }
+                            break;
+                        default:
+                            await BuildEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Unknown Setting")
+                                .WithDescription($"Unable to recognize \"{attribute} as a valid setting. Please use either the setting names displayed in `~me settings` between brackets.")
+                                .SendEmbed(Context.Channel);
+                            return;
+                    }
+                    profile.Settings = prefs;
+                    ProfilesDB.SaveChanges();
+                    break;
                 default:
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Invalid Action")
-                        .WithDescription($"Unrecognized action: {action}, please use either \"get\" or \"set\".")
+                        .WithDescription($"Unrecognized action: {action}, please use either \"get\", \"set\", or \"config\".")
                         .SendEmbed(Context.Channel);
                     return;
             }
 
+        }
+
+        /// <summary>
+        /// Display the social profile of a given user.
+        /// </summary>
+        /// <param name="user">The target user to query profile information for.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until it completes successfully.</returns>
+
+        [Command("social")]
+        [Alias("friend", "friends")]
+        [Summary("Portal to the social link system; which mainly features the friends system.")]
+        [ExtendedSummary("Usage: social (action) [user]\n" +
+            "If you don't specify an action, you'll see the user's profile\n" +
+            "-  ADD [user]: Sends or accepts a friend request.\n" +
+            "-  REMOVE [user]: Removes a user as a friend or an outgoing friend request.\n" +
+            "-  DECLINE [user]: Declines a friend request.\n" +
+            "-  LIST: Shows a list of friends\n" +
+            "-  REQUESTS: Shows a list of active friend requests\n" +
+            "-  BLOCK [user]: Blocks a user, blocking friend requests from them\n" +
+            "-  UNBLOCK [user]: Unblocks a user\n" +
+            "-  BLOCKED: Shows a list of blocked users.")]
+        [BotChannel]
+
+        public async Task SocialQuery(IUser user) {
+
+            if (RestrictionsDB.IsUserRestricted(user.Id, Databases.UserRestrictions.Restriction.Social)) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("User Restricted!")
+                    .WithDescription("This user has had their access to the social system revoked, their profile isn't visible.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+
+            UserProfile profile = ProfilesDB.GetOrCreateProfile(user.Id);
+
+            bool allowed = Context.User.Id == user.Id || Context.User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator;
+            if (!allowed) {
+                switch (profile.Settings.Privacy) {
+                    case ProfilePreferences.PrivacyMode.Private:
+                        allowed = false;
+                        break;
+                    case ProfilePreferences.PrivacyMode.Friends:
+                        allowed = await ProfilesDB.AreLinked(Context.User.Id, user.Id);
+                        break;
+                    case ProfilePreferences.PrivacyMode.Public:
+                        allowed = true;
+                        break;
+                }
+            }
+
+            if (!allowed) {
+                await Context.Channel.SendMessageAsync("Unable to access profile! This user's profile is private.");
+                return;
+            }
+
+            await DisplayProfileInformation(profile);
+        }
+
+        /// <summary>
+        /// Alternative form of the Friend command that takes a user ID for DM compatibility
+        /// </summary>
+        /// <param name="action">The action to take on the user whose ID is <paramref name="userID"/></param>
+        /// <param name="userID">The ID of the target user</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until it completes successfully.</returns>
+
+        [Command("social")]
+        [Alias("friend", "friends")]
+
+        public async Task FriendCommand(string action, ulong userID) {
+
+            IUser target = DiscordSocketClient.GetUser(userID);
+
+            if (target is null) {
+                await Context.Channel.SendMessageAsync($"Unable to find user with ID {userID}.");
+                return;
+            }
+
+            await FriendCommand(action, target);
+
+        }
+
+        /// <summary>
+        /// Deals with all sorts of social linking, friending, blocking, etc.
+        /// </summary>
+        /// <param name="action">The action to take, add, remove, block, etc...</param>
+        /// <param name="user">The user to affect by <paramref name="action"/>.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
+
+        [Command("social")]
+        [Alias("friend", "friends")]
+
+        public async Task FriendCommand(string action, IUser user = null) {
+
+            if (user is not null && RestrictionsDB.IsUserRestricted(user.Id, Databases.UserRestrictions.Restriction.Social)) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("User Restricted!")
+                    .WithDescription("This user has had their access to the social system revoked, their profile isn't accessible.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+
+            if (RestrictionsDB.IsUserRestricted(Context.User.Id, Databases.UserRestrictions.Restriction.Social)) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("User Restricted!")
+                    .WithDescription("You don't have permissions to use the social module, if you think this is a mistake, please contact a moderator.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+
+            UserProfile profile = null;
+
+            if (user is not null) {
+                profile = ProfilesDB.GetOrCreateProfile(user.Id);
+            }
+
+            if (user is not null && user.Equals(Context.User)) {
+                await BuildEmbed(EmojiEnum.Wut)
+                    .WithTitle("Self-Centered much?")
+                    .WithDescription("Look, I don't know what you're trying to do with yourself, but you should probably considering socializing with *other beings*.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+
+            switch (action.ToLower()) {
+                case "list":
+                    List<ulong> friends = await ProfilesDB.GetLinksAsync(Context.User.Id);
+                    EmbedBuilder[] pages = BuildUserListEmbeds(friends, "Friends", "Here's a list of users you have friended using the Dexter social system:", FriendDisplay);
+                    
+                    await PublishListResult(pages, "It seems you have no friends added yet! :c. You can add more using ~friend add [User]. But hey... I'm always here if you need a hug. <3");
+                    return;
+                case "requests":
+                    List<ulong> friendRequests = await ProfilesDB.GetLinksAsync(Context.User.Id, false, LinkType.FriendRequest);
+                    pages = BuildUserListEmbeds(friendRequests, "Friend Requests", "Here's a list of active friend requests linked with you!", FriendRequestDisplay);
+
+                    await PublishListResult(pages, "Nothing to see here! You're up to date. ^w^");
+                    return;
+                case "add":
+                case "accept":
+                    if (user is null) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Invalid number of arguments")
+                            .WithDescription("You must provide a user to add as a friend.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+
+                    UserLink req = ProfilesDB.GetLink(Context.User.Id, user.Id, true, true, LinkType.FriendRequest);
+                    if (req is null) {
+                        req = ProfilesDB.GetLink(Context.User.Id, user.Id, true);
+
+                        if (req is null) {
+                            req = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.FriendRequest);
+
+                            try {
+                                await new EmbedBuilder()
+                                    .WithColor(Color.Green)
+                                    .WithTitle("Incoming Friend Request!")
+                                    .WithThumbnailUrl(Context.User.GetTrueAvatarUrl())
+                                    .WithAuthor(Context.User)
+                                    .WithDescription($"You've received a friend request from {Context.User.Mention}!\n" +
+                                    $"To accept or decline this request, type `~friend <accept|decline> {Context.User.Id}`.")
+                                    .SendEmbed(await user.GetOrCreateDMChannelAsync());
+
+                                await BuildEmbed(EmojiEnum.Love)
+                                    .WithTitle("Friend Request Sent!")
+                                    .WithDescription($"{user.Mention} has been notified of your request. You can check the list of friends you have by typing `~friend list`.")
+                                    .SendEmbed(Context.Channel);
+                            }
+                            catch (HttpException) {
+                                await BuildEmbed(EmojiEnum.Annoyed)
+                                    .WithTitle("Unable to Send Message!")
+                                    .WithDescription($"I wasn't able to contact {user.Mention}, perhaps you could contact them yourself? They can accept this request by using the command `~friend add {Context.User.Id}`.")
+                                    .SendEmbed(Context.Channel);
+                            }
+                            return;
+                        }
+
+                        if (req.LinkType == LinkType.Friend) {
+                            await BuildEmbed(EmojiEnum.Wut)
+                                .WithTitle("You're already friends with this user!")
+                                .WithDescription($"You and {user.Mention} are already friends!")
+                                .SendEmbed(Context.Channel);
+                            return;
+                        }
+                        else if (req.LinkType == LinkType.Blocked) {
+                            if (req.Sender == Context.User.Id && req.Settings.BlockMode.HasFlag(Databases.UserProfiles.Direction.Sender)
+                                || req.Sendee == Context.User.Id && req.Settings.BlockMode.HasFlag(Databases.UserProfiles.Direction.Sendee)) {
+                                await BuildEmbed(EmojiEnum.Annoyed)
+                                    .WithTitle("This user has blocked you.")
+                                    .WithDescription("You can't send notifications to a user that has blocked you.")
+                                    .SendEmbed(Context.Channel);
+                                return;
+                            }
+                            else {
+                                await BuildEmbed(EmojiEnum.Annoyed)
+                                    .WithTitle("You have blocked this user!")
+                                    .WithDescription($"You can't send notifications to a user you have blocked; to unblock them, use `~social unblock {user.Id}`.")
+                                    .SendEmbed(Context.Channel);
+                                return;
+                            }
+                        }
+                    }
+
+                    if (req.Sender == Context.User.Id) {
+                        await BuildEmbed(EmojiEnum.Wut)
+                            .WithTitle("Active Friend Request Present")
+                            .WithDescription($"You've already sent {user.Mention} a friend request. They can accept it by using the `~friend add {Context.User.Id}` command.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+
+                    if (req.Sender != Context.User.Id && req.LinkType == LinkType.FriendRequest) {
+                        req.LinkType = LinkType.Friend;
+                        await BuildEmbed(EmojiEnum.Love)
+                            .WithTitle("Accepted Friend Request!")
+                            .WithDescription($"You are now friends with {user.Mention}! ^w^")
+                            .SendEmbed(Context.Channel);
+                        break;
+                    }
+                    break;
+                case "remove":
+                case "unfriend":
+                    if (user is null) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Invalid number of arguments")
+                            .WithDescription("You must provide a user to remove your friendship status with.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+
+                    if (!ProfilesDB.TryRemove(Context.User.Id, user.Id)) {
+                        if (!ProfilesDB.TryRemove(Context.User.Id, user.Id, false, LinkType.FriendRequest)) {
+                            await BuildEmbed(EmojiEnum.Annoyed)
+                                .WithTitle("Non-existent Link")
+                                .WithDescription("You and the specified user are not friends in the Dexter system.")
+                                .SendEmbed(Context.Channel);
+                            return;
+                        }
+                        else {
+                            await BuildEmbed(EmojiEnum.Love)
+                                .WithTitle("Removed Friend Request!")
+                                .WithDescription($"Your friend request to {user.Mention} has been cancelled.")
+                                .SendEmbed(Context.Channel);
+                            return;
+                        }
+                    }
+
+                    await BuildEmbed(EmojiEnum.Love)
+                        .WithTitle("Removed Friend")
+                        .WithDescription($"Your friend status with user {user.Mention} has been revoked.")
+                        .SendEmbed(Context.Channel);
+                    return;
+                case "decline":
+                    if (user is null) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Invalid number of arguments")
+                            .WithDescription("You must provide a user to remove your friendship status with.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+
+                    if (!ProfilesDB.TryRemove(user.Id, Context.User.Id, false, LinkType.FriendRequest)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Non-existent Request")
+                            .WithDescription("This user hasn't sent you a friend request. :(")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+                    else {
+                        await BuildEmbed(EmojiEnum.Love)
+                            .WithTitle("Removed Friend Request!")
+                            .WithDescription($"You have declined the friend request from {user.Mention}.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+                case "block":
+                    if (user is null) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Invalid number of arguments")
+                            .WithDescription("You must provide a user to block.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+
+                    UserLink toBlock = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.Blocked);
+
+                    if (toBlock.LinkType == LinkType.Friend) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("User is friended!")
+                            .WithDescription($"You can't block friends. If you wish to block this user, unfriend them first: `~friend remove {user.Id}`.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+                    toBlock.LinkType = LinkType.Blocked;
+
+                    if (toBlock.IsUserBlocked(user.Id)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("User already blocked")
+                            .WithDescription($"You've already blocked user {user.Mention}.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    } else {
+                        toBlock.BlockUser(user.Id);
+
+                        await BuildEmbed(EmojiEnum.Sign)
+                            .WithTitle("User Successfully Blocked")
+                            .WithDescription($"You've blocked {user.Mention}, you won't receive any Dexter notifications from them.")
+                            .SendEmbed(Context.Channel);
+                        break;
+                    }
+                case "unblock":
+                    if (user is null) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Invalid number of arguments")
+                            .WithDescription("You must provide a user to unblock.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+
+                    UserLink link = ProfilesDB.GetLink(Context.User.Id, user.Id, true, true, LinkType.Blocked);
+
+                    if (link is null) {
+                        await BuildEmbed(EmojiEnum.Wut)
+                            .WithTitle("No block link found.")
+                            .WithDescription("You can't unblock a user that you haven't blocked.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+
+                    bool blockedSendee = link.Sender == Context.User.Id && link.Settings.BlockMode.HasFlag(Databases.UserProfiles.Direction.Sendee);
+                    bool blockedSender = link.Sendee == Context.User.Id && link.Settings.BlockMode.HasFlag(Databases.UserProfiles.Direction.Sender);
+                    if (blockedSendee || blockedSender) {
+                        if (blockedSendee) link.Settings.BlockMode &= ~Databases.UserProfiles.Direction.Sendee;
+                        if (blockedSender) link.Settings.BlockMode &= ~Databases.UserProfiles.Direction.Sender;
+                        bool isUserBlocked = link.Settings.BlockMode != Databases.UserProfiles.Direction.None;
+
+                        await BuildEmbed(isUserBlocked ? EmojiEnum.Sign : EmojiEnum.Love)
+                            .WithTitle("User Unblocked")
+                            .WithDescription($"You've unblocked user {user.Mention}!{(isUserBlocked ? " However, they still have you blocked" : "")}.")
+                            .SendEmbed(Context.Channel);
+                        break;
+                    }
+                    else {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Incongruent Block Authority")
+                            .WithDescription($"{user.Mention} has blocked you, but you haven't blocked them. You can't remove a block imposed by a different user.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+                case "blocked":
+                    List<ulong> blockedUsers = await ProfilesDB.GetLinksAsync(Context.User.Id, false, LinkType.Blocked);
+                    pages = BuildUserListEmbeds(blockedUsers, "Blocked Users", "Here's a list of users you have blocked or that have blocked you:", BlockedDisplay);
+
+                    await PublishListResult(pages, "Nobody! Quite impressive.");
+                    return;
+                default:
+
+                    return;
+            }
+            ProfilesDB.SaveChanges();
+
+        }
+
+        /// <summary>
+        /// Configures a specific link between two users.
+        /// </summary>
+        /// <param name="user">The target user of the link to modify.</param>
+        /// <param name="attribute">The attribute in the configuration to modify.</param>
+        /// <param name="value">The value to give to the attribute.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
+
+        [Command("configlink")]
+        [Alias("linkconfig")]
+        [Summary("Configures the link-specific settings of a command.")]
+        [ExtendedSummary("Usage: configlink [user] (attribute) (value)\n" +
+            "Leave attribute and value empty to see your current settings for a social link.\n" +
+            "In this information report, you can also see the possible configuration attributes.\n" +
+            "Leave the value empty to see the possible values for an attribute.")]
+        [BotChannel]
+
+        public async Task ConfigLinkCommand(IUser user, string attribute = "", [Remainder] string value = "") {
+
+            if (RestrictionsDB.IsUserRestricted(Context.User.Id, Databases.UserRestrictions.Restriction.Social)) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("User Restricted!")
+                    .WithDescription("You don't have permissions to use the social module, if you think this is a mistake, please contact a moderator.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+
+            UserLink link = ProfilesDB.GetLink(Context.User.Id, user.Id, true, true);
+
+            if (link is null) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("User Link not found")
+                    .WithDescription($"You aren't friended with {user.Mention}, you can send them a friend request with `~friend add {user.Id}` if you haven't.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(attribute)) {
+                await new EmbedBuilder()
+                    .WithColor(Color.Purple)
+                    .WithThumbnailUrl(user.GetTrueAvatarUrl())
+                    .WithTitle($"Friend Settings")
+                    .WithDescription($"Link settings with user {user.Mention}:\n" +
+                    $"Get Borkday Notification [*borkdaynotify*]: {(link.IsUserBorkdayNotified(Context.User.Id) ? "True" : "False")}.\n")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+
+            LinkPreferences prefs = link.Settings;
+
+            switch(attribute.ToLower()) {
+                case "borkdaynotify":
+                case "birthdaynotify":
+                    switch(value.ToLower()) {
+                        case "true":
+                        case "yes":
+                            prefs.SetBorkdayMode(link, Context.User.Id, true);
+                            await BuildEmbed(EmojiEnum.Love)
+                                .WithTitle("Set value for \"Borkday Notify\"")
+                                .WithDescription("You will now receive birthday notifications from this user if they have their settings configured.")
+                                .SendEmbed(Context.Channel);
+                            break;
+                        case "false":
+                        case "no":
+                            prefs.SetBorkdayMode(link, Context.User.Id, false);
+                            await BuildEmbed(EmojiEnum.Love)
+                                .WithTitle("Set value for \"Borkday Notify\"")
+                                .WithDescription("You will no longer receive birthday notifications from this user.")
+                                .SendEmbed(Context.Channel);
+                            break;
+                        default:
+                            await BuildEmbed(EmojiEnum.Sign)
+                                .WithTitle("Information about Borkday Notify")
+                                .WithDescription("This setting controls whether you get birthday notifications for your friend's birthday.")
+                                .AddField("Possible Values",
+                                "True: Receive borkday notifications.\n" +
+                                "False: Don't receive borkday notifications.")
+                                .SendEmbed(Context.Channel);
+                            return;
+                    }
+                    break;
+                default:
+
+                    return;
+            }
+            link.Settings = prefs;
+            ProfilesDB.SaveChanges();
+        }
+
+        /// <summary>
+        /// Configures a specific link between two users.
+        /// </summary>
+        /// <param name="userID">The ID of the target user of the link to modify.</param>
+        /// <param name="attribute">The attribute in the configuration to modify.</param>
+        /// <param name="value">The value to give to the attribute.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
+
+        [Command("configlink")]
+
+        public async Task ConfigLinkCommand(ulong userID, string attribute = "", [Remainder] string value = "") {
+            IUser target = DiscordSocketClient.GetUser(userID);
+
+            if (target is null) {
+                await Context.Channel.SendMessageAsync($"Unable to find user with ID {userID}.");
+                return;
+            }
+
+            await ConfigLinkCommand(target, attribute, value);
+        }
+
+        private async Task PublishListResult(EmbedBuilder[] pages, string emptySetRemark) {
+            if (pages.Length == 0) {
+                await Context.Channel.SendMessageAsync(emptySetRemark);
+            }
+            else if (pages.Length == 1) {
+                await pages.First().SendEmbed(Context.Channel);
+            }
+            else {
+                await CreateReactionMenu(pages, Context.Channel);
+            }
+            return;
+        }
+
+        private async Task DisplayProfileInformation(UserProfile profile) {
+            IUser user = DiscordSocketClient.GetUser(profile.UserID);
+
+            if (user is null) { await Context.Channel.SendMessageAsync("Unable to find user information!"); }
+            
+            bool TZSuccess = LanguageHelper.TryParseTimeZone(profile.TimeZone, LanguageConfiguration, out TimeZoneData TZ);
+            bool TZDSTSuccess = LanguageHelper.TryParseTimeZone(profile.TimeZoneDST, LanguageConfiguration, out TimeZoneData TZDST);
+
+            await new EmbedBuilder()
+                .WithColor(Color.DarkPurple)
+                .WithThumbnailUrl(user.GetTrueAvatarUrl())
+                .WithTitle($"{((user as IGuildUser)?.Nickname ?? user.Username).Possessive()} Profile")
+                .WithDescription($"Custom user profile for user: {user.GetUserInformation()}")
+                .AddField(!string.IsNullOrEmpty(profile.Gender), "Gender", profile.Gender, true)
+                .AddField(!string.IsNullOrEmpty(profile.Orientation), "Sexuality", profile.Orientation, true)
+                .AddField(profile.Borkday != default, "Borkday", $"{profile.Borkday}" + (profile.BirthYear > 0 ? $", {profile.BirthYear} (**Age**: {GetAge(profile, out _)})" : ""))
+                .AddField(TZSuccess, "Time Zone", TZ.ToString() + ((profile.TimeZone != profile.TimeZoneDST && TZDSTSuccess) ? $" ({TZDST} during Daylight Savings. [{profile.DSTRules?.ToString() ?? "Never"}])" : ""))
+                .AddField(!string.IsNullOrEmpty(profile.Nationality), "Nationality", profile.Nationality, true)
+                .AddField(!string.IsNullOrEmpty(profile.Languages), "Languages", profile.Languages, true)
+                .AddField(!string.IsNullOrEmpty(profile.SonaInfo), "Sona", profile.SonaInfo)
+                .AddField(!string.IsNullOrEmpty(profile.Info), "Info", profile.Info)
+                .SendEmbed(Context.Channel);
         }
 
         private async Task GenericSuccessInfo(string attribute, object value) {
@@ -330,32 +950,13 @@ namespace Dexter.Commands {
         }
 
         private DateTimeOffset GetNow(UserProfile profile) {
-            return DateTimeOffset.Now.ToOffset(GetRelevantTimeZone(profile).TimeOffset);
+            return DateTimeOffset.Now.ToOffset(profile.GetRelevantTimeZone(LanguageConfiguration).TimeOffset);
         }
 
         private DateTimeOffset GetBirthDay(UserProfile profile) {
             int day = profile.Borkday?.Day ?? 0;
             LanguageHelper.Month month = profile.Borkday?.Month ?? LanguageHelper.Month.January;
-            return new DateTimeOffset(new DateTime(profile.BirthYear <= 0 ? DateTime.Now.Year : profile.BirthYear, (int)month, day, 0, 0, 0), GetRelevantTimeZone(profile)?.TimeOffset ?? default);
-        }
-
-        private TimeZoneData GetRelevantTimeZone(UserProfile profile) {
-            return GetRelevantTimeZone(profile, DateTimeOffset.Now);
-        }
-
-        private TimeZoneData GetRelevantTimeZone(UserProfile profile, DateTimeOffset day) {
-            if (!LanguageHelper.TryParseTimeZone(profile.TimeZone, LanguageConfiguration, out TimeZoneData TZ))
-                return null;
-
-            if (profile.DSTRules is null || !profile.DSTRules.IsDST(day)) {
-                return TZ;
-            }
-            else {
-                if (!LanguageHelper.TryParseTimeZone(profile.TimeZoneDST, LanguageConfiguration, out TimeZoneData TZDST)) {
-                    return TZ;
-                }
-                return TZDST;
-            }
+            return new DateTimeOffset(new DateTime(profile.BirthYear <= 0 ? DateTime.Now.Year : profile.BirthYear, (int)month, day, 0, 0, 0), profile?.GetRelevantTimeZone(LanguageConfiguration).TimeOffset ?? default);
         }
 
         private bool TryRemoveBirthdayTimer(UserProfile profile) {
@@ -368,9 +969,13 @@ namespace Dexter.Commands {
 
         private async Task CreateBirthdayTimer(UserProfile profile) {
             TryRemoveBirthdayTimer(profile);
+            if (profile?.Borkday is null) {
+                return;
+            }
+
             int nextYear = DateTime.Now.Year;
             DateTime relevantDay = new DateTime(nextYear, (int)profile.Borkday.Month, profile.Borkday.Day, 0, 0, 0);
-            TimeSpan relevantOffset = GetRelevantTimeZone(profile, new DateTimeOffset(relevantDay)).TimeOffset;
+            TimeSpan relevantOffset = profile.GetRelevantTimeZone(new DateTimeOffset(relevantDay), LanguageConfiguration).TimeOffset;
             if (new DateTimeOffset(relevantDay, relevantOffset).CompareTo(DateTimeOffset.Now) <= 0) {
                 nextYear++;
             }
@@ -388,29 +993,59 @@ namespace Dexter.Commands {
         public async Task BorkdayCallback(Dictionary<string, string> args) {
 
             ulong id = ulong.Parse(args["ID"]);
+
+            if (RestrictionsDB.IsUserRestricted(id, Databases.UserRestrictions.Restriction.Social)) {
+                return;
+            }
+
             IGuildUser user = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(id);
             if (user is null) return;
 
             UserProfile profile = ProfilesDB.GetOrCreateProfile(id);
 
-            IRole role = Context.Guild.GetRole(
-                user.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator ?
-                    ModerationConfiguration.StaffBorkdayRoleID : ModerationConfiguration.BorkdayRoleID
-            );
+            if (profile.Settings?.GiveBorkdayRole ?? false) {
+                IRole role = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(
+                    user.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator ?
+                        ModerationConfiguration.StaffBorkdayRoleID : ModerationConfiguration.BorkdayRoleID
+                );
 
-            await user.AddRoleAsync(role);
+                await user.AddRoleAsync(role);
 
-            // Notify friends with birthday notifications.
+                await CreateEventTimer(
+                    RemoveBorkday,
+                    new Dictionary<string, string>() {
+                        { "User", user.Id.ToString() },
+                        { "Role", role.Id.ToString() }
+                    },
+                    ModerationConfiguration.SecondsOfBorkday,
+                    Databases.EventTimers.TimerType.Expire
+                );
 
-            await CreateEventTimer(
-                RemoveBorkday,
-                new Dictionary<string, string>() {
-                    { "User", user.Id.ToString() },
-                    { "Role", role.Id.ToString() }
-                },
-                ModerationConfiguration.SecondsOfBorkday,
-                Databases.EventTimers.TimerType.Expire
-            );
+                try {
+                    await new EmbedBuilder()
+                        .WithColor(Color.Gold)
+                        .WithThumbnailUrl(user.GetTrueAvatarUrl())
+                        .WithTitle("🎂 Happy Borkday 🎂")
+                        .WithDescription("Happy borkday from the USF Team! We hope your day goes wonderfully!\n" +
+                        "If this wasn't sent at midnight, make sure you set your timezones up correctly on your profile :3")
+                        .SendEmbed(await user.GetOrCreateDMChannelAsync());
+                }
+                catch { }
+            }
+
+            List<ulong> notify = await ProfilesDB.BorkdayNotifs(user.Id);
+            foreach(ulong uid in notify) {
+                try {
+                    IUser friend = DiscordSocketClient.GetUser(uid);
+                    await new EmbedBuilder()
+                        .WithColor(Color.Gold)
+                        .WithThumbnailUrl(user.GetTrueAvatarUrl())
+                        .WithTitle("🎂 Borkday Time 🎂")
+                        .WithDescription($"Hey there! It's {user.Mention}'{(user.Username.EndsWith('s') ? "" : "s")} birthday! Thought you'd like to know and celebrate! :3")
+                        .WithCurrentTimestamp()
+                        .SendEmbed(await user.GetOrCreateDMChannelAsync());
+                } catch { }
+            }
 
             await CreateBirthdayTimer(profile);
 
@@ -432,6 +1067,72 @@ namespace Dexter.Commands {
             if (user is null) return;
 
             await user.RemoveRoleAsync(guild.GetRole(roleID));
+        }
+
+        /// <summary>
+        /// Creates an collection of <see cref="EmbedBuilder"/>s that list a set of <paramref name="users"/> with a specific display per-user.
+        /// </summary>
+        /// <param name="users">The set of users to display.</param>
+        /// <param name="title">The title of the list menu.</param>
+        /// <param name="description">The description before the list of users is displayed.</param>
+        /// <param name="displayPattern">A method detailing the way to display each user as a string.</param>
+        /// <returns>An array of <see cref="EmbedBuilder"/>s, detailing the given list of <paramref name="users"/>.</returns>
+
+        public EmbedBuilder[] BuildUserListEmbeds(IEnumerable<ulong> users, string title, string description, Func<IUser, string> displayPattern) {
+            List<EmbedBuilder> embeds = new();
+            int inPage = CommunityConfiguration.MaxUsersPerEmbed;
+            List<StringBuilder> userlists = new();
+
+            foreach (ulong userID in users) {
+                IUser user = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(userID);
+
+                if (user is null) {
+                    user = DiscordSocketClient.GetUser(userID);
+                    if (user is null) continue;
+                }
+
+                if (inPage >= CommunityConfiguration.MaxUsersPerEmbed) {
+                    userlists.Add(new());
+                    inPage = 0;
+                }
+
+                userlists.Last().Append($"{displayPattern(user)}\n");
+                inPage++;
+            }
+
+            int page = 0;
+            foreach (StringBuilder sb in userlists) {
+                embeds.Add(new EmbedBuilder()
+                    .WithColor(Color.Purple)
+                    .WithTitle($"{title} - Page {++page}/{userlists.Count}")
+                    .WithDescription($"{description}\n {sb}")
+                    .WithFooter($"{page}/{userlists.Count}"));
+            }
+
+            return embeds.ToArray();
+        }
+
+        private static string DefaultDisplay(IUser user) {
+            return $"👥{user.Mention}";
+        }
+
+        private string BlockedDisplay(IUser user) {
+            UserLink link = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.Invalid);
+            bool receiving = link.IsUserBlocked(Context.User.Id);
+            bool blocking = link.IsUserBlocked(user.Id);
+            return $"🚫{user.Mention} ({(receiving ? "⬅️" : "")}{(blocking ? "➡️" : "")})";
+        }
+
+        private string FriendDisplay(IUser user) {
+            UserLink link = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.Invalid);
+            bool borkdayNotifs = link.IsUserBorkdayNotified(Context.User.Id);
+            return $"👥{user.Mention}{( borkdayNotifs ? " (🎂)" : "")}";
+        }
+
+        private string FriendRequestDisplay(IUser user) {
+            UserLink link = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.Invalid);
+            bool sent = link.Sender == Context.User.Id;
+            return $"{(sent ? "➡️" : "⬅️")}{user.Mention} {(sent ? "(Outgoing)" : $"(Incoming: `~friend <add|decline> {user.Id}`)")}";
         }
     }
 }

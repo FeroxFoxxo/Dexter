@@ -147,6 +147,73 @@ namespace Dexter.Databases.UserProfiles {
 
         public string Info { get; set; }
 
+        /// <summary>
+        /// Represents the per-user specific preferences to do with the profile system.
+        /// </summary>
+
+        [NotMapped]
+        public ProfilePreferences Settings {
+            get {
+                try {
+                    return JsonConvert.DeserializeObject<ProfilePreferences>(SettingsStr);
+                }
+                catch {
+                    return null;
+                }
+            }
+            set {
+                SettingsStr = JsonConvert.SerializeObject(value);
+            }
+        }
+
+        /// <summary>
+        /// JSON representation of the profile preferences object.
+        /// </summary>
+
+        public string SettingsStr { get; set; }
+
+        /// <summary>
+        /// Obtains the current time zone for a user with correctly set up time zone data.
+        /// </summary>
+        /// <param name="languageConfiguration">The Language Configuration item necessary for time zone parsing.</param>
+        /// <returns>A <see cref="TimeZoneData"/> object detailing the information of the user's time zone.</returns>
+
+        public TimeZoneData GetRelevantTimeZone(LanguageConfiguration languageConfiguration) {
+            return GetRelevantTimeZone(DateTimeOffset.Now, languageConfiguration);
+        }
+
+        /// <summary>
+        /// Obtains the current time zone for a user with correctly set up time zone data.
+        /// </summary>
+        /// <param name="languageConfiguration">The Language Configuration item necessary for time zone parsing.</param>
+        /// <param name="day">The day to calculate the time zone data for.</param>
+        /// <returns>A <see cref="TimeZoneData"/> object detailing the information of the user's time zone.</returns>
+
+        public TimeZoneData GetRelevantTimeZone(DateTimeOffset day, LanguageConfiguration languageConfiguration) {
+            if (!TimeZoneData.TryParse(TimeZone, languageConfiguration, out TimeZoneData TZ))
+                return null;
+
+            if (DSTRules is null || !DSTRules.IsDST(day)) {
+                return TZ;
+            }
+            else {
+                if (!TimeZoneData.TryParse(TimeZoneDST, languageConfiguration, out TimeZoneData TZDST)) {
+                    return TZ;
+                }
+                return TZDST;
+            }
+        }
+
+        /// <summary>
+        /// Gets the current time shifted to the user's configured timezone.
+        /// </summary>
+        /// <param name="languageConfiguration">The configuration data necessary for time zone parsing.</param>
+        /// <returns>A <see cref="DateTimeOffset"/> object containing the current time shifted to the appropriate time zone.</returns>
+
+        public DateTimeOffset GetNow(LanguageConfiguration languageConfiguration) {
+            return DateTimeOffset.Now.ToOffset(GetRelevantTimeZone(languageConfiguration).TimeOffset);
+        }
+
     }
 
     /// <summary>
@@ -421,6 +488,7 @@ namespace Dexter.Databases.UserProfiles {
         /// <returns>A string detailing the meaning of the values of this object.</returns>
 
         public override string ToString() {
+            if (Starts is null || Ends is null) return $"Undefined";
             return $"From the {Starts.ToString(IsAbsolute)} to the {Ends.ToString(IsAbsolute)}.";
         }
 
@@ -477,5 +545,51 @@ namespace Dexter.Databases.UserProfiles {
             { "European", new() { IsAbsolute = false, Starts = new() { Day = (byte)LanguageHelper.Weekday.Sunday - 7, Month = LanguageHelper.Month.March }, Ends = new() { Day = (sbyte)LanguageHelper.Weekday.Sunday - 7, Month = LanguageHelper.Month.October } } },
             { "Australian", new() { IsAbsolute = false, Starts = new() { Day = (sbyte)LanguageHelper.Weekday.Sunday, Month = LanguageHelper.Month.October }, Ends = new() { Day = (sbyte)LanguageHelper.Weekday.Sunday, Month = LanguageHelper.Month.April } } },
         };
+    }
+
+    /// <summary>
+    /// Codified the per-user preferences for a given user profile.
+    /// </summary>
+
+    [Serializable]
+    public class ProfilePreferences {
+
+        /// <summary>
+        /// Codifies the access level for general users to this user's profile.
+        /// </summary>
+
+        public enum PrivacyMode : byte {
+            /// <summary>
+            /// Anyone can view this profile
+            /// </summary>
+            Public, 
+            /// <summary>
+            /// Only friends of this user can view this profile
+            /// </summary>
+            Friends,
+            /// <summary>
+            /// Only the user can view this profile
+            /// </summary>
+            Private
+        }
+
+        /// <summary>
+        /// Indicates which users have permission to view this profile.
+        /// </summary>
+
+        public PrivacyMode Privacy { get; set; } = PrivacyMode.Friends;
+
+        /// <summary>
+        /// Indicates whether the user should get the borkday role added when it's their birthday
+        /// </summary>
+
+        public bool GiveBorkdayRole { get; set; } = true;
+
+        /// <summary>
+        /// Indicates whether to block friend requests directed to this user in general.
+        /// </summary>
+
+        public bool BlockRequests { get; set; } = false; //Missing implementation
+
     }
 }

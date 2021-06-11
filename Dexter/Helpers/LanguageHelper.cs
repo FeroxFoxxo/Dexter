@@ -863,20 +863,20 @@ namespace Dexter.Helpers {
         }
 
         /// <summary>
-        /// Attempts to find a time zone by the abbreviated name of <paramref name="Input"/> and returns it as a TimeSpan to be used as an Offset. 
+        /// Attempts to find a time zone by the abbreviated name of <paramref name="input"/> and returns it as a TimeSpan to be used as an Offset. 
         /// </summary>
-        /// <param name="Input">The abbreviation of the time zone as it appears in <paramref name="LanguageConfiguration"/>.</param>
-        /// <param name="LanguageConfiguration">The Config file containing data on Time Zone names and their respective offsets.</param>
-        /// <param name="TimeZone">The output value of the parsed <paramref name="Input"/>, or <see langword="null"/> if it can't be parsed.</param>
+        /// <param name="input">The abbreviation of the time zone as it appears in <paramref name="languageConfiguration"/>.</param>
+        /// <param name="languageConfiguration">The Config file containing data on Time Zone names and their respective offsets.</param>
+        /// <param name="timeZone">The output value of the parsed <paramref name="input"/>, or <see langword="null"/> if it can't be parsed.</param>
         /// <returns><see langword="true"/> if the parsing was successful; otherwise <see langword="false"/>.</returns>
 
-        public static bool TryParseTimeZone(this string Input, LanguageConfiguration LanguageConfiguration, out TimeZoneData TimeZone) {
-            if (LanguageConfiguration.TimeZones.ContainsKey(Input)) {
-                TimeZone = LanguageConfiguration.TimeZones[Input];
+        public static bool TryParseTimeZone(this string input, LanguageConfiguration languageConfiguration, out TimeZoneData timeZone) {
+            if (languageConfiguration.TimeZones.ContainsKey(input)) {
+                timeZone = languageConfiguration.TimeZones[input];
                 return true;
             }
 
-            TimeZone = null;
+            timeZone = null;
             return false;
         }
 
@@ -1222,7 +1222,7 @@ namespace Dexter.Helpers {
         /// The offset to UTC of the time zone, as a <c>TimeSpan</c>.
         /// </summary>
 
-        public TimeSpan TimeOffset { get { return TimeSpan.FromHours(Offset); } }
+        public TimeSpan TimeOffset { get { return TimeSpan.FromMinutes((int)Math.Round(Offset * 60)); } }
 
         /// <summary>
         /// Stringifies the given timezone
@@ -1256,47 +1256,47 @@ namespace Dexter.Helpers {
         /// <summary>
         /// Attempts to Parse a TimeZone data from given information.
         /// </summary>
-        /// <param name="Str">The string to parse into TimeZone data.</param>
-        /// <param name="LanguageConfiguration">The Configuration data containing static time zone definitions.</param>
-        /// <param name="Result">A <c>TimeZoneData</c> object whose name is <paramref name="Str"/> or the name attached to the abbreviation and Offset is obtained by parsing <paramref name="Str"/></param>
-        /// <returns>A <c>TimeZoneData</c> object whose name is <paramref name="Str"/> and Offset is obtained by parsing <paramref name="Str"/>.</returns>
+        /// <param name="str">The string to parse into TimeZone data.</param>
+        /// <param name="languageConfiguration">The Configuration data containing static time zone definitions.</param>
+        /// <param name="result">A <c>TimeZoneData</c> object whose name is <paramref name="str"/> or the name attached to the abbreviation and Offset is obtained by parsing <paramref name="str"/></param>
+        /// <returns>A <c>TimeZoneData</c> object whose name is <paramref name="str"/> and Offset is obtained by parsing <paramref name="str"/>.</returns>
 
-        public static bool TryParse(string Str, LanguageConfiguration LanguageConfiguration, out TimeZoneData Result) {
+        public static bool TryParse(string str, LanguageConfiguration languageConfiguration, out TimeZoneData result) {
 
-            bool Success = false;
-            Result = new TimeZoneData() {
+            bool success = false;
+            result = new TimeZoneData() {
                 Offset = 0,
-                Name = Str
+                Name = str
             };
 
-            int Sign = 1;
+            int sign = 1;
 
-            int SignPos = Str.IndexOf("+");
-            if (SignPos < 0) {
-                Sign = -1;
-                SignPos = Str.IndexOf("-");
+            int signPos = str.IndexOf("+");
+            if (signPos < 0) {
+                sign = -1;
+                signPos = str.IndexOf("-");
             }
 
-            string TZString = SignPos < 0 ? Str : Str[..SignPos];
+            string TZString = signPos < 0 ? str : str[..signPos];
             if (!string.IsNullOrEmpty(TZString)) {
-                if (LanguageHelper.TryParseTimeZone(TZString.Trim(), LanguageConfiguration, out TimeZoneData TimeZone)) {
-                    Result.Name = TimeZone.Name;
-                    Result.Offset = TimeZone.Offset;
-                    Success = true;
+                if (LanguageHelper.TryParseTimeZone(TZString.Trim(), languageConfiguration, out TimeZoneData TimeZone)) {
+                    result.Name = TimeZone.Name;
+                    result.Offset = TimeZone.Offset;
+                    success = true;
                 }
             } else {
-                Result.Name = "UTC";
+                result.Name = "UTC";
             }
 
-            if (SignPos >= 0) {
-                string[] Mods = Str[(SignPos + 1)..].Split(":");
-                Result.Name += Str[SignPos] + Str[(SignPos + 1)..];
-                Result.Offset += int.Parse(Mods[0]) * Sign;
-                if (Mods.Length > 1) Result.Offset += int.Parse(Mods[1]) / 60f;
-                Success = true;
+            if (signPos >= 0) {
+                string[] Mods = str[(signPos + 1)..].Split(":");
+                result.Name += str[signPos] + str[(signPos + 1)..];
+                result.Offset += int.Parse(Mods[0]) * sign;
+                if (Mods.Length > 1) result.Offset += int.Parse(Mods[1]) / 60f;
+                success = true;
             }
 
-            return Success;
+            return success;
         }
 
         /// <summary>

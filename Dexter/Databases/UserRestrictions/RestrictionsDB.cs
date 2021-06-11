@@ -19,7 +19,7 @@ namespace Dexter.Databases.UserRestrictions {
         /// Gets all restrictions related to a user, or NONE if the <paramref name="UserID"/> is not in the database.
         /// </summary>
         /// <param name="UserID">The ID of the target user to fetch from the database.</param>
-        /// <returns>.</returns>
+        /// <returns>A Restriction object representing all flags for which the user is restricted.</returns>
 
         public Restriction GetUserRestrictions(ulong UserID) {
             UserRestriction UR = UserRestrictions.Find(UserID);

@@ -87,5 +87,11 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public int MaxProfileAttributeLength { get; set; }
+
+        /// <summary>
+        /// Maximum number of social entities in an embed.
+        /// </summary>
+
+        public int MaxUsersPerEmbed { get; set; }
     }
 }

@@ -17,6 +17,7 @@
   "IncludeEventResolutionInfo": false,
   "MaxEventsPerMenu": 5,
   "MaxProfileAttributeLength": 256,
+  "MaxUsersPerEmbed": 15,
   "OfficialEventsChannel": 815762162379259936,
   "OfficialEventsNotifiedRole": 815566407081132032,
   "StandardTimeZone": -5

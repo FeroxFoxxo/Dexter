@@ -31,6 +31,10 @@ namespace Dexter.Databases.UserRestrictions {
         /// <summary>
         /// Prevents users from managing or joining games.
         /// </summary>
-        Games = 16
+        Games = 16,
+        /// <summary>
+        /// Prevents users from viewing or editing their profiles, or anyone from accessing their profile.
+        /// </summary>
+        Social = 32
     }
 }

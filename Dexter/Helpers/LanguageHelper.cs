@@ -616,10 +616,10 @@ namespace Dexter.Helpers {
                         Error = $"Failed to parse {MDY[2]} into a valid year!";
                         return false;
                     }
-                    if (Year < 1970) Year += 2000; //YY parsing
+                    if (Year < 100) Year += 2000; //YY parsing
                     if (Year > 10000) Year -= 10000; //Human Era Parsing
-                    if (Year < 1970 || Year > 3000) {
-                        Error = $"Year {Year} is outside the range of valid accepted years (must be between 1970 and 3000)";
+                    if (Year < 100 || Year > 3000) {
+                        Error = $"Year {Year} is outside the range of valid accepted years (must be between 100 and 3000)";
                         return false;
                     }
                 }
@@ -649,20 +649,29 @@ namespace Dexter.Helpers {
                 Minute = 0;
             } else {
                 if (string.IsNullOrEmpty(TimeSegment)) {
-                    Error = "A time must be provided! Time segments are formatted as: `hh:mm(:ss) (<am/pm>))`";
-                    return false;
+                    if (string.IsNullOrEmpty(DateNumSegment) && string.IsNullOrEmpty(DateStrSegment)) {
+                        Error = "A time or day must be provided! Time segments are formatted as: `hh:mm(:ss) (<am/pm>)`";
+                        return false;
+                    }
+                    else {
+                        TMD = TimeMeridianDiscriminator.H24;
+                        Hour = 0;
+                        Minute = 0;
+                        Second = 0;
+                    }
                 }
+                else {
+                    if (TimeSegment[^1] is 'm' or 'M') {
+                        TMD = TimeSegment[^2] is 'p' or 'P' ? TimeMeridianDiscriminator.PM : TimeMeridianDiscriminator.AM;
+                        TimeSegment = TimeSegment[..^2];
+                    }
 
-                if (TimeSegment[^1] is 'm' or 'M') {
-                    TMD = TimeSegment[^2] is 'p' or 'P' ? TimeMeridianDiscriminator.PM : TimeMeridianDiscriminator.AM;
-                    TimeSegment = TimeSegment[..^2];
+                    string[] hmsf = TimeSegment.Trim().Split(":");
+                    Hour = int.Parse(hmsf[0]);
+                    Minute = int.Parse(hmsf[1]);
+
+                    if (hmsf.Length > 2) Second = float.Parse(hmsf[2]);
                 }
-
-                string[] hmsf = TimeSegment.Trim().Split(":");
-                Hour = int.Parse(hmsf[0]);
-                Minute = int.Parse(hmsf[1]);
-
-                if (hmsf.Length > 2) Second = float.Parse(hmsf[2]);
             }
 
             if (TMD == TimeMeridianDiscriminator.AM && Hour == 12) Hour = 0;
@@ -688,17 +697,17 @@ namespace Dexter.Helpers {
         /// <summary>
         /// Attempts to parse a Month given a CultureInfo for Month Names and Abbreviated Month Names.
         /// </summary>
-        /// <param name="Input">An abbreviated or complete month name in accordance to <paramref name="CultureInfo"/>, case-insensitive.</param>
-        /// <param name="CultureInfo">The contextual CultureInfo containing the calendar information and month names.</param>
-        /// <returns></returns>
+        /// <param name="input">An abbreviated or complete month name in accordance to <paramref name="cultureInfo"/>, case-insensitive.</param>
+        /// <param name="cultureInfo">The contextual CultureInfo containing the calendar information and month names.</param>
+        /// <returns><c>-1</c> if the parsing is unsuccessful, otherwise the number corresponding to the month (1 for January, 2 for February... etc.)</returns>
 
-        public static int ParseMonth(this string Input, CultureInfo CultureInfo = null) {
-            if (CultureInfo == null) CultureInfo = CultureInfo.InvariantCulture;
+        public static int ParseMonth(this string input, CultureInfo cultureInfo = null) {
+            if (cultureInfo == null) cultureInfo = CultureInfo.InvariantCulture;
 
-            Input = Input.ToLower();
+            input = input.ToLower();
 
-            for (int i = 0; i < CultureInfo.DateTimeFormat.MonthNames.Length; i++) {
-                if (Input == CultureInfo.DateTimeFormat.MonthNames[i].ToLower() || Input == CultureInfo.DateTimeFormat.AbbreviatedMonthNames[i].ToLower()) {
+            for (int i = 0; i < cultureInfo.DateTimeFormat.MonthNames.Length; i++) {
+                if (input == cultureInfo.DateTimeFormat.MonthNames[i].ToLower() || input == cultureInfo.DateTimeFormat.AbbreviatedMonthNames[i].ToLower()) {
                     return i + 1;
                 }
             }
@@ -707,20 +716,167 @@ namespace Dexter.Helpers {
         }
 
         /// <summary>
-        /// Attempts to find a time zone by the abbreviated name of <paramref name="Input"/> and returns it as a TimeSpan to be used as an Offset. 
+        /// Attempts to parse a Month given a CultureInfo for Month Names and Abbreviated Month Names.
         /// </summary>
-        /// <param name="Input">The abbreviation of the time zone as it appears in <paramref name="LanguageConfiguration"/>.</param>
-        /// <param name="LanguageConfiguration">The Config file containing data on Time Zone names and their respective offsets.</param>
-        /// <param name="TimeZone">The output value of the parsed <paramref name="Input"/>, or <see langword="null"/> if it can't be parsed.</param>
+        /// <param name="input">An abbreviated or complete month name in accordance to <paramref name="cultureInfo"/>, case-insensitive.</param>
+        /// <param name="cultureInfo">The contextual CultureInfo containing the calendar information and month names.</param>
+        /// <returns>The Month enum corresponding to the parsed month, or <see cref="Month.None"/> if none match.</returns>
+
+        public static Month ParseMonthEnum(this string input, CultureInfo cultureInfo = null) {
+            int m = ParseMonth(input, cultureInfo);
+
+            if (m < 0) return Month.None;
+            else return (Month)m;
+        }
+
+        /// <summary>
+        /// Attempts to obtain a <see cref="Weekday"/> from a string representation of it.
+        /// </summary>
+        /// <param name="input">The raw stringified expression.</param>
+        /// <param name="weekday">The result of the operation if successful.</param>
+        /// <param name="feedback">The description of the result or error in the operation.</param>
+        /// <returns><see langword="true"/> if the parsing is successful, otherwise <see langword="false"/>.</returns>
+
+        public static bool TryParseWeekday(this string input, out Weekday weekday, out string feedback) {
+
+            HashSet<string> days = CultureInfo.InvariantCulture.DateTimeFormat.DayNames.ToHashSet();
+            input = input.ToLower();
+            weekday = Weekday.None;
+
+            for (int i = 0; i < input.Length; i++) {
+                days.RemoveWhere((d) => d.Length < i || char.ToLower(d[i]) != input[i]);
+            }
+
+            if (days.Count == 0) {
+                feedback = $"No days of the week start with the sequence {input}.";
+                return false;
+            }
+            else if (days.Count > 1) {
+                feedback = $"Input is ambiguouos between the following possible terms: {string.Join(", ", days)}.";
+                return false;
+            }
+
+            if (!Enum.TryParse(days.First(), true, out weekday)) {
+                feedback = $"Unable to parse {days.First()} to a valid standard weekday, if you're using the English language, this is an error; please contact a developer so it can be fixed.";
+                return false;
+            }
+            feedback = $"Parsed {weekday} from {input}.";
+            return true;
+        }
+
+        /// <summary>
+        /// Represents a day of the week.
+        /// </summary>
+
+        public enum Weekday : byte {
+            /// <summary>
+            /// Represents the 1st day of the work week.
+            /// </summary>        
+            Monday,
+            /// <summary>
+            /// Represents the 2nd day of the work week.
+            /// </summary>  
+            Tuesday,
+            /// <summary>
+            /// Represents the 3rd day of the work week.
+            /// </summary>  
+            Wednesday,
+            /// <summary>
+            /// Represents the 4th day of the work week.
+            /// </summary>  
+            Thursday,
+            /// <summary>
+            /// Represents the 5th day of the work week.
+            /// </summary>  
+            Friday,
+            /// <summary>
+            /// Represents the 1st day of the weekend.
+            /// </summary> 
+            Saturday,
+            /// <summary>
+            /// Represents the 2nd day of the weekend.
+            /// </summary>  
+            Sunday,
+            /// <summary>
+            /// Represents a non-valid weekday.
+            /// </summary>
+            None
+        }
+
+        /// <summary>
+        /// Represents a month in the year
+        /// </summary>
+
+        public enum Month : byte {
+            /// <summary>
+            /// Represents an invalid month of the year.
+            /// </summary>
+            None,
+            /// <summary>
+            /// Represents the 1st month of the year.
+            /// </summary>
+            January,
+            /// <summary>
+            /// Represents the 2nd month of the year.
+            /// </summary>
+            February,
+            /// <summary>
+            /// Represents the 3rd month of the year.
+            /// </summary>
+            March,
+            /// <summary>
+            /// Represents the 4th month of the year.
+            /// </summary>
+            April,
+            /// <summary>
+            /// Represents the 5th month of the year.
+            /// </summary>
+            May,
+            /// <summary>
+            /// Represents the 6th month of the year.
+            /// </summary>
+            June,
+            /// <summary>
+            /// Represents the 7th month of the year.
+            /// </summary>
+            July,
+            /// <summary>
+            /// Represents the 8th month of the year.
+            /// </summary>
+            August,
+            /// <summary>
+            /// Represents the 9th month of the year.
+            /// </summary>
+            September,
+            /// <summary>
+            /// Represents the 10th month of the year.
+            /// </summary>
+            October,
+            /// <summary>
+            /// Represents the 11th month of the year.
+            /// </summary>
+            November,
+            /// <summary>
+            /// Represents the 12th month of the year.
+            /// </summary>
+            December
+        }
+
+        /// <summary>
+        /// Attempts to find a time zone by the abbreviated name of <paramref name="input"/> and returns it as a TimeSpan to be used as an Offset. 
+        /// </summary>
+        /// <param name="input">The abbreviation of the time zone as it appears in <paramref name="languageConfiguration"/>.</param>
+        /// <param name="languageConfiguration">The Config file containing data on Time Zone names and their respective offsets.</param>
+        /// <param name="timeZone">The output value of the parsed <paramref name="input"/>, or <see langword="null"/> if it can't be parsed.</param>
         /// <returns><see langword="true"/> if the parsing was successful; otherwise <see langword="false"/>.</returns>
 
-        public static bool TryParseTimeZone(this string Input, LanguageConfiguration LanguageConfiguration, out TimeZoneData TimeZone) {
-            if (LanguageConfiguration.TimeZones.ContainsKey(Input)) {
-                TimeZone = LanguageConfiguration.TimeZones[Input];
+        public static bool TryParseTimeZone(this string input, LanguageConfiguration languageConfiguration, out TimeZoneData timeZone) {
+            if (languageConfiguration.TimeZones.ContainsKey(input)) {
+                timeZone = languageConfiguration.TimeZones[input];
                 return true;
             }
 
-            TimeZone = null;
+            timeZone = null;
             return false;
         }
 
@@ -1066,7 +1222,7 @@ namespace Dexter.Helpers {
         /// The offset to UTC of the time zone, as a <c>TimeSpan</c>.
         /// </summary>
 
-        public TimeSpan TimeOffset { get { return TimeSpan.FromHours(Offset); } }
+        public TimeSpan TimeOffset { get { return TimeSpan.FromMinutes((int)Math.Round(Offset * 60)); } }
 
         /// <summary>
         /// Stringifies the given timezone
@@ -1100,47 +1256,47 @@ namespace Dexter.Helpers {
         /// <summary>
         /// Attempts to Parse a TimeZone data from given information.
         /// </summary>
-        /// <param name="Str">The string to parse into TimeZone data.</param>
-        /// <param name="LanguageConfiguration">The Configuration data containing static time zone definitions.</param>
-        /// <param name="Result">A <c>TimeZoneData</c> object whose name is <paramref name="Str"/> or the name attached to the abbreviation and Offset is obtained by parsing <paramref name="Str"/></param>
-        /// <returns>A <c>TimeZoneData</c> object whose name is <paramref name="Str"/> and Offset is obtained by parsing <paramref name="Str"/>.</returns>
+        /// <param name="str">The string to parse into TimeZone data.</param>
+        /// <param name="languageConfiguration">The Configuration data containing static time zone definitions.</param>
+        /// <param name="result">A <c>TimeZoneData</c> object whose name is <paramref name="str"/> or the name attached to the abbreviation and Offset is obtained by parsing <paramref name="str"/></param>
+        /// <returns>A <c>TimeZoneData</c> object whose name is <paramref name="str"/> and Offset is obtained by parsing <paramref name="str"/>.</returns>
 
-        public static bool TryParse(string Str, LanguageConfiguration LanguageConfiguration, out TimeZoneData Result) {
+        public static bool TryParse(string str, LanguageConfiguration languageConfiguration, out TimeZoneData result) {
 
-            bool Success = false;
-            Result = new TimeZoneData() {
+            bool success = false;
+            result = new TimeZoneData() {
                 Offset = 0,
-                Name = Str
+                Name = str
             };
 
-            int Sign = 1;
+            int sign = 1;
 
-            int SignPos = Str.IndexOf("+");
-            if (SignPos < 0) {
-                Sign = -1;
-                SignPos = Str.IndexOf("-");
+            int signPos = str.IndexOf("+");
+            if (signPos < 0) {
+                sign = -1;
+                signPos = str.IndexOf("-");
             }
 
-            string TZString = SignPos < 0 ? Str : Str[..SignPos];
+            string TZString = signPos < 0 ? str : str[..signPos];
             if (!string.IsNullOrEmpty(TZString)) {
-                if (LanguageHelper.TryParseTimeZone(TZString.Trim(), LanguageConfiguration, out TimeZoneData TimeZone)) {
-                    Result.Name = TimeZone.Name;
-                    Result.Offset = TimeZone.Offset;
-                    Success = true;
+                if (LanguageHelper.TryParseTimeZone(TZString.Trim(), languageConfiguration, out TimeZoneData TimeZone)) {
+                    result.Name = TimeZone.Name;
+                    result.Offset = TimeZone.Offset;
+                    success = true;
                 }
             } else {
-                Result.Name = "UTC";
+                result.Name = "UTC";
             }
 
-            if (SignPos >= 0) {
-                string[] Mods = Str[(SignPos + 1)..].Split(":");
-                Result.Name += Str[SignPos] + Str[(SignPos + 1)..];
-                Result.Offset += int.Parse(Mods[0]) * Sign;
-                if (Mods.Length > 1) Result.Offset += int.Parse(Mods[1]) / 60f;
-                Success = true;
+            if (signPos >= 0) {
+                string[] Mods = str[(signPos + 1)..].Split(":");
+                result.Name += str[signPos] + str[(signPos + 1)..];
+                result.Offset += int.Parse(Mods[0]) * sign;
+                if (Mods.Length > 1) result.Offset += int.Parse(Mods[1]) / 60f;
+                success = true;
             }
 
-            return Success;
+            return success;
         }
 
         /// <summary>

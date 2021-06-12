@@ -74,12 +74,24 @@ namespace Dexter.Configurations {
         /// Sets a different embed color for a given event status. The values are 24-bit colors formatted in hexadecimal and stringified.
         /// </summary>
 
-        public Dictionary<EventStatus, string> EventStatusColor { get; set;}
+        public Dictionary<EventStatus, string> EventStatusColor { get; set; }
 
         /// <summary>
         /// Sets whether command help for approving or declining an event should be included in event proposals.
         /// </summary>
 
         public bool IncludeEventResolutionInfo { get; set; }
+
+        /// <summary>
+        /// The maximum length for any given attribute in the user profiles system.
+        /// </summary>
+
+        public int MaxProfileAttributeLength { get; set; }
+
+        /// <summary>
+        /// Maximum number of social entities in an embed.
+        /// </summary>
+
+        public int MaxUsersPerEmbed { get; set; }
     }
 }

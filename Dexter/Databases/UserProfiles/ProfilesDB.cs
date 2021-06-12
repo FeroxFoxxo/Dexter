@@ -43,6 +43,8 @@ namespace Dexter.Databases.UserProfiles {
             if (Profile is null) {
                 Profile = new() {
                     UserID = UserID,
+                    BorkdayTime = 0,
+                    DateJoined = 0,
                     TimeZone = "UTC+0:00",
                     TimeZoneDST = "UTC+0:00",
                     Settings = new()

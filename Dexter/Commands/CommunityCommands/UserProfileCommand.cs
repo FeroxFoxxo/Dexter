@@ -899,8 +899,8 @@ namespace Dexter.Commands {
 
             if (user is null) { await Context.Channel.SendMessageAsync("Unable to find user information!"); }
             
-            bool TZSuccess = LanguageHelper.TryParseTimeZone(profile.TimeZone, LanguageConfiguration, out TimeZoneData TZ);
-            bool TZDSTSuccess = LanguageHelper.TryParseTimeZone(profile.TimeZoneDST, LanguageConfiguration, out TimeZoneData TZDST);
+            bool TZSuccess = TimeZoneData.TryParse(profile.TimeZone, LanguageConfiguration, out TimeZoneData TZ);
+            bool TZDSTSuccess = TimeZoneData.TryParse(profile.TimeZoneDST, LanguageConfiguration, out TimeZoneData TZDST);
 
             await new EmbedBuilder()
                 .WithColor(Color.DarkPurple)

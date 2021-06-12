@@ -37,6 +37,7 @@ namespace Dexter.Commands {
             "-  CONFIG [field] [value]: Configures your social profile preferences, such as privacy and friend requests.\n" +
             "-    To see all configuration fields, don't specify a field or value\n" +
             "-    To see values for a field, don't specify a value")]
+        [BotChannel]
 
         public async Task MyProfileCommand(string action = "get", [Remainder] string parameters = "") {
 

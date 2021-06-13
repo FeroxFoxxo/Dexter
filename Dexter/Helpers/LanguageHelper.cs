@@ -1269,6 +1269,10 @@ namespace Dexter.Helpers {
                 Name = str
             };
 
+            if (str is null) {
+                return false;
+            }
+
             int sign = 1;
 
             int signPos = str.IndexOf("+");
@@ -1289,10 +1293,10 @@ namespace Dexter.Helpers {
             }
 
             if (signPos >= 0) {
-                string[] Mods = str[(signPos + 1)..].Split(":");
+                string[] mods = str[(signPos + 1)..].Split(":");
                 result.Name += str[signPos] + str[(signPos + 1)..];
-                result.Offset += int.Parse(Mods[0]) * sign;
-                if (Mods.Length > 1) result.Offset += int.Parse(Mods[1]) / 60f;
+                result.Offset += int.Parse(mods[0]) * sign;
+                if (mods.Length > 1) result.Offset += int.Parse(mods[1]) / 60f;
                 success = true;
             }
 

@@ -34,7 +34,7 @@ namespace Dexter.Commands {
             "-  SET [attribute] [value]: Set one of your profile attributes to a given value.\n" +
             "-    Attributes are the following: " + AttributeNames + "\n" +
             "-    For Timezone attributes, the value should be a timezone abbreviation (use `~timezone search [abbr]` to check out similar abbreviations and meanings)\n" +
-            "-    For TimeZone rules, follow the syntax `(from) [N]th (Weekday) (of) [Month] to [N]th (Weekday) (of) [Month]\n" +
+            "-    For TimeZone rules, follow the syntax `(from) [N]th (Weekday) (of) [Month] to [N]th (Weekday) (of) [Month]`\n" +
             "-  CONFIG [field] [value]: Configures your social profile preferences, such as privacy and friend requests.\n" +
             "-    To see all configuration fields, don't specify a field or value\n" +
             "-    To see values for a field, don't specify a value")]

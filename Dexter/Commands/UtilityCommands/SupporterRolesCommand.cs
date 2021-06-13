@@ -13,6 +13,7 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
+using Discord.WebSocket;
 using Newtonsoft.Json;
 
 namespace Dexter.Commands {
@@ -147,7 +148,8 @@ namespace Dexter.Commands {
         const int IconRoleNameMargin = 10;
 
         private async Task ReloadColorList(bool verbose = false) {
-            IEnumerable<IRole> roles = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Roles;
+            List<SocketRole> roles = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Roles.ToList();
+            roles.Sort((ra, rb) => rb.Position.CompareTo(ra.Position));
             List<IRole> colorRoles = new();
 
             foreach (IRole role in roles) {
@@ -186,27 +188,26 @@ namespace Dexter.Commands {
                     ColorMatrix colorMatrix = BasicTransform(role.Color.R / 255f, role.Color.G / 255f, role.Color.B / 255f);
                     ImageAttributes imageAttributes = new();
                     imageAttributes.SetColorMatrix(colorMatrix);
-                    Console.Out.WriteLine($"Role {role.Name}: ({row}, {col})");
                     g.DrawImage(icon, 
                         new Rectangle(col * colwidth, row * rowheight, rowheight, rowheight), 
                         0, 0, icon.Width, icon.Height,
                         GraphicsUnit.Pixel,
                         imageAttributes);
                     g.DrawString(ToRoleName(role), font, brush,
-                        col * colwidth + rowheight + IconRoleNameMargin, (rowheight - UtilityConfiguration.ColorListFontSize) / 2);
+                        col * colwidth + rowheight + IconRoleNameMargin, (rowheight - UtilityConfiguration.ColorListFontSize) / 2 + row * rowheight);
 
                     if (UtilityConfiguration.ColorListDisplayByRows) {
-                        row++;
-                        if (row >= rowcount) {
-                            row = 0;
-                            col++;
-                        }
-                    }
-                    else {
                         col++;
                         if (col >= colcount) {
                             col = 0;
                             row++;
+                        }
+                    }
+                    else {
+                        row++;
+                        if (row >= rowcount) {
+                            row = 0;
+                            col++;
                         }
                     }
                 }

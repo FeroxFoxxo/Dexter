@@ -42,13 +42,13 @@ namespace Dexter.Databases.UserProfiles {
         /// The user's gender and pronouns.
         /// </summary>
 
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
 
         /// <summary>
         /// The user's sexual and romantic orientation.
         /// </summary>
 
-        public string Orientation { get; set; }
+        public string? Orientation { get; set; }
 
         /// <summary>
         /// The user's birthday date for each year.
@@ -73,19 +73,19 @@ namespace Dexter.Databases.UserProfiles {
         /// The JSON expression for Borkday.
         /// </summary>
 
-        public string BorkdayStr { get; set; }
+        public string? BorkdayStr { get; set; }
 
         /// <summary>
         /// The user's birth year.
         /// </summary>
 
-        public int BirthYear { get; set; }
+        public int? BirthYear { get; set; }
 
         /// <summary>
         /// The token for the timer that control the borkday role event for the user attached to this profile.
         /// </summary>
 
-        public string BorkdayTimerToken { get; set; }
+        public string? BorkdayTimerToken { get; set; }
 
         /// <summary>
         /// The user's time zone abbreviation for non-daylight saving time.
@@ -97,7 +97,7 @@ namespace Dexter.Databases.UserProfiles {
         /// The user's time zone abbreviation for daylight saving time.
         /// </summary>
 
-        public string TimeZoneDST { get; set; }
+        public string? TimeZoneDST { get; set; }
 
         /// <summary>
         /// Describes the rules of DST functionality for the user's local area.
@@ -121,31 +121,31 @@ namespace Dexter.Databases.UserProfiles {
         /// String JSON representation of DSTRules. 
         /// </summary>
 
-        public string DSTRulesStr { get; set; }
+        public string? DSTRulesStr { get; set; }
 
         /// <summary>
         /// The user's sona information provided by the user.
         /// </summary>
 
-        public string SonaInfo { get; set; }
+        public string? SonaInfo { get; set; }
 
         /// <summary>
         /// The user's location, up to the specificity that the user wishes to set.
         /// </summary>
 
-        public string Nationality { get; set; }
+        public string? Nationality { get; set; }
 
         /// <summary>
         /// The user's known languages. 
         /// </summary>
 
-        public string Languages { get; set; }
+        public string? Languages { get; set; }
 
         /// <summary>
         /// Miscellaneous user information.
         /// </summary>
 
-        public string Info { get; set; }
+        public string? Info { get; set; }
 
         /// <summary>
         /// Represents the per-user specific preferences to do with the profile system.

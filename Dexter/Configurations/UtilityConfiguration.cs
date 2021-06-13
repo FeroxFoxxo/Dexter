@@ -68,5 +68,11 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public int ColorListFontSize { get; set; }
+
+        /// <summary>
+        /// The set of role IDs for roles which grant permission to change your color role.
+        /// </summary>
+
+        public ulong[] ColorChangeRoles { get; set; }
     }
 }

@@ -11,5 +11,8 @@
   "ColorListColCount": 3,
   "ColorListRowHeight": 125,
   "ColorListDisplayByRows": false,
-  "ColorListFontSize": 60
+  "ColorListFontSize": 60,
+  "ColorChangeRoles": [
+    853691823197257778
+  ]
 }

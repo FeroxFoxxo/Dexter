@@ -12,28 +12,77 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
+using Discord.Net;
 using Newtonsoft.Json;
 
 namespace Dexter.Commands {
     public partial class UtilityCommands {
 
+        /// <summary>
+        /// Sets the role color of users with the permission or displays the list of available color roles.
+        /// </summary>
+        /// <param name="colorname"></param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
+
         [Command("color")]
+        [Summary("Changes your color role or lists all available color roles.")]
+        [ExtendedSummary("Changes your color role or lists all available color roles.\n" +
+            "`color LIST` - displays a list of available color roles\n" +
+            "`color NONE` - removes all color roles from you\n" +
+            "`color [colorname]` - changes your current color role to the one specified.")]
         
-        public async Task SupporterRolesCommand(string colorname) {
+        public async Task SupporterRolesCommand([Remainder] string colorname) {
 
             if (colorname == "list") {
                 await PrintColorOptions();
                 return;
             }
 
+            IGuildUser user;
+            if (Context.User is not IGuildUser) {
+                user = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id);
+                if (user is null) {
+                    await BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Unable to find user!")
+                        .WithDescription("This could be due to caching errors, but I couldn't find you in the server! Try again later, if this persists, contact the developer team or an administrator.")
+                        .SendEmbed(Context.Channel);
+                    return;
+                }
+            } else {
+                user = (IGuildUser) Context.User;
+            }
+
             IEnumerable<IRole> roles = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Roles;
+            Dictionary<ulong, IRole> colorRoleIDs = new();
 
             IRole toAdd = null;
-            foreach(IRole role in roles) {
-                if (role.Name.ToLower().StartsWith(UtilityConfiguration.ColorRolePrefix.ToLower() + colorname.ToLower())) {
-                    toAdd = role;
-                    break;
+            bool found = false;
+            foreach (IRole role in roles) {
+                if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix)) {
+                    colorRoleIDs.Add(role.Id, role);
+                    if (!found && role.Name.ToLower().EndsWith(colorname.ToLower())) {
+                        toAdd = role;
+                    }
                 }
+            }
+            bool canChangeColor = CanChangeColor(user);
+            if (!canChangeColor || colorname.ToLower() == "none") {
+                if (!await TryRemoveRoles(user, colorRoleIDs)) return;
+
+                if (!canChangeColor)
+                    await Context.Channel.SendMessageAsync("You don't have the necessary roles to change your color role!");
+                else
+                    await Context.Channel.SendMessageAsync("Removed color roles!");
+                return;
+            }
+
+            if (UtilityConfiguration.LockedColors.ContainsKey(toAdd.Id) 
+                && !user.RoleIds.Contains(UtilityConfiguration.LockedColors[toAdd.Id])) {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Locked Role!")
+                    .WithDescription($"In order to unlock this role, you must first get <@&{UtilityConfiguration.LockedColors[toAdd.Id]}>.")
+                    .SendEmbed(Context.Channel);
+                return;
             }
 
             if (toAdd is null) {
@@ -42,6 +91,31 @@ namespace Dexter.Commands {
                     .WithDescription($"Unable to find the specified color \"{colorname}\". To see a list of colors and their names, use the `color list` command.")
                     .SendEmbed(Context.Channel);
                 return;
+            }
+
+            if (!await TryRemoveRoles(user, colorRoleIDs)) return;
+            try {
+                await user.AddRoleAsync(toAdd);
+            }
+            catch {
+                await Context.Channel.SendMessageAsync("Unable to add role! Missing required permissions.");
+                return;
+            }
+
+            await BuildEmbed(EmojiEnum.Love)
+                .WithTitle("Successfully added new role!")
+                .WithDescription($"Changed your color role to: {toAdd.Name}.")
+                .SendEmbed(Context.Channel);
+        }
+
+        private async Task<bool> TryRemoveRoles(IGuildUser user, Dictionary<ulong, IRole> colorRoleIDs) {
+            try {
+                await user.RemoveRolesAsync(colorRoleIDs.Values);
+                return true;
+            }
+            catch(HttpException e) {
+                await Context.Channel.SendMessageAsync($"Missing permissions for role management! {e}");
+                return false;
             }
         }
 
@@ -56,6 +130,11 @@ namespace Dexter.Commands {
 
             await Context.Channel.SendFileAsync(filepath);
         }
+
+        /// <summary>
+        /// Reloads the emote list image from the given configuration.
+        /// </summary>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         [Command("reloadcolors")]
         [Summary("Updates the color list graphic to reflect new settings and new added roles")]
@@ -95,7 +174,7 @@ namespace Dexter.Commands {
             FontFamily fontfamily = privateFontCollection.Families.First();
             Font font = new(fontfamily, UtilityConfiguration.ColorListFontSize, FontStyle.Regular, GraphicsUnit.Pixel);
 
-            Bitmap picture = new Bitmap(colwidth * colcount, height);
+            Bitmap picture = new(colwidth * colcount, height);
             using (Graphics g = Graphics.FromImage(picture)) {
                 int col = 0;
                 int row = 0;
@@ -154,7 +233,16 @@ namespace Dexter.Commands {
         }
 
         private string ToRoleName(IRole role) {
-            return role.Name.Substring(UtilityConfiguration.ColorRolePrefix.Length);
+            return role.Name[UtilityConfiguration.ColorRolePrefix.Length..];
+        }
+
+        private bool CanChangeColor(IGuildUser user) {
+            if (user is null) return false;
+
+            foreach(ulong roleId in user.RoleIds) {
+                if (UtilityConfiguration.ColorChangeRoles.Contains(roleId)) return true;
+            }
+            return false;
         }
     }
 

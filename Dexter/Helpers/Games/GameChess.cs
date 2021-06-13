@@ -1007,7 +1007,6 @@ namespace Dexter.Helpers.Games {
             public char promote;
 
             public bool IsLegal(Board boardOriginal, out string error) {
-                error = "";
                 Board board = (Board) boardOriginal.Clone();
                 board.ExecuteMove(this);
                 if (!isCastle) {

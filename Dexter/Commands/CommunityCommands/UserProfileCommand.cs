@@ -82,23 +82,70 @@ namespace Dexter.Commands {
                     switch(attribute.ToLower()) {
                         case "timezone":
                         case "tz":
-                            if (!TimeZoneData.TryParse(value, LanguageConfiguration, out TimeZoneData timeZone)) {
+                            string[] segments = value.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                            TimeZoneData tz;
+                            TimeZoneData tzdst;
+                            DaylightShiftRules tzrules = null;
+
+                            if (segments.Length == 1) {
+                                if (!TimeZoneData.TryParse(value, LanguageConfiguration, out tz)) {
+                                    await BuildEmbed(EmojiEnum.Annoyed)
+                                        .WithTitle("Unable to find time zone")
+                                        .WithDescription($"Couldn't find time zone {value}. Make sure you capitalize it correctly. You can use the `~timezone search [abbreviation]` command to look for similar recognized time zones.")
+                                        .SendEmbed(Context.Channel);
+                                    return;
+                                }
+
+                                profile.TimeZone = value;
+                                profile.TimeZoneDST = value;
+                                await BuildEmbed(EmojiEnum.Love)
+                                    .WithTitle("Successfully set default time zone!")
+                                    .WithDescription($"Your default and DST time zones have been set to {tz}.")
+                                    .SendEmbed(Context.Channel);
+
+                                await CreateBirthdayTimer(profile);
+                                break;
+                            }
+                            else if (segments.Length >= 2) {
+                                bool tzParsed = TimeZoneData.TryParse(segments[0], LanguageConfiguration, out tz);
+                                bool tzdstParsed = TimeZoneData.TryParse(segments[1], LanguageConfiguration, out tzdst);
+
+                                if (!tzParsed || !tzdstParsed) {
+                                    await BuildEmbed(EmojiEnum.Annoyed)
+                                        .WithTitle("Unable to find time zone!")
+                                        .WithDescription($"I was unable to parse the following time zones:{(tzParsed ? "" : $" \"{segments[0]}\"")}{(tzdstParsed ? "" : $" \"{segments[1]}\"")}.\n" +
+                                        $"Make sure you've capitalized it correctly. You can find similar time zone abbreviations by using `~timezone search [abbr]`.")
+                                        .SendEmbed(Context.Channel);
+                                    return;
+                                }
+
+                                bool rulesParsed = false;
+                                string rulesError = "";
+                                if (segments.Length >= 3) {
+                                    rulesParsed = DaylightShiftRules.TryParse(segments[2], LanguageConfiguration, out rulesError, out tzrules);
+                                    if (rulesParsed) {
+                                        profile.DSTRules = tzrules;
+                                    }
+                                }
+
+                                profile.TimeZone = segments[0];
+                                profile.TimeZoneDST = segments[1];
+                                await BuildEmbed(EmojiEnum.Love)
+                                    .WithTitle("Successfully set time zones!")
+                                    .WithDescription($"Your default and DST time zones have been set to **{tz}** and **{tzdst}** respectively." +
+                                    (rulesParsed ? $"\nDST will be considered to be {tzrules}" : "No new DST rules were applied.") +
+                                    (!rulesParsed && segments.Length >= 3 ? $"\nError while parsing DSTRules: {rulesError}" : ""))
+                                    .SendEmbed(Context.Channel);
+                                break;
+                            }
+                            else {
                                 await BuildEmbed(EmojiEnum.Annoyed)
-                                    .WithTitle("Unable to find time zone")
-                                    .WithDescription($"Couldn't find time zone {value}. Make sure you capitalize it correctly. You can use the `~timezone search [abbreviation]` command to look for similar recognized time zones.")
+                                    .WithTitle("Malformed Value")
+                                    .WithDescription("Please type the value you wish to give to timezone in a valid format.")
                                     .SendEmbed(Context.Channel);
                                 return;
                             }
-
-                            profile.TimeZone = value;
-                            profile.TimeZoneDST = value;
-                            await BuildEmbed(EmojiEnum.Love)
-                                .WithTitle("Successfully set default time zone!")
-                                .WithDescription($"Your default and DST time zones have been set to {timeZone}.")
-                                .SendEmbed(Context.Channel);
-
-                            await CreateBirthdayTimer(profile);
-                            break;
                         case "dst":
                         case "dsttz":
                         case "dsttimezone":

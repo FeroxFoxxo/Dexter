@@ -874,6 +874,9 @@ namespace Dexter.Helpers {
             if (languageConfiguration.TimeZones.ContainsKey(input)) {
                 timeZone = languageConfiguration.TimeZones[input];
                 return true;
+            } else if (languageConfiguration.TimeZones.ContainsKey(input.ToUpper())) {
+                timeZone = languageConfiguration.TimeZones[input.ToUpper()];
+                return true;
             }
 
             timeZone = null;

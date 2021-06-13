@@ -129,6 +129,8 @@ namespace Dexter.Commands {
                             break;
                         case "dstrules":
                         case "dstrule":
+                        case "timezonerules":
+                        case "tzrules":
                             if (value == "none") {
                                 profile.DSTRules = null;
                                 await BuildEmbed(EmojiEnum.Sign)

@@ -264,7 +264,7 @@ namespace Dexter.Databases.UserProfiles {
 
         public string ToString(bool isAbsolute = true) {
             if (isAbsolute) return $"{((int)Day).Ordinal()} of {Month}";
-            else return $"{(WeekdayCount <= 0 ? "last" : WeekdayCount.Ordinal())} {RelativeWeekday} of {Month}";
+            else return $"{(WeekdayCount <= 0 ? "last" : (WeekdayCount+1).Ordinal())} {RelativeWeekday} of {Month}";
         }
 
         static readonly string[] ordinals = { "last", "first", "second", "third", "fourth", "fifth", "sixth" };

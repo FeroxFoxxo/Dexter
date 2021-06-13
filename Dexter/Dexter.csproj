@@ -461,6 +461,36 @@
 		<None Update="Images\Headpats\4.png">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="Images\OtherMedia\Fonts\Whitney\whitneybold.otf">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Images\OtherMedia\Fonts\Whitney\whitneybook.otf">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Images\OtherMedia\Fonts\Whitney\whitneybookitalic.otf">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Images\OtherMedia\Fonts\Whitney\whitneylight.otf">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Images\OtherMedia\Fonts\Whitney\whitneylightitalic.otf">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Images\OtherMedia\Fonts\Whitney\whitneymedium.otf">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Images\OtherMedia\Fonts\Whitney\whitneymediumitalic.otf">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Images\OtherMedia\Fonts\Whitney\whitneysemibold.otf">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Images\OtherMedia\Fonts\Whitney\whitneysemibolditalic.otf">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Images\PawIcon.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Images\ProfilePictures\DexterSignAwesome.png">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

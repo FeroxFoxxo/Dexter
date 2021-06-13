@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -936,7 +937,7 @@ namespace Dexter.Commands {
         private string GetAge(UserProfile profile, out TimeSpan age) {
             age = default;
             
-            if (profile.BirthYear <= 0) {
+            if (profile.BirthYear is null || profile.BirthYear <= 0) {
                 return "Insufficient information; Missing birth year.";
             }
             else {
@@ -944,7 +945,7 @@ namespace Dexter.Commands {
                     age = DateTimeOffset.Now.Subtract(GetBirthDay(profile));
                     return $"{age.Humanize(3, maxUnit: Humanizer.Localisation.TimeUnit.Year, minUnit: Humanizer.Localisation.TimeUnit.Day)}";
                 }
-                int yrs = DateTime.Now.Year - profile.BirthYear;
+                int yrs = DateTime.Now.Year - (int) profile.BirthYear;
                 age = TimeSpan.FromDays(yrs * 365.24);
                 return $"Approximately {yrs} years.";
             }
@@ -957,7 +958,16 @@ namespace Dexter.Commands {
         private DateTimeOffset GetBirthDay(UserProfile profile) {
             int day = profile.Borkday?.Day ?? 0;
             LanguageHelper.Month month = profile.Borkday?.Month ?? LanguageHelper.Month.January;
-            return new DateTimeOffset(new DateTime(profile.BirthYear <= 0 ? DateTime.Now.Year : profile.BirthYear, (int)month, day, 0, 0, 0), profile?.GetRelevantTimeZone(LanguageConfiguration).TimeOffset ?? default);
+            DateTime birthday;
+
+            if (day == 29 && month == LanguageHelper.Month.February
+                && !CultureInfo.InvariantCulture.Calendar.IsLeapYear(profile.BirthYear ?? DateTime.Now.Year)) {
+                day = 1;
+                month = LanguageHelper.Month.March;
+            }
+            birthday = new DateTime(profile.BirthYear ?? DateTime.Now.Year, (int)month, day, 0, 0, 0);
+
+            return new DateTimeOffset(birthday, profile?.GetRelevantTimeZone(LanguageConfiguration).TimeOffset ?? default);
         }
 
         private bool TryRemoveBirthdayTimer(UserProfile profile) {
@@ -975,14 +985,24 @@ namespace Dexter.Commands {
             }
 
             int nextYear = DateTime.Now.Year;
-            DateTime relevantDay = new DateTime(nextYear, (int)profile.Borkday.Month, profile.Borkday.Day, 0, 0, 0);
-            TimeSpan relevantOffset = profile.GetRelevantTimeZone(new DateTimeOffset(relevantDay), LanguageConfiguration).TimeOffset;
-            if (new DateTimeOffset(relevantDay, relevantOffset).CompareTo(DateTimeOffset.Now) <= 0) {
+            int monthNow = DateTime.Now.Month;
+            int dayNow = DateTime.Now.Day;
+            int monthBD = (int)profile.Borkday.Month;
+            int dayBD = profile.Borkday.Day;
+            if (monthBD < monthNow || (monthBD == monthNow && dayBD <= dayNow)) {
                 nextYear++;
             }
+            if (monthBD == (int)LanguageHelper.Month.February && dayBD == 29
+                && !CultureInfo.InvariantCulture.Calendar.IsLeapYear(nextYear)) {
+                monthBD++;
+                dayBD = 1;
+            }
+            DateTime relevantDay = new DateTime(nextYear, monthBD, dayBD, 0, 0, 0);
+            TimeSpan relevantOffset = profile.GetRelevantTimeZone(new DateTimeOffset(relevantDay), LanguageConfiguration).TimeOffset;
 
-            TimeSpan diff = new DateTimeOffset(new DateTime(nextYear, (int)profile.Borkday.Month, profile.Borkday.Day, 0, 0, 0), relevantOffset).Subtract(DateTimeOffset.Now);
+            TimeSpan diff = new DateTimeOffset(relevantDay, relevantOffset).Subtract(DateTimeOffset.Now);
             profile.BorkdayTimerToken = await CreateEventTimer(BorkdayCallback, new Dictionary<string, string>() { {"ID", profile.UserID.ToString()} }, (int)diff.TotalSeconds, Databases.EventTimers.TimerType.Expire, TimerService);
+            await ProfilesDB.SaveChangesAsync();
         }
 
         /// <summary>

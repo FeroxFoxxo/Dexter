@@ -110,8 +110,17 @@ namespace Dexter.Commands {
         }
 
         private async Task<bool> TryRemoveRoles(IGuildUser user, Dictionary<ulong, IRole> colorRoleIDs) {
+            List<IRole> toRemove = new();
+            foreach(ulong roleID in user.RoleIds) {
+                if (colorRoleIDs.ContainsKey(roleID)) {
+                    toRemove.Add(colorRoleIDs[roleID]);
+                }
+            }
+
+            if (!toRemove.Any()) return true;
+
             try {
-                await user.RemoveRolesAsync(colorRoleIDs.Values);
+                await user.RemoveRolesAsync(toRemove);
                 return true;
             }
             catch(HttpException e) {

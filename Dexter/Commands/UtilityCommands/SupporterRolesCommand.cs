@@ -63,6 +63,7 @@ namespace Dexter.Commands {
                     colorRoleIDs.Add(role.Id, role);
                     if (!found && role.Name.ToLower().EndsWith(colorname.ToLower())) {
                         toAdd = role;
+                        found = true;
                     }
                 }
             }

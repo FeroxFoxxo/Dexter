@@ -572,6 +572,10 @@ namespace Dexter.Helpers {
                 return true;
             }
 
+            foreach (Match m in Regex.Matches(Input, @"[0-9](st|nd|rd|th)")) {
+                Input = $"{Input[..m.Index]}{m.Value[0]}{(Input.Length > m.Index + m.Length ? Input[(m.Index + m.Length)..] : "")}";
+            }
+
             string DateStrSegment = Regex.Match(Input, @"(^|\s)(([A-Za-z]{3,}\s[0-9]{1,2})|([0-9]{1,2}\s[A-Za-z]{3,}))((,|\s)\s?[0-9]{2,5}(\s|$))?").Value.Trim();
             string DateNumSegment = Regex.Match(Input, @"[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,5})?").Value;
             string TimeSimplifiedSegment = Regex.Match(Input, @"(^|\s)[0-9]{1,2}\s?[pa]m(\s|$)", RegexOptions.IgnoreCase).Value;

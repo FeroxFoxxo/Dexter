@@ -589,7 +589,7 @@ namespace Dexter.Databases.UserProfiles {
         /// Indicates whether to block friend requests directed to this user in general.
         /// </summary>
 
-        public bool BlockRequests { get; set; } = false; //Missing implementation
+        public bool BlockRequests { get; set; } = false;
 
     }
 }

@@ -357,7 +357,8 @@ namespace Dexter.Commands {
                             .WithTitle("Profile Settings")
                             .WithDescription(
                             $"**Privacy** [*privacy*]: {profile.Settings.Privacy}\n" +
-                            $"**Get Borkday Role on Borkday** [*borkdayrole*]: {(profile.Settings.GiveBorkdayRole ? "Yes" : "No")}")
+                            $"**Get Borkday Role on Borkday** [*borkdayrole*]: {(profile.Settings.GiveBorkdayRole ? "Yes" : "No")}\n" +
+                            $"**Receive Friend Requests** [*friendrequests*]: {(profile.Settings.BlockRequests ? "Silent" : "Regular")}")
                             .SendEmbed(Context.Channel);
                         return;
                     }
@@ -437,6 +438,32 @@ namespace Dexter.Commands {
                                         .AddField("Possible Values",
                                         "True: Activate the service.\n" +
                                         "False: Deactivate the service.")
+                                        .SendEmbed(Context.Channel);
+                                    return;
+                            }
+                            break;
+                        case "friendrequests":
+                        case "receivefriendrequests":
+                            switch(value.ToLower()) {
+                                case "yes":
+                                case "true":
+                                case "regular":
+                                    prefs.BlockRequests = false;
+                                    await GenericSuccessInfo("Receive Friend Requests", "True; you will receive Dexter DMs for active friend requests.");
+                                    break;
+                                case "no":
+                                case "false":
+                                case "silent":
+                                    prefs.GiveBorkdayRole = true;
+                                    await GenericSuccessInfo("Receive Friend Requests", "False; you will no longer receive DMs from Dexter when receiving friend requests.");
+                                    break;
+                                default:
+                                    await BuildEmbed(EmojiEnum.Sign)
+                                        .WithTitle("Information about \"Receive Friend Requests\"")
+                                        .WithDescription("This setting dictates whether you get DMd by Dexter in sight of a new friend request.")
+                                        .AddField("Possible Values",
+                                        "True: Regular friend requests.\n" +
+                                        "False: Silent friend requests.")
                                         .SendEmbed(Context.Channel);
                                     return;
                             }
@@ -574,7 +601,7 @@ namespace Dexter.Commands {
                 profile = ProfilesDB.GetOrCreateProfile(user.Id);
             }
 
-            if (user is not null && user.Equals(Context.User)) {
+            if (user is not null && user.Id == Context.User.Id) {
                 await BuildEmbed(EmojiEnum.Wut)
                     .WithTitle("Self-Centered much?")
                     .WithDescription("Look, I don't know what you're trying to do with yourself, but you should probably considering socializing with *other beings*.")
@@ -611,6 +638,16 @@ namespace Dexter.Commands {
 
                         if (req is null) {
                             req = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.FriendRequest);
+
+                            if (profile.Settings.BlockRequests) {
+                                await new EmbedBuilder()
+                                    .WithColor(Color.Orange)
+                                    .WithTitle("User has silent friend requests!")
+                                    .WithDescription($"User {user.Mention} now has a pending friend request from you, but they weren't notified of it. They can check their active friend requests with `{BotConfiguration.Prefix}friend requests`.\n" +
+                                    $"To accept your request, they must use the `{BotConfiguration.Prefix}friend add {Context.User.Id}` command.")
+                                    .SendEmbed(Context.Channel);
+                                return;
+                            }
 
                             try {
                                 await new EmbedBuilder()

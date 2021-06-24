@@ -1,0 +1,168 @@
+﻿using Dexter.Abstractions;
+using Dexter.Configurations;
+using Dexter.Enums;
+using Dexter.Extensions;
+using Discord;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Dexter.Databases.Levels {
+    
+    /// <summary>
+    /// An abstraction of the data structure holding all relevant information about user levels.
+    /// </summary>
+
+    public class LevelingDB : Database {
+
+        /// <summary>
+        /// The configuration file that contains all relevant data for the leveling module.
+        /// </summary>
+
+        public LevelingConfiguration LevelingConfiguration { get; set; }
+
+        /// <summary>
+        /// Generic bot configuration that relates to overarching settings.
+        /// </summary>
+
+        public BotConfiguration BotConfiguration { get; set; }
+
+        /// <summary>
+        /// The data structure containing information for user XP.
+        /// </summary>
+
+        public DbSet<UserLevel> Levels { get; set; }
+
+        /// <summary>
+        /// Stores a collection of user preferences for rank card display.
+        /// </summary>
+
+        public DbSet<LevelPreferences> Prefs { get; set; }
+
+        /// <summary>
+        /// The data structure containing all instances of users on Text XP cooldowns.
+        /// </summary>
+
+        public DbSet<UserTextXPRecord> OnTextCooldowns { get; set; }
+
+        public UserLevel GetOrCreateLevelData(ulong id, bool save = true) {
+            UserLevel level = Levels.Find(id);
+
+            if (level is null) {
+                level = new UserLevel {
+                    UserID = id,
+                    TextXP = 0,
+                    VoiceXP = 0
+                };
+
+                Levels.Add(level);
+                if (save)
+                    SaveChanges();
+            }
+
+            return level;
+        }
+
+        /// <summary>
+        /// Gets a level record for a given user, or creates one if it doesn't exist.
+        /// </summary>
+        /// <param name="id">The ID of the user to look up.</param>
+        /// <param name="settings">The corresponding User Preferences object for this user.</param>
+        /// <returns>A <see cref="UserLevel"/> object containing the obtained XP levels for the given <paramref name="id"/>.</returns>
+
+        public UserLevel GetOrCreateLevelData(ulong id, out LevelPreferences settings, bool save = true) {
+            UserLevel level = Levels.Find(id);
+            settings = Prefs.Find(id);
+
+            bool toSave = false;
+            if (level is null) {
+                level = new UserLevel {
+                    UserID = id,
+                    TextXP = 0,
+                    VoiceXP = 0
+                };
+
+                Levels.Add(level);
+                toSave = true;
+            }
+
+            if (settings is null) {
+                settings = new() {
+                    UserId = id
+                };
+
+                Prefs.Add(settings);
+                toSave = true;
+            }
+
+            if (toSave && save) SaveChanges();
+
+            return level;
+        }
+
+        /// <summary>
+        /// Grants a given user an amount of XP and announces the level up in <paramref name="fallbackChannel"/> if appropriate.
+        /// </summary>
+        /// <param name="xpIncrease">The amount of XP to grant the user.</param>
+        /// <param name="isTextXp">Whether to grant Text XP or Voice XP.</param>
+        /// <param name="user">Which user to grant the XP to.</param>
+        /// <param name="fallbackChannel">The channel to send the level up message in, if appropriate.</param>
+        /// <param name="sendLevelUp">Whether to send a level up message at all.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
+
+        public async Task IncrementUserXP (int xpIncrease, bool isTextXp, IGuildUser user, ITextChannel fallbackChannel, bool sendLevelUp) {
+            UserLevel userlevel = Levels.Find(user.Id);
+
+            if (userlevel == null) {
+                userlevel = new UserLevel() { UserID = user.Id, TextXP = 0, VoiceXP = 0 };
+                Levels.Add(userlevel);
+                await SaveChangesAsync();
+            }
+
+            int currentLevel;
+            int otherLevel;
+            long xp;
+
+            if (isTextXp) {
+                userlevel.TextXP += xpIncrease;
+                currentLevel = LevelingConfiguration.GetLevelFromXP(userlevel.TextXP, out xp, out _);
+                otherLevel = LevelingConfiguration.GetLevelFromXP(userlevel.VoiceXP, out _, out _);
+            }
+            else {
+                userlevel.VoiceXP += xpIncrease;
+                currentLevel = LevelingConfiguration.GetLevelFromXP(userlevel.VoiceXP, out xp, out _);
+                otherLevel = LevelingConfiguration.GetLevelFromXP(userlevel.TextXP, out _, out _);
+            }
+
+            if (xp < xpIncrease) {
+                int newLevel = UserLevel.TotalLevel(LevelingConfiguration, isTextXp ? currentLevel : otherLevel, isTextXp ? otherLevel : currentLevel);
+                if (sendLevelUp)
+                    await fallbackChannel.SendMessageAsync(LevelingConfiguration.LevelUpMessage
+                        .Replace("{TYPE}", isTextXp ? "text" : "voice")
+                        .Replace("{MENTION}", user.Mention)
+                        .Replace("{LVL}", currentLevel.ToString()));
+
+                if (LevelingConfiguration.Levels.ContainsKey(newLevel))
+                    if (!user.RoleIds.Contains(LevelingConfiguration.Levels[newLevel])) {
+                        IRole role = user.Guild.GetRole(LevelingConfiguration.Levels[newLevel]);
+
+                        await user.AddRoleAsync(role);
+
+                        if (sendLevelUp)
+                            await new EmbedBuilder().BuildEmbed(EmojiEnum.Love, BotConfiguration)
+                                .WithTitle("You Just Ranked Up!")
+                                .WithDescription($"OwO, what's this? You just got the {role.Name} role!\nCongrats~! <3")
+                                .WithCurrentTimestamp()
+                                .WithFooter($"{user.Guild.Name} Staff Team")
+                                .SendEmbed(user, fallbackChannel);
+                    }
+            }
+
+            await SaveChangesAsync();
+        }
+
+    }
+
+}

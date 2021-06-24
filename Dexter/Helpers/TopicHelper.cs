@@ -85,7 +85,7 @@ namespace Dexter.Commands {
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         public async Task SendTopic(TopicType TopicType, string Name) {
-            FunTopic FunTopic = await FunTopicsDB.Topics.GetRandomTopic(TopicType);
+            FunTopic FunTopic = FunTopicsDB.Topics.GetRandomTopic(TopicType);
 
             if (FunTopic == null) {
                 await BuildEmbed(EmojiEnum.Annoyed)

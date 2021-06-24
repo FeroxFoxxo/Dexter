@@ -2,6 +2,7 @@
 using Dexter.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,19 +21,15 @@ namespace Dexter.Extensions {
         /// <param name="TopicType">The type of topic to draw from. It may be a TOPIC or a WOULDYOURATHER.</param>
         /// <returns>A tasked result of an instance of a fun object.</returns>
         
-        public static async Task<FunTopic> GetRandomTopic(this DbSet<FunTopic> Topics, TopicType TopicType) {
-            if (!Topics.AsQueryable().Any())
+        public static FunTopic GetRandomTopic(this DbSet<FunTopic> Topics, TopicType TopicType) {
+            FunTopic[] eligible = Topics.AsQueryable().Where(t => t.TopicType == TopicType && t.EntryType == EntryType.Issue).ToArray();
+            
+            if (!eligible.Any())
                 return null;
 
-            int RandomID = new Random().Next(1, Topics.AsQueryable().Count());
+            int randomID = new Random().Next(0, eligible.Length);
 
-            FunTopic FunTopic = Topics.Find(RandomID);
-
-            if (FunTopic != null)
-                if (FunTopic.EntryType == EntryType.Issue && FunTopic.TopicType == TopicType)
-                    return FunTopic;
-
-            return await Topics.GetRandomTopic(TopicType);
+            return eligible[randomID];
         }
 
     }

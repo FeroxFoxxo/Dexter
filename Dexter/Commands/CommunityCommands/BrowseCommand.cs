@@ -95,6 +95,10 @@ namespace Dexter.Commands {
                     embeds = BuildEventsEmbeds(events);
                     break;
                 case "topics":
+                case "wyr":
+                case "jokes":
+                case "facts":
+                case "funfacts":
                     if(string.IsNullOrEmpty(filters)) {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Insufficient parameters!")

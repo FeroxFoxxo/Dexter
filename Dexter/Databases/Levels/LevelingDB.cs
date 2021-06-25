@@ -47,6 +47,13 @@ namespace Dexter.Databases.Levels {
 
         public DbSet<UserTextXPRecord> OnTextCooldowns { get; set; }
 
+        /// <summary>
+        /// Gets a level entry from the database or creates one if none exist for <paramref name="id"/>
+        /// </summary>
+        /// <param name="id">The ID of the user to fetch.</param>
+        /// <param name="save">Whether to save the dabase if the user needs to be created.</param>
+        /// <returns>A <see cref="UserLevel"/> object that corresponds to the given <paramref name="id"/> and is being tracked by the database context.</returns>
+
         public UserLevel GetOrCreateLevelData(ulong id, bool save = true) {
             UserLevel level = Levels.Find(id);
 
@@ -70,6 +77,7 @@ namespace Dexter.Databases.Levels {
         /// </summary>
         /// <param name="id">The ID of the user to look up.</param>
         /// <param name="settings">The corresponding User Preferences object for this user.</param>
+        /// <param name="save">Whether to save the data to the database if a user or preferences object needs to be created.</param>
         /// <returns>A <see cref="UserLevel"/> object containing the obtained XP levels for the given <paramref name="id"/>.</returns>
 
         public UserLevel GetOrCreateLevelData(ulong id, out LevelPreferences settings, bool save = true) {
@@ -128,36 +136,53 @@ namespace Dexter.Databases.Levels {
             if (isTextXp) {
                 userlevel.TextXP += xpIncrease;
                 currentLevel = LevelingConfiguration.GetLevelFromXP(userlevel.TextXP, out xp, out _);
-                otherLevel = LevelingConfiguration.GetLevelFromXP(userlevel.VoiceXP, out _, out _);
             }
             else {
                 userlevel.VoiceXP += xpIncrease;
                 currentLevel = LevelingConfiguration.GetLevelFromXP(userlevel.VoiceXP, out xp, out _);
-                otherLevel = LevelingConfiguration.GetLevelFromXP(userlevel.TextXP, out _, out _);
             }
 
-            if (xp < xpIncrease) {
-                int newLevel = UserLevel.TotalLevel(LevelingConfiguration, isTextXp ? currentLevel : otherLevel, isTextXp ? otherLevel : currentLevel);
+            int newLevel = 0;
+            bool tryMerge = LevelingConfiguration.LevelMergeMode is LevelMergeMode.AddXPSimple or LevelMergeMode.AddXPMerged;
+            bool mergeLevelUp = false;
+            if (tryMerge) {
+                long maxXP = userlevel.TextXP > userlevel.VoiceXP ? userlevel.TextXP : userlevel.VoiceXP;
+                long minXP = userlevel.TextXP > userlevel.VoiceXP ? userlevel.VoiceXP : userlevel.TextXP;
+                newLevel = LevelingConfiguration.GetLevelFromXP(maxXP
+                    + (long)(minXP * (LevelingConfiguration.LevelMergeMode == LevelMergeMode.AddXPMerged ? LevelingConfiguration.MergeFactor : 1)), out long resXP, out _);
+                mergeLevelUp = resXP < xpIncrease;
+            }
+
+            if ((xp < xpIncrease && !tryMerge) || mergeLevelUp) {
+                if (!tryMerge) {
+                    if (isTextXp) {
+                        otherLevel = LevelingConfiguration.GetLevelFromXP(userlevel.VoiceXP, out _, out _);
+                    }
+                    else {
+                        otherLevel = LevelingConfiguration.GetLevelFromXP(userlevel.TextXP, out _, out _);
+                    }
+                    newLevel = userlevel.TotalLevel(LevelingConfiguration, isTextXp ? currentLevel : otherLevel, isTextXp ? otherLevel : currentLevel);
+                }
                 if (sendLevelUp)
                     await fallbackChannel.SendMessageAsync(LevelingConfiguration.LevelUpMessage
-                        .Replace("{TYPE}", isTextXp ? "text" : "voice")
+                        .Replace("{TYPE}", mergeLevelUp ? "total" : isTextXp ? "text" : "voice")
                         .Replace("{MENTION}", user.Mention)
-                        .Replace("{LVL}", currentLevel.ToString()));
+                        .Replace("{LVL}", (mergeLevelUp ? newLevel : currentLevel).ToString()));
 
-                if (LevelingConfiguration.Levels.ContainsKey(newLevel))
-                    if (!user.RoleIds.Contains(LevelingConfiguration.Levels[newLevel])) {
-                        IRole role = user.Guild.GetRole(LevelingConfiguration.Levels[newLevel]);
+                if (LevelingConfiguration.Levels.ContainsKey(newLevel)
+                    && !user.RoleIds.Contains(LevelingConfiguration.Levels[newLevel])) {
+                    IRole role = user.Guild.GetRole(LevelingConfiguration.Levels[newLevel]);
 
-                        await user.AddRoleAsync(role);
+                    await user.AddRoleAsync(role);
 
-                        if (sendLevelUp)
-                            await new EmbedBuilder().BuildEmbed(EmojiEnum.Love, BotConfiguration)
-                                .WithTitle("You Just Ranked Up!")
-                                .WithDescription($"OwO, what's this? You just got the {role.Name} role!\nCongrats~! <3")
-                                .WithCurrentTimestamp()
-                                .WithFooter($"{user.Guild.Name} Staff Team")
-                                .SendEmbed(user, fallbackChannel);
-                    }
+                    if (sendLevelUp)
+                        await new EmbedBuilder().BuildEmbed(EmojiEnum.Love, BotConfiguration)
+                            .WithTitle("You Just Ranked Up!")
+                            .WithDescription($"OwO, what's this? You just got the {role.Name} role!\nCongrats~! <3")
+                            .WithCurrentTimestamp()
+                            .WithFooter($"{user.Guild.Name} Staff Team")
+                            .SendEmbed(user, fallbackChannel);
+                }
             }
 
             await SaveChangesAsync();

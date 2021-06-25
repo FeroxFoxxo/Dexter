@@ -38,6 +38,8 @@ namespace Dexter.Commands {
             switch (attribute.ToLower()) {
                 case "color":
                 case "colour":
+                case "xpcolor":
+                case "xpcolour":
                     if (string.IsNullOrEmpty(value)) {
                         await BuildEmbed(EmojiEnum.Sign)
                             .WithTitle("Color Information")
@@ -115,7 +117,7 @@ namespace Dexter.Commands {
                     }
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Operation Successful!")
-                        .WithDescription($"The value of \"pfpborder\" has been set to `{prefs.PfpBorder}`.")
+                        .WithDescription($"The value of \"croppfp\" has been set to `{prefs.CropPfp}`.")
                         .SendEmbed(Context.Channel);
                     break;
                 case "background":
@@ -137,8 +139,10 @@ namespace Dexter.Commands {
                     }
                     if (!string.IsNullOrEmpty(value)) {
                         if (value.EndsWith(".jpg")) value = value[..^4];
+                        if (value.EndsWith(".png")) value = value[..^4];
 
-                        if (!File.Exists(Path.Combine(path, $"{value.ToLower()}.jpg"))) {
+                        if (!File.Exists(Path.Combine(path, $"{value.ToLower()}.jpg"))
+                            && !File.Exists(Path.Combine(path, $"{value.ToLower()}.png"))) {
                             if (Regex.IsMatch(value, @"^(0x|#)?[0-9A-F]{6}$", RegexOptions.IgnoreCase)) {
                                 int hex = int.Parse(value[^6..], System.Globalization.NumberStyles.HexNumber);
                                 color = System.Drawing.Color.FromArgb(unchecked((int)(hex + 0xff000000)));
@@ -200,7 +204,9 @@ namespace Dexter.Commands {
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    await (DiscordSocketClient.GetChannel(LevelingConfiguration.CustomImageDumpsChannel) as ITextChannel).SendMessageAsync(url);
+                    await (DiscordSocketClient.GetGuild(LevelingConfiguration.CustomImageDumpsGuild)
+                        .GetChannel(LevelingConfiguration.CustomImageDumpsChannel) as ITextChannel)
+                        .SendMessageAsync(url);
                     prefs.Background = url;
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Operation Successful!")

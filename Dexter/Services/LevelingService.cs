@@ -74,7 +74,7 @@ namespace Dexter.Services {
                             false,
                             uservc,
                             DiscordSocketClient.GetChannel(LevelingConfiguration.VoiceTextChannel) as ITextChannel,
-                            false
+                            LevelingConfiguration.VoiceSendLevelUpMessage
                         );
                     }
             }

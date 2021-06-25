@@ -7,6 +7,8 @@
   "VCMinXPGiven": 5,
   "VCMaxXPGiven": 10,
   "VoiceTextChannel": 792657870692286464,
+  "VoiceSendLevelUpMessage": false,
+  "CustomImageDumpsGuild": 613441321751019550,
   "CustomImageDumpsChannel": 792661500182790174,
   "CustomImageSizeLimit": 4000000,
   "CustomImageMinimumLevel": 14,

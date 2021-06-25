@@ -179,6 +179,52 @@ namespace Dexter.Helpers {
             }
         }
 
+        private static readonly Dictionary<long, string> BasicUnits = new() {
+            { 1000000000000, "T" },
+            { 1000000000, "B" },
+            { 1000000, "M" },
+            { 1000, "K" }
+        };
+
+        /// <summary>
+        /// Represents a units dictionary for binary memory units.
+        /// </summary>
+
+        public static readonly Dictionary<long, string> ByteUnits = new() {
+            { 1099511627776, "TB" },
+            { 1073741824, "GB" },
+            { 1048576, "MB" },
+            { 1024, "KB" }
+        };
+
+        /// <summary>
+        /// Represents a units dictionary for metric prefixes up to "tera"
+        /// </summary>
+
+        public static readonly Dictionary<long, string> MetricPrefixes = new() {
+            { 1000000000000, "T" },
+            { 1000000000, "G" },
+            { 1000000, "M" },
+            { 1000, "K" }
+        };
+
+        /// <summary>
+        /// Converts an XP amount into a shortened version using suffixes.
+        /// </summary>
+        /// <param name="v">The value to simplify.</param>
+        /// <param name="units">The units dictionary; if <see langword="null"/>, it will default to <see cref="BasicUnits"/>.</param>
+        /// <returns>A string containing the shortened value.</returns>
+
+        public static string ToUnit(this long v, Dictionary<long, string> units = null) {
+            if (units is null) units = BasicUnits;
+            foreach (KeyValuePair<long, string> kvp in units) {
+                if (v >= kvp.Key) {
+                    return $"{(float)v / kvp.Key:G3}{kvp.Value}";
+                }
+            }
+            return v.ToString();
+        }
+
         /// <summary>
         /// Will attempt to guess whether the indefinite article should be 'a' or 'an' based on <paramref name="NextWord"/>.
         /// </summary>

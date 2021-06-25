@@ -1,7 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Dexter.Commands;
 using Dexter.Configurations;
+using Dexter.Helpers;
 using Newtonsoft.Json;
 
 namespace Dexter.Databases.Levels {
@@ -40,7 +42,14 @@ namespace Dexter.Databases.Levels {
         /// <param name="vlvl">The user's voice level</param>
         /// <returns>The total level of a user</returns>
 
-        public static int TotalLevel(LevelingConfiguration config, int tlvl, int vlvl) {
+        public int TotalLevel(LevelingConfiguration config, int tlvl = -1, int vlvl = -1) {
+            if (tlvl < 0) {
+                tlvl = config.GetLevelFromXP(TextXP, out _, out _);
+            }
+            if (vlvl < 0) {
+                vlvl = config.GetLevelFromXP(VoiceXP, out _, out _);
+            }
+
             if (!config.ManageTextXP) return vlvl;
             
             return config.LevelMergeMode switch {
@@ -48,11 +57,27 @@ namespace Dexter.Databases.Levels {
                 LevelMergeMode.AddMerged => tlvl > vlvl ?
                     tlvl + (int)(vlvl * config.MergeFactor) :
                     vlvl + (int)(tlvl * config.MergeFactor),
-                _ => -1,
+                LevelMergeMode.AddXPSimple => config.GetLevelFromXP(
+                    TextXP + VoiceXP,
+                    out _, out _),
+                _ => -1
             };
         }
 
+        /// <summary>
+        /// Gets the total XP of a user for the purpose of merged XP.
+        /// </summary>
+        /// <param name="config">The configuration file containing information about how to calculate total level.</param>
+        /// <returns>The total XP of a user.</returns>
 
+        public long TotalXP (LevelingConfiguration config) {
+            return config.LevelMergeMode switch {
+                LevelMergeMode.AddXPMerged => TextXP > VoiceXP ?
+                    TextXP + (long)(VoiceXP * config.MergeFactor) :
+                    VoiceXP + (long)(TextXP * config.MergeFactor),
+                _ => TextXP + VoiceXP
+            };
+        }
 
         /// <summary>
         /// Obtains a text expression of the user's level and how it's calculated.
@@ -62,16 +87,31 @@ namespace Dexter.Databases.Levels {
         /// <param name="vlvl">The user's voice level</param>
         /// <returns>Stringified expression of the user's total level calculation.</returns>
 
-        public static string TotalLevelStr(LevelingConfiguration config, int tlvl, int vlvl) {
+        public string TotalLevelStr(LevelingConfiguration config, int tlvl = -1, int vlvl = -1) {
+            bool xpbased = config.LevelMergeMode is LevelMergeMode.AddXPMerged or LevelMergeMode.AddXPSimple;
+            
+            if (tlvl < 0 && !xpbased) {
+                tlvl = config.GetLevelFromXP(TextXP, out _, out _);
+            }
+            if (vlvl < 0 && (!xpbased || !config.ManageTextXP)) {
+                vlvl = config.GetLevelFromXP(VoiceXP, out _, out _);
+            }
             if (!config.ManageTextXP) return $"({vlvl} + 0)";
+
+            int max = tlvl > vlvl ? tlvl : vlvl;
+            int min = tlvl > vlvl ? vlvl : tlvl;
 
             switch (config.LevelMergeMode) {
                 case LevelMergeMode.AddSimple:
                     return $"{tlvl} + {vlvl}";
                 case LevelMergeMode.AddMerged:
-                    int max = tlvl > vlvl ? tlvl : vlvl;
-                    int min = tlvl > vlvl ? vlvl : tlvl;
                     return $"{max} + {(int)(min * config.MergeFactor)}";
+                case LevelMergeMode.AddXPSimple:
+                    return $"{(TextXP + VoiceXP).ToUnit()} XP";
+                case LevelMergeMode.AddXPMerged:
+                    long maxXP = TextXP > VoiceXP ? TextXP : VoiceXP;
+                    long minXP = TextXP > VoiceXP ? VoiceXP : TextXP;
+                    return $"{(maxXP + (long)(config.MergeFactor * minXP)).ToUnit()} XP";
                 default:
                     return $"Unknown Level Merge Mode";
             }

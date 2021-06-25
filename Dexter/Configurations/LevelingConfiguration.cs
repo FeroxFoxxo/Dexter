@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 namespace Dexter.Configurations {
 
+    /// <summary>
+    /// The configuration object abstracting all necessary settings and customizable items for the Leveling module.
+    /// </summary>
+
     public class LevelingConfiguration : JSONConfig {
 
         /// <summary>
@@ -47,6 +51,18 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public ulong VoiceTextChannel { get; set; }
+
+        /// <summary>
+        /// Whether to send a level up message in the configured <see cref="VoiceTextChannel"/> when a user gets a voice level.
+        /// </summary>
+
+        public bool VoiceSendLevelUpMessage { get; set; }
+
+        /// <summary>
+        /// The guild containing the text channel used for image dumps.
+        /// </summary>
+
+        public ulong CustomImageDumpsGuild { get; set; }
 
         /// <summary>
         /// The text channel where custom background images for rank cards will be dumped.
@@ -132,14 +148,18 @@ namespace Dexter.Configurations {
         /// <param name="level">The target level</param>
         /// <returns>The XP required to reach a given <paramref name="level"/>.</returns>
 
-        public int GetXPForLevel(double level) {
+        public long GetXPForLevel(double level) {
+            return (long)GetXPForLevelFull(level);
+        }
+
+        private double GetXPForLevelFull(double level) {
             if (level < 0) { return 0; }
 
             double xp = 0;
             for (int i = 0; i < DexterXPCoefficients.Length; i++) {
                 xp += DexterXPCoefficients[i] * Math.Pow(level, i);
             }
-            return (int)xp;
+            return xp;
         }
 
         /// <summary>
@@ -154,17 +174,42 @@ namespace Dexter.Configurations {
         public int GetLevelFromXP(long xp, out long residualXP, out long levelXP, bool throwsError = false) {
             //solve [config.DexterXPCoefficients] [1, x, x^2, x^3 ... x^n]t = xp
             //through Newton's Method
-            double level = 100;
+            double level = 75;
+            double prevlevel;
 
+            const int maxattempts = 500;
             int attempts = 0;
+            int streak = 0;
 
             long lowerXP = GetXPForLevel((int)level);
             long upperXP = GetXPForLevel((int)level + 1);
             while (xp < lowerXP || xp >= upperXP) {
+                prevlevel = level;
                 level = ApproximateLevel(xp, lowerXP, level);
-                lowerXP = GetXPForLevel((int)level);
-                upperXP = GetXPForLevel((int)level + 1);
-                if (attempts++ > 150) {
+                if (prevlevel < level) { //guess increases
+                    if (streak < 0) streak = 0;
+                    if (streak++ > 2) level *= (1 + (float)streak / 10);
+                }
+                if (prevlevel > level) { //guess decreases
+                    if (streak > 0) streak = 0;
+                    if (streak-- < -2) level /= (1 - (float)streak / 10);
+                }
+
+                try {
+                    lowerXP = checked(GetXPForLevel((int)level));
+                    upperXP = checked(GetXPForLevel((int)level + 1));
+                    //Console.Out.WriteLine($"guessing {level} for XP {xp}");
+                } catch {
+                    double lxp = GetXPForLevelFull(level);
+                    double uxp = GetXPForLevelFull(level + 1);
+                    while (uxp > long.MaxValue && attempts++ <= maxattempts) {
+                        level = ApproximateLevelFull(xp, lxp, level);
+                        lxp = GetXPForLevelFull(level);
+                        uxp = GetXPForLevelFull(level + 1);
+                        //Console.Out.WriteLine($"decimal guessing {level} for XP {xp}");
+                    }
+                }
+                if (attempts++ > maxattempts) {
                     if (throwsError)
                         throw new TimeoutException("The user level calculation took too long!");
                     else {
@@ -185,7 +230,13 @@ namespace Dexter.Configurations {
         }
 
         private double ApproximateLevel(long xp, long lowerLevelXP, double guess) {
-            return (xp - lowerLevelXP) / GetDerivativeAtLevel(guess) + guess;
+            double d = GetDerivativeAtLevel(guess);
+            return (xp - lowerLevelXP) / d + guess;
+        }
+
+        private double ApproximateLevelFull(long xp, double lowerLevelXP, double guess) {
+            double d = GetDerivativeAtLevel(guess);
+            return (xp - lowerLevelXP) / d + guess;
         }
 
         private double GetDerivativeAtLevel(double level) {
@@ -209,6 +260,14 @@ namespace Dexter.Configurations {
         /// <summary>
         /// Total level = Maximum level + Minimum level * MergeFactor
         /// </summary>
-        AddMerged
+        AddMerged,
+        /// <summary>
+        /// Total level = Level(MaxLevel.xp + MinLevel.xp)
+        /// </summary>
+        AddXPSimple,
+        /// <summary>
+        /// Total level = Level(MaxLevel.xp + MinLevel.xp * MergeFactor)
+        /// </summary>
+        AddXPMerged
     }
 }

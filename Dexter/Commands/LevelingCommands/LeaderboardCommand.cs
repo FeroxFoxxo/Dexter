@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dexter.Configurations;
 using Dexter.Databases.Levels;
 using Dexter.Extensions;
+using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -14,6 +15,13 @@ using Discord.WebSocket;
 namespace Dexter.Commands {
 
     public partial class LevelingCommands {
+
+        /// <summary>
+        /// Creates a leaderboard spanning users from page <paramref name="min"/> to page <paramref name="max"/> and posts it in chat.
+        /// </summary>
+        /// <param name="min">The first page to display</param>
+        /// <param name="max">The last page to display</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         [Command("levels")]
         [Alias("leaderboard")]
@@ -137,7 +145,7 @@ namespace Dexter.Commands {
                     .Replace("$RANK", rank.ToString())
                     .Replace("$PFPURL", avatarurl)
                     .Replace("$NAME", name)
-                    .Replace("$EXP", ToUnit(xp))
+                    .Replace("$EXP", xp.ToUnit())
                     .Replace("$LVL", lvl.ToString())
                     .Replace("$LEFTROT", leftrot.ToString())
                     .Replace("$RIGHTROT", rightrot.ToString());

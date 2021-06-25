@@ -15,6 +15,7 @@ using Dexter.Configurations;
 using Dexter.Databases.Levels;
 using Dexter.Enums;
 using Dexter.Extensions;
+using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 
@@ -67,7 +68,7 @@ namespace Dexter.Commands {
             int txtlvl = LevelingConfiguration.GetLevelFromXP(ul.TextXP, out long txtXP, out long txtXPLvl);
             int vclvl = LevelingConfiguration.GetLevelFromXP(ul.VoiceXP, out long vcXP, out long vcXPlvl);
 
-            int totalLevel = UserLevel.TotalLevel(LevelingConfiguration, txtlvl, vclvl);
+            int totalLevel = ul.TotalLevel(LevelingConfiguration, txtlvl, vclvl);
 
             (await RenderRankCard(ul, settings)).Save(storagePath);
             await Context.Channel.SendFileAsync(storagePath);
@@ -118,34 +119,12 @@ namespace Dexter.Commands {
             }
         }
 
-        private static readonly Dictionary<long, char> units = new() {
-            { 1000000000000, 'T'},
-            { 1000000000, 'B' },
-            { 1000000, 'M' },
-            { 1000, 'K'}
-        };
-
-        /// <summary>
-        /// Converts an XP amount into a shortened version using suffixes.
-        /// </summary>
-        /// <param name="v">The value to simplify.</param>
-        /// <returns>A string containing the shortened value.</returns>
-
-        public static string ToUnit(long v) {
-            foreach (KeyValuePair<long, char> kvp in units) {
-                if (v >= kvp.Key) {
-                    return $"{(float)v /kvp.Key:G3}{kvp.Value}";
-                }
-            }
-            return v.ToString();
-        }
-
         internal class LevelData {
             public int level;
             public long rxp;
             public long lxp;
             public float Percent => rxp / (float)lxp;
-            public string XpExpr => $"{ToUnit(rxp)} / {ToUnit(lxp)} XP";
+            public string XpExpr => $"{rxp.ToUnit()} / {lxp.ToUnit()} XP";
             public string xpType;
             
             public int rank;
@@ -198,31 +177,51 @@ namespace Dexter.Commands {
             if (user is null)
                 throw new NullReferenceException($"Unable to obtain User from UserLevel object with ID {ul.UserID}.");
 
-            LevelData mainLvlData = new(ul.TextXP > ul.VoiceXP ? ul.TextXP : ul.VoiceXP, mainLevel, LevelingConfiguration);
-            LevelData secondaryLvlData = new(ul.TextXP > ul.VoiceXP ? ul.VoiceXP : ul.TextXP, secondaryLevel, LevelingConfiguration);
+            LevelData mainLvlData;
+            LevelData secondaryLvlData;
+            int totallevel;
 
-            int txtrank;
-            int vcrank;
+            string totallevelstr;
 
-            List<UserLevel> allUsers = LevelingDB.Levels.ToList();
-            allUsers.Sort((a, b) => b.TextXP.CompareTo(a.TextXP));
-            txtrank = allUsers.FindIndex(ul => ul.UserID == user.Id) + 1;
-            allUsers.Sort((a, b) => b.VoiceXP.CompareTo(a.VoiceXP));
-            vcrank = allUsers.FindIndex(ul => ul.UserID == user.Id) + 1;
+            if (LevelingConfiguration.LevelMergeMode is LevelMergeMode.AddXPMerged or LevelMergeMode.AddXPSimple) {
+                mainLvlData = new(ul.TotalXP(LevelingConfiguration), mainLevel, LevelingConfiguration);
+                secondaryLvlData = null;
 
-            if (ul.TextXP > ul.VoiceXP) {
-                mainLvlData.rank = txtrank;
-                mainLvlData.xpType = "Text";
-                secondaryLvlData.rank = vcrank;
-                secondaryLvlData.xpType = "Voice";
-            } else {
-                mainLvlData.rank = vcrank;
-                mainLvlData.xpType = "Voice";
-                secondaryLvlData.rank = txtrank;
-                secondaryLvlData.xpType = "Text";
+                List<UserLevel> allUsers = LevelingDB.Levels.ToList();
+                allUsers.Sort((a, b) => b.TotalXP(LevelingConfiguration).CompareTo(a.TotalXP(LevelingConfiguration)));
+                mainLvlData.rank = allUsers.FindIndex(ul => ul.UserID == user.Id) + 1;
+
+                mainLvlData.xpType = "Level";
+                totallevel = mainLvlData.level;
+                totallevelstr = ul.TotalLevelStr(LevelingConfiguration);
+            }
+            else {
+                mainLvlData = new(ul.TextXP > ul.VoiceXP ? ul.TextXP : ul.VoiceXP, mainLevel, LevelingConfiguration);
+                secondaryLvlData = new(ul.TextXP > ul.VoiceXP ? ul.VoiceXP : ul.TextXP, secondaryLevel, LevelingConfiguration);
+                
+                List<UserLevel> allUsers = LevelingDB.Levels.ToList();
+                allUsers.Sort((a, b) => b.TextXP.CompareTo(a.TextXP));
+                int txtrank = allUsers.FindIndex(ul => ul.UserID == user.Id) + 1;
+                allUsers.Sort((a, b) => b.VoiceXP.CompareTo(a.VoiceXP));
+                int vcrank = allUsers.FindIndex(ul => ul.UserID == user.Id) + 1;
+
+                if (ul.TextXP > ul.VoiceXP) {
+                    mainLvlData.rank = txtrank;
+                    mainLvlData.xpType = "Text";
+                    secondaryLvlData.rank = vcrank;
+                    secondaryLvlData.xpType = "Voice";
+                }
+                else {
+                    mainLvlData.rank = vcrank;
+                    mainLvlData.xpType = "Voice";
+                    secondaryLvlData.rank = txtrank;
+                    secondaryLvlData.xpType = "Text";
+                }
+
+                totallevel = ul.TotalLevel(LevelingConfiguration, mainLvlData.level, secondaryLvlData.level);
+                totallevelstr = ul.TotalLevelStr(LevelingConfiguration, mainLvlData.level, secondaryLvlData.level);
             }
 
-            int totallevel = UserLevel.TotalLevel(LevelingConfiguration, mainLvlData.level, secondaryLvlData.level);
 
             using (Graphics g = Graphics.FromImage(result)) {
                 try {
@@ -256,7 +255,7 @@ namespace Dexter.Commands {
                 g.DrawString(totallevel.ToString(), fontTitle, xpColor, rectLevelText);
                 SizeF offset = g.MeasureString(totallevel.ToString(), fontTitle);
                 const int margin = 5;
-                g.DrawString($"({UserLevel.TotalLevelStr(LevelingConfiguration, mainLvlData.level, secondaryLvlData.level)})", fontDefault, xpColor
+                g.DrawString($"({totallevelstr})", fontDefault, xpColor
                     , new Rectangle(rectLevelText.X + (int)offset.Width + margin, rectLevelText.Y, widthmain / 2 - miniLabelWidth - margin - (int)offset.Width, labelHeight)
                     , new StringFormat { LineAlignment = StringAlignment.Far });
                 g.DrawString($"{user.Username}#{user.Discriminator}", fontDefault, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
@@ -287,6 +286,7 @@ namespace Dexter.Commands {
                 }
 
                 foreach (LevelData ld in new LevelData[] { mainLvlData, secondaryLvlData }) {
+                    if (ld is null) continue;
                     g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb(0xe0, System.Drawing.Color.Black)), ld.rects.Bar(1));
                     g.FillRectangle(xpColor, ld.rects.Bar(ld.Percent));
                     using (System.Drawing.Image levelBox = System.Drawing.Image.FromFile(barPath)) {
@@ -302,6 +302,29 @@ namespace Dexter.Commands {
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Runs a speed test on the calculation speed of inverse level calculations from XP.
+        /// </summary>
+        /// <returns></returns>
+
+        [Command("testlevelcalculationspeed")]
+
+        public async Task RunSpeedTest() {
+            const int rep = 500000;
+            for (int size = 1000; size < 100000000; size *= 10) {
+                System.Diagnostics.Stopwatch t = new();
+                t.Start();
+
+                Random r = new();
+                for (int i = 0; i < rep; i++) {
+                    LevelingConfiguration.GetLevelFromXP(r.Next(0, size), out _, out _);
+                }
+
+                t.Stop();
+                await Context.Channel.SendMessageAsync($"Calculation of {rep} level calculations completed in {t.ElapsedMilliseconds} milliseconds for size = {size}; level <= {LevelingConfiguration.GetLevelFromXP(size, out _, out _)}.");
+            }
         }
     }
 }

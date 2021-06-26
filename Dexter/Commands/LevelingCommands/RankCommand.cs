@@ -90,9 +90,10 @@ namespace Dexter.Commands {
         private static readonly Rectangle rectPfp = new Rectangle(widthmain, height - pfpside , pfpside, pfpside);
 
         private const int miniLabelWidth = 80;
-        private const int labelIntrusionPixels = 10;
+        private const int labelIntrusionPixels = 0;
         private const int labelHeight = 60;
         private const int typeLabelWidth = 175;
+        private const int labelMiniMargin = 5;
         private static readonly Rectangle rectLevelLabel = new Rectangle(defMargin, defMargin, miniLabelWidth + labelIntrusionPixels, labelHeight);
         private static readonly Rectangle rectLevelText = new Rectangle(defMargin + miniLabelWidth, defMargin, widthmain / 2 - defMargin - miniLabelWidth, labelHeight);
         
@@ -112,7 +113,7 @@ namespace Dexter.Commands {
                     , (int)((levelWidth - 2 * barMarginHorizontal) * p), barHeight);
                 currentLevel = new Rectangle(defMargin, originHeight + levelHeight - barHeight - barMarginVertical, barMarginHorizontal, barHeight + 2 * barMarginVertical);
                 nextLevel = new Rectangle(levelWidth + defMargin - barMarginHorizontal, originHeight + levelHeight - barHeight - barMarginVertical, barMarginHorizontal, barHeight + 2 * barMarginVertical);
-                typeLabel = new Rectangle(defMargin, originHeight, typeLabelWidth, labelHeight);
+                typeLabel = new Rectangle(defMargin + labelMiniMargin, originHeight + labelMiniMargin, typeLabelWidth, labelHeight);
                 rankLabel = new Rectangle(defMargin + typeLabelWidth, originHeight, miniLabelWidth + labelIntrusionPixels, labelHeight);
                 rankText = new Rectangle(defMargin + miniLabelWidth + typeLabelWidth, originHeight, levelWidth * 2 / 3 - miniLabelWidth - typeLabelWidth - defMargin, labelHeight);
                 expText = new Rectangle(levelWidth / 3, originHeight, levelWidth * 2 / 3, labelHeight);
@@ -253,7 +254,7 @@ namespace Dexter.Commands {
                 if (settings.TitleBackground)
                     g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb(0xd0, System.Drawing.Color.Black)), titleRect);
                 g.DrawString("LEVEL", fontMini, xpColor, rectLevelLabel, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
-                g.DrawString(totallevel.ToString(), fontTitle, xpColor, rectLevelText);
+                g.DrawString(totallevel.ToString(), fontTitle, xpColor, rectLevelText, new StringFormat() { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far });
                 SizeF offset = g.MeasureString(totallevel.ToString(), fontTitle);
                 const int margin = 5;
                 g.DrawString($"({totallevelstr})", fontDefault, xpColor
@@ -295,7 +296,7 @@ namespace Dexter.Commands {
                     }
                     g.DrawString(ld.xpType, fontTitle, whiteColor, ld.rects.typeLabel);
                     g.DrawString("RANK", fontMini, whiteColor, ld.rects.rankLabel, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
-                    g.DrawString($"#{ld.rank}", fontTitle, whiteColor, ld.rects.rankText);
+                    g.DrawString($"#{ld.rank}", fontTitle, whiteColor, ld.rects.rankText, new StringFormat() { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far });
                     g.DrawString(ld.level.ToString(), fontTitle, xpColor, ld.rects.currentLevel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
                     g.DrawString((ld.level + 1).ToString(), fontTitle, xpColor, ld.rects.nextLevel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
                     g.DrawString(ld.XpExpr, fontDefault, xpColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });

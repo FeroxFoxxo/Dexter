@@ -121,7 +121,7 @@ namespace Dexter.Commands {
         [Summary("Usage: `webloadlevels [minpage] [maxpage] (Args)`. Loads levels from the mee6 API into the system. To force replacement of levels that already exist type \"FORCE\" after the command.")]
         [RequireAdministrator]
 
-        public async Task LoadLevelsFromMee6Command(int min = 0, int max = 50, [Remainder] string args = null) {
+        public async Task LoadLevelsFromMee6Command(int min = 0, int max = 50, [Remainder] string args = "") {
             if (min < 0) min = 0;
             
             if (min > max) {

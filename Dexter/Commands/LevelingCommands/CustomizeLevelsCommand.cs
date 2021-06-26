@@ -162,7 +162,7 @@ namespace Dexter.Commands {
                         string[] processedPaths = Directory.GetFiles(path);
 
                         for (int i = 0; i < processedPaths.Length; i++)
-                            processedPaths[i] = processedPaths[i].Split('\\').Last()[..^4];
+                            processedPaths[i] = processedPaths[i].Split('\\').Last().Split('/').Last()[..^4];
                         await BuildEmbed(EmojiEnum.Sign)
                             .WithTitle("Default Background Images")
                             .WithDescription(string.Join(", ", processedPaths))

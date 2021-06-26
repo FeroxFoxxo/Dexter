@@ -17,6 +17,12 @@ namespace Dexter.Configurations {
         public int XPIncrementTime { get; set; }
 
         /// <summary>
+        /// Conditions whether roles will be modified by Dexter at all in the process of processing experience.
+        /// </summary>
+
+        public bool HandleRoles { get; set; }
+
+        /// <summary>
         /// Minimum amount of users in a voice channel in order to obtain XP.
         /// </summary>
 
@@ -57,6 +63,12 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public bool VoiceSendLevelUpMessage { get; set; }
+
+        /// <summary>
+        /// Whether to count muted users for the purpose of measuring whether a voice channel is active.
+        /// </summary>
+
+        public bool VoiceCountMutedMembers { get; set; }
 
         /// <summary>
         /// The guild containing the text channel used for image dumps.
@@ -105,6 +117,12 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public int TextMaxXPGiven { get; set; }
+
+        /// <summary>
+        /// Whether to send a level up message when a user levels up through text.
+        /// </summary>
+
+        public bool TextSendLevelUpMessage { get; set; }
 
         /// <summary>
         /// The coefficients of XP required to reach a given level 'x', where the index of each item equals the degree of its factor.

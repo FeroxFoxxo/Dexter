@@ -170,7 +170,8 @@ namespace Dexter.Databases.Levels {
                         .Replace("{LVL}", (mergeLevelUp ? newLevel : currentLevel).ToString()));
 
                 if (LevelingConfiguration.Levels.ContainsKey(newLevel)
-                    && !user.RoleIds.Contains(LevelingConfiguration.Levels[newLevel])) {
+                    && !user.RoleIds.Contains(LevelingConfiguration.Levels[newLevel])
+                    && LevelingConfiguration.HandleRoles) {
                     IRole role = user.Guild.GetRole(LevelingConfiguration.Levels[newLevel]);
 
                     await user.AddRoleAsync(role);

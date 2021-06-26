@@ -97,8 +97,14 @@ namespace Dexter.Commands {
 
         public class LeaderboardItem {
             private int rank;
-            private UserLevel text;
-            private UserLevel voice;
+            /// <summary>
+            /// The userlevel corresponding to the user whose rank is <see cref="rank"/> on text.
+            /// </summary>
+            public readonly UserLevel text;
+            /// <summary>
+            /// The userlevel corresponding to the user whose rank is <see cref="rank"/> on voice.
+            /// </summary>
+            public readonly UserLevel voice;
             private DiscordSocketClient client;
             private LevelingConfiguration config;
 

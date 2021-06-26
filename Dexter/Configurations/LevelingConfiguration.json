@@ -1,5 +1,6 @@
 {
   "XPIncrementTime": 60,
+  "HandleRoles": true,
   "VCMinUsers": 3,
   "DisabledVCs": [
     0
@@ -8,6 +9,7 @@
   "VCMaxXPGiven": 10,
   "VoiceTextChannel": 792657870692286464,
   "VoiceSendLevelUpMessage": false,
+  "VoiceCountMutedMembers": true,
   "CustomImageDumpsGuild": 613441321751019550,
   "CustomImageDumpsChannel": 792661500182790174,
   "CustomImageSizeLimit": 4000000,
@@ -22,7 +24,8 @@
   "ManageTextXP": true,
   "TextMinXPGiven": 15,
   "TextMaxXPGiven": 25,
-  "DexterXPCoefficients": [ 0, 63.26, 36.5, 0.24 ],
+  "TextSendLevelUpMessage": true,
+  "DexterXPCoefficients": [ 0, 75.8333333334, 22.5, 1.6666666667 ],
   "LevelMergeMode": 1,
   "MergeFactor": 0.5,
   "MaxLeaderboardItems": 5000,

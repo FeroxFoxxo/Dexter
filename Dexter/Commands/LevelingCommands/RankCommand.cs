@@ -250,7 +250,8 @@ namespace Dexter.Commands {
                 using Brush xpColor = new SolidBrush(System.Drawing.Color.FromArgb(unchecked((int)settings.XpColor)));
                 using Brush whiteColor = new SolidBrush(System.Drawing.Color.White);
 
-                g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb(0xd0, System.Drawing.Color.Black)), titleRect);
+                if (settings.TitleBackground)
+                    g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb(0xd0, System.Drawing.Color.Black)), titleRect);
                 g.DrawString("LEVEL", fontMini, xpColor, rectLevelLabel, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
                 g.DrawString(totallevel.ToString(), fontTitle, xpColor, rectLevelText);
                 SizeF offset = g.MeasureString(totallevel.ToString(), fontTitle);

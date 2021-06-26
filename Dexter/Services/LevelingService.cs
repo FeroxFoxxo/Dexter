@@ -98,7 +98,7 @@ namespace Dexter.Services {
                 true,
                 message.Author as IGuildUser,
                 message.Channel as ITextChannel,
-                true
+                LevelingConfiguration.TextSendLevelUpMessage
                 );
 
             LevelingDB.OnTextCooldowns.Add(new UserTextXPRecord() { Id = message.Author.Id });
@@ -114,7 +114,7 @@ namespace Dexter.Services {
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         public async Task UpdateRoles(IGuildUser user, bool removeExtra = false, int level = -1) {
-            if (user is null) return;
+            if (user is null || !LevelingConfiguration.HandleRoles) return;
 
             if (level < 0) {
                 UserLevel ul = LevelingDB.GetOrCreateLevelData(user.Id, out _);

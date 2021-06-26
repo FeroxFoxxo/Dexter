@@ -141,6 +141,7 @@ namespace Dexter.Commands {
 
             bool force = argsArr?.Contains("FORCE") ?? false;
             bool transform = argsArr?.Contains("TRANSFORM") ?? false;
+            bool updateroles = argsArr?.Contains("UPDATEROLES") ?? false;
 
             using WebClient web = new();
             string dataStr;
@@ -169,6 +170,8 @@ namespace Dexter.Commands {
                             if (force || ul.TextXP < xp) {
                                 ul.TextXP = xp;
                                 count++;
+                                if (updateroles)
+                                    await LevelingService.UpdateRoles(Context.Guild.GetUser(ul.UserID), force);
                             }
                         }
                         catch (Exception e) {
@@ -179,6 +182,8 @@ namespace Dexter.Commands {
                                 if (force || ul?.TextXP < xp) {
                                     ul.TextXP = xp;
                                     count++;
+                                    if (updateroles) 
+                                        await LevelingService.UpdateRoles(Context.Guild.GetUser(ul.UserID), force);
                                 }
                             }
                             catch {

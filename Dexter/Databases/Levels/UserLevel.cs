@@ -174,6 +174,12 @@ namespace Dexter.Databases.Levels {
         /// </summary>
 
         public bool CropPfp { get; set; } = true;
+
+        /// <summary>
+        /// Whether to render a black background behind the level and name.
+        /// </summary>
+
+        public bool TitleBackground { get; set; } = true;
     }
 
 }

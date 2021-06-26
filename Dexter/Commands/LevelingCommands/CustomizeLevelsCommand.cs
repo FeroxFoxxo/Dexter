@@ -120,6 +120,38 @@ namespace Dexter.Commands {
                         .WithDescription($"The value of \"croppfp\" has been set to `{prefs.CropPfp}`.")
                         .SendEmbed(Context.Channel);
                     break;
+                case "namebackground":
+                case "namebg":
+                case "toplabelbackground":
+                case "toplabelbg":
+                case "titlebackground":
+                case "titlebg":
+                    switch (value.ToLower()) {
+                        case "true":
+                        case "yes":
+                        case "enabled":
+                        case "circle":
+                            prefs.TitleBackground = true;
+                            break;
+                        case "false":
+                        case "no":
+                        case "disabled":
+                        case "square":
+                            prefs.TitleBackground = false;
+                            break;
+                        default:
+                            await BuildEmbed(EmojiEnum.Sign)
+                                .WithTitle("Information about \"TitleBackground\"")
+                                .WithDescription("Describes whether the black bar that makes your name and level generally visible should be rendered.")
+                                .AddField("Possible Values", "**true**: The bar will be rendered.\n**false**: The bar won't be rendered.")
+                                .SendEmbed(Context.Channel);
+                            return;
+                    }
+                    await BuildEmbed(EmojiEnum.Love)
+                        .WithTitle("Operation Successful!")
+                        .WithDescription($"The value of \"TitleBackground\" has been set to `{prefs.TitleBackground}`.")
+                        .SendEmbed(Context.Channel);
+                    break;
                 case "background":
                 case "image":
                 case "bgimage":
@@ -220,7 +252,8 @@ namespace Dexter.Commands {
                         $"XPColor: #{prefs.XpColor & 0x00ffffff:X}\n" +
                         $"Background Image: {(prefs.Background.StartsWith("http") ? $"[View]({prefs.Background})" : prefs.Background)}\n" +
                         $"Pfp border: **{prefs.PfpBorder}**\n" +
-                        $"Crop Pfp: **{prefs.CropPfp}**")
+                        $"Crop Pfp: **{prefs.CropPfp}**\n" +
+                        $"Title Background: **{prefs.TitleBackground}**")
                         .SendEmbed(Context.Channel);
                     return;
             }

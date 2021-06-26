@@ -260,8 +260,39 @@ namespace Dexter.Commands {
                 g.DrawString($"({totallevelstr})", fontDefault, xpColor
                     , new Rectangle(rectLevelText.X + (int)offset.Width + margin, rectLevelText.Y, widthmain / 2 - miniLabelWidth - margin - (int)offset.Width, labelHeight)
                     , new StringFormat { LineAlignment = StringAlignment.Far });
-                g.DrawString($"{user.Username}#{user.Discriminator}", fontDefault, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
-                
+
+                List<string> possibleNames = new();
+                Font basicFont = new Font("Arial", labelHeight * 2 / 3);
+                possibleNames.Add(user.Username); 
+                StringBuilder simplifiedUsername = new();
+                StringBuilder asciiUsername = new();
+                foreach (char c in user.Username) {
+                    if (char.IsLetterOrDigit(c) || char.IsPunctuation(c)) simplifiedUsername.Append(c);
+                    else simplifiedUsername.Append('?');
+
+                    if ((int)c < 256) asciiUsername.Append(c);
+                    else asciiUsername.Append('?');
+                }
+                possibleNames.Add(simplifiedUsername.ToString());
+                possibleNames.Add(asciiUsername.ToString());
+                possibleNames.Add("Unknown");
+
+                foreach(string name in possibleNames) {
+                    try {
+                        g.DrawString($"{name}#{user.Discriminator}", fontDefault, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
+                        break;
+                    }
+                    catch {
+                        try {
+                            g.DrawString($"{name}#{user.Discriminator}", basicFont, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
+                            break;
+                        }
+                        catch {
+                            continue;
+                        }
+                    }
+                }
+
                 const int pfpmargin = 3;
                 if (settings.PfpBorder)
                     g.FillEllipse(new SolidBrush(System.Drawing.Color.FromArgb(unchecked((int)0xff3f3f3f)))

@@ -157,9 +157,6 @@ namespace Dexter.Commands {
                         throw new ArgumentOutOfRangeException($"Reached empty leaderboard page ({page}) before reaching max ({max}). Loaded a total of {count} entries out of {total} attempts.");
 
                     foreach (LBPlayer p in data.players) {
-                        if (++total % 50 == 0) {
-                            await loadMsg.ModifyAsync(m => m.Content = $"Loading level entries... {total}/{(max - min + 1) * 100} - page {page}/{max}. (modified {count} values.)");
-                        }
                         long xp = p.xp;
                         if (transform) {
                             xp = LevelingConfiguration.GetXPForLevel(LevelTransformation.Metricate.Run(p.DetailedLevel));
@@ -187,8 +184,11 @@ namespace Dexter.Commands {
                                 }
                             }
                             catch {
-                                await Context.Channel.SendMessageAsync($"Filed to load user {p.id} from page {page}.");
+                                await Context.Channel.SendMessageAsync($"Failed to load user {p.id} from page {page}.");
                             }
+                        }
+                        if (++total % 50 == 0) {
+                            await loadMsg.ModifyAsync(m => m.Content = $"Loading level entries... {total}/{(max - min + 1) * 100} - page {page}/{max}. (modified {count} values.)");
                         }
                     }
                     

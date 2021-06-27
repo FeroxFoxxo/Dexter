@@ -293,13 +293,18 @@ namespace Dexter.Commands {
 
                 foreach(string name in possibleNames) {
                     try {
-                        g.DrawString($"{name}#{user.Discriminator}", fontDefault, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
+                        Bitmap nameDrawn = new Bitmap(result.Size.Width, result.Size.Height);
+                        using Graphics gname = Graphics.FromImage(nameDrawn);
+                        gname.DrawString($"{name}#{user.Discriminator}", fontDefault, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
+                        g.DrawImage(nameDrawn, Point.Empty);
                         break;
                     }
                     catch {
                         try {
-                            g.DrawString($"{name}#{user.Discriminator}", basicFont, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
-                            break;
+                            Bitmap nameDrawn = new Bitmap(result.Size.Width, result.Size.Height);
+                            using Graphics gname = Graphics.FromImage(nameDrawn);
+                            gname.DrawString($"{name}#{user.Discriminator}", basicFont, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
+                            g.DrawImage(nameDrawn, Point.Empty); break;
                         }
                         catch {
                             continue;

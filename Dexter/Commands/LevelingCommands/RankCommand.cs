@@ -330,13 +330,14 @@ namespace Dexter.Commands {
                     try {
                         Console.WriteLine($"Attempt to draw {name} with stylish font.");
                         Bitmap nameDrawn = new(rectName.Size.Width, rectName.Size.Height);
-                        Console.WriteLine($"Is clear? {IsClearSafe(nameDrawn)}");
+                        Console.WriteLine($"Is clear? {IsClearSafe(nameDrawn, out _)}");
                         using Graphics gname = Graphics.FromImage(nameDrawn);
                         gname.DrawString($"{name}#{user.Discriminator}", fontDefault, whiteColor, new Rectangle(Point.Empty, rectName.Size),
                             new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap });
-                        if (IsClearSafe(nameDrawn))
+                        if (IsClearSafe(nameDrawn, out Point loc))
                             throw new Exception($"Unable to draw {name}");
-                        g.DrawImage(nameDrawn, rectName);
+                        gname.FillRectangle(xpColor, new Rectangle(loc, new Size(5, 5)));
+                        g.DrawImageUnscaledAndClipped(nameDrawn, rectName);
                         break;
                     } catch {
                         continue;
@@ -369,16 +370,18 @@ namespace Dexter.Commands {
         }
         */
 
-        private static bool IsClearSafe(Bitmap bitmap) {
+        private static bool IsClearSafe(Bitmap bitmap, out Point location) {
             for (int i = 0; i < bitmap.Width; i++) {
                 for (int j = 0; j < bitmap.Height; j++) {
                     if (bitmap.GetPixel(i, j).A != 0) {
-                        Console.WriteLine($"Found pixel ({i},{j}) with color {bitmap.GetPixel(i, j).ToArgb():X}");
+                        Console.WriteLine($"Found pixel ({i},{j}) with color {bitmap.GetPixel(i, j).ToArgb():X} (dimensions: {bitmap.Width}x{bitmap.Height})");
+                        location = new Point(i, j);
                         return false;
                     }
                 }
             }
 
+            location = Point.Empty;
             return true;
         }
 

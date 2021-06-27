@@ -7,6 +7,7 @@ using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -263,6 +264,35 @@ namespace Dexter.Commands {
                 g.DrawString($"({totallevelstr})", fontDefault, xpColor
                     , new Rectangle(rectLevelText.X + (int)offset.Width + margin, rectLevelText.Y, widthmain / 2 - miniLabelWidth - margin - (int)offset.Width, labelHeight)
                     , new StringFormat { LineAlignment = StringAlignment.Far });
+                                
+                DrawLevels(fontTitle, fontDefault, fontMini, mainLvlData, secondaryLvlData, g, xpColor, whiteColor);
+
+                const int pfpmargin = 3;
+                if (settings.PfpBorder)
+                    g.FillEllipse(new SolidBrush(System.Drawing.Color.FromArgb(unchecked((int)0xff3f3f3f)))
+                        , new Rectangle(rectPfp.X - pfpmargin, rectPfp.Y - pfpmargin, rectPfp.Width + 2 * pfpmargin, rectPfp.Height + 2 * pfpmargin));
+
+                using (WebClient client = new()) {
+                    byte[] dataArr = await client.DownloadDataTaskAsync(user.GetTrueAvatarUrl(512));
+                    using MemoryStream mem = new(dataArr);
+                    using System.Drawing.Image pfp = System.Drawing.Image.FromStream(mem);
+
+                    if (settings.CropPfp) {
+                        Rectangle tempPos = new Rectangle(Point.Empty, rectPfp.Size);
+                        using Bitmap pfplayer = new Bitmap(rectPfp.Width, rectPfp.Height);
+                        using Graphics pfpg = Graphics.FromImage(pfplayer);
+                        using GraphicsPath path = new GraphicsPath();
+                        path.AddEllipse(tempPos);
+                        pfpg.Clip = new Region(path);
+                        pfpg.DrawImage(pfp, tempPos);
+
+                        g.DrawImage(pfplayer, rectPfp);
+                    }
+                    else {
+                        g.DrawImage(pfp, rectPfp);
+                    }
+                }
+
 
                 List<string> possibleNames = new();
                 Font basicFont = new Font("Arial", labelHeight * 2 / 3);
@@ -296,70 +326,67 @@ namespace Dexter.Commands {
                 possibleNames.Add(asciiUsername.ToString());
                 possibleNames.Add("Unknown");
 
-                Point invariableBarBorderPosition = new Point(widthmain / 2, mainLevel.fullRect.Y + mainLevel.fullRect.Height - 1);
-                g.FillEllipse(whiteColor, new Rectangle(invariableBarBorderPosition, new Size(5, 5)));
-
                 foreach (string name in possibleNames) {
                     try {
                         Console.WriteLine($"Attempt to draw {name} with stylish font.");
-                        Bitmap nameDrawn = new(result.Size.Width, result.Size.Height);
+                        Bitmap nameDrawn = new(rectName.Size.Width, rectName.Size.Height);
+                        Console.WriteLine($"Is clear? {IsClearSafe(nameDrawn)}");
                         using Graphics gname = Graphics.FromImage(nameDrawn);
-                        gname.DrawString($"{name}#{user.Discriminator}", fontDefault, whiteColor, rectName,
+                        gname.DrawString($"{name}#{user.Discriminator}", fontDefault, whiteColor, new Rectangle(Point.Empty, rectName.Size),
                             new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap });
-                        DrawLevels(fontTitle, fontDefault, fontMini, mainLvlData, secondaryLvlData, gname, xpColor, whiteColor);
-                        g.DrawImage(nameDrawn, Point.Empty);
-                        if (!nameDrawn.GetPixel(invariableBarBorderPosition.X, invariableBarBorderPosition.Y).Equals(result.GetPixel(invariableBarBorderPosition.X, invariableBarBorderPosition.Y)))
-                            throw new Exception($"Unable to draw graphics for name {name}.");
+                        if (IsClearSafe(nameDrawn))
+                            throw new Exception($"Unable to draw {name}");
+                        g.DrawImage(nameDrawn, rectName);
                         break;
-                    }
-                    catch {
-                        try {
-                            Console.WriteLine($"Attempt to draw {name} with basic font.");
-                            Bitmap nameDrawn = new Bitmap(result.Size.Width, result.Size.Height);
-                            using Graphics gname = Graphics.FromImage(nameDrawn);
-                            gname.DrawString($"{name}#{user.Discriminator}", basicFont, whiteColor, rectName,
-                                new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap });
-                            DrawLevels(fontTitle, fontDefault, fontMini, mainLvlData, secondaryLvlData, gname, xpColor, whiteColor);
-                            g.DrawImage(nameDrawn, Point.Empty);
-                            if (!nameDrawn.GetPixel(invariableBarBorderPosition.X, invariableBarBorderPosition.Y).Equals(result.GetPixel(invariableBarBorderPosition.X, invariableBarBorderPosition.Y)))
-                                throw new Exception($"Unable to draw graphics for name {name}.");
-                            break;
-                        }
-                        catch {
-                            continue;
-                        }
-                    }
-                }
-
-                const int pfpmargin = 3;
-                if (settings.PfpBorder)
-                    g.FillEllipse(new SolidBrush(System.Drawing.Color.FromArgb(unchecked((int)0xff3f3f3f)))
-                        , new Rectangle(rectPfp.X - pfpmargin, rectPfp.Y - pfpmargin, rectPfp.Width + 2 * pfpmargin, rectPfp.Height + 2 * pfpmargin));
-
-                using (WebClient client = new()) {
-                    byte[] dataArr = await client.DownloadDataTaskAsync(user.GetTrueAvatarUrl(512));
-                    using MemoryStream mem = new(dataArr);
-                    using System.Drawing.Image pfp = System.Drawing.Image.FromStream(mem);
-
-                    if (settings.CropPfp) {
-                        Rectangle tempPos = new Rectangle(Point.Empty, rectPfp.Size);
-                        using Bitmap pfplayer = new Bitmap(rectPfp.Width, rectPfp.Height);
-                        using Graphics pfpg = Graphics.FromImage(pfplayer);
-                        using GraphicsPath path = new GraphicsPath();
-                        path.AddEllipse(tempPos);
-                        pfpg.Clip = new Region(path);
-                        pfpg.DrawImage(pfp, tempPos);
-
-                        g.DrawImage(pfplayer, rectPfp);
-                    }
-                    else {
-                        g.DrawImage(pfp, rectPfp);
+                    } catch {
+                        continue;
                     }
                 }
             }
 
             return result;
         }
+
+        /* Unsafe, efficient version of IsClear in case unsafe code is enabled.
+        private static bool IsClear(Bitmap bitmap) {
+            BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            bool result = true;
+            unsafe {
+                PixelData* pPixel = (PixelData*)bitmapData.Scan0;
+                for (int i = 0; i < bitmapData.Height && result; i++) {
+                    for (int j = 0; j < bitmapData.Width; j++) {
+                        if (pPixel->A != 0) {
+                            result = false;
+                            break;
+                        }
+                        pPixel++;
+                    }
+                    pPixel += bitmapData.Stride - (bitmapData.Width * 4);
+                }
+            }
+            bitmap.UnlockBits(bitmapData);
+            return result;
+        }
+        */
+
+        private static bool IsClearSafe(Bitmap bitmap) {
+            for (int i = 0; i < bitmap.Width; i++) {
+                for (int j = 0; j < bitmap.Height; j++) {
+                    if (bitmap.GetPixel(i, j).A != 0) return false;
+                }
+            }
+
+            return true;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct PixelData      
+        {                             
+            public byte B;            
+            public byte G;            
+            public byte R;            
+            public byte A;            
+        }  
 
         private static void DrawLevels(Font fontTitle, Font fontDefault, Font fontMini, LevelData mainLvlData, LevelData secondaryLvlData, Graphics g, Brush xpColor, Brush whiteColor) {
             foreach (LevelData ld in new LevelData[] { mainLvlData, secondaryLvlData }) {

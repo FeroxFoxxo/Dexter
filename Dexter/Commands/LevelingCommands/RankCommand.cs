@@ -296,6 +296,7 @@ namespace Dexter.Commands {
                         Bitmap nameDrawn = new Bitmap(result.Size.Width, result.Size.Height);
                         using Graphics gname = Graphics.FromImage(nameDrawn);
                         gname.DrawString($"{name}#{user.Discriminator}", fontDefault, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
+                        gname.FillRectangle(new SolidBrush(System.Drawing.Color.Transparent), rectName);
                         g.DrawImage(nameDrawn, Point.Empty);
                         break;
                     }
@@ -304,6 +305,7 @@ namespace Dexter.Commands {
                             Bitmap nameDrawn = new Bitmap(result.Size.Width, result.Size.Height);
                             using Graphics gname = Graphics.FromImage(nameDrawn);
                             gname.DrawString($"{name}#{user.Discriminator}", basicFont, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
+                            gname.FillRectangle(new SolidBrush(System.Drawing.Color.Transparent), rectName);
                             g.DrawImage(nameDrawn, Point.Empty); break;
                         }
                         catch {

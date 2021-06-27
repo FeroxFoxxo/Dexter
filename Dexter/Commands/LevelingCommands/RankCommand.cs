@@ -228,14 +228,17 @@ namespace Dexter.Commands {
                 try {
                     using System.Drawing.Image bg = System.Drawing.Image.FromFile(BackgroundPath(settings.Background ?? "default"));
                     g.DrawImage(bg, mainRect);
-                } catch (FileNotFoundException) {
+                }
+                catch (FileNotFoundException) {
                     if (Regex.IsMatch(settings.Background, @"^(#|0x)?[0-9A-F]{6}$", RegexOptions.IgnoreCase)) {
                         System.Drawing.Color bgc = System.Drawing.Color.FromArgb(
                             unchecked((int)(0xff000000 + int.Parse(settings.Background[^6..], System.Globalization.NumberStyles.HexNumber))));
                         g.Clear(bgc);
-                    } else
+                    }
+                    else
                         g.Clear(System.Drawing.Color.FromArgb(unchecked((int)settings.XpColor)));
-                } catch (FileLoadException) {
+                }
+                catch (FileLoadException) {
                     using WebClient client = new();
                     try {
                         byte[] dataArr = await client.DownloadDataTaskAsync(settings.Background);
@@ -270,15 +273,17 @@ namespace Dexter.Commands {
                 StringBuilder asciiUsername = new();
                 foreach (char c in user.Username) {
                     try {
-                        if (g.MeasureString(c.ToString(), fontDefault).Width > 20) {
+                        if (g.MeasureString(c.ToString(), fontDefault).Width > 2) {
                             excludenondrawables.Append(c);
-                        } else {
+                        }
+                        else {
                             excludenondrawables.Append('?');
                         }
-                    } catch {
+                    }
+                    catch {
                         excludenondrawables.Append('?');
                     }
-                    
+
                     if (char.IsLetterOrDigit(c) || char.IsPunctuation(c)) simplifiedUsername.Append(c);
                     else simplifiedUsername.Append('?');
 
@@ -291,21 +296,23 @@ namespace Dexter.Commands {
                 possibleNames.Add(asciiUsername.ToString());
                 possibleNames.Add("Unknown");
 
-                foreach(string name in possibleNames) {
+                foreach (string name in possibleNames) {
                     try {
+                        Console.WriteLine($"Attempt to draw {name} with stylish font.");
                         Bitmap nameDrawn = new Bitmap(result.Size.Width, result.Size.Height);
                         using Graphics gname = Graphics.FromImage(nameDrawn);
                         gname.DrawString($"{name}#{user.Discriminator}", fontDefault, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
-                        gname.FillRectangle(new SolidBrush(System.Drawing.Color.Transparent), rectName);
+                        DrawLevels(fontTitle, fontDefault, fontMini, mainLvlData, secondaryLvlData, gname, xpColor, whiteColor);
                         g.DrawImage(nameDrawn, Point.Empty);
                         break;
                     }
                     catch {
                         try {
+                            Console.WriteLine($"Attempt to draw {name} with basic font.");
                             Bitmap nameDrawn = new Bitmap(result.Size.Width, result.Size.Height);
                             using Graphics gname = Graphics.FromImage(nameDrawn);
                             gname.DrawString($"{name}#{user.Discriminator}", basicFont, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
-                            gname.FillRectangle(new SolidBrush(System.Drawing.Color.Transparent), rectName);
+                            DrawLevels(fontTitle, fontDefault, fontMini, mainLvlData, secondaryLvlData, gname, xpColor, whiteColor);
                             g.DrawImage(nameDrawn, Point.Empty); break;
                         }
                         catch {
@@ -318,7 +325,7 @@ namespace Dexter.Commands {
                 if (settings.PfpBorder)
                     g.FillEllipse(new SolidBrush(System.Drawing.Color.FromArgb(unchecked((int)0xff3f3f3f)))
                         , new Rectangle(rectPfp.X - pfpmargin, rectPfp.Y - pfpmargin, rectPfp.Width + 2 * pfpmargin, rectPfp.Height + 2 * pfpmargin));
-                
+
                 using (WebClient client = new()) {
                     byte[] dataArr = await client.DownloadDataTaskAsync(user.GetTrueAvatarUrl(512));
                     using MemoryStream mem = new(dataArr);
@@ -334,28 +341,31 @@ namespace Dexter.Commands {
                         pfpg.DrawImage(pfp, tempPos);
 
                         g.DrawImage(pfplayer, rectPfp);
-                    } else {
+                    }
+                    else {
                         g.DrawImage(pfp, rectPfp);
                     }
-                }
-
-                foreach (LevelData ld in new LevelData[] { mainLvlData, secondaryLvlData }) {
-                    if (ld is null) continue;
-                    g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb(0xe0, System.Drawing.Color.Black)), ld.rects.Bar(1));
-                    g.FillRectangle(xpColor, ld.rects.Bar(ld.Percent));
-                    using (System.Drawing.Image levelBox = System.Drawing.Image.FromFile(barPath)) {
-                        g.DrawImage(levelBox, ld.rects.fullRect);
-                    }
-                    g.DrawString(ld.xpType, fontTitle, whiteColor, ld.rects.typeLabel);
-                    g.DrawString("RANK", fontMini, whiteColor, ld.rects.rankLabel, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
-                    g.DrawString($"#{ld.rank}", fontTitle, whiteColor, ld.rects.rankText, new StringFormat() { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far });
-                    g.DrawString(ld.level.ToString(), fontTitle, xpColor, ld.rects.currentLevel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
-                    g.DrawString((ld.level + 1).ToString(), fontTitle, xpColor, ld.rects.nextLevel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
-                    g.DrawString(ld.XpExpr, fontDefault, xpColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
                 }
             }
 
             return result;
+        }
+
+        private static void DrawLevels(Font fontTitle, Font fontDefault, Font fontMini, LevelData mainLvlData, LevelData secondaryLvlData, Graphics g, Brush xpColor, Brush whiteColor) {
+            foreach (LevelData ld in new LevelData[] { mainLvlData, secondaryLvlData }) {
+                if (ld is null) continue;
+                g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb(0xe0, System.Drawing.Color.Black)), ld.rects.Bar(1));
+                g.FillRectangle(xpColor, ld.rects.Bar(ld.Percent));
+                using (System.Drawing.Image levelBox = System.Drawing.Image.FromFile(barPath)) {
+                    g.DrawImage(levelBox, ld.rects.fullRect);
+                }
+                g.DrawString(ld.xpType, fontTitle, whiteColor, ld.rects.typeLabel);
+                g.DrawString("RANK", fontMini, whiteColor, ld.rects.rankLabel, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
+                g.DrawString($"#{ld.rank}", fontTitle, whiteColor, ld.rects.rankText, new StringFormat() { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far });
+                g.DrawString(ld.level.ToString(), fontTitle, xpColor, ld.rects.currentLevel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+                g.DrawString((ld.level + 1).ToString(), fontTitle, xpColor, ld.rects.nextLevel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+                g.DrawString(ld.XpExpr, fontDefault, xpColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
+            }
         }
 
         /// <summary>

@@ -267,7 +267,7 @@ namespace Dexter.Commands {
                 List<string> possibleNames = new();
                 Font basicFont = new Font("Arial", labelHeight * 2 / 3);
                 byte[] bytes = Encoding.UTF32.GetBytes(user.Username);
-                string utf8encoded = Encoding.UTF8.GetString(bytes);
+                string utf8encoded = Encoding.Default.GetString(bytes);
                 StringBuilder excludenondrawables = new();
                 StringBuilder simplifiedUsername = new();
                 StringBuilder asciiUsername = new();
@@ -296,14 +296,20 @@ namespace Dexter.Commands {
                 possibleNames.Add(asciiUsername.ToString());
                 possibleNames.Add("Unknown");
 
+                Point invariableBarBorderPosition = new Point(widthmain / 2, mainLevel.fullRect.Y + mainLevel.fullRect.Height - 1);
+                g.FillEllipse(whiteColor, new Rectangle(invariableBarBorderPosition, new Size(5, 5)));
+
                 foreach (string name in possibleNames) {
                     try {
                         Console.WriteLine($"Attempt to draw {name} with stylish font.");
-                        Bitmap nameDrawn = new Bitmap(result.Size.Width, result.Size.Height);
+                        Bitmap nameDrawn = new(result.Size.Width, result.Size.Height);
                         using Graphics gname = Graphics.FromImage(nameDrawn);
-                        gname.DrawString($"{name}#{user.Discriminator}", fontDefault, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
+                        gname.DrawString($"{name}#{user.Discriminator}", fontDefault, whiteColor, rectName,
+                            new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap });
                         DrawLevels(fontTitle, fontDefault, fontMini, mainLvlData, secondaryLvlData, gname, xpColor, whiteColor);
                         g.DrawImage(nameDrawn, Point.Empty);
+                        if (!nameDrawn.GetPixel(invariableBarBorderPosition.X, invariableBarBorderPosition.Y).Equals(result.GetPixel(invariableBarBorderPosition.X, invariableBarBorderPosition.Y)))
+                            throw new Exception($"Unable to draw graphics for name {name}.");
                         break;
                     }
                     catch {
@@ -311,9 +317,13 @@ namespace Dexter.Commands {
                             Console.WriteLine($"Attempt to draw {name} with basic font.");
                             Bitmap nameDrawn = new Bitmap(result.Size.Width, result.Size.Height);
                             using Graphics gname = Graphics.FromImage(nameDrawn);
-                            gname.DrawString($"{name}#{user.Discriminator}", basicFont, whiteColor, rectName, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
+                            gname.DrawString($"{name}#{user.Discriminator}", basicFont, whiteColor, rectName,
+                                new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap });
                             DrawLevels(fontTitle, fontDefault, fontMini, mainLvlData, secondaryLvlData, gname, xpColor, whiteColor);
-                            g.DrawImage(nameDrawn, Point.Empty); break;
+                            g.DrawImage(nameDrawn, Point.Empty);
+                            if (!nameDrawn.GetPixel(invariableBarBorderPosition.X, invariableBarBorderPosition.Y).Equals(result.GetPixel(invariableBarBorderPosition.X, invariableBarBorderPosition.Y)))
+                                throw new Exception($"Unable to draw graphics for name {name}.");
+                            break;
                         }
                         catch {
                             continue;

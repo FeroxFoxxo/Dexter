@@ -415,6 +415,7 @@ namespace Dexter.Commands {
                 .WithAuthor(Author)
                 .WithDescription(Description)
                 .AddField("Release Date:", $"{Release.ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone)):ddd', 'MMM d 'at' hh:mm tt 'UTC'z}")
+                .AddField(Status == EventStatus.Pending, "Approval/Decline:", $"`{BotConfiguration.Prefix}event <approve|decline> {ID}`")
                 .AddField(IncludeResolutionInfo, "Resolution:", $"{BotConfiguration.Prefix}event [approve/decline] {ID}")
                 .AddField(ResolveReason.Length > 0, "Reason:", ResolveReason)
                 .WithFooter(ID.ToString())

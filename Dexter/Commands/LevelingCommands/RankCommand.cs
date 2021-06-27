@@ -372,7 +372,10 @@ namespace Dexter.Commands {
         private static bool IsClearSafe(Bitmap bitmap) {
             for (int i = 0; i < bitmap.Width; i++) {
                 for (int j = 0; j < bitmap.Height; j++) {
-                    if (bitmap.GetPixel(i, j).A != 0) return false;
+                    if (bitmap.GetPixel(i, j).A != 0) {
+                        Console.WriteLine($"Found pixel ({i},{j}) with color {bitmap.GetPixel(i, j).ToArgb():X}");
+                        return false;
+                    }
                 }
             }
 

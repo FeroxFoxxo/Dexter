@@ -191,78 +191,42 @@ namespace Dexter.Configurations {
 
         public int GetLevelFromXP(long xp, out long residualXP, out long levelXP, bool throwsError = false) {
             //solve [config.DexterXPCoefficients] [1, x, x^2, x^3 ... x^n]t = xp
-            //through Newton's Method
-            double level = 75;
-            double prevlevel;
-
-            const int maxattempts = 500;
-            int attempts = 0;
-            int streak = 0;
-
-            long lowerXP = GetXPForLevel((int)level);
-            long upperXP = GetXPForLevel((int)level + 1);
-            while (xp < lowerXP || xp >= upperXP) {
-                prevlevel = level;
-                level = ApproximateLevel(xp, lowerXP, level);
-                if (prevlevel < level) { //guess increases
-                    if (streak < 0) streak = 0;
-                    if (streak++ > 2) level *= (1 + (float)streak / 10);
-                }
-                if (prevlevel > level) { //guess decreases
-                    if (streak > 0) streak = 0;
-                    if (streak-- < -2) level /= (1 - (float)streak / 10);
-                }
-
-                try {
-                    lowerXP = checked(GetXPForLevel((int)level));
-                    upperXP = checked(GetXPForLevel((int)level + 1));
-                    //Console.Out.WriteLine($"guessing {level} for XP {xp}");
-                } catch {
-                    double lxp = GetXPForLevelFull(level);
-                    double uxp = GetXPForLevelFull(level + 1);
-                    while (uxp > long.MaxValue && attempts++ <= maxattempts) {
-                        level = ApproximateLevelFull(xp, lxp, level);
-                        lxp = GetXPForLevelFull(level);
-                        uxp = GetXPForLevelFull(level + 1);
-                        //Console.Out.WriteLine($"decimal guessing {level} for XP {xp}");
-                    }
-                }
-                if (attempts++ > maxattempts) {
-                    if (throwsError)
-                        throw new TimeoutException("The user level calculation took too long!");
-                    else {
-                        residualXP = -1;
-                        levelXP = upperXP;
-                        return (int)level;
-                    }
-                }
+            //through binary approximation
+            int minlevel = 0;
+            int maxlevel = 100;
+            while(xp > GetXPForLevel(maxlevel)) {
+                minlevel = maxlevel;
+                maxlevel *= 2;
             }
+
+            int level = ApproximateLevel(xp, ref minlevel, ref maxlevel, out long lowerXP, out long upperXP);
 
             residualXP = xp - lowerXP;
             levelXP = upperXP - lowerXP;
-            return (int)level;
+            return level;
         }
 
-        private double ApproximateLevel(long xp, double guess) {
-            return ApproximateLevel(xp, GetXPForLevel(guess));
-        }
+        private int ApproximateLevel(long xp, ref int lowerbound, ref int upperbound, out long lvlxp, out long nextlvlxp) {
+            int attempts = 0;
+            while (attempts++ < 500) {
+                int middle = (lowerbound + upperbound) / 2;
 
-        private double ApproximateLevel(long xp, long lowerLevelXP, double guess) {
-            double d = GetDerivativeAtLevel(guess);
-            return (xp - lowerLevelXP) / d + guess;
-        }
+                long xpmiddle = GetXPForLevel(middle);
+                long xpmaxmiddle = GetXPForLevel(middle + 1);
 
-        private double ApproximateLevelFull(long xp, double lowerLevelXP, double guess) {
-            double d = GetDerivativeAtLevel(guess);
-            return (xp - lowerLevelXP) / d + guess;
-        }
-
-        private double GetDerivativeAtLevel(double level) {
-            double d = 0;
-            for (int i = 1; i < DexterXPCoefficients.Length; i++) {
-                d += i * DexterXPCoefficients[i] * Math.Pow(level, i - 1);
+                if (xp >= xpmaxmiddle) {
+                    lowerbound = middle + 1;
+                }
+                else if (xp < xpmiddle) {
+                    upperbound = middle;
+                }
+                else {
+                    lvlxp = xpmiddle;
+                    nextlvlxp = xpmaxmiddle;
+                    return middle;
+                }
             }
-            return d;
+            throw new Exception($"Unable to calculate level for XP {xp}, reached bounds {lowerbound}-{upperbound}");
         }
     }
 

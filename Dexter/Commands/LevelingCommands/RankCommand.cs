@@ -433,5 +433,21 @@ namespace Dexter.Commands {
                 await Context.Channel.SendMessageAsync($"Calculation of {rep} level calculations completed in {t.ElapsedMilliseconds} milliseconds for size = {size}; level <= {LevelingConfiguration.GetLevelFromXP(size, out _, out _)}.");
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+
+        [Command("testlevelcalculationintegrity")]
+
+        public async Task RunIntegrityTest() {
+            const int cap = 100000000;
+            int nextAnnounce = 100;
+            for (int v = 1; v < cap; v++) {
+                LevelingConfiguration.GetLevelFromXP(v, out long resXP, out _);
+            }
+            await Context.Channel.SendMessageAsync($"Success up to XP = {cap}!");
+        }
     }
 }

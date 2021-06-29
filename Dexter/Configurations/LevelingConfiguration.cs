@@ -186,10 +186,10 @@ namespace Dexter.Configurations {
         /// <param name="xp">The total XP accrued by the user.</param>
         /// <param name="residualXP">The XP accrued since the last level up.</param>
         /// <param name="levelXP">The total size of the range of XP required for the obtained level.</param>
-        /// <param name="throwsError">Whether to throw an error if the operation takes too long, if <see langword="false"/>, the method will return the best approximation it has.</param>
+        /// 
         /// <returns>The level of the user, ignoring residual XP.</returns>
 
-        public int GetLevelFromXP(long xp, out long residualXP, out long levelXP, bool throwsError = false) {
+        public int GetLevelFromXP(long xp, out long residualXP, out long levelXP) {
             //solve [config.DexterXPCoefficients] [1, x, x^2, x^3 ... x^n]t = xp
             //through binary approximation
             int minlevel = 0;

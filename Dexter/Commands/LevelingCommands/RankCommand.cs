@@ -320,6 +320,7 @@ namespace Dexter.Commands {
                     if (c < 256) asciiUsername.Append(c);
                     else asciiUsername.Append('?');
                 }
+                possibleNames.Add(Context.User.Username);
                 possibleNames.Add(utf8encoded.ToString());
                 possibleNames.Add(excludenondrawables.ToString());
                 possibleNames.Add(simplifiedUsername.ToString());
@@ -333,11 +334,11 @@ namespace Dexter.Commands {
                         Console.WriteLine($"Is clear? {IsClearSafe(nameDrawn, out _)}");
                         using Graphics gname = Graphics.FromImage(nameDrawn);
                         gname.DrawString($"{name}#{user.Discriminator}", fontDefault, whiteColor, new Rectangle(Point.Empty, rectName.Size),
-                            new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap });
+                            new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap });
                         if (IsClearSafe(nameDrawn, out Point loc))
                             throw new Exception($"Unable to draw {name}");
                         gname.FillRectangle(xpColor, new Rectangle(loc, new Size(5, 5)));
-                        g.DrawImageUnscaledAndClipped(nameDrawn, rectName);
+                        g.DrawImage(nameDrawn, rectName);
                         break;
                     } catch {
                         continue;
@@ -435,7 +436,7 @@ namespace Dexter.Commands {
         }
 
         /// <summary>
-        /// 
+        /// Checks whether the level calculation method works for any xp value up to a cap.
         /// </summary>
         /// <returns></returns>
 
@@ -443,9 +444,14 @@ namespace Dexter.Commands {
 
         public async Task RunIntegrityTest() {
             const int cap = 100000000;
+            IUserMessage report = await Context.Channel.SendMessageAsync($"Running Integrity Test: 0/{cap} XP values.");
             int nextAnnounce = 100;
             for (int v = 1; v < cap; v++) {
-                LevelingConfiguration.GetLevelFromXP(v, out long resXP, out _);
+                if (v > nextAnnounce) {
+                    nextAnnounce *= 5;
+                    await report.ModifyAsync(m => m.Content = $"Running Integrity Test: {v}/{cap} XP values.");
+                }
+                LevelingConfiguration.GetLevelFromXP(v, out _, out _);
             }
             await Context.Channel.SendMessageAsync($"Success up to XP = {cap}!");
         }

@@ -293,26 +293,11 @@ namespace Dexter.Commands {
                     }
                 }
 
-
                 List<string> possibleNames = new();
                 Font basicFont = new Font("Arial", labelHeight * 2 / 3);
-                byte[] bytes = Encoding.UTF32.GetBytes(user.Username);
-                string utf8encoded = Encoding.Default.GetString(bytes);
-                StringBuilder excludenondrawables = new();
                 StringBuilder simplifiedUsername = new();
                 StringBuilder asciiUsername = new();
                 foreach (char c in user.Username) {
-                    try {
-                        if (g.MeasureString(c.ToString(), fontDefault).Width > 2) {
-                            excludenondrawables.Append(c);
-                        }
-                        else {
-                            excludenondrawables.Append('?');
-                        }
-                    }
-                    catch {
-                        excludenondrawables.Append('?');
-                    }
 
                     if (char.IsLetterOrDigit(c) || char.IsPunctuation(c)) simplifiedUsername.Append(c);
                     else simplifiedUsername.Append('?');
@@ -320,9 +305,7 @@ namespace Dexter.Commands {
                     if (c < 256) asciiUsername.Append(c);
                     else asciiUsername.Append('?');
                 }
-                possibleNames.Add(Context.User.Username);
-                possibleNames.Add(utf8encoded.ToString());
-                possibleNames.Add(excludenondrawables.ToString());
+                possibleNames.Add(user.Username);
                 possibleNames.Add(simplifiedUsername.ToString());
                 possibleNames.Add(asciiUsername.ToString());
                 possibleNames.Add("Unknown");

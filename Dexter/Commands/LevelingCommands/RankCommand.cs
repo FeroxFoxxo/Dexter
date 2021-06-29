@@ -312,15 +312,12 @@ namespace Dexter.Commands {
 
                 foreach (string name in possibleNames) {
                     try {
-                        Console.WriteLine($"Attempt to draw {name} with stylish font.");
                         Bitmap nameDrawn = new(rectName.Size.Width, rectName.Size.Height);
-                        Console.WriteLine($"Is clear? {IsClearSafe(nameDrawn, out _)}");
                         using Graphics gname = Graphics.FromImage(nameDrawn);
                         gname.DrawString($"{name}#{user.Discriminator}", fontDefault, whiteColor, new Rectangle(Point.Empty, rectName.Size),
                             new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap });
                         if (IsClearSafe(nameDrawn, out Point loc))
                             throw new Exception($"Unable to draw {name}");
-                        gname.FillRectangle(xpColor, new Rectangle(loc, new Size(5, 5)));
                         g.DrawImage(nameDrawn, rectName);
                         break;
                     } catch {

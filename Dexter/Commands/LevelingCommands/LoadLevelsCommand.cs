@@ -61,7 +61,7 @@ namespace Dexter.Commands {
                         count++;
                     }
                 } catch(InvalidOperationException e) {
-                    Console.Out.WriteLine(e);
+                    Console.Error.WriteLine($"Warning; error when processing level loading: {e}");
                     await LevelingDB.SaveChangesAsync();
                     ul = LevelingDB.GetOrCreateLevelData(r.Id, false);
                     try {
@@ -71,7 +71,7 @@ namespace Dexter.Commands {
                         }
                     }
                     catch {
-                        await Context.Channel.SendMessageAsync($"Filed to load user {r.Id}");
+                        await Context.Channel.SendMessageAsync($"Failed to load user {r.Id}");
                     }
                 }
             }
@@ -172,7 +172,7 @@ namespace Dexter.Commands {
                             }
                         }
                         catch (Exception e) {
-                            Console.Out.WriteLine(e);
+                            Console.Error.WriteLine($"Warning; error when processing web level loading: {e}");
                             await LevelingDB.SaveChangesAsync();
                             ul = LevelingDB.GetOrCreateLevelData(p.id, false);
                             try {

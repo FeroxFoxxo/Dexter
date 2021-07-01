@@ -158,11 +158,11 @@ namespace Dexter.Commands {
                 case "bgimg":
                 case "bg":
                     string path = Path.Combine(Directory.GetCurrentDirectory(), "Images", "Levels", "Backgrounds");
-                    if (value.ToLower() == "list") {
-                        string[] processedPaths = Directory.GetFiles(path);
+                    string[] processedPaths = Directory.GetFiles(path);
 
-                        for (int i = 0; i < processedPaths.Length; i++)
-                            processedPaths[i] = processedPaths[i].Split('\\').Last().Split('/').Last()[..^4];
+                    for (int i = 0; i < processedPaths.Length; i++)
+                        processedPaths[i] = processedPaths[i].Split('\\').Last().Split('/').Last()[..^4];
+                    if (value.ToLower() == "list") {
                         await BuildEmbed(EmojiEnum.Sign)
                             .WithTitle("Default Background Images")
                             .WithDescription(string.Join(", ", processedPaths))
@@ -187,10 +187,6 @@ namespace Dexter.Commands {
                                     .SendEmbed(Context.Channel);
                                 break;
                             }
-                            string[] processedPaths = Directory.GetFiles(path);
-
-                            for (int i = 0; i < processedPaths.Length; i++) 
-                                processedPaths[i] = processedPaths[i].Split('\\').Last()[..^4];
 
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Unable to find default image")

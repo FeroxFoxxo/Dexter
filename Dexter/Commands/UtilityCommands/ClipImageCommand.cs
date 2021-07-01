@@ -160,7 +160,7 @@ namespace Dexter.Commands {
                     fromX, fromY, fromWidth, fromHeight, GraphicsUnit.Pixel);
             }
 
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache", "temp_clipped.png");
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache", "temp_clipped" + format);
             result.Save(path);
 
             await Context.Channel.SendFileAsync(path);

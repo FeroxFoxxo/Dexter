@@ -77,6 +77,11 @@ namespace Dexter.Commands {
         }
 
         //Standard Item positioning
+        /// <summary>
+        /// The size of the rank card in pixels
+        /// </summary>
+        public static readonly Size RankCardSize = new Size(widthmain + pfpside, height);
+        
         private const int widthmain = 1000;
         private const int height = 450;
         private const int pfpside = 350;

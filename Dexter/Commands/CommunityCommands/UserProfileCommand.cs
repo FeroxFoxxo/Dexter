@@ -1070,23 +1070,26 @@ namespace Dexter.Commands {
                 return;
             }
 
-            int nextYear = DateTime.Now.Year;
+            TimeSpan diff = TimeSpan.Zero;
+
+            int nextYear = DateTime.Now.Year - 1;
             int monthNow = DateTime.Now.Month;
             int dayNow = DateTime.Now.Day;
             int monthBD = (int)profile.Borkday.Month;
             int dayBD = profile.Borkday.Day;
-            if (monthBD < monthNow || (monthBD == monthNow && dayBD <= dayNow)) {
-                nextYear++;
-            }
-            if (monthBD == (int)LanguageHelper.Month.February && dayBD == 29
-                && !CultureInfo.InvariantCulture.Calendar.IsLeapYear(nextYear)) {
-                monthBD++;
-                dayBD = 1;
-            }
-            DateTime relevantDay = new DateTime(nextYear, monthBD, dayBD, 0, 0, 0);
-            TimeSpan relevantOffset = profile.GetRelevantTimeZone(new DateTimeOffset(relevantDay), LanguageConfiguration).TimeOffset;
 
-            TimeSpan diff = new DateTimeOffset(relevantDay, relevantOffset).Subtract(DateTimeOffset.Now);
+            while (diff <= TimeSpan.Zero) {
+                nextYear++;
+                if (monthBD == (int)LanguageHelper.Month.February && dayBD == 29
+                    && !CultureInfo.InvariantCulture.Calendar.IsLeapYear(nextYear)) {
+                    monthBD++;
+                    dayBD = 1;
+                }
+                DateTime relevantDay = new DateTime(nextYear, monthBD, dayBD, 0, 0, 0);
+                TimeSpan relevantOffset = profile.GetRelevantTimeZone(new DateTimeOffset(relevantDay), LanguageConfiguration).TimeOffset;
+
+                diff = new DateTimeOffset(relevantDay, relevantOffset).Subtract(DateTimeOffset.Now);
+            }
             profile.BorkdayTimerToken = await CreateEventTimer(BorkdayCallback, new Dictionary<string, string>() { {"ID", profile.UserID.ToString()} }, (int)diff.TotalSeconds, Databases.EventTimers.TimerType.Expire, TimerService);
             await ProfilesDB.SaveChangesAsync();
         }

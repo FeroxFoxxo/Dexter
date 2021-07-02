@@ -70,7 +70,7 @@ namespace Dexter.Services {
                 foreach (IGuildUser uservc in voiceChannel.Users)
                     if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsBot)) {
                         await LevelingDB.IncrementUserXP(
-                            Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven),
+                            Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven + 1),
                             false,
                             uservc,
                             DiscordSocketClient.GetChannel(LevelingConfiguration.VoiceTextChannel) as ITextChannel,
@@ -94,7 +94,7 @@ namespace Dexter.Services {
             if (LevelingDB.OnTextCooldowns.Find(message.Author.Id) is not null) return;
 
             await LevelingDB.IncrementUserXP(
-                Random.Next(LevelingConfiguration.TextMinXPGiven, LevelingConfiguration.TextMaxXPGiven),
+                Random.Next(LevelingConfiguration.TextMinXPGiven, LevelingConfiguration.TextMaxXPGiven + 1),
                 true,
                 message.Author as IGuildUser,
                 message.Channel as ITextChannel,

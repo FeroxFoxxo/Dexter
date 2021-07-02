@@ -475,6 +475,9 @@
 		<None Update="Images\Levels\Assets\LevelTemplate2.png">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="Images\Levels\Assets\LevelTemplateHybrid.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="Images\Levels\Backgrounds\cave.jpg">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

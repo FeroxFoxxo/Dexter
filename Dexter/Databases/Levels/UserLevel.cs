@@ -180,6 +180,12 @@ namespace Dexter.Databases.Levels {
         /// </summary>
 
         public bool TitleBackground { get; set; } = true;
+
+        /// <summary>
+        /// Whether to display the hybrid level bars in Dexter Merge Mode.
+        /// </summary>
+
+        public bool ShowHybrid { get; set; } = true;
     }
 
 }

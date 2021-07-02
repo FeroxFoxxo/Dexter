@@ -29,7 +29,9 @@ namespace Dexter.Commands {
             "-  `background ([DefaultImage] OR #[ColorCode])` {+Attachment} - Sets your rank card background to the `.png` or `.jpg` image you uploaded along with the command. Use the value `list` to see a list of default images.\n" +
             "-  `color ([ColorName] OR #[ColorCode])` - Sets your rank card theme color to the chosen color. You can view some examples by leaving the value field blank.\n" +
             "-  `pfpborder <true|false>` - Sets whether to render a grey circle behind your pfp in your rank card.\n" +
-            "-  `croppfp <true|false>` - Sets whether to crop your pfp into a circle or render it in full in your rank card.")]
+            "-  `croppfp <true|false>` - Sets whether to crop your pfp into a circle or render it in full in your rank card.\n" +
+            "-  `titlebg <true|false>` - Sets whether to display a black background behind the name and total level.\n" +
+            "-  `showhybrid <true|false>` - Sets whether to display separate XP types in Merge Level Mode.")]
         [BotChannel]
 
         public async Task CustomizeLevelsCommand(string attribute = "", [Remainder] string value = "") {
@@ -152,6 +154,36 @@ namespace Dexter.Commands {
                         .WithDescription($"The value of \"TitleBackground\" has been set to `{prefs.TitleBackground}`.")
                         .SendEmbed(Context.Channel);
                     break;
+                case "showhybrid":
+                case "displayhybrid":
+                case "showhybridlevels":
+                case "displayhybridlevels":
+                    switch (value.ToLower()) {
+                        case "true":
+                        case "yes":
+                        case "enabled":
+                        case "circle":
+                            prefs.ShowHybrid = true;
+                            break;
+                        case "false":
+                        case "no":
+                        case "disabled":
+                        case "square":
+                            prefs.ShowHybrid = false;
+                            break;
+                        default:
+                            await BuildEmbed(EmojiEnum.Sign)
+                                .WithTitle("Information about \"ShowHybridLevels\"")
+                                .WithDescription("Describes whether the individual level types should be displayed if Dexter XP is set to XP Merge Mode.")
+                                .AddField("Possible Values", "**true**: Individual levels will be displayed.\n**false**: Only the total level will be displayed.")
+                                .SendEmbed(Context.Channel);
+                            return;
+                    }
+                    await BuildEmbed(EmojiEnum.Love)
+                        .WithTitle("Operation Successful!")
+                        .WithDescription($"The value of \"ShowHybridLevels\" has been set to `{prefs.ShowHybrid}`.")
+                        .SendEmbed(Context.Channel);
+                    break;
                 case "background":
                 case "image":
                 case "bgimage":
@@ -249,7 +281,8 @@ namespace Dexter.Commands {
                         $"Background Image: {(prefs.Background.StartsWith("http") ? $"[View]({prefs.Background})" : prefs.Background)}\n" +
                         $"Pfp border: **{prefs.PfpBorder}**\n" +
                         $"Crop Pfp: **{prefs.CropPfp}**\n" +
-                        $"Title Background: **{prefs.TitleBackground}**")
+                        $"Title Background: **{prefs.TitleBackground}**\n" +
+                        $"Show Hybrid Levels: **{prefs.ShowHybrid}** {(LevelingConfiguration.LevelMergeMode is Configurations.LevelMergeMode.AddXPMerged or Configurations.LevelMergeMode.AddXPSimple ? "" : " *(disabled due to Dexter XP Merge Mode.)*")}\n")
                         .SendEmbed(Context.Channel);
                     return;
             }

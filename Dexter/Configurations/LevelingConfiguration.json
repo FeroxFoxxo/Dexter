@@ -26,8 +26,8 @@
   "TextMaxXPGiven": 25,
   "TextSendLevelUpMessage": true,
   "DexterXPCoefficients": [ 0, 75.8333333334, 22.5, 1.6666666667 ],
-  "LevelMergeMode": 1,
-  "MergeFactor": 0.5,
+  "LevelMergeMode": 2,
+  "MergeFactor": 1,
   "MaxLeaderboardItems": 5000,
   "Mee6SyncGuildId": 336243033416794118,
   "LevelUpMessage": "OwO What's this? {MENTION} just advanced to **{TYPE} level {LVL}**!!! YAY!!!"

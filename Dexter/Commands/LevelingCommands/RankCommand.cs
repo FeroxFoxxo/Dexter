@@ -92,6 +92,8 @@ namespace Dexter.Commands {
         private static readonly Rectangle titleRect = new Rectangle(defMargin, defMargin, widthmain - 2 * defMargin + pfpside, labelHeight);
         private static readonly LevelRect mainLevel = new LevelRect(height - 2 * levelHeight - 2 * defMargin);
         private static readonly LevelRect secondaryLevel = new LevelRect(height - levelHeight - defMargin);
+        private static readonly LevelRect mainHybridLevel = new LevelRect(height - levelHeight - defMargin, LevelRect.LevelBarType.HybridMain);
+        private static readonly LevelRect secondaryHybridLevel = new LevelRect(height - levelHeight - defMargin, LevelRect.LevelBarType.HybridSecondary);
         private static readonly Rectangle rectName = new Rectangle(defMargin, defMargin, widthmain - 2 * defMargin + pfpside, labelHeight);
         private static readonly Rectangle rectPfp = new Rectangle(widthmain, height - pfpside , pfpside, pfpside);
 
@@ -99,6 +101,7 @@ namespace Dexter.Commands {
         private const int labelIntrusionPixels = 0;
         private const int labelHeight = 60;
         private const int typeLabelWidth = 175;
+        private const int hybridLabelWidth = 125;
         private const int labelMiniMargin = 5;
         private static readonly Rectangle rectLevelLabel = new Rectangle(defMargin, defMargin, miniLabelWidth + labelIntrusionPixels, labelHeight);
         private static readonly Rectangle rectLevelText = new Rectangle(defMargin + miniLabelWidth, defMargin, widthmain / 2 - defMargin - miniLabelWidth, labelHeight);
@@ -112,35 +115,59 @@ namespace Dexter.Commands {
             public Rectangle rankLabel;
             public Rectangle rankText;
             public Rectangle expText;
+            public LevelBarType leveltype;
 
-            public LevelRect(int originHeight) {
-                fullRect = new Rectangle(defMargin, originHeight, levelWidth, levelHeight);
-                Bar = (p) => new Rectangle(defMargin + barMarginHorizontal, originHeight + levelHeight - barHeight - barMarginVertical
-                    , (int)((levelWidth - 2 * barMarginHorizontal) * p), barHeight);
-                currentLevel = new Rectangle(defMargin, originHeight + levelHeight - barHeight - barMarginVertical, barMarginHorizontal, barHeight + 2 * barMarginVertical);
-                nextLevel = new Rectangle(levelWidth + defMargin - barMarginHorizontal, originHeight + levelHeight - barHeight - barMarginVertical, barMarginHorizontal, barHeight + 2 * barMarginVertical);
-                typeLabel = new Rectangle(defMargin + labelMiniMargin, originHeight + labelMiniMargin, typeLabelWidth, labelHeight);
-                rankLabel = new Rectangle(defMargin + typeLabelWidth, originHeight, miniLabelWidth + labelIntrusionPixels, labelHeight);
-                rankText = new Rectangle(defMargin + miniLabelWidth + typeLabelWidth, originHeight, levelWidth * 2 / 3 - miniLabelWidth - typeLabelWidth - defMargin, labelHeight);
-                expText = new Rectangle(levelWidth / 3, originHeight, levelWidth * 2 / 3, labelHeight);
+            public LevelRect(int originHeight, LevelBarType leveltype = LevelBarType.Normal) {
+                this.leveltype = leveltype;
+                if (leveltype == LevelBarType.Normal) {
+                    fullRect = new Rectangle(defMargin, originHeight, levelWidth, levelHeight);
+                    Bar = (p) => new Rectangle(defMargin + barMarginHorizontal, originHeight + levelHeight - barHeight - barMarginVertical
+                        , (int)((levelWidth - 2 * barMarginHorizontal) * p), barHeight);
+                    currentLevel = new Rectangle(defMargin, originHeight + levelHeight - barHeight - barMarginVertical, barMarginHorizontal, barHeight + 2 * barMarginVertical);
+                    nextLevel = new Rectangle(levelWidth + defMargin - barMarginHorizontal, originHeight + levelHeight - barHeight - barMarginVertical, barMarginHorizontal, barHeight + 2 * barMarginVertical);
+                    typeLabel = new Rectangle(defMargin + labelMiniMargin, originHeight + labelMiniMargin, typeLabelWidth, labelHeight);
+                    rankLabel = new Rectangle(defMargin + typeLabelWidth, originHeight, miniLabelWidth + labelIntrusionPixels, labelHeight);
+                    rankText = new Rectangle(defMargin + miniLabelWidth + typeLabelWidth, originHeight, levelWidth * 2 / 3 - miniLabelWidth - typeLabelWidth - defMargin, labelHeight);
+                    expText = new Rectangle(levelWidth / 3, originHeight, levelWidth * 2 / 3, labelHeight);
+                }
+                else {
+                    fullRect = new Rectangle(leveltype == LevelBarType.HybridMain ? defMargin : widthmain / 2 + labelMiniMargin, originHeight,
+                        widthmain / 2 - labelMiniMargin - defMargin, levelHeight);
+                    Bar = (p) => new Rectangle(fullRect.X + barMarginHorizontal, originHeight + levelHeight - barHeight - barMarginVertical
+                        , (int)((fullRect.Width - barMarginHorizontal - labelMiniMargin) * p), barHeight);
+                    currentLevel = new Rectangle(fullRect.X, originHeight + levelHeight - barHeight - barMarginVertical, barMarginHorizontal, barHeight + 2 * barMarginVertical);
+                    nextLevel = default;
+                    typeLabel = new Rectangle(fullRect.X + labelMiniMargin, originHeight, hybridLabelWidth, labelHeight);
+                    rankLabel = new Rectangle(fullRect.X, originHeight, fullRect.Width / 2 + labelIntrusionPixels, labelHeight);
+                    rankText = new Rectangle(fullRect.X + fullRect.Width / 2, originHeight, fullRect.Width / 2, labelHeight);
+                    expText = Bar(1);
+                }
+            }
+
+            public enum LevelBarType {
+                Normal,
+                HybridMain,
+                HybridSecondary
             }
         }
 
         internal class LevelData {
+            public bool isHybrid = false;
             public int level;
             public long rxp;
             public long lxp;
             public float Percent => rxp / (float)lxp;
-            public string XpExpr => $"{rxp.ToUnit()} / {lxp.ToUnit()} XP";
+            public string XpExpr => $"{rxp.ToUnit()} / {lxp.ToUnit()}{(isHybrid ? "" : " XP")}";
             public string xpType;
             
             public int rank;
 
             public LevelRect rects;
 
-            public LevelData(long xp, LevelRect rects, LevelingConfiguration config) {
+            public LevelData(long xp, LevelRect rects, LevelingConfiguration config, bool isHybrid = false) {
                 level = config.GetLevelFromXP(xp, out rxp, out lxp);
                 this.rects = rects;
+                this.isHybrid = isHybrid;
             }
         }
 
@@ -165,6 +192,7 @@ namespace Dexter.Commands {
             throw new FileNotFoundException($"No background file named {backgroundName}.");
         }
         private static readonly string barPath = Path.Combine(imgPath, "Assets", "LevelTemplate2.png");
+        private static readonly string hybridBarPath = Path.Combine(imgPath, "Assets", "LevelTemplateHybrid.png");
         private static readonly string storagePath = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache", "rankCard.png");
 
         private async Task<System.Drawing.Image> RenderRankCard(UserLevel ul, LevelPreferences settings) {
@@ -184,49 +212,64 @@ namespace Dexter.Commands {
             if (user is null)
                 throw new NullReferenceException($"Unable to obtain User from UserLevel object with ID {ul.UserID}.");
 
-            LevelData mainLvlData;
-            LevelData secondaryLvlData;
+            List<LevelData> levelsData = new();
             int totallevel;
 
             string totallevelstr;
 
+            List<UserLevel> allUsers = LevelingDB.Levels.ToList();
+            allUsers.Sort((a, b) => b.TextXP.CompareTo(a.TextXP));
+            int txtrank = allUsers.FindIndex(ul => ul.UserID == user.Id) + 1;
+            allUsers.Sort((a, b) => b.VoiceXP.CompareTo(a.VoiceXP));
+            int vcrank = allUsers.FindIndex(ul => ul.UserID == user.Id) + 1;
+
             if (LevelingConfiguration.LevelMergeMode is LevelMergeMode.AddXPMerged or LevelMergeMode.AddXPSimple) {
-                mainLvlData = new(ul.TotalXP(LevelingConfiguration), mainLevel, LevelingConfiguration);
-                secondaryLvlData = null;
+                levelsData.Add(new LevelData(ul.TotalXP(LevelingConfiguration), mainLevel, LevelingConfiguration));
 
-                List<UserLevel> allUsers = LevelingDB.Levels.ToList();
                 allUsers.Sort((a, b) => b.TotalXP(LevelingConfiguration).CompareTo(a.TotalXP(LevelingConfiguration)));
-                mainLvlData.rank = allUsers.FindIndex(ul => ul.UserID == user.Id) + 1;
+                levelsData[0].rank = allUsers.FindIndex(ul => ul.UserID == user.Id) + 1;
 
-                mainLvlData.xpType = "Level";
-                totallevel = mainLvlData.level;
+                levelsData[0].xpType = "Level";
+                totallevel = levelsData[0].level;
                 totallevelstr = ul.TotalLevelStr(LevelingConfiguration);
+
+                if (settings.ShowHybrid) {
+                    levelsData.Add(new LevelData(ul.TextXP > ul.VoiceXP ? ul.TextXP : ul.VoiceXP, mainHybridLevel, LevelingConfiguration, true));
+                    levelsData.Add(new LevelData(ul.TextXP > ul.VoiceXP ? ul.VoiceXP : ul.TextXP, secondaryHybridLevel, LevelingConfiguration, true));
+
+                    if (ul.TextXP > ul.VoiceXP) {
+                        levelsData[1].rank = txtrank;
+                        levelsData[1].xpType = "Txt";
+                        levelsData[2].rank = vcrank;
+                        levelsData[2].xpType = "VC";
+                    }
+                    else {
+                        levelsData[1].rank = vcrank;
+                        levelsData[1].xpType = "VC";
+                        levelsData[2].rank = txtrank;
+                        levelsData[2].xpType = "Txt";
+                    }
+                }
             }
             else {
-                mainLvlData = new(ul.TextXP > ul.VoiceXP ? ul.TextXP : ul.VoiceXP, mainLevel, LevelingConfiguration);
-                secondaryLvlData = new(ul.TextXP > ul.VoiceXP ? ul.VoiceXP : ul.TextXP, secondaryLevel, LevelingConfiguration);
-                
-                List<UserLevel> allUsers = LevelingDB.Levels.ToList();
-                allUsers.Sort((a, b) => b.TextXP.CompareTo(a.TextXP));
-                int txtrank = allUsers.FindIndex(ul => ul.UserID == user.Id) + 1;
-                allUsers.Sort((a, b) => b.VoiceXP.CompareTo(a.VoiceXP));
-                int vcrank = allUsers.FindIndex(ul => ul.UserID == user.Id) + 1;
+                levelsData.Add(new LevelData(ul.TextXP > ul.VoiceXP ? ul.TextXP : ul.VoiceXP, mainLevel, LevelingConfiguration));
+                levelsData.Add(new LevelData(ul.TextXP > ul.VoiceXP ? ul.VoiceXP : ul.TextXP, secondaryLevel, LevelingConfiguration));
 
                 if (ul.TextXP > ul.VoiceXP) {
-                    mainLvlData.rank = txtrank;
-                    mainLvlData.xpType = "Text";
-                    secondaryLvlData.rank = vcrank;
-                    secondaryLvlData.xpType = "Voice";
+                    levelsData[0].rank = txtrank;
+                    levelsData[0].xpType = "Text";
+                    levelsData[1].rank = vcrank;
+                    levelsData[1].xpType = "Voice";
                 }
                 else {
-                    mainLvlData.rank = vcrank;
-                    mainLvlData.xpType = "Voice";
-                    secondaryLvlData.rank = txtrank;
-                    secondaryLvlData.xpType = "Text";
+                    levelsData[0].rank = vcrank;
+                    levelsData[0].xpType = "Voice";
+                    levelsData[1].rank = txtrank;
+                    levelsData[1].xpType = "Text";
                 }
 
-                totallevel = ul.TotalLevel(LevelingConfiguration, mainLvlData.level, secondaryLvlData.level);
-                totallevelstr = ul.TotalLevelStr(LevelingConfiguration, mainLvlData.level, secondaryLvlData.level);
+                totallevel = ul.TotalLevel(LevelingConfiguration, levelsData[0].level, levelsData[1].level);
+                totallevelstr = ul.TotalLevelStr(LevelingConfiguration, levelsData[0].level, levelsData[1].level);
             }
 
 
@@ -257,8 +300,8 @@ namespace Dexter.Commands {
                     }
                 }
 
-                using Brush xpColor = new SolidBrush(System.Drawing.Color.FromArgb(unchecked((int)settings.XpColor)));
-                using Brush whiteColor = new SolidBrush(System.Drawing.Color.White);
+                using SolidBrush xpColor = new SolidBrush(System.Drawing.Color.FromArgb(unchecked((int)settings.XpColor)));
+                using SolidBrush whiteColor = new SolidBrush(System.Drawing.Color.White);
 
                 if (settings.TitleBackground)
                     g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb(0xd0, System.Drawing.Color.Black)), titleRect);
@@ -270,7 +313,7 @@ namespace Dexter.Commands {
                     , new Rectangle(rectLevelText.X + (int)offset.Width + margin, rectLevelText.Y, widthmain / 2 - miniLabelWidth - margin - (int)offset.Width, labelHeight)
                     , new StringFormat { LineAlignment = StringAlignment.Far });
                                 
-                DrawLevels(fontTitle, fontDefault, fontMini, mainLvlData, secondaryLvlData, g, xpColor, whiteColor);
+                DrawLevels(fontTitle, fontDefault, fontMini, levelsData, g, xpColor, whiteColor);
 
                 const int pfpmargin = 3;
                 if (settings.PfpBorder)
@@ -380,20 +423,35 @@ namespace Dexter.Commands {
             public byte A;            
         }  
 
-        private static void DrawLevels(Font fontTitle, Font fontDefault, Font fontMini, LevelData mainLvlData, LevelData secondaryLvlData, Graphics g, Brush xpColor, Brush whiteColor) {
-            foreach (LevelData ld in new LevelData[] { mainLvlData, secondaryLvlData }) {
+        private static void DrawLevels(Font fontTitle, Font fontDefault, Font fontMini, IEnumerable<LevelData> levels, Graphics g, SolidBrush xpColor, SolidBrush whiteColor) {
+            foreach (LevelData ld in levels) {
                 if (ld is null) continue;
                 g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb(0xe0, System.Drawing.Color.Black)), ld.rects.Bar(1));
                 g.FillRectangle(xpColor, ld.rects.Bar(ld.Percent));
-                using (System.Drawing.Image levelBox = System.Drawing.Image.FromFile(barPath)) {
+                using (System.Drawing.Image levelBox = System.Drawing.Image.FromFile(ld.rects.leveltype == LevelRect.LevelBarType.Normal ? barPath : hybridBarPath)) {
                     g.DrawImage(levelBox, ld.rects.fullRect);
                 }
                 g.DrawString(ld.xpType, fontTitle, whiteColor, ld.rects.typeLabel);
-                g.DrawString("RANK", fontMini, whiteColor, ld.rects.rankLabel, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
-                g.DrawString($"#{ld.rank}", fontTitle, whiteColor, ld.rects.rankText, new StringFormat() { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far });
+                if (ld.rects.rankLabel != default)
+                    g.DrawString("RANK", fontMini, whiteColor, ld.rects.rankLabel, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
+                if (ld.rects.rankText != default)
+                    g.DrawString($"#{ld.rank}", fontTitle, whiteColor, ld.rects.rankText, new StringFormat() { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far });
                 g.DrawString(ld.level.ToString(), fontTitle, xpColor, ld.rects.currentLevel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
-                g.DrawString((ld.level + 1).ToString(), fontTitle, xpColor, ld.rects.nextLevel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
-                g.DrawString(ld.XpExpr, fontDefault, xpColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
+                if (ld.rects.nextLevel != default)
+                    g.DrawString((ld.level + 1).ToString(), fontTitle, xpColor, ld.rects.nextLevel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+
+                if (ld.isHybrid) {
+                    SolidBrush overXPColor = new SolidBrush(xpColor.Color.GetBrightness() < 0.5 ? System.Drawing.Color.White : System.Drawing.Color.Black);
+                    GraphicsPath xpclip = new();
+                    xpclip.AddRectangle(ld.rects.Bar(ld.Percent));
+                    g.DrawString(ld.XpExpr, fontDefault, xpColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Far });
+                    g.Clip = new Region(xpclip);
+                    g.DrawString(ld.XpExpr, fontDefault, overXPColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Far });
+                    g.Clip = new Region();
+                }
+                else {
+                    g.DrawString(ld.XpExpr, fontDefault, xpColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
+                }
             }
         }
 

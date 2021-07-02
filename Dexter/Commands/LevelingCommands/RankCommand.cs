@@ -137,7 +137,7 @@ namespace Dexter.Commands {
                         , (int)((fullRect.Width - barMarginHorizontal - labelMiniMargin) * p), barHeight);
                     currentLevel = new Rectangle(fullRect.X, originHeight + levelHeight - barHeight - barMarginVertical, barMarginHorizontal, barHeight + 2 * barMarginVertical);
                     nextLevel = default;
-                    typeLabel = new Rectangle(fullRect.X + labelMiniMargin, originHeight, hybridLabelWidth, labelHeight);
+                    typeLabel = new Rectangle(fullRect.X + labelMiniMargin, originHeight + labelMiniMargin, hybridLabelWidth, labelHeight);
                     rankLabel = new Rectangle(fullRect.X, originHeight, fullRect.Width / 2 + labelIntrusionPixels, labelHeight);
                     rankText = new Rectangle(fullRect.X + fullRect.Width / 2, originHeight, fullRect.Width / 2, labelHeight);
                     expText = Bar(1);

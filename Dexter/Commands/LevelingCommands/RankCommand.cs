@@ -431,7 +431,7 @@ namespace Dexter.Commands {
                 using (System.Drawing.Image levelBox = System.Drawing.Image.FromFile(ld.rects.leveltype == LevelRect.LevelBarType.Normal ? barPath : hybridBarPath)) {
                     g.DrawImage(levelBox, ld.rects.fullRect);
                 }
-                g.DrawString(ld.xpType, fontTitle, whiteColor, ld.rects.typeLabel);
+                g.DrawString(ld.xpType, fontTitle, whiteColor, ld.rects.typeLabel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
                 if (ld.rects.rankLabel != default)
                     g.DrawString("RANK", fontMini, whiteColor, ld.rects.rankLabel, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
                 if (ld.rects.rankText != default)

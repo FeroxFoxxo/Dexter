@@ -113,8 +113,8 @@ namespace Dexter.Services {
         /// <param name="level">The level of the user, autocalculated if below 0.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task UpdateRoles(IGuildUser user, bool removeExtra = false, int level = -1) {
-            if (user is null || !LevelingConfiguration.HandleRoles) return;
+        public async Task<bool> UpdateRoles(IGuildUser user, bool removeExtra = false, int level = -1) {
+            if (user is null || !LevelingConfiguration.HandleRoles) return false;
 
             if (level < 0) {
                 UserLevel ul = LevelingDB.GetOrCreateLevelData(user.Id, out _);
@@ -137,6 +137,8 @@ namespace Dexter.Services {
                 await user.AddRolesAsync(toAdd);
             if (toRemove.Count > 0)
                 await user.RemoveRolesAsync(toRemove);
+
+            return toAdd.Count > 0 || toRemove.Count > 0;
         }
 
     }

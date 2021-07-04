@@ -41,6 +41,13 @@ namespace Dexter.Commands
             {
                 await ModeratorCommands.MuteUser(User, TimeSpan.FromSeconds(0));
 
+                await BuildEmbed(EmojiEnum.Love)
+                    .WithTitle($"Muted {User.Username}#{User.Discriminator}")
+                    .WithDescription($"{User.GetUserInformation()} has been muted for {Reason}")
+                    .WithCurrentTimestamp()
+                    .WithFooter("USFurries")
+                    .SendEmbed(Context.Channel);
+
             }
         }
 

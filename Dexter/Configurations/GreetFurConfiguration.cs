@@ -63,6 +63,12 @@ namespace Dexter.Configurations {
         
         public Dictionary<string, int> Information { get; set; }
 
+        /// <summary>
+        /// The AWOO role ID is used for finding if a GreetFur is attempting to mute someone already in the server.
+        /// </summary>
+
+        public ulong AwooRole { get; set; }
+
     }
 
 }

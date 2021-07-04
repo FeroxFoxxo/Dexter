@@ -29,6 +29,8 @@ namespace Dexter.Commands {
 
         public SheetsService SheetsService;
 
+        public ModeratorCommands ModeratorCommands { get; set; }
+
     }
 
 }

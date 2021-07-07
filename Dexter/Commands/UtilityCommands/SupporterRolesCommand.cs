@@ -230,10 +230,18 @@ namespace Dexter.Commands {
             if (verbose) await Context.Channel.SendMessageAsync($"Successfully reloaded colors!");
         }
 
-        private readonly float[] alphatransform = new float[] { 0, 0, 0, 1, 0 };
-        private readonly float[] lineartransform = new float[] { 0, 0, 0, 0, 1 };
+        private readonly static float[] alphatransform = new float[] { 0, 0, 0, 1, 0 };
+        private readonly static float[] lineartransform = new float[] { 0, 0, 0, 0, 1 };
 
-        private ColorMatrix BasicTransform(float r, float g, float b) {
+        /// <summary>
+        /// Returns a color transformation matrix with the given RGB values.
+        /// </summary>
+        /// <param name="r">The red component value</param>
+        /// <param name="g">The green component value</param>
+        /// <param name="b">The blue component value</param>
+        /// <returns></returns>
+
+        public static ColorMatrix BasicTransform(float r, float g, float b) {
             return new ColorMatrix(new float[][] {
                 new float[] {r, 0, 0, 0, 0},
                 new float[] {0, g, 0, 0, 0},

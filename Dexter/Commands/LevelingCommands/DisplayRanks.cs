@@ -48,7 +48,7 @@ namespace Dexter.Commands {
         private readonly string iconPath = Path.Join(Directory.GetCurrentDirectory(), "Images", "PawIcon.png");
 
         private System.Drawing.Image RenderRankedRoles(SortedDictionary<int, IRole> roles) {
-            Bitmap result = new(colwidth, rowheight * roles.Count());
+            Bitmap result = new(colwidth, rowheight * roles.Count);
 
             using (Graphics g = Graphics.FromImage(result)) {
                 

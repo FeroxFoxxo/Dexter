@@ -184,6 +184,14 @@ namespace Dexter.Databases.Levels {
                             .WithFooter($"{user.Guild.Name} Staff Team")
                             .SendEmbed(user, fallbackChannel);
                 }
+
+                if (LevelingConfiguration.MemberRoleLevel > 0
+                    && !user.RoleIds.Contains(LevelingConfiguration.MemberRoleID)
+                    && LevelingConfiguration.HandleRoles) {
+                    IRole memrole = user.Guild.GetRole(LevelingConfiguration.MemberRoleID);
+
+                    await user.AddRoleAsync(memrole);
+                }
             }
 
             await SaveChangesAsync();

@@ -124,19 +124,33 @@ namespace Dexter.Services {
             List<IRole> toAdd = new();
             List<IRole> toRemove = new();
 
-            foreach(KeyValuePair<int, ulong> rank in LevelingConfiguration.Levels) {
+            SocketGuild guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
+            IReadOnlyCollection<ulong> userRoles = user.RoleIds;
 
-                if (level >= rank.Key && !user.RoleIds.Contains(rank.Value))
-                    toAdd.Add(DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(rank.Value));
-
-                else if (removeExtra && level < rank.Key && user.RoleIds.Contains(rank.Value))
-                    toRemove.Add(DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(rank.Value));
+            if (LevelingConfiguration.MemberRoleLevel > 0 
+                && level >= LevelingConfiguration.MemberRoleLevel
+                && !userRoles.Contains(LevelingConfiguration.MemberRoleID)) {
+                toAdd.Add(guild.GetRole(LevelingConfiguration.MemberRoleID));
             }
 
-            if (toAdd.Count > 0)
-                await user.AddRolesAsync(toAdd);
-            if (toRemove.Count > 0)
-                await user.RemoveRolesAsync(toRemove);
+            foreach(KeyValuePair<int, ulong> rank in LevelingConfiguration.Levels) {
+
+                if (level >= rank.Key && !userRoles.Contains(rank.Value))
+                    toAdd.Add(guild.GetRole(rank.Value));
+
+                else if (removeExtra && level < rank.Key && userRoles.Contains(rank.Value))
+                    toRemove.Add(guild.GetRole(rank.Value));
+            }
+
+            try {
+                if (toAdd.Count > 0)
+                    await user.AddRolesAsync(toAdd);
+                if (toRemove.Count > 0)
+                    await user.RemoveRolesAsync(toRemove);
+            }
+            catch (NullReferenceException) {
+                throw new NullReferenceException("At least one of the specified roles in configuration that should be applied does not exist!");
+            }
 
             return toAdd.Count > 0 || toRemove.Count > 0;
         }

@@ -53,6 +53,18 @@ namespace Dexter.Configurations {
         public Dictionary<int, ulong> Levels { get; set; }
 
         /// <summary>
+        /// The ID of the basic member role.
+        /// </summary>
+
+        public ulong MemberRoleID { get; set; }
+
+        /// <summary>
+        /// The level at which to award the basic member role; disabled if negative.
+        /// </summary>
+
+        public int MemberRoleLevel { get; set; }
+
+        /// <summary>
         /// The text channel where VC level ups should be announced.
         /// </summary>
 

@@ -184,6 +184,42 @@ namespace Dexter.Commands {
                         .WithDescription($"The value of \"ShowHybridLevels\" has been set to `{prefs.ShowHybrid}`.")
                         .SendEmbed(Context.Channel);
                     break;
+                case "levelalpha":
+                case "levelopacity":
+                    bool isPercent = false;
+                    if (value.EndsWith('%')) {
+                        isPercent = true;
+                        value = value[..^1];
+                    }
+                    float opacity = 0;
+                    int discreteOpacity = 0;
+                    if (!(int.TryParse(value, out discreteOpacity) && discreteOpacity > 1) && !float.TryParse(value, out opacity)) {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Unable to Parse Value.")
+                            .WithDescription($"The value \"{value}\" could not be parsed into a valid number.")
+                            .SendEmbed(Context.Channel);
+                        return;
+                    }
+                    if (discreteOpacity > 1) {
+                        if (isPercent)
+                            opacity = discreteOpacity / 100f;
+                        else
+                            opacity = discreteOpacity / 255f;
+                    }
+                    else if (isPercent) opacity /= 100;
+                    if (opacity > 1 || opacity < 0) {
+                    await BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Invalid Opacity Value")
+                        .WithDescription("Enter a decimal value between 0 and 1 or an integer value between 2 and 255.")
+                        .SendEmbed(Context.Channel);
+                    return;
+                    }
+                    prefs.LevelOpacity = opacity;
+                    await BuildEmbed(EmojiEnum.Love)
+                        .WithTitle("Operation Successful!")
+                        .WithDescription($"Your rankcard level template opacity has been set to {opacity * 100:G3}%.")
+                        .SendEmbed(Context.Channel);
+                    break;
                 case "background":
                 case "image":
                 case "bgimage":

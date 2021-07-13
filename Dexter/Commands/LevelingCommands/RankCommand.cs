@@ -102,7 +102,7 @@ namespace Dexter.Commands {
         private const int labelHeight = 60;
         private const int typeLabelWidth = 175;
         private const int hybridLabelWidth = 125;
-        private const int labelMiniMargin = 5;
+        private const int labelMiniMargin = 10;
         private static readonly Rectangle rectLevelLabel = new Rectangle(defMargin, defMargin, miniLabelWidth + labelIntrusionPixels, labelHeight);
         private static readonly Rectangle rectLevelText = new Rectangle(defMargin + miniLabelWidth, defMargin, widthmain / 2 - defMargin - miniLabelWidth, labelHeight);
         
@@ -174,7 +174,7 @@ namespace Dexter.Commands {
         //Level bars
         private const int barMarginVertical = 9;
         private const int barMarginHorizontal = 125;
-        private const int barHeight = 75 - 2 * barMarginVertical;
+        private const int barHeight = 75 - 3 * barMarginVertical;
 
         //Image paths
         private static readonly string imgPath = Path.Combine(Directory.GetCurrentDirectory(), "Images", "Levels");
@@ -313,7 +313,7 @@ namespace Dexter.Commands {
                     , new Rectangle(rectLevelText.X + (int)offset.Width + margin, rectLevelText.Y, widthmain / 2 - miniLabelWidth - margin - (int)offset.Width, labelHeight)
                     , new StringFormat { LineAlignment = StringAlignment.Far });
                                 
-                DrawLevels(fontTitle, fontDefault, fontMini, levelsData, g, xpColor, whiteColor);
+                DrawLevels(fontTitle, fontDefault, fontMini, levelsData, g, xpColor, whiteColor, settings);
 
                 const int pfpmargin = 3;
                 if (settings.PfpBorder)
@@ -423,14 +423,24 @@ namespace Dexter.Commands {
             public byte A;            
         }  
 
-        private static void DrawLevels(Font fontTitle, Font fontDefault, Font fontMini, IEnumerable<LevelData> levels, Graphics g, SolidBrush xpColor, SolidBrush whiteColor) {
+        private static void DrawLevels(Font fontTitle, Font fontDefault, Font fontMini, IEnumerable<LevelData> levels, Graphics g, SolidBrush xpColor, SolidBrush whiteColor, LevelPreferences prefs) {
             foreach (LevelData ld in levels) {
                 if (ld is null) continue;
-                g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb(0xe0, System.Drawing.Color.Black)), ld.rects.Bar(1));
-                g.FillRectangle(xpColor, ld.rects.Bar(ld.Percent));
+                Rectangle barRect = ld.rects.Bar(1);
+                GraphicsPath barGPath = GraphicsExtensions.RoundedRect(barRect, barRect.Height / 2);
+                Region levelRenderArea = new Region(barGPath);
+                g.Clip = levelRenderArea;
+                g.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(0xe0, System.Drawing.Color.Black)), barGPath);
+                g.FillPath(xpColor, GraphicsExtensions.RoundedRect(ld.rects.Bar(ld.Percent), barRect.Height / 2));
+                ColorMatrix colorized = System.Drawing.Color.FromArgb((int)(255 * prefs.LevelOpacity), System.Drawing.Color.White).ToColorMatrix();
+                ImageAttributes attr = new();
+                attr.SetColorMatrix(colorized);
                 using (System.Drawing.Image levelBox = System.Drawing.Image.FromFile(ld.rects.leveltype == LevelRect.LevelBarType.Normal ? barPath : hybridBarPath)) {
-                    g.DrawImage(levelBox, ld.rects.fullRect);
+                    levelRenderArea.Complement(new Region(ld.rects.fullRect));
+                    g.Clip = levelRenderArea;
+                    g.DrawImage(levelBox, ld.rects.fullRect, 0, 0, levelBox.Width, levelBox.Height, GraphicsUnit.Pixel, attr);
                 }
+                g.Clip = new Region();
                 g.DrawString(ld.xpType, fontTitle, whiteColor, ld.rects.typeLabel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
                 if (ld.rects.rankLabel != default)
                     g.DrawString("RANK", fontMini, whiteColor, ld.rects.rankLabel, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });

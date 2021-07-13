@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -46,6 +48,61 @@ namespace Dexter.Extensions {
             image.Save(tempCachePath);
             await channel.SendFileAsync(tempCachePath);
             File.Delete(tempCachePath);
+        }
+
+        private readonly static float[] lineartransform = new float[] { 0, 0, 0, 0, 1 };
+
+        /// <summary>
+        /// Creates a color matrix from a given color.
+        /// </summary>
+        /// <param name="color">The base color to create a transformation off of.</param>
+        /// <returns>A color matrix that can be used to recolorize images.</returns>
+
+        public static System.Drawing.Imaging.ColorMatrix ToColorMatrix(this System.Drawing.Color color) {
+            return new System.Drawing.Imaging.ColorMatrix(new float[][] {
+                new float[] {color.R / 255f, 0, 0, 0, 0},
+                new float[] {0, color.G / 255f, 0, 0, 0},
+                new float[] {0, 0, color.B / 255f, 0, 0},
+                new float[] {0, 0, 0, color.A / 255f, 0},
+                lineartransform
+                });
+        }
+
+        /// <summary>
+        /// Creates a rounded rectangle path with a given set of bounds and a radius.
+        /// </summary>
+        /// <param name="bounds">The outer rectangle to inscribe the resulting rounded rectangle in.</param>
+        /// <param name="radius">The rounding radius for the rectangle.</param>
+        /// <returns>A <see cref="GraphicsPath"/> that describes a rounded rectangle with the given parameters.</returns>
+
+        public static GraphicsPath RoundedRect(Rectangle bounds, int radius) {
+            int diameter = radius * 2;
+            Size size = new(diameter, diameter);
+            Rectangle arc = new(bounds.Location, size);
+            GraphicsPath path = new();
+
+            if (radius == 0) {
+                path.AddRectangle(bounds);
+                return path;
+            }
+
+            // top left arc  
+            path.AddArc(arc, 180, 90);
+
+            // top right arc  
+            arc.X = bounds.Right - diameter;
+            path.AddArc(arc, 270, 90);
+
+            // bottom right arc  
+            arc.Y = bounds.Bottom - diameter;
+            path.AddArc(arc, 0, 90);
+
+            // bottom left arc 
+            arc.X = bounds.Left;
+            path.AddArc(arc, 90, 90);
+
+            path.CloseFigure();
+            return path;
         }
 
     }

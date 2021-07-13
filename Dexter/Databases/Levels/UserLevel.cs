@@ -186,6 +186,12 @@ namespace Dexter.Databases.Levels {
         /// </summary>
 
         public bool ShowHybrid { get; set; } = true;
+
+        /// <summary>
+        /// Dictates the opacity level of the level bar template backgrounds.
+        /// </summary>
+
+        public float LevelOpacity { get; set; } = 1;
     }
 
 }

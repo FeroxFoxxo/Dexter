@@ -428,10 +428,11 @@ namespace Dexter.Commands {
                 if (ld is null) continue;
                 Rectangle barRect = ld.rects.Bar(1);
                 GraphicsPath barGPath = GraphicsExtensions.RoundedRect(barRect, barRect.Height / 2);
+                GraphicsPath barXPGPath = GraphicsExtensions.RoundedRect(ld.rects.Bar(ld.Percent), barRect.Height / 2);
                 Region levelRenderArea = new Region(barGPath);
                 g.Clip = levelRenderArea;
                 g.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(0xe0, System.Drawing.Color.Black)), barGPath);
-                g.FillPath(xpColor, GraphicsExtensions.RoundedRect(ld.rects.Bar(ld.Percent), barRect.Height / 2));
+                g.FillPath(xpColor, barXPGPath);
                 ColorMatrix colorized = System.Drawing.Color.FromArgb((int)(255 * prefs.LevelOpacity), System.Drawing.Color.White).ToColorMatrix();
                 ImageAttributes attr = new();
                 attr.SetColorMatrix(colorized);
@@ -452,10 +453,8 @@ namespace Dexter.Commands {
 
                 if (ld.isHybrid) {
                     SolidBrush overXPColor = new SolidBrush(xpColor.Color.GetBrightness() < 0.5 ? System.Drawing.Color.White : System.Drawing.Color.Black);
-                    GraphicsPath xpclip = new();
-                    xpclip.AddRectangle(ld.rects.Bar(ld.Percent));
                     g.DrawString(ld.XpExpr, fontDefault, xpColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Far });
-                    g.Clip = new Region(xpclip);
+                    g.Clip = new Region(barXPGPath);
                     g.DrawString(ld.XpExpr, fontDefault, overXPColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Far });
                     g.Clip = new Region();
                 }

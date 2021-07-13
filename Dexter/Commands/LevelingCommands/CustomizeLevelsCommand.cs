@@ -31,7 +31,8 @@ namespace Dexter.Commands {
             "-  `pfpborder <true|false>` - Sets whether to render a grey circle behind your pfp in your rank card.\n" +
             "-  `croppfp <true|false>` - Sets whether to crop your pfp into a circle or render it in full in your rank card.\n" +
             "-  `titlebg <true|false>` - Sets whether to display a black background behind the name and total level.\n" +
-            "-  `showhybrid <true|false>` - Sets whether to display separate XP types in Merge Level Mode.")]
+            "-  `showhybrid <true|false>` - Sets whether to display separate XP types in Merge Level Mode.\n" +
+            "-  `levelopacity ([decimal 0-1] OR [whole 2-255] OR [0-100]%)` - Sets the opacity of the level background.\n")]
         [BotChannel]
 
         public async Task CustomizeLevelsCommand(string attribute = "", [Remainder] string value = "") {
@@ -318,7 +319,8 @@ namespace Dexter.Commands {
                         $"Pfp border: **{prefs.PfpBorder}**\n" +
                         $"Crop Pfp: **{prefs.CropPfp}**\n" +
                         $"Title Background: **{prefs.TitleBackground}**\n" +
-                        $"Show Hybrid Levels: **{prefs.ShowHybrid}** {(LevelingConfiguration.LevelMergeMode is Configurations.LevelMergeMode.AddXPMerged or Configurations.LevelMergeMode.AddXPSimple ? "" : " *(disabled due to Dexter XP Merge Mode.)*")}\n")
+                        $"Show Hybrid Levels: **{prefs.ShowHybrid}** {(LevelingConfiguration.LevelMergeMode is Configurations.LevelMergeMode.AddXPMerged or Configurations.LevelMergeMode.AddXPSimple ? "" : " *(disabled due to Dexter XP Merge Mode.)*")}\n" +
+                        $"Level Opacity: **{prefs.LevelOpacity * 100:G3}%**")
                         .SendEmbed(Context.Channel);
                     return;
             }

@@ -424,14 +424,17 @@ namespace Dexter.Commands {
         }  
 
         private static void DrawLevels(Font fontTitle, Font fontDefault, Font fontMini, IEnumerable<LevelData> levels, Graphics g, SolidBrush xpColor, SolidBrush whiteColor, LevelPreferences prefs) {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
             foreach (LevelData ld in levels) {
                 if (ld is null) continue;
                 Rectangle barRect = ld.rects.Bar(1);
                 GraphicsPath barGPath = GraphicsExtensions.RoundedRect(barRect, barRect.Height / 2);
                 GraphicsPath barXPGPath = GraphicsExtensions.RoundedRect(ld.rects.Bar(ld.Percent), barRect.Height / 2);
+                Region barInnerClipPath = new Region(GraphicsExtensions.RoundedRect(new Rectangle(barRect.X + 2, barRect.Y + 2, barRect.Width - 4, barRect.Height - 4), barRect.Height / 2 - 2));
                 Region levelRenderArea = new Region(barGPath);
                 g.Clip = levelRenderArea;
                 g.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(0xe0, System.Drawing.Color.Black)), barGPath);
+                g.Clip = barInnerClipPath;
                 g.FillPath(xpColor, barXPGPath);
                 ColorMatrix colorized = System.Drawing.Color.FromArgb((int)(255 * prefs.LevelOpacity), System.Drawing.Color.White).ToColorMatrix();
                 ImageAttributes attr = new();

@@ -1,11 +1,14 @@
 ﻿using Dexter.Abstractions;
+using Dexter.Commands;
 using Dexter.Configurations;
 using Dexter.Enums;
 using Dexter.Extensions;
+using Dexter.Services;
 using Discord;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -111,6 +114,13 @@ namespace Dexter.Databases.Levels {
         }
 
         /// <summary>
+        /// The service that manages leveling internally.
+        /// </summary>
+
+        [NotMapped]
+        public LevelingService LevelingService { get; set; }
+
+        /// <summary>
         /// Grants a given user an amount of XP and announces the level up in <paramref name="fallbackChannel"/> if appropriate.
         /// </summary>
         /// <param name="xpIncrease">The amount of XP to grant the user.</param>
@@ -169,21 +179,7 @@ namespace Dexter.Databases.Levels {
                         .Replace("{MENTION}", user.Mention)
                         .Replace("{LVL}", (mergeLevelUp ? newLevel : currentLevel).ToString()));
 
-                if (LevelingConfiguration.Levels.ContainsKey(newLevel)
-                    && !user.RoleIds.Contains(LevelingConfiguration.Levels[newLevel])
-                    && LevelingConfiguration.HandleRoles) {
-                    IRole role = user.Guild.GetRole(LevelingConfiguration.Levels[newLevel]);
-
-                    await user.AddRoleAsync(role);
-
-                    if (sendLevelUp)
-                        await new EmbedBuilder().BuildEmbed(EmojiEnum.Love, BotConfiguration)
-                            .WithTitle("You Just Ranked Up!")
-                            .WithDescription($"OwO, what's this? You just got the {role.Name} role!\nCongrats~! <3")
-                            .WithCurrentTimestamp()
-                            .WithFooter($"{user.Guild.Name} Staff Team")
-                            .SendEmbed(user, fallbackChannel);
-                }
+                await LevelingService.UpdateRoles(user, false, mergeLevelUp ? newLevel : currentLevel);
 
                 if (LevelingConfiguration.MemberRoleLevel > 0
                     && !user.RoleIds.Contains(LevelingConfiguration.MemberRoleID)

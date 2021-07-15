@@ -165,7 +165,7 @@ namespace Dexter.Databases.Levels {
                 }
                 if (sendLevelUp)
                     await fallbackChannel.SendMessageAsync(LevelingConfiguration.LevelUpMessage
-                        .Replace("{TYPE}", mergeLevelUp ? "" : isTextXp ? "text" : "voice")
+                        .Replace("{TYPE}", mergeLevelUp ? "total" : isTextXp ? "text" : "voice")
                         .Replace("{MENTION}", user.Mention)
                         .Replace("{LVL}", (mergeLevelUp ? newLevel : currentLevel).ToString()));
 

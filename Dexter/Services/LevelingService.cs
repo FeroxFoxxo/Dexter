@@ -46,6 +46,7 @@ namespace Dexter.Services {
                 TimerService.EventTimersDB.EventTimers.Remove(Timer);
 
             DiscordSocketClient.MessageReceived += HandleMessage;
+            DiscordSocketClient.UserJoined += HandleJoin;
 
             await CreateEventTimer(AddLevels, new(), LevelingConfiguration.XPIncrementTime, TimerType.Interval);
         }
@@ -117,7 +118,9 @@ namespace Dexter.Services {
             if (user is null || !LevelingConfiguration.HandleRoles) return false;
 
             if (level < 0) {
-                UserLevel ul = LevelingDB.GetOrCreateLevelData(user.Id, out _);
+                UserLevel ul = LevelingDB.Levels.Find(user.Id);
+
+                if (ul is null) return false;
                 level = ul.TotalLevel(LevelingConfiguration);
             }
 
@@ -153,6 +156,16 @@ namespace Dexter.Services {
             }
 
             return toAdd.Count > 0 || toRemove.Count > 0;
+        }
+
+        /// <summary>
+        /// Detects when a user joins the guild and immediately assigns them their ranked roles.
+        /// </summary>
+        /// <param name="user">The user that joined the guild.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
+
+        public async Task HandleJoin(SocketGuildUser user) {
+            await UpdateRoles(user);
         }
 
     }

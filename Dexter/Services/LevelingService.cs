@@ -80,10 +80,8 @@ namespace Dexter.Services {
                     }
             }
 
-            foreach (UserTextXPRecord ur in LevelingDB.OnTextCooldowns) {
-                LevelingDB.OnTextCooldowns.Remove(ur);
-            }
-            await LevelingDB.SaveChangesAsync();
+            LevelingDB.RemoveRange(LevelingDB.OnTextCooldowns);
+            LevelingDB.SaveChanges();
         }
 
         private async Task HandleMessage(SocketMessage message) {

@@ -35,6 +35,10 @@ namespace Dexter.Databases.UserRestrictions {
         /// <summary>
         /// Prevents users from viewing or editing their profiles, or anyone from accessing their profile.
         /// </summary>
-        Social = 32
+        Social = 32,
+        /// <summary>
+        /// Prevents users from obtaining Voice XP altogether.
+        /// </summary>
+        VoiceXP = 64
     }
 }

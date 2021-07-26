@@ -2,6 +2,7 @@
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
 using Dexter.Databases.Levels;
+using Dexter.Databases.UserRestrictions;
 using Discord;
 using Discord.WebSocket;
 using System;
@@ -36,6 +37,12 @@ namespace Dexter.Services {
         public LevelingDB LevelingDB { get; set; }
 
         /// <summary>
+        /// The data structure holding all relevant information for user restrictions.
+        /// </summary>
+
+        public RestrictionsDB RestrictionsDB { get; set; }
+
+        /// <summary>
         /// This method is run when the service is first started; which happens after dependency injection.
         /// </summary>
 
@@ -65,11 +72,11 @@ namespace Dexter.Services {
             foreach (SocketVoiceChannel voiceChannel in vcs) {
                 int nonbotusers = 0;
                 foreach(IGuildUser uservc in voiceChannel.Users)
-                    if (!uservc.IsBot && !uservc.IsDeafened && !uservc.IsSelfDeafened) nonbotusers++;
+                    if (!uservc.IsBot && !uservc.IsDeafened && !uservc.IsSelfDeafened && !RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)) nonbotusers++;
                 if (nonbotusers < LevelingConfiguration.VCMinUsers) continue;
                 if (LevelingConfiguration.DisabledVCs.Contains(voiceChannel.Id)) continue;
                 foreach (IGuildUser uservc in voiceChannel.Users)
-                    if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsBot)) {
+                    if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsBot || RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP))) {
                         await LevelingDB.IncrementUserXP(
                             Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven + 1),
                             false,

@@ -173,6 +173,18 @@ namespace Dexter.Configurations {
         public ulong Mee6SyncGuildId { get; set; }
 
         /// <summary>
+        /// The leveling replacement role that removes a user's ability to change their nickname.
+        /// </summary>
+
+        public ulong NicknameDisabledRole { get; set; }
+
+        /// <summary>
+        /// The unique ID of the role that grants the ability to change one's nickname that must be replaced by the <see cref="NicknameDisabledRole"/>.
+        /// </summary>
+
+        public ulong NicknameDisabledReplacement { get; set; }
+
+        /// <summary>
         /// Returns the amount of XP required for a given level
         /// </summary>
         /// <param name="level">The target level</param>

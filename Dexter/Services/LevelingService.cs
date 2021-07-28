@@ -150,6 +150,16 @@ namespace Dexter.Services {
                     toRemove.Add(guild.GetRole(rank.Value));
             }
 
+            if (user.RoleIds.Contains(LevelingConfiguration.NicknameDisabledRole)) {
+                SocketRole replRole = guild.GetRole(LevelingConfiguration.NicknameDisabledReplacement);
+
+                if (user.RoleIds.Contains(LevelingConfiguration.NicknameDisabledReplacement))
+                    toRemove.Add(replRole);
+
+                if (toAdd.Contains(replRole))
+                    toAdd.Remove(replRole);
+            }
+
             try {
                 if (toAdd.Count > 0)
                     await user.AddRolesAsync(toAdd);

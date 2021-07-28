@@ -32,5 +32,7 @@
   "MergeFactor": 1,
   "MaxLeaderboardItems": 5000,
   "Mee6SyncGuildId": 336243033416794118,
+  "NicknameDisabledRole": 870011785950924810,
+  "NicknameDisabledReplacement": 815091090117885974,
   "LevelUpMessage": "OwO What's this? {MENTION} just advanced to **{TYPE} level {LVL}**!!! YAY!!!"
 }

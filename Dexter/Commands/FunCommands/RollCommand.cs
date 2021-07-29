@@ -24,6 +24,7 @@ namespace Dexter.Commands {
         [ExtendedSummary("Rolls one or more dice!\n" +
             "Basic structure: `(number)d[faces]`, to roll (number) [faces]-faced dice. (use an uppercase D to make rolls verbose.)\n" +
             "**Modifiers**: Modifiers can be appended to the roll separated by spaces, they modify the results:\n" +
+            "- +[n], -[n], +[n]d[D], -[n]d[D] - Adds or subtracts a number or a series of rolls.\n" +
             "- kh[n], kl[n], dh[n], dl[n] - Keep or drop highest or lowest [n] rolls. e.g. {4, 1, 3} => (**kh2**) {4, 3}.\n" +
             "- rr[n], rr>[n], rr<[n] - Reroll any dice whose roll value satisfies the condition. {4, 1, 3} => (**rr1**) => {4, 2, 3}.\n" +
             "- [n]=>[m] - Replaces a number with another for all rolled n's.\n" +
@@ -73,7 +74,7 @@ namespace Dexter.Commands {
             foreach (string rawmod in rollArgs) {
                 bool success = false;
                 foreach (KeyValuePair<string, Func<List<int>, string, RollContext, List<int>>> pair in Modifiers) {
-                    string mod = Regex.Match(rawmod, pair.Key).Value;
+                    string mod = Regex.Match(rawmod, @$"^{pair.Key}$").Value;
                     if (string.IsNullOrEmpty(mod)) continue;
 
                     rolls = pair.Value(rolls, mod, rollContext);
@@ -183,6 +184,58 @@ namespace Dexter.Commands {
         }
 
         private readonly Dictionary<string, Func<List<int>, string, RollContext, List<int>>> Modifiers = new() {
+            {
+                //Add a number
+                @"\+[0-9]{1,10}",
+                (List<int> r, string mod, RollContext context) => {
+                    int n = int.Parse(mod[1..]);
+                    r.Add(n);
+                    return r;
+                }
+            },
+            {
+                //Subtract a number
+                @"-[0-9]{1,10}",
+                (List<int> r, string mod, RollContext context) => {
+                    int n = int.Parse(mod[1..]);
+                    r.Add(-n);
+                    return r;
+                }
+            },
+            {
+                //Add a roll
+                @"\+[0-9]{1,10}[dD][0-9]{1,10}",
+                (List<int> r, string mod, RollContext context) => {
+                    int di = mod.IndexOf('d');
+                    if (di < 0) di = mod.IndexOf('D');
+                    int n = int.Parse(mod[1..di]);
+                    int d = int.Parse(mod[(di + 1)..]);
+                    if (n > context.funConfiguration.MaxDieRolls - r.Count)
+                        n = context.funConfiguration.MaxDieRolls - r.Count;
+
+                    for(int i = 0; i < n; i++) {
+                        r.Add(context.rand.Next(1, d + 1));
+                    }
+                    return r;
+                }
+            },
+            {
+                //Subtract a roll
+                @"-[0-9]{1,10}[dD][0-9]{1,10}",
+                (List<int> r, string mod, RollContext context) => {
+                    int di = mod.IndexOf('d');
+                    if (di < 0) di = mod.IndexOf('D');
+                    int n = int.Parse(mod[1..di]);
+                    int d = int.Parse(mod[(di + 1)..]);
+                    if (n > context.funConfiguration.MaxDieRolls - r.Count)
+                        n = context.funConfiguration.MaxDieRolls - r.Count;
+
+                    for (int i = 0; i < n; i++) {
+                        r.Add(-context.rand.Next(1, d + 1));
+                    }
+                    return r;
+                }
+            },
             {
                 //Keep highest
                 @"kh[0-9]{1,10}",
@@ -366,7 +419,7 @@ namespace Dexter.Commands {
             },
             {
                 //Explode once
-                @"([^!]|^)!([1-9]|$)[0-9]{0,9}",
+                @"!([1-9]|$)[0-9]{0,9}",
                 (List<int> r, string mod, RollContext context) => {
                     if (context.d == 1) return r;
                     int toExplode;
@@ -389,7 +442,7 @@ namespace Dexter.Commands {
             },
             {
                 //Explode once compare
-                @"([^!]|^)!(<|>)[0-9]{1,10}",
+                @"!(<|>)[0-9]{1,10}",
                 (List<int> r, string mod, RollContext context) => {
                     bool explodeLower = mod[1] == '<';
                     int toExplode;

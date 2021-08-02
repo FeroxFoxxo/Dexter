@@ -8,32 +8,35 @@ using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
 
-namespace Dexter.Services {
+namespace Dexter.Services
+{
 
     /// <summary>
     /// The ChannelCooldownService checks to see if a user has posted multiple commissions in the given channel in a quicker period of 
     /// time than otherwise allowed and, if so, attempts to remove the posting and warns the user of the event.
     /// </summary>
-    
-    public class ChannelCooldownService : Service {
+
+    public class ChannelCooldownService : Service
+    {
 
         /// <summary>
         /// The CooldownDB contains all the current cooldowns in the database.
         /// </summary>
-        
+
         public CooldownDB CooldownDB { get; set; }
 
         /// <summary>
         /// The ChannelCooldownConfiguration contains information regarding the channel in which the commission is in, aswell as how long cooldowns should last.
         /// </summary>
-        
+
         public ChannelCooldownConfiguration ChannelCooldownConfiguration { get; set; }
 
         /// <summary>
         /// The Initialize override hooks into the MessageReceived event to run the related method.
         /// </summary>
-        
-        public override void Initialize() {
+
+        public override void Initialize()
+        {
             DiscordSocketClient.MessageReceived += MessageReceived;
         }
 
@@ -43,8 +46,9 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="SocketMessage">The SocketMessage contains information of the message that was sent, including the author, and can be used to remove the message.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-        
-        public async Task MessageReceived(SocketMessage SocketMessage) {
+
+        public async Task MessageReceived(SocketMessage SocketMessage)
+        {
             // We first check to see if the channel is in the commissions corner and not from a bot to continue.
             if (!ChannelCooldownConfiguration.ChannelCooldowns.ContainsKey(SocketMessage.Channel.Id) || SocketMessage.Author.IsBot)
                 return;
@@ -52,13 +56,16 @@ namespace Dexter.Services {
             // We then try pull the cooldown from the database to see if the user and channel ID both exist as a token.
             Cooldown Cooldown = CooldownDB.Cooldowns.Find($"{SocketMessage.Author.Id}{SocketMessage.Channel.Id}");
 
-            if (Cooldown != null) {
+            if (Cooldown != null)
+            {
 
                 // We then check to see if the cooldown is expired. If so, we set the new time.
-                if (Cooldown.TimeOfCooldown + ChannelCooldownConfiguration.ChannelCooldowns[SocketMessage.Channel.Id]["CooldownTime"] > DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
+                if (Cooldown.TimeOfCooldown + ChannelCooldownConfiguration.ChannelCooldowns[SocketMessage.Channel.Id]["CooldownTime"] > DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                {
 
                     // We then check to see if the cooldown is in the grace-period. This is a period of time where the user can send multiple messages. Once this cooldown has ended we warn the user.
-                    if (Cooldown.TimeOfCooldown + ChannelCooldownConfiguration.ChannelCooldowns[SocketMessage.Channel.Id]["GracePeriod"] < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
+                    if (Cooldown.TimeOfCooldown + ChannelCooldownConfiguration.ChannelCooldowns[SocketMessage.Channel.Id]["GracePeriod"] < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                    {
                         DateTime CooldownTime = DateTime.UnixEpoch.AddSeconds(Cooldown.TimeOfCooldown);
 
                         // We first attempt to delete the message. This may throw an error.
@@ -75,16 +82,21 @@ namespace Dexter.Services {
                             .WithCurrentTimestamp()
                             .SendEmbed(SocketMessage.Author, SocketMessage.Channel as ITextChannel);
                     }
-                } else {
+                }
+                else
+                {
                     // If the commission has expired we set the new cooldown.
                     Cooldown.TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
                     CooldownDB.SaveChanges();
                 }
-            } else {
+            }
+            else
+            {
                 // If the user has not posted a commission before we add a new commission cooldown to the database.
                 CooldownDB.Cooldowns.Add(
-                    new Cooldown() {
+                    new Cooldown()
+                    {
                         Token = $"{SocketMessage.Author.Id}{SocketMessage.Channel.Id}",
                         TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                     }

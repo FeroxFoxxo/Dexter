@@ -5,9 +5,11 @@ using Discord.Commands;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class UtilityCommands {
+    public partial class UtilityCommands
+    {
 
         /// <summary>
         /// Sends in the target user's profile picture as a full-resolution image. If no user is provided, defaults to Context.User.
@@ -18,7 +20,8 @@ namespace Dexter.Commands {
         [Command("avatar")]
         [Summary("Gets the avatar of a user mentioned or yours.")]
 
-        public async Task AvatarCommand([Optional] IUser User) {
+        public async Task AvatarCommand([Optional] IUser User)
+        {
             if (User == null)
                 User = Context.User;
 

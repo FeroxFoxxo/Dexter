@@ -1,15 +1,17 @@
 ﻿using Dexter.Attributes.Methods;
+using Dexter.Databases.Cooldowns;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Discord.Commands;
-using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
 using System;
-using Dexter.Databases.Cooldowns;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ModeratorCommands {
+    public partial class ModeratorCommands
+    {
 
         /// <summary>
         /// The Cooldown Command method runs on COOLDOWN. It takes in the type of entry of cooldown you'd like to apply and sets the cooldown accordingly.
@@ -26,16 +28,21 @@ namespace Dexter.Commands {
         [Alias("commCooldown", "cooldown")]
         [RequireModerator]
 
-        public async Task CooldownCommand (EntryType EntryType, IUser User, ITextChannel TextChannel) {
-            switch (EntryType) {
+        public async Task CooldownCommand(EntryType EntryType, IUser User, ITextChannel TextChannel)
+        {
+            switch (EntryType)
+            {
                 case EntryType.Issue:
                     Cooldown IssueCooldown = CooldownDB.Cooldowns.Find($"{User.Id}{TextChannel.Id}");
 
                     if (IssueCooldown != null)
-                        if (IssueCooldown.TimeOfCooldown + CommissionCooldownConfiguration.ChannelCooldowns[TextChannel.Id]["CooldownTime"] < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
+                        if (IssueCooldown.TimeOfCooldown + CommissionCooldownConfiguration.ChannelCooldowns[TextChannel.Id]["CooldownTime"] < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                        {
                             CooldownDB.Cooldowns.Remove(IssueCooldown);
                             CooldownDB.SaveChanges();
-                        } else {
+                        }
+                        else
+                        {
                             DateTime CooldownTime = DateTime.UnixEpoch.AddSeconds(IssueCooldown.TimeOfCooldown);
 
                             await BuildEmbed(EmojiEnum.Love)
@@ -48,7 +55,8 @@ namespace Dexter.Commands {
                             return;
                         }
 
-                    Cooldown NewCooldown = new () {
+                    Cooldown NewCooldown = new()
+                    {
                         Token = $"{User.Id}{TextChannel.Id}",
                         TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                     };
@@ -75,7 +83,8 @@ namespace Dexter.Commands {
                 case EntryType.Revoke:
                     Cooldown RevokeCooldown = CooldownDB.Cooldowns.Find($"{User.Id}{TextChannel.Id}");
 
-                    if (RevokeCooldown != null) {
+                    if (RevokeCooldown != null)
+                    {
                         CooldownDB.Cooldowns.Remove(RevokeCooldown);
                         CooldownDB.SaveChanges();
 
@@ -92,7 +101,9 @@ namespace Dexter.Commands {
                                 $"{CooldownTime.ToLongDateString()}. You should now be able to re-send your informtion into the channel. <3")
                                 .WithCurrentTimestamp()
                         );
-                    } else {
+                    }
+                    else
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle($"Unable To Remove {TextChannel} Cooldown.")
                             .WithDescription($"Haiya! I was unable to remove the cooldown from {User.GetUserInformation()}. " +

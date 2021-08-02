@@ -13,14 +13,16 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace Dexter.Services {
+namespace Dexter.Services
+{
 
     /// <summary>
     /// The Timer Service module loops through all the event timers in the EventTimerDatabase and runs them.
     /// Timers that expire will be removed but interval timers will loop at set intervals of time.
     /// </summary>
 
-    public class TimerService : Service {
+    public class TimerService : Service
+    {
 
         /// <summary>
         /// The database holding all dynamic data to reference and operate with Event Timers.
@@ -37,7 +39,7 @@ namespace Dexter.Services {
         /// <summary>
         /// The ServiceProvider is where our dependencies are stored - used to execute an object when a timer is run.
         /// </summary>
-        
+
         public ServiceProvider ServiceProvider { get; set; }
 
         /// <summary>
@@ -55,8 +57,9 @@ namespace Dexter.Services {
         /// <summary>
         /// The Initialize method hooks the client Ready events and begins to loop through all timers.
         /// </summary>
-        
-        public override void Initialize() {
+
+        public override void Initialize()
+        {
             DiscordSocketClient.Ready += HasTimerStarted;
         }
 
@@ -65,10 +68,13 @@ namespace Dexter.Services {
         /// already created by creating a system timer that loops for a set amount of time.
         /// </summary>
 
-        public async Task HasTimerStarted () {
+        public async Task HasTimerStarted()
+        {
             // Runs the bot timer to loop through all events that may occur on a timer.
-            if (!HasStarted) {
-                Timer EventTimer = new(TimeSpan.FromSeconds(5).TotalMilliseconds) {
+            if (!HasStarted)
+            {
+                Timer EventTimer = new(TimeSpan.FromSeconds(5).TotalMilliseconds)
+                {
                     AutoReset = true,
                     Enabled = true
                 };
@@ -85,13 +91,16 @@ namespace Dexter.Services {
         /// </summary>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task LoopThroughEvents() {
+        public async Task LoopThroughEvents()
+        {
             long CurrentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             await EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.ExpirationTime <= CurrentTime)
-                .ForEachAsync(async (EventTimer Timer) => {
+                .ForEachAsync(async (EventTimer Timer) =>
+                {
 
-                    switch (Timer.TimerType) {
+                    switch (Timer.TimerType)
+                    {
                         case TimerType.Expire:
                             EventTimersDB.EventTimers.Remove(Timer);
                             break;
@@ -105,19 +114,24 @@ namespace Dexter.Services {
                     Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Timer.CallbackParameters);
                     Type Class = Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.Name.Equals(Timer.CallbackClass)).FirstOrDefault();
 
-                    if (Class != null) {
+                    if (Class != null)
+                    {
                         if (Class.GetMethod(Timer.CallbackMethod) == null)
                             throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
 
-                        try {
+                        try
+                        {
                             await (Task)Class.GetMethod(Timer.CallbackMethod)
                                 .Invoke(ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
-                        } catch (Exception Exception) {
+                        }
+                        catch (Exception Exception)
+                        {
                             await LoggingService.LogMessageAsync(
                                 new LogMessage(LogSeverity.Error, GetType().Name, Exception.Message, exception: Exception)
                             );
                         }
-                    } else if (Timer.TimerType == TimerType.Interval)
+                    }
+                    else if (Timer.TimerType == TimerType.Interval)
                         EventTimersDB.EventTimers.Remove(Timer);
                 });
         }
@@ -132,10 +146,12 @@ namespace Dexter.Services {
         /// <param name="TimerType">Whether the timer is a single-trigger timer (Expire) or triggers every set number of <paramref name="SecondsTillExpiration"/> (Interval).</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task<string> AddTimer(string JSON, string ClassName, string MethodName, int SecondsTillExpiration, TimerType TimerType) {
+        public async Task<string> AddTimer(string JSON, string ClassName, string MethodName, int SecondsTillExpiration, TimerType TimerType)
+        {
             string Token = CreateToken();
 
-            EventTimer Timer = new () {
+            EventTimer Timer = new()
+            {
                 Token = Token,
                 ExpirationLength = SecondsTillExpiration,
                 CallbackClass = ClassName,
@@ -157,7 +173,8 @@ namespace Dexter.Services {
         /// </summary>
         /// <returns>A randomly generated token in the form of a string that is not in the database already.</returns>
 
-        public string CreateToken() {
+        public string CreateToken()
+        {
             char[] TokenArray = new char[BotConfiguration.TrackerLength];
 
             for (int i = 0; i < TokenArray.Length; i++)
@@ -165,9 +182,11 @@ namespace Dexter.Services {
 
             string Token = new(TokenArray);
 
-            if (EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.Token == Token).FirstOrDefault() == null) {
+            if (EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.Token == Token).FirstOrDefault() == null)
+            {
                 return Token;
-            } else
+            }
+            else
                 return CreateToken();
         }
 
@@ -177,7 +196,8 @@ namespace Dexter.Services {
         /// <param name="TimerTracker">The unique identifier of the target EventTimer.</param>
         /// <returns><see langword="true"/> if the timer exists; <see langword="false"/> otherwise.</returns>
 
-        public bool TimerExists(string TimerTracker) {
+        public bool TimerExists(string TimerTracker)
+        {
             EventTimer Timer = EventTimersDB.EventTimers.Find(TimerTracker);
 
             if (Timer == null)
@@ -192,7 +212,8 @@ namespace Dexter.Services {
         /// <remarks>This function removes the timer given by its <paramref name="TimerTracker"/> from the database completely.</remarks>
         /// <param name="TimerTracker">The unique identifier of the target EventTimer.</param>
 
-        public void RemoveTimer(string TimerTracker) {
+        public void RemoveTimer(string TimerTracker)
+        {
             EventTimer Timer = EventTimersDB.EventTimers.Find(TimerTracker);
 
             if (Timer != null)

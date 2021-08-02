@@ -4,9 +4,11 @@ using Discord.Commands;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class UtilityCommands {
+    public partial class UtilityCommands
+    {
 
         /// <summary>
         /// Lists all available profile pictures from the configured directory by their file names.
@@ -17,7 +19,8 @@ namespace Dexter.Commands {
         [Summary("Gets all the given profile pictures in the pfp directory.")]
         [Alias("getpfps")]
 
-        public async Task GetProfiles () {
+        public async Task GetProfiles()
+        {
             string ProfilePictures = string.Join('\n', ProfileService.GetProfilePictures().Select(Profile => Profile.Name).ToArray());
 
             await BuildEmbed(EmojiEnum.Love)

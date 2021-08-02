@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Dexter.Helpers.Games;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dexter.Helpers.Games;
-using Discord;
 
-namespace Dexter.Databases.Games {
+namespace Dexter.Databases.Games
+{
 
     /// <summary>
     /// Represents a particular instance of a game or session in the Dexter Games subsystem.
     /// </summary>
 
-    public class GameInstance {
+    public class GameInstance
+    {
 
         /// <summary>
         /// Comma representation used to escape comma characters in managed data sequences.
@@ -81,8 +77,10 @@ namespace Dexter.Databases.Games {
         /// Gets the banned users in a more user-friendly way.
         /// </summary>
 
-        public string BannedMentions {
-            get {
+        public string BannedMentions
+        {
+            get
+            {
                 return Banned.Length > 0 ? $"<@{Banned.Replace(", ", "> <@")}>" : "";
             }
         }
@@ -98,8 +96,10 @@ namespace Dexter.Databases.Games {
         /// </summary>
         /// <returns>The <see cref="IGameTemplate"/> corresponding to this GameInstance, or <see langword="null"/> if the gameType is unknown.</returns>
 
-        public IGameTemplate ToGameProper() {
-            return (Type) switch {
+        public IGameTemplate ToGameProper()
+        {
+            return (Type) switch
+            {
                 GameType.Hangman => new GameHangman(this),
                 GameType.TicTacToe => new GameTicTacToe(this),
                 GameType.Connect4 => new GameConnect4(this),
@@ -115,7 +115,8 @@ namespace Dexter.Databases.Games {
     /// Represents an integer that has a set range from which it can't deviate.
     /// </summary>
 
-    public struct BoundedInt {
+    public struct BoundedInt
+    {
         /// <summary>
         /// The minimum permitted value for the integer
         /// </summary>
@@ -129,11 +130,14 @@ namespace Dexter.Databases.Games {
         /// <summary>
         /// The value this integer represents
         /// </summary>
-        public int Value {
-            get {
+        public int Value
+        {
+            get
+            {
                 return value;
             }
-            set {
+            set
+            {
                 if (value > max) this.value = max;
                 else if (value < min) this.value = min;
                 else this.value = value;

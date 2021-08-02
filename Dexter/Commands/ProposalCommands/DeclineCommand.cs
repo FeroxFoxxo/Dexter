@@ -6,9 +6,11 @@ using Discord.Commands;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ProposalCommands {
+    public partial class ProposalCommands
+    {
 
         /// <summary>
         /// The Decline Proposal method runs on the DECLINE command. It will change the proposal to an DECLINED status
@@ -24,7 +26,8 @@ namespace Dexter.Commands {
         [Alias("deny")]
         [RequireAdministrator]
 
-        public async Task DeclineProposal(string Tracker, [Optional][Remainder] string Reason) {
+        public async Task DeclineProposal(string Tracker, [Optional][Remainder] string Reason)
+        {
             await ProposalService.EditProposal(Tracker, Reason, Context.User, Context.Channel, ProposalStatus.Declined);
         }
 

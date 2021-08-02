@@ -10,9 +10,11 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ModeratorCommands {
+    public partial class ModeratorCommands
+    {
 
         /// <summary>
         /// Sends a direct message to a target user.
@@ -26,7 +28,8 @@ namespace Dexter.Commands {
         [Alias("dm", "message", "mail")]
         [RequireModerator]
 
-        public async Task UserDMCommand(IUser User, [Remainder] string Message) {
+        public async Task UserDMCommand(IUser User, [Remainder] string Message)
+        {
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("User DM")
                 .WithDescription(Message)
@@ -52,7 +55,8 @@ namespace Dexter.Commands {
         [Alias("dm", "message", "mail")]
         [RequireModerator]
 
-        public async Task UserDMCommand(string Token, [Remainder] string Message) {
+        public async Task UserDMCommand(string Token, [Remainder] string Message)
+        {
             ModMail ModMail = ModMailDB.ModMail.Find(Token);
 
             IUser User = null;
@@ -60,14 +64,18 @@ namespace Dexter.Commands {
             if (ModMail != null)
                 User = DiscordSocketClient.GetUser(ModMail.UserID);
 
-            if (ModMail == null || User == null) {
-                if (Regex.IsMatch(Token, @"<@!?[0-9]{18}>")) {
+            if (ModMail == null || User == null)
+            {
+                if (Regex.IsMatch(Token, @"<@!?[0-9]{18}>"))
+                {
                     Token = Token[^18..^1];
                 }
-                if (ulong.TryParse(Token, out ulong UserID) && UserID != 0) {
+                if (ulong.TryParse(Token, out ulong UserID) && UserID != 0)
+                {
                     User = DiscordSocketClient.GetUser(UserID);
 
-                    if (User is not null) {
+                    if (User is not null)
+                    {
                         await UserDMCommand(User, Message);
                         return;
                     }
@@ -78,27 +86,36 @@ namespace Dexter.Commands {
                         "The token should be given as the footer of the embed. Make sure this is the token and not the modmail number.")
                     .WithCurrentTimestamp()
                     .SendEmbed(Context.Channel);
-            } else {
+            }
+            else
+            {
                 SocketChannel SocketChannel = DiscordSocketClient.GetChannel(ModerationConfiguration.ModMailChannelID);
 
-                if (SocketChannel is SocketTextChannel TextChannel) {
+                if (SocketChannel is SocketTextChannel TextChannel)
+                {
                     IMessage MailMessage = await TextChannel.GetMessageAsync(ModMail.MessageID);
 
-                    if (MailMessage is IUserMessage MailMSG) {
-                        try {
+                    if (MailMessage is IUserMessage MailMSG)
+                    {
+                        try
+                        {
                             await MailMSG.ModifyAsync(MailMSGs => MailMSGs.Embed = MailMessage.Embeds.FirstOrDefault().ToEmbedBuilder()
                                 .WithColor(Color.Green)
                                 .AddField($"Replied By: {Context.User.Username}", Message.Length > 300 ? $"{Message.Substring(0, 300)} ..." : Message)
                                 .Build()
                             );
-                        } catch (InvalidOperationException) {
+                        }
+                        catch (InvalidOperationException)
+                        {
                             IMessage Messaged = await MailMSG.Channel.SendMessageAsync(embed: MailMSG.Embeds.FirstOrDefault().ToEmbedBuilder().Build());
                             ModMail.MessageID = Messaged.Id;
                             ModMailDB.SaveChanges();
                         }
-                    } else
+                    }
+                    else
                         throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? ModMail Type: {MailMessage.GetType()}");
-                } else
+                }
+                else
                     throw new Exception($"Eek! The given channel of {SocketChannel} turned out *not* to be an instance of SocketTextChannel, rather {SocketChannel.GetType().Name}!");
 
                 await BuildEmbed(EmojiEnum.Love)

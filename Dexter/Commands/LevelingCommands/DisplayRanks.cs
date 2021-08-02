@@ -1,19 +1,19 @@
-﻿using System;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Extensions;
+using Discord;
+using Discord.Commands;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
-using Dexter.Extensions;
-using Discord;
-using Discord.Commands;
 
-namespace Dexter.Commands {
-    public partial class LevelingCommands {
+namespace Dexter.Commands
+{
+    public partial class LevelingCommands
+    {
 
         /// <summary>
         /// Displays all configured ranked roles and relevant information about them in an image sent to the contextual channel.
@@ -25,16 +25,19 @@ namespace Dexter.Commands {
         [Summary("Displays all configured ranked roles and what level they are obtained at.")]
         [BotChannel]
 
-        public async Task DisplayRankedRolesCommand() {
+        public async Task DisplayRankedRolesCommand()
+        {
             await RenderRankedRoles(GetRankedRoles())
                 .Send(Context.Channel);
         }
 
-        private SortedDictionary<int, IRole> GetRankedRoles() {
+        private SortedDictionary<int, IRole> GetRankedRoles()
+        {
             SortedDictionary<int, IRole> result = new();
             IGuild guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
 
-            foreach(KeyValuePair<int, ulong> roleEntry in LevelingConfiguration.Levels) {
+            foreach (KeyValuePair<int, ulong> roleEntry in LevelingConfiguration.Levels)
+            {
                 result.Add(roleEntry.Key, guild.GetRole(roleEntry.Value));
             }
 
@@ -47,14 +50,17 @@ namespace Dexter.Commands {
 
         private readonly string iconPath = Path.Join(Directory.GetCurrentDirectory(), "Images", "PawIcon.png");
 
-        private System.Drawing.Image RenderRankedRoles(SortedDictionary<int, IRole> roles) {
+        private System.Drawing.Image RenderRankedRoles(SortedDictionary<int, IRole> roles)
+        {
             Bitmap result = new(colwidth, rowheight * roles.Count);
 
-            using (Graphics g = Graphics.FromImage(result)) {
-                
+            using (Graphics g = Graphics.FromImage(result))
+            {
+
                 using System.Drawing.Image icon = System.Drawing.Image.FromFile(iconPath);
                 int row = 0;
-                foreach (KeyValuePair<int, IRole> role in roles) {
+                foreach (KeyValuePair<int, IRole> role in roles)
+                {
                     ColorMatrix colorMatrix = UtilityCommands.BasicTransform(role.Value.Color.R / 255f, role.Value.Color.G / 255f, role.Value.Color.B / 255f);
                     ImageAttributes imageAttributes = new();
                     imageAttributes.SetColorMatrix(colorMatrix);

@@ -1,25 +1,27 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Services;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Figgle;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Discord;
 using System.Threading.Tasks;
 
-namespace Dexter {
+namespace Dexter
+{
 
     /// <summary>
     /// The InitializeDependencies class is the entrance of the program. It is where dependencies are injected into all of their respected classes and where the bot starts up.
     /// </summary>
-    
-    public static class InitializeDependencies {
+
+    public static class InitializeDependencies
+    {
 
         /// <summary>
         /// The Main method is the entrance to the program. Arguments can be added to this method and supplied
@@ -29,8 +31,9 @@ namespace Dexter {
         /// <param name="ParsedVersion">[OPTIONAL] The version of the bot specified by the release pipeline, is 0 by default.</param>
         /// <param name="WorkingDirectory">[OPTIONAL] The directory you wish the databases and configurations to be in. By default this is the build directory.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-        
-        public static async Task Main(string Token, int ParsedVersion, string WorkingDirectory) {
+
+        public static async Task Main(string Token, int ParsedVersion, string WorkingDirectory)
+        {
             // Set title to "Starting..."
             Console.Title = "Starting...";
 
@@ -70,7 +73,8 @@ namespace Dexter {
 
             // Adds an instance of the DiscordSocketClient to the collection, specifying the cache it should retain should be 1000 messages in size.
             DiscordSocketClient DiscordSocketClient = new(
-                new DiscordSocketConfig {
+                new DiscordSocketConfig
+                {
                     MessageCacheSize = 5000,
                     ExclusiveBulkDelete = false
                 }
@@ -80,7 +84,8 @@ namespace Dexter {
 
             // Adds an instance of the CommandService, which is what calls our various commands.
             CommandService CommandService = new(
-                new CommandServiceConfig {
+                new CommandServiceConfig
+                {
                     IgnoreExtraArgs = true
                 }
             );
@@ -88,7 +93,8 @@ namespace Dexter {
             ServiceCollection.AddSingleton(CommandService);
 
             // Adds an instance of LoggingService, which allows us to log to the console.
-            LoggingService LoggingService = new() {
+            LoggingService LoggingService = new()
+            {
                 DiscordSocketClient = DiscordSocketClient,
                 CommandService = CommandService
             };
@@ -100,8 +106,10 @@ namespace Dexter {
             // Finds all JSON configurations and initializes them from their respective files.
             // If a JSON file is not created, a new one is initialized in its place.
             Assembly.GetExecutingAssembly().GetTypes()
-                    .Where(Type => Type.IsSubclassOf(typeof(JSONConfig)) && !Type.IsAbstract).ToList().ForEach(async Type => {
-                        if (!File.Exists($"Configurations/{Type.Name}.json")) {
+                    .Where(Type => Type.IsSubclassOf(typeof(JSONConfig)) && !Type.IsAbstract).ToList().ForEach(async Type =>
+                    {
+                        if (!File.Exists($"Configurations/{Type.Name}.json"))
+                        {
                             File.WriteAllText(
                                 $"Configurations/{Type.Name}.json",
                                 JsonSerializer.Serialize(
@@ -115,8 +123,11 @@ namespace Dexter {
                             await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Warning, "Initialization",
                                 $" This application does not have a configuration file for {Type.Name}! " +
                                 $"A mock JSON class has been created in its place..."));
-                        } else {
-                            try {
+                        }
+                        else
+                        {
+                            try
+                            {
                                 object JSON = JsonSerializer.Deserialize(
                                     File.ReadAllText($"Configurations/{Type.Name}.json"),
                                     Type,
@@ -127,7 +138,9 @@ namespace Dexter {
                                     Type,
                                     JSON
                                 );
-                            } catch (JsonException Exception) {
+                            }
+                            catch (JsonException Exception)
+                            {
                                 await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Initialization",
                                     $" Unable to initialize {Type.Name}! Ran into: {Exception.InnerException}."));
 
@@ -153,7 +166,8 @@ namespace Dexter {
             Assembly.GetExecutingAssembly().GetTypes()
                     .Where(Type => Type.IsSubclassOf(typeof(Database)) && !Type.IsAbstract)
                     .ToList().ForEach(
-                DBType => {
+                DBType =>
+                {
                     Database EntityDatabase = (Database)ServiceProvider.GetRequiredService(DBType);
 
                     EntityDatabase.Database.EnsureCreated();
@@ -164,7 +178,8 @@ namespace Dexter {
             Assembly.GetExecutingAssembly().GetTypes()
                     .Where(Type => (Type.IsSubclassOf(typeof(DiscordModule)) || Type.IsSubclassOf(typeof(Service)) || Type.IsSubclassOf(typeof(Database))) && !Type.IsAbstract)
                     .ToList().ForEach(
-                Type => Type.GetProperties().ToList().ForEach(Property => {
+                Type => Type.GetProperties().ToList().ForEach(Property =>
+                {
                     if (Property.PropertyType == typeof(ServiceProvider))
                         Property.SetValue(ServiceProvider.GetRequiredService(Type), ServiceProvider);
 

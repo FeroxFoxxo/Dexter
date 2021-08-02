@@ -3,9 +3,11 @@ using Dexter.Extensions;
 using Discord.Commands;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class UtilityCommands {
+    public partial class UtilityCommands
+    {
 
         /// <summary>
         /// Displays the latency between Discord's API and the bot.
@@ -16,7 +18,8 @@ namespace Dexter.Commands {
         [Summary("Displays the latency between both Discord and the bot.")]
         [Alias("latency")]
 
-        public async Task PingCommand() {
+        public async Task PingCommand()
+        {
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Gateway Ping")
                 .WithDescription($"**{Context.Client.Latency}ms**")

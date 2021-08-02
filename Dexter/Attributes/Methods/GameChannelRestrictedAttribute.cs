@@ -1,20 +1,21 @@
 ﻿using Dexter.Configurations;
 using Discord.Commands;
-using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dexter.Attributes.Methods {
+namespace Dexter.Attributes.Methods
+{
 
     /// <summary>
     /// The BotChannel attribute specifies the command can only be used in the bot channels
     /// provided through the BotConfiguration file. It is applied to the command's method.
     /// </summary>
-    
+
     [AttributeUsage(AttributeTargets.Method)]
-    public class GameChannelRestrictedAttribute : PreconditionAttribute {
+    public class GameChannelRestrictedAttribute : PreconditionAttribute
+    {
 
         /// <summary>
         /// The CheckPermissionsAsync is an overriden method from its superclass,
@@ -27,9 +28,10 @@ namespace Dexter.Attributes.Methods {
         /// such as the BotConfigurations class, used to find if the command has been run in a specified bot channel.</param>
         /// <returns>The result of the checked permission, returning successful if it is able to be run or an error if not.
         /// This error is then thrown to the Command Handler Service to log to the user.</returns>
-        
-        public override Task<PreconditionResult> CheckPermissionsAsync (ICommandContext CommandContext,
-                CommandInfo CommandInfo, IServiceProvider ServiceProvider) {
+
+        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext,
+                CommandInfo CommandInfo, IServiceProvider ServiceProvider)
+        {
             if (ServiceProvider.GetService<FunConfiguration>() == null)
                 return Task.FromResult(PreconditionResult.FromSuccess());
 

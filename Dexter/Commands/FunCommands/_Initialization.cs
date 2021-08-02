@@ -1,16 +1,18 @@
-﻿using Dexter.Configurations;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
+using Dexter.Configurations;
 using Dexter.Databases.FunTopics;
-using Dexter.Databases.UserRestrictions;
 using Dexter.Databases.Games;
+using Dexter.Databases.UserRestrictions;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
     /// <summary>
     /// The class containing all commands within the Fun module.
     /// </summary>
 
-    public partial class FunCommands : DiscordModule {
+    public partial class FunCommands : DiscordModule
+    {
 
         /// <summary>
         /// Works as an interface between the configuration files attached to the Fun module and the commands.

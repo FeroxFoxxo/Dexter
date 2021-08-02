@@ -2,13 +2,15 @@
 using Dexter.Helpers;
 using System.Collections.Generic;
 
-namespace Dexter.Configurations {
+namespace Dexter.Configurations
+{
 
     /// <summary>
     /// Holds relevant configuration for natural language processing and processing of strings.
     /// </summary>
 
-    public class LanguageConfiguration : JSONConfig {
+    public class LanguageConfiguration : JSONConfig
+    {
 
         /// <summary>
         /// Holds a list of plurals that can't be naturally processed through standard rules.

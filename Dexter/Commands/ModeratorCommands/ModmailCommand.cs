@@ -6,9 +6,11 @@ using Discord.Commands;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ModeratorCommands {
+    public partial class ModeratorCommands
+    {
 
         /// <summary>
         /// Sends an anonymous message to the moderators in a specific channel prepared for this.
@@ -19,8 +21,10 @@ namespace Dexter.Commands {
         [Command("modmail")]
         [Summary("Sends an anonymous message to the moderators. This should be used in DMs.")]
 
-        public async Task SendModMail([Remainder] string Message) {
-            if (RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.Modmail)) {
+        public async Task SendModMail([Remainder] string Message)
+        {
+            if (RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.Modmail))
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("You aren't permitted to send modmails!")
                     .WithDescription("You have been blacklisted from using this service. If you think this is a mistake, feel free to personally contact an administrator")
@@ -28,7 +32,8 @@ namespace Dexter.Commands {
                 return;
             }
 
-            if (Message.Length > 1250) {
+            if (Message.Length > 1250)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Your modmail message is too big!")
                     .WithDescription("Please try to summarise your modmail a touch! If you are unable to, try send it in two different messages! " +
@@ -57,7 +62,8 @@ namespace Dexter.Commands {
                     .Build()
             );
 
-            ModMail ModMail = new() {
+            ModMail ModMail = new()
+            {
                 Message = Message,
                 UserID = Context.User.Id,
                 MessageID = UsrMessage.Id,
@@ -84,7 +90,8 @@ namespace Dexter.Commands {
         /// </summary>
         /// <returns>A randomly generated token in the form of a string that is not in the database already.</returns>
 
-        public string CreateToken() {
+        public string CreateToken()
+        {
             char[] TokenArray = new char[BotConfiguration.TrackerLength];
 
             for (int i = 0; i < TokenArray.Length; i++)

@@ -1,11 +1,13 @@
-﻿namespace Dexter.Databases.FunTopics {
+﻿namespace Dexter.Databases.FunTopics
+{
 
     /// <summary>
     /// [risk of deprecation] The subtype a topic falls into. Can be of type TOPIC or WOULDYOURATHER.
     /// </summary>
 
-    public enum TopicType {
-        
+    public enum TopicType
+    {
+
         /// <summary>
         /// A topic that initiates a random, unprompted conversation, generally by asking an open question.
         /// </summary>

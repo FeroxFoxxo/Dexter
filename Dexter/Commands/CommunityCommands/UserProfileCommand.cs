@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Databases.UserProfiles;
 using Dexter.Enums;
 using Dexter.Extensions;
@@ -14,10 +7,18 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Humanizer;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
-    
-    public partial class CommunityCommands {
+namespace Dexter.Commands
+{
+
+    public partial class CommunityCommands
+    {
         private const string AttributeNames = "Gender, Sexuality, Timezone, TimeZoneDST, DSTRules, Birthday, Birthyear, Nation, Languages and Miscellaneous.";
 
         /// <summary>
@@ -40,9 +41,11 @@ namespace Dexter.Commands {
             "-    To see values for a field, don't specify a value")]
         [BotChannel]
 
-        public async Task MyProfileCommand(string action = "get", [Remainder] string parameters = "") {
+        public async Task MyProfileCommand(string action = "get", [Remainder] string parameters = "")
+        {
 
-            if (RestrictionsDB.IsUserRestricted(Context.User.Id, Databases.UserRestrictions.Restriction.Social)) {
+            if (RestrictionsDB.IsUserRestricted(Context.User.Id, Databases.UserRestrictions.Restriction.Social))
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("User Restricted!")
                     .WithDescription("You don't have permissions to use the social module, if you think this is a mistake, please contact a moderator.")
@@ -52,7 +55,8 @@ namespace Dexter.Commands {
 
             UserProfile profile = ProfilesDB.GetOrCreateProfile(Context.User.Id);
 
-            switch(action.ToLower()) {
+            switch (action.ToLower())
+            {
                 case "get":
                 case "profile":
                     await DisplayProfileInformation(profile);
@@ -60,7 +64,8 @@ namespace Dexter.Commands {
                 case "set":
                 case "edit":
                     int separatorIndex = parameters.IndexOf(' ');
-                    if (separatorIndex < 0) {
+                    if (separatorIndex < 0)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid Number of Parameters")
                             .WithDescription("You must provide at least an attribute name to change and a new value for it.")
@@ -70,7 +75,8 @@ namespace Dexter.Commands {
                     string attribute = parameters[..separatorIndex];
                     string value = parameters[separatorIndex..].Trim();
 
-                    if (value.Length > CommunityConfiguration.MaxProfileAttributeLength) {
+                    if (value.Length > CommunityConfiguration.MaxProfileAttributeLength)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Excessively long value")
                             .WithDescription($"Keep your profile fields under a maximum length of {CommunityConfiguration.MaxProfileAttributeLength}")
@@ -79,7 +85,8 @@ namespace Dexter.Commands {
                     }
 
                     string feedback = "";
-                    switch(attribute.ToLower()) {
+                    switch (attribute.ToLower())
+                    {
                         case "timezone":
                         case "tz":
                             string[] segments = value.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -88,8 +95,10 @@ namespace Dexter.Commands {
                             TimeZoneData tzdst;
                             DaylightShiftRules tzrules = null;
 
-                            if (segments.Length == 1) {
-                                if (!TimeZoneData.TryParse(value, LanguageConfiguration, out tz)) {
+                            if (segments.Length == 1)
+                            {
+                                if (!TimeZoneData.TryParse(value, LanguageConfiguration, out tz))
+                                {
                                     await BuildEmbed(EmojiEnum.Annoyed)
                                         .WithTitle("Unable to find time zone")
                                         .WithDescription($"Couldn't find time zone {value}. Make sure you capitalize it correctly. You can use the `~timezone search [abbreviation]` command to look for similar recognized time zones.")
@@ -107,11 +116,13 @@ namespace Dexter.Commands {
                                 await CreateBirthdayTimer(profile);
                                 break;
                             }
-                            else if (segments.Length >= 2) {
+                            else if (segments.Length >= 2)
+                            {
                                 bool tzParsed = TimeZoneData.TryParse(segments[0], LanguageConfiguration, out tz);
                                 bool tzdstParsed = TimeZoneData.TryParse(segments[1], LanguageConfiguration, out tzdst);
 
-                                if (!tzParsed || !tzdstParsed) {
+                                if (!tzParsed || !tzdstParsed)
+                                {
                                     await BuildEmbed(EmojiEnum.Annoyed)
                                         .WithTitle("Unable to find time zone!")
                                         .WithDescription($"I was unable to parse the following time zones:{(tzParsed ? "" : $" \"{segments[0]}\"")}{(tzdstParsed ? "" : $" \"{segments[1]}\"")}.\n" +
@@ -122,9 +133,11 @@ namespace Dexter.Commands {
 
                                 bool rulesParsed = false;
                                 string rulesError = "";
-                                if (segments.Length >= 3) {
+                                if (segments.Length >= 3)
+                                {
                                     rulesParsed = DaylightShiftRules.TryParse(segments[2], LanguageConfiguration, out rulesError, out tzrules);
-                                    if (rulesParsed) {
+                                    if (rulesParsed)
+                                    {
                                         profile.DSTRules = tzrules;
                                     }
                                 }
@@ -139,7 +152,8 @@ namespace Dexter.Commands {
                                     .SendEmbed(Context.Channel);
                                 break;
                             }
-                            else {
+                            else
+                            {
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Malformed Value")
                                     .WithDescription("Please type the value you wish to give to timezone in a valid format.")
@@ -151,14 +165,16 @@ namespace Dexter.Commands {
                         case "dsttimezone":
                         case "tzdst":
                         case "timezonedst":
-                            if (value == "none") {
+                            if (value == "none")
+                            {
                                 profile.TimeZoneDST = "";
                                 await GenericResetInfo("DST Time Zone");
                                 ProfilesDB.SaveChanges();
                                 return;
                             }
 
-                            if (!LanguageHelper.TryParseTimeZone(value, LanguageConfiguration, out TimeZoneData timeZoneDST)) {
+                            if (!LanguageHelper.TryParseTimeZone(value, LanguageConfiguration, out TimeZoneData timeZoneDST))
+                            {
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Unable to find time zone")
                                     .WithDescription($"Couldn't find time zone {value}. Make sure you capitalize it correctly. You can use the `~timezone search [abbreviation]` command to look for similar recognized time zones.")
@@ -178,7 +194,8 @@ namespace Dexter.Commands {
                         case "dstrule":
                         case "timezonerules":
                         case "tzrules":
-                            if (value == "none") {
+                            if (value == "none")
+                            {
                                 profile.DSTRules = null;
                                 await BuildEmbed(EmojiEnum.Sign)
                                     .WithTitle("Cleared data about DST application rules")
@@ -188,7 +205,8 @@ namespace Dexter.Commands {
                                 return;
                             }
 
-                            if (!DaylightShiftRules.TryParse(value, LanguageConfiguration, out feedback, out DaylightShiftRules rules)) {
+                            if (!DaylightShiftRules.TryParse(value, LanguageConfiguration, out feedback, out DaylightShiftRules rules))
+                            {
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Unable to parse time zone rules")
                                     .WithDescription(feedback)
@@ -208,7 +226,8 @@ namespace Dexter.Commands {
                             break;
                         case "borkday":
                         case "birthday":
-                            if (value.ToLower() == "none") {
+                            if (value.ToLower() == "none")
+                            {
                                 profile.Borkday = default;
                                 TryRemoveBirthdayTimer(profile);
                                 ProfilesDB.SaveChanges();
@@ -219,7 +238,8 @@ namespace Dexter.Commands {
                                 return;
                             }
 
-                            if (!DayInYear.TryParse(value, true, LanguageConfiguration, out DayInYear day, out feedback, out int year)) {
+                            if (!DayInYear.TryParse(value, true, LanguageConfiguration, out DayInYear day, out feedback, out int year))
+                            {
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Unable to parse birthday.")
                                     .WithDescription(feedback)
@@ -239,7 +259,8 @@ namespace Dexter.Commands {
                                 .SendEmbed(Context.Channel);
                             break;
                         case "birthyear":
-                            if (value.ToLower() == "none") {
+                            if (value.ToLower() == "none")
+                            {
                                 profile.BirthYear = default;
                                 await BuildEmbed(EmojiEnum.Sign)
                                     .WithTitle("Removed local birth year records")
@@ -249,7 +270,8 @@ namespace Dexter.Commands {
                                 return;
                             }
 
-                            if(!int.TryParse(value, out int result)) {
+                            if (!int.TryParse(value, out int result))
+                            {
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Unable to parse value into a number")
                                     .WithDescription("Please enter a decimal value, entering 0 is equivalent to clearing the birth year.")
@@ -264,22 +286,26 @@ namespace Dexter.Commands {
                             break;
                         case "gender":
                         case "pronouns":
-                            if (value == "none") {
+                            if (value == "none")
+                            {
                                 profile.Gender = "";
                                 await GenericResetInfo("Gender");
                             }
-                            else {
+                            else
+                            {
                                 profile.Gender = value;
                                 await GenericSuccessInfo("Gender", value);
                             }
                             break;
                         case "sexuality":
                         case "orientation":
-                            if (value == "none") {
+                            if (value == "none")
+                            {
                                 profile.Orientation = "";
                                 await GenericResetInfo("Sexuality");
                             }
-                            else {
+                            else
+                            {
                                 profile.Orientation = value;
                                 await GenericSuccessInfo("Sexuality", value);
                             }
@@ -287,11 +313,13 @@ namespace Dexter.Commands {
                         case "sona":
                         case "fursona":
                         case "sonainfo":
-                            if (value == "none") {
+                            if (value == "none")
+                            {
                                 profile.SonaInfo = "";
                                 await GenericResetInfo("Sona Info");
                             }
-                            else {
+                            else
+                            {
                                 profile.SonaInfo = value;
                                 await GenericSuccessInfo("Sona Info", value);
                             }
@@ -299,22 +327,26 @@ namespace Dexter.Commands {
                         case "nation":
                         case "country":
                         case "nationality":
-                            if (value == "none") {
+                            if (value == "none")
+                            {
                                 profile.Nationality = "";
                                 await GenericResetInfo("Nationality");
                             }
-                            else {
+                            else
+                            {
                                 profile.Nationality = value;
                                 await GenericSuccessInfo("Nationality", value);
                             }
                             break;
                         case "languages":
                         case "language":
-                            if (value == "none") {
+                            if (value == "none")
+                            {
                                 profile.Languages = "";
                                 await GenericResetInfo("Languages");
                             }
-                            else {
+                            else
+                            {
                                 profile.Languages = value;
                                 await GenericSuccessInfo("Languages", value);
                             }
@@ -326,11 +358,13 @@ namespace Dexter.Commands {
                         case "miscellaneous":
                         case "misc":
                         case "other":
-                            if (value == "none") {
+                            if (value == "none")
+                            {
                                 profile.Info = "";
                                 await GenericResetInfo("Info");
                             }
-                            else {
+                            else
+                            {
                                 profile.Info = value;
                                 await GenericSuccessInfo("Info", value);
                             }
@@ -347,8 +381,10 @@ namespace Dexter.Commands {
                 case "settings":
                 case "config":
                 case "configuration":
-                    if (string.IsNullOrEmpty(parameters)) {
-                        if(profile.Settings is null) {
+                    if (string.IsNullOrEmpty(parameters))
+                    {
+                        if (profile.Settings is null)
+                        {
                             profile.Settings = new();
                             ProfilesDB.SaveChanges();
                         }
@@ -364,7 +400,8 @@ namespace Dexter.Commands {
                     }
 
                     separatorIndex = parameters.IndexOf(' ');
-                    if (separatorIndex < 0) {
+                    if (separatorIndex < 0)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid Number of Parameters")
                             .WithDescription("You must provide at least an attribute name to change and a new value for it.")
@@ -374,7 +411,8 @@ namespace Dexter.Commands {
                     attribute = parameters[..separatorIndex];
                     value = parameters[separatorIndex..].Trim();
 
-                    if (value.Length > CommunityConfiguration.MaxProfileAttributeLength) {
+                    if (value.Length > CommunityConfiguration.MaxProfileAttributeLength)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Excessively long value")
                             .WithDescription($"Keep your profile fields under a maximum length of {CommunityConfiguration.MaxProfileAttributeLength}")
@@ -384,10 +422,12 @@ namespace Dexter.Commands {
 
                     ProfilePreferences prefs = profile.Settings;
 
-                    switch (attribute.ToLower()) {
+                    switch (attribute.ToLower())
+                    {
                         case "privacy":
                         case "access":
-                            switch(value.ToLower()) {
+                            switch (value.ToLower())
+                            {
                                 case "public":
                                 case "everyone":
                                 case "everybody":
@@ -419,7 +459,8 @@ namespace Dexter.Commands {
                             break;
                         case "borkdayrole":
                         case "birthdayrole":
-                            switch (value.ToLower()) {
+                            switch (value.ToLower())
+                            {
                                 case "yes":
                                 case "true":
                                     prefs.GiveBorkdayRole = true;
@@ -444,7 +485,8 @@ namespace Dexter.Commands {
                             break;
                         case "friendrequests":
                         case "receivefriendrequests":
-                            switch(value.ToLower()) {
+                            switch (value.ToLower())
+                            {
                                 case "yes":
                                 case "true":
                                 case "regular":
@@ -509,9 +551,11 @@ namespace Dexter.Commands {
             "-  BLOCKED: Shows a list of blocked users.")]
         [BotChannel]
 
-        public async Task SocialQuery(IUser user) {
+        public async Task SocialQuery(IUser user)
+        {
 
-            if (RestrictionsDB.IsUserRestricted(user.Id, Databases.UserRestrictions.Restriction.Social)) {
+            if (RestrictionsDB.IsUserRestricted(user.Id, Databases.UserRestrictions.Restriction.Social))
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("User Restricted!")
                     .WithDescription("This user has had their access to the social system revoked, their profile isn't visible.")
@@ -522,8 +566,10 @@ namespace Dexter.Commands {
             UserProfile profile = ProfilesDB.GetOrCreateProfile(user.Id);
 
             bool allowed = Context.User.Id == user.Id || Context.User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator;
-            if (!allowed) {
-                switch (profile.Settings.Privacy) {
+            if (!allowed)
+            {
+                switch (profile.Settings.Privacy)
+                {
                     case ProfilePreferences.PrivacyMode.Private:
                         allowed = false;
                         break;
@@ -536,7 +582,8 @@ namespace Dexter.Commands {
                 }
             }
 
-            if (!allowed) {
+            if (!allowed)
+            {
                 await Context.Channel.SendMessageAsync("Unable to access profile! This user's profile is private.");
                 return;
             }
@@ -554,11 +601,13 @@ namespace Dexter.Commands {
         [Command("social")]
         [Alias("friend", "friends")]
 
-        public async Task FriendCommand(string action, ulong userID) {
+        public async Task FriendCommand(string action, ulong userID)
+        {
 
             IUser target = DiscordSocketClient.GetUser(userID);
 
-            if (target is null) {
+            if (target is null)
+            {
                 await Context.Channel.SendMessageAsync($"Unable to find user with ID {userID}.");
                 return;
             }
@@ -577,9 +626,11 @@ namespace Dexter.Commands {
         [Command("social")]
         [Alias("friend", "friends")]
 
-        public async Task FriendCommand(string action, IUser user = null) {
+        public async Task FriendCommand(string action, IUser user = null)
+        {
 
-            if (user is not null && RestrictionsDB.IsUserRestricted(user.Id, Databases.UserRestrictions.Restriction.Social)) {
+            if (user is not null && RestrictionsDB.IsUserRestricted(user.Id, Databases.UserRestrictions.Restriction.Social))
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("User Restricted!")
                     .WithDescription("This user has had their access to the social system revoked, their profile isn't accessible.")
@@ -587,7 +638,8 @@ namespace Dexter.Commands {
                 return;
             }
 
-            if (RestrictionsDB.IsUserRestricted(Context.User.Id, Databases.UserRestrictions.Restriction.Social)) {
+            if (RestrictionsDB.IsUserRestricted(Context.User.Id, Databases.UserRestrictions.Restriction.Social))
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("User Restricted!")
                     .WithDescription("You don't have permissions to use the social module, if you think this is a mistake, please contact a moderator.")
@@ -597,11 +649,13 @@ namespace Dexter.Commands {
 
             UserProfile profile = null;
 
-            if (user is not null) {
+            if (user is not null)
+            {
                 profile = ProfilesDB.GetOrCreateProfile(user.Id);
             }
 
-            if (user is not null && user.Id == Context.User.Id) {
+            if (user is not null && user.Id == Context.User.Id)
+            {
                 await BuildEmbed(EmojiEnum.Wut)
                     .WithTitle("Self-Centered much?")
                     .WithDescription("Look, I don't know what you're trying to do with yourself, but you should probably considering socializing with *other beings*.")
@@ -609,11 +663,12 @@ namespace Dexter.Commands {
                 return;
             }
 
-            switch (action.ToLower()) {
+            switch (action.ToLower())
+            {
                 case "list":
                     List<ulong> friends = await ProfilesDB.GetLinksAsync(Context.User.Id);
                     EmbedBuilder[] pages = BuildUserListEmbeds(friends, "Friends", "Here's a list of users you have friended using the Dexter social system:", FriendDisplay);
-                    
+
                     await PublishListResult(pages, "It seems you have no friends added yet! :c. You can add more using ~friend add [User]. But hey... I'm always here if you need a hug. <3");
                     return;
                 case "requests":
@@ -624,7 +679,8 @@ namespace Dexter.Commands {
                     return;
                 case "add":
                 case "accept":
-                    if (user is null) {
+                    if (user is null)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid number of arguments")
                             .WithDescription("You must provide a user to add as a friend.")
@@ -633,13 +689,16 @@ namespace Dexter.Commands {
                     }
 
                     UserLink req = ProfilesDB.GetLink(Context.User.Id, user.Id, true, true, LinkType.FriendRequest);
-                    if (req is null) {
+                    if (req is null)
+                    {
                         req = ProfilesDB.GetLink(Context.User.Id, user.Id, true);
 
-                        if (req is null) {
+                        if (req is null)
+                        {
                             req = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.FriendRequest);
 
-                            if (profile.Settings.BlockRequests) {
+                            if (profile.Settings.BlockRequests)
+                            {
                                 await new EmbedBuilder()
                                     .WithColor(Color.Orange)
                                     .WithTitle("User has silent friend requests!")
@@ -649,7 +708,8 @@ namespace Dexter.Commands {
                                 return;
                             }
 
-                            try {
+                            try
+                            {
                                 await new EmbedBuilder()
                                     .WithColor(Color.Green)
                                     .WithTitle("Incoming Friend Request!")
@@ -664,7 +724,8 @@ namespace Dexter.Commands {
                                     .WithDescription($"{user.Mention} has been notified of your request. You can check the list of friends you have by typing `~friend list`.")
                                     .SendEmbed(Context.Channel);
                             }
-                            catch (HttpException) {
+                            catch (HttpException)
+                            {
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Unable to Send Message!")
                                     .WithDescription($"I wasn't able to contact {user.Mention}, perhaps you could contact them yourself? They can accept this request by using the command `~friend add {Context.User.Id}`.")
@@ -673,23 +734,27 @@ namespace Dexter.Commands {
                             return;
                         }
 
-                        if (req.LinkType == LinkType.Friend) {
+                        if (req.LinkType == LinkType.Friend)
+                        {
                             await BuildEmbed(EmojiEnum.Wut)
                                 .WithTitle("You're already friends with this user!")
                                 .WithDescription($"You and {user.Mention} are already friends!")
                                 .SendEmbed(Context.Channel);
                             return;
                         }
-                        else if (req.LinkType == LinkType.Blocked) {
+                        else if (req.LinkType == LinkType.Blocked)
+                        {
                             if (req.Sender == Context.User.Id && req.Settings.BlockMode.HasFlag(Databases.UserProfiles.Direction.Sender)
-                                || req.Sendee == Context.User.Id && req.Settings.BlockMode.HasFlag(Databases.UserProfiles.Direction.Sendee)) {
+                                || req.Sendee == Context.User.Id && req.Settings.BlockMode.HasFlag(Databases.UserProfiles.Direction.Sendee))
+                            {
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("This user has blocked you.")
                                     .WithDescription("You can't send notifications to a user that has blocked you.")
                                     .SendEmbed(Context.Channel);
                                 return;
                             }
-                            else {
+                            else
+                            {
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("You have blocked this user!")
                                     .WithDescription($"You can't send notifications to a user you have blocked; to unblock them, use `~social unblock {user.Id}`.")
@@ -699,7 +764,8 @@ namespace Dexter.Commands {
                         }
                     }
 
-                    if (req.Sender == Context.User.Id) {
+                    if (req.Sender == Context.User.Id)
+                    {
                         await BuildEmbed(EmojiEnum.Wut)
                             .WithTitle("Active Friend Request Present")
                             .WithDescription($"You've already sent {user.Mention} a friend request. They can accept it by using the `~friend add {Context.User.Id}` command.")
@@ -707,7 +773,8 @@ namespace Dexter.Commands {
                         return;
                     }
 
-                    if (req.Sender != Context.User.Id && req.LinkType == LinkType.FriendRequest) {
+                    if (req.Sender != Context.User.Id && req.LinkType == LinkType.FriendRequest)
+                    {
                         req.LinkType = LinkType.Friend;
                         await BuildEmbed(EmojiEnum.Love)
                             .WithTitle("Accepted Friend Request!")
@@ -718,7 +785,8 @@ namespace Dexter.Commands {
                     break;
                 case "remove":
                 case "unfriend":
-                    if (user is null) {
+                    if (user is null)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid number of arguments")
                             .WithDescription("You must provide a user to remove your friendship status with.")
@@ -726,15 +794,18 @@ namespace Dexter.Commands {
                         return;
                     }
 
-                    if (!ProfilesDB.TryRemove(Context.User.Id, user.Id)) {
-                        if (!ProfilesDB.TryRemove(Context.User.Id, user.Id, false, LinkType.FriendRequest)) {
+                    if (!ProfilesDB.TryRemove(Context.User.Id, user.Id))
+                    {
+                        if (!ProfilesDB.TryRemove(Context.User.Id, user.Id, false, LinkType.FriendRequest))
+                        {
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Non-existent Link")
                                 .WithDescription("You and the specified user are not friends in the Dexter system.")
                                 .SendEmbed(Context.Channel);
                             return;
                         }
-                        else {
+                        else
+                        {
                             await BuildEmbed(EmojiEnum.Love)
                                 .WithTitle("Removed Friend Request!")
                                 .WithDescription($"Your friend request to {user.Mention} has been cancelled.")
@@ -749,7 +820,8 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
                     return;
                 case "decline":
-                    if (user is null) {
+                    if (user is null)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid number of arguments")
                             .WithDescription("You must provide a user to remove your friendship status with.")
@@ -757,14 +829,16 @@ namespace Dexter.Commands {
                         return;
                     }
 
-                    if (!ProfilesDB.TryRemove(user.Id, Context.User.Id, false, LinkType.FriendRequest)) {
+                    if (!ProfilesDB.TryRemove(user.Id, Context.User.Id, false, LinkType.FriendRequest))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Non-existent Request")
                             .WithDescription("This user hasn't sent you a friend request. :(")
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    else {
+                    else
+                    {
                         await BuildEmbed(EmojiEnum.Love)
                             .WithTitle("Removed Friend Request!")
                             .WithDescription($"You have declined the friend request from {user.Mention}.")
@@ -772,7 +846,8 @@ namespace Dexter.Commands {
                         return;
                     }
                 case "block":
-                    if (user is null) {
+                    if (user is null)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid number of arguments")
                             .WithDescription("You must provide a user to block.")
@@ -782,7 +857,8 @@ namespace Dexter.Commands {
 
                     UserLink toBlock = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.Blocked);
 
-                    if (toBlock.LinkType == LinkType.Friend) {
+                    if (toBlock.LinkType == LinkType.Friend)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("User is friended!")
                             .WithDescription($"You can't block friends. If you wish to block this user, unfriend them first: `~friend remove {user.Id}`.")
@@ -791,13 +867,16 @@ namespace Dexter.Commands {
                     }
                     toBlock.LinkType = LinkType.Blocked;
 
-                    if (toBlock.IsUserBlocked(user.Id)) {
+                    if (toBlock.IsUserBlocked(user.Id))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("User already blocked")
                             .WithDescription($"You've already blocked user {user.Mention}.")
                             .SendEmbed(Context.Channel);
                         return;
-                    } else {
+                    }
+                    else
+                    {
                         toBlock.BlockUser(user.Id);
 
                         await BuildEmbed(EmojiEnum.Sign)
@@ -807,7 +886,8 @@ namespace Dexter.Commands {
                         break;
                     }
                 case "unblock":
-                    if (user is null) {
+                    if (user is null)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid number of arguments")
                             .WithDescription("You must provide a user to unblock.")
@@ -817,7 +897,8 @@ namespace Dexter.Commands {
 
                     UserLink link = ProfilesDB.GetLink(Context.User.Id, user.Id, true, true, LinkType.Blocked);
 
-                    if (link is null) {
+                    if (link is null)
+                    {
                         await BuildEmbed(EmojiEnum.Wut)
                             .WithTitle("No block link found.")
                             .WithDescription("You can't unblock a user that you haven't blocked.")
@@ -827,7 +908,8 @@ namespace Dexter.Commands {
 
                     bool blockedSendee = link.Sender == Context.User.Id && link.Settings.BlockMode.HasFlag(Databases.UserProfiles.Direction.Sendee);
                     bool blockedSender = link.Sendee == Context.User.Id && link.Settings.BlockMode.HasFlag(Databases.UserProfiles.Direction.Sender);
-                    if (blockedSendee || blockedSender) {
+                    if (blockedSendee || blockedSender)
+                    {
                         if (blockedSendee) link.Settings.BlockMode &= ~Databases.UserProfiles.Direction.Sendee;
                         if (blockedSender) link.Settings.BlockMode &= ~Databases.UserProfiles.Direction.Sender;
                         bool isUserBlocked = link.Settings.BlockMode != Databases.UserProfiles.Direction.None;
@@ -838,7 +920,8 @@ namespace Dexter.Commands {
                             .SendEmbed(Context.Channel);
                         break;
                     }
-                    else {
+                    else
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Incongruent Block Authority")
                             .WithDescription($"{user.Mention} has blocked you, but you haven't blocked them. You can't remove a block imposed by a different user.")
@@ -876,9 +959,11 @@ namespace Dexter.Commands {
             "Leave the value empty to see the possible values for an attribute.")]
         [BotChannel]
 
-        public async Task ConfigLinkCommand(IUser user, string attribute = "", [Remainder] string value = "") {
+        public async Task ConfigLinkCommand(IUser user, string attribute = "", [Remainder] string value = "")
+        {
 
-            if (RestrictionsDB.IsUserRestricted(Context.User.Id, Databases.UserRestrictions.Restriction.Social)) {
+            if (RestrictionsDB.IsUserRestricted(Context.User.Id, Databases.UserRestrictions.Restriction.Social))
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("User Restricted!")
                     .WithDescription("You don't have permissions to use the social module, if you think this is a mistake, please contact a moderator.")
@@ -888,7 +973,8 @@ namespace Dexter.Commands {
 
             UserLink link = ProfilesDB.GetLink(Context.User.Id, user.Id, true, true);
 
-            if (link is null) {
+            if (link is null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("User Link not found")
                     .WithDescription($"You aren't friended with {user.Mention}, you can send them a friend request with `~friend add {user.Id}` if you haven't.")
@@ -896,7 +982,8 @@ namespace Dexter.Commands {
                 return;
             }
 
-            if (string.IsNullOrEmpty(attribute)) {
+            if (string.IsNullOrEmpty(attribute))
+            {
                 await new EmbedBuilder()
                     .WithColor(Color.Purple)
                     .WithThumbnailUrl(user.GetTrueAvatarUrl())
@@ -909,10 +996,12 @@ namespace Dexter.Commands {
 
             LinkPreferences prefs = link.Settings;
 
-            switch(attribute.ToLower()) {
+            switch (attribute.ToLower())
+            {
                 case "borkdaynotify":
                 case "birthdaynotify":
-                    switch(value.ToLower()) {
+                    switch (value.ToLower())
+                    {
                         case "true":
                         case "yes":
                             prefs.SetBorkdayMode(link, Context.User.Id, true);
@@ -958,10 +1047,12 @@ namespace Dexter.Commands {
 
         [Command("configlink")]
 
-        public async Task ConfigLinkCommand(ulong userID, string attribute = "", [Remainder] string value = "") {
+        public async Task ConfigLinkCommand(ulong userID, string attribute = "", [Remainder] string value = "")
+        {
             IUser target = DiscordSocketClient.GetUser(userID);
 
-            if (target is null) {
+            if (target is null)
+            {
                 await Context.Channel.SendMessageAsync($"Unable to find user with ID {userID}.");
                 return;
             }
@@ -969,24 +1060,29 @@ namespace Dexter.Commands {
             await ConfigLinkCommand(target, attribute, value);
         }
 
-        private async Task PublishListResult(EmbedBuilder[] pages, string emptySetRemark) {
-            if (pages.Length == 0) {
+        private async Task PublishListResult(EmbedBuilder[] pages, string emptySetRemark)
+        {
+            if (pages.Length == 0)
+            {
                 await Context.Channel.SendMessageAsync(emptySetRemark);
             }
-            else if (pages.Length == 1) {
+            else if (pages.Length == 1)
+            {
                 await pages.First().SendEmbed(Context.Channel);
             }
-            else {
+            else
+            {
                 await CreateReactionMenu(pages, Context.Channel);
             }
             return;
         }
 
-        private async Task DisplayProfileInformation(UserProfile profile) {
+        private async Task DisplayProfileInformation(UserProfile profile)
+        {
             IUser user = DiscordSocketClient.GetUser(profile.UserID);
 
             if (user is null) { await Context.Channel.SendMessageAsync("Unable to find user information!"); }
-            
+
             bool TZSuccess = TimeZoneData.TryParse(profile.TimeZone, LanguageConfiguration, out TimeZoneData TZ);
             bool TZDSTSuccess = TimeZoneData.TryParse(profile.TimeZoneDST, LanguageConfiguration, out TimeZoneData TZDST);
 
@@ -1006,48 +1102,57 @@ namespace Dexter.Commands {
                 .SendEmbed(Context.Channel);
         }
 
-        private async Task GenericSuccessInfo(string attribute, object value) {
+        private async Task GenericSuccessInfo(string attribute, object value)
+        {
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"Successfully changed value of \"{attribute}\"")
                 .WithDescription($"New value set to: {value}")
                 .SendEmbed(Context.Channel);
         }
 
-        private async Task GenericResetInfo(string attribute) {
+        private async Task GenericResetInfo(string attribute)
+        {
             await BuildEmbed(EmojiEnum.Sign)
                 .WithTitle($"Cleared local data about \"{attribute}\".")
                 .WithDescription("The data you've previously introduced for this field has been removed and is no longer being tracked.")
                 .SendEmbed(Context.Channel);
         }
 
-        private string GetAge(UserProfile profile, out TimeSpan age) {
+        private string GetAge(UserProfile profile, out TimeSpan age)
+        {
             age = default;
-            
-            if (profile.BirthYear is null || profile.BirthYear <= 0) {
+
+            if (profile.BirthYear is null || profile.BirthYear <= 0)
+            {
                 return "Insufficient information; Missing birth year.";
             }
-            else {
-                if (profile.Borkday != default) {
+            else
+            {
+                if (profile.Borkday != default)
+                {
                     age = DateTimeOffset.Now.Subtract(GetBirthDay(profile));
                     return $"{age.Humanize(3, maxUnit: Humanizer.Localisation.TimeUnit.Year, minUnit: Humanizer.Localisation.TimeUnit.Day)}";
                 }
-                int yrs = DateTime.Now.Year - (int) profile.BirthYear;
+                int yrs = DateTime.Now.Year - (int)profile.BirthYear;
                 age = TimeSpan.FromDays(yrs * 365.24);
                 return $"Approximately {yrs} years.";
             }
         }
 
-        private DateTimeOffset GetNow(UserProfile profile) {
+        private DateTimeOffset GetNow(UserProfile profile)
+        {
             return DateTimeOffset.Now.ToOffset(profile.GetRelevantTimeZone(LanguageConfiguration).TimeOffset);
         }
 
-        private DateTimeOffset GetBirthDay(UserProfile profile) {
+        private DateTimeOffset GetBirthDay(UserProfile profile)
+        {
             int day = profile.Borkday?.Day ?? 0;
             LanguageHelper.Month month = profile.Borkday?.Month ?? LanguageHelper.Month.January;
             DateTime birthday;
 
             if (day == 29 && month == LanguageHelper.Month.February
-                && !CultureInfo.InvariantCulture.Calendar.IsLeapYear(profile.BirthYear ?? DateTime.Now.Year)) {
+                && !CultureInfo.InvariantCulture.Calendar.IsLeapYear(profile.BirthYear ?? DateTime.Now.Year))
+            {
                 day = 1;
                 month = LanguageHelper.Month.March;
             }
@@ -1056,17 +1161,21 @@ namespace Dexter.Commands {
             return new DateTimeOffset(birthday, profile?.GetRelevantTimeZone(LanguageConfiguration).TimeOffset ?? default);
         }
 
-        private bool TryRemoveBirthdayTimer(UserProfile profile) {
-            if (!string.IsNullOrEmpty(profile.BorkdayTimerToken) && TimerService.TimerExists(profile.BorkdayTimerToken)) {
+        private bool TryRemoveBirthdayTimer(UserProfile profile)
+        {
+            if (!string.IsNullOrEmpty(profile.BorkdayTimerToken) && TimerService.TimerExists(profile.BorkdayTimerToken))
+            {
                 TimerService.RemoveTimer(profile.BorkdayTimerToken);
                 return true;
             }
             return false;
         }
 
-        private async Task CreateBirthdayTimer(UserProfile profile) {
+        private async Task CreateBirthdayTimer(UserProfile profile)
+        {
             TryRemoveBirthdayTimer(profile);
-            if (profile?.Borkday is null) {
+            if (profile?.Borkday is null)
+            {
                 return;
             }
 
@@ -1078,10 +1187,12 @@ namespace Dexter.Commands {
             int monthBD = (int)profile.Borkday.Month;
             int dayBD = profile.Borkday.Day;
 
-            while (diff <= TimeSpan.Zero) {
+            while (diff <= TimeSpan.Zero)
+            {
                 nextYear++;
                 if (monthBD == (int)LanguageHelper.Month.February && dayBD == 29
-                    && !CultureInfo.InvariantCulture.Calendar.IsLeapYear(nextYear)) {
+                    && !CultureInfo.InvariantCulture.Calendar.IsLeapYear(nextYear))
+                {
                     monthBD++;
                     dayBD = 1;
                 }
@@ -1090,7 +1201,7 @@ namespace Dexter.Commands {
 
                 diff = new DateTimeOffset(relevantDay, relevantOffset).Subtract(DateTimeOffset.Now);
             }
-            profile.BorkdayTimerToken = await CreateEventTimer(BorkdayCallback, new Dictionary<string, string>() { {"ID", profile.UserID.ToString()} }, (int)diff.TotalSeconds, Databases.EventTimers.TimerType.Expire, TimerService);
+            profile.BorkdayTimerToken = await CreateEventTimer(BorkdayCallback, new Dictionary<string, string>() { { "ID", profile.UserID.ToString() } }, (int)diff.TotalSeconds, Databases.EventTimers.TimerType.Expire, TimerService);
             await ProfilesDB.SaveChangesAsync();
         }
 
@@ -1100,11 +1211,13 @@ namespace Dexter.Commands {
         /// <param name="args">A string-string dictionary containing a definition for a ulong-parsable "ID" UserID.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task BorkdayCallback(Dictionary<string, string> args) {
+        public async Task BorkdayCallback(Dictionary<string, string> args)
+        {
 
             ulong id = ulong.Parse(args["ID"]);
 
-            if (RestrictionsDB.IsUserRestricted(id, Databases.UserRestrictions.Restriction.Social)) {
+            if (RestrictionsDB.IsUserRestricted(id, Databases.UserRestrictions.Restriction.Social))
+            {
                 return;
             }
 
@@ -1113,7 +1226,8 @@ namespace Dexter.Commands {
 
             UserProfile profile = ProfilesDB.GetOrCreateProfile(id);
 
-            if (profile.Settings?.GiveBorkdayRole ?? false) {
+            if (profile.Settings?.GiveBorkdayRole ?? false)
+            {
                 IRole role = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(
                     user.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator ?
                         ModerationConfiguration.StaffBorkdayRoleID : ModerationConfiguration.BorkdayRoleID
@@ -1131,7 +1245,8 @@ namespace Dexter.Commands {
                     Databases.EventTimers.TimerType.Expire
                 );
 
-                try {
+                try
+                {
                     await new EmbedBuilder()
                         .WithColor(Color.Gold)
                         .WithThumbnailUrl(user.GetTrueAvatarUrl())
@@ -1144,8 +1259,10 @@ namespace Dexter.Commands {
             }
 
             List<ulong> notify = await ProfilesDB.BorkdayNotifs(user.Id);
-            foreach(ulong uid in notify) {
-                try {
+            foreach (ulong uid in notify)
+            {
+                try
+                {
                     IUser friend = DiscordSocketClient.GetUser(uid);
                     await new EmbedBuilder()
                         .WithColor(Color.Gold)
@@ -1154,7 +1271,8 @@ namespace Dexter.Commands {
                         .WithDescription($"Hey there! It's {user.Mention}'{(user.Username.EndsWith('s') ? "" : "s")} birthday! Thought you'd like to know and celebrate! :3")
                         .WithCurrentTimestamp()
                         .SendEmbed(await user.GetOrCreateDMChannelAsync());
-                } catch { }
+                }
+                catch { }
             }
 
             await CreateBirthdayTimer(profile);
@@ -1167,7 +1285,8 @@ namespace Dexter.Commands {
         /// <param name="args">A string-string dictionary containing a definition for a ulong-parsable "User" ID and a ulong-parsable "Role" ID.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task RemoveBorkday(Dictionary<string, string> args) {
+        public async Task RemoveBorkday(Dictionary<string, string> args)
+        {
             ulong userID = Convert.ToUInt64(args["User"]);
             ulong roleID = Convert.ToUInt64(args["Role"]);
 
@@ -1188,20 +1307,24 @@ namespace Dexter.Commands {
         /// <param name="displayPattern">A method detailing the way to display each user as a string.</param>
         /// <returns>An array of <see cref="EmbedBuilder"/>s, detailing the given list of <paramref name="users"/>.</returns>
 
-        public EmbedBuilder[] BuildUserListEmbeds(IEnumerable<ulong> users, string title, string description, Func<IUser, string> displayPattern) {
+        public EmbedBuilder[] BuildUserListEmbeds(IEnumerable<ulong> users, string title, string description, Func<IUser, string> displayPattern)
+        {
             List<EmbedBuilder> embeds = new();
             int inPage = CommunityConfiguration.MaxUsersPerEmbed;
             List<StringBuilder> userlists = new();
 
-            foreach (ulong userID in users) {
+            foreach (ulong userID in users)
+            {
                 IUser user = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(userID);
 
-                if (user is null) {
+                if (user is null)
+                {
                     user = DiscordSocketClient.GetUser(userID);
                     if (user is null) continue;
                 }
 
-                if (inPage >= CommunityConfiguration.MaxUsersPerEmbed) {
+                if (inPage >= CommunityConfiguration.MaxUsersPerEmbed)
+                {
                     userlists.Add(new());
                     inPage = 0;
                 }
@@ -1211,7 +1334,8 @@ namespace Dexter.Commands {
             }
 
             int page = 0;
-            foreach (StringBuilder sb in userlists) {
+            foreach (StringBuilder sb in userlists)
+            {
                 embeds.Add(new EmbedBuilder()
                     .WithColor(Color.Purple)
                     .WithTitle($"{title} - Page {++page}/{userlists.Count}")
@@ -1222,24 +1346,28 @@ namespace Dexter.Commands {
             return embeds.ToArray();
         }
 
-        private static string DefaultDisplay(IUser user) {
+        private static string DefaultDisplay(IUser user)
+        {
             return $"👥{user.Mention}";
         }
 
-        private string BlockedDisplay(IUser user) {
+        private string BlockedDisplay(IUser user)
+        {
             UserLink link = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.Invalid);
             bool receiving = link.IsUserBlocked(Context.User.Id);
             bool blocking = link.IsUserBlocked(user.Id);
             return $"🚫{user.Mention} ({(receiving ? "⬅️" : "")}{(blocking ? "➡️" : "")})";
         }
 
-        private string FriendDisplay(IUser user) {
+        private string FriendDisplay(IUser user)
+        {
             UserLink link = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.Invalid);
             bool borkdayNotifs = link.IsUserBorkdayNotified(Context.User.Id);
-            return $"👥{user.Mention}{( borkdayNotifs ? " (🎂)" : "")}";
+            return $"👥{user.Mention}{(borkdayNotifs ? " (🎂)" : "")}";
         }
 
-        private string FriendRequestDisplay(IUser user) {
+        private string FriendRequestDisplay(IUser user)
+        {
             UserLink link = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.Invalid);
             bool sent = link.Sender == Context.User.Id;
             return $"{(sent ? "➡️" : "⬅️")}{user.Mention} {(sent ? "(Outgoing)" : $"(Incoming: `~friend <add|decline> {user.Id}`)")}";

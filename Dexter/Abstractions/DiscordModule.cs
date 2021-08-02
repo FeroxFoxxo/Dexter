@@ -14,14 +14,16 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Dexter.Abstractions {
+namespace Dexter.Abstractions
+{
 
     /// <summary>
     /// The DiscordModule class is an abstract class all command modules extend upon.
     /// Command modules contain methods that run on the specified command being entered.
     /// </summary>
-    
-    public abstract class DiscordModule : ModuleBase<SocketCommandContext> {
+
+    public abstract class DiscordModule : ModuleBase<SocketCommandContext>
+    {
 
         /// <summary>
         /// The ProposalService class is used to send a command to be accepted by an admin through the SendForAdminApproval method.
@@ -59,7 +61,8 @@ namespace Dexter.Abstractions {
         /// <param name="Thumbnail">The thumbnail that you would like to be applied to the embed.</param>
         /// <returns>A new embed builder with the specified attributes applied to the embed.</returns>
 
-        public EmbedBuilder BuildEmbed(EmojiEnum Thumbnail) {
+        public EmbedBuilder BuildEmbed(EmojiEnum Thumbnail)
+        {
             return new EmbedBuilder().BuildEmbed(Thumbnail, BotConfiguration);
         }
 
@@ -74,14 +77,15 @@ namespace Dexter.Abstractions {
         /// <param name="DenyCallbackMethod">Optional method you wish to callback if denied.</param>
         /// <param name="DenyCallbackParameters">Optional parameters for the <paramref name="DenyCallbackMethod"/>, must be set if <paramref name="DenyCallbackMethod"/> is set.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully. The Task holds the <c>string</c> token of the created <c>Proposal</c>.</returns>
-        
+
         public async Task<Proposal> SendForAdminApproval(Action<Dictionary<string, string>> CallbackMethod,
-                Dictionary<string, string> CallbackParameters, ulong Author, string Proposal, Action<Dictionary<string, string>> DenyCallbackMethod = null, Dictionary<string, string> DenyCallbackParameters = null) {
+                Dictionary<string, string> CallbackParameters, ulong Author, string Proposal, Action<Dictionary<string, string>> DenyCallbackMethod = null, Dictionary<string, string> DenyCallbackParameters = null)
+        {
 
             string JSON = JsonConvert.SerializeObject(CallbackParameters);
 
             string DenyJSON = "";
-            if(DenyCallbackParameters != null)
+            if (DenyCallbackParameters != null)
                 DenyJSON = JsonConvert.SerializeObject(DenyCallbackParameters);
 
             return await ProposalService.SendAdminConfirmation(JSON, CallbackMethod.Target.GetType().Name,
@@ -97,13 +101,15 @@ namespace Dexter.Abstractions {
         /// <param name="WebhookName">The Webhook Name is the identifier of the webhook, and is what the webhook will be called.</param>
         /// <returns>The DiscordWebhookClient of the webhook that has been gotten or created.</returns>
 
-        public async Task<DiscordWebhookClient> CreateOrGetWebhook(ulong ChannelID, string WebhookName) {
+        public async Task<DiscordWebhookClient> CreateOrGetWebhook(ulong ChannelID, string WebhookName)
+        {
             if (ChannelID <= 0)
                 return null;
 
             SocketChannel Channel = DiscordSocketClient.GetChannel(ChannelID);
 
-            if (Channel is SocketTextChannel TextChannel) {
+            if (Channel is SocketTextChannel TextChannel)
+            {
                 foreach (RestWebhook RestWebhook in await TextChannel.GetWebhooksAsync())
                     if (RestWebhook.Name.Equals(WebhookName))
                         return new DiscordWebhookClient(RestWebhook.Id, RestWebhook.Token);
@@ -127,7 +133,8 @@ namespace Dexter.Abstractions {
         /// <returns>The token associated with the timed event for future reference.</returns>
 
         public async Task<string> CreateEventTimer(Func<Dictionary<string, string>, Task> CallbackMethod,
-                Dictionary<string, string> CallbackParameters, int SecondsTillExpiration, TimerType TimerType) {
+                Dictionary<string, string> CallbackParameters, int SecondsTillExpiration, TimerType TimerType)
+        {
 
             return await CreateEventTimer(CallbackMethod, CallbackParameters, SecondsTillExpiration, TimerType, TimerService);
         }
@@ -159,7 +166,8 @@ namespace Dexter.Abstractions {
         /// <param name="Channel">The channel that the reaction menu should be sent to.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task CreateReactionMenu(EmbedBuilder[] EmbedBuilders, ISocketMessageChannel Channel) {
+        public async Task CreateReactionMenu(EmbedBuilder[] EmbedBuilders, ISocketMessageChannel Channel)
+        {
             await ReactionMenuService.CreateReactionMenu(EmbedBuilders, Channel);
         }
 

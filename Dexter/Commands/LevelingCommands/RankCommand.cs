@@ -1,4 +1,12 @@
-﻿using System;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Configurations;
+using Dexter.Databases.Levels;
+using Dexter.Enums;
+using Dexter.Extensions;
+using Dexter.Helpers;
+using Discord;
+using Discord.Commands;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -11,18 +19,12 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
-using Dexter.Configurations;
-using Dexter.Databases.Levels;
-using Dexter.Enums;
-using Dexter.Extensions;
-using Dexter.Helpers;
-using Discord;
-using Discord.Commands;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class LevelingCommands {
+    public partial class LevelingCommands
+    {
 
         /// <summary>
         /// Displays the rank of a user given a user ID.
@@ -34,10 +36,12 @@ namespace Dexter.Commands {
         [Alias("level")]
         [BotChannel]
 
-        public async Task RankCommand(ulong userID) {
+        public async Task RankCommand(ulong userID)
+        {
             IUser user = DiscordSocketClient.GetUser(userID);
 
-            if (user is null) {
+            if (user is null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to find user!")
                     .WithDescription("This may be a caching issue, check that the ID is correct; if it is, try again later!")
@@ -53,14 +57,16 @@ namespace Dexter.Commands {
         /// </summary>
         /// <param name="user">The user to query the XP for.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
-        
+
         [Command("rank")]
         [Alias("level")]
         [Summary("Displays your Dexter level or that of other users.")]
         [BotChannel]
 
-        public async Task RankCommand(IUser user = null) {
-            if (user is null) {
+        public async Task RankCommand(IUser user = null)
+        {
+            if (user is null)
+            {
                 user = Context.User;
             }
 
@@ -81,7 +87,7 @@ namespace Dexter.Commands {
         /// The size of the rank card in pixels
         /// </summary>
         public static readonly Size RankCardSize = new Size(widthmain + pfpside, height);
-        
+
         private const int widthmain = 1000;
         private const int height = 450;
         private const int pfpside = 350;
@@ -95,7 +101,7 @@ namespace Dexter.Commands {
         private static readonly LevelRect mainHybridLevel = new LevelRect(height - levelHeight - defMargin, LevelRect.LevelBarType.HybridMain);
         private static readonly LevelRect secondaryHybridLevel = new LevelRect(height - levelHeight - defMargin, LevelRect.LevelBarType.HybridSecondary);
         private static readonly Rectangle rectName = new Rectangle(defMargin, defMargin, widthmain - 2 * defMargin + pfpside, labelHeight);
-        private static readonly Rectangle rectPfp = new Rectangle(widthmain, height - pfpside , pfpside, pfpside);
+        private static readonly Rectangle rectPfp = new Rectangle(widthmain, height - pfpside, pfpside, pfpside);
 
         private const int miniLabelWidth = 80;
         private const int labelIntrusionPixels = 0;
@@ -105,8 +111,9 @@ namespace Dexter.Commands {
         private const int labelMiniMargin = 10;
         private static readonly Rectangle rectLevelLabel = new Rectangle(defMargin, defMargin, miniLabelWidth + labelIntrusionPixels, labelHeight);
         private static readonly Rectangle rectLevelText = new Rectangle(defMargin + miniLabelWidth, defMargin, widthmain / 2 - defMargin - miniLabelWidth, labelHeight);
-        
-        internal class LevelRect {
+
+        internal class LevelRect
+        {
             public Rectangle fullRect;
             public Func<float, Rectangle> Bar;
             public Rectangle currentLevel;
@@ -117,9 +124,11 @@ namespace Dexter.Commands {
             public Rectangle expText;
             public LevelBarType leveltype;
 
-            public LevelRect(int originHeight, LevelBarType leveltype = LevelBarType.Normal) {
+            public LevelRect(int originHeight, LevelBarType leveltype = LevelBarType.Normal)
+            {
                 this.leveltype = leveltype;
-                if (leveltype == LevelBarType.Normal) {
+                if (leveltype == LevelBarType.Normal)
+                {
                     fullRect = new Rectangle(defMargin, originHeight, levelWidth, levelHeight);
                     Bar = (p) => new Rectangle(defMargin + barMarginHorizontal, originHeight + levelHeight - barHeight - barMarginVertical
                         , (int)((levelWidth - 2 * barMarginHorizontal) * p), barHeight);
@@ -130,7 +139,8 @@ namespace Dexter.Commands {
                     rankText = new Rectangle(defMargin + miniLabelWidth + typeLabelWidth, originHeight, levelWidth * 2 / 3 - miniLabelWidth - typeLabelWidth - defMargin, labelHeight);
                     expText = new Rectangle(levelWidth / 3, originHeight, levelWidth * 2 / 3, labelHeight);
                 }
-                else {
+                else
+                {
                     fullRect = new Rectangle(leveltype == LevelBarType.HybridMain ? defMargin : widthmain / 2 + labelMiniMargin, originHeight,
                         widthmain / 2 - labelMiniMargin - defMargin, levelHeight);
                     Bar = (p) => new Rectangle(fullRect.X + barMarginHorizontal, originHeight + levelHeight - barHeight - barMarginVertical
@@ -144,14 +154,16 @@ namespace Dexter.Commands {
                 }
             }
 
-            public enum LevelBarType {
+            public enum LevelBarType
+            {
                 Normal,
                 HybridMain,
                 HybridSecondary
             }
         }
 
-        internal class LevelData {
+        internal class LevelData
+        {
             public bool isHybrid = false;
             public int level;
             public long rxp;
@@ -159,12 +171,13 @@ namespace Dexter.Commands {
             public float Percent => rxp / (float)lxp;
             public string XpExpr => $"{rxp.ToUnit()} / {lxp.ToUnit()}{(isHybrid ? "" : " XP")}";
             public string xpType;
-            
+
             public int rank;
 
             public LevelRect rects;
 
-            public LevelData(long xp, LevelRect rects, LevelingConfiguration config, bool isHybrid = false) {
+            public LevelData(long xp, LevelRect rects, LevelingConfiguration config, bool isHybrid = false)
+            {
                 level = config.GetLevelFromXP(xp, out rxp, out lxp);
                 this.rects = rects;
                 this.isHybrid = isHybrid;
@@ -178,13 +191,15 @@ namespace Dexter.Commands {
 
         //Image paths
         private static readonly string imgPath = Path.Combine(Directory.GetCurrentDirectory(), "Images", "Levels");
-        private static string BackgroundPath(string backgroundName = "default") {
+        private static string BackgroundPath(string backgroundName = "default")
+        {
             if (backgroundName.StartsWith("http"))
-                throw new FileLoadException("File must be downloaded");         
+                throw new FileLoadException("File must be downloaded");
             string[] extensions = new string[] { "jpg", "png" };
             string path = Path.Combine(imgPath, "Backgrounds");
             backgroundName = backgroundName.ToLower();
-            foreach (string ext in extensions) {
+            foreach (string ext in extensions)
+            {
                 string filePath = Path.Combine(path, $"{backgroundName}.{ext}");
                 if (File.Exists(filePath))
                     return filePath;
@@ -195,7 +210,8 @@ namespace Dexter.Commands {
         private static readonly string hybridBarPath = Path.Combine(imgPath, "Assets", "LevelTemplateHybrid.png");
         private static readonly string storagePath = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache", "rankCard.png");
 
-        private async Task<System.Drawing.Image> RenderRankCard(UserLevel ul, LevelPreferences settings) {
+        private async Task<System.Drawing.Image> RenderRankCard(UserLevel ul, LevelPreferences settings)
+        {
             Bitmap result = new(widthmain + pfpside, height);
 
             string fontPath = Path.Join(Directory.GetCurrentDirectory(), "Images", "OtherMedia", "Fonts", "Cuyabra", "cuyabra.otf");
@@ -223,7 +239,8 @@ namespace Dexter.Commands {
             allUsers.Sort((a, b) => b.VoiceXP.CompareTo(a.VoiceXP));
             int vcrank = allUsers.FindIndex(ul => ul.UserID == user.Id) + 1;
 
-            if (LevelingConfiguration.LevelMergeMode is LevelMergeMode.AddXPMerged or LevelMergeMode.AddXPSimple) {
+            if (LevelingConfiguration.LevelMergeMode is LevelMergeMode.AddXPMerged or LevelMergeMode.AddXPSimple)
+            {
                 levelsData.Add(new LevelData(ul.TotalXP(LevelingConfiguration), mainLevel, LevelingConfiguration));
 
                 allUsers.Sort((a, b) => b.TotalXP(LevelingConfiguration).CompareTo(a.TotalXP(LevelingConfiguration)));
@@ -233,17 +250,20 @@ namespace Dexter.Commands {
                 totallevel = levelsData[0].level;
                 totallevelstr = ul.TotalLevelStr(LevelingConfiguration);
 
-                if (settings.ShowHybrid) {
+                if (settings.ShowHybrid)
+                {
                     levelsData.Add(new LevelData(ul.TextXP > ul.VoiceXP ? ul.TextXP : ul.VoiceXP, mainHybridLevel, LevelingConfiguration, true));
                     levelsData.Add(new LevelData(ul.TextXP > ul.VoiceXP ? ul.VoiceXP : ul.TextXP, secondaryHybridLevel, LevelingConfiguration, true));
 
-                    if (ul.TextXP > ul.VoiceXP) {
+                    if (ul.TextXP > ul.VoiceXP)
+                    {
                         levelsData[1].rank = txtrank;
                         levelsData[1].xpType = "Txt";
                         levelsData[2].rank = vcrank;
                         levelsData[2].xpType = "VC";
                     }
-                    else {
+                    else
+                    {
                         levelsData[1].rank = vcrank;
                         levelsData[1].xpType = "VC";
                         levelsData[2].rank = txtrank;
@@ -251,17 +271,20 @@ namespace Dexter.Commands {
                     }
                 }
             }
-            else {
+            else
+            {
                 levelsData.Add(new LevelData(ul.TextXP > ul.VoiceXP ? ul.TextXP : ul.VoiceXP, mainLevel, LevelingConfiguration));
                 levelsData.Add(new LevelData(ul.TextXP > ul.VoiceXP ? ul.VoiceXP : ul.TextXP, secondaryLevel, LevelingConfiguration));
 
-                if (ul.TextXP > ul.VoiceXP) {
+                if (ul.TextXP > ul.VoiceXP)
+                {
                     levelsData[0].rank = txtrank;
                     levelsData[0].xpType = "Text";
                     levelsData[1].rank = vcrank;
                     levelsData[1].xpType = "Voice";
                 }
-                else {
+                else
+                {
                     levelsData[0].rank = vcrank;
                     levelsData[0].xpType = "Voice";
                     levelsData[1].rank = txtrank;
@@ -273,13 +296,17 @@ namespace Dexter.Commands {
             }
 
 
-            using (Graphics g = Graphics.FromImage(result)) {
-                try {
+            using (Graphics g = Graphics.FromImage(result))
+            {
+                try
+                {
                     using System.Drawing.Image bg = System.Drawing.Image.FromFile(BackgroundPath(settings.Background ?? "default"));
                     g.DrawImage(bg, mainRect);
                 }
-                catch (FileNotFoundException) {
-                    if (Regex.IsMatch(settings.Background, @"^(#|0x)?[0-9A-F]{6}$", RegexOptions.IgnoreCase)) {
+                catch (FileNotFoundException)
+                {
+                    if (Regex.IsMatch(settings.Background, @"^(#|0x)?[0-9A-F]{6}$", RegexOptions.IgnoreCase))
+                    {
                         System.Drawing.Color bgc = System.Drawing.Color.FromArgb(
                             unchecked((int)(0xff000000 + int.Parse(settings.Background[^6..], System.Globalization.NumberStyles.HexNumber))));
                         g.Clear(bgc);
@@ -287,15 +314,18 @@ namespace Dexter.Commands {
                     else
                         g.Clear(System.Drawing.Color.FromArgb(unchecked((int)settings.XpColor)));
                 }
-                catch (FileLoadException) {
+                catch (FileLoadException)
+                {
                     using WebClient client = new();
-                    try {
+                    try
+                    {
                         byte[] dataArr = await client.DownloadDataTaskAsync(settings.Background);
                         using MemoryStream mem = new(dataArr);
                         using System.Drawing.Image bg = System.Drawing.Image.FromStream(mem);
                         g.DrawImage(bg, mainRect);
                     }
-                    catch {
+                    catch
+                    {
                         g.Clear(System.Drawing.Color.FromArgb(unchecked((int)settings.XpColor)));
                     }
                 }
@@ -312,7 +342,7 @@ namespace Dexter.Commands {
                 g.DrawString($"({totallevelstr})", fontDefault, xpColor
                     , new Rectangle(rectLevelText.X + (int)offset.Width + margin, rectLevelText.Y, widthmain / 2 - miniLabelWidth - margin - (int)offset.Width, labelHeight)
                     , new StringFormat { LineAlignment = StringAlignment.Far });
-                                
+
                 DrawLevels(fontTitle, fontDefault, fontMini, levelsData, g, xpColor, whiteColor, settings);
 
                 const int pfpmargin = 3;
@@ -320,12 +350,14 @@ namespace Dexter.Commands {
                     g.FillEllipse(new SolidBrush(System.Drawing.Color.FromArgb(unchecked((int)0xff3f3f3f)))
                         , new Rectangle(rectPfp.X - pfpmargin, rectPfp.Y - pfpmargin, rectPfp.Width + 2 * pfpmargin, rectPfp.Height + 2 * pfpmargin));
 
-                using (WebClient client = new()) {
+                using (WebClient client = new())
+                {
                     byte[] dataArr = await client.DownloadDataTaskAsync(user.GetTrueAvatarUrl(512));
                     using MemoryStream mem = new(dataArr);
                     using System.Drawing.Image pfp = System.Drawing.Image.FromStream(mem);
 
-                    if (settings.CropPfp) {
+                    if (settings.CropPfp)
+                    {
                         Rectangle tempPos = new Rectangle(Point.Empty, rectPfp.Size);
                         using Bitmap pfplayer = new Bitmap(rectPfp.Width, rectPfp.Height);
                         using Graphics pfpg = Graphics.FromImage(pfplayer);
@@ -336,7 +368,8 @@ namespace Dexter.Commands {
 
                         g.DrawImage(pfplayer, rectPfp);
                     }
-                    else {
+                    else
+                    {
                         g.DrawImage(pfp, rectPfp);
                     }
                 }
@@ -345,7 +378,8 @@ namespace Dexter.Commands {
                 Font basicFont = new Font("Arial", labelHeight * 2 / 3);
                 StringBuilder simplifiedUsername = new();
                 StringBuilder asciiUsername = new();
-                foreach (char c in user.Username) {
+                foreach (char c in user.Username)
+                {
 
                     if (char.IsLetterOrDigit(c) || char.IsPunctuation(c)) simplifiedUsername.Append(c);
                     else simplifiedUsername.Append('?');
@@ -358,8 +392,10 @@ namespace Dexter.Commands {
                 possibleNames.Add(asciiUsername.ToString());
                 possibleNames.Add("Unknown");
 
-                foreach (string name in possibleNames) {
-                    try {
+                foreach (string name in possibleNames)
+                {
+                    try
+                    {
                         Bitmap nameDrawn = new(rectName.Size.Width, rectName.Size.Height);
                         using Graphics gname = Graphics.FromImage(nameDrawn);
                         gname.DrawString($"{name}#{user.Discriminator}", fontDefault, whiteColor, new Rectangle(Point.Empty, rectName.Size),
@@ -368,7 +404,9 @@ namespace Dexter.Commands {
                             throw new Exception($"Unable to draw {name}");
                         g.DrawImage(nameDrawn, rectName);
                         break;
-                    } catch {
+                    }
+                    catch
+                    {
                         continue;
                     }
                 }
@@ -399,10 +437,14 @@ namespace Dexter.Commands {
         }
         */
 
-        private static bool IsClearSafe(Bitmap bitmap, out Point location) {
-            for (int i = 0; i < bitmap.Width; i++) {
-                for (int j = 0; j < bitmap.Height; j++) {
-                    if (bitmap.GetPixel(i, j).A != 0) {
+        private static bool IsClearSafe(Bitmap bitmap, out Point location)
+        {
+            for (int i = 0; i < bitmap.Width; i++)
+            {
+                for (int j = 0; j < bitmap.Height; j++)
+                {
+                    if (bitmap.GetPixel(i, j).A != 0)
+                    {
                         Console.WriteLine($"Found pixel ({i},{j}) with color {bitmap.GetPixel(i, j).ToArgb():X} (dimensions: {bitmap.Width}x{bitmap.Height})");
                         location = new Point(i, j);
                         return false;
@@ -415,17 +457,19 @@ namespace Dexter.Commands {
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct PixelData      
-        {                             
-            public byte B;            
-            public byte G;            
-            public byte R;            
-            public byte A;            
-        }  
+        private struct PixelData
+        {
+            public byte B;
+            public byte G;
+            public byte R;
+            public byte A;
+        }
 
-        private static void DrawLevels(Font fontTitle, Font fontDefault, Font fontMini, IEnumerable<LevelData> levels, Graphics g, SolidBrush xpColor, SolidBrush whiteColor, LevelPreferences prefs) {
+        private static void DrawLevels(Font fontTitle, Font fontDefault, Font fontMini, IEnumerable<LevelData> levels, Graphics g, SolidBrush xpColor, SolidBrush whiteColor, LevelPreferences prefs)
+        {
             g.SmoothingMode = SmoothingMode.AntiAlias;
-            foreach (LevelData ld in levels) {
+            foreach (LevelData ld in levels)
+            {
                 if (ld is null) continue;
                 Rectangle barRect = ld.rects.Bar(1);
                 GraphicsPath barGPath = GraphicsExtensions.RoundedRect(barRect, barRect.Height / 2);
@@ -439,7 +483,8 @@ namespace Dexter.Commands {
                 ColorMatrix colorized = System.Drawing.Color.FromArgb((int)(255 * prefs.LevelOpacity), System.Drawing.Color.White).ToColorMatrix();
                 ImageAttributes attr = new();
                 attr.SetColorMatrix(colorized);
-                using (System.Drawing.Image levelBox = System.Drawing.Image.FromFile(ld.rects.leveltype == LevelRect.LevelBarType.Normal ? barPath : hybridBarPath)) {
+                using (System.Drawing.Image levelBox = System.Drawing.Image.FromFile(ld.rects.leveltype == LevelRect.LevelBarType.Normal ? barPath : hybridBarPath))
+                {
                     levelRenderArea.Complement(new Region(ld.rects.fullRect));
                     g.Clip = levelRenderArea;
                     g.DrawImage(levelBox, ld.rects.fullRect, 0, 0, levelBox.Width, levelBox.Height, GraphicsUnit.Pixel, attr);
@@ -454,14 +499,16 @@ namespace Dexter.Commands {
                 if (ld.rects.nextLevel != default)
                     g.DrawString((ld.level + 1).ToString(), fontTitle, xpColor, ld.rects.nextLevel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
 
-                if (ld.isHybrid) {
+                if (ld.isHybrid)
+                {
                     SolidBrush overXPColor = new SolidBrush(xpColor.Color.GetBrightness() < 0.5 ? System.Drawing.Color.White : System.Drawing.Color.Black);
                     g.DrawString(ld.XpExpr, fontDefault, xpColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Far });
                     g.Clip = new Region(barXPGPath);
                     g.DrawString(ld.XpExpr, fontDefault, overXPColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Far });
                     g.Clip = new Region();
                 }
-                else {
+                else
+                {
                     g.DrawString(ld.XpExpr, fontDefault, xpColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
                 }
             }
@@ -474,14 +521,17 @@ namespace Dexter.Commands {
 
         [Command("testlevelcalculationspeed")]
 
-        public async Task RunSpeedTest() {
+        public async Task RunSpeedTest()
+        {
             const int rep = 500000;
-            for (int size = 1000; size < 100000000; size *= 10) {
+            for (int size = 1000; size < 100000000; size *= 10)
+            {
                 System.Diagnostics.Stopwatch t = new();
                 t.Start();
 
                 Random r = new();
-                for (int i = 0; i < rep; i++) {
+                for (int i = 0; i < rep; i++)
+                {
                     LevelingConfiguration.GetLevelFromXP(r.Next(0, size), out _, out _);
                 }
 
@@ -497,12 +547,15 @@ namespace Dexter.Commands {
 
         [Command("testlevelcalculationintegrity")]
 
-        public async Task RunIntegrityTest() {
+        public async Task RunIntegrityTest()
+        {
             const int cap = 100000000;
             IUserMessage report = await Context.Channel.SendMessageAsync($"Running Integrity Test: 0/{cap} XP values.");
             int nextAnnounce = 100;
-            for (int v = 1; v < cap; v++) {
-                if (v > nextAnnounce) {
+            for (int v = 1; v < cap; v++)
+            {
+                if (v > nextAnnounce)
+                {
                     nextAnnounce *= 5;
                     await report.ModifyAsync(m => m.Content = $"Running Integrity Test: {v}/{cap} XP values.");
                 }

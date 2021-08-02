@@ -1,22 +1,24 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Cooldowns;
-using Dexter.Databases.Relays;
-using Dexter.Databases.Infractions;
-using Discord.WebSocket;
-using Dexter.Databases.Mail;
 using Dexter.Databases.FinalWarns;
-using System;
+using Dexter.Databases.Infractions;
+using Dexter.Databases.Mail;
+using Dexter.Databases.Relays;
 using Dexter.Databases.UserProfiles;
 using Dexter.Databases.UserRestrictions;
+using Discord.WebSocket;
+using System;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
     /// <summary>
     /// The ModeratorCommands module relates to recording of users in breach of rules and other, miscellaneous commands relating to the moderation of the server.
     /// </summary>
 
-    public partial class ModeratorCommands : DiscordModule {
+    public partial class ModeratorCommands : DiscordModule
+    {
 
         /// <summary>
         /// The CooldownDB stores the cooldowns that the cooldown command interfaces with.
@@ -57,7 +59,7 @@ namespace Dexter.Commands {
         /// <summary>
         /// The ModMailDB stores the mail to be sent to the moderators.
         /// </summary>
-         
+
         public ModMailDB ModMailDB { get; set; }
 
         /// <summary>

@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Levels;
 using Dexter.Services;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
     /// <summary>
     /// Contains all commands and utilities related to the levels system.
     /// </summary>
-    public partial class LevelingCommands : DiscordModule {
+    public partial class LevelingCommands : DiscordModule
+    {
 
         /// <summary>
         /// Holds specific methods for managing user levels.

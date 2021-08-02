@@ -1,13 +1,15 @@
 ﻿using System;
 
-namespace Dexter.Databases.UserRestrictions {
+namespace Dexter.Databases.UserRestrictions
+{
 
     /// <summary>
     /// Represents a set of restrictions from different server features as a combination of flags.
     /// </summary>
 
     [Flags]
-    public enum Restriction : ulong {
+    public enum Restriction : ulong
+    {
         /// <summary>
         /// Represents the null restriction (default)
         /// </summary>

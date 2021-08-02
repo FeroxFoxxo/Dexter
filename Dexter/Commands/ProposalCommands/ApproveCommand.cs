@@ -1,14 +1,16 @@
 ﻿using Dexter.Attributes.Methods;
+using Dexter.Databases.Proposals;
 using Dexter.Services;
 using Discord;
 using Discord.Commands;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Dexter.Databases.Proposals;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ProposalCommands {
+    public partial class ProposalCommands
+    {
 
         /// <summary>
         /// The Approve Proposal method runs on the APPROVE command. It will change the proposal to an APPROVED status
@@ -24,7 +26,8 @@ namespace Dexter.Commands {
         [Alias("accept")]
         [RequireAdministrator]
 
-        public async Task ApproveProposal(string Tracker, [Optional] [Remainder] string Reason) {
+        public async Task ApproveProposal(string Tracker, [Optional][Remainder] string Reason)
+        {
             await ProposalService.EditProposal(Tracker, Reason, Context.User, Context.Channel, ProposalStatus.Approved);
         }
 

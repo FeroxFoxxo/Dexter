@@ -1,30 +1,32 @@
-﻿using Dexter.Configurations;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
+using Dexter.Commands;
+using Dexter.Configurations;
+using Dexter.Databases.EventTimers;
+using Dexter.Databases.Infractions;
 using Dexter.Extensions;
 using Discord;
 using Discord.Webhook;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using System;
-using Dexter.Databases.Infractions;
-using Microsoft.EntityFrameworkCore;
-using Dexter.Databases.EventTimers;
-using Dexter.Commands;
 
-namespace Dexter.Services {
+namespace Dexter.Services
+{
 
     /// <summary>
     /// The Moderation Service deals with logging certain events to a channel.
     /// Currently, this only includes the logging of reactions to the channel.
     /// </summary>
-    
-    public class ModerationService : Service {
+
+    public class ModerationService : Service
+    {
 
         /// <summary>
         /// The ModerationService is used to find and create the moderation logs webhook.
         /// </summary>
-        
+
         public ModerationConfiguration ModerationConfiguration { get; set; }
 
         /// <summary>
@@ -49,8 +51,9 @@ namespace Dexter.Services {
         /// The Initialize method adds the ReactionRemoved hook to the ReactionRemovedLog method.
         /// It also hooks the ready event to the CreateWebhook delegate.
         /// </summary>
-        
-        public override void Initialize() {
+
+        public override void Initialize()
+        {
             DiscordSocketClient.ReactionRemoved += ReactionRemovedLog;
             DiscordSocketClient.Ready += CreateWebhook;
             DiscordSocketClient.Ready += DexterProfileChecks;
@@ -62,9 +65,11 @@ namespace Dexter.Services {
         /// </summary>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task DexterProfileChecks() {
+        public async Task DexterProfileChecks()
+        {
             await InfractionsDB.DexterProfiles.AsQueryable().ForEachAsync(
-                async DexterProfile => {
+                async DexterProfile =>
+                {
                     if (DexterProfile.InfractionAmount < ModerationConfiguration.MaxPoints)
                         if (!TimerService.TimerExists(DexterProfile.CurrentPointTimer))
                             DexterProfile.CurrentPointTimer = await CreateEventTimer(
@@ -82,7 +87,8 @@ namespace Dexter.Services {
         /// </summary>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task CreateWebhook() {
+        public async Task CreateWebhook()
+        {
             DiscordWebhookClient = await CreateOrGetWebhook(ModerationConfiguration.WebhookChannel, ModerationConfiguration.WebhookName);
         }
 
@@ -93,8 +99,9 @@ namespace Dexter.Services {
         /// <param name="MessageChannel">The channel of which the reaction has been removed in - used to check if it's from a channel that is often removed from.</param>
         /// <param name="Reaction">An object containing the reaction that had been removed.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-        
-        public async Task ReactionRemovedLog(Cacheable<IUserMessage, ulong> UserMessage, ISocketMessageChannel MessageChannel, SocketReaction Reaction) {
+
+        public async Task ReactionRemovedLog(Cacheable<IUserMessage, ulong> UserMessage, ISocketMessageChannel MessageChannel, SocketReaction Reaction)
+        {
             if (ModerationConfiguration.DisabledReactionChannels.Contains(MessageChannel.Id))
                 return;
 

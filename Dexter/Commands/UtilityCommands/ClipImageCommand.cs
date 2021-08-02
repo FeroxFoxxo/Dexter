@@ -1,21 +1,22 @@
-﻿using System;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Enums;
+using Dexter.Extensions;
+using Discord;
+using Discord.Commands;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
-using Dexter.Enums;
-using Dexter.Extensions;
-using Discord;
-using Discord.Commands;
 
-namespace Dexter.Commands {
-    public partial class UtilityCommands {
+namespace Dexter.Commands
+{
+    public partial class UtilityCommands
+    {
 
         /// <summary>
         /// Crops a given image into a given target size with a set of options.
@@ -34,12 +35,14 @@ namespace Dexter.Commands {
             "`unscaled` - Makes it so, if the source cropped image would be bigger than the resolution you specified, the crop is instead reduced to a smaller fraction of the image to avoid scaling.")]
         [BotChannel]
 
-        public async Task ClipImageCommand(string targetSize, [Remainder] string options = "") {
+        public async Task ClipImageCommand(string targetSize, [Remainder] string options = "")
+        {
 
             Attachment att = Context.Message.Attachments.FirstOrDefault();
             string format = ".png";
 
-            if (att is null || !(att.Filename.EndsWith(".jpg") || att.Filename.EndsWith(".png"))) {
+            if (att is null || !(att.Filename.EndsWith(".jpg") || att.Filename.EndsWith(".png")))
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("No valid attachment found")
                     .WithDescription("You must send a png or jpg image with the command in order to treat it.")
@@ -51,7 +54,8 @@ namespace Dexter.Commands {
 
             int targetWidth = -1;
             float targetRatio = 1;
-            switch(targetSize.ToLower()) {
+            switch (targetSize.ToLower())
+            {
                 case "rankcard":
                     targetWidth = LevelingCommands.RankCardSize.Width;
                     targetRatio = LevelingCommands.RankCardSize.Width / (float)LevelingCommands.RankCardSize.Height;
@@ -63,7 +67,8 @@ namespace Dexter.Commands {
                     string[] numbersStr;
                     int num1;
                     int num2;
-                    if (!string.IsNullOrEmpty(dimsStr)) {
+                    if (!string.IsNullOrEmpty(dimsStr))
+                    {
                         numbersStr = dimsStr.Split('x');
                         num1 = int.Parse(numbersStr[0]);
                         num2 = int.Parse(numbersStr[1]);
@@ -71,14 +76,16 @@ namespace Dexter.Commands {
                         targetWidth = num1;
                         targetRatio = num1 / (float)num2;
                     }
-                    else if (!string.IsNullOrEmpty(ratioStr)) {
+                    else if (!string.IsNullOrEmpty(ratioStr))
+                    {
                         numbersStr = ratioStr.Split(':');
                         num1 = int.Parse(numbersStr[0]);
                         num2 = int.Parse(numbersStr[1]);
 
                         targetRatio = num1 / (float)num2;
                     }
-                    else {
+                    else
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid rank card size expression")
                             .WithDescription("Please use an expression of the form: `NxN` or `N:N` where `N` is a whole number below 100000000000 and without thousands divisions (,).")
@@ -94,8 +101,10 @@ namespace Dexter.Commands {
             bool scaled = true;
             float shift = 0;
             List<string> unrecognizedSymbols = new();
-            foreach (string opt in options.Split(' ', StringSplitOptions.RemoveEmptyEntries)) {
-                switch(opt.ToLower()) {
+            foreach (string opt in options.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                switch (opt.ToLower())
+                {
                     case "circle":
                         toCircle = true;
                         break;
@@ -104,14 +113,16 @@ namespace Dexter.Commands {
                         break;
                     default:
                         string shiftStr = Regex.Match(opt, @"shift[0-9]+(.[0-9]+)?%?", RegexOptions.IgnoreCase).Value;
-                        if(!string.IsNullOrEmpty(shiftStr)) {
+                        if (!string.IsNullOrEmpty(shiftStr))
+                        {
                             bool isPercent = shiftStr.EndsWith('%');
                             if (isPercent)
                                 shiftStr = shiftStr[0..^1];
                             shift = float.Parse(shiftStr["shift".Length..]) / (isPercent ? 100 : 1);
                             if (shift > 1) shift = 1;
                         }
-                        else {
+                        else
+                        {
                             unrecognizedSymbols.Add(opt);
                         }
                         break;
@@ -131,13 +142,16 @@ namespace Dexter.Commands {
             int fromWidth = img.Width;
             int fromHeight = (int)(fromWidth / targetRatio);
 
-            if (fromHeight > img.Height) {
+            if (fromHeight > img.Height)
+            {
                 fromHeight = img.Height;
                 fromWidth = (int)(fromHeight * targetRatio);
             }
 
-            if (!scaled) {
-                if (fromHeight > targetWidth * targetRatio && fromWidth > targetWidth) {
+            if (!scaled)
+            {
+                if (fromHeight > targetWidth * targetRatio && fromWidth > targetWidth)
+                {
                     fromHeight = (int)(targetWidth * targetRatio);
                     fromWidth = targetWidth;
                 }
@@ -147,10 +161,12 @@ namespace Dexter.Commands {
             int fromY = (int)((img.Height - fromHeight) * shift);
 
             using Bitmap result = new Bitmap(actualWidth, (int)(actualWidth / targetRatio));
-            using (Graphics g = Graphics.FromImage(result)) {
+            using (Graphics g = Graphics.FromImage(result))
+            {
                 Rectangle fullrect = new Rectangle(Point.Empty, result.Size);
 
-                if (toCircle) {
+                if (toCircle)
+                {
                     using GraphicsPath clipPath = new GraphicsPath();
                     clipPath.AddEllipse(fullrect);
                     g.Clip = new Region(clipPath);

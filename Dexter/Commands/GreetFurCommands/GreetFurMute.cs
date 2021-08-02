@@ -3,9 +3,7 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using Google.Apis.Sheets.v4.Data;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,7 +17,7 @@ namespace Dexter.Commands
         [Summary("Mutes someone indefinitely and notifies the staff.")]
         [RequireGreetFur]
 
-        public async Task GreetFurMute (IGuildUser User, [Remainder] string Reason)
+        public async Task GreetFurMute(IGuildUser User, [Remainder] string Reason)
         {
             if (User.RoleIds.Contains(GreetFurConfiguration.AwooRole))
             {
@@ -37,7 +35,8 @@ namespace Dexter.Commands
                     .WithFooter("GreetFur Muting Module")
                     .WithCurrentTimestamp()
                     .SendEmbed(Context.Guild.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel);
-            } else
+            }
+            else
             {
                 await ModeratorCommands.MuteUser(User, TimeSpan.FromSeconds(0));
 

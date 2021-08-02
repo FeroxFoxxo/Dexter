@@ -10,8 +10,10 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
-    public partial class UtilityCommands {
+namespace Dexter.Commands
+{
+    public partial class UtilityCommands
+    {
 
         /// <summary>
         /// Gives general information about time zones, or compares them, or searches for one, depending on <paramref name="Action"/>.
@@ -32,9 +34,11 @@ namespace Dexter.Commands {
             "`timezone USER [USER]` - Gets the current time and time zone of a user from the social system.")]
         [BotChannel]
 
-        public async Task TimezoneCommand(string Action = "", [Remainder] string argument = "") {
-            
-            if(string.IsNullOrEmpty(Action) || Action.ToLower() == "info") {
+        public async Task TimezoneCommand(string Action = "", [Remainder] string argument = "")
+        {
+
+            if (string.IsNullOrEmpty(Action) || Action.ToLower() == "info")
+            {
                 await BuildEmbed(EmojiEnum.Sign)
                     .WithTitle("Time Zone Info")
                     .WithDescription("Time Zones are used to coordinate the times you input with those of other members in different parts of the world.\n" +
@@ -43,19 +47,21 @@ namespace Dexter.Commands {
                         $"Dexter is running in {TimeZoneData.ToTimeZoneExpression(DateTimeOffset.Now.Offset)}.")
                     .WithCurrentTimestamp()
                     .SendEmbed(Context.Channel);
-                    return;
+                return;
             }
 
             TimeZoneData timeZone;
-            switch (Action.ToLower()) {
+            switch (Action.ToLower())
+            {
                 case "search":
-                    if(string.IsNullOrEmpty(argument)) {
+                    if (string.IsNullOrEmpty(argument))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid number of arguments!")
                             .WithDescription("You must provide a Time Zone Abbreviation to search for!")
                             .SendEmbed(Context.Channel);
                         return;
-                    } 
+                    }
 
                     {
                         string[] results = LanguageHelper.SearchTimeZone(argument, LanguageConfiguration);
@@ -71,7 +77,8 @@ namespace Dexter.Commands {
                     }
                     return;
                 case "span":
-                    if(string.IsNullOrEmpty(argument)) {
+                    if (string.IsNullOrEmpty(argument))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid number of arguments!")
                             .WithDescription("You must provide a Time Zone Expression to search for!")
@@ -80,7 +87,8 @@ namespace Dexter.Commands {
                     }
 
                     {
-                        if(!TimeZoneData.TryParse(argument, LanguageConfiguration, out TimeZoneData TimeZone)) {
+                        if (!TimeZoneData.TryParse(argument, LanguageConfiguration, out TimeZoneData TimeZone))
+                        {
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Couldn't find time zone!")
                                 .WithDescription($"Time Zone {argument} doesn't exist. Use `{BotConfiguration.Prefix}timezone search {argument}` to look for similar ones.")
@@ -101,16 +109,18 @@ namespace Dexter.Commands {
                     }
                     return;
                 case "now":
-                    if (string.IsNullOrEmpty(argument)) {
+                    if (string.IsNullOrEmpty(argument))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid number of arguments!")
                             .WithDescription("You must provide a Time Zone Expression to search for!")
                             .SendEmbed(Context.Channel);
                         return;
-                    } 
-                    
+                    }
+
                     {
-                        if (!TimeZoneData.TryParse(argument, LanguageConfiguration, out timeZone)) {
+                        if (!TimeZoneData.TryParse(argument, LanguageConfiguration, out timeZone))
+                        {
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Couldn't find time zone!")
                                 .WithDescription($"Time Zone {argument} doesn't exist. Use `{BotConfiguration.Prefix}timezone search {argument}` to look for similar ones.")
@@ -122,15 +132,17 @@ namespace Dexter.Commands {
                     }
                     return;
                 case "get":
-                    if (string.IsNullOrEmpty(argument)) {
+                    if (string.IsNullOrEmpty(argument))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Invalid number of arguments!")
                                 .WithDescription("You must provide a Time Zone Abbreviation to search for!")
                                 .SendEmbed(Context.Channel);
                         return;
                     }
-                    
-                    if(!LanguageConfiguration.TimeZones.ContainsKey(argument)) {
+
+                    if (!LanguageConfiguration.TimeZones.ContainsKey(argument))
+                    {
                         string[] results = LanguageHelper.SearchTimeZone(argument, LanguageConfiguration);
                         string[] resultsHumanized = new string[Math.Min(3, results.Length)];
 
@@ -152,7 +164,8 @@ namespace Dexter.Commands {
                 case "when":
                 case "until":
                 case "till":
-                    if (string.IsNullOrEmpty(argument)) {
+                    if (string.IsNullOrEmpty(argument))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Invalid number of arguments!")
                                 .WithDescription("You must provide a Date and Time to compare to!")
@@ -160,7 +173,8 @@ namespace Dexter.Commands {
                         return;
                     }
 
-                    if (!LanguageHelper.TryParseTime(argument, CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset time, out _)) {
+                    if (!LanguageHelper.TryParseTime(argument, CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset time, out _))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Failed to parse date!")
                             .WithDescription($"I was unable to parse the time: `{argument}`\n Make sure it follows the correct format! For more info, check out `{BotConfiguration.Prefix}checktime [Your Date]`")
@@ -178,17 +192,19 @@ namespace Dexter.Commands {
                 case "difference":
                 case "comp":
                 case "compare":
-                    if (string.IsNullOrEmpty(argument)) {
+                    if (string.IsNullOrEmpty(argument))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Invalid number of arguments!")
                                 .WithDescription("You must provide two time zones to compare!")
                                 .SendEmbed(Context.Channel);
                         return;
-                    } 
-                    
+                    }
+
                     {
                         string[] args = argument.Split(" ");
-                        if(args.Length < 2) {
+                        if (args.Length < 2)
+                        {
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Invalid number of arguments!")
                                 .WithDescription("You haven't provided enough time zones to compare! You must provide two.")
@@ -197,9 +213,11 @@ namespace Dexter.Commands {
                         }
 
                         TimeZoneData[] timeZones = new TimeZoneData[2];
-                        
-                        for(int i = 0; i < timeZones.Length; i++) {
-                            if (!TimeZoneData.TryParse(args[i], LanguageConfiguration, out timeZones[i])) {
+
+                        for (int i = 0; i < timeZones.Length; i++)
+                        {
+                            if (!TimeZoneData.TryParse(args[i], LanguageConfiguration, out timeZones[i]))
+                            {
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Couldn't find time zone!")
                                     .WithDescription($"Time Zone {args[i]} doesn't exist. Use `{BotConfiguration.Prefix}timezone search {args[i]}` to look for similar ones.")
@@ -222,7 +240,8 @@ namespace Dexter.Commands {
                 case "user":
                     string idStr = Regex.Match(argument, @"[0-9]{18}").Value;
 
-                    if (string.IsNullOrEmpty(idStr)) {
+                    if (string.IsNullOrEmpty(idStr))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Argument can't be parsed to a user!")
                             .WithDescription("Please include a user you'd like to know the time for.")
@@ -235,7 +254,8 @@ namespace Dexter.Commands {
 
                     Console.Out.WriteLine($"Before: {profile} | {profile.UserID}");
 
-                    if (profile is null) {
+                    if (profile is null)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("User doesn't have a profile!")
                             .WithDescription("No data for this user to obtain a time zone from.")
@@ -245,7 +265,8 @@ namespace Dexter.Commands {
 
                     timeZone = profile.GetRelevantTimeZone(LanguageConfiguration);
                     TimeZoneData.TryParse("UTC+0:00", LanguageConfiguration, out TimeZoneData defRef);
-                    if (timeZone.Name == defRef.Name) {
+                    if (timeZone.Name == defRef.Name)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("No custom time zone!")
                             .WithDescription("This user hasn't configured their personal time zone in their profile :(")

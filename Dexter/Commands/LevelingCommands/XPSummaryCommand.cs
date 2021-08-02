@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Databases.Levels;
 using Dexter.Enums;
 using Dexter.Extensions;
@@ -12,9 +6,16 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Humanizer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
-    public partial class LevelingCommands {
+namespace Dexter.Commands
+{
+    public partial class LevelingCommands
+    {
 
         /// <summary>
         /// Presents a report of information about a user's experience.
@@ -31,7 +32,8 @@ namespace Dexter.Commands {
             "`rank:[rank role name]` will select the target ranked for average time calculation.")]
         [BotChannel]
 
-        public async Task XPSummaryCommand([Remainder] string arguments = "") {
+        public async Task XPSummaryCommand([Remainder] string arguments = "")
+        {
             string[] args = arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             ulong targetID = Context.User.Id;
@@ -47,9 +49,11 @@ namespace Dexter.Commands {
 
             List<string> errors = new();
 
-            foreach (string arg in args) {
+            foreach (string arg in args)
+            {
                 int colonIndex = arg.IndexOf(':');
-                if (colonIndex < 0) {
+                if (colonIndex < 0)
+                {
                     errors.Add($"Unable to recognize argument {arg}; missing a colon (:)");
                     continue;
                 }
@@ -57,17 +61,20 @@ namespace Dexter.Commands {
                 string attr = arg[..colonIndex];
                 string value = arg[(colonIndex + 1)..];
 
-                switch (attr.ToLower()) {
+                switch (attr.ToLower())
+                {
                     case "user":
                         string idstr = Regex.Match(value, @"[0-9]{18}").Value;
-                        if (string.IsNullOrEmpty(idstr)) {
+                        if (string.IsNullOrEmpty(idstr))
+                        {
                             errors.Add($"Unable to recognize user {value}; the argument contains no correctly formatted ID.");
                             continue;
                         }
                         targetID = ulong.Parse(idstr);
                         break;
                     case "level":
-                        if (!int.TryParse(value, out targetlvl)) {
+                        if (!int.TryParse(value, out targetlvl))
+                        {
                             errors.Add($"Unable to parse level {value} to a whole number.");
                             continue;
                         }
@@ -77,19 +84,24 @@ namespace Dexter.Commands {
                     case "role":
                         IRole result = null;
                         List<string> roleNames = new();
-                        foreach (KeyValuePair<int, ulong> levelRole in LevelingConfiguration.Levels) {
+                        foreach (KeyValuePair<int, ulong> levelRole in LevelingConfiguration.Levels)
+                        {
                             SocketRole r = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(levelRole.Value);
-                            if (r.Name.ToLower() == value.ToLower()) {
+                            if (r.Name.ToLower() == value.ToLower())
+                            {
                                 result = r;
                                 targetRankLevel = levelRole.Key;
                                 targetRankName = r.Name;
                                 postcalcTargetRank = false;
                                 break;
-                            } else {
+                            }
+                            else
+                            {
                                 roleNames.Add(r.Name);
                             }
                         }
-                        if (result == null) {
+                        if (result == null)
+                        {
                             errors.Add($"Unable to parse ranked role {value}; please use one of the following: \"{string.Join("\", \"", roleNames)}\"");
                             continue;
                         }
@@ -101,7 +113,8 @@ namespace Dexter.Commands {
             }
 
             ul = LevelingDB.Levels.Find(targetID);
-            if (ul is null) {
+            if (ul is null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("User not found in database.")
                     .WithDescription($"We weren't able to find any logged user with the ID {targetID}")
@@ -114,25 +127,31 @@ namespace Dexter.Commands {
             long totalXP = ul.TotalXP(LevelingConfiguration);
             int totalLevel = LevelingConfiguration.GetLevelFromXP(totalXP, out long resTotalXP, out long levelTotalXP);
 
-            if (postcalcTargetLevel) {
+            if (postcalcTargetLevel)
+            {
                 targetlvl = ul.TotalLevel(LevelingConfiguration, textLevel, voiceLevel) + 1;
             }
             long targetxp = LevelingConfiguration.GetXPForLevel(targetlvl);
 
-            if (postcalcTargetRank) {
+            if (postcalcTargetRank)
+            {
                 bool found = false;
                 int maxLevel = 0;
-                foreach (KeyValuePair<int, ulong> levelRole in LevelingConfiguration.Levels) {
+                foreach (KeyValuePair<int, ulong> levelRole in LevelingConfiguration.Levels)
+                {
                     SocketRole r = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(levelRole.Value);
-                    if (levelRole.Key > totalLevel) {
+                    if (levelRole.Key > totalLevel)
+                    {
                         targetRankLevel = levelRole.Key;
                         targetRankName = r.Name;
                         found = true;
                         break;
-                    } else if (levelRole.Key > maxLevel) maxLevel = levelRole.Key;
+                    }
+                    else if (levelRole.Key > maxLevel) maxLevel = levelRole.Key;
                 }
 
-                if (!found) {
+                if (!found)
+                {
                     targetRankLevel = maxLevel;
                     targetRankName = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(LevelingConfiguration.Levels[maxLevel]).Name;
                 }
@@ -151,20 +170,26 @@ namespace Dexter.Commands {
                 .SendEmbed(Context.Channel);
         }
 
-        private string LevelTargetExpression(long currentXP, long targetXP) {
+        private string LevelTargetExpression(long currentXP, long targetXP)
+        {
             string textExpr;
-            try {
+            try
+            {
                 TimeSpan textTime = TimeSpan.FromMinutes((targetXP - currentXP) / ((LevelingConfiguration.TextMinXPGiven + LevelingConfiguration.TextMaxXPGiven) >> 1));
                 textExpr = textTime.Humanize(2, minUnit: Humanizer.Localisation.TimeUnit.Minute);
-            } catch {
+            }
+            catch
+            {
                 textExpr = "a **very** long time";
             }
             string voiceExpr;
-            try {
+            try
+            {
                 TimeSpan voiceTime = TimeSpan.FromMinutes((targetXP - currentXP) / ((LevelingConfiguration.VCMinXPGiven + LevelingConfiguration.VCMaxXPGiven) >> 1));
                 voiceExpr = voiceTime.Humanize(2, minUnit: Humanizer.Localisation.TimeUnit.Minute);
             }
-            catch {
+            catch
+            {
                 voiceExpr = "a **very** long time";
             }
             if (targetXP > currentXP) return $"{currentXP} out of {targetXP} experience. Missing {targetXP - currentXP}; " +

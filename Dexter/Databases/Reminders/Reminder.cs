@@ -1,11 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.Reminders {
+namespace Dexter.Databases.Reminders
+{
 
     /// <summary>
     /// Represents a reminder item in the Dexter Reminder system.
     /// </summary>
-    public class Reminder {
+    public class Reminder
+    {
 
         /// <summary>
         /// The Unique identifier for the reminder within the database.

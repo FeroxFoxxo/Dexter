@@ -7,9 +7,11 @@ using Discord.Commands;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ModeratorCommands {
+    public partial class ModeratorCommands
+    {
 
         /// <summary>
         /// Suggests the removal of a channel's relay from the relevant database.
@@ -22,10 +24,12 @@ namespace Dexter.Commands {
         [Summary("Clears a channel's relay in the related database.")]
         [RequireAdministrator]
 
-        public async Task ClearRelay(ITextChannel Channel) {
+        public async Task ClearRelay(ITextChannel Channel)
+        {
             Relay FindRelay = RelayDB.Relays.Find(Channel.Id);
 
-            if (FindRelay == null) {
+            if (FindRelay == null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle($"Relay already exists!")
                     .WithDescription($"The relay to the channel {Channel} does not exist and thus can not be removed!")
@@ -54,7 +58,8 @@ namespace Dexter.Commands {
         /// This value should be parsable to a <c>ulong</c> (Channel ID).
         /// </param>
 
-        public void RemoveRelayCallback(Dictionary<string, string> Parameters) {
+        public void RemoveRelayCallback(Dictionary<string, string> Parameters)
+        {
             ulong ChannelID = ulong.Parse(Parameters["ChannelID"]);
 
             Relay RelayToRemove = RelayDB.Relays.Find(ChannelID);

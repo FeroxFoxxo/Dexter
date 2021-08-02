@@ -2,13 +2,15 @@
 using System;
 using System.Collections.Generic;
 
-namespace Dexter.Configurations {
+namespace Dexter.Configurations
+{
 
     /// <summary>
     /// The configuration object abstracting all necessary settings and customizable items for the Leveling module.
     /// </summary>
 
-    public class LevelingConfiguration : JSONConfig {
+    public class LevelingConfiguration : JSONConfig
+    {
 
         /// <summary>
         /// The interval between attempts to give users experience, in seconds.
@@ -190,15 +192,18 @@ namespace Dexter.Configurations {
         /// <param name="level">The target level</param>
         /// <returns>The XP required to reach a given <paramref name="level"/>.</returns>
 
-        public long GetXPForLevel(double level) {
+        public long GetXPForLevel(double level)
+        {
             return (long)GetXPForLevelFull(level);
         }
 
-        private double GetXPForLevelFull(double level) {
+        private double GetXPForLevelFull(double level)
+        {
             if (level < 0) { return 0; }
 
             double xp = 0;
-            for (int i = 0; i < DexterXPCoefficients.Length; i++) {
+            for (int i = 0; i < DexterXPCoefficients.Length; i++)
+            {
                 xp += DexterXPCoefficients[i] * Math.Pow(level, i);
             }
             return xp;
@@ -213,12 +218,14 @@ namespace Dexter.Configurations {
         /// 
         /// <returns>The level of the user, ignoring residual XP.</returns>
 
-        public int GetLevelFromXP(long xp, out long residualXP, out long levelXP) {
+        public int GetLevelFromXP(long xp, out long residualXP, out long levelXP)
+        {
             //solve [config.DexterXPCoefficients] [1, x, x^2, x^3 ... x^n]t = xp
             //through binary approximation
             int minlevel = 0;
             int maxlevel = 100;
-            while(xp > GetXPForLevel(maxlevel)) {
+            while (xp > GetXPForLevel(maxlevel))
+            {
                 minlevel = maxlevel;
                 maxlevel *= 2;
             }
@@ -230,21 +237,26 @@ namespace Dexter.Configurations {
             return level;
         }
 
-        private int ApproximateLevel(long xp, ref int lowerbound, ref int upperbound, out long lvlxp, out long nextlvlxp) {
+        private int ApproximateLevel(long xp, ref int lowerbound, ref int upperbound, out long lvlxp, out long nextlvlxp)
+        {
             int attempts = 0;
-            while (attempts++ < 500) {
+            while (attempts++ < 500)
+            {
                 int middle = (lowerbound + upperbound) / 2;
 
                 long xpmiddle = GetXPForLevel(middle);
                 long xpmaxmiddle = GetXPForLevel(middle + 1);
 
-                if (xp >= xpmaxmiddle) {
+                if (xp >= xpmaxmiddle)
+                {
                     lowerbound = middle + 1;
                 }
-                else if (xp < xpmiddle) {
+                else if (xp < xpmiddle)
+                {
                     upperbound = middle;
                 }
-                else {
+                else
+                {
                     lvlxp = xpmiddle;
                     nextlvlxp = xpmaxmiddle;
                     return middle;
@@ -258,7 +270,8 @@ namespace Dexter.Configurations {
     /// Dictates how the total level is calculated based on the text and voice levels of a user.
     /// </summary>
 
-    public enum LevelMergeMode {
+    public enum LevelMergeMode
+    {
         /// <summary>
         /// Total level = Maximum level + Minimum level
         /// </summary>

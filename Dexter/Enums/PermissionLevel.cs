@@ -1,15 +1,17 @@
-﻿namespace Dexter.Enums {
+﻿namespace Dexter.Enums
+{
 
     /// <summary>
     /// An enum of the types of the different permission levels a user can have.
     /// </summary>
-    
-    public enum PermissionLevel {
+
+    public enum PermissionLevel
+    {
 
         /// <summary>
         /// The DEFAULT value is given to an ordinary user with no special roles.
         /// </summary>
-        
+
         Default,
 
         /// <summary>

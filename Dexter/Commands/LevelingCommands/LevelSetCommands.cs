@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Databases.Levels;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
+using System;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
-    public partial class LevelingCommands {
-    
+namespace Dexter.Commands
+{
+    public partial class LevelingCommands
+    {
+
         /// <summary>
         /// Sets a user's XP of a given type to a given value.
         /// </summary>
@@ -26,10 +25,12 @@ namespace Dexter.Commands {
         [Summary("Modifies a user's XP. Usage: `setxp [User] [Type] [Amount] [Units]`. Types are \"text\", \"voice\". Units are \"xp\", \"lvl\".")]
         [RequireAdministrator]
 
-        public async Task SetXPCommand(IUser user, string xptype, long amount, string unit = "xp") {
+        public async Task SetXPCommand(IUser user, string xptype, long amount, string unit = "xp")
+        {
             UserLevel ul = LevelingDB.GetOrCreateLevelData(user.Id, out _);
             bool isTextXP;
-            switch(xptype.ToLower()) {
+            switch (xptype.ToLower())
+            {
                 case "text":
                 case "tc":
                 case "txt":
@@ -48,16 +49,19 @@ namespace Dexter.Commands {
             }
 
             int newLvl;
-            switch (unit.ToLower()) {
+            switch (unit.ToLower())
+            {
                 case "x":
                 case "xp":
                 case "exp":
                     long prevXP;
-                    if (isTextXP) {
+                    if (isTextXP)
+                    {
                         prevXP = ul.TextXP;
                         ul.TextXP = amount;
                     }
-                    else {
+                    else
+                    {
                         prevXP = ul.VoiceXP;
                         ul.VoiceXP = amount;
                     }
@@ -73,21 +77,27 @@ namespace Dexter.Commands {
                 case "lvl":
                 case "level":
                 case "levels":
-                    if (amount > int.MaxValue) {
+                    if (amount > int.MaxValue)
+                    {
                         amount = int.MaxValue;
                     }
                     int prevLvl;
                     newLvl = (int)amount;
-                    try {
-                        if (isTextXP) {
+                    try
+                    {
+                        if (isTextXP)
+                        {
                             prevLvl = LevelingConfiguration.GetLevelFromXP(ul.TextXP, out _, out _);
                             ul.TextXP = checked(LevelingConfiguration.GetXPForLevel(newLvl));
                         }
-                        else {
+                        else
+                        {
                             prevLvl = LevelingConfiguration.GetLevelFromXP(ul.VoiceXP, out _, out _);
                             ul.VoiceXP = checked(LevelingConfiguration.GetXPForLevel(newLvl));
                         }
-                    } catch(OverflowException) {
+                    }
+                    catch (OverflowException)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Overflow Exception")
                             .WithDescription("The value provided causes user XP to exceed its maximum possible value!")
@@ -125,10 +135,12 @@ namespace Dexter.Commands {
         [Summary("Grants a user a given amount of experience. Usage: `givexp [User] [Type] [Amount]`. Types are \"text\", \"voice\"")]
         [RequireAdministrator]
 
-        public async Task GiveXPCommand(IUser user, string xptype, long amount) {
+        public async Task GiveXPCommand(IUser user, string xptype, long amount)
+        {
             UserLevel ul = LevelingDB.GetOrCreateLevelData(user.Id, out _);
             bool isTextXP;
-            switch (xptype.ToLower()) {
+            switch (xptype.ToLower())
+            {
                 case "text":
                 case "tc":
                 case "txt":
@@ -146,13 +158,19 @@ namespace Dexter.Commands {
                     return;
             }
 
-            try {
-                if (isTextXP) {
+            try
+            {
+                if (isTextXP)
+                {
                     ul.TextXP = checked(ul.TextXP + amount);
-                } else {
+                }
+                else
+                {
                     ul.VoiceXP = checked(ul.VoiceXP + amount);
                 }
-            } catch (OverflowException) {
+            }
+            catch (OverflowException)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Overflow Exception")
                             .WithDescription("The value provided causes user XP to exceed its maximum possible value!")

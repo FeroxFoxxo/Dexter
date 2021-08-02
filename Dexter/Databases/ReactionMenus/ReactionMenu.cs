@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.ReactionMenus {
+namespace Dexter.Databases.ReactionMenus
+{
 
     /// <summary>
     /// Represents a menu that can be navigated through the use of message reactions.
     /// </summary>
 
-    public class ReactionMenu {
+    public class ReactionMenu
+    {
 
         /// <summary>
         /// The unique numerical ID of the target message which contains the menu.

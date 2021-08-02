@@ -5,13 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dexter.Databases.UserProfiles {
+namespace Dexter.Databases.UserProfiles
+{
 
     /// <summary>
     /// The BorkdayDB contains a set of all the users who have had the borkday role and the time of the issue.
     /// </summary>
 
-    public class ProfilesDB : Database {
+    public class ProfilesDB : Database
+    {
 
         /// <summary>
         /// A table of the borkday times in the BorkdayDB database.
@@ -37,11 +39,14 @@ namespace Dexter.Databases.UserProfiles {
         /// <param name="UserID">The ID of the profile to fetch.</param>
         /// <returns>A UserProfile object detailing the relevant information about the user.</returns>
 
-        public UserProfile GetOrCreateProfile(ulong UserID) {
+        public UserProfile GetOrCreateProfile(ulong UserID)
+        {
             UserProfile Profile = Profiles.Find(UserID);
 
-            if (Profile is null) {
-                Profile = new() {
+            if (Profile is null)
+            {
+                Profile = new()
+                {
                     UserID = UserID,
                     BorkdayTime = 0,
                     DateJoined = 0,
@@ -66,17 +71,20 @@ namespace Dexter.Databases.UserProfiles {
         /// <param name="anyOrder">Whether to try find a link where the sender and sendee are reversed.</param>
         /// <returns>A new or already tracked UserLink object with the appropriate sender and sendee.</returns>
 
-        public UserLink GetOrCreateLink(ulong sender, ulong sendee, LinkType linkType, bool anyOrder = true) {
+        public UserLink GetOrCreateLink(ulong sender, ulong sendee, LinkType linkType, bool anyOrder = true)
+        {
 
             UserLink link = Links.AsQueryable().Where(l => l.Sender == sender && l.Sendee == sendee).FirstOrDefault();
             if (link is not null) return link;
-            
-            if (anyOrder) {
+
+            if (anyOrder)
+            {
                 link = Links.AsQueryable().Where(l => l.Sender == sendee && l.Sendee == sender).FirstOrDefault();
                 if (link is not null) return link;
             }
 
-            link = new UserLink() {
+            link = new UserLink()
+            {
                 Sender = sender,
                 Sendee = sendee,
                 LinkType = linkType,
@@ -98,11 +106,13 @@ namespace Dexter.Databases.UserProfiles {
         /// <param name="strictLinkType">Whether to look exclusively for links of type <paramref name="linkType"/>. If no links of <paramref name="linkType"/> are found, the result will be <see langword="null"/>.</param>
         /// <returns>A <see cref="UserLink"/> with the given properties, or <see langword="null"/> if none exist with the given parameters.</returns>
 
-        public UserLink GetLink(ulong sender, ulong sendee, bool anyOrder = true, bool strictLinkType = false, LinkType linkType = LinkType.Friend) {
+        public UserLink GetLink(ulong sender, ulong sendee, bool anyOrder = true, bool strictLinkType = false, LinkType linkType = LinkType.Friend)
+        {
             UserLink link = Links.AsQueryable().Where(l => l.Sender == sender && l.Sendee == sendee && (!strictLinkType || l.LinkType == linkType)).FirstOrDefault();
             if (link is not null) return link;
 
-            if (anyOrder) {
+            if (anyOrder)
+            {
                 link = Links.AsQueryable().Where(l => l.Sender == sendee && l.Sendee == sender && (!strictLinkType || l.LinkType == linkType)).FirstOrDefault();
                 if (link is not null) return link;
             }
@@ -118,7 +128,8 @@ namespace Dexter.Databases.UserProfiles {
         /// <param name="linkType">The type of link to filter for.</param>
         /// <returns>A list of user IDs for users that match the above criteria.</returns>
 
-        public async Task<List<ulong>> GetLinksAsync(ulong user, bool mustBeSender = false, LinkType linkType = LinkType.Friend) {
+        public async Task<List<ulong>> GetLinksAsync(ulong user, bool mustBeSender = false, LinkType linkType = LinkType.Friend)
+        {
             return await GetLinksAsync(user, (l) => true, mustBeSender, linkType);
         }
 
@@ -131,15 +142,19 @@ namespace Dexter.Databases.UserProfiles {
         /// <param name="linkType">The type of link to filter for.</param>
         /// <returns>A list of user IDs for users that match the above criteria.</returns>
 
-        public async Task<List<ulong>> GetLinksAsync(ulong user, Func<UserLink, bool> filter, bool mustBeSender = false, LinkType linkType = LinkType.Friend) {
+        public async Task<List<ulong>> GetLinksAsync(ulong user, Func<UserLink, bool> filter, bool mustBeSender = false, LinkType linkType = LinkType.Friend)
+        {
             List<ulong> links = new();
-            await Links.ForEachAsync(l => {
+            await Links.ForEachAsync(l =>
+            {
                 if (l.LinkType != linkType) return;
-                if (l.Sender == user) {
+                if (l.Sender == user)
+                {
                     if (filter(l))
                         links.Add(l.Sendee);
                 }
-                else if (!mustBeSender && l.Sendee == user) {
+                else if (!mustBeSender && l.Sendee == user)
+                {
                     if (filter(l))
                         links.Add(l.Sender);
                 }
@@ -157,10 +172,12 @@ namespace Dexter.Databases.UserProfiles {
         /// <param name="linkType">What type of link to look for.</param>
         /// <returns><see langword="true"/> if a link is found with the given parameters, otherwise <see langword="false"/>.</returns>
 
-        public async Task<bool> AreLinked(ulong sender, ulong sendee, bool anyOrder = true, LinkType linkType = LinkType.Friend) {
+        public async Task<bool> AreLinked(ulong sender, ulong sendee, bool anyOrder = true, LinkType linkType = LinkType.Friend)
+        {
             bool found = false;
 
-            await Links.ForEachAsync(l => {
+            await Links.ForEachAsync(l =>
+            {
                 if (found) return;
                 if (l.LinkType != linkType) return;
                 if (l.Sender == sender && l.Sendee == sendee) found = true;
@@ -176,8 +193,10 @@ namespace Dexter.Databases.UserProfiles {
         /// <param name="user">The user whose birthday it is.</param>
         /// <returns>A list of ulong unique IDs identifying the set of users who should be notified.</returns>
 
-        public async Task<List<ulong>> BorkdayNotifs(ulong user) {
-            return await GetLinksAsync(user, (l) => {
+        public async Task<List<ulong>> BorkdayNotifs(ulong user)
+        {
+            return await GetLinksAsync(user, (l) =>
+            {
                 return l.IsUserBorkdayNotified(user);
             });
         }
@@ -191,10 +210,12 @@ namespace Dexter.Databases.UserProfiles {
         /// <param name="linkType">The type of link to remove.</param>
         /// <returns><see langword="true"/> if a compatible link was found and removed, otherwise <see langword="false"/>.</returns>
 
-        public bool TryRemove(ulong sender, ulong sendee, bool anyOrder = true, LinkType linkType = LinkType.Friend) {
+        public bool TryRemove(ulong sender, ulong sendee, bool anyOrder = true, LinkType linkType = LinkType.Friend)
+        {
             UserLink link = Links.AsQueryable().Where(l => l.Sender == sender && l.Sendee == sendee && l.LinkType == linkType).FirstOrDefault();
 
-            if (link is null && anyOrder) {
+            if (link is null && anyOrder)
+            {
                 link = Links.AsQueryable().Where(l => l.Sender == sendee && l.Sendee == sender && l.LinkType == linkType).FirstOrDefault();
             }
 

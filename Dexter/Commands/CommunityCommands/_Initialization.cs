@@ -1,18 +1,20 @@
-﻿using Dexter.Configurations;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
+using Dexter.Configurations;
 using Dexter.Databases.CommunityEvents;
-using Dexter.Databases.UserRestrictions;
-using Dexter.Databases.Games;
 using Dexter.Databases.FunTopics;
+using Dexter.Databases.Games;
 using Dexter.Databases.UserProfiles;
+using Dexter.Databases.UserRestrictions;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
     /// <summary>
     /// The class containing all commands and utilities within the Community module.
     /// </summary>
 
-    public partial class CommunityCommands : DiscordModule {
+    public partial class CommunityCommands : DiscordModule
+    {
 
         /// <summary>
         /// Works as an interface between the configuration files attached to the Community module and its commands.

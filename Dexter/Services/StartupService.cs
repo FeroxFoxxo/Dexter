@@ -1,33 +1,35 @@
-﻿using Dexter.Configurations;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
+using Dexter.Configurations;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
-using System.Threading.Tasks;
-using System;
 using Figgle;
-using System.Net.Http;
-using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
-using System.Linq;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading.Tasks;
 
-namespace Dexter.Services {
+namespace Dexter.Services
+{
 
     /// <summary>
     /// The Startup Serivce module applies the token for the bot, as well as running the bot once all dependencies have loaded up.
     /// Furthermore, it logs and sends a message to the moderation channel when it does start up, including various information
     /// like its bot and Discord.NET versionings.
     /// </summary>
-    
-    public class StartupService : Service {
+
+    public class StartupService : Service
+    {
 
         /// <summary>
         /// An instance of the Logging Service, which we use to log if the token has not been set to the console.
         /// </summary>
-        
+
         public LoggingService LoggingService { get; set; }
 
         /// <summary>
@@ -51,8 +53,9 @@ namespace Dexter.Services {
         /// <summary>
         /// The Initialize method hooks the client ready event to the Display Startup Version Async method.
         /// </summary>
-        
-        public override void Initialize() {
+
+        public override void Initialize()
+        {
             DiscordSocketClient.Ready += DisplayStartupVersionAsync;
         }
 
@@ -64,11 +67,12 @@ namespace Dexter.Services {
         /// Returns false if does not exist and flows onto the token specified in the BotConfiguration.</param>
         /// <param name="Version">The current version of the bot, as parsed from the InitializeDependencies class.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-        
-        public async Task StartAsync(string Token, string Version) {
+
+        public async Task StartAsync(string Token, string Version)
+        {
             this.Version = Version;
 
-            if(!string.IsNullOrEmpty(Token))
+            if (!string.IsNullOrEmpty(Token))
                 await RunBot(Token);
             else
                 await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Startup", $"The login token in the command line arguments was not set~!"));
@@ -79,8 +83,9 @@ namespace Dexter.Services {
         /// </summary>
         /// <param name="Token">A string containing the token from which we use to log into Discord.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-        
-        public async Task RunBot(string Token) {
+
+        public async Task RunBot(string Token)
+        {
             LoggingService.LockedCMDOut = true;
             await DiscordSocketClient.LoginAsync(TokenType.Bot, Token);
             await DiscordSocketClient.StartAsync();
@@ -91,8 +96,9 @@ namespace Dexter.Services {
         /// to a specified guild that the bot has sucessfully started and the versionings that it is running.
         /// </summary>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-        
-        public async Task DisplayStartupVersionAsync() {
+
+        public async Task DisplayStartupVersionAsync()
+        {
             await DiscordSocketClient.SetActivityAsync(new Game(BotConfiguration.BotStatus));
 
             if (HasStarted)
@@ -118,11 +124,13 @@ namespace Dexter.Services {
             Assembly.GetExecutingAssembly().GetTypes()
                     .Where(Type => Type.IsSubclassOf(typeof(JSONConfig)) && !Type.IsAbstract)
                     .ToList().ForEach(
-                Configuration => {
+                Configuration =>
+                {
                     object Service = ServiceProvider.GetService(Configuration);
 
                     Configuration.GetProperties().ToList().ForEach(
-                        Property => {
+                        Property =>
+                        {
                             object Value = Property.GetValue(Service);
 
                             if (Value != null)

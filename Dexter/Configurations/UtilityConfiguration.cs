@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
+using System.Collections.Generic;
 
-namespace Dexter.Configurations {
+namespace Dexter.Configurations
+{
 
     /// <summary>
     /// Configures the relevant aspects of the Utility Commands Module.
     /// </summary>
 
-    public class UtilityConfiguration : JSONConfig {
+    public class UtilityConfiguration : JSONConfig
+    {
 
         /// <summary>
         /// The maximum number of items that can appear on an Embed Menu's page for upcoming reminders.

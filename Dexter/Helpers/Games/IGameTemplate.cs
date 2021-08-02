@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dexter.Configurations;
+﻿using Dexter.Configurations;
 using Dexter.Databases.Games;
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
+using System.Threading.Tasks;
 
-namespace Dexter.Helpers.Games {
+namespace Dexter.Helpers.Games
+{
 
     /// <summary>
     /// Represents a standardized form of a game, with the minimum set of globally required methods.
     /// </summary>
 
-    public interface IGameTemplate {
+    public interface IGameTemplate
+    {
 
         /// <summary>
         /// Represents the general status and data of a game.

@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.EventTimers {
+namespace Dexter.Databases.EventTimers
+{
 
     /// <summary>
     /// Database-compatible class to deal with calling time-based or time-limited events when required.
     /// </summary>
 
-    public class EventTimer {
+    public class EventTimer
+    {
 
         /// <summary>
         /// Unique identifier for the EventTimer object.
@@ -14,7 +16,7 @@ namespace Dexter.Databases.EventTimers {
 
         [Key]
         public string Token { get; set; }
-        
+
         /// <summary>
         /// The delta-time since the event is created until it expires, in seconds.
         /// </summary>
@@ -30,19 +32,19 @@ namespace Dexter.Databases.EventTimers {
         /// <summary>
         /// The Callback Class field specifies the class in which the method is that will be called back to.
         /// </summary>
-        
+
         public string CallbackClass { get; set; }
 
         /// <summary>
         /// The Callback Method field specifies the method that will be called if the confirmation is approved.
         /// </summary>
-        
+
         public string CallbackMethod { get; set; }
 
         /// <summary>
         /// The Callback Parameters field specifies the parameters that will be called back to the method once approved.
         /// </summary>
-        
+
         public string CallbackParameters { get; set; }
 
         /// <summary>

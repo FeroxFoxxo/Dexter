@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Databases.Games;
 using Dexter.Enums;
 using Dexter.Extensions;
@@ -11,9 +6,16 @@ using Dexter.Helpers;
 using Dexter.Helpers.Games;
 using Discord;
 using Discord.Commands;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
-    partial class FunCommands {
+namespace Dexter.Commands
+{
+    partial class FunCommands
+    {
 
         /// <summary>
         /// Interface Command for the games system and game management.
@@ -40,29 +42,34 @@ namespace Dexter.Commands {
         [Alias("games")]
         [BotChannel]
 
-        public async Task GameCommand(string Action, [Remainder] string Arguments = "") {
-            if (RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.Games) && Action.ToLower() != "leave") {
+        public async Task GameCommand(string Action, [Remainder] string Arguments = "")
+        {
+            if (RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.Games) && Action.ToLower() != "leave")
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("You aren't permitted to manage or join games!")
                     .WithDescription("You have been blacklisted from using this service. If you think this is a mistake, feel free to personally contact an administrator.")
                     .SendEmbed(Context.Channel);
                 return;
             }
-            
+
             string Feedback;
 
             Player Player = GamesDB.GetOrCreatePlayer(Context.User.Id);
             GameInstance Game = null;
-            if (Player.Playing > 0) {
+            if (Player.Playing > 0)
+            {
                 Game = GamesDB.Games.Find(Player.Playing);
                 if (Game is not null && Game.Type == GameType.Unselected) Game = null;
             }
 
-            switch (Action.ToLower()) {
+            switch (Action.ToLower())
+            {
                 case "new":
                 case "create":
                     string[] Args = Arguments.Split(" ");
-                    if (Args.Length < 2) {
+                    if (Args.Length < 2)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid amount of parameters!")
                             .WithDescription("You must at least provide a game type and a title.")
@@ -70,7 +77,8 @@ namespace Dexter.Commands {
                         return;
                     }
                     string GameTypeStr = Args[0].ToLower();
-                    if (!GameTypeConversion.GameNames.ContainsKey(GameTypeStr)) {
+                    if (!GameTypeConversion.GameNames.ContainsKey(GameTypeStr))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Game not found!")
                             .WithDescription($"Game \"{GameTypeStr}\" not found! Currently supported games are: {string.Join(", ", Enum.GetNames<GameType>()[1..])}")
@@ -84,7 +92,8 @@ namespace Dexter.Commands {
 
                     int SeparatorPos = RelevantArgs.IndexOf(';');
                     if (SeparatorPos + 1 == RelevantArgs.Length) SeparatorPos = -1;
-                    if (SeparatorPos > 0) {
+                    if (SeparatorPos > 0)
+                    {
                         Title = RelevantArgs[..SeparatorPos];
                         Description = RelevantArgs[(SeparatorPos + 1)..];
                     }
@@ -97,7 +106,8 @@ namespace Dexter.Commands {
                     return;
                 case "help":
                 case "info":
-                    if (Game is null || Game.ToGameProper() is null) {
+                    if (Game is null || Game.ToGameProper() is null)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("You aren't in a game!")
                             .WithDescription("Join or create a game before using this command.")
@@ -108,7 +118,8 @@ namespace Dexter.Commands {
                     return;
                 case "leaderboard":
                 case "points":
-                    if (Game is null) {
+                    if (Game is null)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("You aren't in a game!")
                             .WithDescription("Join or create a game before using this command.")
@@ -124,7 +135,8 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
                     return;
                 case "join":
-                    if (string.IsNullOrEmpty(Arguments)) {
+                    if (string.IsNullOrEmpty(Arguments))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("No Arguments Provided!")
                             .WithDescription("You must provide, at least, an instance ID to join!")
@@ -132,14 +144,16 @@ namespace Dexter.Commands {
                         return;
                     }
                     string Number = Arguments.Split(" ")[0];
-                    if (!int.TryParse(Number, out int ID)) {
+                    if (!int.TryParse(Number, out int ID))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Failed to parse Game ID")
                             .WithDescription($"Unable to parse {Number} into an integer value.")
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    if (Game is not null && Game.GameID == ID) {
+                    if (Game is not null && Game.GameID == ID)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("You're already in this game!")
                             .WithDescription("You can't join a game you're already in.")
@@ -147,7 +161,8 @@ namespace Dexter.Commands {
                         return;
                     }
                     Game = GamesDB.Games.Find(ID);
-                    if (!Join(Player, Game, out Feedback, Arguments[Number.Length..].Trim())) {
+                    if (!Join(Player, Game, out Feedback, Arguments[Number.Length..].Trim()))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Failed to join game")
                             .WithDescription(Feedback)
@@ -161,7 +176,8 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
                     return;
                 case "leave":
-                    if (Player is null || Game is null) {
+                    if (Player is null || Game is null)
+                    {
                         await Context.Message.ReplyAsync("You're not in a game!");
                         return;
                     }
@@ -175,30 +191,37 @@ namespace Dexter.Commands {
                 case "get":
                 case "status":
                     int GameID = -1;
-                    if (string.IsNullOrEmpty(Arguments) || !int.TryParse(Arguments, out GameID)) {
-                        if (Game is null) {
+                    if (string.IsNullOrEmpty(Arguments) || !int.TryParse(Arguments, out GameID))
+                    {
+                        if (Game is null)
+                        {
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Invalid selection")
                                 .WithDescription("You're not in a game and no game was specified!")
                                 .SendEmbed(Context.Channel);
                             return;
                         }
-                    } else {
+                    }
+                    else
+                    {
                         Game = GamesDB.Games.Find(GameID);
                     }
-                    
-                    if(Game is null || Game.ToGameProper() is null) {
+
+                    if (Game is null || Game.ToGameProper() is null)
+                    {
                         await Context.Message.ReplyAsync("This game doesn't exist or isn't active!");
                         return;
                     }
                     await Game.ToGameProper().GetStatus(DiscordSocketClient).SendEmbed(Context.Channel);
                     return;
                 case "reset":
-                    if (Game is null || Game.ToGameProper() is null) {
+                    if (Game is null || Game.ToGameProper() is null)
+                    {
                         await Context.Message.ReplyAsync("You're not in an implemented game!");
                         return;
                     }
-                    if (Game.Master != Context.User.Id) {
+                    if (Game.Master != Context.User.Id)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Missing permissions!")
                             .WithDescription($"Only the game master (<@{Game.Master}>) can reset the game!")
@@ -217,7 +240,8 @@ namespace Dexter.Commands {
                     await Context.Message.ReplyAsync("Saved games!");
                     return;
                 case "set":
-                    if (string.IsNullOrEmpty(Arguments)) {
+                    if (string.IsNullOrEmpty(Arguments))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("No Arguments Provided!")
                             .WithDescription("You must provide a field and a value to set.")
@@ -225,7 +249,8 @@ namespace Dexter.Commands {
                         return;
                     }
                     string Field = Arguments.Split(" ")[0];
-                    if (!Set(Player, Game, Field, Arguments[Field.Length..].Trim(), out Feedback)) {
+                    if (!Set(Player, Game, Field, Arguments[Field.Length..].Trim(), out Feedback))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Error!")
                             .WithDescription(Feedback)
@@ -262,9 +287,11 @@ namespace Dexter.Commands {
             "-  Common fields are `score` and `lives`.")]
         [BotChannel]
 
-        public async Task PlayerCommand(string Action, IUser User, [Remainder] string Arguments = "") {
+        public async Task PlayerCommand(string Action, IUser User, [Remainder] string Arguments = "")
+        {
             Player Player = GamesDB.Players.Find(User.Id);
-            if (Player is null) {
+            if (Player is null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("The player you targeted doesn't exist.")
                     .WithDescription("Make sure the player you targeted is playing in your game session!")
@@ -273,19 +300,23 @@ namespace Dexter.Commands {
             }
 
             Player Author = GamesDB.Players.Find(Context.User.Id);
-            if (Author is null) {
+            if (Author is null)
+            {
                 await Context.Message.ReplyAsync("You aren't playing any games!");
                 return;
             }
             GameInstance Game = GamesDB.Games.Find(Author.Playing);
-            if (Game is null || Game.Master != Context.User.Id) {
+            if (Game is null || Game.Master != Context.User.Id)
+            {
                 await Context.Message.ReplyAsync("You must be a master in an active game to manage players!");
                 return;
             }
 
-            switch (Action.ToLower()) {
+            switch (Action.ToLower())
+            {
                 case "ban":
-                    if (!BanPlayer(Player, Game)) {
+                    if (!BanPlayer(Player, Game))
+                    {
                         await Context.Message.ReplyAsync("This user is already banned from your game!");
                         return;
                     }
@@ -296,7 +327,8 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
                     return;
                 case "unban":
-                    if(!UnbanPlayer(User.Id, Game)) {
+                    if (!UnbanPlayer(User.Id, Game))
+                    {
                         await Context.Message.ReplyAsync("This player isn't banned in your game!");
                         return;
                     }
@@ -307,7 +339,8 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
                     return;
                 case "kick":
-                    if (Player.Playing != Game.GameID) {
+                    if (Player.Playing != Game.GameID)
+                    {
                         await Context.Message.ReplyAsync("This player isn't in your game!");
                         return;
                     }
@@ -322,23 +355,26 @@ namespace Dexter.Commands {
                     return;
                 case "set":
                     string[] Args = Arguments.Split(" ");
-                    if(Args.Length < 2) {
+                    if (Args.Length < 2)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid number of arguments!")
                             .WithDescription("You must provide a field and a value to set it to.")
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    if(!double.TryParse(Args[1], out double Value)) {
+                    if (!double.TryParse(Args[1], out double Value))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Cannot parse value")
                             .WithDescription($"The term `{Args[1]}` cannot be parsed to a number.")
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    switch (Args[0].ToLower()) {
+                    switch (Args[0].ToLower())
+                    {
                         case "lives":
-                            Player.Lives = (int) Value;
+                            Player.Lives = (int)Value;
                             await Context.Message.ReplyAsync($"Player {User.Mention} now has {Value:D0} lives!");
                             return;
                         case "score":
@@ -361,9 +397,11 @@ namespace Dexter.Commands {
         [Summary("Forces a game session to be closed by ID - Syntax `killgame [ID]`")]
         [RequireModerator]
 
-        public async Task KillGameCommand(int GameID) {
+        public async Task KillGameCommand(int GameID)
+        {
             GameInstance Game = GamesDB.Games.Find(GameID);
-            if (Game is null) {
+            if (Game is null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to find game!")
                     .WithDescription($"No game exists with ID {GameID}.")
@@ -382,14 +420,16 @@ namespace Dexter.Commands {
             return;
         }
 
-        private void RemovePlayer(ulong PlayerID) {
+        private void RemovePlayer(ulong PlayerID)
+        {
             Player Player = GamesDB.Players.Find(PlayerID);
 
             if (Player is null) return;
             RemovePlayer(Player);
         }
 
-        private void RemovePlayer(Player Player) {
+        private void RemovePlayer(Player Player)
+        {
             int WasPlaying = Player.Playing;
 
             Player.Score = 0;
@@ -400,18 +440,22 @@ namespace Dexter.Commands {
             CheckCloseSession(WasPlaying);
         }
 
-        private void CheckCloseSession(int InstanceID) {
+        private void CheckCloseSession(int InstanceID)
+        {
             GameInstance Instance = GamesDB.Games.Find(InstanceID);
             if (Instance is null) return;
             Player Master = GamesDB.GetOrCreatePlayer(Instance.Master);
-            if (Master.Playing != InstanceID) {
+            if (Master.Playing != InstanceID)
+            {
                 CloseSession(Instance);
                 return;
             }
         }
 
-        private bool BanPlayer(Player Player, GameInstance Instance) {
-            if (Player is not null && Player.Playing == Instance.GameID) {
+        private bool BanPlayer(Player Player, GameInstance Instance)
+        {
+            if (Player is not null && Player.Playing == Instance.GameID)
+            {
                 RemovePlayer(Player);
             }
 
@@ -421,7 +465,8 @@ namespace Dexter.Commands {
             return true;
         }
 
-        private bool UnbanPlayer(ulong PlayerID, GameInstance Instance) {
+        private bool UnbanPlayer(ulong PlayerID, GameInstance Instance)
+        {
             if (Instance is null) return false;
 
             List<string> b = Instance.Banned.Split(", ").ToList();
@@ -431,20 +476,24 @@ namespace Dexter.Commands {
             return true;
         }
 
-        private void CloseSession(GameInstance Instance) {
+        private void CloseSession(GameInstance Instance)
+        {
             Player[] Players = GamesDB.GetPlayersFromInstance(Instance.GameID);
 
-            foreach(Player p in Players) {
+            foreach (Player p in Players)
+            {
                 RemovePlayer(p);
             }
 
             GamesDB.Games.Remove(Instance);
         }
 
-        private GameInstance OpenSession(Player Master, string Title, string Description, GameType GameType) {
+        private GameInstance OpenSession(Player Master, string Title, string Description, GameType GameType)
+        {
             RemovePlayer(Master);
 
-            GameInstance Result = new() {
+            GameInstance Result = new()
+            {
                 GameID = GamesDB.GenerateGameToken(),
                 Master = Master.UserID,
                 Title = Title,
@@ -466,23 +515,28 @@ namespace Dexter.Commands {
             return Result;
         }
 
-        private bool Set(Player Player, GameInstance Instance, string Field, string Value, out string Feedback) {
-            if(Player is null) {
+        private bool Set(Player Player, GameInstance Instance, string Field, string Value, out string Feedback)
+        {
+            if (Player is null)
+            {
                 Feedback = "You are not registered in any game! Join a game before you attempt to set a value.";
                 return false;
             }
 
-            if(Instance is null) {
+            if (Instance is null)
+            {
                 Feedback = "You are not registered in any game! Join a game before you attempt to set a value.";
                 return false;
             }
 
-            if (Context.User.Id != Instance.Master) {
+            if (Context.User.Id != Instance.Master)
+            {
                 Feedback = "You are not this game's Master! You can't modify its values.";
                 return false;
             }
 
-            switch(Field.ToLower()) {
+            switch (Field.ToLower())
+            {
                 case "title":
                     Instance.Title = Value.Trim();
                     Feedback = $"Success! Title is \"{Value}\"";
@@ -499,21 +553,28 @@ namespace Dexter.Commands {
                 case "master":
                     ulong ID;
                     IUser Master;
-                    if(Context.Message.MentionedUsers.Count > 0) {
+                    if (Context.Message.MentionedUsers.Count > 0)
+                    {
                         Master = Context.Message.MentionedUsers.First();
                         ID = Master.Id;
-                    } else if (ulong.TryParse(Value, out ID)) {
+                    }
+                    else if (ulong.TryParse(Value, out ID))
+                    {
                         Master = DiscordSocketClient.GetUser(ID);
-                        if(Master is null) {
+                        if (Master is null)
+                        {
                             Feedback = $"The ID provided ({ID}) doesn't map to any user.";
                             return false;
                         }
-                    } else {
+                    }
+                    else
+                    {
                         Feedback = $"Unable to parse a user from \"{Value}\"!";
                         return false;
                     }
                     Player p = GamesDB.Players.Find(Master.Id);
-                    if(p is null || p.Playing != Instance.GameID) {
+                    if (p is null || p.Playing != Instance.GameID)
+                    {
                         Feedback = $"The player you targeted isn't playing in your game instance!";
                         return false;
                     }
@@ -523,21 +584,24 @@ namespace Dexter.Commands {
                     return true;
                 default:
                     IGameTemplate Game = Instance.ToGameProper();
-                    if (Game is null) {
+                    if (Game is null)
+                    {
                         Feedback = "Game mode is not set! This is weird... you should probably make a new game session";
                         return false;
                     }
 
-                    return Game.Set(Field, Value, FunConfiguration, out Feedback); 
+                    return Game.Set(Field, Value, FunConfiguration, out Feedback);
             }
         }
 
-        private EmbedBuilder Leaderboard(GameInstance Instance) {
+        private EmbedBuilder Leaderboard(GameInstance Instance)
+        {
             StringBuilder Board = new StringBuilder();
             List<Player> Players = GamesDB.GetPlayersFromInstance(Instance.GameID).ToList();
             Players.Sort((a, b) => b.Score.CompareTo(a.Score));
 
-            foreach (Player p in Players) {
+            foreach (Player p in Players)
+            {
                 IUser User = DiscordSocketClient.GetUser(p.UserID);
                 if (User is null) continue;
                 Board.Append($"{(Board.Length > 0 ? "\n" : "")}{User.Username.TruncateTo(16),-16}| {p.Score:G4}, ♥×{p.Lives}");
@@ -549,25 +613,31 @@ namespace Dexter.Commands {
                 .WithDescription($"`{Board}`");
         }
 
-        private bool Join(Player Player, GameInstance Instance, out string Feedback, string Password = "") {
+        private bool Join(Player Player, GameInstance Instance, out string Feedback, string Password = "")
+        {
             Feedback = "";
-            
-            if (Instance is null) {
+
+            if (Instance is null)
+            {
                 Feedback = "Game Instance does not exist.";
                 return false;
             }
 
             string[] BannedIDs = Instance.Banned.Split(", ");
-            if (!string.IsNullOrWhiteSpace(Instance.Banned)) {
-                foreach (string s in BannedIDs) {
-                    if (ulong.Parse(s) == Player.UserID) {
+            if (!string.IsNullOrWhiteSpace(Instance.Banned))
+            {
+                foreach (string s in BannedIDs)
+                {
+                    if (ulong.Parse(s) == Player.UserID)
+                    {
                         Feedback = "Player is banned from this game.";
                         return false;
                     }
                 }
             }
 
-            if (!string.IsNullOrEmpty(Instance.Password) && Password != Instance.Password) {
+            if (!string.IsNullOrEmpty(Instance.Password) && Password != Instance.Password)
+            {
                 Feedback = "Password is incorrect.";
                 return false;
             }

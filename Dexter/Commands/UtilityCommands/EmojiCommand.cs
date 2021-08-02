@@ -4,9 +4,11 @@ using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class UtilityCommands {
+    public partial class UtilityCommands
+    {
 
         /// <summary>
         /// Sends an emoji as a full-resolution image file.
@@ -18,7 +20,8 @@ namespace Dexter.Commands {
         [Summary("Gets the full image of an emoji.")]
         [Alias("emoji")]
 
-        public async Task EmojiCommand(string Emoji) {
+        public async Task EmojiCommand(string Emoji)
+        {
             if (Emote.TryParse(Emoji, out Emote Emojis))
                 await BuildEmbed(EmojiEnum.Unknown)
                     .WithImageUrl(Emojis.Url)

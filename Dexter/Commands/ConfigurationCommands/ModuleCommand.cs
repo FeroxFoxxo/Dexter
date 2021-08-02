@@ -1,13 +1,15 @@
 ﻿using Dexter.Attributes.Methods;
+using Dexter.Databases.Configurations;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Dexter.Databases.Configurations;
 using Discord.Commands;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ConfigurationCommands {
+    public partial class ConfigurationCommands
+    {
 
         /// <summary>
         /// The ListModule method runs on MODULES and will list all the enabled, disabled and essential commands when
@@ -42,11 +44,14 @@ namespace Dexter.Commands {
         [RequireAdministrator]
         [Alias("module", "mod")]
 
-        public async Task ModifyModule(ModuleActionType ModuleActionType, string ModuleName) {
-            if (Services.ModuleService.VerifyModuleName(ref ModuleName)) {
+        public async Task ModifyModule(ModuleActionType ModuleActionType, string ModuleName)
+        {
+            if (Services.ModuleService.VerifyModuleName(ref ModuleName))
+            {
                 bool IsActive = ModuleService.GetModuleState(ModuleName);
 
-                switch (ModuleActionType) {
+                switch (ModuleActionType)
+                {
                     case ModuleActionType.Status:
                         await BuildEmbed(IsActive ? EmojiEnum.Love : EmojiEnum.Annoyed)
                             .WithTitle("Module ProposalStatus.")
@@ -59,7 +64,8 @@ namespace Dexter.Commands {
                                 .WithTitle("Module already set to value!")
                                 .WithDescription($"The module **{ModuleName}** is already **{(IsActive ? "enabled" : "disabled")}.**")
                                 .SendEmbed(Context.Channel);
-                        else {
+                        else
+                        {
                             bool Active = ModuleActionType == ModuleActionType.Enable;
                             await ModuleService.SetModuleState(ModuleName, Active);
                             await BuildEmbed(Active ? EmojiEnum.Love : EmojiEnum.Annoyed)
@@ -69,7 +75,8 @@ namespace Dexter.Commands {
                         }
                         break;
                 }
-            } else
+            }
+            else
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unknown Module!")
                     .WithDescription($"I don't know a module called **{ModuleName}.**")

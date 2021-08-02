@@ -4,9 +4,11 @@ using Discord.Commands;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class CustomCommands {
+    public partial class CustomCommands
+    {
 
         /// <summary>
         /// The ListCommands method runs on CCLIST and will list all the custom commands in the database.
@@ -17,7 +19,8 @@ namespace Dexter.Commands {
         [Summary("Displays all avaliable custom commands in the database.")]
         [Alias("customcommands", "ccl")]
 
-        public async Task ListCommands () {
+        public async Task ListCommands()
+        {
             string CustomCommands = string.Join("\n", CustomCommandDB.CustomCommands.AsQueryable().Select(CustomCommand => BotConfiguration.Prefix + CustomCommand.CommandName));
 
             await BuildEmbed(EmojiEnum.Love)

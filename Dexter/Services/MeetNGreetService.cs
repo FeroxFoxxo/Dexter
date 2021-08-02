@@ -1,24 +1,26 @@
-﻿using Dexter.Configurations;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
+using Dexter.Configurations;
 using Dexter.Extensions;
 using Discord;
 using Discord.Webhook;
 using Discord.WebSocket;
 using System.Threading.Tasks;
 
-namespace Dexter.Services {
+namespace Dexter.Services
+{
 
     /// <summary>
     /// The MeetNGreet service is used to log messages that have been updated and deleted from the MeetNGreet channel.
     /// It does this through creating a webhook and sending to that very webhook each time an event runs.
     /// </summary>
-    
-    public class MeetNGreetService : Service {
+
+    public class MeetNGreetService : Service
+    {
 
         /// <summary>
         /// The MNGConfiguration is used to find and create the MNG webhook.
         /// </summary>
-        
+
         public MNGConfiguration MNGConfiguration { get; set; }
 
         /// <summary>
@@ -31,8 +33,9 @@ namespace Dexter.Services {
         /// The Initialize method adds the MessageDeleted and MessageUpdated hooks into their respective MNG check methods.
         /// It also hooks the ready event to the CreateWebhook delegate.
         /// </summary>
-        
-        public override void Initialize() {
+
+        public override void Initialize()
+        {
             DiscordSocketClient.MessageDeleted += MNGMessageDeleted;
             DiscordSocketClient.MessageUpdated += MNGMessageUpdated;
             DiscordSocketClient.Ready += CreateWebhook;
@@ -42,8 +45,9 @@ namespace Dexter.Services {
         /// The Create Webhook method runs on Ready and is what initializes our webhook.
         /// </summary>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-        
-        public async Task CreateWebhook() {
+
+        public async Task CreateWebhook()
+        {
             DiscordWebhookClient = await CreateOrGetWebhook(MNGConfiguration.WebhookChannel, MNGConfiguration.WebhookName);
         }
 
@@ -56,8 +60,9 @@ namespace Dexter.Services {
         /// <param name="NewMessage">The instance of the new, changed message.</param>
         /// <param name="SocketMessageChannel">The channel from which the message had been sent from.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-        
-        public async Task MNGMessageUpdated(Cacheable<IMessage, ulong> OldMessage, SocketMessage NewMessage, ISocketMessageChannel SocketMessageChannel) {
+
+        public async Task MNGMessageUpdated(Cacheable<IMessage, ulong> OldMessage, SocketMessage NewMessage, ISocketMessageChannel SocketMessageChannel)
+        {
             if (SocketMessageChannel.Id != MNGConfiguration.MeetNGreetChannel)
                 return;
 
@@ -88,8 +93,9 @@ namespace Dexter.Services {
         /// <param name="DeletedMessage">The message that has been cached from the sent channel.</param>
         /// <param name="Channel">The channel from which the message had been sent from.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-        
-        public async Task MNGMessageDeleted(Cacheable<IMessage, ulong> DeletedMessage, IChannel Channel) {
+
+        public async Task MNGMessageDeleted(Cacheable<IMessage, ulong> DeletedMessage, IChannel Channel)
+        {
             if (Channel.Id != MNGConfiguration.MeetNGreetChannel)
                 return;
 
@@ -104,7 +110,7 @@ namespace Dexter.Services {
             if (DiscordWebhookClient != null)
                 await new EmbedBuilder()
                     .WithAuthor(CachedMessage.Author)
-                    .WithDescription($"**Message sent by <@{CachedMessage.Author.Id}> deleted in in <#{Channel.Id}>**\n{(CachedMessage.Content.Length > 1900 ? CachedMessage.Content.Substring(0, 1900) + "...": CachedMessage.Content)}")
+                    .WithDescription($"**Message sent by <@{CachedMessage.Author.Id}> deleted in in <#{Channel.Id}>**\n{(CachedMessage.Content.Length > 1900 ? CachedMessage.Content.Substring(0, 1900) + "..." : CachedMessage.Content)}")
                     .WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")
                     .WithCurrentTimestamp()
                     .WithColor(Color.Blue)

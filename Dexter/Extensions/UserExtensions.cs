@@ -5,13 +5,15 @@ using Discord.WebSocket;
 using System;
 using System.Linq;
 
-namespace Dexter.Extensions {
+namespace Dexter.Extensions
+{
 
     /// <summary>
     /// The User Extensions class offers a variety of different extensions that can be applied to user to return specific attributes.
     /// </summary>
-    
-    public static class UserExtensions {
+
+    public static class UserExtensions
+    {
 
         /// <summary>
         /// The GetPermissionLevel returns the highest permission the user has access to for commands.
@@ -21,7 +23,8 @@ namespace Dexter.Extensions {
         /// <param name="BotConfiguration">The instance of the bot configuration which is used to get the role ID for roles.</param>
         /// <returns>What permission level the user has, in the form from the PermissionLevel enum.</returns>
 
-        public static PermissionLevel GetPermissionLevel(this IUser User, DiscordSocketClient DiscordSocketClient, BotConfiguration BotConfiguration) {
+        public static PermissionLevel GetPermissionLevel(this IUser User, DiscordSocketClient DiscordSocketClient, BotConfiguration BotConfiguration)
+        {
             IGuildUser GuildUser = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(User.Id);
 
             if (GuildUser == null)
@@ -44,8 +47,9 @@ namespace Dexter.Extensions {
         /// </summary>
         /// <param name="User">The user of which you want to create the standardized string of the user's information of.</param>
         /// <returns>A string which contains the user's username, discriminator, mention and ID.</returns>
-        
-        public static string GetUserInformation(this IUser User) {
+
+        public static string GetUserInformation(this IUser User)
+        {
             return $"{User.Username}#{User.Discriminator} ({User.Mention}) ({User.Id})";
         }
 
@@ -56,7 +60,8 @@ namespace Dexter.Extensions {
         /// <param name="DefaultSize">The size of the image to return in. This can be any power of 2 in the range [16, 2048].</param>
         /// <returns>A string holding the URL of the target user's avatar.</returns>
 
-        public static string GetTrueAvatarUrl (this IUser User, ushort DefaultSize = 128) {
+        public static string GetTrueAvatarUrl(this IUser User, ushort DefaultSize = 128)
+        {
             return string.IsNullOrEmpty(User.GetAvatarUrl(size: DefaultSize)) ? User.GetDefaultAvatarUrl() : User.GetAvatarUrl(size: DefaultSize);
         }
 

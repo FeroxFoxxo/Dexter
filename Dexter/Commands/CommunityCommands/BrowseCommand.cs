@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Attributes.Methods;
 using Dexter.Databases.CommunityEvents;
 using Dexter.Databases.FunTopics;
@@ -14,9 +9,16 @@ using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 using Humanizer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
-    public partial class CommunityCommands {
+namespace Dexter.Commands
+{
+    public partial class CommunityCommands
+    {
 
         private const int MaxFieldContentsLength = 2000;
 
@@ -35,18 +37,23 @@ namespace Dexter.Commands {
             "`browse TOPICS [Expression]` - Browse topics similar to the given expression.")]
         [BotChannel]
 
-        public async Task BrowseCommand(string type, [Remainder] string filters = "") {
+        public async Task BrowseCommand(string type, [Remainder] string filters = "")
+        {
             EmbedBuilder[] embeds;
 
-            switch (type.ToLower()) {
+            switch (type.ToLower())
+            {
                 case "games":
                     GameInstance[] games;
 
-                    if (string.IsNullOrEmpty(filters)) {
+                    if (string.IsNullOrEmpty(filters))
+                    {
                         games = GamesDB.Games.ToArray();
                     }
-                    else {
-                        if (!GameTypeConversion.GameNames.ContainsKey(type.ToLower())) {
+                    else
+                    {
+                        if (!GameTypeConversion.GameNames.ContainsKey(type.ToLower()))
+                        {
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Unable to find game type")
                                 .WithDescription($"I wasn't able to parse \"{filters}\" into a valid game type.\n" +
@@ -63,12 +70,15 @@ namespace Dexter.Commands {
                 case "events":
                     CommunityEvent[] events;
 
-                    if (string.IsNullOrEmpty(filters)) {
+                    if (string.IsNullOrEmpty(filters))
+                    {
                         events = CommunityEventsDB.Events.AsQueryable().Where(e =>
                             e.Status == EventStatus.Approved).ToArray();
-                    } 
-                    else {
-                        switch (filters.ToLower()) {
+                    }
+                    else
+                    {
+                        switch (filters.ToLower())
+                        {
                             case "official":
                                 events = CommunityEventsDB.Events.AsQueryable().Where(e =>
                                     e.EventType == EventType.Official
@@ -99,7 +109,8 @@ namespace Dexter.Commands {
                 case "jokes":
                 case "facts":
                 case "funfacts":
-                    if(string.IsNullOrEmpty(filters)) {
+                    if (string.IsNullOrEmpty(filters))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Insufficient parameters!")
                             .WithDescription("Missing `filters` parameter; you must provide a term to search for!")
@@ -107,7 +118,8 @@ namespace Dexter.Commands {
                         return;
                     }
                     List<WeightedObject<FunTopic>> topics = new();
-                    foreach(FunTopic t in FunTopicsDB.Topics) {
+                    foreach (FunTopic t in FunTopicsDB.Topics)
+                    {
                         topics.Add(new WeightedObject<FunTopic>(t, LanguageHelper.GetCorrelationIndex(t.Topic.ToLower(), filters.ToLower())));
                     }
                     WeightedObject<FunTopic>.SortByWeightInPlace(topics, true);
@@ -125,26 +137,34 @@ namespace Dexter.Commands {
             await DisplayEmbeds(type, embeds);
         }
 
-        private async Task DisplayEmbeds(string type, EmbedBuilder[] embeds) {
-            if (embeds.Length == 0) {
+        private async Task DisplayEmbeds(string type, EmbedBuilder[] embeds)
+        {
+            if (embeds.Length == 0)
+            {
                 await BuildEmbed(EmojiEnum.Wut)
                     .WithTitle($"No {type.ToLower()} found!")
                     .WithDescription("No items match your search criteria!")
                     .SendEmbed(Context.Channel);
-            } else if (embeds.Length == 1) {
+            }
+            else if (embeds.Length == 1)
+            {
                 await embeds[0].SendEmbed(Context.Channel);
-            } else {
+            }
+            else
+            {
                 await CreateReactionMenu(embeds, Context.Channel);
             }
         }
 
         const int GamesPerEmbed = 15;
 
-        private EmbedBuilder[] BuildGamesEmbeds(GameInstance[] Games) {
+        private EmbedBuilder[] BuildGamesEmbeds(GameInstance[] Games)
+        {
             if (Games.Length == 0) return new EmbedBuilder[0];
             EmbedBuilder[] Embeds = new EmbedBuilder[(Games.Length - 1) / GamesPerEmbed + 1];
 
-            for(int i = 0; i < Embeds.Length; i++) {
+            for (int i = 0; i < Embeds.Length; i++)
+            {
                 GameInstance[] RelevantGames = Games[(i * GamesPerEmbed)..((i + 1) * GamesPerEmbed > Games.Length ? Games.Length : (i + 1) * GamesPerEmbed)];
 
                 Embeds[i] = new EmbedBuilder()
@@ -161,41 +181,47 @@ namespace Dexter.Commands {
         }
 
         const string Header = "`ID`|🎮|`     Title     `|`  Game Master  `|`PC`|🔒";
-        private string StringifyGames(GameInstance[] Games) {
-            
+        private string StringifyGames(GameInstance[] Games)
+        {
+
             StringBuilder Str = new StringBuilder();
 
-            foreach(GameInstance Game in Games) {
+            foreach (GameInstance Game in Games)
+            {
                 Str.Append(StringifyGame(Game) + "\n");
             }
 
             return Str.ToString().TrimEnd();
         }
 
-        private string StringifyGame(GameInstance Game) {
+        private string StringifyGame(GameInstance Game)
+        {
             IGuildUser Master = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(Game.Master);
             string MasterName;
             if (Master is null) MasterName = "Unknown";
             else MasterName = Master.Nickname ?? Master.Username;
 
             Player[] Players = GamesDB.GetPlayersFromInstance(Game.GameID);
-                
+
             return $"`{Game.GameID:D2}`|{GameTypeConversion.GameEmoji[Game.Type]}|`{ToLength(15, Game.Title)}`|`{ToLength(15, MasterName)}`|`{Players.Length:D2}`|{(Game.Password.Length > 0 ? "🔑" : "")}";
         }
 
-        private string ToLength(int Length, string S) {
+        private string ToLength(int Length, string S)
+        {
             if (S.Length < Length) return S.PadRight(Length);
             return S.TruncateTo(Length);
         }
 
         const int EventsPerEmbed = 5;
 
-        private EmbedBuilder[] BuildEventsEmbeds(CommunityEvent[] Events) {
+        private EmbedBuilder[] BuildEventsEmbeds(CommunityEvent[] Events)
+        {
             if (Events.Length == 0) return new EmbedBuilder[0];
             EmbedBuilder[] Embeds = new EmbedBuilder[(Events.Length - 1) / EventsPerEmbed + 1];
             int counter = 0;
 
-            for (int i = 0; i < Embeds.Length; i++) {
+            for (int i = 0; i < Embeds.Length; i++)
+            {
                 CommunityEvent[] RelevantEvents = Events[(i * GamesPerEmbed)..((i + 1) * GamesPerEmbed > Events.Length ? Events.Length : (i + 1) * GamesPerEmbed)];
 
                 Embeds[i] = new EmbedBuilder()
@@ -205,9 +231,10 @@ namespace Dexter.Commands {
                     .WithFooter($"{i + 1}/{Embeds.Length}")
                     .WithCurrentTimestamp();
 
-                foreach(CommunityEvent Event in RelevantEvents) {
+                foreach (CommunityEvent Event in RelevantEvents)
+                {
                     TimeSpan TimeUntil = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).Subtract(DateTimeOffset.Now);
-                    Embeds[i].AddField($"Event {++counter} (ID {Event.ID})", 
+                    Embeds[i].AddField($"Event {++counter} (ID {Event.ID})",
                         $"{Event.Description.TruncateTo(100)}\n" +
                         $"**Release**: {TimeUntil.Humanize(2, maxUnit: Humanizer.Localisation.TimeUnit.Year)} from now.");
                 }
@@ -216,11 +243,13 @@ namespace Dexter.Commands {
             return Embeds;
         }
 
-        private EmbedBuilder[] BuildTopicsEmbeds(List<WeightedObject<FunTopic>> topics, string filters) {
+        private EmbedBuilder[] BuildTopicsEmbeds(List<WeightedObject<FunTopic>> topics, string filters)
+        {
             int maxDescLength = MaxFieldContentsLength / CommunityConfiguration.BrowseTopicsPerPage;
             EmbedBuilder[] embeds = new EmbedBuilder[CommunityConfiguration.BrowseTopicsMaxPages];
 
-            for(int p = 0; p < CommunityConfiguration.BrowseTopicsMaxPages; p++) {
+            for (int p = 0; p < CommunityConfiguration.BrowseTopicsMaxPages; p++)
+            {
                 int initial = p * CommunityConfiguration.BrowseTopicsPerPage;
                 EmbedBuilder embed = new EmbedBuilder()
                     .WithColor(Color.Magenta)
@@ -228,7 +257,8 @@ namespace Dexter.Commands {
                     .WithDescription($"Displaying topics similar to `{filters.TruncateTo(128)}`")
                     .WithFooter($"{p + 1}/{embeds.Length}")
                     .WithCurrentTimestamp();
-                for(int i = initial; i < initial + CommunityConfiguration.BrowseTopicsPerPage; i++) {
+                for (int i = initial; i < initial + CommunityConfiguration.BrowseTopicsPerPage; i++)
+                {
                     if (i >= topics.Count) break;
                     FunTopic t = topics[i].obj;
                     IUser topicProvider = DiscordSocketClient.GetUser(t.ProposerID);

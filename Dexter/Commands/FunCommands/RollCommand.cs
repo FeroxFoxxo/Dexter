@@ -1,17 +1,19 @@
-﻿using System;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Configurations;
+using Dexter.Extensions;
+using Dexter.Helpers;
+using Discord.Commands;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
-using Dexter.Configurations;
-using Dexter.Extensions;
-using Dexter.Helpers;
-using Discord.Commands;
 
-namespace Dexter.Commands {
-    public partial class FunCommands {
+namespace Dexter.Commands
+{
+    public partial class FunCommands
+    {
 
         /// <summary>
         /// Handles rolling dice of different types, as well as certain useful output transformations.
@@ -32,10 +34,12 @@ namespace Dexter.Commands {
             "- !!(n)(,max), !!>(n)(,max), !!<n(,max) - Explode up to max times if a condition is satisfied. {4, 1, 3} => (!!>2,3) => {4, 1, 3, 2, 3, 4}")]
         [CommandCooldown(10)]
 
-        public async Task RollCommand([Remainder] string roll) {
+        public async Task RollCommand([Remainder] string roll)
+        {
 
             string baseRoll = Regex.Match(roll, @"^([1-9][0-9]*)?[dD][1-9][0-9]*").Value;
-            if (string.IsNullOrEmpty(baseRoll)) {
+            if (string.IsNullOrEmpty(baseRoll))
+            {
                 await BuildEmbed(Enums.EmojiEnum.Annoyed)
                     .WithTitle("Invalid roll!")
                     .WithDescription($"Please follow a valid roll expression. Type `{BotConfiguration.Prefix}help roll` for more information.")
@@ -46,17 +50,20 @@ namespace Dexter.Commands {
             if (dIndex < 0) dIndex = baseRoll.IndexOf("D");
             bool verbose = baseRoll[dIndex] == 'D';
 
-            if (!int.TryParse(baseRoll[..dIndex], out int n)) {
+            if (!int.TryParse(baseRoll[..dIndex], out int n))
+            {
                 n = 1;
             }
-            else if (n > FunConfiguration.MaxDieRolls) {
+            else if (n > FunConfiguration.MaxDieRolls)
+            {
                 await BuildEmbed(Enums.EmojiEnum.Annoyed)
                     .WithTitle("Excessive Roll Count!")
                     .WithDescription($"{n} is too high! Keep the number of dice to roll below {FunConfiguration.MaxDieRolls}.")
                     .SendEmbed(Context.Channel);
                 return;
             }
-            if (!int.TryParse(baseRoll[(dIndex + 1)..], out int d)) {
+            if (!int.TryParse(baseRoll[(dIndex + 1)..], out int d))
+            {
                 await BuildEmbed(Enums.EmojiEnum.Annoyed)
                     .WithTitle("Invalid Face Count!")
                     .WithDescription($"You entered number \"{baseRoll[(dIndex + 1)..]}\", make sure you use an input that is compatible with a 32-bit integer. (<{int.MaxValue})")
@@ -71,14 +78,17 @@ namespace Dexter.Commands {
             report.Add(rollContext.StringifyRolls("Base Rolls", rolls));
 
             List<string> errors = new();
-            foreach (string rawmod in rollArgs) {
+            foreach (string rawmod in rollArgs)
+            {
                 bool success = false;
-                foreach (KeyValuePair<string, Func<List<int>, string, RollContext, List<int>>> pair in Modifiers) {
+                foreach (KeyValuePair<string, Func<List<int>, string, RollContext, List<int>>> pair in Modifiers)
+                {
                     string mod = Regex.Match(rawmod, @$"^{pair.Key}$").Value;
                     if (string.IsNullOrEmpty(mod)) continue;
 
                     rolls = pair.Value(rolls, mod, rollContext);
-                    if (rolls.Count > FunConfiguration.MaxDieRolls) {
+                    if (rolls.Count > FunConfiguration.MaxDieRolls)
+                    {
                         await BuildEmbed(Enums.EmojiEnum.Annoyed)
                             .WithTitle("Modifier caused excess of maximum allowed rolls!")
                             .WithDescription($"The following modifier: `{mod}`, caused rolls to exceed {FunConfiguration.MaxDieRolls}, with a total of {rolls.Count} rolls.")
@@ -90,28 +100,34 @@ namespace Dexter.Commands {
                     success = true;
                     break;
                 }
-                
-                if (!success) {
+
+                if (!success)
+                {
                     errors.Add(rawmod);
                 }
             }
 
             string message;
-            if (!verbose) {
+            if (!verbose)
+            {
                 message = $"You rolled **{rolls.Sum()}**!";
             }
-            else if (report.Count <= FunConfiguration.MaxDieRollExpressionCount) {
+            else if (report.Count <= FunConfiguration.MaxDieRollExpressionCount)
+            {
                 message = string.Join('\n', report);
-            } else {
+            }
+            else
+            {
                 message = $"{string.Join('\n', report.ToArray()[..FunConfiguration.MaxDieRollExpressionCount])} => ... => \n{report.Last()}";
             }
 
             await Context.Channel.SendMessageAsync(message + (errors.Count > 0 ? $"\n**Invalid modifier expressions**: {string.Join(", ", errors)}" : ""));
         }
 
-        
 
-        private class RollContext {
+
+        private class RollContext
+        {
             public int d;
             public int n;
             public Random rand;
@@ -124,7 +140,8 @@ namespace Dexter.Commands {
             public int highlightMin = -1;
             public int highlightMax = -1;
 
-            public RollContext(int n, int d, Random rand, FunConfiguration funConfiguration) {
+            public RollContext(int n, int d, Random rand, FunConfiguration funConfiguration)
+            {
                 this.n = n;
                 this.d = d;
                 this.rand = rand;
@@ -132,36 +149,47 @@ namespace Dexter.Commands {
                 ResetHighlights();
             }
 
-            public List<int> Roll() {
+            public List<int> Roll()
+            {
                 List<int> result = new List<int>(n);
-                for(int i = 0; i < n; i++) {
+                for (int i = 0; i < n; i++)
+                {
                     result.Add(rand.Next(1, d + 1));
                 }
                 return result;
             }
 
-            public string StringifyRolls(string title, List<int> rolls) {
+            public string StringifyRolls(string title, List<int> rolls)
+            {
                 StringBuilder sb = new();
-                foreach(int r in rolls) {
+                foreach (int r in rolls)
+                {
                     if (sb.Length > 0) sb.Append(", ");
                     sb.Append(StringifyRoll(r));
-                    if (sb.LengthSpecial(LanguageHelper.DiscordRichTextChars) > funConfiguration.MaxDieRollExpressionLength) {
+                    if (sb.LengthSpecial(LanguageHelper.DiscordRichTextChars) > funConfiguration.MaxDieRollExpressionLength)
+                    {
                         sb.Append("...");
                         break;
                     };
                 }
                 string total;
-                try {
+                try
+                {
                     total = rolls.Sum().ToString();
-                } catch (OverflowException) {
+                }
+                catch (OverflowException)
+                {
                     total = $"Infinity (>{int.MaxValue})";
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     total = $"Error: {e.Message}";
                 }
                 return $"(**{title}**) {{{sb}}} = **{total}**";
             }
 
-            public void ResetHighlights() {
+            public void ResetHighlights()
+            {
                 underlineMin = -1;
                 underlineMax = -1;
                 italicizeMin = -1;
@@ -170,7 +198,8 @@ namespace Dexter.Commands {
                 highlightMax = d;
             }
 
-            private string StringifyRoll(int roll) {
+            private string StringifyRoll(int roll)
+            {
                 StringBuilder b = new();
                 if (roll >= underlineMin && roll <= underlineMax) b.Append("__");
                 if (roll >= italicizeMin && roll <= italicizeMax) b.Append("*");
@@ -183,11 +212,13 @@ namespace Dexter.Commands {
             }
         }
 
-        private readonly Dictionary<string, Func<List<int>, string, RollContext, List<int>>> Modifiers = new() {
+        private readonly Dictionary<string, Func<List<int>, string, RollContext, List<int>>> Modifiers = new()
+        {
             {
                 //Add a number
                 @"\+[0-9]{1,10}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     int n = int.Parse(mod[1..]);
                     r.Add(n);
                     return r;
@@ -196,7 +227,8 @@ namespace Dexter.Commands {
             {
                 //Subtract a number
                 @"-[0-9]{1,10}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     int n = int.Parse(mod[1..]);
                     r.Add(-n);
                     return r;
@@ -205,7 +237,8 @@ namespace Dexter.Commands {
             {
                 //Add a roll
                 @"\+[0-9]{1,10}[dD][0-9]{1,10}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     int di = mod.IndexOf('d');
                     if (di < 0) di = mod.IndexOf('D');
                     int n = int.Parse(mod[1..di]);
@@ -213,7 +246,8 @@ namespace Dexter.Commands {
                     if (n > context.funConfiguration.MaxDieRolls - r.Count)
                         n = context.funConfiguration.MaxDieRolls - r.Count;
 
-                    for(int i = 0; i < n; i++) {
+                    for (int i = 0; i < n; i++)
+                    {
                         r.Add(context.rand.Next(1, d + 1));
                     }
                     return r;
@@ -222,7 +256,8 @@ namespace Dexter.Commands {
             {
                 //Subtract a roll
                 @"-[0-9]{1,10}[dD][0-9]{1,10}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     int di = mod.IndexOf('d');
                     if (di < 0) di = mod.IndexOf('D');
                     int n = int.Parse(mod[1..di]);
@@ -230,7 +265,8 @@ namespace Dexter.Commands {
                     if (n > context.funConfiguration.MaxDieRolls - r.Count)
                         n = context.funConfiguration.MaxDieRolls - r.Count;
 
-                    for (int i = 0; i < n; i++) {
+                    for (int i = 0; i < n; i++)
+                    {
                         r.Add(-context.rand.Next(1, d + 1));
                     }
                     return r;
@@ -239,12 +275,14 @@ namespace Dexter.Commands {
             {
                 //Keep highest
                 @"kh[0-9]{1,10}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     int toKeep = int.Parse(mod[2..]);
                     if (toKeep >= r.Count) return r;
                     r.Sort();
                     List<int> result = new();
-                    for(int i = 0; i < toKeep; i++) {
+                    for (int i = 0; i < toKeep; i++)
+                    {
                         result.Add(r[^(i + 1)]);
                     }
                     return result;
@@ -253,12 +291,14 @@ namespace Dexter.Commands {
             {
                 //Keep lowest
                 @"kl[0-9]{1,10}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     int toKeep = int.Parse(mod[2..]);
                     if (toKeep >= r.Count) return r;
                     r.Sort();
                     List<int> result = new();
-                    for (int i = 0; i < toKeep; i++) {
+                    for (int i = 0; i < toKeep; i++)
+                    {
                         result.Add(r[i]);
                     }
                     return result;
@@ -267,12 +307,14 @@ namespace Dexter.Commands {
             {
                 //Drop highest
                 @"dh[0-9]{1,10}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     int toDrop = int.Parse(mod[2..]);
                     if (toDrop >= r.Count) return new List<int>();
                     r.Sort();
                     List<int> result = new();
-                    for (int i = 0; i < r.Count - toDrop; i++) {
+                    for (int i = 0; i < r.Count - toDrop; i++)
+                    {
                         result.Add(r[i]);
                     }
                     return result;
@@ -281,12 +323,14 @@ namespace Dexter.Commands {
             {
                 //Drop lowest
                 @"dl[0-9]{1,10}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     int toDrop = int.Parse(mod[2..]);
                     if (toDrop >= r.Count) return new List<int>();
                     r.Sort();
                     List<int> result = new();
-                    for (int i = 0; i < r.Count - toDrop; i++) {
+                    for (int i = 0; i < r.Count - toDrop; i++)
+                    {
                         result.Add(r[^(i + 1)]);
                     }
                     return result;
@@ -295,11 +339,14 @@ namespace Dexter.Commands {
             {
                 //Reroll
                 @"rr[0-9]{1,10}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     if (context.d == 1) return r;
                     int toReroll = int.Parse(mod[2..]);
-                    for (int i = 0; i < r.Count; i++) {
-                        if(r[i] == toReroll) {
+                    for (int i = 0; i < r.Count; i++)
+                    {
+                        if (r[i] == toReroll)
+                        {
                             r[i] = context.rand.Next(1, context.d);
                             if (r[i] >= toReroll) r[i]++;
                         }
@@ -310,11 +357,14 @@ namespace Dexter.Commands {
             {
                 //Reroll less than
                 @"rr<[0-9]{1,10}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     int toReroll = int.Parse(mod[3..]);
                     if (context.d < toReroll) return r;
-                    for (int i = 0; i < r.Count; i++) {
-                        if (r[i] < toReroll) {
+                    for (int i = 0; i < r.Count; i++)
+                    {
+                        if (r[i] < toReroll)
+                        {
                             r[i] = context.rand.Next(toReroll, context.d + 1);
                         }
                     }
@@ -324,11 +374,14 @@ namespace Dexter.Commands {
             {
                 //Reroll greater than
                 @"rr>[0-9]{1,10}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     int toReroll = int.Parse(mod[3..]);
                     if (toReroll < 1) return r;
-                    for (int i = 0; i < r.Count; i++) {
-                        if (r[i] > toReroll) {
+                    for (int i = 0; i < r.Count; i++)
+                    {
+                        if (r[i] > toReroll)
+                        {
                             r[i] = context.rand.Next(1, toReroll + 1);
                             if (r[i] >= toReroll) r[i]++;
                         }
@@ -339,10 +392,12 @@ namespace Dexter.Commands {
             {
                 //Replace
                 @"[0-9]{1,10}=>[0-9]{1,10}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     int toSwap = int.Parse(mod[..mod.IndexOf('=')]);
                     int swapTo = int.Parse(mod[(mod.IndexOf('>') + 1)..]);
-                    for (int i = 0; i < r.Count; i++) {
+                    for (int i = 0; i < r.Count; i++)
+                    {
                         if (r[i] == toSwap) r[i] = swapTo;
                     }
                     return r;
@@ -351,14 +406,18 @@ namespace Dexter.Commands {
             {
                 //Explode
                 @"!!([0-9]{1,10}|$)(,[0-9]{1,10})?",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     if (context.d == 1) return r;
                     int maxSeparator = mod.IndexOf(',');
                     int toExplode;
                     int max = int.MaxValue;
-                    if (maxSeparator < 0) {
+                    if (maxSeparator < 0)
+                    {
                         toExplode = mod.Length == 2 ? context.d : int.Parse(mod[2..]);
-                    } else {
+                    }
+                    else
+                    {
                         string toExplodeStr = mod[2..maxSeparator];
                         if (toExplodeStr.Length == 0) toExplode = context.d;
                         else toExplode = int.Parse(toExplodeStr);
@@ -369,8 +428,10 @@ namespace Dexter.Commands {
 
                     int i = 0;
                     int rerolls = 0;
-                    while(i < r.Count && rerolls < max) {
-                        if (r[i++] == toExplode) {
+                    while (i < r.Count && rerolls < max)
+                    {
+                        if (r[i++] == toExplode)
+                        {
                             r.Add(context.rand.Next(1, context.d + 1));
                             rerolls++;
                         }
@@ -381,24 +442,30 @@ namespace Dexter.Commands {
             {
                 //Explode Compare
                 @"!!(<|>)[0-9]{1,10}(,[0-9]{1,10})?",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     if (context.d == 1) return r;
                     bool explodeLower = mod[1] == '<';
                     int maxSeparator = mod.IndexOf(',');
                     int toExplode;
                     int max = int.MaxValue;
-                    if (maxSeparator < 0) {
+                    if (maxSeparator < 0)
+                    {
                         toExplode = int.Parse(mod[3..]);
                     }
-                    else {
+                    else
+                    {
                         toExplode = int.Parse(mod[3..maxSeparator]);
                         max = int.Parse(mod[(maxSeparator + 1)..]);
                     }
 
-                    if (explodeLower) {
+                    if (explodeLower)
+                    {
                         context.highlightMax = toExplode - 1;
                         context.highlightMin = 0;
-                    } else {
+                    }
+                    else
+                    {
                         context.highlightMax = context.d;
                         context.highlightMin = toExplode + 1;
                     }
@@ -407,8 +474,10 @@ namespace Dexter.Commands {
 
                     int i = 0;
                     int rerolls = 0;
-                    while (i < r.Count && rerolls < max) {
-                        if (r[i] != toExplode && (r[i] > toExplode ^ explodeLower)) {
+                    while (i < r.Count && rerolls < max)
+                    {
+                        if (r[i] != toExplode && (r[i] > toExplode ^ explodeLower))
+                        {
                             r.Add(context.rand.Next(1, context.d + 1));
                             rerolls++;
                         }
@@ -420,7 +489,8 @@ namespace Dexter.Commands {
             {
                 //Explode once
                 @"!([1-9]|$)[0-9]{0,9}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     if (context.d == 1) return r;
                     int toExplode;
                     int max = context.funConfiguration.MaxDieRollExplosions;
@@ -431,8 +501,10 @@ namespace Dexter.Commands {
                     int originalCount = r.Count;
                     int i = 0;
                     int rerolls = 0;
-                    while (i < originalCount && rerolls < max) {
-                        if (r[i++] == toExplode) {
+                    while (i < originalCount && rerolls < max)
+                    {
+                        if (r[i++] == toExplode)
+                        {
                             r.Add(context.rand.Next(1, context.d + 1));
                             rerolls++;
                         }
@@ -443,17 +515,20 @@ namespace Dexter.Commands {
             {
                 //Explode once compare
                 @"!(<|>)[0-9]{1,10}",
-                (List<int> r, string mod, RollContext context) => {
+                (List<int> r, string mod, RollContext context) =>
+                {
                     bool explodeLower = mod[1] == '<';
                     int toExplode;
                     int max = context.funConfiguration.MaxDieRollExplosions;
                     toExplode = int.Parse(mod[2..]);
 
-                    if (explodeLower) {
+                    if (explodeLower)
+                    {
                         context.highlightMax = toExplode - 1;
                         context.highlightMin = 0;
                     }
-                    else {
+                    else
+                    {
                         context.highlightMax = context.d;
                         context.highlightMin = toExplode + 1;
                     }
@@ -461,8 +536,10 @@ namespace Dexter.Commands {
                     int originalCount = r.Count;
                     int i = 0;
                     int rerolls = 0;
-                    while (i < originalCount && rerolls < max) {
-                        if (r[i] != toExplode && (r[i] > toExplode ^ explodeLower)) {
+                    while (i < originalCount && rerolls < max)
+                    {
+                        if (r[i] != toExplode && (r[i] > toExplode ^ explodeLower))
+                        {
                             r.Add(context.rand.Next(1, context.d + 1));
                             rerolls++;
                         }

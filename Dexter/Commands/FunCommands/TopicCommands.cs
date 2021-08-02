@@ -4,9 +4,11 @@ using Discord.Commands;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class FunCommands {
+    public partial class FunCommands
+    {
 
         /// <summary>
         /// Returns a random topic from the database if the command provided is an empty string or null object.
@@ -24,7 +26,8 @@ namespace Dexter.Commands {
                     "`REMOVE [TOPIC ID]` - removes a topic from the database.")]
         [CommandCooldown(120)]
 
-        public async Task TopicCommand([Optional][Remainder] string Command) {
+        public async Task TopicCommand([Optional][Remainder] string Command)
+        {
             await RunTopic(Command, TopicType.Topic);
         }
 
@@ -45,7 +48,8 @@ namespace Dexter.Commands {
         [Alias("would you rather", "wouldyourather")]
         [CommandCooldown(120)]
 
-        public async Task WYRCommand([Optional][Remainder] string Command) {
+        public async Task WYRCommand([Optional][Remainder] string Command)
+        {
             await RunTopic(Command, TopicType.WouldYouRather);
         }
 
@@ -66,7 +70,8 @@ namespace Dexter.Commands {
         [Alias("fact", "sciencefact")]
         [CommandCooldown(120)]
 
-        public async Task FunFactCommand([Optional][Remainder] string Command) {
+        public async Task FunFactCommand([Optional][Remainder] string Command)
+        {
             await RunTopic(Command, TopicType.FunFact);
         }
 
@@ -87,7 +92,8 @@ namespace Dexter.Commands {
         [Alias("pun")]
         [CommandCooldown(120)]
 
-        public async Task JokeCommand([Optional][Remainder] string Command) {
+        public async Task JokeCommand([Optional][Remainder] string Command)
+        {
             await RunTopic(Command, TopicType.Joke);
         }
 

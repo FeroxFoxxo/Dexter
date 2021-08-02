@@ -10,13 +10,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dexter.Services {
+namespace Dexter.Services
+{
 
     /// <summary>
     /// Manages the events and timers related to granting users Dexter experience for activity.
     /// </summary>
 
-    public class LevelingService : Service {
+    public class LevelingService : Service
+    {
 
         /// <summary>
         /// The relevant configuration related to the specific data and parameters of leveling.
@@ -46,7 +48,8 @@ namespace Dexter.Services {
         /// This method is run when the service is first started; which happens after dependency injection.
         /// </summary>
 
-        public override async void Initialize() {
+        public override async void Initialize()
+        {
             EventTimer Timer = TimerService.EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault();
 
             if (Timer != null)
@@ -64,19 +67,22 @@ namespace Dexter.Services {
         /// <param name="parameters">Irrelevant argument used to fit event timer task form.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task AddLevels(Dictionary<string, string> parameters) {
+        public async Task AddLevels(Dictionary<string, string> parameters)
+        {
             // Voice leveling up.
 
             IReadOnlyCollection<SocketVoiceChannel> vcs = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).VoiceChannels;
 
-            foreach (SocketVoiceChannel voiceChannel in vcs) {
+            foreach (SocketVoiceChannel voiceChannel in vcs)
+            {
                 int nonbotusers = 0;
-                foreach(IGuildUser uservc in voiceChannel.Users)
+                foreach (IGuildUser uservc in voiceChannel.Users)
                     if (!uservc.IsBot && !uservc.IsDeafened && !uservc.IsSelfDeafened && !RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)) nonbotusers++;
                 if (nonbotusers < LevelingConfiguration.VCMinUsers) continue;
                 if (LevelingConfiguration.DisabledVCs.Contains(voiceChannel.Id)) continue;
                 foreach (IGuildUser uservc in voiceChannel.Users)
-                    if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsBot || RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP))) {
+                    if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsBot || RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)))
+                    {
                         await LevelingDB.IncrementUserXP(
                             Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven + 1),
                             false,
@@ -91,7 +97,8 @@ namespace Dexter.Services {
             LevelingDB.SaveChanges();
         }
 
-        private async Task HandleMessage(SocketMessage message) {
+        private async Task HandleMessage(SocketMessage message)
+        {
             if (!LevelingConfiguration.ManageTextXP) return;
             if (message.Author.IsBot) return;
 
@@ -119,10 +126,12 @@ namespace Dexter.Services {
         /// <param name="level">The level of the user, autocalculated if below 0.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task<bool> UpdateRoles(IGuildUser user, bool removeExtra = false, int level = -1) {
+        public async Task<bool> UpdateRoles(IGuildUser user, bool removeExtra = false, int level = -1)
+        {
             if (user is null || !LevelingConfiguration.HandleRoles) return false;
 
-            if (level < 0) {
+            if (level < 0)
+            {
                 UserLevel ul = LevelingDB.Levels.Find(user.Id);
 
                 if (ul is null) return false;
@@ -135,13 +144,15 @@ namespace Dexter.Services {
             SocketGuild guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
             IReadOnlyCollection<ulong> userRoles = user.RoleIds;
 
-            if (LevelingConfiguration.MemberRoleLevel > 0 
+            if (LevelingConfiguration.MemberRoleLevel > 0
                 && level >= LevelingConfiguration.MemberRoleLevel
-                && !userRoles.Contains(LevelingConfiguration.MemberRoleID)) {
+                && !userRoles.Contains(LevelingConfiguration.MemberRoleID))
+            {
                 toAdd.Add(guild.GetRole(LevelingConfiguration.MemberRoleID));
             }
 
-            foreach(KeyValuePair<int, ulong> rank in LevelingConfiguration.Levels) {
+            foreach (KeyValuePair<int, ulong> rank in LevelingConfiguration.Levels)
+            {
 
                 if (level >= rank.Key && !userRoles.Contains(rank.Value))
                     toAdd.Add(guild.GetRole(rank.Value));
@@ -150,7 +161,8 @@ namespace Dexter.Services {
                     toRemove.Add(guild.GetRole(rank.Value));
             }
 
-            if (user.RoleIds.Contains(LevelingConfiguration.NicknameDisabledRole)) {
+            if (user.RoleIds.Contains(LevelingConfiguration.NicknameDisabledRole))
+            {
                 SocketRole replRole = guild.GetRole(LevelingConfiguration.NicknameDisabledReplacement);
 
                 if (user.RoleIds.Contains(LevelingConfiguration.NicknameDisabledReplacement))
@@ -160,13 +172,15 @@ namespace Dexter.Services {
                     toAdd.Remove(replRole);
             }
 
-            try {
+            try
+            {
                 if (toAdd.Count > 0)
                     await user.AddRolesAsync(toAdd);
                 if (toRemove.Count > 0)
                     await user.RemoveRolesAsync(toRemove);
             }
-            catch (NullReferenceException) {
+            catch (NullReferenceException)
+            {
                 throw new NullReferenceException("At least one of the specified roles in configuration that should be applied does not exist!");
             }
 
@@ -179,7 +193,8 @@ namespace Dexter.Services {
         /// <param name="user">The user that joined the guild.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task HandleJoin(SocketGuildUser user) {
+        public async Task HandleJoin(SocketGuildUser user)
+        {
             await UpdateRoles(user);
         }
 

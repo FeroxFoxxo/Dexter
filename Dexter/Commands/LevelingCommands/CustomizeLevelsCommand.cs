@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Databases.Levels;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
-    public partial class LevelingCommands {
+namespace Dexter.Commands
+{
+    public partial class LevelingCommands
+    {
 
         /// <summary>
         /// Handles the modification of profile-specific level system prefrences.
@@ -35,15 +34,18 @@ namespace Dexter.Commands {
             "-  `levelopacity ([decimal 0-1] OR [whole 2-255] OR [0-100]%)` - Sets the opacity of the level background.\n")]
         [BotChannel]
 
-        public async Task CustomizeLevelsCommand(string attribute = "", [Remainder] string value = "") {
+        public async Task CustomizeLevelsCommand(string attribute = "", [Remainder] string value = "")
+        {
             UserLevel ul = LevelingDB.GetOrCreateLevelData(Context.User.Id, out LevelPreferences prefs);
 
-            switch (attribute.ToLower()) {
+            switch (attribute.ToLower())
+            {
                 case "color":
                 case "colour":
                 case "xpcolor":
                 case "xpcolour":
-                    if (string.IsNullOrEmpty(value)) {
+                    if (string.IsNullOrEmpty(value))
+                    {
                         await BuildEmbed(EmojiEnum.Sign)
                             .WithTitle("Color Information")
                             .WithDescription("You can set a custom color for your XP display. Use either the name of an existing color such as \"Red\" or a hexadecimal string such as \"#df21fe\".")
@@ -52,8 +54,10 @@ namespace Dexter.Commands {
                     }
                     System.Drawing.Color color;
                     color = System.Drawing.Color.FromName(value);
-                    if (value.ToLower() != "black" && color.R == 0 && color.G == 0 && color.B == 0) {
-                        if(!Regex.IsMatch(value, @"^(0x|#)?[0-9A-F]{6}$", RegexOptions.IgnoreCase)) {
+                    if (value.ToLower() != "black" && color.R == 0 && color.G == 0 && color.B == 0)
+                    {
+                        if (!Regex.IsMatch(value, @"^(0x|#)?[0-9A-F]{6}$", RegexOptions.IgnoreCase))
+                        {
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Unable to parse color!")
                                 .WithDescription($"The color {value} isn't a known color name nor follows a hexadecimal format with 6 digits.")
@@ -71,7 +75,8 @@ namespace Dexter.Commands {
                     break;
                 case "pfpborder":
                 case "pfpbackground":
-                    switch(value.ToLower()) {
+                    switch (value.ToLower())
+                    {
                         case "true":
                         case "yes":
                         case "enabled":
@@ -97,7 +102,8 @@ namespace Dexter.Commands {
                     break;
                 case "croppfp":
                 case "pfpcrop":
-                    switch (value.ToLower()) {
+                    switch (value.ToLower())
+                    {
                         case "true":
                         case "yes":
                         case "enabled":
@@ -129,7 +135,8 @@ namespace Dexter.Commands {
                 case "toplabelbg":
                 case "titlebackground":
                 case "titlebg":
-                    switch (value.ToLower()) {
+                    switch (value.ToLower())
+                    {
                         case "true":
                         case "yes":
                         case "enabled":
@@ -159,7 +166,8 @@ namespace Dexter.Commands {
                 case "displayhybrid":
                 case "showhybridlevels":
                 case "displayhybridlevels":
-                    switch (value.ToLower()) {
+                    switch (value.ToLower())
+                    {
                         case "true":
                         case "yes":
                         case "enabled":
@@ -188,32 +196,36 @@ namespace Dexter.Commands {
                 case "levelalpha":
                 case "levelopacity":
                     bool isPercent = false;
-                    if (value.EndsWith('%')) {
+                    if (value.EndsWith('%'))
+                    {
                         isPercent = true;
                         value = value[..^1];
                     }
                     float opacity = 0;
                     int discreteOpacity = 0;
-                    if (!(int.TryParse(value, out discreteOpacity) && discreteOpacity > 1) && !float.TryParse(value, out opacity)) {
+                    if (!(int.TryParse(value, out discreteOpacity) && discreteOpacity > 1) && !float.TryParse(value, out opacity))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable to Parse Value.")
                             .WithDescription($"The value \"{value}\" could not be parsed into a valid number.")
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    if (discreteOpacity > 1) {
+                    if (discreteOpacity > 1)
+                    {
                         if (isPercent)
                             opacity = discreteOpacity / 100f;
                         else
                             opacity = discreteOpacity / 255f;
                     }
                     else if (isPercent) opacity /= 100;
-                    if (opacity > 1 || opacity < 0) {
-                    await BuildEmbed(EmojiEnum.Annoyed)
-                        .WithTitle("Invalid Opacity Value")
-                        .WithDescription("Enter a decimal value between 0 and 1 or an integer value between 2 and 255.")
-                        .SendEmbed(Context.Channel);
-                    return;
+                    if (opacity > 1 || opacity < 0)
+                    {
+                        await BuildEmbed(EmojiEnum.Annoyed)
+                            .WithTitle("Invalid Opacity Value")
+                            .WithDescription("Enter a decimal value between 0 and 1 or an integer value between 2 and 255.")
+                            .SendEmbed(Context.Channel);
+                        return;
                     }
                     prefs.LevelOpacity = opacity;
                     await BuildEmbed(EmojiEnum.Love)
@@ -231,20 +243,24 @@ namespace Dexter.Commands {
 
                     for (int i = 0; i < processedPaths.Length; i++)
                         processedPaths[i] = processedPaths[i].Split('\\').Last().Split('/').Last()[..^4];
-                    if (value.ToLower() == "list") {
+                    if (value.ToLower() == "list")
+                    {
                         await BuildEmbed(EmojiEnum.Sign)
                             .WithTitle("Default Background Images")
                             .WithDescription(string.Join(", ", processedPaths))
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    if (!string.IsNullOrEmpty(value)) {
+                    if (!string.IsNullOrEmpty(value))
+                    {
                         if (value.EndsWith(".jpg")) value = value[..^4];
                         if (value.EndsWith(".png")) value = value[..^4];
 
                         if (!File.Exists(Path.Combine(path, $"{value.ToLower()}.jpg"))
-                            && !File.Exists(Path.Combine(path, $"{value.ToLower()}.png"))) {
-                            if (Regex.IsMatch(value, @"^(0x|#)?[0-9A-F]{6}$", RegexOptions.IgnoreCase)) {
+                            && !File.Exists(Path.Combine(path, $"{value.ToLower()}.png")))
+                        {
+                            if (Regex.IsMatch(value, @"^(0x|#)?[0-9A-F]{6}$", RegexOptions.IgnoreCase))
+                            {
                                 int hex = int.Parse(value[^6..], System.Globalization.NumberStyles.HexNumber);
                                 color = System.Drawing.Color.FromArgb(unchecked((int)(hex + 0xff000000)));
 
@@ -272,14 +288,16 @@ namespace Dexter.Commands {
                             .SendEmbed(Context.Channel);
                         break;
                     }
-                    if (ul.TotalLevel(LevelingConfiguration) < LevelingConfiguration.CustomImageMinimumLevel) {
+                    if (ul.TotalLevel(LevelingConfiguration) < LevelingConfiguration.CustomImageMinimumLevel)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Locked Feature!")
                             .WithDescription($"You must reach level {LevelingConfiguration.CustomImageMinimumLevel} in order to use this feature.")
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    if (Context.Message.Attachments.FirstOrDefault() is null) {
+                    if (Context.Message.Attachments.FirstOrDefault() is null)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("No Attachments Found")
                             .WithDescription($"Send an image in a valid format along with your command! It must be a single message.")
@@ -287,14 +305,16 @@ namespace Dexter.Commands {
                         return;
                     }
                     string url = Context.Message.Attachments.First().ProxyUrl;
-                    if (!(url.EndsWith(".png") || url.EndsWith(".jpg"))) {
+                    if (!(url.EndsWith(".png") || url.EndsWith(".jpg")))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Invalid Image Format")
                             .WithDescription($"Your custom image must either have the extension `.jpg` or `.png`.")
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    if (Context.Message.Attachments.FirstOrDefault().Size > LevelingConfiguration.CustomImageSizeLimit) {
+                    if (Context.Message.Attachments.FirstOrDefault().Size > LevelingConfiguration.CustomImageSizeLimit)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Maximum File Size Exceeded")
                             .WithDescription($"Keep your custom image files below a size of {LevelingConfiguration.CustomImageSizeLimit} bytes.")

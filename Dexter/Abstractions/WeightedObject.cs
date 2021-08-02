@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Dexter.Abstractions {
-    
+namespace Dexter.Abstractions
+{
+
     /// <summary>
     /// A structure containing an object and a related value used for sorting.
     /// </summary>
-    
-    public class WeightedObject<T> {
+
+    public class WeightedObject<T>
+    {
         /// <summary>
         /// The object held in this instance.
         /// </summary>
@@ -26,7 +25,8 @@ namespace Dexter.Abstractions {
         /// <param name="obj">The object to hold.</param>
         /// <param name="weight">The weight of the object.</param>
 
-        public WeightedObject(T obj = default, double weight = 0) {
+        public WeightedObject(T obj = default, double weight = 0)
+        {
             this.obj = obj;
             this.weight = weight;
         }
@@ -38,7 +38,8 @@ namespace Dexter.Abstractions {
         /// <param name="descending">Whether to sort in descending order.</param>
         /// <returns>A list with the values in <paramref name="objs"/> sorted in ascending order if <paramref name="descending"/> is <see langword="false"/>, or otherwise in descending order.</returns>
 
-        public static List<WeightedObject<T>> SortByWeight(IEnumerable<WeightedObject<T>> objs, bool descending = false) {
+        public static List<WeightedObject<T>> SortByWeight(IEnumerable<WeightedObject<T>> objs, bool descending = false)
+        {
             List<WeightedObject<T>> result = objs.ToList();
 
             SortByWeightInPlace(result);
@@ -51,7 +52,8 @@ namespace Dexter.Abstractions {
         /// <param name="objs">The list to sort.</param>
         /// <param name="descending">Whether to sort the list in a descending order.</param>
 
-        public static void SortByWeightInPlace(List<WeightedObject<T>> objs, bool descending = false) {
+        public static void SortByWeightInPlace(List<WeightedObject<T>> objs, bool descending = false)
+        {
             objs.Sort((a, b) => (a.weight < b.weight ^ descending) ? -1 : 1);
         }
     }

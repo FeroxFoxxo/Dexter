@@ -1,17 +1,19 @@
-﻿using Dexter.Configurations;
-using Dexter.Attributes.Methods;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Configurations;
+using Dexter.Databases.CustomCommands;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Dexter.Databases.CustomCommands;
 using Discord.Commands;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class CustomCommands {
+    public partial class CustomCommands
+    {
 
         /// <summary>
         /// The CustomCommand method runs on CC and will add/edit/remove/get a custom command in the CustomCommandDB
@@ -32,10 +34,13 @@ namespace Dexter.Commands {
         [Alias("customcommand", "command")]
         [RequireModerator]
 
-        public async Task CustomCommand (ActionType ActionType, string CommandName, [Optional] [Remainder] string Reply) {
-            switch (ActionType) {
+        public async Task CustomCommand(ActionType ActionType, string CommandName, [Optional][Remainder] string Reply)
+        {
+            switch (ActionType)
+            {
                 case ActionType.Add:
-                    if (string.IsNullOrEmpty(Reply)) {
+                    if (string.IsNullOrEmpty(Reply))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable To Add Reply.")
                             .WithDescription("Reply is not given! Please enter a reply with this command.")
@@ -43,7 +48,8 @@ namespace Dexter.Commands {
                         return;
                     }
 
-                    if (CustomCommandDB.GetCommandByNameOrAlias(CommandName) != null) {
+                    if (CustomCommandDB.GetCommandByNameOrAlias(CommandName) != null)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable To Add Reply.")
                             .WithDescription($"A command with the name `{BotConfiguration.Prefix}{CommandName}` already exists!")
@@ -51,7 +57,8 @@ namespace Dexter.Commands {
                         return;
                     }
 
-                    if (Reply.Length > 1000) {
+                    if (Reply.Length > 1000)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable To Add Reply.")
                             .WithDescription("Heya! Please cut down on your length of reply. " +
@@ -80,7 +87,8 @@ namespace Dexter.Commands {
 
                     break;
                 case ActionType.Edit:
-                    if (string.IsNullOrEmpty(Reply)) {
+                    if (string.IsNullOrEmpty(Reply))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable To Edit Reply.")
                             .WithDescription("Reply is not given! Please enter a reply with this command.")
@@ -90,7 +98,8 @@ namespace Dexter.Commands {
 
                     CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
-                    if (Command == null) {
+                    if (Command == null)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable To Edit Reply.")
                             .WithDescription($"A command with the name `{BotConfiguration.Prefix}{CommandName}` doesn't exist!")
@@ -98,7 +107,8 @@ namespace Dexter.Commands {
                         return;
                     }
 
-                    if (Reply.Length > 1000) {
+                    if (Reply.Length > 1000)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable To Edit Reply.")
                             .WithDescription($"Heya! Please cut down on your length of reply. " +
@@ -141,7 +151,8 @@ namespace Dexter.Commands {
                 case ActionType.Get:
                     CustomCommand GetCommand = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
-                    if (GetCommand == null) {
+                    if (GetCommand == null)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable To Get Reply.")
                             .WithDescription("A command with the name `{BotConfiguration.Prefix}{CommandName}` doesn't exist!")
@@ -172,11 +183,13 @@ namespace Dexter.Commands {
         ///     Reply = The reply of the given command.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public void CreateCommandCallback(Dictionary<string, string> Parameters) {
+        public void CreateCommandCallback(Dictionary<string, string> Parameters)
+        {
             string CommandName = Parameters["CommandName"];
             string Reply = Parameters["Reply"];
 
-            CustomCommandDB.CustomCommands.Add(new CustomCommand() {
+            CustomCommandDB.CustomCommands.Add(new CustomCommand()
+            {
                 CommandName = CommandName,
                 Reply = Reply,
                 Alias = ""
@@ -193,7 +206,8 @@ namespace Dexter.Commands {
         ///     Reply = The edited reply of the given command.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public void EditCommandCallback(Dictionary<string, string> Parameters) {
+        public void EditCommandCallback(Dictionary<string, string> Parameters)
+        {
             string CommandName = Parameters["CommandName"];
             string Reply = Parameters["Reply"];
 
@@ -210,7 +224,8 @@ namespace Dexter.Commands {
         /// </param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public void RemoveCommandCallback(Dictionary<string, string> Parameters) {
+        public void RemoveCommandCallback(Dictionary<string, string> Parameters)
+        {
             string CommandName = Parameters["CommandName"];
 
             CustomCommandDB.CustomCommands.Remove(CustomCommandDB.GetCommandByNameOrAlias(CommandName));

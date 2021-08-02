@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Dexter.Databases.Games {
+﻿namespace Dexter.Databases.Games
+{
 
     /// <summary>
     /// Indicates a game type that a game instance can take on.
     /// </summary>
 
-    public enum GameType {
+    public enum GameType
+    {
 
         /// <summary>
         /// The default GameType, it should largely be unused.

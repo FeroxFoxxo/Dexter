@@ -1,15 +1,17 @@
-﻿using System;
-using System.Linq;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 
-namespace Dexter.Databases.Reminders {
+namespace Dexter.Databases.Reminders
+{
 
     /// <summary>
     /// Contains all reminders and relevant management methods for the Reminder System.
     /// </summary>
 
-    public class ReminderDB : Database {
+    public class ReminderDB : Database
+    {
 
         /// <summary>
         /// Holds all individual reminders and their related information for processing.
@@ -23,7 +25,8 @@ namespace Dexter.Databases.Reminders {
         /// <param name="ReminderID">The ID of the reminder to fetch.</param>
         /// <returns>A <c>Reminder</c> object if one with the given ID exists, <see langword="null"/> otherwise.</returns>
 
-        public Reminder GetReminder(int ReminderID) {
+        public Reminder GetReminder(int ReminderID)
+        {
             return Reminders.Find(ReminderID);
         }
 
@@ -33,7 +36,8 @@ namespace Dexter.Databases.Reminders {
         /// <param name="User">The Issuer of reminders to filter for.</param>
         /// <returns>A <c>Reminder[]</c> array, where all Issuers are <paramref name="User"/>.</returns>
 
-        public Reminder[] GetRemindersByUser(Discord.IUser User) {
+        public Reminder[] GetRemindersByUser(Discord.IUser User)
+        {
             return GetRemindersByUser(User.Id);
         }
 
@@ -43,7 +47,8 @@ namespace Dexter.Databases.Reminders {
         /// <param name="UserID">The ID of the Issuer of reminders to filter for.</param>
         /// <returns>A <c>Reminder[]</c> array, where all IssuerIDs are <paramref name="UserID"/>.</returns>
 
-        public Reminder[] GetRemindersByUser(ulong UserID) {
+        public Reminder[] GetRemindersByUser(ulong UserID)
+        {
             return Reminders.AsQueryable().Where(r => r.IssuerID == UserID).ToArray();
         }
 
@@ -55,8 +60,10 @@ namespace Dexter.Databases.Reminders {
         /// <param name="Message">The content of the reminder.</param>
         /// <returns>A <c>Reminder</c> object which includes the assigned ID.</returns>
 
-        public Reminder AddReminder(Discord.IUser User, DateTimeOffset Time, string Message) {
-            Reminder r = new() {
+        public Reminder AddReminder(Discord.IUser User, DateTimeOffset Time, string Message)
+        {
+            Reminder r = new()
+            {
                 ID = GenerateToken(),
                 IssuerID = User.Id,
                 DateTimeRelease = Time.ToUnixTimeSeconds(),
@@ -75,7 +82,8 @@ namespace Dexter.Databases.Reminders {
         /// </summary>
         /// <returns>A unique integer that can be used as a key for a new Event in the Events database.</returns>
 
-        public int GenerateToken() {
+        public int GenerateToken()
+        {
             while (Reminders.Find(Count) != null) Count++;
             return Count;
         }

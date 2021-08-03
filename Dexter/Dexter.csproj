@@ -12,9 +12,6 @@
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<AnalysisLevel>preview</AnalysisLevel>
 		<Nullable>enable</Nullable>
-		<PublishTrimmed>true</PublishTrimmed>
-		<TrimMode>link</TrimMode>
-		<SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

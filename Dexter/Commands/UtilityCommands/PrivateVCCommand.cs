@@ -88,6 +88,8 @@ namespace Dexter.Commands
 
                     await WaitingChannel.ModifyAsync((VoiceChannelProperties properties) => properties.CategoryId = UtilityConfiguration.PrivateCategoryID);
 
+                    await WaitingChannel.SyncPermissionsAsync();
+
                     await WaitingChannel.AddPermissionOverwriteAsync(AwooRole, OverwritePermissions.DenyAll(WaitingChannel).Modify(viewChannel: PermValue.Allow, connect: PermValue.Allow));
 
                     await WaitingChannel.AddPermissionOverwriteAsync(DivineFurRole, OverwritePermissions.DenyAll(WaitingChannel).Modify(viewChannel: PermValue.Allow, connect: PermValue.Allow, moveMembers: PermValue.Allow));
@@ -96,6 +98,8 @@ namespace Dexter.Commands
                 IVoiceChannel Channel = await Context.Guild.CreateVoiceChannelAsync(VCName);
 
                 await Channel.ModifyAsync((VoiceChannelProperties properties) => properties.CategoryId = UtilityConfiguration.PrivateCategoryID);
+
+                await Channel.SyncPermissionsAsync();
 
                 await Channel.AddPermissionOverwriteAsync(Context.User, OverwritePermissions.AllowAll(Channel).Modify(createInstantInvite: PermValue.Deny, prioritySpeaker: PermValue.Deny));
 

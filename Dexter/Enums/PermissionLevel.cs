@@ -15,10 +15,10 @@
         Default,
 
         /// <summary>
-        /// The DIVINE FUR value is given to a user who hold the divine fur role specified in the bot configuration.
+        /// The UNIFURSAL value is given to a user who hold the divine fur role specified in the bot configuration.
         /// </summary>
 
-        DivineFur,
+        Unifursal,
 
         /// <summary>
         /// The GREETFUR value is given to a user who hold the greetfur role specified in the bot configuration.

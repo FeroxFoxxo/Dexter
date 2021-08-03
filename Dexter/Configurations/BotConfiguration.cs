@@ -47,10 +47,10 @@ namespace Dexter.Configurations
         public ulong GreetFurRoleID { get; set; }
 
         /// <summary>
-        /// The DIVINE FUR ROLE ID is the snowflake ID of the role that the divine furs have.
+        /// The UNIFURSAL ROLE ID is the snowflake ID of the role that the unifusal + members have.
         /// </summary>
 
-        public ulong DivineFurRoleID { get; set; }
+        public ulong UnifursalRoleID { get; set; }
 
         /// <summary>
         /// The GUILD ID is the snowflake ID of the main guild the bot is in.

@@ -21,7 +21,7 @@ namespace Dexter.Commands
         [Command("createvc", RunMode = RunMode.Async)]
         [Summary("Creates a personal VC [DIVINE FUR+ ONLY].")]
         [Alias("privatevc")]
-        [RequireDivineFur]
+        [RequireUnifursal]
         [BotChannel]
 
         public async Task CreateVCCommand([Remainder] string VCName)
@@ -82,13 +82,13 @@ namespace Dexter.Commands
 
                 if (WaitingChannel == null)
                 {
-                    IRole DivineFurRole = Context.Guild.GetRole(BotConfiguration.DivineFurRoleID);
+                    IRole DivineFurRole = Context.Guild.GetRole(BotConfiguration.UnifursalRoleID);
 
                     WaitingChannel = await Context.Guild.CreateVoiceChannelAsync(UtilityConfiguration.WaitingVCName);
 
                     await WaitingChannel.ModifyAsync((VoiceChannelProperties properties) => properties.CategoryId = UtilityConfiguration.PrivateCategoryID);
 
-                    await WaitingChannel.SyncPermissionsAsync();
+                    await WaitingChannel.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, OverwritePermissions.DenyAll(WaitingChannel));
 
                     await WaitingChannel.AddPermissionOverwriteAsync(AwooRole, OverwritePermissions.DenyAll(WaitingChannel).Modify(viewChannel: PermValue.Allow, connect: PermValue.Allow));
 
@@ -99,7 +99,7 @@ namespace Dexter.Commands
 
                 await Channel.ModifyAsync((VoiceChannelProperties properties) => properties.CategoryId = UtilityConfiguration.PrivateCategoryID);
 
-                await Channel.SyncPermissionsAsync();
+                await Channel.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, OverwritePermissions.DenyAll(WaitingChannel));
 
                 await Channel.AddPermissionOverwriteAsync(Context.User, OverwritePermissions.AllowAll(Channel).Modify(createInstantInvite: PermValue.Deny, prioritySpeaker: PermValue.Deny));
 

@@ -37,8 +37,8 @@ namespace Dexter.Extensions
                 return PermissionLevel.Moderator;
             else if (GuildUser.RoleIds.Contains(BotConfiguration.GreetFurRoleID))
                 return PermissionLevel.GreetFur;
-            else if (GuildUser.RoleIds.Contains(BotConfiguration.DivineFurRoleID))
-                return PermissionLevel.DivineFur;
+            else if (GuildUser.RoleIds.Contains(BotConfiguration.UnifursalRoleID))
+                return PermissionLevel.Unifursal;
             else
                 return PermissionLevel.Default;
         }

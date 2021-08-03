@@ -22,6 +22,7 @@ namespace Dexter.Commands
         [Summary("Creates a personal VC [DIVINE FUR+ ONLY].")]
         [Alias("privatevc")]
         [RequireDivineFur]
+        [BotChannel]
 
         public async Task CreateVCCommand([Remainder] string VCName)
         {

@@ -18,7 +18,7 @@ namespace Dexter.Commands
         /// <param name="VCName">The name of the VC that the user wishes to create.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        [Command("createvc")]
+        [Command("createvc", RunMode = RunMode.Async)]
         [Summary("Creates a personal VC [DIVINE FUR+ ONLY].")]
         [Alias("privatevc")]
         [RequireDivineFur]
@@ -107,7 +107,7 @@ namespace Dexter.Commands
                 });
 
                 await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle($"Created {VCName}.")
+                    .WithTitle($"Created ``{VCName}``")
                     .WithDescription("Haiya! Your private voice channel has sucessfully been created. " +
                         "You should have full permission to edit it, move members and much more! " +
                         "Have fun~!")

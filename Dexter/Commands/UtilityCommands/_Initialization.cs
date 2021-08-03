@@ -70,6 +70,12 @@ namespace Dexter.Commands
 
         public WolframAlphaClient WolframAlphaClient;
 
+        /// <summary>
+        /// Levelling role for getting the Awoo role.
+        /// </summary>
+        
+        public LevelingConfiguration LevelingConfiguration { get; set; }
+
     }
 
 }

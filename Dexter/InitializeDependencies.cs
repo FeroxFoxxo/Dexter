@@ -40,7 +40,7 @@ namespace Dexter
             // Draws "STARTING..." in the color of cyan.
             Console.ForegroundColor = ConsoleColor.Cyan;
 
-            await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render("Starting..."));
+            await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render("Dexter Bot"));
 
             string Version = string.Empty;
 

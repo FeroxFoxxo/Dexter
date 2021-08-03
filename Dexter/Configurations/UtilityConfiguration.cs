@@ -76,5 +76,12 @@ namespace Dexter.Configurations
         /// </summary>
 
         public ulong[] ColorChangeRoles { get; set; }
+
+        /// <summary>
+        /// The snowflake ID for the private voice chat category.
+        /// </summary>
+        
+        public ulong PrivateCategoryID { get; set;  }
+
     }
 }

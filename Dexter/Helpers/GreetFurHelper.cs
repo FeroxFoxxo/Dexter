@@ -33,14 +33,14 @@ namespace Dexter.Commands
             // The file token.json stores the user's access and refresh tokens, and is created
             // automatically when the authorization flow completes for the first time.
 
-            UserCredential Credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                GoogleClientSecrets.Load(Stream).Secrets,
+            UserCredential Credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                GoogleClientSecrets.FromStream(Stream).Secrets,
                 new string[1] { SheetsService.Scope.SpreadsheetsReadonly },
                 "user",
                 CancellationToken.None,
                 new FileDataStore(GreetFurConfiguration.TokenFile, true),
                 new PromptCodeReceiver()
-            ).Result;
+            );
 
             // Create Google Sheets API service.
             SheetsService = new SheetsService(new BaseClientService.Initializer()

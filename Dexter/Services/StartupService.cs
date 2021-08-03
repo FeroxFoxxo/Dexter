@@ -86,7 +86,6 @@ namespace Dexter.Services
 
         public async Task RunBot(string Token)
         {
-            LoggingService.LockedCMDOut = true;
             await DiscordSocketClient.LoginAsync(TokenType.Bot, Token);
             await DiscordSocketClient.StartAsync();
         }
@@ -106,15 +105,7 @@ namespace Dexter.Services
 
             SocketChannel LoggingChannel = DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID);
 
-            Console.Clear();
-
             Console.Title = $"{DiscordSocketClient.CurrentUser.Username} v{Version} (Discord.Net v{DiscordConfig.Version})";
-
-            Console.ForegroundColor = ConsoleColor.Cyan;
-
-            await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(DiscordSocketClient.CurrentUser.Username));
-
-            LoggingService.LockedCMDOut = false;
 
             if (LoggingChannel == null || LoggingChannel is not ITextChannel)
                 return;

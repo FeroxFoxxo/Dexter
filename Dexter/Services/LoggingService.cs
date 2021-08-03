@@ -25,12 +25,6 @@ namespace Dexter.Services
         public CommandService CommandService { get; set; }
 
         /// <summary>
-        /// The LockedCMDOut is a boolean of whether or not the output of the console is locked or not.
-        /// </summary>
-
-        public bool LockedCMDOut = false;
-
-        /// <summary>
         /// The LogFile is the string of the location of the logfile. It can be used to locate and send the logfile.
         /// </summary>
 
@@ -41,12 +35,6 @@ namespace Dexter.Services
         /// </summary>
 
         public readonly object LockLogFile = new();
-
-        /// <summary>
-        /// The BackloggedMessages is a list that can be used to store console logs while Dexter is initializing, so they are not cleared on ready.
-        /// </summary>
-
-        public readonly List<LogMessage> BackloggedMessages = new();
 
         /// <summary>
         /// The Initialize override hooks into both the Commands.Log event and the Client.Log event to run LogMessageAsync.
@@ -68,23 +56,6 @@ namespace Dexter.Services
 
         public async Task LogMessageAsync(LogMessage LogMessage)
         {
-            // If the CMD is locked we add the message to a backlog of messages and log it to the console, not writing to the file.
-            if (LockedCMDOut)
-            {
-                await LogToConsole(LogMessage);
-                BackloggedMessages.Add(LogMessage);
-                return;
-            }
-
-            // If we have backlogged messages, we loop through them and clear them out.
-            if (BackloggedMessages.Count > 0)
-            {
-                foreach (LogMessage Message in BackloggedMessages)
-                    await LogToFile(Message);
-
-                BackloggedMessages.Clear();
-            }
-
             // We finally log the message to the console and file if it is not locked.
             await LogToFile(LogMessage);
         }

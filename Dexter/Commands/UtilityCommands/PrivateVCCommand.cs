@@ -19,7 +19,7 @@ namespace Dexter.Commands
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         [Command("createvc", RunMode = RunMode.Async)]
-        [Summary("Creates a personal VC [DIVINE FUR+ ONLY].")]
+        [Summary("Creates a personal VC [UNIFURSAL+ ONLY].")]
         [Alias("privatevc")]
         [RequireUnifursal]
         [BotChannel]
@@ -78,7 +78,7 @@ namespace Dexter.Commands
             {
                 IVoiceChannel? WaitingChannel = Context.Guild.VoiceChannels.FirstOrDefault(Channel => Channel.Name == UtilityConfiguration.WaitingVCName);
 
-                IRole AwooRole = Context.Guild.GetRole(LevelingConfiguration.Levels.Values.Min());
+                IRole AwooRole = Context.Guild.GetRole(LevelingConfiguration.Levels[LevelingConfiguration.Levels.Keys.Min()]);
 
                 if (WaitingChannel == null)
                 {

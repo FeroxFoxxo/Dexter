@@ -83,5 +83,12 @@ namespace Dexter.Configurations
         
         public ulong PrivateCategoryID { get; set;  }
 
+
+        /// <summary>
+        /// The name of the waiting VC that people will be in when waiting to be dragged in and out of private VCs.
+        /// </summary>
+
+        public string WaitingVCName { get; set; }
+
     }
 }

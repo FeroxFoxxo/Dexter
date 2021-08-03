@@ -2,7 +2,6 @@
 using Dexter.Configurations;
 using Discord;
 using Discord.WebSocket;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -39,11 +38,9 @@ namespace Dexter.Services
 
         private async Task LoopVCs()
         {
-            ICategoryChannel CategoryChannel = DiscordSocketClient.GetChannel(UtilityConfiguration.PrivateCategoryID) as ICategoryChannel;
+            SocketCategoryChannel CategoryChannel = DiscordSocketClient.GetChannel(UtilityConfiguration.PrivateCategoryID) as SocketCategoryChannel;
 
-            IReadOnlyCollection<IVoiceChannel> Channels = await CategoryChannel.Guild.GetVoiceChannelsAsync();
-
-            foreach(SocketVoiceChannel Channel in Channels.Where( (IVoiceChannel Check ) => Check.CategoryId == CategoryChannel.Id))
+            foreach(SocketVoiceChannel Channel in CategoryChannel.Guild.VoiceChannels.Where( (IVoiceChannel Check ) => Check.CategoryId == CategoryChannel.Id))
             {
                 await CheckRemoveVCs(Channel);
             }
@@ -55,7 +52,16 @@ namespace Dexter.Services
 
             if (UserCount <= 0)
             {
-                await Channel.DeleteAsync();
+                IEnumerable<IVoiceChannel> VoiceChannels = Channel.Guild.VoiceChannels.Where((IVoiceChannel Check) => Check.CategoryId == UtilityConfiguration.PrivateCategoryID);
+                
+                if (VoiceChannels.Count() == 2)
+                {
+                    foreach (IVoiceChannel DeadChannel in VoiceChannels)
+                    {
+                        await DeadChannel.DeleteAsync();
+                    }
+                } else
+                    await Channel.DeleteAsync();
             }
         }
 

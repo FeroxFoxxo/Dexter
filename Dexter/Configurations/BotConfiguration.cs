@@ -17,6 +17,12 @@ namespace Dexter.Configurations
         public string Prefix { get; set; }
 
         /// <summary>
+        /// The BOTNAME field is the name of the bot.
+        /// </summary>
+
+        public string? BotName { get; set; }
+
+        /// <summary>
         /// The MODERATOR ROLE ID is the snowflake ID of the role that the moderators have.
         /// </summary>
 

@@ -1,4 +1,5 @@
 ﻿using Dexter.Abstractions;
+using Dexter.Configurations;
 using Dexter.Services;
 using Discord;
 using Discord.Commands;
@@ -36,11 +37,6 @@ namespace Dexter
         {
             // Set title to "Starting..."
             Console.Title = "Starting...";
-
-            // Draws "STARTING..." in the color of cyan.
-            Console.ForegroundColor = ConsoleColor.Cyan;
-
-            await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render("Dexter Bot"));
 
             string Version = string.Empty;
 
@@ -161,6 +157,11 @@ namespace Dexter
 
             // Builds the service collection.
             ServiceProvider ServiceProvider = ServiceCollection.BuildServiceProvider();
+
+            // Draws "STARTING..." in the color of cyan.
+            Console.ForegroundColor = ConsoleColor.Cyan;
+
+            await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(ServiceProvider.GetRequiredService<BotConfiguration>().BotName));
 
             // Makes sure all entity databases exist and are created if they do not.
             Assembly.GetExecutingAssembly().GetTypes()

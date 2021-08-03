@@ -4,7 +4,6 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
-using Figgle;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using System;

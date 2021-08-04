@@ -49,7 +49,7 @@ namespace Dexter.Databases.Proposals
         /// The Reason field specifies the reason a suggestion has been approved or denied.
         /// </summary>
 
-        public string Reason { get; set; }
+        public string? Reason { get; set; }
 
         /// <summary>
         /// The Message ID field is the snowflake ID of the embed that has been put forth in the #suggestions channel.
@@ -61,19 +61,19 @@ namespace Dexter.Databases.Proposals
         /// The Proxy URL field is the URL of the attachment which has been fed through the storage channel.
         /// </summary>
 
-        public string ProxyURL { get; set; }
+        public string? ProxyURL { get; set; }
 
         /// <summary>
         /// The true avatar URL of the user who first made the proposal.
         /// </summary>
 
-        public string AvatarURL { get; set; }
+        public string? AvatarURL { get; set; }
 
         /// <summary>
         /// The username of the user who first made the proposal.
         /// </summary>
 
-        public string Username { get; set; }
+        public string? Username { get; set; }
     }
 
 }

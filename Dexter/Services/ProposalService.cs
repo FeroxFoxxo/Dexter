@@ -605,9 +605,10 @@ namespace Dexter.Services
             if (SocketChannel is SocketTextChannel TextChannel)
             {
                 IMessage ProposalMessage = await TextChannel.GetMessageAsync(MessageID);
-
+                Console.Out.WriteLine($"Modifying the status of proposal: {Proposal.Tracker}, linked message is {ProposalMessage}.");
                 if (ProposalMessage is IUserMessage ProposalMSG)
                 {
+                    Console.Out.WriteLine($"{ProposalMessage} is of type \"IUserMessage\"");
                     await ProposalMessage.RemoveAllReactionsAsync();
 
                     try
@@ -630,7 +631,7 @@ namespace Dexter.Services
                     }
                 }
                 else
-                    throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? ProposalType: {ProposalMessage.GetType()}");
+                    throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? ProposalType: {Proposal.ProposalType}");
             }
             else
                 throw new Exception($"Eek! The given channel of {SocketChannel} turned out *not* to be an instance of SocketTextChannel, rather {SocketChannel.GetType().Name}!");

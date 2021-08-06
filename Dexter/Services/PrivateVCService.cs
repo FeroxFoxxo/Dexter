@@ -36,9 +36,9 @@ namespace Dexter.Services
         public override void Initialize()
         {
             DiscordSocketClient.Ready += CheckRemoveVCs;
-            DiscordSocketClient.UserVoiceStateUpdated += async (_, OldVoiceChannel, NewVoiceChannel) => {
-                if (NewVoiceChannel.VoiceChannel == null && OldVoiceChannel.VoiceChannel != null)
-                    if (OldVoiceChannel.VoiceChannel.CategoryId == UtilityConfiguration.PrivateCategoryID)
+            DiscordSocketClient.UserVoiceStateUpdated += async (_, oldVoiceChannel, newVoiceChannel) => {
+                if (newVoiceChannel.VoiceChannel == null && oldVoiceChannel.VoiceChannel != null)
+                    if (oldVoiceChannel.VoiceChannel.CategoryId == UtilityConfiguration.PrivateCategoryID)
                         await CheckRemoveVCs();
             };
         }
@@ -50,32 +50,32 @@ namespace Dexter.Services
 
         public async Task CheckRemoveVCs()
         {
-            SocketCategoryChannel? CategoryChannel = DiscordSocketClient.GetChannel(UtilityConfiguration.PrivateCategoryID) as SocketCategoryChannel;
+            SocketCategoryChannel? categoryChannel = DiscordSocketClient.GetChannel(UtilityConfiguration.PrivateCategoryID) as SocketCategoryChannel;
 
-            if (CategoryChannel != null)
+            if (categoryChannel != null)
             {
-                IEnumerable<SocketVoiceChannel> VoiceChannels = CategoryChannel.Guild.VoiceChannels.Where((SocketVoiceChannel Check) => Check.CategoryId == UtilityConfiguration.PrivateCategoryID && Check.Name != UtilityConfiguration.WaitingVCName);
+                IEnumerable<SocketVoiceChannel> voiceChannels = categoryChannel.Guild.VoiceChannels.Where((SocketVoiceChannel check) => check.CategoryId == UtilityConfiguration.PrivateCategoryID && check.Name != UtilityConfiguration.WaitingVCName);
 
-                bool VoiceLobbyExists = false;
+                bool voiceLobbyExists = false;
 
-                foreach (SocketVoiceChannel VoiceChannel in VoiceChannels)
+                foreach (SocketVoiceChannel voiceChannel in voiceChannels)
                 {
-                    int UserCount = VoiceChannel.Users.Count;
+                    int userCount = voiceChannel.Users.Count;
 
-                    if (UserCount <= 0)
+                    if (userCount <= 0)
                     {
-                        await VoiceChannel.DeleteAsync();
+                        await voiceChannel.DeleteAsync();
                     }
                     else
-                        VoiceLobbyExists = true;
+                        voiceLobbyExists = true;
                 }
 
-                if (!VoiceLobbyExists)
+                if (!voiceLobbyExists)
                 {
-                    SocketVoiceChannel? WaitingLobby = CategoryChannel.Guild.VoiceChannels.FirstOrDefault((SocketVoiceChannel Check) => Check.Name == UtilityConfiguration.WaitingVCName);
+                    SocketVoiceChannel? waitingLobby = categoryChannel.Guild.VoiceChannels.FirstOrDefault((SocketVoiceChannel check) => check.Name == UtilityConfiguration.WaitingVCName);
 
-                    if (WaitingLobby != null)
-                        await WaitingLobby.DeleteAsync();
+                    if (waitingLobby != null)
+                        await waitingLobby.DeleteAsync();
                 }
             }
             else

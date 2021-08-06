@@ -2,16 +2,13 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net5.0</TargetFramework>
-		<AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
-		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+		<TargetFramework>net6.0</TargetFramework>
 		<PlatformTarget>x64</PlatformTarget>
 		<ApplicationIcon>DexLove.ico</ApplicationIcon>
 		<Optimize>true</Optimize>
 		<DefaultItemExcludes>.git\**;$(DefaultItemExcludes)</DefaultItemExcludes>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<AnalysisLevel>preview</AnalysisLevel>
-		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

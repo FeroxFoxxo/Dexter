@@ -37,9 +37,9 @@ namespace Dexter.Services
         {
             DiscordSocketClient.Ready += CheckRemoveVCs;
             DiscordSocketClient.UserVoiceStateUpdated += async (_, oldVoiceChannel, newVoiceChannel) => {
-                if (newVoiceChannel.VoiceChannel == null && oldVoiceChannel.VoiceChannel != null)
-                    if (oldVoiceChannel.VoiceChannel.CategoryId == UtilityConfiguration.PrivateCategoryID)
-                        await CheckRemoveVCs();
+                if (oldVoiceChannel.VoiceChannel is not null
+                && oldVoiceChannel.VoiceChannel.CategoryId == UtilityConfiguration.PrivateCategoryID)
+                    await CheckRemoveVCs();
             };
         }
 

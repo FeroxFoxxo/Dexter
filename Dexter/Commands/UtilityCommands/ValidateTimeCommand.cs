@@ -8,8 +8,10 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
-    partial class UtilityCommands {
+namespace Dexter.Commands
+{
+    partial class UtilityCommands
+    {
 
         /// <summary>
         /// Provides help and support to the users to help them use proper syntax in terms of inputting correct DateTimeOffset-parsable strings.
@@ -23,8 +25,10 @@ namespace Dexter.Commands {
             "Use `checktime examples` to see a few examples.")]
         [BotChannel]
 
-        public async Task CheckTimeCommand([Remainder] string InputDate = "") {
-            if(string.IsNullOrEmpty(InputDate)) {
+        public async Task CheckTimeCommand([Remainder] string InputDate = "")
+        {
+            if (string.IsNullOrEmpty(InputDate))
+            {
 
                 await Context.Channel.SendMessageAsync("Dates are given in the following format. Elements in parentheses are optional.\n" +
                         $"**(DATE)**: {LanguageHelper.DEFAULT_DATE_FORMAT_INFO} **|** Month = full name or 3 first letters of a month, dd = day of month, year = full year or last two numbers.\n" +
@@ -34,7 +38,8 @@ namespace Dexter.Commands {
                 return;
             }
 
-            if(InputDate.ToLower() == "examples") {
+            if (InputDate.ToLower() == "examples")
+            {
                 await BuildEmbed(EmojiEnum.Sign)
                     .WithTitle("Date Format Examples")
                     .WithDescription(
@@ -50,7 +55,8 @@ namespace Dexter.Commands {
                 return;
             }
 
-            if(!InputDate.TryParseTime(CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset Time, out string Error)) {
+            if (!InputDate.TryParseTime(CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset Time, out string Error))
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Parse attempt failed!")
                     .WithDescription(Error)

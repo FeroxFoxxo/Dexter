@@ -1,20 +1,22 @@
-﻿using System;
+﻿using Dexter.Abstractions;
+using Dexter.Databases.UserProfiles;
+using Discord;
+using Discord.WebSocket;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Dexter.Abstractions;
-using Dexter.Databases.UserProfiles;
-using Discord;
-using Discord.WebSocket;
 
-namespace Dexter.Services {
+namespace Dexter.Services
+{
 
     /// <summary>
     /// Stores, manages, and records modifications to users' nicknames among other data.
     /// </summary>
 
-    public class UserRecordsService : Service {
+    public class UserRecordsService : Service
+    {
 
         /// <summary>
         /// Holds all information used in the module for management.
@@ -26,20 +28,25 @@ namespace Dexter.Services {
         /// This method is called after all dependencies are initialized and serves to hook the appropriate events to this service's methods.
         /// </summary>
 
-        public override void Initialize() {
+        public override void Initialize()
+        {
             DiscordSocketClient.GuildMemberUpdated += RecordNicknameChange;
             DiscordSocketClient.UserUpdated += RecordUserNameChange;
             DiscordSocketClient.UserJoined += RecordUserJoin;
         }
 
-        private async Task RecordUserNameChange(SocketUser Before, SocketUser After) {
-            if (Before.Username != After.Username && !string.IsNullOrEmpty(After.Username)) {
+        private async Task RecordUserNameChange(SocketUser Before, SocketUser After)
+        {
+            if (Before.Username != After.Username && !string.IsNullOrEmpty(After.Username))
+            {
                 NameRecord Record = ProfilesDB.Names.AsQueryable().Where(n => n.Name == After.Username && n.UserID == After.Id && n.Type == NameType.Username).FirstOrDefault();
 
                 if (Record != null)
                     Record.SetTime = DateTimeOffset.Now.ToUnixTimeSeconds();
-                else {
-                    ProfilesDB.Names.Add(new() {
+                else
+                {
+                    ProfilesDB.Names.Add(new()
+                    {
                         UserID = After.Id,
                         Name = After.Username,
                         SetTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
@@ -57,14 +64,18 @@ namespace Dexter.Services {
         /// <param name="After">The information of the user after the modification.</param>
         /// <returns>A completed <c>Task</c> object.</returns>
 
-        public async Task RecordNicknameChange(SocketGuildUser Before, SocketGuildUser After) {
-            if (Before.Nickname != After.Nickname && !string.IsNullOrEmpty(After.Nickname)) {
+        public async Task RecordNicknameChange(SocketGuildUser Before, SocketGuildUser After)
+        {
+            if (Before.Nickname != After.Nickname && !string.IsNullOrEmpty(After.Nickname))
+            {
                 NameRecord Record = ProfilesDB.Names.AsQueryable().Where(n => n.Name == After.Username && n.UserID == After.Id && n.Type == NameType.Nickname).FirstOrDefault();
 
                 if (Record != null)
                     Record.SetTime = DateTimeOffset.Now.ToUnixTimeSeconds();
-                else {
-                    ProfilesDB.Names.Add(new() {
+                else
+                {
+                    ProfilesDB.Names.Add(new()
+                    {
                         UserID = After.Id,
                         Name = After.Nickname,
                         SetTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
@@ -86,21 +97,29 @@ namespace Dexter.Services {
         /// <param name="IsRegex">Whether <paramref name="Pattern"/> should be interpreted as a regular expression.</param>
         /// <returns>A List of strings containing all nicknames that fit <paramref name="Pattern"/>.</returns>
 
-        public List<NameRecord> RemoveNames(IUser User, NameType NameType, string Pattern, bool IsRegex = false) {
+        public List<NameRecord> RemoveNames(IUser User, NameType NameType, string Pattern, bool IsRegex = false)
+        {
             List<NameRecord> Result = new();
             List<NameRecord> Records = ProfilesDB.Names.Where(n => n.Type == NameType && n.UserID == User.Id).ToList();
             Pattern = Pattern.Trim();
 
-            if (IsRegex) {
-                foreach(NameRecord Record in Records) {
-                    if (Regex.Match(Record.Name, Pattern).Success) {
+            if (IsRegex)
+            {
+                foreach (NameRecord Record in Records)
+                {
+                    if (Regex.Match(Record.Name, Pattern).Success)
+                    {
                         ProfilesDB.Names.Remove(Record);
                         Result.Add(Record.Clone());
                     }
                 }
-            } else {
-                foreach(NameRecord Record in Records) {
-                    if (Record.Name == Pattern) {
+            }
+            else
+            {
+                foreach (NameRecord Record in Records)
+                {
+                    if (Record.Name == Pattern)
+                    {
                         ProfilesDB.Names.Remove(Record);
                         Result = new List<NameRecord>() { Record.Clone() };
                         break;
@@ -119,12 +138,14 @@ namespace Dexter.Services {
         /// <param name="NameType">Whether to query for Nicknames or Usernames.</param>
         /// <returns>An array of strings containing all <paramref name="NameType"/>s <paramref name="User"/> has used.</returns>
 
-        public string[] GetNames(IUser User, NameType NameType) {
+        public string[] GetNames(IUser User, NameType NameType)
+        {
             NameRecord[] NameRecords = GetNameRecords(User, NameType);
 
             string[] Names = new string[NameRecords.Length];
 
-            for(int i = 0; i < Names.Length; i++) {
+            for (int i = 0; i < Names.Length; i++)
+            {
                 Names[i] = NameRecords[i].Name;
             }
 
@@ -138,7 +159,8 @@ namespace Dexter.Services {
         /// <param name="NameType">Whether to query for Nicknames or Usernames.</param>
         /// <returns>An array of NameRecords containing all <paramref name="NameType"/>s <paramref name="User"/> has used.</returns>
 
-        public NameRecord[] GetNameRecords(IUser User, NameType NameType) {
+        public NameRecord[] GetNameRecords(IUser User, NameType NameType)
+        {
             return ProfilesDB.Names.AsQueryable().Where(n => n.Type == NameType && n.UserID == User.Id).ToArray();
         }
 
@@ -148,7 +170,8 @@ namespace Dexter.Services {
         /// <param name="User">The user whose join event is being recorded.</param>
         /// <returns>A completed <c>Task</c> object.</returns>
 
-        public Task RecordUserJoin(SocketGuildUser User) {
+        public Task RecordUserJoin(SocketGuildUser User)
+        {
             UserProfile Profile = ProfilesDB.GetOrCreateProfile(User.Id);
 
             if (Profile.DateJoined != default) return Task.CompletedTask;
@@ -166,7 +189,8 @@ namespace Dexter.Services {
         /// <param name="User">The user whose join date is being queried.</param>
         /// <returns>A <c>DateTimeOffset</c> object detailing the join date of the user, or <see langword="default"/> if no data can be obtained.</returns>
 
-        public DateTimeOffset GetUserJoin(IGuildUser User) {
+        public DateTimeOffset GetUserJoin(IGuildUser User)
+        {
             UserProfile Profile = ProfilesDB.GetOrCreateProfile(User.Id);
 
             if (Profile.DateJoined != default) return DateTimeOffset.FromUnixTimeSeconds(Profile.DateJoined);

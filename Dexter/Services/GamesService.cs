@@ -1,22 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Games;
 using Dexter.Helpers.Games;
 using Discord;
 using Discord.WebSocket;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Dexter.Services {
+namespace Dexter.Services
+{
 
     /// <summary>
     /// This service manages the Dexter Games subsystem and sends events to the appropriate data structures.
     /// </summary>
 
-    public class GamesService : Service {
+    public class GamesService : Service
+    {
 
         /// <summary>
         /// The database holding all relevant dynamic data for game management.
@@ -34,11 +34,13 @@ namespace Dexter.Services {
         /// This method is run after dependencies are initialized and injected, it manages hooking up the service to all relevant events.
         /// </summary>
 
-        public override void Initialize() {
-            DiscordSocketClient.MessageReceived += HandleMessage; 
+        public override void Initialize()
+        {
+            DiscordSocketClient.MessageReceived += HandleMessage;
         }
 
-        private async Task HandleMessage(SocketMessage Message) {
+        private async Task HandleMessage(SocketMessage Message)
+        {
             if (!FunConfiguration.GamesChannels.Contains(Message.Channel.Id) && Message.Channel is not IDMChannel) return;
             if (Message.Content.StartsWith(BotConfiguration.Prefix)) return;
 

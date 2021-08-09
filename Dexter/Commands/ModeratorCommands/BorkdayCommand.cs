@@ -1,7 +1,7 @@
 ﻿using Dexter.Attributes.Methods;
 using Dexter.Configurations;
-using Dexter.Databases.UserProfiles;
 using Dexter.Databases.EventTimers;
+using Dexter.Databases.UserProfiles;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
@@ -12,9 +12,11 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ModeratorCommands {
+    public partial class ModeratorCommands
+    {
 
         /// <summary>
         /// Gives a user the "Happy Borkday" role for 24 hours.
@@ -28,7 +30,8 @@ namespace Dexter.Commands {
         [Alias("birthday")]
         [RequireModerator]
 
-        public async Task GiveBorkday([Optional] IGuildUser User) {
+        public async Task GiveBorkday([Optional] IGuildUser User)
+        {
             if (User == null)
                 User = Context.Guild.GetUser(Context.User.Id);
 
@@ -36,13 +39,16 @@ namespace Dexter.Commands {
 
             if (Borkday == null)
                 BorkdayDB.Profiles.Add(
-                    new UserProfile() {
+                    new UserProfile()
+                    {
                         BorkdayTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
                         UserID = User.Id
                     }
                 );
-            else {
-                if (Borkday.BorkdayTime + TimeSpan.FromDays(364).Seconds > DateTimeOffset.Now.ToUnixTimeSeconds()) {
+            else
+            {
+                if (Borkday.BorkdayTime + TimeSpan.FromDays(364).Seconds > DateTimeOffset.Now.ToUnixTimeSeconds())
+                {
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Unable To Give Borkday Role!")
                         .WithDescription($"Haiya! I was unable to give the borkday role as this user's last borkday was on " +
@@ -52,7 +58,8 @@ namespace Dexter.Commands {
                         .SendEmbed(Context.Channel);
 
                     return;
-                } else
+                }
+                else
                     Borkday.BorkdayTime = DateTimeOffset.Now.ToUnixTimeSeconds();
             }
 
@@ -67,7 +74,8 @@ namespace Dexter.Commands {
 
             await CreateEventTimer(
                 RemoveBorkday,
-                new() {
+                new()
+                {
                     { "User", User.Id.ToString() },
                     { "Role", Role.Id.ToString() }
                 },
@@ -94,7 +102,8 @@ namespace Dexter.Commands {
         /// <param name="Parameters">The target user whose role is to be removed.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task RemoveBorkday(Dictionary<string, string> Parameters) {
+        public async Task RemoveBorkday(Dictionary<string, string> Parameters)
+        {
             ulong UserID = Convert.ToUInt64(Parameters["User"]);
             ulong RoleID = Convert.ToUInt64(Parameters["Role"]);
 

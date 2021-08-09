@@ -3,15 +3,16 @@ using Dexter.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 
-namespace Dexter.Extensions {
+namespace Dexter.Extensions
+{
 
     /// <summary>
     /// The Database Extensions class offers a variety of different extensions that can be applied to a database.
     /// </summary>
-    
-    public static class DatabaseExtensions {
+
+    public static class DatabaseExtensions
+    {
 
         /// <summary>
         /// The GetRandomTopic command extends upon a database set and returns a random, valid entry.
@@ -19,20 +20,17 @@ namespace Dexter.Extensions {
         /// <param name="Topics">The topics field is the set of fun topics you wish to query from.</param>
         /// <param name="TopicType">The type of topic to draw from. It may be a TOPIC or a WOULDYOURATHER.</param>
         /// <returns>A tasked result of an instance of a fun object.</returns>
-        
-        public static async Task<FunTopic> GetRandomTopic(this DbSet<FunTopic> Topics, TopicType TopicType) {
-            if (!Topics.AsQueryable().Any())
+
+        public static FunTopic GetRandomTopic(this DbSet<FunTopic> Topics, TopicType TopicType)
+        {
+            FunTopic[] eligible = Topics.AsQueryable().Where(t => t.TopicType == TopicType && t.EntryType == EntryType.Issue).ToArray();
+
+            if (!eligible.Any())
                 return null;
 
-            int RandomID = new Random().Next(1, Topics.AsQueryable().Count());
+            int randomID = new Random().Next(0, eligible.Length);
 
-            FunTopic FunTopic = Topics.Find(RandomID);
-
-            if (FunTopic != null)
-                if (FunTopic.EntryType == EntryType.Issue && FunTopic.TopicType == TopicType)
-                    return FunTopic;
-
-            return await Topics.GetRandomTopic(TopicType);
+            return eligible[randomID];
         }
 
     }

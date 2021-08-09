@@ -1,19 +1,21 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.CustomCommands {
+namespace Dexter.Databases.CustomCommands
+{
 
     /// <summary>
     /// The CustomCommand class contains information on a custom command, including its name,
     /// the reply it gives, and its possible aliases of sorts.
     /// </summary>
-    
-    public class CustomCommand {
+
+    public class CustomCommand
+    {
 
         /// <summary>
         /// The CommandName is the KEY of the table.
         /// It is the default name of the command.
         /// </summary>
-        
+
         [Key]
 
         public string CommandName { get; set; }
@@ -21,14 +23,14 @@ namespace Dexter.Databases.CustomCommands {
         /// <summary>
         /// The Reply field is what the bot will respond with once the command has been run.
         /// </summary>
-        
+
         public string Reply { get; set; }
 
         /// <summary>
         /// The Alias field is a string of possible aliases a command may have.
         /// Each alias is split by a comma (,).
         /// </summary>
-        
+
         public string Alias { get; set; }
 
     }

@@ -1,13 +1,15 @@
 ﻿using Dexter.Abstractions;
 using System.Collections.Generic;
 
-namespace Dexter.Configurations {
+namespace Dexter.Configurations
+{
 
     /// <summary>
     /// The FunConfiguration relates to attributes required by the FunCommands module.
     /// </summary>
 
-    public class FunConfiguration : JSONConfig {
+    public class FunConfiguration : JSONConfig
+    {
 
         /// <summary>
         /// The EMOJI GUILD ID field is the snowflake ID of the server in which the eight-ball and gay emojis are stored.

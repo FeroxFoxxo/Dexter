@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.Mail {
+namespace Dexter.Databases.Mail
+{
 
     /// <summary>
     /// The Mod Mail class contains information on a message sent to the moderators.
     /// </summary>
 
-    public class ModMail {
+    public class ModMail
+    {
 
         /// <summary>
         /// The TrackerID field is the KEY of the table. It is unique per mail.

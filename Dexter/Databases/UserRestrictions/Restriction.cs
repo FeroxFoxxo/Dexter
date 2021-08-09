@@ -1,13 +1,15 @@
 ﻿using System;
 
-namespace Dexter.Databases.UserRestrictions {
+namespace Dexter.Databases.UserRestrictions
+{
 
     /// <summary>
     /// Represents a set of restrictions from different server features as a combination of flags.
     /// </summary>
 
     [Flags]
-    public enum Restriction : ulong {
+    public enum Restriction : ulong
+    {
         /// <summary>
         /// Represents the null restriction (default)
         /// </summary>
@@ -35,6 +37,10 @@ namespace Dexter.Databases.UserRestrictions {
         /// <summary>
         /// Prevents users from viewing or editing their profiles, or anyone from accessing their profile.
         /// </summary>
-        Social = 32
+        Social = 32,
+        /// <summary>
+        /// Prevents users from obtaining Voice XP altogether.
+        /// </summary>
+        VoiceXP = 64
     }
 }

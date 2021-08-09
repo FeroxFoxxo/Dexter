@@ -1,18 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Databases.Reminders;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
-    partial class UtilityCommands {
+namespace Dexter.Commands
+{
+    partial class UtilityCommands
+    {
 
         const string DateArgSeparator = ";";
         const string DateArgSeparatorName = "a semicolon";
@@ -33,21 +35,27 @@ namespace Dexter.Commands {
             "`UPCOMING` - Shows all upcoming reminders for the user, if any.")]
         [BotChannel]
 
-        public async Task ReminderCommand(string Action, [Remainder] string Arguments = "") {
+        public async Task ReminderCommand(string Action, [Remainder] string Arguments = "")
+        {
             Action = Action.ToLower();
 
             Reminder Reminder;
 
-            switch (Action) { 
+            switch (Action)
+            {
                 case "add":
                     int SeparatorIndex = Arguments.IndexOf(DateArgSeparator);
 
-                    if (SeparatorIndex == -1) {
+                    if (SeparatorIndex == -1)
+                    {
                         System.Text.RegularExpressions.Match Match = System.Text.RegularExpressions.Regex.Match(Arguments, @"\sto\s");
-                        if (Match.Success) {
+                        if (Match.Success)
+                        {
                             SeparatorIndex = Match.Index;
                             Arguments = $"{Arguments[..Match.Index]};{Arguments[(Match.Index + Match.Length)..]}";
-                        } else {
+                        }
+                        else
+                        {
                             await BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle("Unable to parse arguments!")
                                 .WithDescription($"Make sure to separate your time and reminder with {DateArgSeparatorName} ({DateArgSeparator}) or \" to \".")
@@ -59,7 +67,8 @@ namespace Dexter.Commands {
                     string DateSection = Arguments[..SeparatorIndex];
                     string Message = Arguments[(SeparatorIndex + 1)..].Trim();
 
-                    if (!DateSection.TryParseTime(CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset Date, out _)) {
+                    if (!DateSection.TryParseTime(CultureInfo.CurrentCulture, LanguageConfiguration, out DateTimeOffset Date, out _))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable to parse date!")
                             .WithDescription($"Time {DateSection} cannot be parsed into a valid date.\nUse the `{BotConfiguration.Prefix}checktime` command to learn more about this.")
@@ -67,13 +76,16 @@ namespace Dexter.Commands {
                         return;
                     }
 
-                    if (string.IsNullOrEmpty(Message)) {
+                    if (string.IsNullOrEmpty(Message))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Empty Reminder!")
                             .WithDescription("I think reminding you of nothing is kind of unnecessary, don't you think so?")
                             .SendEmbed(Context.Channel);
                         return;
-                    } else if (Message.Length > 1024) {
+                    }
+                    else if (Message.Length > 1024)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Your message is too long!")
                             .WithDescription("Try to keep your reminder under 1024 characters.")
@@ -84,7 +96,7 @@ namespace Dexter.Commands {
                     Reminder = ReminderDB.AddReminder(Context.User, Date, Message);
                     ReminderDB.SaveChanges();
 
-                    await CreateEventTimer(ReminderCallback, new Dictionary<string, string> { { "ID", Reminder.ID.ToString() } }, (int) Date.Subtract(DateTimeOffset.Now).TotalSeconds, Databases.EventTimers.TimerType.Expire);
+                    await CreateEventTimer(ReminderCallback, new Dictionary<string, string> { { "ID", Reminder.ID.ToString() } }, (int)Date.Subtract(DateTimeOffset.Now).TotalSeconds, Databases.EventTimers.TimerType.Expire);
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"🎗Created Reminder #{Reminder.ID}🎗")
@@ -96,7 +108,8 @@ namespace Dexter.Commands {
                     Reminder = await TryParseAndGetReminder(Arguments, Context.User);
                     if (Reminder == null) return;
 
-                    if (Reminder.Status != ReminderStatus.Pending) {
+                    if (Reminder.Status != ReminderStatus.Pending)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Reminder is not Pending!")
                             .WithDescription($"This reminder has already been {Reminder.Status}, it can't be removed.")
@@ -121,7 +134,8 @@ namespace Dexter.Commands {
                     Reminder = await TryParseAndGetReminder(IDArg, Context.User);
                     if (Reminder == null) return;
 
-                    if(Reminder.Status != ReminderStatus.Pending) {
+                    if (Reminder.Status != ReminderStatus.Pending)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Reminder is not Pending!")
                             .WithDescription($"This reminder has already been {Reminder.Status}, it can't be edited.")
@@ -150,19 +164,26 @@ namespace Dexter.Commands {
                         .Where(r => r.Status == ReminderStatus.Pending)
                         .ToList();
                     Reminders.Sort((a1, a2) => a1.DateTimeRelease.CompareTo(a2.DateTimeRelease));
-                    if(Reminders.Count == 0) {
+                    if (Reminders.Count == 0)
+                    {
                         await BuildEmbed(EmojiEnum.Wut)
                             .WithTitle("No upcoming reminders!")
                             .WithDescription("It seems as though you need no assistance with your mental storage allocation process for now!")
                             .WithCurrentTimestamp()
                             .SendEmbed(Context.Channel);
-                    } else if(Reminders.Count == 1) {
+                    }
+                    else if (Reminders.Count == 1)
+                    {
                         await BuildReminderInfo(Reminders[0])
                             .SendEmbed(Context.Channel);
-                    } else if(Reminders.Count <= UtilityConfiguration.ReminderMaxItemsPerPage) {
+                    }
+                    else if (Reminders.Count <= UtilityConfiguration.ReminderMaxItemsPerPage)
+                    {
                         await BuildReminderPage(Reminders)
                             .SendEmbed(Context.Channel);
-                    } else {
+                    }
+                    else
+                    {
                         EmbedBuilder[] Embeds = BuildReminderEmbeds(Reminders);
                         await CreateReactionMenu(Embeds, Context.Channel);
                     }
@@ -192,7 +213,8 @@ namespace Dexter.Commands {
             "    `remindme in 1d 4h; Gotta go to the dentist.`\n")]
         [BotChannel]
 
-        public async Task RemindMeShorthandCommand([Remainder] string Arguments) {
+        public async Task RemindMeShorthandCommand([Remainder] string Arguments)
+        {
             await ReminderCommand("add", Arguments);
         }
 
@@ -202,7 +224,8 @@ namespace Dexter.Commands {
         /// <param name="Args">A string-string Dictionary containing a definition for "ID", which must be parsable to an <c>int</c>.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully</returns>
 
-        public async Task ReminderCallback(Dictionary<string, string> Args) {
+        public async Task ReminderCallback(Dictionary<string, string> Args)
+        {
             Reminder Reminder = ReminderDB.GetReminder(int.Parse(Args["ID"]));
             if (Reminder == null || Reminder.Status != ReminderStatus.Pending) return;
 
@@ -212,7 +235,8 @@ namespace Dexter.Commands {
             Reminder.Status = ReminderStatus.Released;
             ReminderDB.SaveChanges();
 
-            try {
+            try
+            {
                 await BuildEmbed(EmojiEnum.Sign)
                     .WithTitle("🎗Dexter Reminder!🎗")
                     .WithDescription(Reminder.Message)
@@ -222,7 +246,8 @@ namespace Dexter.Commands {
             catch { }
         }
 
-        private EmbedBuilder[] BuildReminderEmbeds(IEnumerable<Reminder> Reminders) {
+        private EmbedBuilder[] BuildReminderEmbeds(IEnumerable<Reminder> Reminders)
+        {
             Reminder[] ReminderArray = Reminders.ToArray();
             int TotalPages = (ReminderArray.Length - 1) / UtilityConfiguration.ReminderMaxItemsPerPage + 1;
 
@@ -230,7 +255,8 @@ namespace Dexter.Commands {
 
             int counter = 1;
 
-            for(int p = 1; p <= TotalPages; p++) {
+            for (int p = 1; p <= TotalPages; p++)
+            {
                 int First = (p - 1) * UtilityConfiguration.ReminderMaxItemsPerPage;
                 int LastExcluded = p * UtilityConfiguration.ReminderMaxItemsPerPage;
                 if (LastExcluded > ReminderArray.Length) LastExcluded = ReminderArray.Length;
@@ -243,17 +269,20 @@ namespace Dexter.Commands {
             return Embeds;
         }
 
-        private EmbedBuilder BuildReminderPage(IEnumerable<Reminder> Reminders) {
+        private EmbedBuilder BuildReminderPage(IEnumerable<Reminder> Reminders)
+        {
             int count = 1;
             return BuildReminderPage(Reminders, ref count);
         }
 
-        private EmbedBuilder BuildReminderPage(IEnumerable<Reminder> Reminders, ref int counter) {
+        private EmbedBuilder BuildReminderPage(IEnumerable<Reminder> Reminders, ref int counter)
+        {
             EmbedBuilder Builder = BuildEmbed(EmojiEnum.Sign)
                 .WithTitle("Reminders")
                 .WithCurrentTimestamp();
 
-            foreach(Reminder r in Reminders) {
+            foreach (Reminder r in Reminders)
+            {
                 Builder.AddField($"🎗Reminder {counter++} (ID {r.ID})🎗", $"{r.Message.TruncateTo(UtilityConfiguration.ReminderMaxCharactersPerItem)}\n " +
                     $"- **Release:** {DateTimeOffset.FromUnixTimeSeconds(r.DateTimeRelease).HumanizeExtended(BotConfiguration, true)}");
             }
@@ -261,7 +290,8 @@ namespace Dexter.Commands {
             return Builder;
         }
 
-        private EmbedBuilder BuildReminderInfo(Reminder Reminder) {
+        private EmbedBuilder BuildReminderInfo(Reminder Reminder)
+        {
             return BuildEmbed(EmojiEnum.Sign)
                 .WithTitle($"Reminder #{Reminder.ID}")
                 .WithDescription(Reminder.Message)
@@ -269,8 +299,10 @@ namespace Dexter.Commands {
                 .AddField("Status:", Reminder.Status.ToString());
         }
 
-        private async Task<Reminder> TryParseAndGetReminder(string ID, IUser Issuer = null) {
-            if(string.IsNullOrEmpty(ID)) {
+        private async Task<Reminder> TryParseAndGetReminder(string ID, IUser Issuer = null)
+        {
+            if (string.IsNullOrEmpty(ID))
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("No ID was provided")
                     .WithDescription("You must provide a reminder ID for this command!")
@@ -278,7 +310,8 @@ namespace Dexter.Commands {
                 return null;
             }
 
-            if (!int.TryParse(ID, out int Result)) {
+            if (!int.TryParse(ID, out int Result))
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Can't parse ID!")
                     .WithDescription($"ID {ID} cannot be parsed to a number.")
@@ -288,7 +321,8 @@ namespace Dexter.Commands {
 
             Reminder r = ReminderDB.GetReminder(Result);
 
-            if (r == null) {
+            if (r == null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unknown Reminder")
                     .WithDescription($"No reminder exists with ID {Result}")
@@ -296,7 +330,8 @@ namespace Dexter.Commands {
                 return null;
             }
 
-            if (Issuer != null && r.IssuerID != Issuer.Id) {
+            if (Issuer != null && r.IssuerID != Issuer.Id)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Forbidden!")
                     .WithDescription("This reminder isn't yours, you're not allowed to access it.")

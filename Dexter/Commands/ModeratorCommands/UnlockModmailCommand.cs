@@ -1,17 +1,19 @@
-﻿using Dexter.Databases.Mail;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Databases.Mail;
 using Dexter.Enums;
-using Discord.Commands;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
 using Dexter.Extensions;
-using System.Collections.Generic;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ModeratorCommands {
+    public partial class ModeratorCommands
+    {
 
         /// <summary>
         /// Displays the ID attached to a modmail token
@@ -24,10 +26,12 @@ namespace Dexter.Commands {
         [RequireModerator]
         [BotChannel]
 
-        public async Task ModmailGetUser(string Token, [Remainder] string Reason) {
+        public async Task ModmailGetUser(string Token, [Remainder] string Reason)
+        {
             ModMail ModMail = ModMailDB.ModMail.Find(Token);
 
-            if(ModMail == null) {
+            if (ModMail == null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Invalid Token!")
                     .WithDescription("I wasn't able to find a modmail with that token!")
@@ -35,7 +39,8 @@ namespace Dexter.Commands {
                 return;
             }
 
-            if (Reason.Length > 200) {
+            if (Reason.Length > 200)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Your unlock reason is to long!")
                     .WithDescription(
@@ -65,7 +70,8 @@ namespace Dexter.Commands {
         /// </summary>
         /// <param name="Parameters"></param>
 
-        public async void UnlockModmail(Dictionary<string, string> Parameters) {
+        public async void UnlockModmail(Dictionary<string, string> Parameters)
+        {
             string Token = Parameters["Token"];
             string Reason = Parameters["Reason"];
 

@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.CommunityEvents {
+namespace Dexter.Databases.CommunityEvents
+{
 
     /// <summary>
     /// An event proposed by a member of the community.
     /// </summary>
 
-    public class CommunityEvent {
+    public class CommunityEvent
+    {
 
         /// <summary>
         /// The unique numeric ID for a given event and the token by which to target events.

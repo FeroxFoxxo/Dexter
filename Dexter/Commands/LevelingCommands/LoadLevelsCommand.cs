@@ -1,22 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Databases.Levels;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class LevelingCommands {
+    public partial class LevelingCommands
+    {
 
         /// <summary>
         /// Loads levels from an existing levels.json file.
@@ -28,15 +28,19 @@ namespace Dexter.Commands {
         [Summary("Loads levels from a json file into the system. To force replacement of levels that already exist type \"FORCE\" after the command.")]
         [RequireAdministrator]
 
-        public async Task LoadLevelsCommand(string arg = "") {
+        public async Task LoadLevelsCommand(string arg = "")
+        {
 
             bool force = arg == "FORCE";
             LevelRecord[] records;
-            try {
+            try
+            {
                 records = JsonConvert.DeserializeObject<LevelRecord[]>(
                     File.ReadAllText(Path.Join(Directory.GetCurrentDirectory(), "Images", "OtherMedia", "LevelData", "levels.json"))
                     );
-            } catch(FileNotFoundException e) {
+            }
+            catch (FileNotFoundException e)
+            {
                 await BuildEmbed(Enums.EmojiEnum.Annoyed)
                     .WithTitle("No levels file!")
                     .WithDescription(e.Message)
@@ -48,35 +52,45 @@ namespace Dexter.Commands {
 
             int total = 0;
             int count = 0;
-            foreach (LevelRecord r in records) {
+            foreach (LevelRecord r in records)
+            {
                 UserLevel ul = null;
-                if (++total % 1000 == 0) {
+                if (++total % 1000 == 0)
+                {
                     await loadMsg.ModifyAsync(m => m.Content = $"Loading level entries... {total}/{records.Length}");
                     await LevelingDB.SaveChangesAsync();
                 }
-                try {
+                try
+                {
                     ul = LevelingDB.GetOrCreateLevelData(r.Id, false);
-                    if (force || ul.TextXP < r.Xp) {
+                    if (force || ul.TextXP < r.Xp)
+                    {
                         ul.TextXP = r.Xp;
                         count++;
                     }
-                } catch(InvalidOperationException e) {
-                    Console.Out.WriteLine(e);
+                }
+                catch (InvalidOperationException e)
+                {
+                    Console.Error.WriteLine($"Warning; error when processing level loading: {e}");
                     await LevelingDB.SaveChangesAsync();
                     ul = LevelingDB.GetOrCreateLevelData(r.Id, false);
-                    try {
-                        if (force || ul?.TextXP < r.Xp) {
+                    try
+                    {
+                        if (force || ul?.TextXP < r.Xp)
+                        {
                             ul.TextXP = r.Xp;
                             count++;
                         }
                     }
-                    catch {
-                        await Context.Channel.SendMessageAsync($"Filed to load user {r.Id}");
+                    catch
+                    {
+                        await Context.Channel.SendMessageAsync($"Failed to load user {r.Id}");
                     }
                 }
             }
 
-            if (count > 0) {
+            if (count > 0)
+            {
                 await LevelingDB.SaveChangesAsync();
 
                 await BuildEmbed(Enums.EmojiEnum.Love)
@@ -94,8 +108,10 @@ namespace Dexter.Commands {
 
 #pragma warning disable 0649
         //Unassigned variables (Assigned through JSON Deserialization)
-        private class LevelRecord {
-            public LevelRecord(ulong id, int level, long xp) {
+        private class LevelRecord
+        {
+            public LevelRecord(ulong id, int level, long xp)
+            {
                 Id = id;
                 Level = level;
                 Xp = xp;
@@ -121,10 +137,12 @@ namespace Dexter.Commands {
         [Summary("Usage: `webloadlevels [minpage] [maxpage] (Args)`. Loads levels from the mee6 API into the system. To force replacement of levels that already exist type \"FORCE\" after the command.")]
         [RequireAdministrator]
 
-        public async Task LoadLevelsFromMee6Command(int min = 0, int max = 50, [Remainder] string args = "") {
+        public async Task LoadLevelsFromMee6Command(int min = 0, int max = 50, [Remainder] string args = "")
+        {
             if (min < 0) min = 0;
-            
-            if (min > max) {
+
+            if (min > max)
+            {
                 await BuildEmbed(Enums.EmojiEnum.Annoyed)
                     .WithTitle("Invalid range!")
                     .WithDescription($"*max* must exceed *min*. Received *min* of {min} and *max* of {max}")
@@ -147,8 +165,10 @@ namespace Dexter.Commands {
             string dataStr;
             LBData data;
 
-            try {
-                for (page = min; page <= max; page++) {
+            try
+            {
+                for (page = min; page <= max; page++)
+                {
                     string url = $"{mee6apiurl}{LevelingConfiguration.Mee6SyncGuildId}?&page={page}";
                     dataStr = await web.DownloadStringTaskAsync(url);
                     data = JsonConvert.DeserializeObject<LBData>(dataStr);
@@ -156,51 +176,64 @@ namespace Dexter.Commands {
                     if (data?.players?.FirstOrDefault() is null)
                         throw new ArgumentOutOfRangeException($"Reached empty leaderboard page ({page}) before reaching max ({max}). Loaded a total of {count} entries out of {total} attempts.");
 
-                    foreach (LBPlayer p in data.players) {
-                        if (++total % 50 == 0) {
-                            await loadMsg.ModifyAsync(m => m.Content = $"Loading level entries... {total}/{(max - min + 1) * 100} - page {page}/{max}. (modified {count} values.)");
-                        }
+                    foreach (LBPlayer p in data.players)
+                    {
                         long xp = p.xp;
-                        if (transform) {
+                        if (transform)
+                        {
                             xp = LevelingConfiguration.GetXPForLevel(LevelTransformation.Metricate.Run(p.DetailedLevel));
                         }
                         UserLevel ul = null;
-                        try {
+                        try
+                        {
                             ul = LevelingDB.GetOrCreateLevelData(p.id, false);
-                            if (force || ul.TextXP < xp) {
+                            if (force || ul.TextXP < xp)
+                            {
                                 ul.TextXP = xp;
                                 count++;
                                 if (updateroles)
                                     await LevelingService.UpdateRoles(Context.Guild.GetUser(ul.UserID), force);
                             }
                         }
-                        catch (Exception e) {
-                            Console.Out.WriteLine(e);
+                        catch (Exception e)
+                        {
+                            Console.Error.WriteLine($"Warning; error when processing web level loading: {e}");
                             await LevelingDB.SaveChangesAsync();
                             ul = LevelingDB.GetOrCreateLevelData(p.id, false);
-                            try {
-                                if (force || ul?.TextXP < xp) {
+                            try
+                            {
+                                if (force || ul?.TextXP < xp)
+                                {
                                     ul.TextXP = xp;
                                     count++;
-                                    if (updateroles) 
+                                    if (updateroles)
                                         await LevelingService.UpdateRoles(Context.Guild.GetUser(ul.UserID), force);
                                 }
                             }
-                            catch {
-                                await Context.Channel.SendMessageAsync($"Filed to load user {p.id} from page {page}.");
+                            catch
+                            {
+                                await Context.Channel.SendMessageAsync($"Failed to load user {p.id} from page {page}.");
                             }
                         }
+                        if (++total % 50 == 0)
+                        {
+                            await loadMsg.ModifyAsync(m => m.Content = $"Loading level entries... {total}/{(max - min + 1) * 100} - page {page}/{max}. (modified {count} values.)");
+                        }
                     }
-                    
+
                     await LevelingDB.SaveChangesAsync();
                 }
-            } catch (ArgumentOutOfRangeException e) {
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
                 await BuildEmbed(Enums.EmojiEnum.Sign)
                     .WithTitle("Completed Loading with Errors")
                     .WithDescription(e.ParamName)
                     .SendEmbed(Context.Channel);
                 return;
-            } catch (HttpException e) {
+            }
+            catch (HttpException e)
+            {
                 await BuildEmbed(Enums.EmojiEnum.Annoyed)
                     .WithTitle("HTTP Exception Reached")
                     .WithDescription($"Error {e.HttpCode}: {e.Message}.\n" +
@@ -215,9 +248,10 @@ namespace Dexter.Commands {
                 .SendEmbed(Context.Channel);
         }
 
-        #pragma warning disable IDE1006 // Naming Styles
+#pragma warning disable IDE1006 // Naming Styles
         [Serializable]
-        private class LBPlayer {
+        private class LBPlayer
+        {
             public long xp { get; set; }
             public long[] detailed_xp { get; set; }
             public ulong id { get; set; }
@@ -225,35 +259,43 @@ namespace Dexter.Commands {
 
             public float DetailedLevel => level + ((float)detailed_xp[0] / detailed_xp[1]);
 
-            public override string ToString() {
+            public override string ToString()
+            {
                 return $"LVL {level} {xp} = {detailed_xp[2]} ({detailed_xp[0]}/{detailed_xp[1]}) - ID = {id}";
             }
         }
 
         [Serializable]
-        private class LBData {
+        private class LBData
+        {
             public LBPlayer[] players { get; set; }
         }
-        #pragma warning restore IDE1006 // Naming Styles
+#pragma warning restore IDE1006 // Naming Styles
 
-        private class LevelTransformation {
+        private class LevelTransformation
+        {
             public Dictionary<int, int> equivalences;
 
-            public LevelTransformation(int[] reffrom, int[] refto) {
+            public LevelTransformation(int[] reffrom, int[] refto)
+            {
                 equivalences = new();
-                for (int i = 0; i < Math.Min(reffrom.Length, refto.Length); i++) {
+                for (int i = 0; i < Math.Min(reffrom.Length, refto.Length); i++)
+                {
                     equivalences.Add(reffrom[i], refto[i]);
                 }
             }
 
-            public float Run(float reflevel) {
+            public float Run(float reflevel)
+            {
                 if (reflevel < 0) return 0;
 
                 float slope = 1;
                 KeyValuePair<int, int> last = new KeyValuePair<int, int>(0, 0);
-                foreach(KeyValuePair<int, int> e in equivalences) {
+                foreach (KeyValuePair<int, int> e in equivalences)
+                {
                     slope = (float)(e.Value - last.Value) / (e.Key - last.Key);
-                    if (reflevel < e.Key) {
+                    if (reflevel < e.Key)
+                    {
                         return last.Value + (reflevel - last.Key) * slope;
                     }
                     last = e;
@@ -262,7 +304,7 @@ namespace Dexter.Commands {
             }
 
             public static LevelTransformation Metricate =>
-                    new LevelTransformation(new int[] {0, 1, 7, 14, 21, 28, 35, 42, 49, 55, 61, 67, 73, 79, 85, 90, 95, 100}, 
+                    new LevelTransformation(new int[] { 0, 1, 7, 14, 21, 28, 35, 42, 49, 55, 61, 67, 73, 79, 85, 90, 95, 100 },
                         new int[] { 0, 1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160 });
         }
     }

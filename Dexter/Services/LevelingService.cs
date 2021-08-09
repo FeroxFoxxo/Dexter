@@ -2,6 +2,7 @@
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
 using Dexter.Databases.Levels;
+using Dexter.Databases.UserRestrictions;
 using Discord;
 using Discord.WebSocket;
 using System;
@@ -9,13 +10,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dexter.Services {
+namespace Dexter.Services
+{
 
     /// <summary>
     /// Manages the events and timers related to granting users Dexter experience for activity.
     /// </summary>
 
-    public class LevelingService : Service {
+    public class LevelingService : Service
+    {
 
         /// <summary>
         /// The relevant configuration related to the specific data and parameters of leveling.
@@ -36,16 +39,24 @@ namespace Dexter.Services {
         public LevelingDB LevelingDB { get; set; }
 
         /// <summary>
+        /// The data structure holding all relevant information for user restrictions.
+        /// </summary>
+
+        public RestrictionsDB RestrictionsDB { get; set; }
+
+        /// <summary>
         /// This method is run when the service is first started; which happens after dependency injection.
         /// </summary>
 
-        public override async void Initialize() {
+        public override async void Initialize()
+        {
             EventTimer Timer = TimerService.EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault();
 
             if (Timer != null)
                 TimerService.EventTimersDB.EventTimers.Remove(Timer);
 
             DiscordSocketClient.MessageReceived += HandleMessage;
+            DiscordSocketClient.UserJoined += HandleJoin;
 
             await CreateEventTimer(AddLevels, new(), LevelingConfiguration.XPIncrementTime, TimerType.Interval);
         }
@@ -56,21 +67,24 @@ namespace Dexter.Services {
         /// <param name="parameters">Irrelevant argument used to fit event timer task form.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task AddLevels(Dictionary<string, string> parameters) {
+        public async Task AddLevels(Dictionary<string, string> parameters)
+        {
             // Voice leveling up.
 
             IReadOnlyCollection<SocketVoiceChannel> vcs = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).VoiceChannels;
 
-            foreach (SocketVoiceChannel voiceChannel in vcs) {
+            foreach (SocketVoiceChannel voiceChannel in vcs)
+            {
                 int nonbotusers = 0;
-                foreach(IGuildUser uservc in voiceChannel.Users)
-                    if (!uservc.IsBot && !uservc.IsDeafened && !uservc.IsSelfDeafened) nonbotusers++;
+                foreach (IGuildUser uservc in voiceChannel.Users)
+                    if (!uservc.IsBot && !uservc.IsDeafened && !uservc.IsSelfDeafened && !RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)) nonbotusers++;
                 if (nonbotusers < LevelingConfiguration.VCMinUsers) continue;
                 if (LevelingConfiguration.DisabledVCs.Contains(voiceChannel.Id)) continue;
                 foreach (IGuildUser uservc in voiceChannel.Users)
-                    if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsBot)) {
+                    if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsBot || RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)))
+                    {
                         await LevelingDB.IncrementUserXP(
-                            Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven),
+                            Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven + 1),
                             false,
                             uservc,
                             DiscordSocketClient.GetChannel(LevelingConfiguration.VoiceTextChannel) as ITextChannel,
@@ -79,13 +93,12 @@ namespace Dexter.Services {
                     }
             }
 
-            foreach (UserTextXPRecord ur in LevelingDB.OnTextCooldowns) {
-                LevelingDB.OnTextCooldowns.Remove(ur);
-            }
-            await LevelingDB.SaveChangesAsync();
+            LevelingDB.RemoveRange(LevelingDB.OnTextCooldowns);
+            LevelingDB.SaveChanges();
         }
 
-        private async Task HandleMessage(SocketMessage message) {
+        private async Task HandleMessage(SocketMessage message)
+        {
             if (!LevelingConfiguration.ManageTextXP) return;
             if (message.Author.IsBot) return;
 
@@ -94,7 +107,7 @@ namespace Dexter.Services {
             if (LevelingDB.OnTextCooldowns.Find(message.Author.Id) is not null) return;
 
             await LevelingDB.IncrementUserXP(
-                Random.Next(LevelingConfiguration.TextMinXPGiven, LevelingConfiguration.TextMaxXPGiven),
+                Random.Next(LevelingConfiguration.TextMinXPGiven, LevelingConfiguration.TextMaxXPGiven + 1),
                 true,
                 message.Author as IGuildUser,
                 message.Channel as ITextChannel,
@@ -113,30 +126,76 @@ namespace Dexter.Services {
         /// <param name="level">The level of the user, autocalculated if below 0.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task UpdateRoles(IGuildUser user, bool removeExtra = false, int level = -1) {
-            if (user is null || !LevelingConfiguration.HandleRoles) return;
+        public async Task<bool> UpdateRoles(IGuildUser user, bool removeExtra = false, int level = -1)
+        {
+            if (user is null || !LevelingConfiguration.HandleRoles) return false;
 
-            if (level < 0) {
-                UserLevel ul = LevelingDB.GetOrCreateLevelData(user.Id, out _);
+            if (level < 0)
+            {
+                UserLevel ul = LevelingDB.Levels.Find(user.Id);
+
+                if (ul is null) return false;
                 level = ul.TotalLevel(LevelingConfiguration);
             }
 
             List<IRole> toAdd = new();
             List<IRole> toRemove = new();
 
-            foreach(KeyValuePair<int, ulong> rank in LevelingConfiguration.Levels) {
+            SocketGuild guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
+            IReadOnlyCollection<ulong> userRoles = user.RoleIds;
 
-                if (level >= rank.Key && !user.RoleIds.Contains(rank.Value))
-                    toAdd.Add(DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(rank.Value));
-
-                else if (removeExtra && level < rank.Key && user.RoleIds.Contains(rank.Value))
-                    toRemove.Add(DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(rank.Value));
+            if (LevelingConfiguration.MemberRoleLevel > 0
+                && level >= LevelingConfiguration.MemberRoleLevel
+                && !userRoles.Contains(LevelingConfiguration.MemberRoleID))
+            {
+                toAdd.Add(guild.GetRole(LevelingConfiguration.MemberRoleID));
             }
 
-            if (toAdd.Count > 0)
-                await user.AddRolesAsync(toAdd);
-            if (toRemove.Count > 0)
-                await user.RemoveRolesAsync(toRemove);
+            foreach (KeyValuePair<int, ulong> rank in LevelingConfiguration.Levels)
+            {
+
+                if (level >= rank.Key && !userRoles.Contains(rank.Value))
+                    toAdd.Add(guild.GetRole(rank.Value));
+
+                else if (removeExtra && level < rank.Key && userRoles.Contains(rank.Value))
+                    toRemove.Add(guild.GetRole(rank.Value));
+            }
+
+            if (user.RoleIds.Contains(LevelingConfiguration.NicknameDisabledRole))
+            {
+                SocketRole replRole = guild.GetRole(LevelingConfiguration.NicknameDisabledReplacement);
+
+                if (user.RoleIds.Contains(LevelingConfiguration.NicknameDisabledReplacement))
+                    toRemove.Add(replRole);
+
+                if (toAdd.Contains(replRole))
+                    toAdd.Remove(replRole);
+            }
+
+            try
+            {
+                if (toAdd.Count > 0)
+                    await user.AddRolesAsync(toAdd);
+                if (toRemove.Count > 0)
+                    await user.RemoveRolesAsync(toRemove);
+            }
+            catch (NullReferenceException)
+            {
+                throw new NullReferenceException("At least one of the specified roles in configuration that should be applied does not exist!");
+            }
+
+            return toAdd.Count > 0 || toRemove.Count > 0;
+        }
+
+        /// <summary>
+        /// Detects when a user joins the guild and immediately assigns them their ranked roles.
+        /// </summary>
+        /// <param name="user">The user that joined the guild.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
+
+        public async Task HandleJoin(SocketGuildUser user)
+        {
+            await UpdateRoles(user);
         }
 
     }

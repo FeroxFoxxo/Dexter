@@ -1,21 +1,23 @@
 ﻿using Dexter.Attributes.Methods;
+using Dexter.Databases.Infractions;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Dexter.Databases.Infractions;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
+using Discord.WebSocket;
+using Humanizer;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices;
 using System.Linq;
-using Humanizer;
-using Discord.WebSocket;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ModeratorCommands {
+    public partial class ModeratorCommands
+    {
 
         /// <summary>
         /// Sends an embed with the records of infractions of a specified user.
@@ -30,17 +32,20 @@ namespace Dexter.Commands {
         [RequireModerator]
         [BotChannel]
 
-        public async Task InfractionsCommand(ulong UserID) {
+        public async Task InfractionsCommand(ulong UserID)
+        {
             IUser User = DiscordSocketClient.GetUser(UserID);
-            
-            if (User == null) {
+
+            if (User == null)
+            {
                 EmbedBuilder[] Warnings = GetWarnings(UserID, Context.User.Id, $"<@{UserID}>", $"Unknown ({UserID})", true);
 
                 if (Warnings.Length > 1)
                     await CreateReactionMenu(Warnings, Context.Channel);
                 else
                     await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
-            } else
+            }
+            else
                 await InfractionsCommand(User);
         }
 
@@ -57,27 +62,35 @@ namespace Dexter.Commands {
         [Alias("warnings", "record", "warns", "mutes")]
         [BotChannel]
 
-        public async Task InfractionsCommand([Optional] IUser User) {
+        public async Task InfractionsCommand([Optional] IUser User)
+        {
             bool IsUserSpecified = User != null;
 
-            if (IsUserSpecified) {
-                if ((Context.User as IGuildUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator) {
+            if (IsUserSpecified)
+            {
+                if ((Context.User as IGuildUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator)
+                {
                     EmbedBuilder[] Warnings = GetWarnings(User.Id, Context.User.Id, User.Mention, User.Username, true);
 
                     if (Warnings.Length > 1)
                         await CreateReactionMenu(Warnings, Context.Channel);
                     else
                         await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
-                } else {
+                }
+                else
+                {
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Halt! Don't go there-")
                         .WithDescription("Heya! To run this command with a user specified, you will need to be a moderator. <3")
                         .SendEmbed(Context.Channel);
                 }
-            } else {
+            }
+            else
+            {
                 EmbedBuilder[] Embeds = GetWarnings(Context.User.Id, Context.User.Id, Context.User.Mention, Context.User.Username, false);
 
-                try {
+                try
+                {
                     foreach (EmbedBuilder Embed in Embeds)
                         await Embed.SendEmbed(await Context.User.GetOrCreateDMChannelAsync());
 
@@ -88,7 +101,9 @@ namespace Dexter.Commands {
                         .WithTitle("Sent infractions log.")
                         .WithDescription("Heya! I've sent you a log of your infractions. Feel free to take a look over them in your own time! <3")
                         .SendEmbed(Context.Channel);
-                } catch (HttpException) {
+                }
+                catch (HttpException)
+                {
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Unable to send infractions log!")
                         .WithDescription("Woa, it seems as though I'm not able to send you a log of your infractions! " +
@@ -109,8 +124,9 @@ namespace Dexter.Commands {
         /// <param name="Username">The target user's username in the given context.</param>
         /// <param name="ShowIssuer">Whether or not the moderators should be shown in the log. Enabled for moderators, disabled for DMed records.</param>
         /// <returns>An array of embeds containing the given user's warnings.</returns>
-        
-        public EmbedBuilder[] GetWarnings(ulong User, ulong RunBy, string Mention, string Username, bool ShowIssuer) {
+
+        public EmbedBuilder[] GetWarnings(ulong User, ulong RunBy, string Mention, string Username, bool ShowIssuer)
+        {
             Infraction[] Infractions = InfractionsDB.GetInfractions(User);
 
             if (Infractions.Length <= 0)
@@ -121,7 +137,7 @@ namespace Dexter.Commands {
                         $"Go give {(User == RunBy ? "yourself" : "them")} a pat on the back. <3")
                 };
 
-            List<EmbedBuilder> Embeds = new ();
+            List<EmbedBuilder> Embeds = new();
 
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User);
 
@@ -129,7 +145,8 @@ namespace Dexter.Commands {
                 .WithTitle($"{Username}'s Infractions - {Infractions.Length} {(Infractions.Length == 1 ? "Entry" : "Entries")} and {DexterProfile.InfractionAmount} {(DexterProfile.InfractionAmount == 1 ? "Point" : "Points")}.")
                 .WithDescription($"All times are displayed in {TimeZoneInfo.Local.DisplayName}");
 
-            for (int Index = 0; Index < Infractions.Length; Index++) {
+            for (int Index = 0; Index < Infractions.Length; Index++)
+            {
                 Infraction Infraction = Infractions[Index];
 
                 IUser Issuer = Client.GetUser(Infraction.Issuer);
@@ -145,13 +162,19 @@ namespace Dexter.Commands {
                         $":notepad_spiral: {Infraction.Reason}"
                     );
 
-                if (Index % 5 == 0 && Index != 0) {
+                if (Index % 5 == 0 && Index != 0)
+                {
                     Embeds.Add(CurrentBuilder);
                     CurrentBuilder = new EmbedBuilder().AddField(Field).WithColor(Color.Green);
-                } else {
-                    try {
+                }
+                else
+                {
+                    try
+                    {
                         CurrentBuilder.AddField(Field);
-                    } catch (Exception) {
+                    }
+                    catch (Exception)
+                    {
                         Embeds.Add(CurrentBuilder);
                         CurrentBuilder = new EmbedBuilder().AddField(Field).WithColor(Color.Green);
                     }

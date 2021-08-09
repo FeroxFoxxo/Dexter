@@ -2,13 +2,15 @@
 using Dexter.Databases.CommunityEvents;
 using System.Collections.Generic;
 
-namespace Dexter.Configurations {
+namespace Dexter.Configurations
+{
 
     /// <summary>
     /// Holds settings and server-specific data related to the managing of community resources such as events.
     /// </summary>
 
-    public class CommunityConfiguration : JSONConfig {
+    public class CommunityConfiguration : JSONConfig
+    {
 
         /// <summary>
         /// The unique id of the channel where event proposals are to be sent.

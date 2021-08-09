@@ -1,13 +1,15 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.UserProfiles {
+namespace Dexter.Databases.UserProfiles
+{
 
     /// <summary>
     /// Represents a recorded instance of a name change for a username.
     /// </summary>
 
-    public class NameRecord {
+    public class NameRecord
+    {
 
         /// <summary>
         /// A unique identifier for the name record.
@@ -44,8 +46,10 @@ namespace Dexter.Databases.UserProfiles {
         /// Copies a record to avoid issues with deletion of data.
         /// </summary>
 
-        public NameRecord Clone() {
-            return new NameRecord() {
+        public NameRecord Clone()
+        {
+            return new NameRecord()
+            {
                 Index = -1,
                 Name = this.Name,
                 UserID = this.UserID,
@@ -59,7 +63,8 @@ namespace Dexter.Databases.UserProfiles {
         /// </summary>
         /// <returns>The name this record holds.</returns>
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return Name;
         }
 
@@ -68,7 +73,8 @@ namespace Dexter.Databases.UserProfiles {
         /// </summary>
         /// <returns>A string containing the time the name was last used followed by the Name.</returns>
 
-        public string Expression() {
+        public string Expression()
+        {
             return $"{DateTimeOffset.FromUnixTimeSeconds(SetTime):MM/dd/yyy HH:mm 'UTC'z}: **{Name}**";
         }
     }

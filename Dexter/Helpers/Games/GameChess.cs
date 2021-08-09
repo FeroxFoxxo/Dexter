@@ -1,4 +1,9 @@
-﻿using System;
+﻿using Dexter.Configurations;
+using Dexter.Databases.Games;
+using Dexter.Extensions;
+using Discord;
+using Discord.WebSocket;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -6,131 +11,157 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Dexter.Configurations;
-using Dexter.Databases.Games;
-using Dexter.Extensions;
-using Discord;
-using Discord.WebSocket;
-using Google.Apis.Sheets.v4.Data;
 
-namespace Dexter.Helpers.Games {
+namespace Dexter.Helpers.Games
+{
 
     /// <summary>
     /// Represents a game of Chess.
     /// </summary>
 
-    public class GameChess : IGameTemplate {
+    public class GameChess : IGameTemplate
+    {
 
         private const string EmptyData = StartingPos + ", -, 0, 0, 0, 0, NN, standard, 0";
         private const string StartingPos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-        private string BoardRaw {
-            get {
+        private string BoardRaw
+        {
+            get
+            {
                 return game.Data.Split(", ")[0];
             }
-            set {
+            set
+            {
                 string[] newValue = game.Data.Split(", ");
                 newValue[0] = value;
                 game.Data = string.Join(", ", newValue);
             }
         }
 
-        private string LastMove {
-            get {
+        private string LastMove
+        {
+            get
+            {
                 return game.Data.Split(", ")[1];
             }
-            set {
+            set
+            {
                 string[] newValue = game.Data.Split(", ");
                 newValue[1] = value;
                 game.Data = string.Join(", ", newValue);
             }
         }
 
-        private ulong BoardID {
-            get {
+        private ulong BoardID
+        {
+            get
+            {
                 return ulong.Parse(game.Data.Split(", ")[2]);
             }
-            set {
+            set
+            {
                 string[] newValue = game.Data.Split(", ");
                 newValue[2] = value.ToString();
                 game.Data = string.Join(", ", newValue);
             }
         }
 
-        private ulong DumpID {
-            get {
+        private ulong DumpID
+        {
+            get
+            {
                 return ulong.Parse(game.Data.Split(", ")[3]);
             }
-            set {
+            set
+            {
                 string[] newValue = game.Data.Split(", ");
                 newValue[3] = value.ToString();
                 game.Data = string.Join(", ", newValue);
             }
         }
 
-        private ulong PlayerWhite {
-            get {
+        private ulong PlayerWhite
+        {
+            get
+            {
                 return ulong.Parse(game.Data.Split(", ")[4]);
             }
-            set {
+            set
+            {
                 string[] newValue = game.Data.Split(", ");
                 newValue[4] = value.ToString();
                 game.Data = string.Join(", ", newValue);
             }
         }
 
-        private ulong PlayerBlack {
-            get {
+        private ulong PlayerBlack
+        {
+            get
+            {
                 return ulong.Parse(game.Data.Split(", ")[5]);
             }
-            set {
+            set
+            {
                 string[] newValue = game.Data.Split(", ");
                 newValue[5] = value.ToString();
                 game.Data = string.Join(", ", newValue);
             }
         }
 
-        private string Agreements {
-            get {
+        private string Agreements
+        {
+            get
+            {
                 return game.Data.Split(", ")[6];
             }
-            set {
+            set
+            {
                 string[] newValue = game.Data.Split(", ");
                 newValue[6] = value;
                 game.Data = string.Join(", ", newValue);
             }
         }
 
-        private string Theme {
-            get {
+        private string Theme
+        {
+            get
+            {
                 return game.Data.Split(", ")[7];
             }
-            set {
+            set
+            {
                 string[] newValue = game.Data.Split(", ");
                 newValue[7] = value;
                 game.Data = string.Join(", ", newValue);
             }
         }
 
-        private enum ViewMode {
+        private enum ViewMode
+        {
             Flip,
             White,
             Black
         }
 
-        private ViewMode View {
-            get {
+        private ViewMode View
+        {
+            get
+            {
                 return (ViewMode)int.Parse(game.Data.Split(", ")[8]);
             }
-            set {
+            set
+            {
                 string[] newValue = game.Data.Split(", ");
                 newValue[8] = ((int)value).ToString();
                 game.Data = string.Join(", ", newValue);
             }
-        } 
+        }
 
-        private bool IsWhitesTurn {
-            get {
+        private bool IsWhitesTurn
+        {
+            get
+            {
                 return BoardRaw.Split(" ")[1] == "w";
             }
         }
@@ -142,7 +173,8 @@ namespace Dexter.Helpers.Games {
         /// </summary>
         /// <param name="game">The generic GameInstance from which to generate the chess game.</param>
 
-        public GameChess(GameInstance game) {
+        public GameChess(GameInstance game)
+        {
             this.game = game;
             if (string.IsNullOrEmpty(game.Data)) game.Data = EmptyData;
         }
@@ -153,7 +185,8 @@ namespace Dexter.Helpers.Games {
         /// <param name="client">SocketClient used to parse UserIDs.</param>
         /// <returns>An Embed detailing the various aspects of the game in its current instance.</returns>
 
-        public EmbedBuilder GetStatus(DiscordSocketClient client) {
+        public EmbedBuilder GetStatus(DiscordSocketClient client)
+        {
             return new EmbedBuilder()
                 .WithColor(Discord.Color.Blue)
                 .WithTitle($"{game.Title} (Game {game.GameID})")
@@ -172,7 +205,8 @@ namespace Dexter.Helpers.Games {
         /// <param name="funConfiguration">The configuration file holding relevant information for the game.</param>
         /// <returns>An <see cref="EmbedBuilder"/> object holding the stylized information.</returns>
 
-        public EmbedBuilder Info(FunConfiguration funConfiguration) {
+        public EmbedBuilder Info(FunConfiguration funConfiguration)
+        {
             return new EmbedBuilder()
                 .WithColor(Discord.Color.Magenta)
                 .WithTitle("How to Play: Chess")
@@ -197,7 +231,8 @@ namespace Dexter.Helpers.Games {
         /// <param name="funConfiguration">The configuration file holding all relevant parameters for Games.</param>
         /// <param name="gamesDB">The games database where relevant data concerning games and players is stored.</param>
 
-        public void Reset(FunConfiguration funConfiguration, GamesDB gamesDB) {
+        public void Reset(FunConfiguration funConfiguration, GamesDB gamesDB)
+        {
             ulong white = PlayerWhite;
             ulong black = PlayerBlack;
             ulong dumpID = DumpID;
@@ -205,8 +240,10 @@ namespace Dexter.Helpers.Games {
             PlayerWhite = white;
             PlayerBlack = black;
             DumpID = dumpID;
-            if (gamesDB is not null) {
-                foreach (Player p in gamesDB.GetPlayersFromInstance(game.GameID)) {
+            if (gamesDB is not null)
+            {
+                foreach (Player p in gamesDB.GetPlayersFromInstance(game.GameID))
+                {
                     p.Score = 0;
                     p.Lives = 0;
                 }
@@ -222,14 +259,17 @@ namespace Dexter.Helpers.Games {
         /// <param name="feedback">The result of the operation, explained in a humanized way.</param>
         /// <returns><see langword="true"/> if the change was successful, otherwise <see langword="false"/>.</returns>
 
-        public bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback) {
-            switch(field.ToLower()) {
+        public bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback)
+        {
+            switch (field.ToLower())
+            {
                 case "fen":
                 case "pos":
                 case "position":
                 case "state":
                 case "board":
-                    if (funConfiguration.ChessPositions.ContainsKey(value.ToLower())) {
+                    if (funConfiguration.ChessPositions.ContainsKey(value.ToLower()))
+                    {
                         BoardRaw = funConfiguration.ChessPositions[value.ToLower()];
                         feedback = $"Successfully reset the board to custom position: `{value}`.";
                         return true;
@@ -241,7 +281,8 @@ namespace Dexter.Helpers.Games {
                     return true;
                 case "theme":
                 case "style":
-                    if (!funConfiguration.ChessThemes.Contains(value.ToLower())) {
+                    if (!funConfiguration.ChessThemes.Contains(value.ToLower()))
+                    {
                         feedback = $"Unable to find theme \"{value}\", valid themes are: {string.Join(", ", funConfiguration.ChessThemes)}.";
                         return false;
                     }
@@ -249,7 +290,8 @@ namespace Dexter.Helpers.Games {
                     feedback = $"Successfully set theme to {value}";
                     return true;
                 case "view":
-                    switch(value.ToLower()) {
+                    switch (value.ToLower())
+                    {
                         case "white":
                             View = ViewMode.White;
                             feedback = "View mode set to white! The game will be seen from white's perspective.";
@@ -281,7 +323,8 @@ namespace Dexter.Helpers.Games {
         /// <param name="funConfiguration">The configuration settings attached to the Fun Commands module.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration) {
+        public async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration)
+        {
             if (message.Channel is IDMChannel) return;
             Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
 
@@ -290,7 +333,8 @@ namespace Dexter.Helpers.Games {
             IUserMessage boardMsg = null;
             if (BoardID != 0) boardMsg = await message.Channel.GetMessageAsync(BoardID) as IUserMessage;
 
-            if (!Board.TryParseBoard(BoardRaw, out Board board, out string boardCorruptedError)) {
+            if (!Board.TryParseBoard(BoardRaw, out Board board, out string boardCorruptedError))
+            {
                 await new EmbedBuilder()
                     .WithColor(Discord.Color.Red)
                     .WithTitle("Corrupted Board State")
@@ -301,7 +345,8 @@ namespace Dexter.Helpers.Games {
                 return;
             }
 
-            if (msg == "board") {
+            if (msg == "board")
+            {
                 bool lastMoveValid = Move.TryParseMock(LastMove, board, out Move lastMove, out string lastMoveError);
                 if (!lastMoveValid) lastMove = null;
 
@@ -316,8 +361,10 @@ namespace Dexter.Helpers.Games {
             }
 
             string[] args = msg.Split(' ');
-            if (args.Length > 0 && args[0] == "info") {
-                if (args.Length == 1) {
+            if (args.Length > 0 && args[0] == "info")
+            {
+                if (args.Length == 1)
+                {
                     await new EmbedBuilder()
                         .WithColor(Discord.Color.Blue)
                         .WithTitle("Auxiliary Information: Chess")
@@ -326,7 +373,8 @@ namespace Dexter.Helpers.Games {
                     return;
                 }
 
-                switch(args[1]) {
+                switch (args[1])
+                {
                     case "moves":
                         await new EmbedBuilder()
                             .WithColor(Discord.Color.Blue)
@@ -387,11 +435,14 @@ namespace Dexter.Helpers.Games {
                 }
             }
 
-            if (msg.StartsWith("claim")) {
-                if (args.Length > 1) {
+            if (msg.StartsWith("claim"))
+            {
+                if (args.Length > 1)
+                {
                     Player prevPlayer = null;
                     bool skip = false;
-                    switch (args[1]) {
+                    switch (args[1])
+                    {
                         case "white":
                         case "w":
                             if (PlayerWhite == 0) skip = true;
@@ -407,7 +458,8 @@ namespace Dexter.Helpers.Games {
                             return;
                     }
 
-                    if (!skip && prevPlayer is not null && prevPlayer.Playing == game.GameID) {
+                    if (!skip && prevPlayer is not null && prevPlayer.Playing == game.GameID)
+                    {
                         await message.Channel.SendMessageAsync($"Can't claim color since player <@{prevPlayer.UserID}> is actively controlling it.");
                         return;
                     }
@@ -422,20 +474,25 @@ namespace Dexter.Helpers.Games {
                 return;
             }
 
-            if (msg == "resign") {
+            if (msg == "resign")
+            {
                 if (BoardRaw == StartingPos) return;
                 bool resign = false;
                 bool isWhite = false;
-                if (message.Author.Id == PlayerWhite) {
+                if (message.Author.Id == PlayerWhite)
+                {
                     resign = true;
                     isWhite = true;
                     gamesDB.GetOrCreatePlayer(PlayerBlack).Score++;
-                } else if (message.Author.Id == PlayerBlack) {
+                }
+                else if (message.Author.Id == PlayerBlack)
+                {
                     resign = true;
                     isWhite = false;
                     gamesDB.GetOrCreatePlayer(PlayerWhite).Score++;
                 }
-                if (resign) {
+                if (resign)
+                {
                     await new EmbedBuilder()
                         .WithColor(Discord.Color.Gold)
                         .WithTitle($"{(isWhite ? "White" : "Black")} resigns!")
@@ -446,25 +503,30 @@ namespace Dexter.Helpers.Games {
                 }
             }
 
-            if (msg == "draw") {
+            if (msg == "draw")
+            {
                 if (BoardRaw == StartingPos) return;
                 bool draw = false;
                 bool isWhite = false;
                 bool retracted = false;
-                if (message.Author.Id == PlayerWhite) {
+                if (message.Author.Id == PlayerWhite)
+                {
                     draw = true;
                     isWhite = true;
                     if (Agreements[0] == 'D') { Agreements = $"N{Agreements[1]}"; retracted = true; }
                     else Agreements = $"D{Agreements[1]}";
                 }
-                else if (message.Author.Id == PlayerBlack) {
+                else if (message.Author.Id == PlayerBlack)
+                {
                     draw = true;
                     isWhite = false;
                     if (Agreements[1] == 'D') { Agreements = $"{Agreements[0]}N"; retracted = true; }
                     else Agreements = $"{Agreements[0]}D";
                 }
-                if (draw) {
-                    if (Agreements == "DD") {
+                if (draw)
+                {
+                    if (Agreements == "DD")
+                    {
                         await new EmbedBuilder()
                             .WithColor(Discord.Color.Orange)
                             .WithTitle($"Draw!")
@@ -472,33 +534,43 @@ namespace Dexter.Helpers.Games {
                             .SendEmbed(message.Channel);
                         Reset(funConfiguration, gamesDB);
                         gamesDB.SaveChanges();
-                    } else {
-                        if (retracted) {
+                    }
+                    else
+                    {
+                        if (retracted)
+                        {
                             await message.Channel.SendMessageAsync($"{(isWhite ? "White" : "Black")} retracts their offer to draw the game!");
-                        } else {
+                        }
+                        else
+                        {
                             await message.Channel.SendMessageAsync($"{(isWhite ? "White" : "Black")} is offering a draw, to accept it; type \"draw\"!");
                         }
                     }
                 }
             }
 
-            if (Move.TryParse(msgRaw, board, out Move move, out string error)) {
-                if (boardMsg is null) {
+            if (Move.TryParse(msgRaw, board, out Move move, out string error))
+            {
+                if (boardMsg is null)
+                {
                     await message.Channel.SendMessageAsync($"You must create a board first! Type `board`.");
                     return;
                 }
 
-                if (!string.IsNullOrEmpty(error)) {
+                if (!string.IsNullOrEmpty(error))
+                {
                     await message.Channel.SendMessageAsync(error);
                     return;
                 }
 
-                if ((board.isWhitesTurn && message.Author.Id != PlayerWhite) || (!board.isWhitesTurn && message.Author.Id != PlayerBlack)) {
+                if ((board.isWhitesTurn && message.Author.Id != PlayerWhite) || (!board.isWhitesTurn && message.Author.Id != PlayerBlack))
+                {
                     await message.Channel.SendMessageAsync($"You don't control the {(board.isWhitesTurn ? "white" : "black")} pieces!");
                     return;
                 }
 
-                if (!move.IsLegal(board, out string legalerror)) {
+                if (!move.IsLegal(board, out string legalerror))
+                {
                     await message.Channel.SendMessageAsync(legalerror);
                     return;
                 }
@@ -514,7 +586,8 @@ namespace Dexter.Helpers.Games {
                 string link = await CreateBoardDisplay(board, move, client, funConfiguration);
                 await boardMsg.ModifyAsync(m => m.Content = link);
 
-                if (outcome == Outcome.Checkmate) {
+                if (outcome == Outcome.Checkmate)
+                {
                     BoardID = 0;
                     player.Score += 1;
                     await new EmbedBuilder()
@@ -526,7 +599,8 @@ namespace Dexter.Helpers.Games {
                     return;
                 }
 
-                if (outcome == Outcome.Draw) {
+                if (outcome == Outcome.Draw)
+                {
                     await new EmbedBuilder()
                         .WithColor(Discord.Color.LightOrange)
                         .WithTitle("Draw!")
@@ -536,7 +610,8 @@ namespace Dexter.Helpers.Games {
                     return;
                 }
 
-                if (outcome == Outcome.FiftyMoveRule) {
+                if (outcome == Outcome.FiftyMoveRule)
+                {
                     await new EmbedBuilder()
                         .WithColor(Discord.Color.LightOrange)
                         .WithTitle("Draw!")
@@ -545,7 +620,8 @@ namespace Dexter.Helpers.Games {
                     Reset(funConfiguration, null);
                 }
 
-                if (outcome == Outcome.InsufficientMaterial) {
+                if (outcome == Outcome.InsufficientMaterial)
+                {
                     await new EmbedBuilder()
                         .WithColor(Discord.Color.LightOrange)
                         .WithTitle("Draw!")
@@ -557,27 +633,33 @@ namespace Dexter.Helpers.Games {
                 return;
             }
 
-            if (args.Length > 2 && args[0] == "pass") {
+            if (args.Length > 2 && args[0] == "pass")
+            {
                 ulong otherID = message.MentionedUserIds.FirstOrDefault();
-                if (otherID == default && !ulong.TryParse(args[2], out otherID) || otherID == 0) {
+                if (otherID == default && !ulong.TryParse(args[2], out otherID) || otherID == 0)
+                {
                     await message.Channel.SendMessageAsync($"Could not parse \"{args[2]}\" into a valid user.");
                     return;
                 }
                 IUser otherUser = client.GetUser(otherID);
-                if (otherUser is null) {
+                if (otherUser is null)
+                {
                     await message.Channel.SendMessageAsync($"I wasn't able to find this user!");
                     return;
                 }
                 Player otherPlayer = gamesDB.GetOrCreatePlayer(otherUser.Id);
-                if (otherPlayer.Playing != game.GameID) {
+                if (otherPlayer.Playing != game.GameID)
+                {
                     await message.Channel.SendMessageAsync("That user isn't playing in this game session!");
                     return;
                 }
 
-                switch (args[1]) {
+                switch (args[1])
+                {
                     case "w":
                     case "white":
-                        if (message.Author.Id != game.Master && message.Author.Id != PlayerWhite) {
+                        if (message.Author.Id != game.Master && message.Author.Id != PlayerWhite)
+                        {
                             await message.Channel.SendMessageAsync($"You aren't the master nor controlling the white pieces!");
                             return;
                         }
@@ -585,7 +667,8 @@ namespace Dexter.Helpers.Games {
                         break;
                     case "b":
                     case "black":
-                        if (message.Author.Id != game.Master && message.Author.Id != PlayerBlack) {
+                        if (message.Author.Id != game.Master && message.Author.Id != PlayerBlack)
+                        {
                             await message.Channel.SendMessageAsync($"You aren't the master nor controlling the black pieces!");
                             return;
                         }
@@ -600,8 +683,10 @@ namespace Dexter.Helpers.Games {
                 return;
             }
 
-            if (args[0] == "swap") {
-                if (message.Author.Id != game.Master) {
+            if (args[0] == "swap")
+            {
+                if (message.Author.Id != game.Master)
+                {
                     await message.Channel.SendMessageAsync("Only the game master can swap the colors!");
                     return;
                 }
@@ -616,14 +701,16 @@ namespace Dexter.Helpers.Games {
             }
         }
 
-        private async Task<string> CreateBoardDisplay(Board board, Move lastMove, DiscordSocketClient client, FunConfiguration funConfiguration) {
+        private async Task<string> CreateBoardDisplay(Board board, Move lastMove, DiscordSocketClient client, FunConfiguration funConfiguration)
+        {
             string imageChacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
             string filepath = Path.Join(imageChacheDir, $"Chess{game.Master}.png");
             System.Drawing.Image image = RenderBoard(board, lastMove);
             image.Save(filepath);
-            if (DumpID != 0) { 
+            if (DumpID != 0)
+            {
                 IMessage prevDump = await (client.GetChannel(funConfiguration.GamesImageDumpsChannel) as ITextChannel).GetMessageAsync(DumpID);
-                if (prevDump is not null) await prevDump.DeleteAsync(); 
+                if (prevDump is not null) await prevDump.DeleteAsync();
             }
             IUserMessage cacheMessage = await (client.GetChannel(funConfiguration.GamesImageDumpsChannel) as ITextChannel).SendFileAsync(filepath);
             DumpID = cacheMessage.Id;
@@ -631,64 +718,84 @@ namespace Dexter.Helpers.Games {
             return cacheMessage.Attachments.First().ProxyUrl;
         }
 
-        private System.Drawing.Image RenderBoard(Board board, Move lastMove) {
+        private System.Drawing.Image RenderBoard(Board board, Move lastMove)
+        {
             Bitmap img = new Bitmap(2 * Offset + 8 * CellSize, 2 * Offset + 8 * CellSize);
 
             Dictionary<char, System.Drawing.Image> pieceImages = new();
-            foreach (Piece p in Piece.pieces) {
-                for (int c = 0; c < 2; c++) {
-                    pieceImages.Add(c == 0 ? p.representation : char.ToLower(p.representation), 
+            foreach (Piece p in Piece.pieces)
+            {
+                for (int c = 0; c < 2; c++)
+                {
+                    pieceImages.Add(c == 0 ? p.representation : char.ToLower(p.representation),
                         System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{PiecePrefixes[c]}{p.representation}.png")));
                 }
             }
 
-            bool whiteside = (View) switch {
+            bool whiteside = (View) switch
+            {
                 ViewMode.White => true,
                 ViewMode.Black => false,
                 _ => board.isWhitesTurn
             };
 
-            using (Graphics g = Graphics.FromImage(img)) {
-                using (System.Drawing.Image boardImg = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{BoardImgName}.png"))) {
+            using (Graphics g = Graphics.FromImage(img))
+            {
+                using (System.Drawing.Image boardImg = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{BoardImgName}.png")))
+                {
                     if (!whiteside) boardImg.RotateFlip(RotateFlipType.Rotate180FlipNone);
                     g.DrawImage(boardImg, 0, 0, 2 * Offset + 8 * CellSize, 2 * Offset + 8 * CellSize);
                 }
 
-                if (lastMove != null) {
-                    using (System.Drawing.Image highlight = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{HighlightImage}.png"))) {
-                        foreach (int n in lastMove.ToHighlight()) {
+                if (lastMove != null)
+                {
+                    using (System.Drawing.Image highlight = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{HighlightImage}.png")))
+                    {
+                        foreach (int n in lastMove.ToHighlight())
+                        {
                             if (whiteside) g.DrawImage(highlight, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
                             else g.DrawImage(highlight, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
                         }
                     }
-                    if (lastMove.isCapture) {
-                        if (lastMove.isEnPassant) {
-                            using (System.Drawing.Image captureMark = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{CaptureImage}.png"))) {
-                                foreach (int n in lastMove.ToEnPassant()) {
+                    if (lastMove.isCapture)
+                    {
+                        if (lastMove.isEnPassant)
+                        {
+                            using (System.Drawing.Image captureMark = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{CaptureImage}.png")))
+                            {
+                                foreach (int n in lastMove.ToEnPassant())
+                                {
                                     if (whiteside) g.DrawImage(captureMark, (n % 8) * CellSize, (n / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
                                     else g.DrawImage(captureMark, (7 - n % 8) * CellSize, (7 - n / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
                                 }
                             }
                         }
-                        else {
-                            using (System.Drawing.Image captureMark = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{CaptureImage}.png"))) {
+                        else
+                        {
+                            using (System.Drawing.Image captureMark = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{CaptureImage}.png")))
+                            {
                                 if (whiteside) g.DrawImage(captureMark, (lastMove.target % 8) * CellSize, (lastMove.target / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
                                 else g.DrawImage(captureMark, (7 - lastMove.target % 8) * CellSize, (7 - lastMove.target / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
                             }
                         }
                     }
 
-                    using (System.Drawing.Image danger = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{DangerImage}.png"))) {
-                        foreach (int n in lastMove.ToDanger(board)) {
+                    using (System.Drawing.Image danger = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{DangerImage}.png")))
+                    {
+                        foreach (int n in lastMove.ToDanger(board))
+                        {
                             if (whiteside) g.DrawImage(danger, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
                             else g.DrawImage(danger, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
                         }
                     }
                 }
 
-                for (int x = 0; x < 8; x++) {
-                    for (int y = 0; y < 8; y++) {
-                        if (board.squares[x, y] != '-') {
+                for (int x = 0; x < 8; x++)
+                {
+                    for (int y = 0; y < 8; y++)
+                    {
+                        if (board.squares[x, y] != '-')
+                        {
                             if (whiteside) g.DrawImage(pieceImages[board.squares[x, y]], Offset + CellSize * x, Offset + CellSize * y, CellSize, CellSize);
                             else g.DrawImage(pieceImages[board.squares[x, y]], Offset + (7 - x) * CellSize, Offset + (7 - y) * CellSize, CellSize, CellSize);
                         }
@@ -706,17 +813,20 @@ namespace Dexter.Helpers.Games {
         private const string HighlightImage = "SquareHighlight";
         private const string CaptureImage = "CaptureMarker";
         private const string DangerImage = "SquareDanger";
-        private readonly string[] PiecePrefixes = new string[] {"W", "B"};
+        private readonly string[] PiecePrefixes = new string[] { "W", "B" };
 
-        private static Tuple<int, int> ToMatrixCoords(int pos) {
+        private static Tuple<int, int> ToMatrixCoords(int pos)
+        {
             return new Tuple<int, int>(pos % 8, pos / 8);
         }
 
-        private static string ToSquareName(Tuple<int, int> coord) {
+        private static string ToSquareName(Tuple<int, int> coord)
+        {
             return $"{(char)('a' + coord.Item1)}{(char)('8' - coord.Item2)}";
         }
 
-        private static bool TryParseSquare(string input, out int pos) {
+        private static bool TryParseSquare(string input, out int pos)
+        {
             pos = -1;
             if (input.Length < 2) return false;
 
@@ -730,7 +840,8 @@ namespace Dexter.Helpers.Games {
         }
 
         [Flags]
-        private enum MoveType {
+        private enum MoveType
+        {
             None = 0,
             Orthogonal = 1,
             Diagonal = 2,
@@ -738,43 +849,52 @@ namespace Dexter.Helpers.Games {
             Pawn = 8
         }
 
-        private class Piece {
+        private class Piece
+        {
             public char representation;
             public string name;
             public bool canPin;
             public Func<int, int, Board, bool, bool> isValid;
             public Func<int, Board, bool, bool> hasValidMoves;
 
-            public static readonly Piece Rook = new Piece() {
+            public static readonly Piece Rook = new Piece()
+            {
                 representation = 'R',
                 name = "Rook",
                 canPin = true,
-                isValid = (origin, target, board, flip) => {
+                isValid = (origin, target, board, flip) =>
+                {
                     if (!BasicValidate(Rook, origin, target, board, flip)) return false;
                     return OrthogonalValidate(origin, target, board);
                 },
                 hasValidMoves = (origin, board, flip) => HasOrthogonalValidMoves(origin, board, flip)
             };
 
-            public static readonly Piece Knight = new Piece() {
+            public static readonly Piece Knight = new Piece()
+            {
                 representation = 'N',
                 name = "Knight",
                 canPin = false,
-                isValid = (origin, target, board, flip) => {
+                isValid = (origin, target, board, flip) =>
+                {
                     if (!BasicValidate(Knight, origin, target, board, flip)) return false;
                     int xdiff = Math.Abs(target % 8 - origin % 8);
                     int ydiff = Math.Abs(target / 8 - origin / 8);
                     if (xdiff == 0 || ydiff == 0) return false;
                     return xdiff + ydiff == 3;
                 },
-                hasValidMoves = (origin, board, flip) => {
+                hasValidMoves = (origin, board, flip) =>
+                {
                     int x0 = origin % 8;
                     int y0 = origin / 8;
-                    for (int dx = 1; dx <= 2; dx++) {
-                        for (int xsign = -1; xsign <= 1; xsign += 2) {
+                    for (int dx = 1; dx <= 2; dx++)
+                    {
+                        for (int xsign = -1; xsign <= 1; xsign += 2)
+                        {
                             int x = x0 + dx * xsign;
                             if (x < 0 || x >= 8) continue;
-                            for (int ysign = -1; ysign <= 1; ysign += 2) {
+                            for (int ysign = -1; ysign <= 1; ysign += 2)
+                            {
                                 int y = y0 + (3 - dx) * ysign;
                                 if (y < 0 || y >= 8) continue;
                                 if (board.squares[x, y] == '-' || (char.IsUpper(board.squares[x, y]) ^ board.isWhitesTurn ^ flip)) return true;
@@ -785,22 +905,26 @@ namespace Dexter.Helpers.Games {
                 }
             };
 
-            public static readonly Piece Bishop = new Piece() {
+            public static readonly Piece Bishop = new Piece()
+            {
                 representation = 'B',
                 name = "Bishop",
                 canPin = true,
-                isValid = (origin, target, board, flip) => {
+                isValid = (origin, target, board, flip) =>
+                {
                     if (!BasicValidate(Bishop, origin, target, board, flip)) return false;
                     return DiagonalValidate(origin, target, board);
                 },
                 hasValidMoves = (origin, board, flip) => HasDiagonalValidMoves(origin, board, flip)
             };
 
-            public static readonly Piece King = new Piece() {
+            public static readonly Piece King = new Piece()
+            {
                 representation = 'K',
                 name = "King",
                 canPin = false,
-                isValid = (origin, target, board, flip) => {
+                isValid = (origin, target, board, flip) =>
+                {
                     if (!BasicValidate(King, origin, target, board, flip)) return false;
                     int xdiff = Math.Abs(target % 8 - origin % 8);
                     int ydiff = Math.Abs(target / 8 - origin / 8);
@@ -809,44 +933,53 @@ namespace Dexter.Helpers.Games {
                 hasValidMoves = (origin, board, flip) => HasDiagonalValidMoves(origin, board, flip, true) || HasOrthogonalValidMoves(origin, board, flip, true)
             };
 
-            public static readonly Piece Queen = new Piece() {
+            public static readonly Piece Queen = new Piece()
+            {
                 representation = 'Q',
                 name = "Queen",
                 canPin = true,
-                isValid = (origin, target, board, flip) => {
+                isValid = (origin, target, board, flip) =>
+                {
                     if (!BasicValidate(Queen, origin, target, board, flip)) return false;
                     return OrthogonalValidate(origin, target, board) || DiagonalValidate(origin, target, board);
                 },
                 hasValidMoves = (origin, board, flip) => HasDiagonalValidMoves(origin, board, flip) || HasOrthogonalValidMoves(origin, board, flip)
             };
 
-            public static readonly Piece Pawn = new Piece() {
+            public static readonly Piece Pawn = new Piece()
+            {
                 representation = 'P',
                 name = "Pawn",
                 canPin = false,
-                isValid = (origin, target, board, flip) => {
+                isValid = (origin, target, board, flip) =>
+                {
                     if (!BasicValidate(Pawn, origin, target, board, flip)) return false;
                     int yAdv = (board.isWhitesTurn ^ flip) ? -1 : 1;
                     int x0 = origin % 8;
                     int y0 = origin / 8;
                     int xf = target % 8;
                     int yf = target / 8;
-                    if (board.GetSquare(target) != '-' || (target == board.enPassant && x0 != xf)) {
+                    if (board.GetSquare(target) != '-' || (target == board.enPassant && x0 != xf))
+                    {
                         return Math.Abs(x0 - xf) == 1 && yf == y0 + yAdv;
-                    } else {
+                    }
+                    else
+                    {
                         if (xf != x0) return false;
                         if (yf == y0 + yAdv) return true;
                         int initialRank = (board.isWhitesTurn ^ flip) ? 6 : 1;
                         return y0 == initialRank && yf == y0 + 2 * yAdv && board.squares[x0, y0 + yAdv] == '-';
                     }
                 },
-                hasValidMoves = (origin, board, flip) => {
+                hasValidMoves = (origin, board, flip) =>
+                {
                     int yAdv = (board.isWhitesTurn ^ flip) ? -1 : 1;
                     int x0 = origin % 8;
                     int y0 = origin / 8;
                     if (y0 + yAdv < 0 || y0 + yAdv >= 8) return false;
                     if (board.squares[x0, y0 + yAdv] == '-') return true;
-                    for (int x = x0 - 1; x <= x0 + 1; x += 2) {
+                    for (int x = x0 - 1; x <= x0 + 1; x += 2)
+                    {
                         if (x < 0 || x >= 8) continue;
                         if (board.enPassant == x + (y0 + yAdv) * 8) return true;
                         if (board.squares[x, y0 + yAdv] == '-') continue;
@@ -856,7 +989,8 @@ namespace Dexter.Helpers.Games {
                 }
             };
 
-            private static bool BasicValidate(Piece p, int origin, int target, Board board, bool flip) {
+            private static bool BasicValidate(Piece p, int origin, int target, Board board, bool flip)
+            {
                 if (origin == target) return false;
                 if (char.ToUpper(board.GetSquare(origin)) != p.representation) return false;
                 char piecef = board.GetSquare(target);
@@ -864,24 +998,29 @@ namespace Dexter.Helpers.Games {
                 return true;
             }
 
-            private static bool OrthogonalValidate(int origin, int target, Board board) {
+            private static bool OrthogonalValidate(int origin, int target, Board board)
+            {
                 int x0 = origin % 8;
                 int y0 = origin / 8;
                 int xf = target % 8;
                 int yf = target / 8;
-                if (y0 == yf) {
+                if (y0 == yf)
+                {
                     int direction = target - origin > 0 ? 1 : -1;
                     int x = x0 + direction;
-                    while (x != xf) {
+                    while (x != xf)
+                    {
                         if (board.squares[x, y0] != '-') return false;
                         x += direction;
                     }
                     return true;
                 }
-                else if (x0 == xf) {
+                else if (x0 == xf)
+                {
                     int direction = target - origin > 0 ? 1 : -1;
                     int y = y0 + direction;
-                    while (y != yf) {
+                    while (y != yf)
+                    {
                         if (board.squares[x0, y] != '-') return false;
                         y += direction;
                     }
@@ -891,24 +1030,28 @@ namespace Dexter.Helpers.Games {
                 return false;
             }
 
-            private static bool DiagonalValidate(int origin, int target, Board board) {
+            private static bool DiagonalValidate(int origin, int target, Board board)
+            {
                 int x0 = origin % 8;
                 int y0 = origin / 8;
                 int xf = target % 8;
                 int yf = target / 8;
                 int ydir = target - origin > 0 ? 1 : -1;
                 int xdir;
-                if (x0 + y0 == xf + yf) {
+                if (x0 + y0 == xf + yf)
+                {
                     xdir = -ydir;
                 }
-                else if (x0 - y0 == xf - yf) {
+                else if (x0 - y0 == xf - yf)
+                {
                     xdir = ydir;
                 }
                 else return false;
 
                 int x = x0 + xdir;
                 int y = y0 + ydir;
-                while (x != xf) {
+                while (x != xf)
+                {
                     if (board.squares[x, y] != '-') return false;
                     x += xdir;
                     y += ydir;
@@ -917,53 +1060,62 @@ namespace Dexter.Helpers.Games {
                 return true;
             }
 
-            private static bool HasOrthogonalValidMoves(int origin, Board board, bool flip, bool mustBeSafe = false) {
+            private static bool HasOrthogonalValidMoves(int origin, Board board, bool flip, bool mustBeSafe = false)
+            {
                 int x0 = origin % 8;
                 int y0 = origin / 8;
                 char p;
                 char thisPiece = board.squares[x0, y0];
-                for (int x = x0 - 1; x <= x0 + 1; x += 2) {
+                for (int x = x0 - 1; x <= x0 + 1; x += 2)
+                {
                     if (x < 0 || x >= 8) continue;
                     p = board.squares[x, y0];
                     if (p != '-' && !(char.IsUpper(p) ^ board.isWhitesTurn ^ flip)) continue;
                     if (!mustBeSafe) return true;
                     board.squares[x0, y0] = '-';
-                    if (!board.IsControlled(x + y0 * 8, !flip)) { 
-                        board.squares[x0, y0] = thisPiece; 
-                        return true; 
+                    if (!board.IsControlled(x + y0 * 8, !flip))
+                    {
+                        board.squares[x0, y0] = thisPiece;
+                        return true;
                     }
                     board.squares[x0, y0] = thisPiece;
                 }
-                for (int y = y0 - 1; y <= y0 + 1; y += 2) {
+                for (int y = y0 - 1; y <= y0 + 1; y += 2)
+                {
                     if (y < 0 || y >= 8) continue;
                     p = board.squares[x0, y];
                     if (p != '-' && !(char.IsUpper(p) ^ board.isWhitesTurn ^ flip)) continue;
                     if (!mustBeSafe) return true;
                     board.squares[x0, y0] = '-';
-                    if (!board.IsControlled(x0 + y * 8, !flip)) { 
-                        board.squares[x0, y0] = thisPiece; 
-                        return true; 
+                    if (!board.IsControlled(x0 + y * 8, !flip))
+                    {
+                        board.squares[x0, y0] = thisPiece;
+                        return true;
                     }
                     board.squares[x0, y0] = thisPiece;
                 }
                 return false;
             }
 
-            private static bool HasDiagonalValidMoves(int origin, Board board, bool flip, bool mustBeSafe = false) {
+            private static bool HasDiagonalValidMoves(int origin, Board board, bool flip, bool mustBeSafe = false)
+            {
                 int x0 = origin % 8;
                 int y0 = origin / 8;
                 char p;
                 char thisPiece = board.squares[x0, y0];
-                for (int x = x0 - 1; x <= x0 + 1; x += 2) {
+                for (int x = x0 - 1; x <= x0 + 1; x += 2)
+                {
                     if (x < 0 || x >= 8) continue;
-                    for (int y = y0 - 1; y <= y0 + 1; y += 2) {
+                    for (int y = y0 - 1; y <= y0 + 1; y += 2)
+                    {
                         if (y < 0 || y >= 8) continue;
                         p = board.squares[x, y];
                         if (p != '-' && !(char.IsUpper(p) ^ board.isWhitesTurn ^ flip)) continue;
                         if (!mustBeSafe)
                             return true;
                         board.squares[x0, y0] = '-';
-                        if (!board.IsControlled(x + y * 8, !flip)) {
+                        if (!board.IsControlled(x + y * 8, !flip))
+                        {
                             board.squares[x0, y0] = thisPiece;
                             return true;
                         }
@@ -974,18 +1126,23 @@ namespace Dexter.Helpers.Games {
             }
 
             public static readonly Piece[] pieces = new Piece[] { Rook, Knight, Bishop, King, Queen, Pawn };
-            public static char[] PieceCharacters {
-                get {
+            public static char[] PieceCharacters
+            {
+                get
+                {
                     char[] result = new char[pieces.Length];
-                    for (int i = 0; i < result.Length; i++) {
+                    for (int i = 0; i < result.Length; i++)
+                    {
                         result[i] = pieces[i].representation;
                     }
                     return result;
                 }
             }
 
-            public static Piece FromRepresentation(char c) {
-                foreach (Piece p in pieces) {
+            public static Piece FromRepresentation(char c)
+            {
+                foreach (Piece p in pieces)
+                {
                     if (p.representation == char.ToUpper(c)) return p;
                 }
                 return null;
@@ -996,7 +1153,8 @@ namespace Dexter.Helpers.Games {
         /// Represents a move in chess
         /// </summary>
 
-        private class Move {
+        private class Move
+        {
             public int origin;
             public int target;
             public bool isCastle;
@@ -1006,17 +1164,22 @@ namespace Dexter.Helpers.Games {
             public bool isCheckMate;
             public char promote;
 
-            public bool IsLegal(Board boardOriginal, out string error) {
-                Board board = (Board) boardOriginal.Clone();
+            public bool IsLegal(Board boardOriginal, out string error)
+            {
+                Board board = (Board)boardOriginal.Clone();
                 board.ExecuteMove(this);
-                if (!isCastle) {
+                if (!isCastle)
+                {
                     error = "King will be under attack - invalid move!";
                     int kingPosition = board.isWhitesTurn ? board.blackKing : board.whiteKing;
                     if (board.IsThreatened(kingPosition)) return false;
-                } else {
+                }
+                else
+                {
                     error = "King or rook will be under attack - invalid castle!";
                     bool targetReached = false;
-                    for (int moveSquare = origin; !targetReached; moveSquare += (target - origin) > 0 ? 1 : -1){
+                    for (int moveSquare = origin; !targetReached; moveSquare += (target - origin) > 0 ? 1 : -1)
+                    {
                         if (board.IsThreatened(moveSquare)) return false;
                         if (moveSquare == target) targetReached = true;
                     }
@@ -1025,16 +1188,19 @@ namespace Dexter.Helpers.Games {
                 return true;
             }
 
-            public static bool TryParseMock(string input, Board board, out Move move, out string error) {
+            public static bool TryParseMock(string input, Board board, out Move move, out string error)
+            {
                 move = new Move(-1, -1);
                 error = "";
-                if (Regex.IsMatch(input.ToUpper(), @"^[O0]\-[O0]([+#!?.\s]|$)")) {
+                if (Regex.IsMatch(input.ToUpper(), @"^[O0]\-[O0]([+#!?.\s]|$)"))
+                {
                     move.origin = !board.isWhitesTurn ? 60 : 4;
                     move.target = !board.isWhitesTurn ? 62 : 6;
                     move.isCastle = true;
                     return true;
                 }
-                else if (Regex.IsMatch(input.ToUpper(), @"^[O0]\-[O0]\-[O0]([+#!?.\s]|$)")) {
+                else if (Regex.IsMatch(input.ToUpper(), @"^[O0]\-[O0]\-[O0]([+#!?.\s]|$)"))
+                {
                     move.origin = !board.isWhitesTurn ? 60 : 4;
                     move.target = !board.isWhitesTurn ? 58 : 2;
                     move.isCastle = true;
@@ -1042,14 +1208,17 @@ namespace Dexter.Helpers.Games {
                 }
                 else if (input.Length != 4 && (input.Length != 5 || input[^1] != 'x') && (input.Length != 6 || input[^2..] != "xp")) { error = "wrong format"; return false; }
 
-                if (!TryParseSquare(input[..2], out move.origin)) {
+                if (!TryParseSquare(input[..2], out move.origin))
+                {
                     error = "wrong format on origin"; return false;
                 }
-                if (!TryParseSquare(input[2..4], out move.target)) {
+                if (!TryParseSquare(input[2..4], out move.target))
+                {
                     error = "wrong format on target"; return false;
                 }
                 if (input[^1] == 'x') move.isCapture = true;
-                if (input[^2..] == "xp") {
+                if (input[^2..] == "xp")
+                {
                     move.isCapture = true;
                     move.isEnPassant = true;
                 }
@@ -1057,25 +1226,31 @@ namespace Dexter.Helpers.Games {
                 return true;
             }
 
-            public static bool TryParse(string input, Board board, out Move move, out string error) {
+            public static bool TryParse(string input, Board board, out Move move, out string error)
+            {
                 move = new(-1, -1);
                 error = "";
 
                 Match promotionSegment = Regex.Match(input, @"=[A-Z]([+#!?.]|$)");
-                if (promotionSegment.Success) {
+                if (promotionSegment.Success)
+                {
                     move.promote = promotionSegment.Value[1];
-                    if (!Piece.PieceCharacters.Contains(move.promote)) {
+                    if (!Piece.PieceCharacters.Contains(move.promote))
+                    {
                         error = $"\"{move.promote}\" cannot be parsed to a valid piece!";
                         return true;
                     }
-                    if (move.promote == Piece.King.representation || move.promote == Piece.Pawn.representation) {
+                    if (move.promote == Piece.King.representation || move.promote == Piece.Pawn.representation)
+                    {
                         error = $"You can't promote a piece to a King or a Pawn.";
                         return true;
                     }
                 }
 
-                if (Regex.IsMatch(input.ToUpper(), @"^[O0]\-[O0]([+#!?.\s]|$)")) {
-                    if (!board.castling[board.isWhitesTurn ? 0 : 2]) {
+                if (Regex.IsMatch(input.ToUpper(), @"^[O0]\-[O0]([+#!?.\s]|$)"))
+                {
+                    if (!board.castling[board.isWhitesTurn ? 0 : 2])
+                    {
                         error = "Short castling is currently unavailable!";
                         return true;
                     }
@@ -1084,16 +1259,20 @@ namespace Dexter.Helpers.Games {
                     move.isCastle = true;
                     int dir = move.target - move.origin > 0 ? 1 : -1;
                     int rook = board.isWhitesTurn ? 63 : 7;
-                    for (int pos = move.origin + dir; pos != rook; pos += dir) {
-                        if (board.GetSquare(pos) != '-') {
+                    for (int pos = move.origin + dir; pos != rook; pos += dir)
+                    {
+                        if (board.GetSquare(pos) != '-')
+                        {
                             error = $"Can't castle king-side! A piece is obstructing the castle in {ToSquareName(ToMatrixCoords(pos))}.";
                             return true;
                         }
                     }
                     return true;
                 }
-                else if (Regex.IsMatch(input.ToUpper(), @"^[O0]\-[O0]\-[O0]([+#!?.\s]|$)")) {
-                    if (!board.castling[board.isWhitesTurn ? 1 : 3]) {
+                else if (Regex.IsMatch(input.ToUpper(), @"^[O0]\-[O0]\-[O0]([+#!?.\s]|$)"))
+                {
+                    if (!board.castling[board.isWhitesTurn ? 1 : 3])
+                    {
                         error = "Long castling is currently unavailable!";
                         return true;
                     }
@@ -1102,8 +1281,10 @@ namespace Dexter.Helpers.Games {
                     move.isCastle = true;
                     int dir = move.target - move.origin > 0 ? 1 : -1;
                     int rook = board.isWhitesTurn ? 56 : 0;
-                    for (int pos = move.origin + dir; pos != rook; pos += dir) {
-                        if (board.GetSquare(pos) != '-') {
+                    for (int pos = move.origin + dir; pos != rook; pos += dir)
+                    {
+                        if (board.GetSquare(pos) != '-')
+                        {
                             error = $"Can't castle queen-side! A piece is obstructing the castle in {ToSquareName(ToMatrixCoords(pos))}.";
                             return true;
                         }
@@ -1117,78 +1298,97 @@ namespace Dexter.Helpers.Games {
                 Piece toMove;
                 Match explicitFormMatch = Regex.Match(input, @"^[a-h][1-8][x\s]*[a-hA-H][1-8]");
 
-                if (explicitFormMatch.Success) {
-                    if (!TryParseSquare(explicitFormMatch.Value[..2], out move.origin)) {
+                if (explicitFormMatch.Success)
+                {
+                    if (!TryParseSquare(explicitFormMatch.Value[..2], out move.origin))
+                    {
                         error = $"The specified origin square ({explicitFormMatch.Value[..2]}) is invalid!";
                         return true;
                     }
                     potentialOrigins.Add(move.origin);
-                    if (!Piece.PieceCharacters.Contains(char.ToUpper(board.GetSquare(move.origin)))) {
+                    if (!Piece.PieceCharacters.Contains(char.ToUpper(board.GetSquare(move.origin))))
+                    {
                         error = $"The specified origin square ({explicitFormMatch.Value[..2]}) doesn't contain a valid piece";
                         return true;
                     }
                     toMove = Piece.FromRepresentation(board.GetSquare(move.origin));
 
-                    if (!TryParseSquare(explicitFormMatch.Value[^2..].ToLower(), out move.target)) {
+                    if (!TryParseSquare(explicitFormMatch.Value[^2..].ToLower(), out move.target))
+                    {
                         error = $"The specified target square ({explicitFormMatch.Value[^2..]}) is invalid!";
                         return true;
                     }
-                    if (!toMove.isValid(move.origin, move.target, board, false)) {
+                    if (!toMove.isValid(move.origin, move.target, board, false))
+                    {
                         error = "The targeted piece cannot move to the desired square!";
                         return true;
                     }
-                } else {
+                }
+                else
+                {
                     Match basicFormMatch = Regex.Match(input, @"^[A-Z]?[a-h1-8]?x?[a-hA-H][1-8]");
 
-                    if (basicFormMatch.Success) {
+                    if (basicFormMatch.Success)
+                    {
                         string basicForm = basicFormMatch.Value;
 
-                        if (!TryParseSquare(basicForm[^2..].ToLower(), out move.target)) {
+                        if (!TryParseSquare(basicForm[^2..].ToLower(), out move.target))
+                        {
                             error = $"The specified target square ({basicForm[^2..]}) is invalid!";
                             return true;
                         }
 
                         if (char.IsLower(basicForm[0])) toMove = Piece.Pawn;
-                        else if (!Piece.PieceCharacters.Contains(input[0])) {
+                        else if (!Piece.PieceCharacters.Contains(input[0]))
+                        {
                             error = $"\"{input[0]}\" cannot be parsed to a valid piece!";
                             return true;
                         }
                         else toMove = Piece.FromRepresentation(input[0]);
 
-                        if (Regex.IsMatch(basicForm, @"^[A-Z]?[a-h]x?[a-hA-H][1-8]")) {
+                        if (Regex.IsMatch(basicForm, @"^[A-Z]?[a-h]x?[a-hA-H][1-8]"))
+                        {
                             fileFilter = (char.IsLower(basicForm[0]) ? basicForm[0] : basicForm[1]) - 'a';
                         }
-                        else if (Regex.IsMatch(basicForm, @"^[A-Z][1-8]x?[a-hA-H][1-8]")) {
+                        else if (Regex.IsMatch(basicForm, @"^[A-Z][1-8]x?[a-hA-H][1-8]"))
+                        {
                             rankFilter = '8' - basicForm[1];
                         }
 
                         char targetPiece = board.isWhitesTurn ? toMove.representation : char.ToLower(toMove.representation);
 
-                        for (int x = 0; x < 8; x++) {
+                        for (int x = 0; x < 8; x++)
+                        {
                             if (fileFilter != -1 && fileFilter != x) continue;
-                            for (int y = 0; y < 8; y++) {
+                            for (int y = 0; y < 8; y++)
+                            {
                                 if (rankFilter != -1 && rankFilter != y) continue;
                                 if (board.squares[x, y] == targetPiece) potentialOrigins.Add(x + y * 8);
                             }
                         }
 
                         List<int> validOrigins = new();
-                        foreach (int origin in potentialOrigins) {
-                            if (toMove.isValid(origin, move.target, board, false)) {
+                        foreach (int origin in potentialOrigins)
+                        {
+                            if (toMove.isValid(origin, move.target, board, false))
+                            {
                                 validOrigins.Add(origin);
                             }
                         }
 
-                        if (validOrigins.Count == 0) {
+                        if (validOrigins.Count == 0)
+                        {
                             error = $"Invalid move! Unable to find any {toMove.name}" +
                                 $"{(fileFilter == -1 ? "" : $" in file {(char)('a' + fileFilter)}")}" +
                                 $"{(rankFilter == -1 ? "" : $" in rank {(char)('8' - rankFilter)}")}" +
                                 $" which can move to {ToSquareName(ToMatrixCoords(move.target))}";
                             return true;
                         }
-                        else if (validOrigins.Count > 1) {
+                        else if (validOrigins.Count > 1)
+                        {
                             string[] ambiguousSquares = new string[validOrigins.Count];
-                            for (int i = 0; i < ambiguousSquares.Length; i++) {
+                            for (int i = 0; i < ambiguousSquares.Length; i++)
+                            {
                                 ambiguousSquares[i] = ToSquareName(ToMatrixCoords(validOrigins[i]));
                             }
                             error = $"Ambiguous move! A {toMove.name} can move to that position from: {string.Join(", ", ambiguousSquares)}";
@@ -1200,9 +1400,11 @@ namespace Dexter.Helpers.Games {
                     else return false;
                 }
 
-                if (move.origin >= 0 && move.target >= 0) {
+                if (move.origin >= 0 && move.target >= 0)
+                {
                     if (((move.target / 8 == 0 && board.isWhitesTurn) || (move.target / 8 == 7 && !board.isWhitesTurn))
-                        && (toMove == Piece.Pawn)) {
+                        && (toMove == Piece.Pawn))
+                    {
                         if (move.promote == ' ') move.promote = Piece.Queen.representation;
                     }
                     else
@@ -1215,7 +1417,8 @@ namespace Dexter.Helpers.Games {
                 return true;
             }
 
-            public Move(int origin, int target, bool isCastle = false, bool isCapture = false, bool isEnPassant = false, bool isCheck = false, bool isCheckMate = false, char promote = ' ') {
+            public Move(int origin, int target, bool isCastle = false, bool isCapture = false, bool isEnPassant = false, bool isCheck = false, bool isCheckMate = false, char promote = ' ')
+            {
                 this.origin = origin;
                 this.target = target;
                 this.isCastle = isCastle;
@@ -1226,18 +1429,22 @@ namespace Dexter.Helpers.Games {
                 this.promote = promote;
             }
 
-            public List<int> ToHighlight() {
+            public List<int> ToHighlight()
+            {
                 List<int> result = new();
 
                 result.Add(origin);
                 result.Add(target);
 
-                if (isCastle) {
-                    if (target % 8 < 4) {
+                if (isCastle)
+                {
+                    if (target % 8 < 4)
+                    {
                         result.Add(target + 1);
                         result.Add(target - 2);
                     }
-                    else {
+                    else
+                    {
                         result.Add(target - 1);
                         result.Add(target + 1);
                     }
@@ -1245,17 +1452,20 @@ namespace Dexter.Helpers.Games {
                 return result;
             }
 
-            public List<int> ToEnPassant() {
+            public List<int> ToEnPassant()
+            {
                 List<int> result = new();
 
-                result.Add((origin/8)*8 + target%8);
+                result.Add((origin / 8) * 8 + target % 8);
 
                 return result;
             }
 
-            public List<int> ToDanger(Board board) {
+            public List<int> ToDanger(Board board)
+            {
                 List<int> result = new();
-                if (isCheck || isCheckMate) {
+                if (isCheck || isCheckMate)
+                {
                     result.Add(board.isWhitesTurn ? board.whiteKing : board.blackKing);
                 }
                 return result;
@@ -1266,17 +1476,20 @@ namespace Dexter.Helpers.Games {
             /// </summary>
             /// <returns>A string representing the origin and endpoint of the move.</returns>
 
-            public override string ToString() {
-                if (isCastle) {
+            public override string ToString()
+            {
+                if (isCastle)
+                {
                     return target > origin ? "O-O" : "O-O-O";
                 }
                 Tuple<int, int> originpos = ToMatrixCoords(origin);
                 Tuple<int, int> finalpos = ToMatrixCoords(target);
-                return $"{ToSquareName(originpos)}{ToSquareName(finalpos)}{(isCapture?"x":"")}{(isEnPassant?"p":"")}";
+                return $"{ToSquareName(originpos)}{ToSquareName(finalpos)}{(isCapture ? "x" : "")}{(isEnPassant ? "p" : "")}";
             }
         }
 
-        private enum Outcome {
+        private enum Outcome
+        {
             Playing,
             Draw,
             FiftyMoveRule,
@@ -1285,7 +1498,8 @@ namespace Dexter.Helpers.Games {
             Check
         }
 
-        private class Board {
+        private class Board
+        {
             public char[,] squares;
             public bool isWhitesTurn;
             public bool[] castling;
@@ -1296,19 +1510,22 @@ namespace Dexter.Helpers.Games {
             public int whiteKing = -1;
             public int blackKing = -1;
 
-            public static bool TryParseBoard(string fen, out Board board, out string error) {
+            public static bool TryParseBoard(string fen, out Board board, out string error)
+            {
                 error = "";
                 board = new Board();
                 string[] components = fen.Split(" ");
 
-                if (components.Length < 6) {
+                if (components.Length < 6)
+                {
                     error = "Missing components! The syntax must be `positions turn castling enpassant halfmoves fullmoves`";
                     return false;
                 }
 
                 string[] ranks = components[0].Split('/');
 
-                if (ranks.Length != 8) {
+                if (ranks.Length != 8)
+                {
                     error = "Positions expression doesn't have the correct number of ranks separated by '/'";
                     return false;
                 }
@@ -1316,27 +1533,36 @@ namespace Dexter.Helpers.Games {
                 char[] pieceChars = Piece.PieceCharacters;
 
                 board.squares = new char[8, 8];
-                for(int i = 0; i < 8; i++) {
+                for (int i = 0; i < 8; i++)
+                {
                     int counter = 0;
-                    foreach (char c in ranks[i]) {
-                        if (counter >= 8) {
+                    foreach (char c in ranks[i])
+                    {
+                        if (counter >= 8)
+                        {
                             error = $"Rank {8 - i} contains more than 8 positions.";
                             return false;
                         }
-                        if (!int.TryParse(c.ToString(), out int n)) {
-                            if (!pieceChars.Contains(char.ToUpper(c))) {
+                        if (!int.TryParse(c.ToString(), out int n))
+                        {
+                            if (!pieceChars.Contains(char.ToUpper(c)))
+                            {
                                 error = $"Rank {8 - i} contains an invalid piece: \"{c}\"";
                                 return false;
                             }
-                            if (c == 'K') {
-                                if (board.whiteKing >= 0) {
+                            if (c == 'K')
+                            {
+                                if (board.whiteKing >= 0)
+                                {
                                     error = $"This board contains more than one white king!";
                                     return false;
                                 }
                                 board.whiteKing = i * 8 + counter;
                             }
-                            else if (c == 'k') {
-                                if (board.blackKing >= 0) {
+                            else if (c == 'k')
+                            {
+                                if (board.blackKing >= 0)
+                                {
                                     error = $"This board contains more than one black king!";
                                     return false;
                                 }
@@ -1345,17 +1571,20 @@ namespace Dexter.Helpers.Games {
                             board.squares[counter++, i] = c;
                             continue;
                         }
-                        if (counter + n > 8) {
+                        if (counter + n > 8)
+                        {
                             error = $"Rank {8 - i} contains more than 8 positions.";
                             return false;
                         }
-                        for (int j = 0; j < n; j++) {
+                        for (int j = 0; j < n; j++)
+                        {
                             board.squares[counter++, i] = '-';
                         }
                     }
                 }
 
-                if (board.whiteKing < 0 || board.blackKing < 0) {
+                if (board.whiteKing < 0 || board.blackKing < 0)
+                {
                     error = $"Both colors must at least have a king!";
                     return false;
                 }
@@ -1376,17 +1605,20 @@ namespace Dexter.Helpers.Games {
                 if (board.squares[7, 7] != 'R') board.castling[0] = false;
 
                 if (components[3] == "-") board.enPassant = -1;
-                else if (!TryParseSquare(components[3], out board.enPassant)) {
+                else if (!TryParseSquare(components[3], out board.enPassant))
+                {
                     error = "Unable to parse en-passant square into a valid square (a1-h8)";
                     return false;
                 }
 
-                if (!int.TryParse(components[4], out board.halfmoves)) {
+                if (!int.TryParse(components[4], out board.halfmoves))
+                {
                     error = "Unable to parse halfmoves into an integer.";
                     return false;
                 }
 
-                if (!int.TryParse(components[5], out board.fullmoves)) {
+                if (!int.TryParse(components[5], out board.fullmoves))
+                {
                     error = "Unable to parse fullmoves into an integer.";
                     return false;
                 }
@@ -1394,7 +1626,8 @@ namespace Dexter.Helpers.Games {
                 return true;
             }
 
-            public void ExecuteMove(Move move) {
+            public void ExecuteMove(Move move)
+            {
                 int x0 = move.origin % 8;
                 int y0 = move.origin / 8;
                 int xf = move.target % 8;
@@ -1404,7 +1637,8 @@ namespace Dexter.Helpers.Games {
                 squares[xf, yf] = representation;
 
                 if (move.isEnPassant) squares[xf, y0] = '-';
-                if (move.isCastle) {
+                if (move.isCastle)
+                {
                     squares[xf < 4 ? 0 : 7, yf] = '-';
                     squares[(x0 + xf) / 2, yf] = 'r'.MatchCase(representation);
                 }
@@ -1414,8 +1648,9 @@ namespace Dexter.Helpers.Games {
                 else
                     enPassant = -1;
                 if (isPawn && move.promote != ' ') squares[xf, yf] = move.promote.MatchCase(representation);
-                
-                if (char.ToUpper(representation) == Piece.King.representation) {
+
+                if (char.ToUpper(representation) == Piece.King.representation)
+                {
                     if (char.IsUpper(representation)) whiteKing = move.target;
                     else blackKing = move.target;
                 }
@@ -1426,37 +1661,48 @@ namespace Dexter.Helpers.Games {
                 else halfmoves++;
             }
 
-            public Outcome GetOutcome() {
+            public Outcome GetOutcome()
+            {
                 if (halfmoves >= 100) return Outcome.FiftyMoveRule;
                 if (InsufficientMaterial()) return Outcome.InsufficientMaterial;
 
                 bool check = IsThreatenedVerbose(isWhitesTurn ? whiteKing : blackKing, true, out bool doubleAttack, out int attacker);
                 bool noMove = !HasLegalMoves(check, doubleAttack, attacker);
 
-                if (check && noMove) {
+                if (check && noMove)
+                {
                     return Outcome.Checkmate;
-                } else if (check) {
+                }
+                else if (check)
+                {
                     return Outcome.Check;
-                } else if (noMove) {
+                }
+                else if (noMove)
+                {
                     return Outcome.Draw;
                 }
                 return Outcome.Playing;
             }
 
-            public bool InsufficientMaterial() {
+            public bool InsufficientMaterial()
+            {
                 Dictionary<char, int> pieceCounts = new Dictionary<char, int>();
-                foreach (char p in Piece.PieceCharacters) {
+                foreach (char p in Piece.PieceCharacters)
+                {
                     pieceCounts.Add(p, 0);
                     pieceCounts.Add(char.ToLower(p), 0);
                 }
-                for (int x = 0; x < 8; x++) {
-                    for (int y = 0; y < 8; y++) {
+                for (int x = 0; x < 8; x++)
+                {
+                    for (int y = 0; y < 8; y++)
+                    {
                         char c = squares[x, y];
                         if (c == '-') continue;
                         else pieceCounts[c]++;
                     }
                 }
-                for (int i = 0; i <= 1; i++) {
+                for (int i = 0; i <= 1; i++)
+                {
                     char color = i == 0 ? 'a' : 'A';
                     if (pieceCounts[Piece.Queen.representation.MatchCase(color)] > 0) return false;
                     if (pieceCounts[Piece.Rook.representation.MatchCase(color)] > 0) return false;
@@ -1466,26 +1712,32 @@ namespace Dexter.Helpers.Games {
                 return true;
             }
 
-            public bool HasLegalMoves(bool inCheck, bool doubleAttack, int attackerPos) {
+            public bool HasLegalMoves(bool inCheck, bool doubleAttack, int attackerPos)
+            {
                 HashSet<int> pinned = new();
                 int kingPos = isWhitesTurn ? whiteKing : blackKing;
 
-                if (!inCheck) {
-                    for (int pos = 0; pos < 64; pos++) {
+                if (!inCheck)
+                {
+                    for (int pos = 0; pos < 64; pos++)
+                    {
                         if (pos == kingPos) continue;
                         char piecechar = GetSquare(pos);
                         if (piecechar == '-' || char.IsLower(piecechar) == isWhitesTurn) continue;
                         if (IsPiecePinned(pos, kingPos)) { pinned.Add(pos); }
-                        else {
+                        else
+                        {
                             Piece piece = Piece.FromRepresentation(piecechar);
-                            if (piece.hasValidMoves(pos, this, false)) {
+                            if (piece.hasValidMoves(pos, this, false))
+                            {
                                 return true;
                             }
                         }
                     }
                     int kx = kingPos % 8;
                     int ky = kingPos / 8;
-                    foreach (int pos in pinned) {
+                    foreach (int pos in pinned)
+                    {
                         char piecechar = GetSquare(pos);
                         Piece piece = Piece.FromRepresentation(piecechar);
 
@@ -1493,17 +1745,20 @@ namespace Dexter.Helpers.Games {
                         int y0 = pos / 8;
                         int dx = Math.Sign(kx - x0);
                         int dy = Math.Sign(ky - y0);
-                        for (int sign = -1; sign <= 1; sign += 2) {
+                        for (int sign = -1; sign <= 1; sign += 2)
+                        {
                             if (piece.isValid(pos, pos + dx * sign + dy * sign * 8, this, false)) return true;
                         }
                     }
                     if (Piece.King.hasValidMoves(kingPos, this, false)) { return true; }
                 }
-                else {
+                else
+                {
                     Piece attacker = Piece.FromRepresentation(GetSquare(attackerPos));
                     HashSet<int> blockSquares = new();
 
-                    if (attacker.canPin && !doubleAttack) {
+                    if (attacker.canPin && !doubleAttack)
+                    {
                         int px = attackerPos % 8;
                         int py = attackerPos / 8;
                         int kx = kingPos % 8;
@@ -1514,24 +1769,29 @@ namespace Dexter.Helpers.Games {
 
                         int adv = Math.Sign(dx) + Math.Sign(dy) * 8;
                         int newPos = kingPos + adv;
-                        while (newPos != attackerPos) {
+                        while (newPos != attackerPos)
+                        {
                             blockSquares.Add(newPos);
                             newPos += adv;
                         }
                     }
 
-                    for (int pos = 0; pos < 64; pos++) {
+                    for (int pos = 0; pos < 64; pos++)
+                    {
                         if (pos == kingPos) continue;
                         char piecechar = GetSquare(pos);
                         if (piecechar == '-' || char.IsLower(piecechar) == isWhitesTurn) continue;
-                        if (IsPiecePinned(pos, kingPos)) {
+                        if (IsPiecePinned(pos, kingPos))
+                        {
                             pinned.Add(pos);
                         }
-                        else if (!doubleAttack) { //If it is not pinned AND can capture only attacker, legal.
+                        else if (!doubleAttack)
+                        { //If it is not pinned AND can capture only attacker, legal.
                             Piece piece = Piece.FromRepresentation(piecechar);
                             if (piece.isValid(pos, attackerPos, this, false)) return true;
 
-                            foreach (int sq in blockSquares) { //If a piece can block the attack, legal.
+                            foreach (int sq in blockSquares)
+                            { //If a piece can block the attack, legal.
                                 if (piece.isValid(pos, sq, this, false)) return true;
                             }
                         }
@@ -1542,17 +1802,21 @@ namespace Dexter.Helpers.Games {
                 return false;
             }
 
-            public char GetSquare(int value) {
+            public char GetSquare(int value)
+            {
                 return squares[value % 8, value / 8];
             }
 
-            public override string ToString() {
+            public override string ToString()
+            {
                 StringBuilder builder = new StringBuilder(80);
 
-                for (int y = 0; y < 8; y++) {
+                for (int y = 0; y < 8; y++)
+                {
                     if (y != 0) builder.Append('/');
                     int spaces = 0;
-                    for (int x = 0; x < 8; x++) {
+                    for (int x = 0; x < 8; x++)
+                    {
                         if (squares[x, y] == '-') { spaces++; continue; }
                         if (spaces > 0) { builder.Append(spaces); spaces = 0; }
                         builder.Append(squares[x, y]);
@@ -1563,7 +1827,8 @@ namespace Dexter.Helpers.Games {
                 builder.Append($" {(isWhitesTurn ? 'w' : 'b')} ");
 
                 if (!castling[0] && !castling[1] && !castling[2] && !castling[3]) builder.Append('-');
-                else {
+                else
+                {
                     if (castling[0]) builder.Append('K');
                     if (castling[1]) builder.Append('Q');
                     if (castling[2]) builder.Append('k');
@@ -1572,7 +1837,8 @@ namespace Dexter.Helpers.Games {
                 builder.Append(' ');
 
                 string enPassantExpression = "-";
-                if (enPassant >= 0) {
+                if (enPassant >= 0)
+                {
                     enPassantExpression = ToSquareName(ToMatrixCoords(enPassant));
                 }
 
@@ -1581,17 +1847,20 @@ namespace Dexter.Helpers.Games {
                 return builder.ToString();
             }
 
-            public object Clone() {
+            public object Clone()
+            {
                 Board output = new Board();
 
                 output.squares = new char[8, 8];
-                for (int i = 0; i < 64; i++) {
-                    output.squares.SetValue((Char) squares[i/8, i%8], new int[] { i / 8,i % 8});
+                for (int i = 0; i < 64; i++)
+                {
+                    output.squares.SetValue((Char)squares[i / 8, i % 8], new int[] { i / 8, i % 8 });
                 }
                 output.isWhitesTurn = (bool)isWhitesTurn;
                 output.castling = new bool[4];
-                for (int i = 0; i < 4; i++) {
-                    output.castling.SetValue((bool) castling[i], i);
+                for (int i = 0; i < 4; i++)
+                {
+                    output.castling.SetValue((bool)castling[i], i);
                 }
                 output.enPassant = (int)enPassant;
                 output.halfmoves = (int)halfmoves;
@@ -1602,11 +1871,14 @@ namespace Dexter.Helpers.Games {
                 return output;
             }
 
-            public bool IsThreatened(int square, bool flipThreat = false) { 
-                for (int position = 0; position < 64; position++) {
+            public bool IsThreatened(int square, bool flipThreat = false)
+            {
+                for (int position = 0; position < 64; position++)
+                {
                     char pieceName = squares[position % 8, position / 8];
                     if (!char.IsLetter(pieceName)) continue;
-                    if ((char.IsUpper(pieceName) == isWhitesTurn) ^ flipThreat) {
+                    if ((char.IsUpper(pieceName) == isWhitesTurn) ^ flipThreat)
+                    {
                         Piece attacker = Piece.FromRepresentation(pieceName);
                         if (attacker.isValid(position, square, this, flipThreat)) return true;
                     }
@@ -1614,19 +1886,25 @@ namespace Dexter.Helpers.Games {
                 return false;
             }
 
-            public bool IsControlled(int square, bool flipThreat = false) {
-                for (int position = 0; position < 64; position++) {
+            public bool IsControlled(int square, bool flipThreat = false)
+            {
+                for (int position = 0; position < 64; position++)
+                {
                     char pieceName = squares[position % 8, position / 8];
                     if (!char.IsLetter(pieceName)) continue;
-                    if ((char.IsUpper(pieceName) == isWhitesTurn) ^ flipThreat) {
+                    if ((char.IsUpper(pieceName) == isWhitesTurn) ^ flipThreat)
+                    {
                         Piece attacker = Piece.FromRepresentation(pieceName);
                         char temp = squares[square % 8, square / 8];
                         char enemyPiece = isWhitesTurn ^ flipThreat ? char.ToLower(Piece.Pawn.representation) : char.ToUpper(Piece.Pawn.representation);
                         squares[square % 8, square / 8] = enemyPiece;
-                        if (attacker.isValid(position, square, this, flipThreat)) {
+                        if (attacker.isValid(position, square, this, flipThreat))
+                        {
                             squares[square % 8, square / 8] = temp;
                             return true;
-                        } else {
+                        }
+                        else
+                        {
                             squares[square % 8, square / 8] = temp;
                         }
                     }
@@ -1634,19 +1912,26 @@ namespace Dexter.Helpers.Games {
                 return false;
             }
 
-            public bool IsThreatenedVerbose(int square, bool flipThreat, out bool multipleAttackers, out int firstAttacker) {
+            public bool IsThreatenedVerbose(int square, bool flipThreat, out bool multipleAttackers, out int firstAttacker)
+            {
                 multipleAttackers = false;
                 firstAttacker = -1;
-                for (int position = 0; position < 64; position++) {
+                for (int position = 0; position < 64; position++)
+                {
                     char pieceName = squares[position % 8, position / 8];
                     if (!char.IsLetter(pieceName)) continue;
-                    if ((char.IsUpper(pieceName) == isWhitesTurn) ^ flipThreat) {
+                    if ((char.IsUpper(pieceName) == isWhitesTurn) ^ flipThreat)
+                    {
                         Piece attacker = Piece.FromRepresentation(pieceName);
-                        if (attacker.isValid(position, square, this, flipThreat)) {
-                            if (firstAttacker >= 0) {
+                        if (attacker.isValid(position, square, this, flipThreat))
+                        {
+                            if (firstAttacker >= 0)
+                            {
                                 multipleAttackers = true;
                                 return true;
-                            } else {
+                            }
+                            else
+                            {
                                 firstAttacker = position;
                             }
                         }
@@ -1655,7 +1940,8 @@ namespace Dexter.Helpers.Games {
                 return firstAttacker >= 0;
             }
 
-            public bool IsPiecePinned(int piecePosition, int kingLocation) {
+            public bool IsPiecePinned(int piecePosition, int kingLocation)
+            {
                 if (piecePosition == kingLocation) return false;
                 int px = piecePosition % 8;
                 int py = piecePosition / 8;
@@ -1672,9 +1958,11 @@ namespace Dexter.Helpers.Games {
                 int x = kx + xAdv;
                 int y = ky + yAdv;
                 bool beforePiece = true;
-                while (x >= 0 && x < 8 && y >= 0 && y < 8) {
+                while (x >= 0 && x < 8 && y >= 0 && y < 8)
+                {
                     if (x == px && y == py) { beforePiece = false; x += xAdv; y += yAdv; continue; }
-                    if (squares[x, y] != '-') {
+                    if (squares[x, y] != '-')
+                    {
                         if (beforePiece) return false;
                         Piece p = Piece.FromRepresentation(squares[x, y]);
                         return p.canPin && p.isValid(x + y * 8, piecePosition, this, true);

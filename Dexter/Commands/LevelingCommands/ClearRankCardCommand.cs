@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Databases.Levels;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
-    public partial class LevelingCommands {
+namespace Dexter.Commands
+{
+    public partial class LevelingCommands
+    {
 
         /// <summary>
         /// Removes the associated preferences entry related to a given user.
@@ -22,7 +20,8 @@ namespace Dexter.Commands {
         [Summary("Clears the rank card custom settings for a given user.")]
         [RequireModerator]
 
-        public async Task ClearRankCardCommand(IUser target) {
+        public async Task ClearRankCardCommand(IUser target)
+        {
             _ = LevelingDB.GetOrCreateLevelData(target.Id, out LevelPreferences settings);
 
             LevelingDB.Prefs.Remove(settings);
@@ -44,7 +43,8 @@ namespace Dexter.Commands {
         [Summary("Clears the rank card custom settings for a given user by their ID.")]
         [RequireModerator]
 
-        public async Task ClearRankCardCommand(ulong targetID) {
+        public async Task ClearRankCardCommand(ulong targetID)
+        {
             _ = LevelingDB.GetOrCreateLevelData(targetID, out LevelPreferences settings);
 
             LevelingDB.Prefs.Remove(settings);

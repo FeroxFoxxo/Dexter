@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.ReactionMenus {
+namespace Dexter.Databases.ReactionMenus
+{
 
     /// <summary>
     /// This class abstracts and serves to store the color information of a ReactionMenu's embeds.
     /// </summary>
 
-    public class ColorMenu {
+    public class ColorMenu
+    {
 
         /// <summary>
         /// The unique identifier of a color scheme for any given ReactionMenu.

@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Databases.UserRestrictions;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
-    partial class ModeratorCommands {
+namespace Dexter.Commands
+{
+    partial class ModeratorCommands
+    {
 
         /// <summary>
         /// Manages the addition, removal, and fetching of Restrictions for specific <paramref name="User"/>s.
@@ -30,30 +32,35 @@ namespace Dexter.Commands {
         [RequireModerator]
         [BotChannel]
 
-        public async Task ServiceBanCommand(string Action, IUser User, [Remainder] string Restrictions = "") {
+        public async Task ServiceBanCommand(string Action, IUser User, [Remainder] string Restrictions = "")
+        {
             string[] RestrictionsArray = Restrictions.Trim().Split(" ");
 
             Restriction Apply;
             bool[] Success;
             List<string> Errored = new();
 
-            if(string.IsNullOrEmpty(Restrictions)) {
+            if (string.IsNullOrEmpty(Restrictions))
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("No restrictions provided!")
                     .WithDescription("You must provide at least one restriction to apply or remove.")
                     .SendEmbed(Context.Channel);
                 return;
             }
-            
-            switch(Action.ToLower()) {
+
+            switch (Action.ToLower())
+            {
                 case "add":
                     Apply = ParseRestriction(RestrictionsArray, out Success);
 
-                    for(int i = 0; i < Success.Length; i++) {
+                    for (int i = 0; i < Success.Length; i++)
+                    {
                         if (!Success[i]) Errored.Add(RestrictionsArray[i]);
                     }
 
-                    if(!RestrictionsDB.AddRestriction(User, Apply)) {
+                    if (!RestrictionsDB.AddRestriction(User, Apply))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Failure!")
                             .WithDescription($"User {User.GetUserInformation()} already has the following restrictions applied: \n" +
@@ -75,11 +82,13 @@ namespace Dexter.Commands {
                 case "remove":
                     Apply = ParseRestriction(RestrictionsArray, out Success);
 
-                    for (int i = 0; i < Success.Length; i++) {
+                    for (int i = 0; i < Success.Length; i++)
+                    {
                         if (!Success[i]) Errored.Add(RestrictionsArray[i]);
                     }
 
-                    if (!RestrictionsDB.RemoveRestriction(User, Apply)) {
+                    if (!RestrictionsDB.RemoveRestriction(User, Apply))
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Failure!")
                             .WithDescription($"User {User.GetUserInformation()} has none of the following restrictions: \n" +
@@ -114,17 +123,23 @@ namespace Dexter.Commands {
             }
         }
 
-        private Restriction ParseRestriction(string[] Input, out bool[] Success) {
+        private Restriction ParseRestriction(string[] Input, out bool[] Success)
+        {
             Restriction Result = Restriction.None;
             Success = new bool[Input.Length];
 
-            for(int i = 0; i < Input.Length; i++) {
+            for (int i = 0; i < Input.Length; i++)
+            {
                 string R = Input[i];
-                if (Enum.TryParse(R, true, out Restriction NewR)) {
+                if (Enum.TryParse(R, true, out Restriction NewR))
+                {
                     Result |= NewR;
                     Success[i] = true;
-                } else {
-                    switch (R.ToLower()) {
+                }
+                else
+                {
+                    switch (R.ToLower())
+                    {
                         case "suggest":
                         case "suggestion":
                             Result |= Restriction.Suggestions;
@@ -141,8 +156,9 @@ namespace Dexter.Commands {
                             Success[i] = true;
                             break;
                         case "all":
-                            foreach(ulong r in Enum.GetValues<Restriction>()) {
-                                Result |= (Restriction) r;
+                            foreach (ulong r in Enum.GetValues<Restriction>())
+                            {
+                                Result |= (Restriction)r;
                             }
                             Success[i] = true;
                             break;
@@ -163,7 +179,8 @@ namespace Dexter.Commands {
         [RequireModerator]
         [BotChannel]
 
-        public async Task ListBannableServicesCommand() {
+        public async Task ListBannableServicesCommand()
+        {
             await Context.Message.ReplyAsync($"Valid expressions are: ***{string.Join("***, ***", Enum.GetNames<Restriction>())}***, ***All***.");
         }
 

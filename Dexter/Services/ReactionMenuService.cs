@@ -11,13 +11,15 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dexter.Services {
+namespace Dexter.Services
+{
 
     /// <summary>
     /// The Reaction Menu service, which is used to create and update reaction menus.
     /// </summary>
 
-    public class ReactionMenuService : Service {
+    public class ReactionMenuService : Service
+    {
 
         /// <summary>
         /// A reference to the database holding dynamic ReactionMenu data, such as current active menus and CurrentPages attached to them.
@@ -29,8 +31,9 @@ namespace Dexter.Services {
         /// The Initialize method hooks the client ReactionAdded events and sets them to their related delegates.
         /// It is also used to delete the previous database to save on space.
         /// </summary>
-        
-        public override void Initialize() {
+
+        public override void Initialize()
+        {
             DiscordSocketClient.ReactionAdded += ReactionMenu;
 
             // Clear reaction menus if exists.
@@ -50,7 +53,8 @@ namespace Dexter.Services {
         /// <param name="Reaction">The reaction data attached to the new reaction added to the <paramref name="CachedMessage"/>.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task ReactionMenu(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel Channel, SocketReaction Reaction) {
+        public async Task ReactionMenu(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel Channel, SocketReaction Reaction)
+        {
             ReactionMenu ReactionMenu = ReactionMenuDB.ReactionMenus.Find(CachedMessage.Id);
 
             if (ReactionMenu == null || Reaction.User.Value.IsBot)
@@ -61,11 +65,14 @@ namespace Dexter.Services {
             EmbedBuilder[] Menus = JsonConvert.DeserializeObject<EmbedBuilder[]>
                 (ReactionMenuDB.EmbedMenus.Find(ReactionMenu.EmbedMenuIndex).EmbedMenuJSON);
 
-            if (Reaction.Emote.Name.Equals("⬅️")) {
+            if (Reaction.Emote.Name.Equals("⬅️"))
+            {
                 ReactionMenu.CurrentPage--;
                 if (ReactionMenu.CurrentPage < 1)
                     ReactionMenu.CurrentPage = Menus.Length;
-            } else if (Reaction.Emote.Name.Equals("➡️")) {
+            }
+            else if (Reaction.Emote.Name.Equals("➡️"))
+            {
                 ReactionMenu.CurrentPage++;
                 if (ReactionMenu.CurrentPage > Menus.Length)
                     ReactionMenu.CurrentPage = 1;
@@ -73,9 +80,11 @@ namespace Dexter.Services {
 
             await Message.ModifyAsync(MessageP => MessageP.Embed = CreateMenuEmbed(ReactionMenu));
 
-            try {
+            try
+            {
                 await Message.RemoveReactionAsync(Reaction.Emote, Reaction.User.Value);
-            } catch (HttpException) { }
+            }
+            catch (HttpException) { }
         }
 
         /// <summary>
@@ -85,12 +94,13 @@ namespace Dexter.Services {
         /// <param name="Channel">The channel to send the ReactionMenu into.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task CreateReactionMenu(EmbedBuilder[] EmbedBuilders, ISocketMessageChannel Channel) {
+        public async Task CreateReactionMenu(EmbedBuilder[] EmbedBuilders, ISocketMessageChannel Channel)
+        {
             RestUserMessage Message = await Channel.SendMessageAsync(
                 embed: BuildEmbed(EmojiEnum.Unknown).WithTitle("Setting up reaction menu-").Build()
             );
 
-            List<uint> Colors = new ();
+            List<uint> Colors = new();
 
             foreach (EmbedBuilder Builder in EmbedBuilders)
                 Colors.Add(Builder.Color.HasValue ? Builder.Color.Value.RawValue : Color.Blue.RawValue);
@@ -103,11 +113,13 @@ namespace Dexter.Services {
 
             if (EmbedMenu != null)
                 EmbedMenuID = EmbedMenu.EmbedIndex;
-            else {
+            else
+            {
                 EmbedMenuID = ReactionMenuDB.EmbedMenus.AsQueryable().Count() + 1;
 
                 ReactionMenuDB.EmbedMenus.Add(
-                    new EmbedMenu() {
+                    new EmbedMenu()
+                    {
                         EmbedIndex = EmbedMenuID,
                         EmbedMenuJSON = EmbedMenuJSON
                     }
@@ -122,16 +134,19 @@ namespace Dexter.Services {
 
             if (ColorMenu != null)
                 ColorMenuID = ColorMenu.ColorIndex;
-            else {
+            else
+            {
                 ColorMenuID = ReactionMenuDB.ColorMenus.AsQueryable().Count() + 1;
 
-                ReactionMenuDB.ColorMenus.Add(new ColorMenu() {
+                ReactionMenuDB.ColorMenus.Add(new ColorMenu()
+                {
                     ColorIndex = ColorMenuID,
                     ColorMenuJSON = ColorMenuJSON
                 });
             }
 
-            ReactionMenu ReactionMenu = new() {
+            ReactionMenu ReactionMenu = new()
+            {
                 CurrentPage = 1,
                 MessageID = Message.Id,
                 ColorMenuIndex = ColorMenuID,
@@ -154,7 +169,8 @@ namespace Dexter.Services {
         /// <param name="ReactionMenu">A specific instance of a ReactionMenu to obtain the active embed from.</param>
         /// <returns>An Embed object, which can be sent or replace a different message via editing.</returns>
 
-        public Embed CreateMenuEmbed (ReactionMenu ReactionMenu) {
+        public Embed CreateMenuEmbed(ReactionMenu ReactionMenu)
+        {
             EmbedBuilder[] Menus = JsonConvert.DeserializeObject<EmbedBuilder[]>
                 (ReactionMenuDB.EmbedMenus.Find(ReactionMenu.EmbedMenuIndex).EmbedMenuJSON);
 

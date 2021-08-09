@@ -2,9 +2,11 @@
 using Discord.Commands;
 using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class MuzzleCommands {
+    public partial class MuzzleCommands
+    {
 
         /// <summary>
         /// Has a chance to muzzle Context.User.
@@ -18,7 +20,8 @@ namespace Dexter.Commands {
         [CommandCooldown(45)]
         [GameChannelRestricted]
 
-        public async Task RouletteCommand() {
+        public async Task RouletteCommand()
+        {
             if (Random.Next(4) == 1)
                 await MuzzleCommand(Context.Guild.GetUser(Context.User.Id));
             else

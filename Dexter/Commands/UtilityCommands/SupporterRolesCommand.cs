@@ -1,23 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Drawing.Text;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Drawing.Text;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
-    public partial class UtilityCommands {
+namespace Dexter.Commands
+{
+    public partial class UtilityCommands
+    {
 
         /// <summary>
         /// Sets the role color of users with the permission or displays the list of available color roles.
@@ -31,26 +31,32 @@ namespace Dexter.Commands {
             "`color LIST` - displays a list of available color roles\n" +
             "`color NONE` - removes all color roles from you\n" +
             "`color [colorname]` - changes your current color role to the one specified.")]
-        
-        public async Task SupporterRolesCommand([Remainder] string colorname) {
 
-            if (colorname == "list") {
+        public async Task SupporterRolesCommand([Remainder] string colorname)
+        {
+
+            if (colorname == "list")
+            {
                 await PrintColorOptions();
                 return;
             }
 
             IGuildUser user;
-            if (Context.User is not IGuildUser) {
+            if (Context.User is not IGuildUser)
+            {
                 user = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id);
-                if (user is null) {
+                if (user is null)
+                {
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Unable to find user!")
                         .WithDescription("This could be due to caching errors, but I couldn't find you in the server! Try again later, if this persists, contact the developer team or an administrator.")
                         .SendEmbed(Context.Channel);
                     return;
                 }
-            } else {
-                user = (IGuildUser) Context.User;
+            }
+            else
+            {
+                user = (IGuildUser)Context.User;
             }
 
             IEnumerable<IRole> roles = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Roles;
@@ -58,17 +64,21 @@ namespace Dexter.Commands {
 
             IRole toAdd = null;
             bool found = false;
-            foreach (IRole role in roles) {
-                if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix)) {
+            foreach (IRole role in roles)
+            {
+                if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix))
+                {
                     colorRoleIDs.Add(role.Id, role);
-                    if (!found && role.Name.ToLower().EndsWith(colorname.ToLower())) {
+                    if (!found && role.Name.ToLower().EndsWith(colorname.ToLower()))
+                    {
                         toAdd = role;
                         found = true;
                     }
                 }
             }
             bool canChangeColor = CanChangeColor(user);
-            if (!canChangeColor || colorname.ToLower() == "none") {
+            if (!canChangeColor || colorname.ToLower() == "none")
+            {
                 if (!await TryRemoveRoles(user, colorRoleIDs)) return;
 
                 if (!canChangeColor)
@@ -78,8 +88,9 @@ namespace Dexter.Commands {
                 return;
             }
 
-            if (UtilityConfiguration.LockedColors.ContainsKey(toAdd.Id) 
-                && !user.RoleIds.Contains(UtilityConfiguration.LockedColors[toAdd.Id])) {
+            if (UtilityConfiguration.LockedColors.ContainsKey(toAdd.Id)
+                && !user.RoleIds.Contains(UtilityConfiguration.LockedColors[toAdd.Id]))
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Locked Role!")
                     .WithDescription($"In order to unlock this role, you must first get <@&{UtilityConfiguration.LockedColors[toAdd.Id]}>.")
@@ -87,7 +98,8 @@ namespace Dexter.Commands {
                 return;
             }
 
-            if (toAdd is null) {
+            if (toAdd is null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Color not found")
                     .WithDescription($"Unable to find the specified color \"{colorname}\". To see a list of colors and their names, use the `color list` command.")
@@ -96,10 +108,12 @@ namespace Dexter.Commands {
             }
 
             if (!await TryRemoveRoles(user, colorRoleIDs)) return;
-            try {
+            try
+            {
                 await user.AddRoleAsync(toAdd);
             }
-            catch {
+            catch
+            {
                 await Context.Channel.SendMessageAsync("Unable to add role! Missing required permissions.");
                 return;
             }
@@ -110,32 +124,39 @@ namespace Dexter.Commands {
                 .SendEmbed(Context.Channel);
         }
 
-        private async Task<bool> TryRemoveRoles(IGuildUser user, Dictionary<ulong, IRole> colorRoleIDs) {
+        private async Task<bool> TryRemoveRoles(IGuildUser user, Dictionary<ulong, IRole> colorRoleIDs)
+        {
             List<IRole> toRemove = new();
-            foreach(ulong roleID in user.RoleIds) {
-                if (colorRoleIDs.ContainsKey(roleID)) {
+            foreach (ulong roleID in user.RoleIds)
+            {
+                if (colorRoleIDs.ContainsKey(roleID))
+                {
                     toRemove.Add(colorRoleIDs[roleID]);
                 }
             }
 
             if (!toRemove.Any()) return true;
 
-            try {
+            try
+            {
                 await user.RemoveRolesAsync(toRemove);
                 return true;
             }
-            catch(HttpException e) {
+            catch (HttpException e)
+            {
                 await Context.Channel.SendMessageAsync($"Missing permissions for role management! {e}");
                 return false;
             }
         }
 
-        private async Task PrintColorOptions() {
+        private async Task PrintColorOptions()
+        {
 
             string imageChacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
             string filepath = Path.Join(imageChacheDir, $"ColorsList.jpg");
 
-            if (!File.Exists(filepath)) {
+            if (!File.Exists(filepath))
+            {
                 await ReloadColorList();
             }
 
@@ -151,24 +172,29 @@ namespace Dexter.Commands {
         [Summary("Updates the color list graphic to reflect new settings and new added roles")]
         [RequireModerator]
 
-        public async Task ReloadColorListCommand() {
+        public async Task ReloadColorListCommand()
+        {
             await ReloadColorList(true);
         }
 
         const int IconRoleNameMargin = 10;
 
-        private async Task ReloadColorList(bool verbose = false) {
+        private async Task ReloadColorList(bool verbose = false)
+        {
             List<SocketRole> roles = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Roles.ToList();
             roles.Sort((ra, rb) => rb.Position.CompareTo(ra.Position));
             List<IRole> colorRoles = new();
 
-            foreach (IRole role in roles) {
-                if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix)) {
+            foreach (IRole role in roles)
+            {
+                if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix))
+                {
                     colorRoles.Add(role);
                 }
             }
 
-            if (verbose && !colorRoles.Any()) {
+            if (verbose && !colorRoles.Any())
+            {
                 await Context.Channel.SendMessageAsync($"No roles found with the prefix: \"{UtilityConfiguration.ColorRolePrefix}\".");
                 return;
             }
@@ -177,7 +203,7 @@ namespace Dexter.Commands {
             int colcount = UtilityConfiguration.ColorListColCount;
             int rowheight = UtilityConfiguration.ColorListRowHeight;
             int rowcount = (colorRoles.Count - 1) / colcount + 1;
-            int height =  rowcount * rowheight;
+            int height = rowcount * rowheight;
 
             string fontPath = Path.Join(Directory.GetCurrentDirectory(), "Images", "OtherMedia", "Fonts", "Whitney", "whitneymedium.otf");
 
@@ -187,35 +213,41 @@ namespace Dexter.Commands {
             Font font = new(fontfamily, UtilityConfiguration.ColorListFontSize, FontStyle.Regular, GraphicsUnit.Pixel);
 
             Bitmap picture = new(colwidth * colcount, height);
-            using (Graphics g = Graphics.FromImage(picture)) {
+            using (Graphics g = Graphics.FromImage(picture))
+            {
                 int col = 0;
                 int row = 0;
 
                 using System.Drawing.Image icon = System.Drawing.Image.FromFile(Path.Join(Directory.GetCurrentDirectory(), "Images", "PawIcon.png"));
-                foreach (IRole role in colorRoles) {
+                foreach (IRole role in colorRoles)
+                {
                     using Brush brush = new SolidBrush(System.Drawing.Color.FromArgb(unchecked((int)(role.Color.RawValue + 0xFF000000))));
 
                     ColorMatrix colorMatrix = BasicTransform(role.Color.R / 255f, role.Color.G / 255f, role.Color.B / 255f);
                     ImageAttributes imageAttributes = new();
                     imageAttributes.SetColorMatrix(colorMatrix);
-                    g.DrawImage(icon, 
-                        new Rectangle(col * colwidth, row * rowheight, rowheight, rowheight), 
+                    g.DrawImage(icon,
+                        new Rectangle(col * colwidth, row * rowheight, rowheight, rowheight),
                         0, 0, icon.Width, icon.Height,
                         GraphicsUnit.Pixel,
                         imageAttributes);
                     g.DrawString(ToRoleName(role), font, brush,
                         col * colwidth + rowheight + IconRoleNameMargin, (rowheight - UtilityConfiguration.ColorListFontSize) / 2 + row * rowheight);
 
-                    if (UtilityConfiguration.ColorListDisplayByRows) {
+                    if (UtilityConfiguration.ColorListDisplayByRows)
+                    {
                         col++;
-                        if (col >= colcount) {
+                        if (col >= colcount)
+                        {
                             col = 0;
                             row++;
                         }
                     }
-                    else {
+                    else
+                    {
                         row++;
-                        if (row >= rowcount) {
+                        if (row >= rowcount)
+                        {
                             row = 0;
                             col++;
                         }
@@ -230,10 +262,19 @@ namespace Dexter.Commands {
             if (verbose) await Context.Channel.SendMessageAsync($"Successfully reloaded colors!");
         }
 
-        private readonly float[] alphatransform = new float[] { 0, 0, 0, 1, 0 };
-        private readonly float[] lineartransform = new float[] { 0, 0, 0, 0, 1 };
+        private readonly static float[] alphatransform = new float[] { 0, 0, 0, 1, 0 };
+        private readonly static float[] lineartransform = new float[] { 0, 0, 0, 0, 1 };
 
-        private ColorMatrix BasicTransform(float r, float g, float b) {
+        /// <summary>
+        /// Returns a color transformation matrix with the given RGB values.
+        /// </summary>
+        /// <param name="r">The red component value</param>
+        /// <param name="g">The green component value</param>
+        /// <param name="b">The blue component value</param>
+        /// <returns></returns>
+
+        public static ColorMatrix BasicTransform(float r, float g, float b)
+        {
             return new ColorMatrix(new float[][] {
                 new float[] {r, 0, 0, 0, 0},
                 new float[] {0, g, 0, 0, 0},
@@ -243,14 +284,17 @@ namespace Dexter.Commands {
                 });
         }
 
-        private string ToRoleName(IRole role) {
+        private string ToRoleName(IRole role)
+        {
             return role.Name[UtilityConfiguration.ColorRolePrefix.Length..];
         }
 
-        private bool CanChangeColor(IGuildUser user) {
+        private bool CanChangeColor(IGuildUser user)
+        {
             if (user is null) return false;
 
-            foreach(ulong roleId in user.RoleIds) {
+            foreach (ulong roleId in user.RoleIds)
+            {
                 if (UtilityConfiguration.ColorChangeRoles.Contains(roleId)) return true;
             }
             return false;

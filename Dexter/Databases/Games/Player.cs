@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.Games {
+namespace Dexter.Databases.Games
+{
 
     /// <summary>
     /// Represents an individual player in the Games System database, and thus a user on Discord in general.
     /// </summary>
 
-    public class Player {
+    public class Player
+    {
 
         /// <summary>
         /// The unique user ID for the user that this player represents.

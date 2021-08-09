@@ -3,9 +3,11 @@
   "DeveloperRoleID": 795545764909678593,
   "ModeratorRoleID": 679632649807069232,
   "GreetFurRoleID": 808587693881688064,
+  "DivineFurRoleID": 871729807090655232,
   "GuildID": 613441321751019550,
   "ModerationLogChannelID": 792657959192231976,
   "Prefix": "~",
+  "BotName": "Dexter DEV",
   "ThumbnailURLs": [
     "",
     "https://cdn.discordapp.com/attachments/781077443338960926/808664878977646602/DexAnnoyed.png",

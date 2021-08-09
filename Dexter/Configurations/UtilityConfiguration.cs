@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
+using System.Collections.Generic;
 
-namespace Dexter.Configurations {
+namespace Dexter.Configurations
+{
 
     /// <summary>
     /// Configures the relevant aspects of the Utility Commands Module.
     /// </summary>
 
-    public class UtilityConfiguration : JSONConfig {
+    public class UtilityConfiguration : JSONConfig
+    {
 
         /// <summary>
         /// The maximum number of items that can appear on an Embed Menu's page for upcoming reminders.
@@ -74,5 +76,19 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public ulong[] ColorChangeRoles { get; set; }
+
+        /// <summary>
+        /// The snowflake ID for the private voice chat category.
+        /// </summary>
+        
+        public ulong PrivateCategoryID { get; set;  }
+
+
+        /// <summary>
+        /// The name of the waiting VC that people will be in when waiting to be dragged in and out of private VCs.
+        /// </summary>
+
+        public string WaitingVCName { get; set; }
+
     }
 }

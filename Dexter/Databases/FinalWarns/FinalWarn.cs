@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Dexter.Enums;
+﻿using Dexter.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.FinalWarns
 {
@@ -7,7 +7,8 @@ namespace Dexter.Databases.FinalWarns
     /// Stores the information related to a final warning entry in a database, including the user it is attached to and whether it's active.
     /// </summary>
 
-    public class FinalWarn {
+    public class FinalWarn
+    {
 
         /// <summary>
         /// The unique ID for the user who received this final warning. This functions as a Key in the final warnings database.

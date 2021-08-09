@@ -1,20 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dexter.Configurations;
+﻿using Dexter.Configurations;
 using Dexter.Databases.Levels;
 using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class LevelingCommands {
+    public partial class LevelingCommands
+    {
 
         /// <summary>
         /// Creates a leaderboard spanning users from page <paramref name="min"/> to page <paramref name="max"/> and posts it in chat.
@@ -27,15 +28,18 @@ namespace Dexter.Commands {
         [Alias("leaderboard")]
         [Summary("Usage: `levels (min) (max)`")]
 
-        public async Task LeaderboardCommand(int min = 1, int max = 100) {
-            if (min >= max) {
+        public async Task LeaderboardCommand(int min = 1, int max = 100)
+        {
+            if (min >= max)
+            {
                 await BuildEmbed(Enums.EmojiEnum.Annoyed)
                     .WithTitle("Invalid range!")
                     .WithDescription($"Argument \"max\" ({max}) must be lower than \"min\" ({min})")
                     .SendEmbed(Context.Channel);
                 return;
             }
-            if (max - min > LevelingConfiguration.MaxLeaderboardItems) {
+            if (max - min > LevelingConfiguration.MaxLeaderboardItems)
+            {
                 await BuildEmbed(Enums.EmojiEnum.Annoyed)
                     .WithTitle("Invalid range!")
                     .WithDescription($"Item count exceeds maximum! You may request up to {LevelingConfiguration.MaxLeaderboardItems} items. You requested {max - min}.")
@@ -49,7 +53,8 @@ namespace Dexter.Commands {
             voiceLevels.Sort((a, b) => b.VoiceXP.CompareTo(a.VoiceXP));
 
             List<LeaderboardItem> lbitems = new();
-            for(int i = min - 1; i < max && i < Math.Min(textLevels.Count, voiceLevels.Count); i++) {
+            for (int i = min - 1; i < max && i < Math.Min(textLevels.Count, voiceLevels.Count); i++)
+            {
                 lbitems.Add(new(i + 1, textLevels[i], voiceLevels[i], DiscordSocketClient, LevelingConfiguration));
             }
 
@@ -63,7 +68,8 @@ namespace Dexter.Commands {
         /// </summary>
         /// <param name="levels">The Leaderboard items to include in the leaderboard.</param>
         /// <returns>A string containing the path to the generated file.</returns>
-        public string LeaderboardPath(IEnumerable<LeaderboardItem> levels) {
+        public string LeaderboardPath(IEnumerable<LeaderboardItem> levels)
+        {
             const string tempCacheFileName = "leaderboard.html";
 
             string finalPath = Path.Combine(
@@ -76,13 +82,17 @@ namespace Dexter.Commands {
             using StreamWriter leaderboardOutput = new StreamWriter(finalPath);
 
             string line = leaderboardTemplate.ReadLine();
-            while (line is not null) {
-                if (line.Contains("$LIST")) {
-                    foreach (LeaderboardItem li in levels) {
+            while (line is not null)
+            {
+                if (line.Contains("$LIST"))
+                {
+                    foreach (LeaderboardItem li in levels)
+                    {
                         leaderboardOutput.Write(li.ToString(levelTemplate));
                     }
                 }
-                else {
+                else
+                {
                     leaderboardOutput.WriteLine(line);
                 }
                 line = leaderboardTemplate.ReadLine();
@@ -95,7 +105,8 @@ namespace Dexter.Commands {
         /// Holds the relevant information to create a leaderboard item for one specific rank.
         /// </summary>
 
-        public class LeaderboardItem {
+        public class LeaderboardItem
+        {
             private int rank;
             /// <summary>
             /// The userlevel corresponding to the user whose rank is <see cref="rank"/> on text.
@@ -117,7 +128,8 @@ namespace Dexter.Commands {
             /// <param name="client">The standard DiscordSocketClient necessary for user parsing.</param>
             /// <param name="config">The standard LevelingConfig necessary for level calculations.</param>
 
-            public LeaderboardItem(int rank, UserLevel text, UserLevel voice, DiscordSocketClient client, LevelingConfiguration config) {
+            public LeaderboardItem(int rank, UserLevel text, UserLevel voice, DiscordSocketClient client, LevelingConfiguration config)
+            {
                 this.rank = rank;
                 this.text = text;
                 this.voice = voice;
@@ -125,15 +137,19 @@ namespace Dexter.Commands {
                 this.config = config;
             }
 
-            private string ReplaceAll(string template, bool isText) {
+            private string ReplaceAll(string template, bool isText)
+            {
                 UserLevel reference = isText ? text : voice;
                 IUser user = client.GetUser(reference.UserID);
                 string name;
                 string avatarurl;
-                if (user is not null) {
+                if (user is not null)
+                {
                     name = $"{user.Username}#{user.Discriminator}";
                     avatarurl = user.GetTrueAvatarUrl();
-                } else {
+                }
+                else
+                {
                     name = reference.UserID.ToString();
                     avatarurl = "https://cdn.discordapp.com/attachments/792661500182790174/856996405288632370/QMarkAlpha.png";
                 }
@@ -156,18 +172,19 @@ namespace Dexter.Commands {
                     .Replace("$LEFTROT", leftrot.ToString())
                     .Replace("$RIGHTROT", rightrot.ToString());
             }
-            
+
             /// <summary>
             /// Converts the object into the full HTML expression obtained from <paramref name="template"/>.
             /// </summary>
             /// <param name="template">The HTML template with annotations to change into their corresponding values.</param>
             /// <returns>A fully formed HTML expression which contains the text and hidden voice rank item.</returns>
 
-            public string ToString(string template) {
+            public string ToString(string template)
+            {
                 return $"{ReplaceAll(template, true)}"
                     + $"{ReplaceAll(template, false)}";
             }
         }
     }
-    
+
 }

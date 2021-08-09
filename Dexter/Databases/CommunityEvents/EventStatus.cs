@@ -1,10 +1,12 @@
-﻿namespace Dexter.Databases.CommunityEvents {
+﻿namespace Dexter.Databases.CommunityEvents
+{
 
     /// <summary>
     /// Keeps track of what stage of approval an event submission is in. It can be PENDING, APPROVED, DENIED, or RELEASED.
     /// </summary>
 
-    public enum EventStatus {
+    public enum EventStatus
+    {
 
         /// <summary>
         /// An item that still has not gone through the admin approval process.

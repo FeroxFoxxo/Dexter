@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.Infractions {
+namespace Dexter.Databases.Infractions
+{
 
     /// <summary>
     /// Contains all user-specific information used for recordkeeping and automoderation.
     /// </summary>
 
-    public class DexterProfile {
+    public class DexterProfile
+    {
 
         /// <summary>
         /// The unique numerical identifier for the profile's linked User.

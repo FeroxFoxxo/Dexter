@@ -1046,6 +1046,7 @@ namespace Dexter.Commands
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         [Command("configlink")]
+        [BotChannel]
 
         public async Task ConfigLinkCommand(ulong userID, string attribute = "", [Remainder] string value = "")
         {
@@ -1173,19 +1174,24 @@ namespace Dexter.Commands
 
         private async Task CreateBirthdayTimer(UserProfile profile)
         {
-            TryRemoveBirthdayTimer(profile);
+            Console.Out.WriteLine($"Profile {profile}");
             if (profile?.Borkday is null)
             {
                 return;
             }
 
+            TryRemoveBirthdayTimer(profile);
             TimeSpan diff = TimeSpan.Zero;
+
+            Console.Out.WriteLine($"Removed BD Timer; diff: {diff.Humanize()}");
 
             int nextYear = DateTime.Now.Year - 1;
             int monthNow = DateTime.Now.Month;
             int dayNow = DateTime.Now.Day;
             int monthBD = (int)profile.Borkday.Month;
             int dayBD = profile.Borkday.Day;
+
+            Console.Out.WriteLine($"Month and Day retrieved as {monthBD} and {dayBD} respectively");
 
             while (diff <= TimeSpan.Zero)
             {
@@ -1201,7 +1207,11 @@ namespace Dexter.Commands
 
                 diff = new DateTimeOffset(relevantDay, relevantOffset).Subtract(DateTimeOffset.Now);
             }
+
+            Console.Out.WriteLine($"Completed Birthday diff recalculation; diff: {diff.Humanize()}");
+
             profile.BorkdayTimerToken = await CreateEventTimer(BorkdayCallback, new Dictionary<string, string>() { { "ID", profile.UserID.ToString() } }, (int)diff.TotalSeconds, Databases.EventTimers.TimerType.Expire, TimerService);
+            Console.Out.WriteLine($"Created timer Token: {profile.BorkdayTimerToken}");
             await ProfilesDB.SaveChangesAsync();
         }
 

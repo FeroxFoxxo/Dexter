@@ -1174,7 +1174,7 @@ namespace Dexter.Commands
 
         private async Task CreateBirthdayTimer(UserProfile profile)
         {
-            Console.Out.WriteLine($"Profile {profile}");
+            Console.Error.WriteLine($"Profile {profile}");
             if (profile?.Borkday is null)
             {
                 return;
@@ -1183,7 +1183,7 @@ namespace Dexter.Commands
             TryRemoveBirthdayTimer(profile);
             TimeSpan diff = TimeSpan.Zero;
 
-            Console.Out.WriteLine($"Removed BD Timer; diff: {diff.Humanize()}");
+            Console.Error.WriteLine($"Removed BD Timer and created diff object.");
 
             int nextYear = DateTime.Now.Year - 1;
             int monthNow = DateTime.Now.Month;
@@ -1191,7 +1191,7 @@ namespace Dexter.Commands
             int monthBD = (int)profile.Borkday.Month;
             int dayBD = profile.Borkday.Day;
 
-            Console.Out.WriteLine($"Month and Day retrieved as {monthBD} and {dayBD} respectively");
+            Console.Error.WriteLine($"Month and Day retrieved as {monthBD} and {dayBD} respectively");
 
             while (diff <= TimeSpan.Zero)
             {
@@ -1208,11 +1208,11 @@ namespace Dexter.Commands
                 diff = new DateTimeOffset(relevantDay, relevantOffset).Subtract(DateTimeOffset.Now);
             }
 
-            Console.Out.WriteLine($"Completed Birthday diff recalculation; diff: {diff.Humanize()}");
+            Console.Error.WriteLine($"Completed Birthday diff recalculation; diff: {diff.Humanize()}");
 
             profile.BorkdayTimerToken = await CreateEventTimer(BorkdayCallback, new Dictionary<string, string>() { { "ID", profile.UserID.ToString() } }, (int)diff.TotalSeconds, Databases.EventTimers.TimerType.Expire, TimerService);
-            Console.Out.WriteLine($"Created timer Token: {profile.BorkdayTimerToken}");
-            await ProfilesDB.SaveChangesAsync();
+            Console.Error.WriteLine($"Created timer Token: {profile.BorkdayTimerToken}");
+            ProfilesDB.SaveChanges();
         }
 
         /// <summary>

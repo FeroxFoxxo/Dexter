@@ -173,7 +173,7 @@ namespace Dexter.Commands
                                 return;
                             }
 
-                            if (!LanguageHelper.TryParseTimeZone(value, LanguageConfiguration, out TimeZoneData timeZoneDST))
+                            if (!TimeZoneData.TryParse(value, LanguageConfiguration, out TimeZoneData timeZoneDST))
                             {
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Unable to find time zone")
@@ -1174,7 +1174,6 @@ namespace Dexter.Commands
 
         private async Task CreateBirthdayTimer(UserProfile profile)
         {
-            Console.Error.WriteLine($"Profile {profile}");
             if (profile?.Borkday is null)
             {
                 return;
@@ -1183,15 +1182,11 @@ namespace Dexter.Commands
             TryRemoveBirthdayTimer(profile);
             TimeSpan diff = TimeSpan.Zero;
 
-            Console.Error.WriteLine($"Removed BD Timer and created diff object.");
-
             int nextYear = DateTime.Now.Year - 1;
             int monthNow = DateTime.Now.Month;
             int dayNow = DateTime.Now.Day;
             int monthBD = (int)profile.Borkday.Month;
             int dayBD = profile.Borkday.Day;
-
-            Console.Error.WriteLine($"Month and Day retrieved as {monthBD} and {dayBD} respectively");
 
             while (diff <= TimeSpan.Zero)
             {
@@ -1208,10 +1203,7 @@ namespace Dexter.Commands
                 diff = new DateTimeOffset(relevantDay, relevantOffset).Subtract(DateTimeOffset.Now);
             }
 
-            Console.Error.WriteLine($"Completed Birthday diff recalculation; diff: {diff.Humanize()}");
-
             profile.BorkdayTimerToken = await CreateEventTimer(BorkdayCallback, new Dictionary<string, string>() { { "ID", profile.UserID.ToString() } }, (int)diff.TotalSeconds, Databases.EventTimers.TimerType.Expire, TimerService);
-            Console.Error.WriteLine($"Created timer Token: {profile.BorkdayTimerToken}");
             ProfilesDB.SaveChanges();
         }
 
@@ -1280,7 +1272,7 @@ namespace Dexter.Commands
                         .WithTitle("🎂 Borkday Time 🎂")
                         .WithDescription($"Hey there! It's {user.Mention}'{(user.Username.EndsWith('s') ? "" : "s")} birthday! Thought you'd like to know and celebrate! :3")
                         .WithCurrentTimestamp()
-                        .SendEmbed(await user.GetOrCreateDMChannelAsync());
+                        .SendEmbed(await friend.GetOrCreateDMChannelAsync());
                 }
                 catch { }
             }

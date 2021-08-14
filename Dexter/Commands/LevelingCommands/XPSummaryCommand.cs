@@ -87,7 +87,7 @@ namespace Dexter.Commands
                         foreach (KeyValuePair<int, ulong> levelRole in LevelingConfiguration.Levels)
                         {
                             SocketRole r = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(levelRole.Value);
-                            if (r.Name.ToLower() == value.ToLower())
+                            if (r.Name.ToLower().Replace(" ", "") == value.ToLower())
                             {
                                 result = r;
                                 targetRankLevel = levelRole.Key;
@@ -97,7 +97,7 @@ namespace Dexter.Commands
                             }
                             else
                             {
-                                roleNames.Add(r.Name);
+                                roleNames.Add(r.Name.Replace(" ", ""));
                             }
                         }
                         if (result == null)

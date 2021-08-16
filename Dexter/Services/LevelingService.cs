@@ -77,10 +77,10 @@ namespace Dexter.Services
             {
                 int nonbotusers = 0;
                 foreach (IGuildUser uservc in voiceChannel.Users)
-                    if (!uservc.IsBot 
-                        && !uservc.IsDeafened && !uservc.IsSelfDeafened 
-                        && !RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)
-                        && (LevelingConfiguration.VoiceCountMutedMembers || (!uservc.IsMuted && !uservc.IsSelfMuted && !uservc.IsSuppressed))) 
+                    if (!(uservc.IsBot 
+                        || uservc.IsDeafened || uservc.IsSelfDeafened 
+                        || RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)
+                        || !LevelingConfiguration.VoiceCountMutedMembers && (uservc.IsMuted || uservc.IsSelfMuted || uservc.IsSuppressed))) 
                         nonbotusers++;
                 if (nonbotusers < LevelingConfiguration.VCMinUsers) continue;
                 if (LevelingConfiguration.DisabledVCs.Contains(voiceChannel.Id)) continue;

@@ -520,6 +520,7 @@ namespace Dexter.Commands
         /// <returns></returns>
 
         [Command("testlevelcalculationspeed")]
+        [RequireModerator]
 
         public async Task RunSpeedTest()
         {
@@ -546,6 +547,7 @@ namespace Dexter.Commands
         /// <returns></returns>
 
         [Command("testlevelcalculationintegrity")]
+        [RequireModerator]
 
         public async Task RunIntegrityTest()
         {

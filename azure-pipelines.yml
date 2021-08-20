@@ -17,6 +17,10 @@ steps:
     performMultiLevelLookup: true
     includePreviewVersions: true
 
+- task: NuGetToolInstaller@1
+  inputs:
+    checkLatest: true
+
 - task: NuGetCommand@2
   displayName: Restore
   inputs:

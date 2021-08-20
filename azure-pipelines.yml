@@ -17,14 +17,14 @@ steps:
     performMultiLevelLookup: true
     includePreviewVersions: true
 
-- task: DotNetCoreCLI@2
+- task: NuGetCommand@2
   displayName: Restore
   inputs:
     command: 'restore'
-    projects: '**/*.sln'
+    restoreSolution: '**/*.sln'
     feedsToUse: 'config'
     nugetConfigPath: './NuGet.Config'
-  
+
 - task: DotNetCoreCLI@2
   displayName: Publish
   inputs:

@@ -27,15 +27,10 @@ namespace Dexter.Commands
         [Alias("muzzleme")]
         [CommandCooldown(60)]
 
-        public async Task MuzzleCommand([Optional] IGuildUser User)
+        public async Task MuzzleCommand()
         {
-            bool IsUserSpecified = User != null;
-
             IGuildUser MuzzledUser = Context.Guild.GetUser(Context.User.Id);
-
-            if (IsUserSpecified && (Context.User as IGuildUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator)
-                MuzzledUser = User;
-
+            
             await Muzzle(MuzzledUser);
 
             await Context.Channel.SendMessageAsync($"Muzzled **{MuzzledUser.Username}#{MuzzledUser.Discriminator}~!**");

@@ -4,7 +4,7 @@ trigger:
       - master
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'ubuntu-latest'
 
 variables:
   solution: '**/*.sln'
@@ -13,23 +13,9 @@ steps:
 - task: UseDotNet@2
   displayName: 'Install .NET Core SDK'
   inputs:
-    version: 6.0.x
+    version: 5.x
     performMultiLevelLookup: true
     includePreviewVersions: true
-
-- task: PowerShell@2
-  displayName: 'Install latest NuGet'
-  inputs:
-    targetType: 'inline'
-    script: 'Invoke-WebRequest "https://dist.nuget.org/win-x86-commandline/v6.0.0-preview3/nuget.exe"'
-
-- task: NuGetAuthenticate@0
-
-- task: PowerShell@2
-  displayName: Restore packages
-  inputs:
-    targetType: 'inline'
-    script: ' .\nuget.exe restore'
 
 - task: DotNetCoreCLI@2
   displayName: Restore
@@ -38,7 +24,7 @@ steps:
     projects: '**/*.sln'
     feedsToUse: 'config'
     nugetConfigPath: './NuGet.Config'
-
+  
 - task: DotNetCoreCLI@2
   displayName: Publish
   inputs:

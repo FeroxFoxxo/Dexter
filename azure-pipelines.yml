@@ -21,7 +21,7 @@ steps:
   displayName: 'Install latest NuGet'
   inputs:
     targetType: 'inline'
-    script: 'Invoke-WebRequest "https://dist.nuget.org/win-x86-commandline/v6.0.0-preview3/nuget.exe" -OutFile .\.nuget\nuget.exe'
+    script: 'Invoke-WebRequest "https://dist.nuget.org/win-x86-commandline/v6.0.0-preview3/nuget.exe"'
 
 - task: NuGetAuthenticate@0
 
@@ -29,7 +29,7 @@ steps:
   displayName: Restore packages
   inputs:
     targetType: 'inline'
-    script: ' .\.nuget\nuget.exe restore'
+    script: ' .\nuget.exe restore'
 
 - task: DotNetCoreCLI@2
   displayName: Restore

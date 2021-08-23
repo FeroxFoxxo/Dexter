@@ -24,7 +24,7 @@
 		<PackageReference Include="Discord.Net" Version="2.4.0" />
 		<PackageReference Include="Figgle" Version="0.4.0" />
 		<PackageReference Include="Genbox.WolframAlpha" Version="3.0.0-alpha3" />
-		<PackageReference Include="Google.Apis.Sheets.v4" Version="1.53.0.2371" />
+		<PackageReference Include="Google.Apis.Sheets.v4" Version="1.54.0.2371" />
 		<PackageReference Include="Humanizer.Core" Version="2.11.10" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.9" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.9">

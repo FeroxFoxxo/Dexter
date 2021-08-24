@@ -564,6 +564,33 @@ namespace Dexter.Helpers
         }
 
         /// <summary>
+        /// Enumerates a list of objects using the typical linguistic conventions for enumeration.
+        /// </summary>
+        /// <param name="inputList">The list of objects to enumerate.</param>
+        /// <returns>A string with the enumeration expressed in a human-readable form.</returns>
+
+        public static string Enumerate(IEnumerable<object> inputList)
+        {
+            switch(inputList.Count())
+            {
+                case 0:
+                    return "";
+                case 1:
+                    return inputList.First().ToString();
+                case 2:
+                    return $"{inputList.First()} and {inputList.Last()}";
+                default:
+                    string[] toEnumerate = new string[inputList.Count()];
+                    int i = 0;
+                    foreach(object o in inputList)
+                    {
+                        toEnumerate[i++] = o.ToString();
+                    }
+                    return $"{string.Join(", ", toEnumerate[..^1])} and {toEnumerate[^1]}";
+            }
+        }
+
+        /// <summary>
         /// Extracts substrings that fit a given url schema from an <paramref name="Input"/> string.
         /// </summary>
         /// <remarks>All potential links in the string must be encapsulated in parentheses or spaces.</remarks>

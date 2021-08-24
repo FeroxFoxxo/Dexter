@@ -3,11 +3,13 @@ using Dexter.Configurations;
 using Dexter.Databases.CustomCommands;
 using Dexter.Enums;
 using Dexter.Extensions;
+using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -91,45 +93,45 @@ namespace Dexter.Services
         /// <summary>
         /// The SendCommandError runs on CommandExecuted and checks if the command run has encountered an error. It also handles custom commands through the result of an unknown command.
         /// </summary>
-        /// <param name="CommandInfo">This gives information about the command that may have been run, such as its name.</param>
-        /// <param name="CommandContext">The context command provides is with information about the message, including who sent it and the channel it was set in.</param>
-        /// <param name="Result">The Result specifies the outcome of the attempted run of the command - whether it was successful or not and the error it may have run in to.</param>
+        /// <param name="commandInfo">This gives information about the command that may have been run, such as its name.</param>
+        /// <param name="commandContext">The context command provides is with information about the message, including who sent it and the channel it was set in.</param>
+        /// <param name="result">The Result specifies the outcome of the attempted run of the command - whether it was successful or not and the error it may have run in to.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task SendCommandError(Optional<CommandInfo> CommandInfo, ICommandContext CommandContext, IResult Result)
+        public async Task SendCommandError(Optional<CommandInfo> commandInfo, ICommandContext commandContext, IResult result)
         {
-            if (Result.IsSuccess)
+            if (result.IsSuccess)
                 return;
 
             try
             {
 
-                switch (Result.Error)
+                switch (result.Error)
                 {
 
                     // Unmet Precondition specifies that the error is a result as one of the preconditions specified by an attribute has returned FromError.
                     case CommandError.UnmetPrecondition:
-                        if (Result.ErrorReason.Length <= 0)
+                        if (result.ErrorReason.Length <= 0)
                             return;
 
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Halt! Don't go there-")
-                            .WithDescription(Result.ErrorReason)
-                            .SendEmbed(CommandContext.Channel);
+                            .WithDescription(result.ErrorReason)
+                            .SendEmbed(commandContext.Channel);
                         break;
 
                     // Bad Argument Count specifies that the command has had an invalid amount of arguments parsed to it. It will send all the commands with their parameters and summaries in response.
                     case CommandError.BadArgCount:
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("You've entered an invalid amount of parameters for this command!")
-                            .WithDescription($"Here are some options of parameters you can have for the command **{CommandInfo.Value.Name}**.")
-                            .GetParametersForCommand(CommandInfo.Value, BotConfiguration)
-                            .SendEmbed(CommandContext.Channel);
+                            .WithDescription($"Here are some options of parameters you can have for the command **{commandInfo.Value.Name}**.")
+                            .GetParametersForCommand(commandInfo.Value, BotConfiguration)
+                            .SendEmbed(commandContext.Channel);
                         break;
 
                     // Unknown Command specifies that the parser was unable to find a command with the name specified. If this throws, we look for custom commands that may have the name and then send that it is an unknown command if there are not any returned.
                     case CommandError.UnknownCommand:
-                        string[] CustomCommandArgs = CommandContext.Message.Content[BotConfiguration.Prefix.Length..].Split(' ');
+                        string[] CustomCommandArgs = commandContext.Message.Content[BotConfiguration.Prefix.Length..].Split(' ');
 
                         CustomCommand CustomCommand = CustomCommandDB.GetCommandByNameOrAlias(CustomCommandArgs[0].ToLower());
 
@@ -137,33 +139,41 @@ namespace Dexter.Services
                         {
                             if (CustomCommand.Reply.Length > 0)
                             {
-                                string Reply = CustomCommand.Reply;
+                                string reply = CustomCommand.Reply;
 
-                                ulong MentionedID = CommandContext.Message.MentionedUserIds.FirstOrDefault();
+                                ulong firstMentionedID = commandContext.Message.MentionedUserIds.FirstOrDefault();
 
-                                Reply = Reply.Replace("AUTHOR", (MentionedID != default && MentionedID != CommandContext.User.Id) || !Reply.Contains("USER")
-                                    ? CommandContext.User.Mention : CommandContext.Client.CurrentUser.Mention);
+                                reply = reply.Replace("AUTHOR", (firstMentionedID != default && firstMentionedID != commandContext.User.Id) || !reply.Contains("USER")
+                                    ? commandContext.User.Mention : commandContext.Client.CurrentUser.Mention);
 
-                                Reply = Reply.Replace("USER", MentionedID != default ? $"<@{MentionedID}>" : CommandContext.User.Mention);
+                                List<string> userMentions = new();
+                                foreach(ulong id in commandContext.Message.MentionedUserIds)
+                                {
+                                    IUser user = DiscordSocketClient.GetUser(id);
+                                    if (user is not null)
+                                        userMentions.Add(user.Mention);
+                                }
+                                string userReplacement = !userMentions.Any() ? commandContext.User.Mention : LanguageHelper.Enumerate(userMentions);
+                                reply = reply.Replace("USER", userReplacement);
 
-                                await CommandContext.Channel.SendMessageAsync(Reply);
+                                await commandContext.Channel.SendMessageAsync(reply);
                             }
                             else
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Misconfigured command!")
                                     .WithDescription($"`{CustomCommand.CommandName}` has not been configured! Please contact a moderator about this. <3")
-                                    .SendEmbed(CommandContext.Channel);
+                                    .SendEmbed(commandContext.Channel);
                         }
                         else
                         {
-                            if (CommandContext.Message.Content.Length <= 1)
+                            if (commandContext.Message.Content.Length <= 1)
                                 return;
-                            else if (CommandContext.Message.Content.Count(Character => Character == '~') > 1 ||
-                                    ProposalConfiguration.CommandRemovals.Contains(CommandContext.Message.Content.Split(' ')[0]))
+                            else if (commandContext.Message.Content.Count(Character => Character == '~') > 1 ||
+                                    ProposalConfiguration.CommandRemovals.Contains(commandContext.Message.Content.Split(' ')[0]))
                                 return;
                             else
                             {
-                                IMessage Message = await CommandContext.Channel.SendMessageAsync(
+                                IMessage Message = await commandContext.Channel.SendMessageAsync(
                                     embed: BuildEmbed(EmojiEnum.Annoyed)
                                         .WithTitle("Unknown Command.")
                                         .WithDescription($"Oopsies! It seems as if the command **{CustomCommandArgs[0].SanitizeMarkdown()}** doesn't exist!")
@@ -184,47 +194,47 @@ namespace Dexter.Services
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable to parse command!")
                             .WithDescription("Invalid amount of command arguments.")
-                            .SendEmbed(CommandContext.Channel);
+                            .SendEmbed(commandContext.Channel);
                         break;
 
                     // The default case specifies that this command has run into an unknown error that will need to be reported.
                     default:
 
                         // If we have been thrown an ObjectNotFound error, this means that the argument has been unable to be found. This could be due to caching, thus we do not need to ping the developers of this error.
-                        if (Result.ToString().Contains("ObjectNotFound"))
+                        if (result.ToString().Contains("ObjectNotFound"))
                         {
                             await BuildEmbed(EmojiEnum.Annoyed)
-                                .WithTitle(Result.ErrorReason)
-                                .WithDescription($"If you believe this was an error, please do ping a developer!\nIf the {Result.ErrorReason.Split(' ')[0].ToLower()} does exist, it may be due to caching. If so, please wait a few minutes.")
-                                .SendEmbed(CommandContext.Channel);
+                                .WithTitle(result.ErrorReason)
+                                .WithDescription($"If you believe this was an error, please do ping a developer!\nIf the {result.ErrorReason.Split(' ')[0].ToLower()} does exist, it may be due to caching. If so, please wait a few minutes.")
+                                .SendEmbed(commandContext.Channel);
 
                             return;
                         }
 
                         // If the error is not an ObjectNotFound error, we log the message to the console with the appropriate data.
-                        await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Warning, GetType().Name.Prettify(), $"Unknown statement reached!\nCommand: {(CommandInfo.IsSpecified ? CommandInfo.Value.Name : null)}\nResult: {Result}"));
+                        await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Warning, GetType().Name.Prettify(), $"Unknown statement reached!\nCommand: {(commandInfo.IsSpecified ? commandInfo.Value.Name : null)}\nResult: {result}"));
 
                         EmbedBuilder CommandErrorEmbed;
 
                         // Once logged, we check to see if the error is an ExecuteResult error as these execution results have more data about the issue that has gone wrong.
-                        if (Result is ExecuteResult ExecuteResult)
+                        if (result is ExecuteResult ExecuteResult)
                             CommandErrorEmbed = BuildEmbed(EmojiEnum.Annoyed)
                                 .WithTitle(ExecuteResult.Exception.GetType().Name.Prettify())
                                 .WithDescription(ExecuteResult.Exception.Message);
                         else
                             CommandErrorEmbed = BuildEmbed(EmojiEnum.Annoyed)
-                                .WithTitle(Result.Error.GetType().Name.Prettify())
-                                .WithDescription(Result.ErrorReason);
+                                .WithTitle(result.Error.GetType().Name.Prettify())
+                                .WithDescription(result.ErrorReason);
 
                         // Finally, we send the error into the channel with a ping to the developers to take notice of.
-                        await CommandContext.Channel.SendMessageAsync($"Unknown error!{(BotConfiguration.PingDevelopers ? $" I'll tell the developers.\n<@&{BotConfiguration.DeveloperRoleID}>" : string.Empty)}", embed: CommandErrorEmbed.Build());
+                        await commandContext.Channel.SendMessageAsync($"Unknown error!{(BotConfiguration.PingDevelopers ? $" I'll tell the developers.\n<@&{BotConfiguration.DeveloperRoleID}>" : string.Empty)}", embed: CommandErrorEmbed.Build());
                         break;
                 }
             }
             catch (HttpException)
             {
-                await CommandContext.Channel.SendMessageAsync($"Haiya <@&{BotConfiguration.DeveloperRoleID}>, it seems as though the bot does not have the correct permissions to send embeds into this channel!\n" +
-                    $"Command errored out on the {Result.Error.Value} error.");
+                await commandContext.Channel.SendMessageAsync($"Haiya <@&{BotConfiguration.DeveloperRoleID}>, it seems as though the bot does not have the correct permissions to send embeds into this channel!\n" +
+                    $"Command errored out on the {result.Error.Value} error.");
             }
 
         }

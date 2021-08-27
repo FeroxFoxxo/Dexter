@@ -100,7 +100,7 @@ namespace Dexter.Services
         public List<NameRecord> RemoveNames(IUser User, NameType NameType, string Pattern, bool IsRegex = false)
         {
             List<NameRecord> Result = new();
-            List<NameRecord> Records = ProfilesDB.Names.Where(n => n.Type == NameType && n.UserID == User.Id).ToList();
+            List<NameRecord> Records = ProfilesDB.Names.AsEnumerable().Where(n => n.Type == NameType && n.UserID == User.Id).ToList();
             Pattern = Pattern.Trim();
 
             if (IsRegex)

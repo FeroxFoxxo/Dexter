@@ -77,11 +77,16 @@ namespace Dexter.Services
             {
                 int nonbotusers = 0;
                 foreach (IGuildUser uservc in voiceChannel.Users)
-                    if (!uservc.IsBot && !uservc.IsDeafened && !uservc.IsSelfDeafened && !RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)) nonbotusers++;
+                    if (!(uservc.IsBot 
+                        || uservc.IsDeafened || uservc.IsSelfDeafened 
+                        || RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)
+                        || !LevelingConfiguration.VoiceCountMutedMembers && (uservc.IsMuted || uservc.IsSelfMuted || uservc.IsSuppressed))) 
+                        nonbotusers++;
                 if (nonbotusers < LevelingConfiguration.VCMinUsers) continue;
                 if (LevelingConfiguration.DisabledVCs.Contains(voiceChannel.Id)) continue;
                 foreach (IGuildUser uservc in voiceChannel.Users)
-                    if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsBot || RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)))
+                    if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsSuppressed 
+                        || uservc.IsBot || RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)))
                     {
                         await LevelingDB.IncrementUserXP(
                             Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven + 1),

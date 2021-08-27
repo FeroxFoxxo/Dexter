@@ -15,32 +15,36 @@ namespace Dexter.Commands
         /// <summary>
         /// Creates a VC for use by DivineFur+ Members.
         /// </summary>
-        /// <param name="VCName">The name of the VC that the user wishes to create.</param>
+        /// <param name="vcName">The name of the VC that the user wishes to create.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         [Command("createvc", RunMode = RunMode.Async)]
         [Summary("Creates a personal VC [UNIFURSAL+ ONLY].")]
+        [ExtendedSummary("Usage: `createvc [Channel Name]`\n" +
+            "This command creates a new private voice channels that only those you drag in will be able to interact in. You must be in a voice channel when you use this command so the bot can drag you in.\n" +
+            "If this channel is empty at any time, it will automatically be deleted.\n" +
+            "To move users in, tell them to join the Waiting Room channel which exists in the private VC category (if it doesn't exist, it will be created when you create a new channel); then drag them in from there.")]
         [Alias("privatevc")]
         [RequireUnifursal]
         [BotChannel]
 
-        public async Task CreateVCCommand([Remainder] string VCName)
+        public async Task CreateVCCommand([Remainder] string vcName)
         {
-            IGuildUser User = Context.Guild.GetUser(Context.User.Id);
+            IGuildUser user = Context.Guild.GetUser(Context.User.Id);
 
-            if (VCName.Length > 100 || VCName.Length == 0)
+            if (vcName.Length > 100 || vcName.Length == 0)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Invalid Channel Name")
                     .WithDescription(
                         "Looks like we ran into an error! " +
                         "Your private channel name must be between 1-100 characters long. " +
-                        $"Your current channel name is {VCName.Length} characters long.")
+                        $"Your current channel name is {vcName.Length} characters long.")
                     .WithCurrentTimestamp()
                     .WithFooter("USFurries Level Rewards")
                     .SendEmbed(Context.Channel);
             }
-            else if (Context.Guild.Channels.Where(Channel => Channel.Name == VCName).FirstOrDefault() != null)
+            else if (Context.Guild.Channels.Where(channel => channel.Name == vcName).FirstOrDefault() != null)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Channel Name Already Exists!")
@@ -52,7 +56,7 @@ namespace Dexter.Commands
                     .WithFooter("USFurries Level Rewards")
                     .SendEmbed(Context.Channel);
             }
-            else if (VCName == UtilityConfiguration.WaitingVCName)
+            else if (vcName == UtilityConfiguration.WaitingVCName)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Please do not set your VC to the waiting lobby name!")
@@ -64,7 +68,7 @@ namespace Dexter.Commands
                     .WithFooter("USFurries Level Rewards")
                     .SendEmbed(Context.Channel);
             }
-            else if (User.VoiceChannel == null)
+            else if (user.VoiceChannel == null)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("You're not in a voice channel!")
@@ -76,42 +80,47 @@ namespace Dexter.Commands
             }
             else
             {
-                IVoiceChannel? WaitingChannel = Context.Guild.VoiceChannels.FirstOrDefault(Channel => Channel.Name == UtilityConfiguration.WaitingVCName);
+                IVoiceChannel? waitingChannel = Context.Guild.VoiceChannels.FirstOrDefault(Channel => Channel.Name == UtilityConfiguration.WaitingVCName);
 
-                IRole AwooRole = Context.Guild.GetRole(LevelingConfiguration.Levels[LevelingConfiguration.Levels.Keys.Min()]);
+                IRole awooRole = Context.Guild.GetRole(LevelingConfiguration.Levels[LevelingConfiguration.Levels.Keys.Min()]);
+                IRole staffRole = Context.Guild.GetRole(BotConfiguration.ModeratorRoleID);
 
-                if (WaitingChannel == null)
+                if (waitingChannel is null)
                 {
-                    IRole DivineFurRole = Context.Guild.GetRole(BotConfiguration.UnifursalRoleID);
+                    IRole vcRequiredRole = Context.Guild.GetRole(BotConfiguration.UnifursalRoleID);
 
-                    WaitingChannel = await Context.Guild.CreateVoiceChannelAsync(UtilityConfiguration.WaitingVCName);
+                    waitingChannel = await Context.Guild.CreateVoiceChannelAsync(UtilityConfiguration.WaitingVCName);
 
-                    await WaitingChannel.ModifyAsync((VoiceChannelProperties properties) => properties.CategoryId = UtilityConfiguration.PrivateCategoryID);
+                    await waitingChannel.ModifyAsync((VoiceChannelProperties properties) => properties.CategoryId = UtilityConfiguration.PrivateCategoryID);
 
-                    await WaitingChannel.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, OverwritePermissions.DenyAll(WaitingChannel));
+                    await waitingChannel.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, OverwritePermissions.DenyAll(waitingChannel));
 
-                    await WaitingChannel.AddPermissionOverwriteAsync(AwooRole, OverwritePermissions.DenyAll(WaitingChannel).Modify(viewChannel: PermValue.Allow, connect: PermValue.Allow));
+                    await waitingChannel.AddPermissionOverwriteAsync(awooRole, OverwritePermissions.DenyAll(waitingChannel).Modify(viewChannel: PermValue.Allow, connect: PermValue.Allow));
 
-                    await WaitingChannel.AddPermissionOverwriteAsync(DivineFurRole, OverwritePermissions.DenyAll(WaitingChannel).Modify(viewChannel: PermValue.Allow, connect: PermValue.Allow, moveMembers: PermValue.Allow));
+                    await waitingChannel.AddPermissionOverwriteAsync(vcRequiredRole, OverwritePermissions.DenyAll(waitingChannel).Modify(viewChannel: PermValue.Allow, connect: PermValue.Allow, moveMembers: PermValue.Allow));
+                    
+                    await waitingChannel.AddPermissionOverwriteAsync(staffRole, OverwritePermissions.InheritAll.Modify(manageChannel: PermValue.Allow, viewChannel: PermValue.Allow, connect: PermValue.Allow, speak: PermValue.Allow, muteMembers: PermValue.Allow, deafenMembers: PermValue.Allow, moveMembers: PermValue.Allow, useVoiceActivation: PermValue.Allow));
                 }
 
-                IVoiceChannel Channel = await Context.Guild.CreateVoiceChannelAsync(VCName);
+                IVoiceChannel newChannel = await Context.Guild.CreateVoiceChannelAsync(vcName);
 
-                await Channel.ModifyAsync((VoiceChannelProperties properties) => properties.CategoryId = UtilityConfiguration.PrivateCategoryID);
+                await newChannel.ModifyAsync((VoiceChannelProperties properties) => properties.CategoryId = UtilityConfiguration.PrivateCategoryID);
 
-                await Channel.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, OverwritePermissions.DenyAll(WaitingChannel));
+                await newChannel.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, OverwritePermissions.DenyAll(waitingChannel));
 
-                await Channel.AddPermissionOverwriteAsync(Context.User, OverwritePermissions.AllowAll(Channel).Modify(createInstantInvite: PermValue.Deny, prioritySpeaker: PermValue.Deny));
+                await newChannel.AddPermissionOverwriteAsync(Context.User, OverwritePermissions.AllowAll(newChannel).Modify(createInstantInvite: PermValue.Deny, prioritySpeaker: PermValue.Deny));
 
-                await Channel.AddPermissionOverwriteAsync(AwooRole, OverwritePermissions.DenyAll(Channel).Modify(viewChannel: PermValue.Allow, speak: PermValue.Allow, useVoiceActivation: PermValue.Allow, stream: PermValue.Allow));
+                await newChannel.AddPermissionOverwriteAsync(awooRole, OverwritePermissions.DenyAll(newChannel).Modify(speak: PermValue.Allow, useVoiceActivation: PermValue.Allow, stream: PermValue.Allow));
 
-                await User.ModifyAsync((GuildUserProperties Properties) =>
+                await newChannel.AddPermissionOverwriteAsync(staffRole, OverwritePermissions.InheritAll.Modify(manageChannel: PermValue.Allow, viewChannel: PermValue.Allow, connect: PermValue.Allow, speak: PermValue.Allow, muteMembers: PermValue.Allow, deafenMembers: PermValue.Allow, moveMembers: PermValue.Allow, useVoiceActivation: PermValue.Allow));
+
+                await user.ModifyAsync((GuildUserProperties properties) =>
                 {
-                    Properties.Channel = new Optional<IVoiceChannel>(Channel);
+                    properties.Channel = new Optional<IVoiceChannel>(newChannel);
                 });
 
                 await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle($"Created ``{VCName}``")
+                    .WithTitle($"Created \"{vcName}\"")
                     .WithDescription("Haiya! Your private voice channel has sucessfully been created. " +
                         "You should have full permission to edit it, move members and much more! " +
                         "Have fun~!")

@@ -1,4 +1,5 @@
 ﻿using Dexter.Attributes.Methods;
+using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
 
@@ -23,7 +24,13 @@ namespace Dexter.Commands
         public async Task RouletteCommand()
         {
             if (Random.Next(4) == 1)
-                await MuzzleCommand(Context.Guild.GetUser(Context.User.Id));
+            {
+                IGuildUser MuzzledUser = Context.Guild.GetUser(Context.User.Id);
+
+                await Muzzle(MuzzledUser);
+
+                await Context.Channel.SendMessageAsync($"Muzzled **{MuzzledUser.Username}#{MuzzledUser.Discriminator}~!**");
+            }
             else
                 await Context.Channel.SendMessageAsync("You missed it - lucky you! <3");
         }

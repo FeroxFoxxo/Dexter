@@ -173,7 +173,7 @@ namespace Dexter.Commands
                                 return;
                             }
 
-                            if (!LanguageHelper.TryParseTimeZone(value, LanguageConfiguration, out TimeZoneData timeZoneDST))
+                            if (!TimeZoneData.TryParse(value, LanguageConfiguration, out TimeZoneData timeZoneDST))
                             {
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle("Unable to find time zone")
@@ -1046,6 +1046,7 @@ namespace Dexter.Commands
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         [Command("configlink")]
+        [BotChannel]
 
         public async Task ConfigLinkCommand(ulong userID, string attribute = "", [Remainder] string value = "")
         {
@@ -1173,12 +1174,12 @@ namespace Dexter.Commands
 
         private async Task CreateBirthdayTimer(UserProfile profile)
         {
-            TryRemoveBirthdayTimer(profile);
             if (profile?.Borkday is null)
             {
                 return;
             }
 
+            TryRemoveBirthdayTimer(profile);
             TimeSpan diff = TimeSpan.Zero;
 
             int nextYear = DateTime.Now.Year - 1;
@@ -1201,8 +1202,9 @@ namespace Dexter.Commands
 
                 diff = new DateTimeOffset(relevantDay, relevantOffset).Subtract(DateTimeOffset.Now);
             }
+
             profile.BorkdayTimerToken = await CreateEventTimer(BorkdayCallback, new Dictionary<string, string>() { { "ID", profile.UserID.ToString() } }, (int)diff.TotalSeconds, Databases.EventTimers.TimerType.Expire, TimerService);
-            await ProfilesDB.SaveChangesAsync();
+            ProfilesDB.SaveChanges();
         }
 
         /// <summary>
@@ -1270,7 +1272,7 @@ namespace Dexter.Commands
                         .WithTitle("🎂 Borkday Time 🎂")
                         .WithDescription($"Hey there! It's {user.Mention}'{(user.Username.EndsWith('s') ? "" : "s")} birthday! Thought you'd like to know and celebrate! :3")
                         .WithCurrentTimestamp()
-                        .SendEmbed(await user.GetOrCreateDMChannelAsync());
+                        .SendEmbed(await friend.GetOrCreateDMChannelAsync());
                 }
                 catch { }
             }

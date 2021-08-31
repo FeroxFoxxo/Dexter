@@ -24,7 +24,6 @@ steps:
     command: publish
     publishWebProjects: False
     zipAfterPublish: False
-    arguments: '-r linux-x64 --output $(Build.ArtifactStagingDirectory)'
     
 - task: PublishBuildArtifacts@1
   displayName: Send Artifact

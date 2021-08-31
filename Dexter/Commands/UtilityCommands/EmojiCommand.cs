@@ -19,7 +19,8 @@ namespace Dexter.Commands
         [Command("emote")]
         [Summary("Gets the full image of an emoji.")]
         [Alias("emoji")]
-
+        [BotChannel]
+        
         public async Task EmojiCommand(string Emoji)
         {
             if (Emote.TryParse(Emoji, out Emote Emojis))

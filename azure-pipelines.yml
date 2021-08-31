@@ -8,13 +8,7 @@ pool:
 
 variables:
   solution: '**/*.sln'
-
-steps:
-- task: UseDotNet@2
-  displayName: 'Install .NET Core SDK'
-  inputs:
-    version: 5.x
-
+ 
 - task: DotNetCoreCLI@2
   displayName: Restore
   inputs:

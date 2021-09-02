@@ -5,6 +5,7 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -57,12 +58,12 @@ namespace Dexter.Commands
                         return;
                     }
 
-                    if (Reply.Length > 1000)
+                    if (Reply.Length > CustomCommandsConfiguration.MaximumReplyLength)
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable To Add Reply.")
                             .WithDescription("Heya! Please cut down on your length of reply. " +
-                            $"It should be a maximum of 1000 characters. Currently this character count sits at {Reply.Length}!")
+                            $"It should be a maximum of {CustomCommandsConfiguration.MaximumReplyLength} characters. Currently this character count sits at {Reply.Length}!")
                             .SendEmbed(Context.Channel);
                         return;
                     }
@@ -70,7 +71,9 @@ namespace Dexter.Commands
                     await SendForAdminApproval(CreateCommandCallback,
                         new Dictionary<string, string>() {
                             { "CommandName", CommandName.ToLower() },
-                            { "Reply", Reply }
+                            { "Reply", Reply },
+                            { "CommandType", UserCommandSource.Unspecified.ToString() },
+                            { "User", "0" }
                         },
                         Context.User.Id,
                         $"{Context.User.GetUserInformation()} has suggested that the command `{BotConfiguration.Prefix}{CommandName}` should be " +
@@ -81,7 +84,7 @@ namespace Dexter.Commands
                         .WithDescription($"Once it has passed admin approval, " +
                             $"use `{BotConfiguration.Prefix}ccalias add` to add an alias to the command! \n" +
                             "Please note, to make the command ping a user if mentioned, add `USER` to the reply~! \n" +
-                            "To make the command ping a user if mentioned, add `AUTHOR` to the reply. \n" +
+                            "To make the command ping the user who executes the command, add `AUTHOR` to the reply. \n" +
                             $"To modify the reply at any time, use `{BotConfiguration.Prefix}ccedit`.")
                         .SendEmbed(Context.Channel);
 
@@ -107,7 +110,7 @@ namespace Dexter.Commands
                         return;
                     }
 
-                    if (Reply.Length > 1000)
+                    if (Reply.Length > CustomCommandsConfiguration.MaximumReplyLength)
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable To Edit Reply.")
@@ -117,16 +120,29 @@ namespace Dexter.Commands
                         return;
                     }
 
+                    Dictionary<string, string> setupArgs = new Dictionary<string, string>() {
+                        { "CommandName", CommandName.ToLower() },
+                        { "Reply", Reply }
+                    };
+
+                    if (Command.CommandType == UserCommandSource.Staff && Command.User == Context.User.Id && CustomCommandsConfiguration.StaffCommandsSkipConfirmation)
+                    {
+                        EditCommandCallback(setupArgs);
+
+                        await BuildEmbed(EmojiEnum.Love)
+                        .WithTitle($"The edit to `{BotConfiguration.Prefix}{CommandName}` was suggested!")
+                        .WithDescription($"The command `{BotConfiguration.Prefix}{CommandName}` has been changed to have the reply of `{Reply}` rather than `{Command.Reply}`.")
+                        .SendEmbed(Context.Channel);
+
+                        break;
+                    }
                     await SendForAdminApproval(EditCommandCallback,
-                        new Dictionary<string, string>() {
-                            { "CommandName", CommandName.ToLower() },
-                            { "Reply", Reply }
-                        },
+                        setupArgs,
                         Context.User.Id,
                         $"{Context.User.GetUserInformation()} has suggested that the command {BotConfiguration.Prefix}{CommandName} should be " +
                         $"edited from `{Command.Reply}` to `{Reply}`");
 
-                    await BuildEmbed(EmojiEnum.Love)
+                    await BuildEmbed(EmojiEnum.Sign)
                         .WithTitle($"The edit to `{BotConfiguration.Prefix}{CommandName}` was suggested!")
                         .WithDescription($"Once it has passed admin approval, " +
                             $"The command `{BotConfiguration.Prefix}{CommandName}` will be changed to have the reply of `{Reply}` rather than `{Command.Reply}`.")
@@ -178,21 +194,65 @@ namespace Dexter.Commands
         /// <summary>
         /// The CreateCommandCallback runs on the confirmation of the admins approving a custom command.
         /// </summary>
-        /// <param name="Parameters">The called back parameters:
+        /// <param name="parameters">The called back parameters:
         ///     CommandName = The name of the command you wish to add.
-        ///     Reply = The reply of the given command.</param>
+        ///     Reply = The reply of the given command.
+        ///     CommandType = The type of command to add.
+        ///     User = The user ID of the attached user, or 0.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public void CreateCommandCallback(Dictionary<string, string> Parameters)
+        public void CreateCommandCallback(Dictionary<string, string> parameters)
         {
-            string CommandName = Parameters["CommandName"];
-            string Reply = Parameters["Reply"];
+            string cmdName = parameters["CommandName"];
+            string reply = parameters["Reply"];
+            UserCommandSource ucs = Enum.Parse<UserCommandSource>(parameters["CommandType"]);
+            ulong userID = ulong.Parse(parameters["User"]);
 
+            if (userID != 0 && ucs != UserCommandSource.Unspecified)
+            {
+                CustomCommand uc = CustomCommandDB.GetCommandByUser(userID, ucs);
+                CustomCommand incompat = CustomCommandDB.GetCommandByNameOrAlias(cmdName);
+                if (incompat is not null && incompat.CommandType == UserCommandSource.Unspecified)
+                {
+                    CustomCommandDB.Remove(incompat);
+                    CustomCommandDB.SaveChanges();
+                }
+                
+                if (uc is not null)
+                {
+                    CustomCommandDB.Remove(uc);
+                    CustomCommandDB.SaveChanges();
+
+                    CustomCommandDB.CustomCommands.Add(new CustomCommand()
+                    {
+                        CommandName = cmdName,
+                        Reply = reply,
+                        Alias = "",
+                        User = userID,
+                        CommandType = ucs
+                    });
+                    CustomCommandDB.SaveChanges();
+                    return;
+                }
+
+                uc = CustomCommandDB.GetCommandByNameOrAlias(cmdName);
+                if (uc is not null && uc.CommandType == UserCommandSource.Unspecified)
+                {
+                    uc.User = userID;
+                    uc.Reply = reply;
+                    uc.CommandType = ucs;
+
+                    CustomCommandDB.SaveChanges();
+                    return;
+                }
+            }
             CustomCommandDB.CustomCommands.Add(new CustomCommand()
             {
-                CommandName = CommandName,
-                Reply = Reply,
-                Alias = ""
+                CommandName = cmdName,
+                Reply = reply,
+                Alias = "",
+                User = userID,
+                CommandType = ucs
             });
 
             CustomCommandDB.SaveChanges();

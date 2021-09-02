@@ -44,6 +44,26 @@ namespace Dexter.Extensions
         }
 
         /// <summary>
+        /// Obtains the tier of the topmost patreon role the user has.
+        /// </summary>
+        /// <param name="user">The target user to query.</param>
+        /// <param name="client">The discord client used to parse the generic user into a guild user of the guild identified by <see cref="BotConfiguration.GuildID"/>.</param>
+        /// <param name="config">The relevant configuration that contains patreon role IDs and the relevant guild.</param>
+        /// <returns><c>0</c> if the user has no patreon status; otherwise returns the tier of their current patreon subscription.</returns>
+
+        public static int GetPatreonTier(this IUser user, DiscordSocketClient client, BotConfiguration config)
+        {
+            IGuildUser guser = client.GetGuild(config.GuildID).GetUser(user.Id);
+
+            for (int i = config.PatreonRoleIDs.Length - 1; i >= 0; i--)
+            {
+                if (guser.RoleIds.Contains(config.PatreonRoleIDs[i])) return i + 1;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
         /// The GetUserInformation method returns a string of the users username, followed by the discriminator, the mention and the ID.
         /// It is used as a standardized way throughout the bot to display information on a user.
         /// </summary>

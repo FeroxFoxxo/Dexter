@@ -4,6 +4,9 @@
   "ModeratorRoleID": 679632649807069232,
   "GreetFurRoleID": 808587693881688064,
   "DivineFurRoleID": 871729807090655232,
+  "PatreonRoleIDs": [
+    853691823197257778
+  ],
   "GuildID": 613441321751019550,
   "ModerationLogChannelID": 792657959192231976,
   "Prefix": "~",

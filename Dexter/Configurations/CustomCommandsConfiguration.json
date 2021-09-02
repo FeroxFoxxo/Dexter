@@ -1,0 +1,5 @@
+{
+  "StaffCommandsSkipConfirmation": true,
+  "MinimumPatreonTierForCustomCommands": 1,
+  "MaximumReplyLength": 1000
+}

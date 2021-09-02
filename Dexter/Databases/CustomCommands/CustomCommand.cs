@@ -33,6 +33,35 @@ namespace Dexter.Databases.CustomCommands
 
         public string Alias { get; set; }
 
+        /// <summary>
+        /// The user attached to this command, 0 if none.
+        /// </summary>
+        public ulong User { get; set; }
+
+        /// <summary>
+        /// The type of user attached to the command.
+        /// </summary>
+        public UserCommandSource CommandType { get; set; }
+
+    }
+
+    /// <summary>
+    /// Represents the type of user that is tied to the command
+    /// </summary>
+    public enum UserCommandSource
+    {
+        /// <summary>
+        /// A generic custom command type, detached from any specific user
+        /// </summary>
+        Unspecified,
+        /// <summary>
+        /// The attached user is a patreon supporter of at least the minimum tier for custom commands
+        /// </summary>
+        Patreon,
+        /// <summary>
+        /// The attached user is a staff member
+        /// </summary>
+        Staff
     }
 
 }

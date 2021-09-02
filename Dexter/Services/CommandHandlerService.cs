@@ -57,6 +57,12 @@ namespace Dexter.Services
         public ProposalConfiguration ProposalConfiguration { get; set; }
 
         /// <summary>
+        /// The CustomCommandsConfiguration is used to ascertain certain details to verify user command interactions.
+        /// </summary>
+
+        public CustomCommandsConfiguration CustomCommandsConfiguration { get; set; }
+
+        /// <summary>
         /// The Initialize override hooks into both the Client's MessageReceived event and the CommandService's CommandExecuted event.
         /// </summary>
 
@@ -138,7 +144,7 @@ namespace Dexter.Services
 
                         if (customCommand != null)
                         {
-                            if (customCommand.Reply.Length > 0)
+                            if (customCommand.Reply.Length > 0 && Commands.CustomCommands.IsCustomCommandActive(customCommand, DiscordSocketClient, BotConfiguration, CustomCommandsConfiguration))
                             {
                                 string reply = customCommand.Reply;
 

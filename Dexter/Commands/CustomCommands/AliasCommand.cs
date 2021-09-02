@@ -33,11 +33,19 @@ namespace Dexter.Commands
             "`LIST [COMMAND NAME]` - lists all the aliases of a command."
         )]
         [Alias("ccaka")]
-        [RequireModerator]
 
         public async Task Alias(AliasActionType AliasActionType, string CommandName, [Optional] string Alias)
         {
             CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
+
+            if (Context.User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) < PermissionLevel.Moderator && Command.User != Context.User.Id)
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Insufficient Permissions")
+                    .WithDescription("You must be staff or the author of this command to be able to manage its aliases")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
 
             switch (AliasActionType)
             {

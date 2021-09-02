@@ -53,6 +53,12 @@ namespace Dexter.Configurations
         public ulong UnifursalRoleID { get; set; }
 
         /// <summary>
+        /// The role IDs of all patreon roles in ascending order.
+        /// </summary>
+
+        public ulong[] PatreonRoleIDs { get; set; }
+
+        /// <summary>
         /// The GUILD ID is the snowflake ID of the main guild the bot is in.
         /// </summary>
         

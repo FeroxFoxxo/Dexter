@@ -1,4 +1,5 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
@@ -19,7 +20,8 @@ namespace Dexter.Commands
 
         [Command("avatar")]
         [Summary("Gets the avatar of a user mentioned or yours.")]
-
+        [BotChannel]
+        
         public async Task AvatarCommand([Optional] IUser User)
         {
             if (User == null)

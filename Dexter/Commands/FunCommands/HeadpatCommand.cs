@@ -3,15 +3,9 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Discord.Webhook;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Image = System.Drawing.Image;
 
 namespace Dexter.Commands
@@ -51,8 +45,8 @@ namespace Dexter.Commands
             {
                 string[] Files = Directory.GetFiles(FunConfiguration.HeadpatsDir, "*.png", SearchOption.AllDirectories);
 
-                using WebClient WebClient = new();
-                using MemoryStream MemoryStream = new(WebClient.DownloadData(User.GetTrueAvatarUrl()));
+                using HttpClient WebClient = new();
+                using MemoryStream MemoryStream = new(await WebClient.GetByteArrayAsync(User.GetTrueAvatarUrl()));
                 using Image PFPImage = Image.FromStream(MemoryStream);
 
                 for (int Index = 0; Index < Files.Length; Index++)

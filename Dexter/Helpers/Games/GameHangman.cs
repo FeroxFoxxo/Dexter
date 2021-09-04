@@ -3,10 +3,7 @@ using Dexter.Databases.Games;
 using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Dexter.Helpers.Games
 {
@@ -181,7 +178,7 @@ namespace Dexter.Helpers.Games
 
         private string MissingLettersExpression()
         {
-            HashSet<char> missing = new HashSet<char>();
+            HashSet<char> missing = new();
             foreach (char c in ScorePerLetter.Keys)
             {
                 missing.Add(c);
@@ -297,7 +294,7 @@ namespace Dexter.Helpers.Games
                         return true;
                     }
 
-                    HashSet<char> missed = new HashSet<char>();
+                    HashSet<char> missed = new();
                     foreach (char c in value.ToCharArray())
                     {
                         if (!char.IsLetter(c)) missed.Add(char.ToUpper('c'));
@@ -333,7 +330,7 @@ namespace Dexter.Helpers.Games
         private int GuessChar(char c)
         {
             c = char.ToUpper(c);
-            StringBuilder newGuess = new StringBuilder(Guess.Length);
+            StringBuilder newGuess = new(Guess.Length);
 
             int result = 0;
             for (int i = 0; i < Math.Min(Term.Length, Guess.Length); i++)
@@ -527,8 +524,8 @@ namespace Dexter.Helpers.Games
         {
             a = a.ToLower();
             b = b.ToLower();
-            StringBuilder aStr = new StringBuilder();
-            StringBuilder bStr = new StringBuilder();
+            StringBuilder aStr = new();
+            StringBuilder bStr = new();
             foreach (char c in a.ToCharArray())
             {
                 if (char.IsLetter(c)) aStr.Append(c);
@@ -540,7 +537,7 @@ namespace Dexter.Helpers.Games
             return aStr.ToString() == bStr.ToString();
         }
 
-        private static readonly Dictionary<char, int> ScorePerLetter = new Dictionary<char, int>() {
+        private static readonly Dictionary<char, int> ScorePerLetter = new() {
             {'A', 1},
             {'B', 3},
             {'C', 3},

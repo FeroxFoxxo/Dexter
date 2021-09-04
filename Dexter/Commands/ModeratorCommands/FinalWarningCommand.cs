@@ -9,8 +9,6 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Humanizer;
-using System;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -76,7 +74,7 @@ namespace Dexter.Commands
                     .AddField("Points Deducted:", PointsDeducted, true)
                     .AddField("Mute Duration:", MuteDuration.Humanize(), true)
                     .WithCurrentTimestamp()
-                    .SendEmbed(await User.GetOrCreateDMChannelAsync());
+                    .SendEmbed(await User.CreateDMChannelAsync());
 
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Message sent successfully!")
@@ -142,7 +140,7 @@ namespace Dexter.Commands
                     .WithDescription("The staff team has convened and decided to revoke your final warning. Be careful, you can't receive more than two final warnings! A third one is an automatic ban.")
                     .AddField(Reason.Length > 0, "Reason:", Reason)
                     .WithCurrentTimestamp()
-                    .SendEmbed(await User.GetOrCreateDMChannelAsync());
+                    .SendEmbed(await User.CreateDMChannelAsync());
             }
             catch (HttpException)
             {

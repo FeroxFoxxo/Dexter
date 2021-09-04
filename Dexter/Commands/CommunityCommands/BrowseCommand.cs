@@ -9,11 +9,7 @@ using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 using Humanizer;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -184,7 +180,7 @@ namespace Dexter.Commands
         private string StringifyGames(GameInstance[] Games)
         {
 
-            StringBuilder Str = new StringBuilder();
+            StringBuilder Str = new();
 
             foreach (GameInstance Game in Games)
             {

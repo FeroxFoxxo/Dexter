@@ -5,9 +5,6 @@ using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

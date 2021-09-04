@@ -3,15 +3,9 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -129,9 +123,9 @@ namespace Dexter.Commands
                 }
             }
 
-            WebClient web = new WebClient();
-            byte[] data = await web.DownloadDataTaskAsync(att.Url);
-            using MemoryStream mem = new MemoryStream(data);
+            HttpClient web = new();
+            byte[] data = await web.GetByteArrayAsync(att.Url);
+            using MemoryStream mem = new(data);
             using System.Drawing.Image img = System.Drawing.Image.FromStream(mem);
 
             web.Dispose();
@@ -160,14 +154,14 @@ namespace Dexter.Commands
             int fromX = (int)((img.Width - fromWidth) * shift);
             int fromY = (int)((img.Height - fromHeight) * shift);
 
-            using Bitmap result = new Bitmap(actualWidth, (int)(actualWidth / targetRatio));
+            using Bitmap result = new(actualWidth, (int)(actualWidth / targetRatio));
             using (Graphics g = Graphics.FromImage(result))
             {
-                Rectangle fullrect = new Rectangle(Point.Empty, result.Size);
+                Rectangle fullrect = new(Point.Empty, result.Size);
 
                 if (toCircle)
                 {
-                    using GraphicsPath clipPath = new GraphicsPath();
+                    using GraphicsPath clipPath = new();
                     clipPath.AddEllipse(fullrect);
                     g.Clip = new Region(clipPath);
                 }

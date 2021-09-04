@@ -5,10 +5,6 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -70,7 +66,7 @@ namespace Dexter.Commands
                 .WithTitle("Infractions Purged")
                 .WithDescription($"Heya! I've purged {Count} warnings from your account. You now have a clean slate! <3")
                 .WithCurrentTimestamp()
-                .SendEmbed(await Client.GetUser(UserID).GetOrCreateDMChannelAsync());
+                .SendEmbed(await Client.GetUser(UserID).CreateDMChannelAsync());
         }
 
     }

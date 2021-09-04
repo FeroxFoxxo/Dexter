@@ -6,10 +6,6 @@ using Discord.Net;
 using Discord.Rest;
 using Discord.WebSocket;
 using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Dexter.Services
 {
@@ -53,7 +49,7 @@ namespace Dexter.Services
         /// <param name="Reaction">The reaction data attached to the new reaction added to the <paramref name="CachedMessage"/>.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task ReactionMenu(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel Channel, SocketReaction Reaction)
+        public async Task ReactionMenu(Cacheable<IUserMessage, ulong> CachedMessage, Cacheable<IMessageChannel, ulong> Channel, SocketReaction Reaction)
         {
             ReactionMenu ReactionMenu = ReactionMenuDB.ReactionMenus.Find(CachedMessage.Id);
 

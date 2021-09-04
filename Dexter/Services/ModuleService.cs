@@ -4,10 +4,7 @@ using Dexter.Databases.Configurations;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Dexter.Services
 {

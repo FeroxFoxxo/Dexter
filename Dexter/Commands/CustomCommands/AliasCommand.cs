@@ -1,14 +1,10 @@
-﻿using Dexter.Attributes.Methods;
-using Dexter.Configurations;
+﻿using Dexter.Configurations;
 using Dexter.Databases.CustomCommands;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
 using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

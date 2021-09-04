@@ -3,14 +3,9 @@ using Dexter.Databases.Games;
 using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Dexter.Helpers.Games
 {
@@ -720,7 +715,7 @@ namespace Dexter.Helpers.Games
 
         private System.Drawing.Image RenderBoard(Board board, Move lastMove)
         {
-            Bitmap img = new Bitmap(2 * Offset + 8 * CellSize, 2 * Offset + 8 * CellSize);
+            Bitmap img = new(2 * Offset + 8 * CellSize, 2 * Offset + 8 * CellSize);
 
             Dictionary<char, System.Drawing.Image> pieceImages = new();
             foreach (Piece p in Piece.pieces)
@@ -857,7 +852,7 @@ namespace Dexter.Helpers.Games
             public Func<int, int, Board, bool, bool> isValid;
             public Func<int, Board, bool, bool> hasValidMoves;
 
-            public static readonly Piece Rook = new Piece()
+            public static readonly Piece Rook = new()
             {
                 representation = 'R',
                 name = "Rook",
@@ -870,7 +865,7 @@ namespace Dexter.Helpers.Games
                 hasValidMoves = (origin, board, flip) => HasOrthogonalValidMoves(origin, board, flip)
             };
 
-            public static readonly Piece Knight = new Piece()
+            public static readonly Piece Knight = new()
             {
                 representation = 'N',
                 name = "Knight",
@@ -905,7 +900,7 @@ namespace Dexter.Helpers.Games
                 }
             };
 
-            public static readonly Piece Bishop = new Piece()
+            public static readonly Piece Bishop = new()
             {
                 representation = 'B',
                 name = "Bishop",
@@ -918,7 +913,7 @@ namespace Dexter.Helpers.Games
                 hasValidMoves = (origin, board, flip) => HasDiagonalValidMoves(origin, board, flip)
             };
 
-            public static readonly Piece King = new Piece()
+            public static readonly Piece King = new()
             {
                 representation = 'K',
                 name = "King",
@@ -933,7 +928,7 @@ namespace Dexter.Helpers.Games
                 hasValidMoves = (origin, board, flip) => HasDiagonalValidMoves(origin, board, flip, true) || HasOrthogonalValidMoves(origin, board, flip, true)
             };
 
-            public static readonly Piece Queen = new Piece()
+            public static readonly Piece Queen = new()
             {
                 representation = 'Q',
                 name = "Queen",
@@ -946,7 +941,7 @@ namespace Dexter.Helpers.Games
                 hasValidMoves = (origin, board, flip) => HasDiagonalValidMoves(origin, board, flip) || HasOrthogonalValidMoves(origin, board, flip)
             };
 
-            public static readonly Piece Pawn = new Piece()
+            public static readonly Piece Pawn = new()
             {
                 representation = 'P',
                 name = "Pawn",
@@ -1686,7 +1681,7 @@ namespace Dexter.Helpers.Games
 
             public bool InsufficientMaterial()
             {
-                Dictionary<char, int> pieceCounts = new Dictionary<char, int>();
+                Dictionary<char, int> pieceCounts = new();
                 foreach (char p in Piece.PieceCharacters)
                 {
                     pieceCounts.Add(p, 0);
@@ -1809,7 +1804,7 @@ namespace Dexter.Helpers.Games
 
             public override string ToString()
             {
-                StringBuilder builder = new StringBuilder(80);
+                StringBuilder builder = new(80);
 
                 for (int y = 0; y < 8; y++)
                 {
@@ -1849,7 +1844,7 @@ namespace Dexter.Helpers.Games
 
             public object Clone()
             {
-                Board output = new Board();
+                Board output = new();
 
                 output.squares = new char[8, 8];
                 for (int i = 0; i < 64; i++)

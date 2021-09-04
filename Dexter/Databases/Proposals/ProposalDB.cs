@@ -1,7 +1,6 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Databases.AdminConfirmations;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace Dexter.Databases.Proposals
 {

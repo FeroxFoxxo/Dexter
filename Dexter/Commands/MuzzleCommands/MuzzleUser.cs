@@ -1,8 +1,5 @@
 ﻿using Dexter.Databases.EventTimers;
 using Discord;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

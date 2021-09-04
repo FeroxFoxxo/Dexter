@@ -3,10 +3,7 @@ using Dexter.Configurations;
 using Dexter.Services;
 using Discord;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Dexter.Databases.Levels
 {

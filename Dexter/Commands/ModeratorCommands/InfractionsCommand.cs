@@ -7,11 +7,7 @@ using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using Humanizer;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -92,7 +88,7 @@ namespace Dexter.Commands
                 try
                 {
                     foreach (EmbedBuilder Embed in Embeds)
-                        await Embed.SendEmbed(await Context.User.GetOrCreateDMChannelAsync());
+                        await Embed.SendEmbed(await Context.User.CreateDMChannelAsync());
 
                     if (Context.Channel.GetType() == typeof(SocketDMChannel))
                         return;

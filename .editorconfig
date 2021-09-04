@@ -2,3 +2,6 @@
 
 # CS0649: Field 'LevelingCommands.LevelRecord.Xp' is never assigned to, and will always have its default value 0
 dotnet_diagnostic.CS0649.severity = silent
+
+# CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+dotnet_diagnostic.CS8632.severity = none

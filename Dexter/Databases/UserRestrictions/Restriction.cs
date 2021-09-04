@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Dexter.Databases.UserRestrictions
+﻿namespace Dexter.Databases.UserRestrictions
 {
 
     /// <summary>

@@ -1,7 +1,5 @@
 ﻿using Dexter.Abstractions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 
 namespace Dexter.Databases.Games
 {

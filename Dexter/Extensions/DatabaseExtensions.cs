@@ -1,8 +1,6 @@
 ﻿using Dexter.Databases.FunTopics;
 using Dexter.Enums;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 
 namespace Dexter.Extensions
 {

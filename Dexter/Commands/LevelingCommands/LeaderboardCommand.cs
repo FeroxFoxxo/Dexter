@@ -5,11 +5,6 @@ using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -77,9 +72,9 @@ namespace Dexter.Commands
 
             string levelTemplate = File.ReadAllText(Path.Combine(
                 Directory.GetCurrentDirectory(), "Images", "OtherMedia", "HTML", "Leaderboard", "LevelItemTemplate.html"));
-            using StreamReader leaderboardTemplate = new StreamReader(Path.Combine(
+            using StreamReader leaderboardTemplate = new(Path.Combine(
                 Directory.GetCurrentDirectory(), "Images", "OtherMedia", "HTML", "Leaderboard", "leaderboard.html"));
-            using StreamWriter leaderboardOutput = new StreamWriter(finalPath);
+            using StreamWriter leaderboardOutput = new(finalPath);
 
             string line = leaderboardTemplate.ReadLine();
             while (line is not null)

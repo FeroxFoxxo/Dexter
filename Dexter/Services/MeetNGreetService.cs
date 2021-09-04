@@ -4,7 +4,6 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Webhook;
 using Discord.WebSocket;
-using System.Threading.Tasks;
 
 namespace Dexter.Services
 {
@@ -78,8 +77,8 @@ namespace Dexter.Services
                 await new EmbedBuilder()
                     .WithAuthor(CachedMessage.Author)
                     .WithDescription($"**Message edited in <#{SocketMessageChannel.Id}>** [Jump to message](https://discordapp.com/channels/{ (NewMessage.Channel as SocketGuildChannel).Guild.Id }/{ NewMessage.Channel.Id }/{ NewMessage.Id })")
-                    .AddField("Before", CachedMessage.Content.Length > 1000 ? CachedMessage.Content.Substring(0, 1000) + "..." : CachedMessage.Content)
-                    .AddField("After", NewMessage.Content.Length > 1000 ? NewMessage.Content.Substring(0, 1000) + "..." : NewMessage.Content)
+                    .AddField("Before", CachedMessage.Content.Length > 1000 ? string.Concat(CachedMessage.Content.AsSpan(0, 1000), "...") : CachedMessage.Content)
+                    .AddField("After", NewMessage.Content.Length > 1000 ? string.Concat(NewMessage.Content.AsSpan(0, 1000), "...") : NewMessage.Content)
                     .WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")
                     .WithCurrentTimestamp()
                     .WithColor(Color.Blue)
@@ -94,7 +93,7 @@ namespace Dexter.Services
         /// <param name="Channel">The channel from which the message had been sent from.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task MNGMessageDeleted(Cacheable<IMessage, ulong> DeletedMessage, IChannel Channel)
+        public async Task MNGMessageDeleted(Cacheable<IMessage, ulong> DeletedMessage, Cacheable<IMessageChannel, ulong> Channel)
         {
             if (Channel.Id != MNGConfiguration.MeetNGreetChannel)
                 return;
@@ -110,7 +109,7 @@ namespace Dexter.Services
             if (DiscordWebhookClient != null)
                 await new EmbedBuilder()
                     .WithAuthor(CachedMessage.Author)
-                    .WithDescription($"**Message sent by <@{CachedMessage.Author.Id}> deleted in in <#{Channel.Id}>**\n{(CachedMessage.Content.Length > 1900 ? CachedMessage.Content.Substring(0, 1900) + "..." : CachedMessage.Content)}")
+                    .WithDescription($"**Message sent by <@{CachedMessage.Author.Id}> deleted in in <#{Channel.Id}>**\n{(CachedMessage.Content.Length > 1900 ? string.Concat(CachedMessage.Content.AsSpan(0, 1900), "...") : CachedMessage.Content)}")
                     .WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")
                     .WithCurrentTimestamp()
                     .WithColor(Color.Blue)

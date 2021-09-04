@@ -1,6 +1,5 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Configurations;
-using System;
 
 namespace Dexter.Commands
 {

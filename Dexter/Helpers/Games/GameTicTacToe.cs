@@ -3,11 +3,7 @@ using Dexter.Databases.Games;
 using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Dexter.Helpers.Games
 {
@@ -68,7 +64,7 @@ namespace Dexter.Helpers.Games
             }
             set
             {
-                StringBuilder Builder = new StringBuilder(9);
+                StringBuilder Builder = new(9);
                 for (int i = 0; i < 3; i++)
                 {
                     for (int j = 0; j < 3; j++)
@@ -160,7 +156,7 @@ namespace Dexter.Helpers.Games
         const string EChar = "⬜";
         const string OChar = "⭕";
         const string XChar = "❌";
-        private readonly Dictionary<char, string> ToEmoji = new Dictionary<char, string>() {
+        private readonly Dictionary<char, string> ToEmoji = new() {
             {'-', EChar},
             {'O', OChar},
             {'X', XChar}
@@ -169,7 +165,7 @@ namespace Dexter.Helpers.Games
         private string DisplayState()
         {
             char[,] icons = State;
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
@@ -477,7 +473,7 @@ namespace Dexter.Helpers.Games
             }
         }
 
-        private readonly Dictionary<string, Tuple<int, int>> Positions = new Dictionary<string, Tuple<int, int>>() {
+        private readonly Dictionary<string, Tuple<int, int>> Positions = new() {
             { "A1", new Tuple<int, int>(2, 0) },
             { "A2", new Tuple<int, int>(1, 0) },
             { "A3", new Tuple<int, int>(0, 0) },

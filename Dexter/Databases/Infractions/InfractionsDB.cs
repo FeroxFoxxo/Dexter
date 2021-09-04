@@ -2,7 +2,6 @@
 using Dexter.Configurations;
 using Dexter.Enums;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace Dexter.Databases.Infractions
 {

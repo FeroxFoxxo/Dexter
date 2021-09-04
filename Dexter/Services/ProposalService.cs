@@ -11,12 +11,8 @@ using Discord.Rest;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Dexter.Services
 {
@@ -111,7 +107,7 @@ namespace Dexter.Services
         /// <param name="Reaction">The reaction of question which was added.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task ReactionAdded(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel MessageChannel, SocketReaction Reaction)
+        public async Task ReactionAdded(Cacheable<IUserMessage, ulong> CachedMessage, Cacheable<IMessageChannel, ulong> MessageChannel, SocketReaction Reaction)
         {
             if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
                 return;
@@ -133,7 +129,7 @@ namespace Dexter.Services
         /// <param name="Reaction">The reaction of question which was removed.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task ReactionRemoved(Cacheable<IUserMessage, ulong> CachedMessage, ISocketMessageChannel MessageChannel, SocketReaction Reaction)
+        public async Task ReactionRemoved(Cacheable<IUserMessage, ulong> CachedMessage, Cacheable<IMessageChannel, ulong> MessageChannel, SocketReaction Reaction)
         {
             if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
                 return;

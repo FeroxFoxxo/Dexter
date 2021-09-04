@@ -3,9 +3,6 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

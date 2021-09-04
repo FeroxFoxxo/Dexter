@@ -2,9 +2,7 @@
 using Dexter.Extensions;
 using Discord.Commands;
 using Humanizer;
-using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

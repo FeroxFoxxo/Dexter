@@ -1,6 +1,5 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Helpers;
-using System.Collections.Generic;
 
 namespace Dexter.Configurations
 {

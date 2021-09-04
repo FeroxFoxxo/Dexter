@@ -3,10 +3,7 @@ using Dexter.Databases.Games;
 using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Dexter.Helpers.Games
 {
@@ -68,7 +65,7 @@ namespace Dexter.Helpers.Games
             }
             set
             {
-                StringBuilder builder = new StringBuilder(60);
+                StringBuilder builder = new(60);
                 for (int i = 0; i < 6; i++)
                 {
                     for (int j = 0; j < 7; j++)
@@ -161,7 +158,7 @@ namespace Dexter.Helpers.Games
         const string EChar = "⚫️";
         const string YellowChar = "🟡";
         const string RedChar = "🔴";
-        private readonly Dictionary<char, string> ToEmoji = new Dictionary<char, string>() {
+        private readonly Dictionary<char, string> ToEmoji = new() {
             {'-', EChar},
             {'Y', YellowChar},
             {'R', RedChar}
@@ -170,7 +167,7 @@ namespace Dexter.Helpers.Games
         private string DisplayState()
         {
             char[,] icons = State;
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             for (int i = 0; i < 6; i++)
             {
                 builder.Append('|');

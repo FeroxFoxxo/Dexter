@@ -1,5 +1,4 @@
 ﻿using Dexter.Enums;
-using System;
 
 namespace Dexter.Attributes.Methods
 {

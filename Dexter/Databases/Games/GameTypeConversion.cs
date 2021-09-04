@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Dexter.Databases.Games
+﻿namespace Dexter.Databases.Games
 {
 
     /// <summary>
@@ -14,7 +12,7 @@ namespace Dexter.Databases.Games
         /// Converts a lowercase string without spaces into the appropriate game.
         /// </summary>
 
-        public static readonly Dictionary<string, GameType> GameNames = new Dictionary<string, GameType>() {
+        public static readonly Dictionary<string, GameType> GameNames = new() {
             {"hangman", GameType.Hangman },
             {"tictactoe", GameType.TicTacToe},
             {"tic-tac-toe", GameType.TicTacToe },
@@ -31,7 +29,7 @@ namespace Dexter.Databases.Games
         /// Correlates each GameType with an emoji for a very small representation.
         /// </summary>
 
-        public static readonly Dictionary<GameType, string> GameEmoji = new Dictionary<GameType, string>() {
+        public static readonly Dictionary<GameType, string> GameEmoji = new() {
             {GameType.Unselected, "❓"},
             {GameType.Hangman, "💀"},
             {GameType.TicTacToe, "⭕"},

@@ -8,12 +8,8 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Humanizer;
 using Humanizer.Localisation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -138,7 +134,7 @@ namespace Dexter.Commands
 
             for (int p = 0; p < Result.Length; p++)
             {
-                StringBuilder Content = new StringBuilder();
+                StringBuilder Content = new();
 
                 foreach (NameRecord n in Names[(p * MaxRowsPerEmbed)..((p + 1) * MaxRowsPerEmbed > Count ? Count : (p + 1) * MaxRowsPerEmbed)])
                 {

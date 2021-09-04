@@ -4,9 +4,7 @@ using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord.Commands;
 using Humanizer;
-using System;
 using System.Globalization;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

@@ -6,19 +6,13 @@ using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -71,11 +65,9 @@ namespace Dexter.Commands
             }
 
             UserLevel ul = LevelingDB.GetOrCreateLevelData(user.Id, out LevelPreferences settings);
-
-            int txtlvl = LevelingConfiguration.GetLevelFromXP(ul.TextXP, out long txtXP, out long txtXPLvl);
-            int vclvl = LevelingConfiguration.GetLevelFromXP(ul.VoiceXP, out long vcXP, out long vcXPlvl);
-
-            int totalLevel = ul.TotalLevel(LevelingConfiguration, txtlvl, vclvl);
+            int txtlvl = LevelingConfiguration.GetLevelFromXP(ul.TextXP, out long _, out long _);
+            int vclvl = LevelingConfiguration.GetLevelFromXP(ul.VoiceXP, out long _, out long _);
+            _ = ul.TotalLevel(LevelingConfiguration, txtlvl, vclvl);
 
             (await RenderRankCard(ul, settings)).Save(storagePath);
             await Context.Channel.SendFileAsync(storagePath);
@@ -86,7 +78,7 @@ namespace Dexter.Commands
         /// <summary>
         /// The size of the rank card in pixels
         /// </summary>
-        public static readonly Size RankCardSize = new Size(widthmain + pfpside, height);
+        public static readonly Size RankCardSize = new(widthmain + pfpside, height);
 
         private const int widthmain = 1000;
         private const int height = 450;
@@ -94,14 +86,14 @@ namespace Dexter.Commands
         private const int levelWidth = 950;
         private const int levelHeight = 125;
         private const int defMargin = 25;
-        private static readonly Rectangle mainRect = new Rectangle(0, 0, widthmain + pfpside, height);
-        private static readonly Rectangle titleRect = new Rectangle(defMargin, defMargin, widthmain - 2 * defMargin + pfpside, labelHeight);
-        private static readonly LevelRect mainLevel = new LevelRect(height - 2 * levelHeight - 2 * defMargin);
-        private static readonly LevelRect secondaryLevel = new LevelRect(height - levelHeight - defMargin);
-        private static readonly LevelRect mainHybridLevel = new LevelRect(height - levelHeight - defMargin, LevelRect.LevelBarType.HybridMain);
-        private static readonly LevelRect secondaryHybridLevel = new LevelRect(height - levelHeight - defMargin, LevelRect.LevelBarType.HybridSecondary);
-        private static readonly Rectangle rectName = new Rectangle(defMargin, defMargin, widthmain - 2 * defMargin + pfpside, labelHeight);
-        private static readonly Rectangle rectPfp = new Rectangle(widthmain, height - pfpside, pfpside, pfpside);
+        private static readonly Rectangle mainRect = new(0, 0, widthmain + pfpside, height);
+        private static readonly Rectangle titleRect = new(defMargin, defMargin, widthmain - 2 * defMargin + pfpside, labelHeight);
+        private static readonly LevelRect mainLevel = new(height - 2 * levelHeight - 2 * defMargin);
+        private static readonly LevelRect secondaryLevel = new(height - levelHeight - defMargin);
+        private static readonly LevelRect mainHybridLevel = new(height - levelHeight - defMargin, LevelRect.LevelBarType.HybridMain);
+        private static readonly LevelRect secondaryHybridLevel = new(height - levelHeight - defMargin, LevelRect.LevelBarType.HybridSecondary);
+        private static readonly Rectangle rectName = new(defMargin, defMargin, widthmain - 2 * defMargin + pfpside, labelHeight);
+        private static readonly Rectangle rectPfp = new(widthmain, height - pfpside, pfpside, pfpside);
 
         private const int miniLabelWidth = 80;
         private const int labelIntrusionPixels = 0;
@@ -109,8 +101,8 @@ namespace Dexter.Commands
         private const int typeLabelWidth = 175;
         private const int hybridLabelWidth = 125;
         private const int labelMiniMargin = 10;
-        private static readonly Rectangle rectLevelLabel = new Rectangle(defMargin, defMargin, miniLabelWidth + labelIntrusionPixels, labelHeight);
-        private static readonly Rectangle rectLevelText = new Rectangle(defMargin + miniLabelWidth, defMargin, widthmain / 2 - defMargin - miniLabelWidth, labelHeight);
+        private static readonly Rectangle rectLevelLabel = new(defMargin, defMargin, miniLabelWidth + labelIntrusionPixels, labelHeight);
+        private static readonly Rectangle rectLevelText = new(defMargin + miniLabelWidth, defMargin, widthmain / 2 - defMargin - miniLabelWidth, labelHeight);
 
         internal class LevelRect
         {
@@ -316,10 +308,10 @@ namespace Dexter.Commands
                 }
                 catch (FileLoadException)
                 {
-                    using WebClient client = new();
+                    using HttpClient client = new();
                     try
                     {
-                        byte[] dataArr = await client.DownloadDataTaskAsync(settings.Background);
+                        byte[] dataArr = await client.GetByteArrayAsync(settings.Background);
                         using MemoryStream mem = new(dataArr);
                         using System.Drawing.Image bg = System.Drawing.Image.FromStream(mem);
                         g.DrawImage(bg, mainRect);
@@ -330,8 +322,8 @@ namespace Dexter.Commands
                     }
                 }
 
-                using SolidBrush xpColor = new SolidBrush(System.Drawing.Color.FromArgb(unchecked((int)settings.XpColor)));
-                using SolidBrush whiteColor = new SolidBrush(System.Drawing.Color.White);
+                using SolidBrush xpColor = new(System.Drawing.Color.FromArgb(unchecked((int)settings.XpColor)));
+                using SolidBrush whiteColor = new(System.Drawing.Color.White);
 
                 if (settings.TitleBackground)
                     g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb(0xd0, System.Drawing.Color.Black)), titleRect);
@@ -350,18 +342,18 @@ namespace Dexter.Commands
                     g.FillEllipse(new SolidBrush(System.Drawing.Color.FromArgb(unchecked((int)0xff3f3f3f)))
                         , new Rectangle(rectPfp.X - pfpmargin, rectPfp.Y - pfpmargin, rectPfp.Width + 2 * pfpmargin, rectPfp.Height + 2 * pfpmargin));
 
-                using (WebClient client = new())
+                using (HttpClient client = new())
                 {
-                    byte[] dataArr = await client.DownloadDataTaskAsync(user.GetTrueAvatarUrl(512));
+                    byte[] dataArr = await client.GetByteArrayAsync(user.GetTrueAvatarUrl(512));
                     using MemoryStream mem = new(dataArr);
                     using System.Drawing.Image pfp = System.Drawing.Image.FromStream(mem);
 
                     if (settings.CropPfp)
                     {
-                        Rectangle tempPos = new Rectangle(Point.Empty, rectPfp.Size);
-                        using Bitmap pfplayer = new Bitmap(rectPfp.Width, rectPfp.Height);
+                        Rectangle tempPos = new(Point.Empty, rectPfp.Size);
+                        using Bitmap pfplayer = new(rectPfp.Width, rectPfp.Height);
                         using Graphics pfpg = Graphics.FromImage(pfplayer);
-                        using GraphicsPath path = new GraphicsPath();
+                        using GraphicsPath path = new();
                         path.AddEllipse(tempPos);
                         pfpg.Clip = new Region(path);
                         pfpg.DrawImage(pfp, tempPos);
@@ -375,7 +367,7 @@ namespace Dexter.Commands
                 }
 
                 List<string> possibleNames = new();
-                Font basicFont = new Font("Arial", labelHeight * 2 / 3);
+                Font basicFont = new("Arial", labelHeight * 2 / 3);
                 StringBuilder simplifiedUsername = new();
                 StringBuilder asciiUsername = new();
                 foreach (char c in user.Username)
@@ -474,8 +466,8 @@ namespace Dexter.Commands
                 Rectangle barRect = ld.rects.Bar(1);
                 GraphicsPath barGPath = GraphicsExtensions.RoundedRect(barRect, barRect.Height / 2);
                 GraphicsPath barXPGPath = GraphicsExtensions.RoundedRect(ld.rects.Bar(ld.Percent), barRect.Height / 2);
-                Region barInnerClipPath = new Region(GraphicsExtensions.RoundedRect(new Rectangle(barRect.X + 2, barRect.Y + 2, barRect.Width - 4, barRect.Height - 4), barRect.Height / 2 - 2));
-                Region levelRenderArea = new Region(barGPath);
+                Region barInnerClipPath = new(GraphicsExtensions.RoundedRect(new Rectangle(barRect.X + 2, barRect.Y + 2, barRect.Width - 4, barRect.Height - 4), barRect.Height / 2 - 2));
+                Region levelRenderArea = new(barGPath);
                 g.Clip = levelRenderArea;
                 g.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(0xe0, System.Drawing.Color.Black)), barGPath);
                 g.Clip = barInnerClipPath;
@@ -501,7 +493,7 @@ namespace Dexter.Commands
 
                 if (ld.isHybrid)
                 {
-                    SolidBrush overXPColor = new SolidBrush(xpColor.Color.GetBrightness() < 0.5 ? System.Drawing.Color.White : System.Drawing.Color.Black);
+                    SolidBrush overXPColor = new(xpColor.Color.GetBrightness() < 0.5 ? System.Drawing.Color.White : System.Drawing.Color.Black);
                     g.DrawString(ld.XpExpr, fontDefault, xpColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Far });
                     g.Clip = new Region(barXPGPath);
                     g.DrawString(ld.XpExpr, fontDefault, overXPColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Far });

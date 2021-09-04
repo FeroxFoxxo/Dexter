@@ -5,10 +5,7 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -120,7 +117,7 @@ namespace Dexter.Commands
                         return;
                     }
 
-                    Dictionary<string, string> setupArgs = new Dictionary<string, string>() {
+                    Dictionary<string, string> setupArgs = new() {
                         { "CommandName", CommandName.ToLower() },
                         { "Reply", Reply }
                     };

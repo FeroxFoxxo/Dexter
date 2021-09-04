@@ -4,7 +4,6 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Genbox.WolframAlpha;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

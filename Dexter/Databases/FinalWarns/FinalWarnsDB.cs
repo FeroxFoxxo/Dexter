@@ -3,7 +3,6 @@ using Dexter.Configurations;
 using Dexter.Enums;
 using Discord;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace Dexter.Databases.FinalWarns
 {
@@ -54,7 +53,7 @@ namespace Dexter.Databases.FinalWarns
         {
             FinalWarn Warn = FinalWarns.Find(User.Id);
 
-            FinalWarn NewWarn = new FinalWarn()
+            FinalWarn NewWarn = new()
             {
                 IssuerID = Issuer.Id,
                 UserID = User.Id,

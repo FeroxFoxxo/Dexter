@@ -2,11 +2,6 @@
 using Dexter.Configurations;
 using Discord;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dexter.Services
 {
@@ -25,9 +20,9 @@ namespace Dexter.Services
             DiscordSocketClient.GuildMemberUpdated += CheckUserColorRoles;
         }
 
-        private async Task CheckUserColorRoles(SocketGuildUser before, SocketGuildUser after)
+        private async Task CheckUserColorRoles(Cacheable<SocketGuildUser, ulong> before, SocketGuildUser after)
         {
-            if (before.Roles == after.Roles) return;
+            if (before.Value.Roles == after.Roles) return;
 
             bool isAfterPatreon = false;
 

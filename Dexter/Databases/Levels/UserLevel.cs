@@ -1,6 +1,5 @@
 ﻿using Dexter.Configurations;
 using Dexter.Helpers;
-using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.Levels

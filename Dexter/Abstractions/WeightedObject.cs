@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Dexter.Abstractions
+﻿namespace Dexter.Abstractions
 {
 
     /// <summary>

@@ -5,14 +5,9 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

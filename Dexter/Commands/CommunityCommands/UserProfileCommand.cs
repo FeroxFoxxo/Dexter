@@ -7,12 +7,8 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Humanizer;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -717,7 +713,7 @@ namespace Dexter.Commands
                                     .WithAuthor(Context.User)
                                     .WithDescription($"You've received a friend request from {Context.User.Mention}!\n" +
                                     $"To accept or decline this request, type `~friend <accept|decline> {Context.User.Id}`.")
-                                    .SendEmbed(await user.GetOrCreateDMChannelAsync());
+                                    .SendEmbed(await user.CreateDMChannelAsync());
 
                                 await BuildEmbed(EmojiEnum.Love)
                                     .WithTitle("Friend Request Sent!")
@@ -1197,7 +1193,7 @@ namespace Dexter.Commands
                     monthBD++;
                     dayBD = 1;
                 }
-                DateTime relevantDay = new DateTime(nextYear, monthBD, dayBD, 0, 0, 0);
+                DateTime relevantDay = new(nextYear, monthBD, dayBD, 0, 0, 0);
                 TimeSpan relevantOffset = profile.GetRelevantTimeZone(new DateTimeOffset(relevantDay), LanguageConfiguration).TimeOffset;
 
                 diff = new DateTimeOffset(relevantDay, relevantOffset).Subtract(DateTimeOffset.Now);
@@ -1255,7 +1251,7 @@ namespace Dexter.Commands
                         .WithTitle("🎂 Happy Borkday 🎂")
                         .WithDescription("Happy borkday from the USF Team! We hope your day goes wonderfully!\n" +
                         "If this wasn't sent at midnight, make sure you set your timezones up correctly on your profile :3")
-                        .SendEmbed(await user.GetOrCreateDMChannelAsync());
+                        .SendEmbed(await user.CreateDMChannelAsync());
                 }
                 catch { }
             }
@@ -1272,7 +1268,7 @@ namespace Dexter.Commands
                         .WithTitle("🎂 Borkday Time 🎂")
                         .WithDescription($"Hey there! It's {user.Mention}'{(user.Username.EndsWith('s') ? "" : "s")} birthday! Thought you'd like to know and celebrate! :3")
                         .WithCurrentTimestamp()
-                        .SendEmbed(await friend.GetOrCreateDMChannelAsync());
+                        .SendEmbed(await friend.CreateDMChannelAsync());
                 }
                 catch { }
             }

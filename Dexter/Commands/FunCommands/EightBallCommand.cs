@@ -2,8 +2,6 @@
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

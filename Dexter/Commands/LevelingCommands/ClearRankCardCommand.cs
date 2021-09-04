@@ -3,7 +3,6 @@ using Dexter.Databases.Levels;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

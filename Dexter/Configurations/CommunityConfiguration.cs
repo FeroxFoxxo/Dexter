@@ -1,6 +1,5 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Databases.CommunityEvents;
-using System.Collections.Generic;
 
 namespace Dexter.Configurations
 {

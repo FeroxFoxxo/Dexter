@@ -7,11 +7,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Humanizer;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -174,7 +170,7 @@ namespace Dexter.Commands
                 case Enums.ActionType.Get:
                     string SearchParam = Params.Split(" ")[0].ToUpper();
                     string SearchString = Params[SearchParam.Length..].Trim();
-                    List<CommunityEvent> Events = new List<CommunityEvent>();
+                    List<CommunityEvent> Events = new();
                     switch (SearchParam)
                     {
                         case "ID":

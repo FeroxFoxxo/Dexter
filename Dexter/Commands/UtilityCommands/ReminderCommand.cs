@@ -5,11 +5,7 @@ using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -241,7 +237,7 @@ namespace Dexter.Commands
                     .WithTitle("🎗Dexter Reminder!🎗")
                     .WithDescription(Reminder.Message)
                     .WithCurrentTimestamp()
-                    .SendEmbed(await Issuer.GetOrCreateDMChannelAsync());
+                    .SendEmbed(await Issuer.CreateDMChannelAsync());
             }
             catch { }
         }

@@ -2,11 +2,7 @@
 using Dexter.Databases.UserProfiles;
 using Discord;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Dexter.Services
 {
@@ -64,9 +60,9 @@ namespace Dexter.Services
         /// <param name="After">The information of the user after the modification.</param>
         /// <returns>A completed <c>Task</c> object.</returns>
 
-        public async Task RecordNicknameChange(SocketGuildUser Before, SocketGuildUser After)
+        public async Task RecordNicknameChange(Cacheable<SocketGuildUser, ulong> Before, SocketGuildUser After)
         {
-            if (Before.Nickname != After.Nickname && !string.IsNullOrEmpty(After.Nickname))
+            if (Before.Value.Nickname != After.Nickname && !string.IsNullOrEmpty(After.Nickname))
             {
                 NameRecord Record = ProfilesDB.Names.AsQueryable().Where(n => n.Name == After.Username && n.UserID == After.Id && n.Type == NameType.Nickname).FirstOrDefault();
 

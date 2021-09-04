@@ -8,9 +8,6 @@ using Discord;
 using Discord.Webhook;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Dexter.Services
 {
@@ -100,7 +97,7 @@ namespace Dexter.Services
         /// <param name="Reaction">An object containing the reaction that had been removed.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task ReactionRemovedLog(Cacheable<IUserMessage, ulong> UserMessage, ISocketMessageChannel MessageChannel, SocketReaction Reaction)
+        public async Task ReactionRemovedLog(Cacheable<IUserMessage, ulong> UserMessage, Cacheable<IMessageChannel, ulong> MessageChannel, SocketReaction Reaction)
         {
             if (ModerationConfiguration.DisabledReactionChannels.Contains(MessageChannel.Id))
                 return;
@@ -117,7 +114,7 @@ namespace Dexter.Services
                 await new EmbedBuilder()
                     .WithAuthor(Reaction.User.Value)
                     .WithDescription($"**Reaction removed in <#{MessageChannel.Id}> by {Reaction.User.GetValueOrDefault().GetUserInformation()}**")
-                    .AddField("Message", CachedMessage.Content.Length > 50 ? CachedMessage.Content.Substring(0, 50) + "..." : CachedMessage.Content)
+                    .AddField("Message", CachedMessage.Content.Length > 50 ? string.Concat(CachedMessage.Content.AsSpan(0, 50), "...") : CachedMessage.Content)
                     .AddField("Reaction Removed", Reaction.Emote)
                     .WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")
                     .WithCurrentTimestamp()

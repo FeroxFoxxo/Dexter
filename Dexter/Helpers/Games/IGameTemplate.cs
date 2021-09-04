@@ -2,7 +2,6 @@
 using Dexter.Databases.Games;
 using Discord;
 using Discord.WebSocket;
-using System.Threading.Tasks;
 
 namespace Dexter.Helpers.Games
 {

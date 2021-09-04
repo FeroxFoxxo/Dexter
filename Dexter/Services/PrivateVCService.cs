@@ -2,10 +2,6 @@
 using Dexter.Configurations;
 using Discord;
 using Discord.WebSocket;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Channels;
-using System.Threading.Tasks;
 
 namespace Dexter.Services
 {

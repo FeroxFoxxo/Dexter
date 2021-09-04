@@ -4,8 +4,6 @@ using Dexter.Services;
 using Discord;
 using Discord.Commands;
 using Newtonsoft.Json.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

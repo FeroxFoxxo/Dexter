@@ -3,12 +3,8 @@ using Dexter.Configurations;
 using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -70,7 +66,7 @@ namespace Dexter.Commands
                     .SendEmbed(Context.Channel);
                 return;
             }
-            RollContext rollContext = new RollContext(n, d, new Random(), FunConfiguration);
+            RollContext rollContext = new(n, d, new Random(), FunConfiguration);
             string[] rollArgs = roll.SanitizeMentions().Split(' ')[1..];
 
             List<string> report = new();
@@ -151,7 +147,7 @@ namespace Dexter.Commands
 
             public List<int> Roll()
             {
-                List<int> result = new List<int>(n);
+                List<int> result = new(n);
                 for (int i = 0; i < n; i++)
                 {
                     result.Add(rand.Next(1, d + 1));

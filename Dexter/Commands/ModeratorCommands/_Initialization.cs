@@ -8,7 +8,6 @@ using Dexter.Databases.Relays;
 using Dexter.Databases.UserProfiles;
 using Dexter.Databases.UserRestrictions;
 using Discord.WebSocket;
-using System;
 
 namespace Dexter.Commands
 {

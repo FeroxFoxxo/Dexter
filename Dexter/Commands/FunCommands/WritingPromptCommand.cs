@@ -1,7 +1,5 @@
 ﻿using Dexter.Attributes.Methods;
 using Discord.Commands;
-using System;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -31,7 +29,7 @@ namespace Dexter.Commands
 
         private string GeneratePrompt()
         {
-            Random RNG = new Random();
+            Random RNG = new();
 
             string Opening = FunConfiguration.WritingPromptOpenings[RNG.Next(FunConfiguration.WritingPromptOpenings.Count)];
             string Predicate = Helpers.LanguageHelper.RandomizePredicate(FunConfiguration.WritingPromptPredicates[RNG.Next(FunConfiguration.WritingPromptPredicates.Count)],

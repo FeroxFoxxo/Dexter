@@ -5,12 +5,6 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -161,7 +155,7 @@ namespace Dexter.Commands
             bool transform = argsArr?.Contains("TRANSFORM") ?? false;
             bool updateroles = argsArr?.Contains("UPDATEROLES") ?? false;
 
-            using WebClient web = new();
+            using HttpClient web = new();
             string dataStr;
             LBData data;
 
@@ -170,7 +164,7 @@ namespace Dexter.Commands
                 for (page = min; page <= max; page++)
                 {
                     string url = $"{mee6apiurl}{LevelingConfiguration.Mee6SyncGuildId}?&page={page}";
-                    dataStr = await web.DownloadStringTaskAsync(url);
+                    dataStr = await web.GetStringAsync(url);
                     data = JsonConvert.DeserializeObject<LBData>(dataStr);
 
                     if (data?.players?.FirstOrDefault() is null)
@@ -290,7 +284,7 @@ namespace Dexter.Commands
                 if (reflevel < 0) return 0;
 
                 float slope = 1;
-                KeyValuePair<int, int> last = new KeyValuePair<int, int>(0, 0);
+                KeyValuePair<int, int> last = new(0, 0);
                 foreach (KeyValuePair<int, int> e in equivalences)
                 {
                     slope = (float)(e.Value - last.Value) / (e.Key - last.Key);
@@ -304,7 +298,7 @@ namespace Dexter.Commands
             }
 
             public static LevelTransformation Metricate =>
-                    new LevelTransformation(new int[] { 0, 1, 7, 14, 21, 28, 35, 42, 49, 55, 61, 67, 73, 79, 85, 90, 95, 100 },
+                    new(new int[] { 0, 1, 7, 14, 21, 28, 35, 42, 49, 55, 61, 67, 73, 79, 85, 90, 95, 100 },
                         new int[] { 0, 1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160 });
         }
     }

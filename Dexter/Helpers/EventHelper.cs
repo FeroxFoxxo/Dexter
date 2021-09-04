@@ -7,10 +7,6 @@ using Discord;
 using Discord.Net;
 using Discord.WebSocket;
 using Humanizer;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -245,7 +241,7 @@ namespace Dexter.Commands
                         .WithTitle("Event Expired")
                         .WithDescription($"One of your events expired without the admins giving their feedback in time! \n{Event.Description}")
                         .WithCurrentTimestamp()
-                        .SendEmbed(await User.GetOrCreateDMChannelAsync());
+                        .SendEmbed(await User.CreateDMChannelAsync());
                 }
                 catch (HttpException) { }
             }

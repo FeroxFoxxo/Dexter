@@ -10,9 +10,6 @@ using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Dexter.Abstractions
 {

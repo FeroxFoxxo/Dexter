@@ -7,12 +7,8 @@ using Discord.WebSocket;
 using Figgle;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Dexter
 {
@@ -71,8 +67,7 @@ namespace Dexter
             DiscordSocketClient DiscordSocketClient = new(
                 new DiscordSocketConfig
                 {
-                    MessageCacheSize = 5000,
-                    ExclusiveBulkDelete = false
+                    MessageCacheSize = 5000
                 }
             );
 
@@ -183,11 +178,15 @@ namespace Dexter
                 {
                     if (Property.PropertyType == typeof(ServiceProvider))
                         Property.SetValue(ServiceProvider.GetRequiredService(Type), ServiceProvider);
+                    else
+                    {
+                        object Service = ServiceProvider.GetService(Property.PropertyType);
 
-                    object Service = ServiceProvider.GetService(Property.PropertyType);
-
-                    if (Service != null)
-                        Property.SetValue(ServiceProvider.GetRequiredService(Type), Service);
+                        if (Service != null)
+                        {
+                            Property.SetValue(ServiceProvider.GetRequiredService(Type), Service);
+                        }
+                    }
                 })
             );
 

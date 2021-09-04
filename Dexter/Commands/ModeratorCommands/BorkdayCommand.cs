@@ -7,10 +7,7 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

@@ -2,7 +2,6 @@
 using Dexter.Databases.FunTopics;
 using Discord.Commands;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

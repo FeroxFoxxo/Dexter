@@ -5,8 +5,6 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
-using System;
-using System.Threading.Tasks;
 
 namespace Dexter.Services
 {

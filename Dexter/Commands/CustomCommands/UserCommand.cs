@@ -1,18 +1,12 @@
-﻿using Dexter.Attributes.Methods;
-using Dexter.Configurations;
+﻿using Dexter.Configurations;
 using Dexter.Databases.CustomCommands;
-using Dexter.Databases.Relays;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -100,7 +94,7 @@ namespace Dexter.Commands
                 description.Append($"\nThis would override the non-user-defined custom command {incompatibleCC.CommandName}; with the following reply: \"{incompatibleCC.Reply.TruncateTo(512)}\"");
             }
 
-            Dictionary<string, string> setupArgs = new Dictionary<string, string>() {
+            Dictionary<string, string> setupArgs = new() {
                             { "CommandName", name },
                             { "Reply", reply },
                             { "CommandType", cct.ToString() },

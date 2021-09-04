@@ -5,9 +5,6 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -109,7 +106,7 @@ namespace Dexter.Commands
                     $"We only do this in extreme circumstances. You will likely be notified of this shortly.\n" +
                     $"- {DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Name} Staff Team")
                     .AddField("Reason: ", Reason)
-                .SendEmbed(await User.GetOrCreateDMChannelAsync());
+                .SendEmbed(await User.CreateDMChannelAsync());
         }
 
     }

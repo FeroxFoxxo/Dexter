@@ -3,13 +3,8 @@ using Dexter.Databases.Games;
 using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Dexter.Helpers.Games
 {
@@ -138,7 +133,7 @@ namespace Dexter.Helpers.Games
             }
             set
             {
-                StringBuilder builder = new StringBuilder();
+                StringBuilder builder = new();
                 int h = value.GetLength(0);
                 int w = value.GetLength(1);
                 for (int i = 0; i < h; i++)
@@ -166,7 +161,7 @@ namespace Dexter.Helpers.Games
             }
             set
             {
-                StringBuilder builder = new StringBuilder();
+                StringBuilder builder = new();
                 int h = value.GetLength(0);
                 int w = value.GetLength(1);
                 for (int i = 0; i < h; i++)
@@ -259,7 +254,7 @@ namespace Dexter.Helpers.Games
         {
             char[,] newState = State;
             isLoss = false;
-            HashSet<Tuple<int, int>> toProbe = new HashSet<Tuple<int, int>>();
+            HashSet<Tuple<int, int>> toProbe = new();
             for (int x = 0; x < newState.GetLength(1); x++)
                 for (int y = 0; y < newState.GetLength(0); y++)
                     if (newState[y, x] > '0' && newState[y, x] < '8')
@@ -406,9 +401,9 @@ namespace Dexter.Helpers.Games
         const int cellSize = 32;
         private Bitmap RenderMatrixImage(char[,] matrix)
         {
-            Bitmap result = new Bitmap(cellSize * (matrix.GetLength(1) + 2), cellSize * (matrix.GetLength(0) + 2));
+            Bitmap result = new(cellSize * (matrix.GetLength(1) + 2), cellSize * (matrix.GetLength(0) + 2));
 
-            Dictionary<char, System.Drawing.Image> cellImages = new Dictionary<char, System.Drawing.Image>();
+            Dictionary<char, System.Drawing.Image> cellImages = new();
             foreach (KeyValuePair<char, string> kvp in CellImageNames)
             {
                 cellImages.Add(kvp.Key, System.Drawing.Image.FromFile(Path.Join(MinesweeperPath, $"{kvp.Value}.png")));
@@ -476,7 +471,7 @@ namespace Dexter.Helpers.Games
         private const string Corner = "GridCorner";
         private readonly string[] NumLabels = new string[] { "NumberLabelLeft", "NumberLabelRight" };
         private readonly string[] LetterLabels = new string[] { "LetterLabelTop", "LetterLabelBottom" };
-        private readonly Dictionary<char, string> CellImageNames = new Dictionary<char, string>() {
+        private readonly Dictionary<char, string> CellImageNames = new() {
             {'0', "Cell0"},
             {'1', "Cell1"},
             {'2', "Cell2"},
@@ -581,7 +576,7 @@ namespace Dexter.Helpers.Games
                     return true;
                 case "size":
                     string[] toParse = value.Split(" ");
-                    List<int> numbers = new List<int>();
+                    List<int> numbers = new();
                     foreach (string s in toParse)
                     {
                         if (int.TryParse(s, out int n)) numbers.Add(n);
@@ -644,7 +639,8 @@ namespace Dexter.Helpers.Games
                     "PRO TIP! Type `auto` to automatically probe any cells deemed safe by surrounding flags and danger levels.");
         }
 
-        Dictionary<string, string> Difficulties = new Dictionary<string, string> {
+        Dictionary<string, string> Difficulties = new()
+        {
             {"beginner", "10 10 10"},
             {"intermediate", "16 16 40"},
             {"advanced", "26 18 99"}
@@ -732,7 +728,7 @@ namespace Dexter.Helpers.Games
                     await message.Channel.SendMessageAsync("You must provide a position to flag or unflag!");
                     return;
                 }
-                List<Tuple<int, int>> toFlag = new List<Tuple<int, int>>();
+                List<Tuple<int, int>> toFlag = new();
                 for (int i = 1; i < args.Length; i++)
                 {
                     if (!TryParsePos(args[i], out Tuple<int, int> flagpos))
@@ -779,7 +775,7 @@ namespace Dexter.Helpers.Games
                     {
                         if (CheckNew(State))
                         {
-                            Random rnd = new Random();
+                            Random rnd = new();
                             char[,] newBoard = GenerateBoard(Height, Width, Math.Min(Mines, MaxMines), rnd);
                             while (newBoard[cells[0].Item2, cells[0].Item1] is 'X')
                             {
@@ -815,7 +811,7 @@ namespace Dexter.Helpers.Games
 
             if (isLoss)
             {
-                int mines = Mines > MaxMines ? MaxMines : Mines;
+                _ = Mines > MaxMines ? MaxMines : Mines;
                 await new EmbedBuilder()
                     .WithColor(Discord.Color.Red)
                     .WithTitle("Defeat!")

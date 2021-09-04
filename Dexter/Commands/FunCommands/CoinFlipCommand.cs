@@ -1,8 +1,6 @@
 ﻿using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
-using System;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -47,7 +45,7 @@ namespace Dexter.Commands
                 return;
             }
 
-            Random RNG = new Random();
+            Random RNG = new();
 
             bool[] Results = new bool[Flips];
 

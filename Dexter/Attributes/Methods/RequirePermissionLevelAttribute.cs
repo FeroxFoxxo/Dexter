@@ -6,8 +6,6 @@ using Dexter.Helpers;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Threading.Tasks;
 
 namespace Dexter.Attributes.Methods
 {

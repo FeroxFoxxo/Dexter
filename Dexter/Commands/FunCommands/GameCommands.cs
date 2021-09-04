@@ -6,11 +6,7 @@ using Dexter.Helpers;
 using Dexter.Helpers.Games;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -596,7 +592,7 @@ namespace Dexter.Commands
 
         private EmbedBuilder Leaderboard(GameInstance Instance)
         {
-            StringBuilder Board = new StringBuilder();
+            StringBuilder Board = new();
             List<Player> Players = GamesDB.GetPlayersFromInstance(Instance.GameID).ToList();
             Players.Sort((a, b) => b.Score.CompareTo(a.Score));
 

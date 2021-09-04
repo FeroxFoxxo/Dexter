@@ -1,9 +1,6 @@
 ﻿using Dexter.Configurations;
 using Humanizer;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -49,14 +46,14 @@ namespace Dexter.Helpers
 
         public static string RandomizePredicate(string Predicate, Dictionary<string, string[]> TermBanks, Random RNG, LanguageConfiguration Config)
         {
-            HashSet<TermClass> Terms = new HashSet<TermClass>();
+            HashSet<TermClass> Terms = new();
 
             foreach (KeyValuePair<string, string[]> k in TermBanks)
             {
                 Terms.Add(new TermClass(k.Key, k.Value));
             }
 
-            StringBuilder NewPredicate = new StringBuilder(Predicate.Length * 2);
+            StringBuilder NewPredicate = new(Predicate.Length * 2);
 
             ArticleType ResolveArticle = ArticleType.None;
             PluralType ResolvePlural = PluralType.None;
@@ -367,7 +364,7 @@ namespace Dexter.Helpers
         /// A set of characters that discord uses for formatting.
         /// </summary>
 
-        public static readonly HashSet<char> DiscordRichTextChars = new HashSet<char>() { '*', '_', '`', '|' };
+        public static readonly HashSet<char> DiscordRichTextChars = new() { '*', '_', '`', '|' };
 
         /// <summary>
         /// Truncates a string to a given length similar to the <see cref="TruncateTo"/> method, but ignores characters marked in <paramref name="ignoreChars"/>.
@@ -548,7 +545,7 @@ namespace Dexter.Helpers
 
         public static string HumanizeOffbaseUnits(int Base, float Value, string[] LargeUnit, string[] SmallUnit, out float Remainder)
         {
-            List<string> Result = new List<string>();
+            List<string> Result = new();
 
             int LargeValue = (int)Value;
             int SmallValue = (int)Math.Round(Value % 1 * Base);
@@ -599,12 +596,12 @@ namespace Dexter.Helpers
 
         public static string[] GetHyperLinks(this string Input)
         {
-            List<string> Matches = new List<string>();
+            List<string> Matches = new();
 
             Input = ' ' + Input + ' ';
 
-            List<int> Openers = new List<int>();
-            List<int> Closers = new List<int>();
+            List<int> Openers = new();
+            List<int> Closers = new();
             for (int i = 0; i < Input.Length; i++)
             {
                 switch (Input[i])
@@ -631,7 +628,7 @@ namespace Dexter.Helpers
 
         private static string[] CheckForLinks(this string Input, IEnumerable<int> Openers, IEnumerable<int> Closers)
         {
-            List<string> Result = new List<string>();
+            List<string> Result = new();
 
             foreach (int o in Openers)
             {
@@ -1116,7 +1113,8 @@ namespace Dexter.Helpers
             Error = "";
             Span = TimeSpan.Zero;
 
-            Dictionary<TimeUnit, string> RegExps = new Dictionary<TimeUnit, string> {
+            Dictionary<TimeUnit, string> RegExps = new()
+            {
                 { TimeUnit.Millisecond, @"(ms)|((milli)(second)?s?)" },
                 { TimeUnit.Second, @"s(ec(ond)?s?)?" },
                 { TimeUnit.Minute, @"m(in(ute)?s?)?" },
@@ -1209,7 +1207,8 @@ namespace Dexter.Helpers
         /// <summary>
         /// Gets the appropriate TimeSpan from a given TimeUnit.
         /// </summary>
-        public static Dictionary<TimeUnit, TimeSpan> UnitToTime = new Dictionary<TimeUnit, TimeSpan> {
+        public static Dictionary<TimeUnit, TimeSpan> UnitToTime = new()
+        {
             { TimeUnit.Millisecond, TimeSpan.FromMilliseconds(1)},
             { TimeUnit.Second, TimeSpan.FromSeconds(1)},
             { TimeUnit.Minute, TimeSpan.FromMinutes(1)},
@@ -1372,7 +1371,7 @@ namespace Dexter.Helpers
                 pMaxSubstr = 0.9 + 0.1 * (LCSS / n);
             }
 
-            Dictionary<char, PairwiseCounter> counts = new Dictionary<char, PairwiseCounter>();
+            Dictionary<char, PairwiseCounter> counts = new();
             for (int i = 0; i < a.Length; i++)
             {
                 if (!counts.ContainsKey(a[i]))
@@ -1582,7 +1581,7 @@ namespace Dexter.Helpers
         /// <summary>
         /// Holds regional indicator characters, where 0 is 🇦 and 25 is 🇿.
         /// </summary>
-        public static readonly Dictionary<int, string> Indicators = new Dictionary<int, string>() {
+        public static readonly Dictionary<int, string> Indicators = new() {
             {0, "🇦"},
             {1, "🇧"},
             {2, "🇨"},

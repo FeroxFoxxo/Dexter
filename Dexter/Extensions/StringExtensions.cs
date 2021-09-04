@@ -1,14 +1,9 @@
 ﻿using Dexter.Configurations;
 using Discord;
 using Discord.WebSocket;
-using System;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Dexter.Extensions
 {
@@ -71,10 +66,14 @@ namespace Dexter.Extensions
 
             string FilePath = Path.Combine(ImageCacheDir, $"{ImageName}{Path.GetExtension(ImageURL.Split("?")[0])}");
 
-            using WebClient WebClient = new();
+            HttpClient client = new();
 
-            await WebClient.DownloadFileTaskAsync(ImageURL, FilePath);
+            var response = await client.GetAsync(ImageURL);
 
+            using (var fs = new FileStream(FilePath, FileMode.CreateNew)) {
+                await response.Content.CopyToAsync(fs);
+            }
+            
             ITextChannel Channel = DiscordSocketClient.GetChannel(ProposalConfiguration.StorageChannelID) as ITextChannel;
 
             IUserMessage AttachmentMSG = await Channel.SendFileAsync(FilePath);

@@ -5,9 +5,6 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.Webhook;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Dexter.Extensions
 {
@@ -82,7 +79,7 @@ namespace Dexter.Extensions
             {
                 try
                 {
-                    IMessageChannel DMChannel = await User.GetOrCreateDMChannelAsync();
+                    IMessageChannel DMChannel = await User.CreateDMChannelAsync();
                     await DMChannel.SendMessageAsync(embed: DMEmbedBuilder.Build());
                 }
                 catch

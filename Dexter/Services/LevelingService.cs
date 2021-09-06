@@ -143,7 +143,7 @@ namespace Dexter.Services
             List<IRole> toRemove = new();
 
             SocketGuild guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
-            IReadOnlyCollection<ulong> userRoles = user.RoleIds;
+            HashSet<ulong> userRoles = user.RoleIds.ToHashSet();
 
             if (LevelingConfiguration.MemberRoleLevel > 0
                 && level >= LevelingConfiguration.MemberRoleLevel
@@ -154,7 +154,6 @@ namespace Dexter.Services
 
             foreach (KeyValuePair<int, ulong> rank in LevelingConfiguration.Levels)
             {
-
                 if (level >= rank.Key && !userRoles.Contains(rank.Value))
                     toAdd.Add(guild.GetRole(rank.Value));
 

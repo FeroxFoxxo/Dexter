@@ -344,25 +344,32 @@ namespace Dexter.Commands
 
                 using (HttpClient client = new())
                 {
-                    byte[] dataArr = await client.GetByteArrayAsync(user.GetTrueAvatarUrl(512));
-                    using MemoryStream mem = new(dataArr);
-                    using System.Drawing.Image pfp = System.Drawing.Image.FromStream(mem);
-
-                    if (settings.CropPfp)
+                    try
                     {
-                        Rectangle tempPos = new(Point.Empty, rectPfp.Size);
-                        using Bitmap pfplayer = new(rectPfp.Width, rectPfp.Height);
-                        using Graphics pfpg = Graphics.FromImage(pfplayer);
-                        using GraphicsPath path = new();
-                        path.AddEllipse(tempPos);
-                        pfpg.Clip = new Region(path);
-                        pfpg.DrawImage(pfp, tempPos);
+                        byte[] dataArr = await client.GetByteArrayAsync(user.GetTrueAvatarUrl(512));
+                        using MemoryStream mem = new(dataArr);
+                        using System.Drawing.Image pfp = System.Drawing.Image.FromStream(mem);
 
-                        g.DrawImage(pfplayer, rectPfp);
+                        if (settings.CropPfp)
+                        {
+                            Rectangle tempPos = new(Point.Empty, rectPfp.Size);
+                            using Bitmap pfplayer = new(rectPfp.Width, rectPfp.Height);
+                            using Graphics pfpg = Graphics.FromImage(pfplayer);
+                            using GraphicsPath path = new();
+                            path.AddEllipse(tempPos);
+                            pfpg.Clip = new Region(path);
+                            pfpg.DrawImage(pfp, tempPos);
+
+                            g.DrawImage(pfplayer, rectPfp);
+                        }
+                        else
+                        {
+                            g.DrawImage(pfp, rectPfp);
+                        }
                     }
-                    else
+                    catch (HttpRequestException)
                     {
-                        g.DrawImage(pfp, rectPfp);
+                        g.DrawEllipse(new Pen(xpColor), rectPfp);
                     }
                 }
 

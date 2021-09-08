@@ -122,7 +122,7 @@ namespace Dexter.Commands
         private async Task<bool> TryRemoveRoles(IGuildUser user, Dictionary<ulong, IRole> colorRoleIDs)
         {
             List<IRole> toRemove = new();
-            foreach (ulong roleID in user.RoleIds)
+            foreach (ulong roleID in user.RoleIds.ToArray())
             {
                 if (colorRoleIDs.ContainsKey(roleID))
                 {

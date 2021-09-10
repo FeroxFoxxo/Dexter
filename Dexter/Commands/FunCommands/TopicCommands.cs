@@ -67,7 +67,7 @@ namespace Dexter.Commands
                     "`EDIT [FACT ID] [NEW FACT]` - edits a fun fact in the database.\n" +
                     "`REMOVE [FACT ID]` - removes a fun fact from the database.")]
         [Alias("fact", "sciencefact")]
-        [CommandCooldown(120)]
+        [CommandCooldown(45)]
 
         public async Task FunFactCommand([Optional][Remainder] string Command)
         {
@@ -89,7 +89,7 @@ namespace Dexter.Commands
                     "`EDIT [JOKE ID] [NEW JOKE]` - edits a joke in the database.\n" +
                     "`REMOVE [JOKE ID]` - removes a joke from the database.")]
         [Alias("pun")]
-        [CommandCooldown(120)]
+        [CommandCooldown(45)]
 
         public async Task JokeCommand([Optional][Remainder] string Command)
         {

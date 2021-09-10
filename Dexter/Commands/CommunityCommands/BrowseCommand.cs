@@ -100,26 +100,25 @@ namespace Dexter.Commands
 
                     embeds = BuildEventsEmbeds(events);
                     break;
+                case "topic":
                 case "topics":
+                    embeds = await SearchTopics(TopicType.Topic, filters);
+                    break;
                 case "wyr":
+                case "wyrs":
+                case "wouldyourather":
+                case "wouldyourathers":
+                    embeds = await SearchTopics(TopicType.WouldYouRather, filters);
+                    break;
+                case "joke":
                 case "jokes":
+                    embeds = await SearchTopics(TopicType.Joke, filters);
+                    break;
+                case "fact":
                 case "facts":
+                case "funfact":
                 case "funfacts":
-                    if (string.IsNullOrEmpty(filters))
-                    {
-                        await BuildEmbed(EmojiEnum.Annoyed)
-                            .WithTitle("Insufficient parameters!")
-                            .WithDescription("Missing `filters` parameter; you must provide a term to search for!")
-                            .SendEmbed(Context.Channel);
-                        return;
-                    }
-                    List<WeightedObject<FunTopic>> topics = new();
-                    foreach (FunTopic t in FunTopicsDB.Topics)
-                    {
-                        topics.Add(new WeightedObject<FunTopic>(t, LanguageHelper.GetCorrelationIndex(t.Topic.ToLower(), filters.ToLower())));
-                    }
-                    WeightedObject<FunTopic>.SortByWeightInPlace(topics, true);
-                    embeds = BuildTopicsEmbeds(topics, filters);
+                    embeds = await SearchTopics(TopicType.FunFact, filters);
                     break;
                 default:
                     await BuildEmbed(EmojiEnum.Annoyed)
@@ -130,7 +129,28 @@ namespace Dexter.Commands
                     return;
             }
 
-            await DisplayEmbeds(type, embeds);
+            if (embeds is not null && embeds.Length > 0)
+                await DisplayEmbeds(type, embeds);
+        }
+
+        private async Task<EmbedBuilder[]> SearchTopics(TopicType type, string filters)
+        {
+            if (string.IsNullOrEmpty(filters))
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Insufficient parameters!")
+                    .WithDescription("Missing `filters` parameter; you must provide a term to search for!")
+                    .SendEmbed(Context.Channel);
+                return null;
+            }
+            List<WeightedObject<FunTopic>> topics = new();
+            foreach (FunTopic t in FunTopicsDB.Topics)
+            {
+                if (type == t.TopicType)
+                    topics.Add(new WeightedObject<FunTopic>(t, LanguageHelper.GetCorrelationIndex(t.Topic.ToLower(), filters.ToLower())));
+            }
+            WeightedObject<FunTopic>.SortByWeightInPlace(topics, true);
+            return BuildTopicsEmbeds(topics, filters);
         }
 
         private async Task DisplayEmbeds(string type, EmbedBuilder[] embeds)

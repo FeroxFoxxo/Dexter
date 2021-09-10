@@ -116,7 +116,7 @@ namespace Dexter.Services
                 );
 
             LevelingDB.OnTextCooldowns.Add(new UserTextXPRecord() { Id = message.Author.Id });
-            await LevelingDB.SaveChangesAsync();
+            LevelingDB.SaveChanges();
         }
 
         /// <summary>

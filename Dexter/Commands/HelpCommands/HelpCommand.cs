@@ -6,15 +6,14 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class HelpCommands {
+    public partial class HelpCommands
+    {
 
         /// <summary>
         /// Displays a navigable list of commands. This list is built from the "Summary" attributes on each command.
@@ -30,57 +29,83 @@ namespace Dexter.Commands {
         [Alias("commands")]
         [BotChannel]
 
-        public async Task HelpCommand([Optional] [Remainder] string Command) {
-            if(string.IsNullOrEmpty(Command)) {
-                List<EmbedBuilder> EmbedBuilders = new();
+        public async Task HelpCommand([Optional][Remainder] string Command)
+        {
+            if (string.IsNullOrEmpty(Command))
+            {
+                List<EmbedBuilder> Embeds = new();
 
-                int PageNumber = 2;
-
-                EmbedBuilders.Add(
+                Embeds.Add(
                     BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"{DiscordSocketClient.CurrentUser.Username} Help")
                         .WithDescription($"{BotConfiguration.Help}")
                 );
 
-                List<string> Pages = new();
+                ServiceCollection ServiceCollection = new();
 
-                foreach (ModuleInfo Module in CommandService.Modules) {
+                HelpAbstraction HelpAbstraction = new()
+                {
+                    BotConfiguration = BotConfiguration,
+                    DiscordSocketClient = DiscordSocketClient
+                };
+
+                ServiceCollection.AddSingleton(HelpAbstraction);
+
+                foreach (ModuleInfo Module in CommandService.Modules)
+                {
                     string ModuleName = Regex.Replace(Module.Name, "[a-z][A-Z]", m => m.Value[0] + " " + m.Value[1]);
 
-                    List<string> Description = new();
+                    EmbedBuilder CurrentBuilder = BuildEmbed(EmojiEnum.Love).WithTitle(ModuleName);
 
-                    ServiceCollection ServiceCollection = new();
+                    string Description = string.Empty;
 
-                    HelpAbstraction HelpAbstraction = new() {
-                        BotConfiguration = BotConfiguration,
-                        DiscordSocketClient = DiscordSocketClient
-                    };
-
-                    ServiceCollection.AddSingleton(HelpAbstraction);
-
-                    foreach (CommandInfo CommandInfo in Module.Commands) {
+                    foreach (CommandInfo CommandInfo in Module.Commands)
+                    {
                         PreconditionResult Result = await CommandInfo.CheckPreconditionsAsync(Context, ServiceCollection.BuildServiceProvider());
 
                         if (Result.IsSuccess)
-                            Description.Add($"**~{string.Join("/", CommandInfo.Aliases.ToArray())}:** {CommandInfo.Summary}");
+                        {
+                            string Field = $"**{BotConfiguration.Prefix}{string.Join("/", CommandInfo.Aliases.ToArray())}:** {CommandInfo.Summary}\n\n";
+
+                            try
+                            {
+                                CurrentBuilder.WithDescription(Description += Field);
+                            }
+                            catch (Exception)
+                            {
+                                Embeds.Add(CurrentBuilder);
+                                Description = string.Empty;
+                                CurrentBuilder = new EmbedBuilder().WithTitle(ModuleName).WithDescription(Description += Field).WithColor(Color.Green);
+                            }
+                        }
                     }
 
-                    if (Description.Count > 0) {
-                        Pages.Add($"**Page {PageNumber++}:** {ModuleName}");
-                        EmbedBuilders.Add(
-                            BuildEmbed(EmojiEnum.Love)
-                                .WithTitle($"{ModuleName}")
-                                .WithDescription(string.Join("\n\n", Description.ToArray()))
-                        );
+                    if (!string.IsNullOrEmpty(CurrentBuilder.Description))
+                        Embeds.Add(CurrentBuilder);
+                }
+
+                List<string> Pages = new();
+                string PreviousPage = $"{DiscordSocketClient.CurrentUser.Username} Help";
+                int PageNumber = 0;
+
+                foreach (EmbedBuilder Embed in Embeds)
+                {
+                    PageNumber++;
+                    if (PreviousPage != Embed.Title)
+                    {
+                        Pages.Add($"**Page {PageNumber}:** {Embed.Title}");
+                        PreviousPage = Embed.Title;
                     }
                 }
 
-                EmbedBuilders[0].AddField("Help Pages",
+                Embeds[0].AddField("Help Pages",
                     string.Join('\n', Pages.ToArray())
                 );
 
-                await CreateReactionMenu(EmbedBuilders.ToArray(), Context.Channel);
-            } else {
+                await CreateReactionMenu(Embeds.ToArray(), Context.Channel);
+            }
+            else
+            {
                 SearchResult Result = CommandService.Search(Context, Command);
 
                 if (!Result.IsSuccess)
@@ -88,9 +113,10 @@ namespace Dexter.Commands {
                         .WithTitle("Unknown Command")
                         .WithDescription($"Sorry, I couldn't find a command like **{Command}**.")
                         .SendEmbed(Context.Channel);
-                else {
+                else
+                {
                     EmbedBuilder EmbedBuilder = BuildEmbed(EmojiEnum.Love)
-                        .WithTitle($"Here are some commands like **{Command}**!");
+                        .WithTitle($"{BotConfiguration.Prefix}{Command} Command Help");
 
                     foreach (CommandMatch CommandMatch in Result.Commands)
                         EmbedBuilder.GetParametersForCommand(CommandMatch.Command, BotConfiguration);

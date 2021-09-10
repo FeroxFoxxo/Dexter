@@ -1,22 +1,20 @@
 ﻿using Dexter.Attributes.Methods;
+using Dexter.Configurations;
+using Dexter.Databases.EventTimers;
+using Dexter.Databases.FinalWarns;
+using Dexter.Databases.Infractions;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Dexter.Databases.Infractions;
-using Dexter.Databases.FinalWarns;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Humanizer;
-using Dexter.Databases.EventTimers;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Dexter.Configurations;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ModeratorCommands {
+    public partial class ModeratorCommands
+    {
 
         /// <summary>
         /// The Issue Infraction method runs on WARN. It applies a warning to a user by adding it to the related database.
@@ -33,7 +31,8 @@ namespace Dexter.Commands {
         [Alias("warnUser")]
         [RequireModerator]
 
-        public async Task IssueWarning(short PointsDeducted, IGuildUser User, [Remainder] string Reason) {
+        public async Task IssueWarning(short PointsDeducted, IGuildUser User, [Remainder] string Reason)
+        {
             if (PointsDeducted == 1 || PointsDeducted == 2)
                 await IssueInfraction(PointsDeducted, User, TimeSpan.FromSeconds(0), Reason);
             else
@@ -59,7 +58,8 @@ namespace Dexter.Commands {
         [Alias("muteUser")]
         [RequireModerator]
 
-        public async Task IssueMute(short PointsDeducted, IGuildUser User, TimeSpan Time, [Remainder] string Reason) {
+        public async Task IssueMute(short PointsDeducted, IGuildUser User, TimeSpan Time, [Remainder] string Reason)
+        {
             if (PointsDeducted is 3 or 4 or 0)
                 await IssueInfraction(PointsDeducted, User, Time, Reason);
             else
@@ -83,7 +83,8 @@ namespace Dexter.Commands {
         [Alias("muteUser")]
         [RequireModerator]
 
-        public async Task IssueMute(IGuildUser User, TimeSpan Time, [Remainder] string Reason) {
+        public async Task IssueMute(IGuildUser User, TimeSpan Time, [Remainder] string Reason)
+        {
             await MuteUser(User, Time);
 
             await BuildEmbed(EmojiEnum.Love)
@@ -110,7 +111,8 @@ namespace Dexter.Commands {
         [Alias("muteUser")]
         [RequireModerator]
 
-        public async Task IssueMute(short PointsDeducted, IGuildUser User, [Remainder] string Reason) {
+        public async Task IssueMute(short PointsDeducted, IGuildUser User, [Remainder] string Reason)
+        {
             if (PointsDeducted == 0)
                 await IssueInfraction(PointsDeducted, User, TimeSpan.FromSeconds(0), Reason);
             else
@@ -130,8 +132,10 @@ namespace Dexter.Commands {
         /// <param name="Reason">A string description of the reason why the mute was issued.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task IssueInfraction(short PointsDeducted, IGuildUser User, TimeSpan Time, [Remainder] string Reason) {
-            if (Reason.Length > 750) {
+        public async Task IssueInfraction(short PointsDeducted, IGuildUser User, TimeSpan Time, [Remainder] string Reason)
+        {
+            if (Reason.Length > 750)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Reason too long.")
                     .WithDescription($"Your reason should be at most 750 characters long. \nWe found {Reason.Length} instead.")
@@ -142,14 +146,15 @@ namespace Dexter.Commands {
             // Dexter Notifications if the user has been in breach of a parameter.
 
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
-            
+
             string Notification = string.Empty;
 
             if (DexterProfile.InfractionAmount > ModerationConfiguration.InfractionNotification &&
                     DexterProfile.InfractionAmount - PointsDeducted <= ModerationConfiguration.InfractionNotification)
                 Notification += $"It seems as though the user {User.GetUserInformation()} is currently standing on {DexterProfile.InfractionAmount - PointsDeducted} points.\n";
 
-            foreach (Dictionary<string, int> Notifications in ModerationConfiguration.InfractionNotifications) {
+            foreach (Dictionary<string, int> Notifications in ModerationConfiguration.InfractionNotifications)
+            {
                 int Points = 0;
 
                 InfractionsDB.GetInfractions(User.Id)
@@ -160,7 +165,8 @@ namespace Dexter.Commands {
                     Notification += $"It seems as though the user {User.GetUserInformation()} has had {Points + PointsDeducted} points deducted in {Notifications["Days"]} days.\n";
             }
 
-            if (Notification.Length > 0) {
+            if (Notification.Length > 0)
+            {
                 await (DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
                     .SendMessageAsync($"**Frequently Warned User >>>** <@&{BotConfiguration.AdministratorRoleID}>",
                         embed: BuildEmbed(EmojiEnum.Wut)
@@ -170,7 +176,8 @@ namespace Dexter.Commands {
                 );
             }
 
-            if (FinalWarnsDB.IsUserFinalWarned(User) && PointsDeducted >= ModerationConfiguration.FinalWarnNotificationThreshold) {
+            if (FinalWarnsDB.IsUserFinalWarned(User) && PointsDeducted >= ModerationConfiguration.FinalWarnNotificationThreshold)
+            {
                 await (DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
                     .SendMessageAsync($"**Final Warned User Infraction >>>** <@&{BotConfiguration.AdministratorRoleID}> <@{Context.User.Id}>",
                         embed: BuildEmbed(EmojiEnum.Wut)
@@ -184,9 +191,12 @@ namespace Dexter.Commands {
 
             DexterProfile.InfractionAmount -= PointsDeducted;
 
-            if (PointsDeducted == 0) {
+            if (PointsDeducted == 0)
+            {
                 await MuteUser(User, Time);
-            } else {
+            }
+            else
+            {
                 TimeSpan? AdditionalTime = null;
 
                 if (DexterProfile.InfractionAmount == 0)
@@ -200,7 +210,8 @@ namespace Dexter.Commands {
                 else if (DexterProfile.InfractionAmount <= -4)
                     AdditionalTime = TimeSpan.FromHours(3);
 
-                if (AdditionalTime.HasValue) {
+                if (AdditionalTime.HasValue)
+                {
                     Time = Time.Add(AdditionalTime.Value);
 
                     Reason += $"\n**Automatic mute of {AdditionalTime.Value.Humanize(2)} applied in addition by {DiscordSocketClient.CurrentUser.Username} for frequent warnings and/or rulebreaks.**";
@@ -219,7 +230,8 @@ namespace Dexter.Commands {
 
             int TotalInfractions = InfractionsDB.GetInfractions(User.Id).Length + 1;
 
-            InfractionsDB.Infractions.Add(new Infraction() {
+            InfractionsDB.Infractions.Add(new Infraction()
+            {
                 Issuer = Context.User.Id,
                 Reason = Reason,
                 User = User.Id,
@@ -251,7 +263,7 @@ namespace Dexter.Commands {
                 BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"{InfractionType.ToString().Humanize()} issued!")
                     .WithDescription($"{(InfractionType == InfractionType.Warning ? "Warned" : "Muted")} {User.GetUserInformation()} {(InfractionType == InfractionType.Mute ? $" for **{Time.Humanize(2)}**" : "")}."))
-                
+
                 .AddField("Reason", Reason)
 
                 // Send the embed into the channel.
@@ -261,7 +273,7 @@ namespace Dexter.Commands {
                     BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"You were issued a {(InfractionType == InfractionType.Warning ? "warning" : $"mute{(InfractionType == InfractionType.Mute ? $" of {Time.Humanize(2)}" : "")}")} from {Context.Guild.Name}.")
                         .WithDescription($"You have had a total of {TotalInfractions} {(TotalInfractions == 1 ? "infraction" : "infractions")} and are on {DexterProfile.InfractionAmount} {(DexterProfile.InfractionAmount == 1 ? "point" : "points")}, you regain one point every 24 hours. " +
-                            ( InfractionType == InfractionType.Warning ?
+                            (InfractionType == InfractionType.Warning ?
                             "Please note that whenever we warn you verbally, you will receive a logged warning. This is not indicative of a mute or ban." :
                             $"Please read over the <#{ModerationConfiguration.RulesAndInfoChannel}> channel if you have not already done so, even if it's just for a refresher, as to make sure your behaviour meets the standards of the server. <3")
                         )
@@ -279,18 +291,22 @@ namespace Dexter.Commands {
         /// </param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task IncrementPoints(Dictionary<string, string> Parameters) {
+        public async Task IncrementPoints(Dictionary<string, string> Parameters)
+        {
             ulong UserID = ulong.Parse(Parameters["UserID"]);
 
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(UserID);
 
-            if (DexterProfile.InfractionAmount < ModerationConfiguration.MaxPoints) {
+            if (DexterProfile.InfractionAmount < ModerationConfiguration.MaxPoints)
+            {
                 DexterProfile.InfractionAmount++;
                 if (DexterProfile.InfractionAmount < ModerationConfiguration.MaxPoints)
                     DexterProfile.CurrentPointTimer = await CreateEventTimer(IncrementPoints, new() { { "UserID", UserID.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
                 else
                     DexterProfile.CurrentPointTimer = string.Empty;
-            } else {
+            }
+            else
+            {
                 if (DexterProfile.InfractionAmount > ModerationConfiguration.MaxPoints)
                     DexterProfile.InfractionAmount = ModerationConfiguration.MaxPoints;
 
@@ -307,20 +323,25 @@ namespace Dexter.Commands {
         /// <param name="Time">The duration of the mute.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method finishes successfully.</returns>
 
-        public async Task MuteUser(IGuildUser User, TimeSpan Time) {
+        public async Task MuteUser(IGuildUser User, TimeSpan Time)
+        {
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
 
             if (TimerService.TimerExists(DexterProfile.CurrentMute))
                 TimerService.RemoveTimer(DexterProfile.CurrentMute);
 
-            try {
-                foreach (ulong MutedRole in ModerationConfiguration.MutedRoles) {
+            try
+            {
+                foreach (ulong MutedRole in ModerationConfiguration.MutedRoles)
+                {
                     IRole Muted = User.Guild.GetRole(MutedRole);
 
                     if (!User.RoleIds.Contains(MutedRole))
                         await User.AddRoleAsync(Muted);
                 }
-            } catch (Discord.Net.HttpException Error) {
+            }
+            catch (Discord.Net.HttpException Error)
+            {
                 await (DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
                     .SendMessageAsync($"**Missing Role Management Permissions >>>** <@&{BotConfiguration.AdministratorRoleID}>",
                         embed: BuildEmbed(EmojiEnum.Annoyed)
@@ -330,6 +351,9 @@ namespace Dexter.Commands {
                         .WithCurrentTimestamp().Build()
                 );
             }
+
+            if (Time == TimeSpan.FromSeconds(0))
+                return;
 
             DexterProfile.CurrentMute = await CreateEventTimer(RemoveMutedRole, new() { { "UserID", User.Id.ToString() } }, Convert.ToInt32(Time.TotalSeconds), TimerType.Expire);
         }
@@ -343,14 +367,16 @@ namespace Dexter.Commands {
         /// </param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task RemoveMutedRole(Dictionary<string, string> Parameters) {
+        public async Task RemoveMutedRole(Dictionary<string, string> Parameters)
+        {
             ulong UserID = ulong.Parse(Parameters["UserID"]);
 
             IGuild Guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
 
             IGuildUser User = await Guild.GetUserAsync(UserID);
 
-            foreach (ulong MutedRole in ModerationConfiguration.MutedRoles) {
+            foreach (ulong MutedRole in ModerationConfiguration.MutedRoles)
+            {
                 IRole Muted = User.Guild.GetRole(MutedRole);
 
                 if (User.RoleIds.Contains(MutedRole))

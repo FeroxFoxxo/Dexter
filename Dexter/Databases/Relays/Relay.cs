@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.Relays {
-    
+namespace Dexter.Databases.Relays
+{
+
     /// <summary>
     /// Sends a preset message in a target channel every time a certain number of messages are sent.
     /// </summary>
 
-    public class Relay {
+    public class Relay
+    {
 
         /// <summary>
         /// The numerical ID of the target channel the relay is measuring.

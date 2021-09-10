@@ -1,14 +1,15 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Databases.CommunityEvents;
-using System.Collections.Generic;
 
-namespace Dexter.Configurations {
+namespace Dexter.Configurations
+{
 
     /// <summary>
     /// Holds settings and server-specific data related to the managing of community resources such as events.
     /// </summary>
 
-    public class CommunityConfiguration : JSONConfig {
+    public class CommunityConfiguration : JSONConfig
+    {
 
         /// <summary>
         /// The unique id of the channel where event proposals are to be sent.
@@ -59,15 +60,39 @@ namespace Dexter.Configurations {
         public short MaxEventsPerMenu { get; set; }
 
         /// <summary>
+        /// The maximum number of pages that will appear when users browse for topics.
+        /// </summary>
+
+        public int BrowseTopicsMaxPages { get; set; }
+
+        /// <summary>
+        /// The amount of topics that will appear in each EmbedMenu page.
+        /// </summary>
+
+        public int BrowseTopicsPerPage { get; set; }
+
+        /// <summary>
         /// Sets a different embed color for a given event status. The values are 24-bit colors formatted in hexadecimal and stringified.
         /// </summary>
 
-        public Dictionary<EventStatus, string> EventStatusColor { get; set;}
+        public Dictionary<EventStatus, string> EventStatusColor { get; set; }
 
         /// <summary>
         /// Sets whether command help for approving or declining an event should be included in event proposals.
         /// </summary>
 
         public bool IncludeEventResolutionInfo { get; set; }
+
+        /// <summary>
+        /// The maximum length for any given attribute in the user profiles system.
+        /// </summary>
+
+        public int MaxProfileAttributeLength { get; set; }
+
+        /// <summary>
+        /// Maximum number of social entities in an embed.
+        /// </summary>
+
+        public int MaxUsersPerEmbed { get; set; }
     }
 }

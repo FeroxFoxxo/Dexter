@@ -2,12 +2,12 @@
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
-using System;
-using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class UtilityCommands {
+    public partial class UtilityCommands
+    {
 
         /// <summary>
         /// Shuts the bot down and, if in use with continuous integration, restarts the process.
@@ -19,7 +19,8 @@ namespace Dexter.Commands {
         [Alias("shutdown")]
         [RequireAdministrator]
 
-        public async Task HaltCommand() {
+        public async Task HaltCommand()
+        {
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Shutting Down")
                 .WithDescription($"Haiya! I'll be going to sleep now.\nCya when I wake back up!")
@@ -27,7 +28,7 @@ namespace Dexter.Commands {
 
             Environment.Exit(0);
         }
-        
+
     }
 
 }

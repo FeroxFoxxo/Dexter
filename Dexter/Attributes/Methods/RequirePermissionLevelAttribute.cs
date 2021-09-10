@@ -6,10 +6,9 @@ using Dexter.Helpers;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Threading.Tasks;
 
-namespace Dexter.Attributes.Methods {
+namespace Dexter.Attributes.Methods
+{
 
     /// <summary>
     /// The Require Permission Level attribute is an abstract class that extends the superclass of the
@@ -19,20 +18,22 @@ namespace Dexter.Attributes.Methods {
 
     [AttributeUsage(AttributeTargets.Method)]
 
-    public abstract class RequirePermissionLevelAttribute : PreconditionAttribute {
+    public abstract class RequirePermissionLevelAttribute : PreconditionAttribute
+    {
 
         /// <summary>
         /// The Permission Level is the level at which a user has to meet or exceed to be able to run the command.
         /// </summary>
-        
+
         public readonly PermissionLevel PermissionLevel;
 
         /// <summary>
         /// The RequirePermissionLevel constructor takes in the level at which a user has to be at to run the command.
         /// </summary>
         /// <param name="PermissionLevel">The permission level required to run the command.</param>
-        
-        public RequirePermissionLevelAttribute(PermissionLevel PermissionLevel) {
+
+        public RequirePermissionLevelAttribute(PermissionLevel PermissionLevel)
+        {
             this.PermissionLevel = PermissionLevel;
         }
 
@@ -45,8 +46,9 @@ namespace Dexter.Attributes.Methods {
         /// <param name="ServiceProvider">The Services are used to find the role IDs to get the permission level of the user from the BotConfiguration.</param>
         /// <returns>The result of the checked permission, returning successful if it is able to be run or an error if not.
         /// This error is then thrown to the Command Handler Service to log to the user.</returns>
-        
-        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, CommandInfo CommandInfo, IServiceProvider ServiceProvider) {
+
+        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, CommandInfo CommandInfo, IServiceProvider ServiceProvider)
+        {
             BotConfiguration BotConfiguration = ServiceProvider.GetService<BotConfiguration>();
 
             if (ServiceProvider.GetService<HelpAbstraction>() != null)

@@ -6,11 +6,9 @@ using Discord;
 using Discord.Commands;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Dexter.Attributes.Methods {
+namespace Dexter.Attributes.Methods
+{
 
     /// <summary>
     /// The Command Cooldown attribute ensures that the given command does not run
@@ -19,22 +17,24 @@ namespace Dexter.Attributes.Methods {
     /// command again in that same channel unless either the cooldown has expired or the
     /// channel is a bot channel.
     /// </summary>
-    
-    public class CommandCooldownAttribute : PreconditionAttribute {
+
+    public class CommandCooldownAttribute : PreconditionAttribute
+    {
 
         /// <summary>
         /// The Cooldown Time is the time it will take for the cooldown on this command to expire.
         /// It is set through the constructor of the attribute.
         /// </summary>
-        
+
         public readonly int CooldownTimer;
 
         /// <summary>
         /// The constructor of the attribute sets the cooldown time of the command.
         /// </summary>
         /// <param name="CooldownTimer">The Cooldown Timer is the set time it will take until this command is able to be rerun.</param>
-        
-        public CommandCooldownAttribute(int CooldownTimer) {
+
+        public CommandCooldownAttribute(int CooldownTimer)
+        {
             this.CooldownTimer = CooldownTimer;
         }
 
@@ -48,7 +48,8 @@ namespace Dexter.Attributes.Methods {
         /// <returns>The result of the checked permission, returning successful if it is able to be run or an error if not.
         /// This error is then thrown to the Command Handler Service to log to the user.</returns>
 
-        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, CommandInfo CommandInfo, IServiceProvider ServiceProvider) {
+        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, CommandInfo CommandInfo, IServiceProvider ServiceProvider)
+        {
             if (ServiceProvider.GetService<BotConfiguration>() == null)
                 return PreconditionResult.FromSuccess();
 
@@ -59,11 +60,15 @@ namespace Dexter.Attributes.Methods {
 
             Cooldown Cooldown = CooldownDB.Cooldowns.Find($"{CommandInfo.Name}{CommandContext.Channel.Id}");
 
-            if (Cooldown != null) {
-                if (Cooldown.TimeOfCooldown + CooldownTimer < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) {
+            if (Cooldown != null)
+            {
+                if (Cooldown.TimeOfCooldown + CooldownTimer < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                {
                     CooldownDB.Remove(Cooldown);
                     CooldownDB.SaveChanges();
-                } else {
+                }
+                else
+                {
                     DateTime Time = DateTime.UnixEpoch.AddSeconds(Cooldown.TimeOfCooldown + CooldownTimer);
 
                     await new EmbedBuilder().BuildEmbed(EmojiEnum.Wut, ServiceProvider.GetService<BotConfiguration>())
@@ -77,7 +82,8 @@ namespace Dexter.Attributes.Methods {
             }
 
             CooldownDB.Add(
-                new Cooldown() {
+                new Cooldown()
+                {
                     Token = $"{CommandInfo.Name}{CommandContext.Channel.Id}",
                     TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
                 }

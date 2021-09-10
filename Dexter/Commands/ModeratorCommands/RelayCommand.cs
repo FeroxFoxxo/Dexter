@@ -4,13 +4,12 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ModeratorCommands {
+    public partial class ModeratorCommands
+    {
 
         /// <summary>
         /// Sends a request to add a relay to a channel, which adds an item to the relay database.
@@ -26,10 +25,12 @@ namespace Dexter.Commands {
         [Summary("Adds a relay in a channel to the database, sending a message every set amount of messages.")]
         [RequireAdministrator]
 
-        public async Task AddRelay(int MessageInterval, ITextChannel Channel, [Remainder] string Message) {
+        public async Task AddRelay(int MessageInterval, ITextChannel Channel, [Remainder] string Message)
+        {
             Relay FindRelay = RelayDB.Relays.AsQueryable().Where(Relay => Relay.ChannelID.Equals(Channel.Id)).FirstOrDefault();
 
-            if (Message.Length > 1500) {
+            if (Message.Length > 1500)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable To Add Relay.")
                     .WithDescription($"Heya! Please cut down on the length of your relay. " +
@@ -37,7 +38,8 @@ namespace Dexter.Commands {
                     .SendEmbed(Context.Channel);
             }
 
-            if (FindRelay != null) {
+            if (FindRelay != null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle($"Relay already exists!")
                     .WithDescription($"The relay to the channel {Channel} already exists with the message of {(FindRelay.Message.Length > 300 ? $"{FindRelay.Message.Substring(0, 300)}..." : FindRelay.Message)} at an interval of {FindRelay.MessageInterval}.")
@@ -68,12 +70,14 @@ namespace Dexter.Commands {
         /// Each of these values should be parsable to an <c>int</c>, <c>ulong</c> (Channel ID), and <c>string</c> respectively. 
         /// </param>
 
-        public void AddRelayCallback(Dictionary<string, string> Parameters) {
+        public void AddRelayCallback(Dictionary<string, string> Parameters)
+        {
             int MessageInterval = int.Parse(Parameters["MessageInterval"]);
             ulong ChannelID = ulong.Parse(Parameters["ChannelID"]);
             string Message = Parameters["Message"];
 
-            RelayDB.Add(new Relay {
+            RelayDB.Add(new Relay
+            {
                 ChannelID = ChannelID,
                 CurrentMessageCount = MessageInterval,
                 MessageInterval = MessageInterval,

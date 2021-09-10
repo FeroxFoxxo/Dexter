@@ -1,11 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+﻿using Dexter.Attributes.Methods;
 using Discord.Commands;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class FunCommands {
+    public partial class FunCommands
+    {
 
         /// <summary>
         /// Functions as an interface between the functions in this module and the JSON configuration file holding data for this module.
@@ -22,12 +22,14 @@ namespace Dexter.Commands {
         [Summary("Provides a randomly generated writing prompt.")]
         [BotChannel]
 
-        public async Task WritingPromptCommand() {
+        public async Task WritingPromptCommand()
+        {
             await Context.Channel.SendMessageAsync(GeneratePrompt());
         }
 
-        private string GeneratePrompt() {
-            Random RNG = new Random();
+        private string GeneratePrompt()
+        {
+            Random RNG = new();
 
             string Opening = FunConfiguration.WritingPromptOpenings[RNG.Next(FunConfiguration.WritingPromptOpenings.Count)];
             string Predicate = Helpers.LanguageHelper.RandomizePredicate(FunConfiguration.WritingPromptPredicates[RNG.Next(FunConfiguration.WritingPromptPredicates.Count)],

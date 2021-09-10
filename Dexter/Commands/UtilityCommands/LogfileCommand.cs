@@ -1,11 +1,11 @@
 ﻿using Dexter.Attributes.Methods;
 using Discord.Commands;
-using System.IO;
-using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class UtilityCommands {
+    public partial class UtilityCommands
+    {
 
         /// <summary>
         /// Sends a file containing all logged data by the current instance of the bot.
@@ -17,7 +17,8 @@ namespace Dexter.Commands {
         [Alias("log", "logs")]
         [RequireDeveloper]
 
-        public async Task LogfileCommand() {
+        public async Task LogfileCommand()
+        {
             if (!File.Exists(LoggingService.LogFile))
                 throw new FileNotFoundException();
 

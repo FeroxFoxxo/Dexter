@@ -6,28 +6,25 @@ using Discord;
 using Discord.Net;
 using Discord.WebSocket;
 using Humanizer;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Dexter.Services {
+namespace Dexter.Services
+{
 
     /// <summary>
     /// The Profiling service deals with the modifying of the profile picture of the bot to a random
     /// profile picture selected in a given directory through the ProfilingConfiguration JSON file.
     /// It also deals with other profiling aspects like database saving.
     /// </summary>
-    
-    public class ProfilingService : Service {
+
+    public class ProfilingService : Service
+    {
 
         /// <summary>
         /// The ProfilingConfiguration stores data on where the pfps are located and which extensions are viable.
         /// </summary>
-        
+
         public ProfilingConfiguration ProfilingConfiguration { get; set; }
 
         /// <summary>
@@ -51,8 +48,9 @@ namespace Dexter.Services {
         /// <summary>
         /// The Initialize void hooks the Client.Ready event to the ChangePFP method.
         /// </summary>
-        
-        public override async void Initialize() {
+
+        public override async void Initialize()
+        {
             if (TimerService.EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault() == null)
                 await CreateEventTimer(ProfileCallback, new(), ProfilingConfiguration.SecTillProfiling, TimerType.Interval);
         }
@@ -63,20 +61,25 @@ namespace Dexter.Services {
         /// <param name="Parameters">A string-string Dictionary containing no compulsory definitions.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task ProfileCallback(Dictionary<string, string> Parameters) {
-            Stopwatch Stopwatch = new ();
+        public async Task ProfileCallback(Dictionary<string, string> Parameters)
+        {
+            Stopwatch Stopwatch = new();
 
             Stopwatch.Start();
 
-            try {
+            try
+            {
                 await DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP()));
-            } catch (HttpException) {
+            }
+            catch (HttpException)
+            {
                 await LoggingService.LogMessageAsync(
                     new LogMessage(LogSeverity.Warning, GetType().Name, "Unable to change the bot's profile picture due to ratelimiting!")
                 );
             }
 
-            if (BotConfiguration.EnableDatabaseBackups) {
+            if (BotConfiguration.EnableDatabaseBackups)
+            {
                 string DatabaseDirectory = Path.Join(Directory.GetCurrentDirectory(), "Databases");
 
                 string BackupPath = Path.Join(Directory.GetCurrentDirectory(), "Backups");
@@ -97,7 +100,8 @@ namespace Dexter.Services {
 
                 int Order = 0;
 
-                while (FileLength >= 1024 && Order < Sizes.Length - 1) {
+                while (FileLength >= 1024 && Order < Sizes.Length - 1)
+                {
                     Order++;
                     FileLength /= 1024;
                 }
@@ -122,7 +126,8 @@ namespace Dexter.Services {
         /// </summary>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public FileStream GetRandomPFP() {
+        public FileStream GetRandomPFP()
+        {
             if (string.IsNullOrEmpty(ProfilingConfiguration.PFPDirectory))
                 return null;
 
@@ -134,7 +139,8 @@ namespace Dexter.Services {
             else if (Files.Length == 1)
                 return Files[0].OpenRead();
 
-            else {
+            else
+            {
                 FileInfo ProfilePicture = Files[Random.Next(0, Files.Length - 2)];
 
                 if (ProfilePicture.Name == CurrentPFP)
@@ -150,8 +156,9 @@ namespace Dexter.Services {
         /// The GetProfilePictures method runs on invocation and will get all the files in the pfp directory and return it. 
         /// </summary>
         /// <returns>A list of FileInfo's of each PFP in the given directory.</returns>
-        
-        public FileInfo[] GetProfilePictures() {
+
+        public FileInfo[] GetProfilePictures()
+        {
             DirectoryInfo DirectoryInfo = new(Path.Combine(Directory.GetCurrentDirectory(), ProfilingConfiguration.PFPDirectory));
 
             return DirectoryInfo.GetFiles("*.*").Where(File => ProfilingConfiguration.PFPExtensions.Contains(File.Extension.ToLower())).ToArray();

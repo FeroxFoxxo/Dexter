@@ -4,12 +4,12 @@ using Dexter.Services;
 using Discord;
 using Discord.Commands;
 using Newtonsoft.Json.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class UtilityCommands {
+    public partial class UtilityCommands
+    {
 
         /// <summary>
         /// Displays the current version Dexter is running on.
@@ -20,7 +20,8 @@ namespace Dexter.Commands {
         [Summary("Displays the current version Dexter is running on.")]
         [Alias("v")]
 
-        public async Task VersionCommand() {
+        public async Task VersionCommand()
+        {
             using HttpClient HTTPClient = new();
 
             HTTPClient.DefaultRequestHeaders.Add("User-Agent",

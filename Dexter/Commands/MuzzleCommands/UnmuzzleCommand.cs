@@ -3,11 +3,12 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class MuzzleCommands {
+    public partial class MuzzleCommands
+    {
 
         /// <summary>
         /// Unmuzzles a target user and notifies them of it.
@@ -20,7 +21,8 @@ namespace Dexter.Commands {
         [Summary("Unmuzzles the specified user.")]
         [RequireModerator]
 
-        public async Task UnmuzzleCommand (IGuildUser User) {
+        public async Task UnmuzzleCommand(IGuildUser User)
+        {
             await Unmuzzle(User);
 
             await BuildEmbed(EmojiEnum.Love)

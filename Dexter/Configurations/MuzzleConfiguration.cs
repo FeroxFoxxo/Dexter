@@ -1,12 +1,14 @@
 ﻿using Dexter.Abstractions;
 
-namespace Dexter.Configurations {
+namespace Dexter.Configurations
+{
 
     /// <summary>
     /// Holds relevant configuration for temporary mutes, generally self-imposed.
     /// </summary>
 
-    public class MuzzleConfiguration : JSONConfig {
+    public class MuzzleConfiguration : JSONConfig
+    {
 
         /// <summary>
         /// The duration of the self-imposed mute upon using the ~muzzle command.

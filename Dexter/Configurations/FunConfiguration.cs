@@ -1,36 +1,37 @@
 ﻿using Dexter.Abstractions;
-using System.Collections.Generic;
 
-namespace Dexter.Configurations {
+namespace Dexter.Configurations
+{
 
     /// <summary>
     /// The FunConfiguration relates to attributes required by the FunCommands module.
     /// </summary>
-    
-    public class FunConfiguration : JSONConfig {
+
+    public class FunConfiguration : JSONConfig
+    {
 
         /// <summary>
         /// The EMOJI GUILD ID field is the snowflake ID of the server in which the eight-ball and gay emojis are stored.
         /// </summary>
-        
+
         public ulong EmojiGuildID { get; set; }
 
         /// <summary>
         /// The EMOJI ID field is a dictionary of the type of emoji (EG love, annoyed, wut) and their corresponding emoji IDs.
         /// </summary>
-        
+
         public Dictionary<string, ulong> EmojiIDs { get; set; }
 
         /// <summary>
         /// The EIGHT BALL field specifies the responces the eight-ball command can give.
         /// </summary>
-        
+
         public Dictionary<string, string[]> EightBall { get; set; }
 
         /// <summary>
         /// The EIGHT BALL EMOJI field links the type of responce the eight-ball command gives to its corresponding emoji in the EMOJI IDs.
         /// </summary>
-        
+
         public Dictionary<string, string> EightBallEmoji { get; set; }
 
         /// <summary>
@@ -82,6 +83,66 @@ namespace Dexter.Configurations {
         /// </summary>
 
         public int MaxCoinFlips { get; set; }
+
+        /// <summary>
+        /// The unique channel ID of the channels designated for the games submodule.
+        /// </summary>
+
+        public ulong[] GamesChannels { get; set; }
+
+        /// <summary>
+        /// The unique channel IDs of the channels wherein GameChannelRestricted methods should not be possible to run.
+        /// </summary>
+
+        public ulong[] GamesOnlyChannels { get; set; }
+
+        /// <summary>
+        /// Sets the lives a default game of hangman is set to on reset and creation.
+        /// </summary>
+
+        public int HangmanDefaultLives { get; set; }
+
+        /// <summary>
+        /// The unique numerical ID of the image dumps channel for the Games module.
+        /// </summary>
+
+        public ulong GamesImageDumpsChannel { get; set; }
+
+        /// <summary>
+        /// An array of valid chess theme names.
+        /// </summary>
+
+        public string[] ChessThemes { get; set; }
+
+        /// <summary>
+        /// Gets a set of custom positions that can be set in chess instead of a position in FEN notation.
+        /// </summary>
+
+        public Dictionary<string, string> ChessPositions { get; set; }
+
+        /// <summary>
+        /// The maximum amount of additional rolls that can be performed due to die explosions when rolling.
+        /// </summary>
+
+        public int MaxDieRollExplosions { get; set; }
+
+        /// <summary>
+        /// The maximum number of dice that can be rolled at once.
+        /// </summary>
+
+        public int MaxDieRolls { get; set; }
+
+        /// <summary>
+        /// The maximum length of an individual roll expression.
+        /// </summary>
+
+        public int MaxDieRollExpressionLength { get; set; }
+
+        /// <summary>
+        /// The maximum number of roll expressions that can be printed due to roll modifiers applied to the roll.
+        /// </summary>
+
+        public int MaxDieRollExpressionCount { get; set; }
     }
 
 }

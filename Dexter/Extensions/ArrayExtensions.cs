@@ -1,10 +1,12 @@
-﻿namespace Dexter.Extensions {
+﻿namespace Dexter.Extensions
+{
 
     /// <summary>
     /// Contains a few methods that allow for treatment of arrays similarly to lists, with a few limitations.
     /// </summary>
 
-    public static class ArrayExtensions {
+    public static class ArrayExtensions
+    {
 
         /// <summary>
         /// Adds a non-default value to an array, and resizes it in a manner that keeps time complexity linear.
@@ -16,8 +18,10 @@
         /// <param name="OverrideDefault">In case you're using a nonstandard default for your array (empty elements).</param>
         /// <returns>The resized array (if necessary), the method modifies the original array if resizing isn't required.</returns>
 
-        public static T[] AddLinear<T>(this T[] Array, T Item, T OverrideDefault = default) {
-            if (!Array[^1].Equals(OverrideDefault)) {
+        public static T[] AddLinear<T>(this T[] Array, T Item, T OverrideDefault = default)
+        {
+            if (!Array[^1].Equals(OverrideDefault))
+            {
                 int i = Array.Length;
                 System.Array.Resize(ref Array, Array.Length * 2);
 
@@ -25,8 +29,10 @@
                 return Array;
             }
 
-            for (int i = Array.Length - 1; i > 0; i--) {
-                if (!Array[i - 1].Equals(OverrideDefault)) {
+            for (int i = Array.Length - 1; i > 0; i--)
+            {
+                if (!Array[i - 1].Equals(OverrideDefault))
+                {
                     Array[i] = Item;
                     return Array;
                 }
@@ -45,25 +51,31 @@
         /// <returns><see langword="true"/> if <paramref name="Item"/> was found, otherwise <see langword="false"/>.</returns>
         /// <returns>An array where <paramref name="Item"/> has been removed, resized to save space if its length is too high compared to its count.</returns>
 
-        public static T[] RemoveLinear<T>(this T[] Array, T Item) {
+        public static T[] RemoveLinear<T>(this T[] Array, T Item)
+        {
             bool Found = false;
             int LastNonDefault = 0;
 
-            for (int i = 0; i < Array.Length; i++) {
+            for (int i = 0; i < Array.Length; i++)
+            {
                 if (!Array[i].Equals(default)) LastNonDefault = i;
 
-                if (Found) {
+                if (Found)
+                {
                     Array[i - 1] = Array[i];
                 }
-                else {
-                    if (Array[i].Equals(Item)) {
+                else
+                {
+                    if (Array[i].Equals(Item))
+                    {
                         Array[i] = default;
                         Found = true;
                     }
                 }
             }
 
-            if (LastNonDefault < Array.Length / 2) {
+            if (LastNonDefault < Array.Length / 2)
+            {
                 System.Array.Resize(ref Array, Array.Length / 2);
             }
 

@@ -1,16 +1,24 @@
-﻿namespace Dexter.Enums {
+﻿namespace Dexter.Enums
+{
 
     /// <summary>
     /// An enum of the types of the different permission levels a user can have.
     /// </summary>
-    
-    public enum PermissionLevel {
+
+    public enum PermissionLevel
+    {
 
         /// <summary>
         /// The DEFAULT value is given to an ordinary user with no special roles.
         /// </summary>
-        
+
         Default,
+
+        /// <summary>
+        /// The UNIFURSAL value is given to a user who hold the divine fur role specified in the bot configuration.
+        /// </summary>
+
+        Unifursal,
 
         /// <summary>
         /// The GREETFUR value is given to a user who hold the greetfur role specified in the bot configuration.

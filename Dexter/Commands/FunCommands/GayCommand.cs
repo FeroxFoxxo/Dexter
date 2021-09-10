@@ -2,13 +2,13 @@
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using System;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class FunCommands {
+    public partial class FunCommands
+    {
 
         /// <summary>
         /// Returns a random percentage measurement that changes every so often depending on the user's ID along with time parameters.
@@ -20,8 +20,10 @@ namespace Dexter.Commands {
         [Summary("How gay are you? Use this command to find out~!")]
         [Alias("straight", "bisexual")]
         [BotChannel]
+        [GameChannelRestricted]
 
-        public async Task GayCommand([Optional] IUser User) {
+        public async Task GayCommand([Optional] IUser User)
+        {
             if (User == null)
                 User = Context.User;
 

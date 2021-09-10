@@ -3,11 +3,12 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class UtilityCommands {
+    public partial class UtilityCommands
+    {
 
         /// <summary>
         /// Changes the bot's profile picture to a randomly selected image from a configured list.
@@ -18,7 +19,8 @@ namespace Dexter.Commands {
         [Summary("Changes the profile picture of the bot to a random image from a selection made for him.")]
         [RequireModerator]
 
-        public async Task ChangeProfile () {
+        public async Task ChangeProfile()
+        {
             await DiscordSocketClient.CurrentUser
                 .ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(ProfileService.GetRandomPFP()));
 

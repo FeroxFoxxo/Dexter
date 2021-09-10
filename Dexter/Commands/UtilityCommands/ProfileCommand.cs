@@ -1,23 +1,21 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Databases.UserProfiles;
+using Dexter.Enums;
+using Dexter.Extensions;
+using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
-using Humanizer;
-using System;
-using System.Threading.Tasks;
-using Dexter.Extensions;
-using System.Runtime.InteropServices;
-using Dexter.Databases.UserProfiles;
-using Humanizer.Localisation;
 using Discord.WebSocket;
-using System.Linq;
-using Dexter.Attributes.Methods;
-using Dexter.Helpers;
-using System.Collections.Generic;
+using Humanizer;
+using Humanizer.Localisation;
+using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class UtilityCommands {
+    public partial class UtilityCommands
+    {
 
         /// <summary>
         /// Sends information concerning the profile of a target user.
@@ -31,7 +29,8 @@ namespace Dexter.Commands {
         [Alias("userinfo")]
         [BotChannel]
 
-        public async Task ProfileCommand([Optional] IUser User) {
+        public async Task ProfileCommand([Optional] IUser User)
+        {
             if (User == null)
                 User = Context.User;
 
@@ -43,6 +42,10 @@ namespace Dexter.Commands {
             string[] LastNicknames = GetLastNameRecords(UserRecordsService.GetNameRecords(User, NameType.Nickname), 5);
             string[] LastUsernames = GetLastNameRecords(UserRecordsService.GetNameRecords(User, NameType.Username), 5);
 
+            SocketRole RoleInst = Context.Guild.Roles.Where(Role => Role.Position == Context.Guild.GetUser(User.Id).Hierarchy).FirstOrDefault();
+
+            string Role = RoleInst != null ? RoleInst.Name : "";
+
             await BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle($"User Profile For {GuildUser.Username}#{GuildUser.Discriminator}")
                 .WithThumbnailUrl(GuildUser.GetTrueAvatarUrl())
@@ -51,19 +54,21 @@ namespace Dexter.Commands {
                 .AddField("Created", $"{GuildUser.CreatedAt:MM/dd/yyyy HH:mm:ss} ({(DateTime.Now - GuildUser.CreatedAt.DateTime).Humanize(2, maxUnit: TimeUnit.Year)} ago)")
                 .AddField(Joined != default, "Joined", $"{Joined:MM/dd/yyyy HH:mm:ss} ({DateTimeOffset.Now.Subtract(Joined).Humanize(2, maxUnit: TimeUnit.Year)} ago)")
                 .AddField(Profile != null && Profile.BorkdayTime != default, "Last Birthday", new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Profile != null ? Profile.BorkdayTime : 0).ToLongDateString())
-                .AddField("Top Role", Context.Guild.Roles.Where(Role => Role.Position == Context.Guild.GetUser(User.Id).Hierarchy).FirstOrDefault().Name)
+                .AddField(!string.IsNullOrEmpty(Role), "Top Role", Role)
                 .AddField(LastNicknames.Length > 1, $"Last {LastNicknames.Length} Nicknames:", string.Join(", ", LastNicknames))
                 .AddField(LastUsernames.Length > 1, $"Last {LastUsernames.Length} Usernames:", string.Join(", ", LastUsernames))
                 .SendEmbed(Context.Channel);
         }
 
-        private string[] GetLastNameRecords(NameRecord[] FullArray, int MaxCount) {
+        private string[] GetLastNameRecords(NameRecord[] FullArray, int MaxCount)
+        {
             List<NameRecord> List = FullArray.ToList();
             List.Sort((a, b) => b.SetTime.CompareTo(a.SetTime));
 
             string[] Result = new string[Math.Min(List.Count, MaxCount)];
 
-            for (int i = 0; i < Result.Length; i++) {
+            for (int i = 0; i < Result.Length; i++)
+            {
                 Result[i] = List[i].Name;
             }
 
@@ -80,7 +85,8 @@ namespace Dexter.Commands {
         [Summary("Gets the nicknames a user has had over time.")]
         [BotChannel]
 
-        public async Task NicknamesCommand([Optional] IUser User) {
+        public async Task NicknamesCommand([Optional] IUser User)
+        {
             await RunNamesCommands(User, NameType.Nickname);
         }
 
@@ -94,11 +100,13 @@ namespace Dexter.Commands {
         [Summary("gets the usernames a user has had over time.")]
         [BotChannel]
 
-        public async Task UsernamesCommand([Optional] IUser User) {
+        public async Task UsernamesCommand([Optional] IUser User)
+        {
             await RunNamesCommands(User, NameType.Username);
         }
 
-        private async Task RunNamesCommands(IUser User, NameType NameType) {
+        private async Task RunNamesCommands(IUser User, NameType NameType)
+        {
             if (User == null)
                 User = Context.User;
 
@@ -107,23 +115,29 @@ namespace Dexter.Commands {
 
             EmbedBuilder[] Menu = BuildNicknameEmbeds(Names.ToArray(), $"{NameType} Record for User {User.Username}#{User.Discriminator}");
 
-            if (Menu.Length == 1) {
+            if (Menu.Length == 1)
+            {
                 await Menu[0].SendEmbed(Context.Channel);
-            } else {
+            }
+            else
+            {
                 await CreateReactionMenu(Menu, Context.Channel);
             }
         }
 
         private const int MaxRowsPerEmbed = 16;
 
-        private EmbedBuilder[] BuildNicknameEmbeds(NameRecord[] Names, string Title = "Names:") {
+        private EmbedBuilder[] BuildNicknameEmbeds(NameRecord[] Names, string Title = "Names:")
+        {
             int Count = Names.Length;
             EmbedBuilder[] Result = new EmbedBuilder[(Count - 1) / MaxRowsPerEmbed + 1];
 
-            for(int p = 0; p < Result.Length; p++) {
-                StringBuilder Content = new StringBuilder();
+            for (int p = 0; p < Result.Length; p++)
+            {
+                StringBuilder Content = new();
 
-                foreach(NameRecord n in Names[(p * MaxRowsPerEmbed) .. ((p + 1) * MaxRowsPerEmbed > Count ? Count : (p + 1) * MaxRowsPerEmbed)]) {
+                foreach (NameRecord n in Names[(p * MaxRowsPerEmbed)..((p + 1) * MaxRowsPerEmbed > Count ? Count : (p + 1) * MaxRowsPerEmbed)])
+                {
                     Content.Append(n.Expression() + "\n");
                 }
 
@@ -154,10 +168,12 @@ namespace Dexter.Commands {
         [BotChannel]
         [RequireModerator]
 
-        public async Task ClearNamesCommand(IUser User, string NameType, [Remainder] string Arguments) {
+        public async Task ClearNamesCommand(IUser User, string NameType, [Remainder] string Arguments)
+        {
             NameType EnumNameType;
-            
-            switch(NameType.ToLower()) {
+
+            switch (NameType.ToLower())
+            {
                 case "nick":
                 case "nickname":
                     EnumNameType = Databases.UserProfiles.NameType.Nickname;
@@ -178,7 +194,8 @@ namespace Dexter.Commands {
             string Term = Arguments.Split(" ").FirstOrDefault().ToLower();
             string Name;
 
-            switch (Term) {
+            switch (Term)
+            {
                 case "reg":
                     IsRegex = true;
                     Name = Arguments[Term.Length..].Trim();
@@ -191,7 +208,8 @@ namespace Dexter.Commands {
                     break;
             }
 
-            if(string.IsNullOrEmpty(Name)) {
+            if (string.IsNullOrEmpty(Name))
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("You must provide a name!")
                     .WithDescription("You didn't provide any name to remove!")
@@ -201,23 +219,26 @@ namespace Dexter.Commands {
 
             List<NameRecord> Removed = UserRecordsService.RemoveNames(User, EnumNameType, Name, IsRegex);
 
-            if(Removed.Count == 0) {
+            if (Removed.Count == 0)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("No names found following your query.")
                     .WithDescription($"I wasn't able to find any name \"{Name}\" for this user! Make sure what you typed is correctly capitalized.")
                     .SendEmbed(Context.Channel);
                 return;
-            } else {
+            }
+            else
+            {
                 Removed.Sort((a, b) => a.Name.CompareTo(b.Name));
 
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Names successfully deleted!")
                     .WithDescription($"This user had {Removed.Count} name{(Removed.Count != 1 ? "s" : "")} following this pattern:\n" +
-                        $"{LanguageHelper.Truncate(string.Join(", ", Removed).ToString(), 2000)}")
+                        $"{LanguageHelper.TruncateTo(string.Join(", ", Removed).ToString(), 2000)}")
                     .SendEmbed(Context.Channel);
                 return;
             }
-             
+
         }
 
     }

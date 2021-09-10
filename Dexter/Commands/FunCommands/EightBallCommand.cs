@@ -2,12 +2,12 @@
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class FunCommands {
+    public partial class FunCommands
+    {
 
         /// <summary>
         /// Sends a reply from a predetermined list in a random fashion. The reply can be affirmative, negative, or hazy.
@@ -20,7 +20,8 @@ namespace Dexter.Commands {
         [Alias("8-ball")]
         [CommandCooldown(60)]
 
-        public async Task EightBallCommand([Remainder] string Message) {
+        public async Task EightBallCommand([Remainder] string Message)
+        {
             string Result = new Random().Next(4) == 3 ? "uncertain" : new Random(Message.GetHash()).Next(2) == 0 ? "yes" : "no";
 
             string[] Responses = FunConfiguration.EightBall[Result];

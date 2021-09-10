@@ -1,14 +1,15 @@
-﻿using Dexter.Enums;
-using Dexter.Extensions;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Databases.Proposals;
+using Dexter.Enums;
+using Dexter.Extensions;
 using Dexter.Services;
 using Discord.Commands;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ProposalCommands {
+    public partial class ProposalCommands
+    {
 
         /// <summary>
         /// The Fetch Proposal method runs on FETCH. It simply builds a proposal based on the tracker that is parsed to it.
@@ -21,7 +22,8 @@ namespace Dexter.Commands {
         [Alias("find")]
         [RequireModerator]
 
-        public async Task FetchProposal(string Tracker) {
+        public async Task FetchProposal(string Tracker)
+        {
             Proposal Proposal = ProposalDB.GetProposalByNameOrID(Tracker);
 
             if (Proposal == null)

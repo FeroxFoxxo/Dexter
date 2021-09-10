@@ -1,13 +1,14 @@
 ﻿using Dexter.Abstractions;
-using System.Collections.Generic;
 
-namespace Dexter.Configurations {
-    
+namespace Dexter.Configurations
+{
+
     /// <summary>
     /// Encompasses all configuration pertaining to the rules about advertising commissions and etc.
     /// </summary>
 
-    public class ChannelCooldownConfiguration : JSONConfig {
+    public class ChannelCooldownConfiguration : JSONConfig
+    {
 
         /// <summary>
         /// A list of channels on a cooldown.

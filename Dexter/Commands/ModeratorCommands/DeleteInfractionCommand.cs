@@ -1,15 +1,16 @@
 ﻿using Dexter.Attributes.Methods;
+using Dexter.Databases.Infractions;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Dexter.Databases.Infractions;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using System.Threading.Tasks;
-using Discord;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ModeratorCommands {
+    public partial class ModeratorCommands
+    {
 
         /// <summary>
         /// The Delete Infraction method runs on UNMUTE. It sets a record to a revoked status,
@@ -23,7 +24,8 @@ namespace Dexter.Commands {
         [Alias("delmute")]
         [RequireModerator]
 
-        public async Task DeleteInfraction(IGuildUser User) {
+        public async Task DeleteInfraction(IGuildUser User)
+        {
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
 
             DexterProfile.CurrentPointTimer = string.Empty;
@@ -51,7 +53,8 @@ namespace Dexter.Commands {
         [Alias("unmute", "unwarn", "delwarn", "delmute")]
         [RequireModerator]
 
-        public async Task DeleteInfraction (int InfractionID) {
+        public async Task DeleteInfraction(int InfractionID)
+        {
             Infraction Infraction = InfractionsDB.Infractions.Find(InfractionID);
 
             Infraction.EntryType = EntryType.Revoke;

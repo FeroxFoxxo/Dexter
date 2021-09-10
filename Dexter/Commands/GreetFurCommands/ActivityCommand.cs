@@ -4,14 +4,12 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Google.Apis.Sheets.v4.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class GreetFurCommands {
+    public partial class GreetFurCommands
+    {
 
         /// <summary>
         /// Displays the information from the Google Sheets database corresponding to the context user.
@@ -23,7 +21,8 @@ namespace Dexter.Commands {
         [BotChannel]
         [RequireGreetFur]
 
-        public async Task GreetFurActivity () {
+        public async Task GreetFurActivity()
+        {
             if (SheetsService == null)
                 await SetupGoogleSheets();
 
@@ -39,12 +38,14 @@ namespace Dexter.Commands {
 
             int IndexOfUser = -1;
 
-            for (int Index = 0; Index < Columns.Values.Count; Index++) {
+            for (int Index = 0; Index < Columns.Values.Count; Index++)
+            {
                 if (Columns.Values[Index][0].Equals(Context.User.Id.ToString()))
                     IndexOfUser = Index + 1;
             }
 
-            if (IndexOfUser == -1) {
+            if (IndexOfUser == -1)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to Find GreetFur")
                     .WithDescription("Haiya, it seems as if you're not in the GreetFur database! Are you sure you're a GreetFur? <3")
@@ -92,10 +93,12 @@ namespace Dexter.Commands {
         /// </summary>
         /// <param name="Value">A numerical value to be converted.</param>
         /// <returns>A string of uppercase letters.</returns>
-        
-        public static string IntToLetters(int? Value) {
+
+        public static string IntToLetters(int? Value)
+        {
             string Result = string.Empty;
-            while (--Value >= 0) {
+            while (--Value >= 0)
+            {
                 Result = (char)('A' + Value % 26) + Result;
                 Value /= 26;
             }

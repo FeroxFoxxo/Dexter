@@ -1,18 +1,16 @@
-﻿using Dexter.Enums;
-using Dexter.Extensions;
+﻿using Dexter.Attributes.Methods;
 using Dexter.Databases.Infractions;
+using Dexter.Enums;
+using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System;
-using Dexter.Attributes.Methods;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class ModeratorCommands {
+    public partial class ModeratorCommands
+    {
 
         /// <summary>
         /// The Purge Infractions method runs on PURGEWARNS. It sends a callback to the SendForAdminApproval
@@ -27,7 +25,8 @@ namespace Dexter.Commands {
         [Alias("purgeinfractions")]
         [RequireAdministrator]
 
-        public async Task PurgeInfractions (IUser User) {
+        public async Task PurgeInfractions(IUser User)
+        {
             await SendForAdminApproval(PurgeWarningsCallback,
                 new Dictionary<string, string>() {
                     { "UserID", User.Id.ToString() }
@@ -52,8 +51,9 @@ namespace Dexter.Commands {
         ///     UserID = Specifies the UserID who will have their warnings purged.
         /// </param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-        
-        public async void PurgeWarningsCallback(Dictionary<string, string> CallbackInformation) {
+
+        public async void PurgeWarningsCallback(Dictionary<string, string> CallbackInformation)
+        {
             ulong UserID = Convert.ToUInt64(CallbackInformation["UserID"]);
 
             int Count = InfractionsDB.GetInfractions(UserID).Length;
@@ -66,7 +66,7 @@ namespace Dexter.Commands {
                 .WithTitle("Infractions Purged")
                 .WithDescription($"Heya! I've purged {Count} warnings from your account. You now have a clean slate! <3")
                 .WithCurrentTimestamp()
-                .SendEmbed(await Client.GetUser(UserID).GetOrCreateDMChannelAsync());
+                .SendEmbed(await Client.GetUser(UserID).CreateDMChannelAsync());
         }
 
     }

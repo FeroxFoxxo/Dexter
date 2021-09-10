@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Dexter.Databases.ReactionMenus {
+namespace Dexter.Databases.ReactionMenus
+{
 
     /// <summary>
     /// Represents a template for the embeds displayed in a ReactionMenu.
     /// </summary>
 
-    public class EmbedMenu {
+    public class EmbedMenu
+    {
 
         /// <summary>
         /// Unique identifier of the EmbedMenu template.

@@ -3,20 +3,16 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Discord.Webhook;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Image = System.Drawing.Image;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class FunCommands {
+    public partial class FunCommands
+    {
 
         /// <summary>
         /// Sends a specially generated animated emoji depicting a 'headpat' gif superposed over the target user's profile picture.
@@ -28,7 +24,8 @@ namespace Dexter.Commands {
         [Summary("Ooh, you've been a good boy? *gives rapid headpats in an emoji*")]
         [Alias("headpats", "petpat", "petpats", "pet", "pat")]
 
-        public async Task HeadpatCommand([Optional] IGuildUser User) {
+        public async Task HeadpatCommand([Optional] IGuildUser User)
+        {
             if (User == null)
                 User = Context.Guild.GetUser(Context.User.Id);
 
@@ -44,21 +41,24 @@ namespace Dexter.Commands {
 
             string FilePath = Path.Join(ImageCacheDir, $"{NameOfUser}.gif");
 
-            using (AnimatedGifCreator Gif = AnimatedGif.AnimatedGif.Create(FilePath, 80)) {
+            using (AnimatedGifCreator Gif = AnimatedGif.AnimatedGif.Create(FilePath, 80))
+            {
                 string[] Files = Directory.GetFiles(FunConfiguration.HeadpatsDir, "*.png", SearchOption.AllDirectories);
 
-                using WebClient WebClient = new();
-                using MemoryStream MemoryStream = new(WebClient.DownloadData(User.GetTrueAvatarUrl()));
+                using HttpClient WebClient = new();
+                using MemoryStream MemoryStream = new(await WebClient.GetByteArrayAsync(User.GetTrueAvatarUrl()));
                 using Image PFPImage = Image.FromStream(MemoryStream);
 
-                for (int Index = 0; Index < Files.Length; Index++) {
+                for (int Index = 0; Index < Files.Length; Index++)
+                {
                     using Image Headpat = Image.FromFile(Files[Index]);
 
                     using Bitmap DrawnImage = new(Headpat.Width, Headpat.Height);
 
                     List<ushort> HeadpatPos = FunConfiguration.HeadpatPositions[Index];
 
-                    using (Graphics Graphics = Graphics.FromImage(DrawnImage)) {
+                    using (Graphics Graphics = Graphics.FromImage(DrawnImage))
+                    {
                         Graphics.DrawImage(PFPImage, HeadpatPos[0], HeadpatPos[1], HeadpatPos[2], HeadpatPos[3]);
                         Graphics.DrawImage(Headpat, 0, 0);
                     }
@@ -67,7 +67,8 @@ namespace Dexter.Commands {
                 }
             }
 
-            using (Discord.Image EmoteImage = new (FilePath)) {
+            using (Discord.Image EmoteImage = new(FilePath))
+            {
                 IGuild Guild = DiscordSocketClient.GetGuild(FunConfiguration.HeadpatStorageGuild);
 
                 Console.WriteLine(NameOfUser.Length);

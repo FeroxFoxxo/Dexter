@@ -1,18 +1,20 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Configurations;
-using Dexter.Databases.UserProfiles;
 using Dexter.Databases.Mail;
 using Dexter.Databases.Reminders;
+using Dexter.Databases.UserProfiles;
 using Dexter.Services;
 using Genbox.WolframAlpha;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
     /// <summary>
     /// The class containing all commands within the Utility module.
     /// </summary>
 
-    public partial class UtilityCommands : DiscordModule {
+    public partial class UtilityCommands : DiscordModule
+    {
 
         /// <summary>
         /// Allows logging necessary data pertaining to issues or important information during interaction with the command environment.
@@ -67,6 +69,12 @@ namespace Dexter.Commands {
         /// </summary>
 
         public WolframAlphaClient WolframAlphaClient;
+
+        /// <summary>
+        /// Levelling role for getting the Awoo role.
+        /// </summary>
+        
+        public LevelingConfiguration LevelingConfiguration { get; set; }
 
     }
 

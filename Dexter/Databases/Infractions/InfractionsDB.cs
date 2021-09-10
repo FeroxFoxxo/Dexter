@@ -2,15 +2,16 @@
 using Dexter.Configurations;
 using Dexter.Enums;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
-namespace Dexter.Databases.Infractions {
+namespace Dexter.Databases.Infractions
+{
 
     /// <summary>
     /// The InfractionsDB contains a set of warnings, issued by a moderator, when a user has been warned in chat.
     /// </summary>
-    
-    public class InfractionsDB : Database {
+
+    public class InfractionsDB : Database
+    {
 
         /// <summary>
         /// A table of the warnings issued in the InfractionsDB database.
@@ -48,10 +49,12 @@ namespace Dexter.Databases.Infractions {
         /// <param name="UserID">The user attached to the target Dexter Profile.</param>
         /// <returns>The corresponding Dexter Profile of the selected user.</returns>
 
-        public DexterProfile GetOrCreateProfile(ulong UserID) {
+        public DexterProfile GetOrCreateProfile(ulong UserID)
+        {
             DexterProfile DexterProfile = DexterProfiles.Find(UserID);
 
-            if (DexterProfile == null) {
+            if (DexterProfile == null)
+            {
                 DexterProfile = new DexterProfile() { UserID = UserID, InfractionAmount = ModerationConfiguration.MaxPoints, CurrentMute = "", CurrentPointTimer = "" };
                 DexterProfiles.Add(DexterProfile);
                 SaveChanges();

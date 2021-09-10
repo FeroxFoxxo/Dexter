@@ -1,17 +1,15 @@
 ﻿using Dexter.Databases.FunTopics;
 using Dexter.Enums;
 using Dexter.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Humanizer;
 using Discord;
+using Humanizer;
+using System.Text.RegularExpressions;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
-    public partial class FunCommands {
+    public partial class FunCommands
+    {
 
         /// <summary>
         /// Manages the modular tasks pertaining to modification of the topic database(s).
@@ -21,12 +19,16 @@ namespace Dexter.Commands {
         /// <param name="TopicType">What type of topic database should be accessed. Either 'topic' or 'wyr'.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task RunTopic (string Command, TopicType TopicType) {
+        public async Task RunTopic(string Command, TopicType TopicType)
+        {
             string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2").Substring(1);
 
-            if (!string.IsNullOrEmpty(Command)) {
-                if (Enum.TryParse(Command.Split(" ")[0].ToLower().Pascalize(), out Enums.ActionType ActionType)) {
-                    if(RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.TopicManagement) && ActionType != Enums.ActionType.Get) {
+            if (!string.IsNullOrEmpty(Command))
+            {
+                if (Enum.TryParse(Command.Split(" ")[0].ToLower().Pascalize(), out Enums.ActionType ActionType))
+                {
+                    if (RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.TopicManagement) && ActionType != Enums.ActionType.Get)
+                    {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("You aren't permitted to manage topics!")
                             .WithDescription("You have been blacklisted from using this service. If you think this is a mistake, feel free to personally contact an administrator")
@@ -36,7 +38,8 @@ namespace Dexter.Commands {
 
                     string Topic = Command[(Command.Split(" ")[0].Length + 1)..];
 
-                    switch (ActionType) {
+                    switch (ActionType)
+                    {
                         case Enums.ActionType.Add:
                             await AddTopic(Topic, TopicType, Name);
                             break;
@@ -71,9 +74,11 @@ namespace Dexter.Commands {
                                 .SendEmbed(Context.Channel);
                             break;
                     }
-                } else
+                }
+                else
                     await SendTopic(TopicType, Name);
-            } else
+            }
+            else
                 await SendTopic(TopicType, Name);
         }
 
@@ -84,10 +89,12 @@ namespace Dexter.Commands {
         /// <param name="Name">The name of the type of topic, generated using regex.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task SendTopic(TopicType TopicType, string Name) {
-            FunTopic FunTopic = await FunTopicsDB.Topics.GetRandomTopic(TopicType);
+        public async Task SendTopic(TopicType TopicType, string Name)
+        {
+            FunTopic FunTopic = FunTopicsDB.Topics.GetRandomTopic(TopicType);
 
-            if (FunTopic == null) {
+            if (FunTopic == null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle($"No {Name}s!")
                     .WithDescription($"Heya! I could not find any {Name.ToLower()}s in the database. " +
@@ -119,10 +126,12 @@ namespace Dexter.Commands {
         /// <param name="Name">The name of the type of topic, generated using regex.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task AddTopic(string TopicEntry, TopicType TopicType, string Name) {
+        public async Task AddTopic(string TopicEntry, TopicType TopicType, string Name)
+        {
             TopicEntry = Regex.Replace(TopicEntry, @"[^\u0000-\u007F]+", "");
 
-            if (TopicEntry.Length > 1000) {
+            if (TopicEntry.Length > 1000)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle($"Unable To Add {Name}!")
                     .WithDescription($"Heya! Please cut down on the length of your {Name.ToLower()}. " +
@@ -136,7 +145,8 @@ namespace Dexter.Commands {
                 .Where(Topic => Topic.Topic.Equals(TopicEntry) && Topic.EntryType == EntryType.Issue && Topic.TopicType == TopicType)
                 .FirstOrDefault();
 
-            if (FunTopic != null) {
+            if (FunTopic != null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle($"Unable To Add {Name}!")
                     .WithDescription($"The {Name.ToLower()} `{FunTopic.Topic}` " +
@@ -168,13 +178,15 @@ namespace Dexter.Commands {
         /// These should be parsable to a <c>string</c>, <c>TopicType</c>, and <c>ulong</c> (IUser ID) respectively.
         /// </param>
 
-        public void CreateTopicCallback(Dictionary<string, string> Parameters) {
+        public void CreateTopicCallback(Dictionary<string, string> Parameters)
+        {
             string Topic = Parameters["Topic"];
             TopicType TopicType = (TopicType)int.Parse(Parameters["TopicType"]);
             ulong Proposer = ulong.Parse(Parameters["Proposer"]);
 
             FunTopicsDB.Topics.Add(
-                new() {
+                new()
+                {
                     Topic = Topic,
                     EntryType = EntryType.Issue,
                     ProposerID = Proposer,
@@ -195,13 +207,15 @@ namespace Dexter.Commands {
         /// <param name="Name">The name of the type of topic, generated using regex.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task RemoveTopic(int TopicID, TopicType TopicType, string Name) {
+        public async Task RemoveTopic(int TopicID, TopicType TopicType, string Name)
+        {
             FunTopic FunTopic = FunTopicsDB.Topics
                     .AsQueryable()
                     .Where(Topic => Topic.TopicID == TopicID && Topic.EntryType == EntryType.Issue && Topic.TopicType == TopicType)
                     .FirstOrDefault();
 
-            if (FunTopic == null) {
+            if (FunTopic == null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle($"Unable To Remove {Name}.")
                     .WithDescription($"The {Name.ToLower()} {TopicID} does not exist in the database! " +
@@ -235,7 +249,8 @@ namespace Dexter.Commands {
         /// These should be parsable to a <c>int</c> and <c>TopicType</c> respectively.
         /// </param>
 
-        public void RemoveTopicCallback(Dictionary<string, string> Parameters) {
+        public void RemoveTopicCallback(Dictionary<string, string> Parameters)
+        {
             int TopicID = int.Parse(Parameters["TopicID"]);
             TopicType TopicType = (TopicType)int.Parse(Parameters["TopicType"]);
 
@@ -257,13 +272,15 @@ namespace Dexter.Commands {
         /// <param name="Name">The name of the type of topic, generated using regex.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task GetTopic(string TopicEntry, TopicType TopicType, string Name) {
+        public async Task GetTopic(string TopicEntry, TopicType TopicType, string Name)
+        {
             FunTopic FunTopic = FunTopicsDB.Topics
                     .AsQueryable()
                     .Where(Topic => Topic.Topic.Equals(TopicEntry) && Topic.EntryType == EntryType.Issue && Topic.TopicType == TopicType)
                     .FirstOrDefault();
 
-            if (FunTopic == null) {
+            if (FunTopic == null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle($"Unable To Get {Name}.")
                     .WithDescription($"The {Name.ToLower()} `{TopicEntry}` does not exist in the database!")
@@ -289,13 +306,15 @@ namespace Dexter.Commands {
         /// <param name="Name">The name of the type of topic, generated using regex.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task EditTopic(int TopicID, string EditedTopic, TopicType TopicType, string Name) {
+        public async Task EditTopic(int TopicID, string EditedTopic, TopicType TopicType, string Name)
+        {
             FunTopic FunTopic = FunTopicsDB.Topics
                     .AsQueryable()
                     .Where(Topic => Topic.TopicID == TopicID && Topic.EntryType == EntryType.Issue && Topic.TopicType == TopicType)
                     .FirstOrDefault();
 
-            if (FunTopic == null) {
+            if (FunTopic == null)
+            {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle($"Unable To Edit {Name}.")
                     .WithDescription($"The {Name.ToLower()} {TopicID} does not exist in the database! " +
@@ -332,7 +351,8 @@ namespace Dexter.Commands {
         /// These should be parsable to an <c>int</c>, <c>TopicType</c>, and <c>string</c> respectively.
         /// </param>
 
-        public void EditTopicCallback(Dictionary<string, string> Parameters) {
+        public void EditTopicCallback(Dictionary<string, string> Parameters)
+        {
             int TopicID = int.Parse(Parameters["TopicID"]);
             TopicType TopicType = (TopicType)int.Parse(Parameters["TopicType"]);
             string EditedTopic = Parameters["EditedTopic"];

@@ -2,7 +2,8 @@
 using Dexter.Attributes.Classes;
 using Dexter.Services;
 
-namespace Dexter.Commands {
+namespace Dexter.Commands
+{
 
     /// <summary>
     /// The ConfigurationCommands module relates to the enabling and disabling of a command module.
@@ -11,12 +12,13 @@ namespace Dexter.Commands {
 
     [EssentialModule]
 
-    public partial class ConfigurationCommands : DiscordModule {
+    public partial class ConfigurationCommands : DiscordModule
+    {
 
         /// <summary>
         /// The ModuleService is what we use to enable and disable the modules, linked to the CommandService.
         /// </summary>
-        
+
         public ModuleService ModuleService { get; set; }
 
     }

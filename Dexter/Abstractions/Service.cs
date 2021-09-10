@@ -9,18 +9,17 @@ using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace Dexter.Abstractions {
+namespace Dexter.Abstractions
+{
 
     /// <summary>
     /// The Service is an abstract class that all services extend upon.
     /// Services run when a specified event occured, as is hooked into the client through the Initialize method.
     /// </summary>
-    
-    public abstract class Service {
+
+    public abstract class Service
+    {
 
         /// <summary>
         /// The ProfileService is used to find a random profile picture for a webhook on create or get.
@@ -56,13 +55,16 @@ namespace Dexter.Abstractions {
         /// <param name="WebhookName">The Webhook Name is the identifier of the webhook, and is what the webhook will be called.</param>
         /// <returns>The DiscordWebhookClient of the webhook that has been gotten or created.</returns>
 
-        public async Task<DiscordWebhookClient> CreateOrGetWebhook(ulong ChannelID, string WebhookName) {
+        public async Task<DiscordWebhookClient> CreateOrGetWebhook(ulong ChannelID, string WebhookName)
+        {
             if (ChannelID > 0)
 
-                try {
+                try
+                {
                     SocketChannel Channel = DiscordSocketClient.GetChannel(ChannelID);
 
-                    if (Channel is SocketTextChannel TextChannel) {
+                    if (Channel is SocketTextChannel TextChannel)
+                    {
                         foreach (RestWebhook RestWebhook in await TextChannel.GetWebhooksAsync())
                             if (RestWebhook.Name.Equals(WebhookName))
                                 return new DiscordWebhookClient(RestWebhook.Id, RestWebhook.Token);
@@ -74,7 +76,8 @@ namespace Dexter.Abstractions {
 
                     throw new Exception($"The webhook {WebhookName} could not be initialized in the given channel {Channel} due to it being of type {Channel.GetType().Name}.");
 
-                } catch (HttpException) { }
+                }
+                catch (HttpException) { }
 
             return null;
         }
@@ -90,7 +93,8 @@ namespace Dexter.Abstractions {
         /// <returns>The token assosiated with the timed event for use to refer to.</returns>
 
         public async Task<string> CreateEventTimer(Func<Dictionary<string, string>, Task> CallbackMethod,
-                Dictionary<string, string> CallbackParameters, int SecondsTillExpiration, TimerType TimerType) {
+                Dictionary<string, string> CallbackParameters, int SecondsTillExpiration, TimerType TimerType)
+        {
 
             string JSON = JsonConvert.SerializeObject(CallbackParameters);
 
@@ -103,7 +107,8 @@ namespace Dexter.Abstractions {
         /// <param name="Thumbnail">The thumbnail that you would like to be applied to the embed.</param>
         /// <returns>A new embed builder with the specified attributes applied to the embed.</returns>
 
-        public EmbedBuilder BuildEmbed(EmojiEnum Thumbnail) {
+        public EmbedBuilder BuildEmbed(EmojiEnum Thumbnail)
+        {
             return new EmbedBuilder().BuildEmbed(Thumbnail, BotConfiguration);
         }
 

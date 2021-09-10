@@ -1,13 +1,15 @@
 ﻿using Dexter.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Dexter.Databases.UserRestrictions {
+namespace Dexter.Databases.UserRestrictions
+{
 
     /// <summary>
     /// Stores, retrieves, and manages the collection of user-specific restrictions applied for command or feature usage.
     /// </summary>
 
-    public class RestrictionsDB : Database {
+    public class RestrictionsDB : Database
+    {
 
         /// <summary>
         /// A collection of user-specific restrictions.
@@ -19,9 +21,10 @@ namespace Dexter.Databases.UserRestrictions {
         /// Gets all restrictions related to a user, or NONE if the <paramref name="UserID"/> is not in the database.
         /// </summary>
         /// <param name="UserID">The ID of the target user to fetch from the database.</param>
-        /// <returns>.</returns>
+        /// <returns>A Restriction object representing all flags for which the user is restricted.</returns>
 
-        public Restriction GetUserRestrictions(ulong UserID) {
+        public Restriction GetUserRestrictions(ulong UserID)
+        {
             UserRestriction UR = UserRestrictions.Find(UserID);
 
             if (UR == null) return Restriction.None;
@@ -35,7 +38,8 @@ namespace Dexter.Databases.UserRestrictions {
         /// <param name="User">The User to fetch from the database.</param>
         /// <returns>A Restriction object representing all flags for which the user is restricted.</returns>
 
-        public Restriction GetUserRestrictions(Discord.IUser User) {
+        public Restriction GetUserRestrictions(Discord.IUser User)
+        {
             return GetUserRestrictions(User.Id);
         }
 
@@ -51,7 +55,8 @@ namespace Dexter.Databases.UserRestrictions {
         /// <param name="MatchAny">Dictates the matching mode, if set to <see langword="true"/>, the matching becomes non-strict.</param>
         /// <returns><see langword="true"/> if the user has all restriction flags in <paramref name="Restriction"/>, otherwise <see langword="false"/>.</returns>
 
-        public bool IsUserRestricted(ulong UserID, Restriction Restriction, bool MatchAny = false) {
+        public bool IsUserRestricted(ulong UserID, Restriction Restriction, bool MatchAny = false)
+        {
             if (MatchAny) return (GetUserRestrictions(UserID) & Restriction) != Restriction.None;
             else return (GetUserRestrictions(UserID) & Restriction) == Restriction;
         }
@@ -63,7 +68,8 @@ namespace Dexter.Databases.UserRestrictions {
         /// <param name="Restriction">The individual or multiple restriction(s) to check for.</param>
         /// <returns><see langword="true"/> if the <paramref name="User"/> has all restriction flags in <paramref name="Restriction"/>, otherwise <see langword="false"/>.</returns>
 
-        public bool IsUserRestricted(Discord.IUser User, Restriction Restriction) {
+        public bool IsUserRestricted(Discord.IUser User, Restriction Restriction)
+        {
             return IsUserRestricted(User.Id, Restriction);
         }
 
@@ -74,11 +80,14 @@ namespace Dexter.Databases.UserRestrictions {
         /// <param name="Restriction">The Restriction flags to add to the User.</param>
         /// <returns><see langword="false"/> if the user already had that <paramref name="Restriction"/>, otherwise <see langword="true"/>.</returns>
 
-        public bool AddRestriction(ulong UserID, Restriction Restriction) {
+        public bool AddRestriction(ulong UserID, Restriction Restriction)
+        {
             UserRestriction UR = UserRestrictions.Find(UserID);
 
-            if (UR == null) {
-                UR = new() {
+            if (UR == null)
+            {
+                UR = new()
+                {
                     UserID = UserID,
                     RestrictionFlags = Restriction
                 };
@@ -99,7 +108,8 @@ namespace Dexter.Databases.UserRestrictions {
         /// <param name="Restriction">The Restriction flags to add to <paramref name="User"/>.</param>
         /// <returns><see langword="false"/> if the user already had that <paramref name="Restriction"/>, otherwise <see langword="true"/>.</returns>
 
-        public bool AddRestriction(Discord.IUser User, Restriction Restriction) {
+        public bool AddRestriction(Discord.IUser User, Restriction Restriction)
+        {
             return AddRestriction(User.Id, Restriction);
         }
 
@@ -110,7 +120,8 @@ namespace Dexter.Databases.UserRestrictions {
         /// <param name="Restriction">The Restriction flags to remove from User.</param>
         /// <returns><see langword="true"/> if the restriction was removed, <see langword="false"/> if the user wasn't in the database or didn't have that restriction.</returns>
 
-        public bool RemoveRestriction(ulong UserID, Restriction Restriction) {
+        public bool RemoveRestriction(ulong UserID, Restriction Restriction)
+        {
             UserRestriction UR = UserRestrictions.Find(UserID);
 
             if (UR == null) return false;
@@ -129,7 +140,8 @@ namespace Dexter.Databases.UserRestrictions {
         /// <param name="Restriction">The Restriction flags to remove from <paramref name="User"/>.</param>
         /// <returns><see langword="true"/> if the restriction was removed, <see langword="false"/> if the user wasn't in the database or didn't have that restriction.</returns>
 
-        public bool RemoveRestriction(Discord.IUser User, Restriction Restriction) {
+        public bool RemoveRestriction(Discord.IUser User, Restriction Restriction)
+        {
             return RemoveRestriction(User.Id, Restriction);
         }
 

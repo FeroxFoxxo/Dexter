@@ -115,8 +115,18 @@ namespace Dexter.Services
                 LevelingConfiguration.TextSendLevelUpMessage
                 );
 
-            LevelingDB.OnTextCooldowns.Add(new UserTextXPRecord() { Id = message.Author.Id });
-            LevelingDB.SaveChanges();
+            if (LevelingDB.OnTextCooldowns.Find(message.Author.Id) is not null) return;
+            LevelingDB.OnTextCooldowns.Update(new UserTextXPRecord() { Id = message.Author.Id });
+            try
+            {
+                LevelingDB.SaveChanges();
+            }
+            catch (System.IndexOutOfRangeException ex)
+            {
+                LevelingDB.RemoveRange(LevelingDB.OnTextCooldowns);
+                LevelingDB.SaveChanges();
+            }
+
         }
 
         /// <summary>

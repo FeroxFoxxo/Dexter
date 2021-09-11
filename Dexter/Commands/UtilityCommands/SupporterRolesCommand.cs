@@ -54,7 +54,7 @@ namespace Dexter.Commands
                 user = (IGuildUser)Context.User;
             }
 
-            IEnumerable<IRole> roles = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Roles;
+            IEnumerable<IRole> roles = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Roles.ToArray();
             Dictionary<ulong, IRole> colorRoleIDs = new();
 
             IRole toAdd = null;
@@ -288,7 +288,7 @@ namespace Dexter.Commands
         {
             if (user is null) return false;
 
-            foreach (ulong roleId in user.RoleIds)
+            foreach (ulong roleId in user.RoleIds.ToArray())
             {
                 if (UtilityConfiguration.ColorChangeRoles.Contains(roleId)) return true;
             }

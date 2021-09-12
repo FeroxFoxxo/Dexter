@@ -43,7 +43,7 @@ namespace Dexter.Databases.Levels
         /// The data structure containing all instances of users on Text XP cooldowns.
         /// </summary>
 
-        public DbSet<UserTextXPRecord> OnTextCooldowns { get; set; }
+        public List<ulong> OnTextCooldowns { get; set; }
 
         /// <summary>
         /// Gets a level entry from the database or creates one if none exist for <paramref name="id"/>

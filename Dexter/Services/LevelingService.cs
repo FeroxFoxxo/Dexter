@@ -94,7 +94,7 @@ namespace Dexter.Services
                     }
             }
 
-            LevelingDB.RemoveRange(LevelingDB.OnTextCooldowns);
+            LevelingDB.OnTextCooldowns = new();
             LevelingDB.SaveChanges();
         }
 
@@ -105,7 +105,7 @@ namespace Dexter.Services
 
             if (message.Channel is IDMChannel || LevelingConfiguration.DisabledTCs.Contains(message.Channel.Id)) return;
 
-            if (LevelingDB.OnTextCooldowns.Find(message.Author.Id) is not null) return;
+            if (LevelingDB.OnTextCooldowns.Contains(message.Author.Id)) return;
 
             await LevelingDB.IncrementUserXP(
                 Random.Next(LevelingConfiguration.TextMinXPGiven, LevelingConfiguration.TextMaxXPGiven + 1),
@@ -115,7 +115,7 @@ namespace Dexter.Services
                 LevelingConfiguration.TextSendLevelUpMessage
                 );
 
-            LevelingDB.OnTextCooldowns.Add(new UserTextXPRecord() { Id = message.Author.Id });
+            LevelingDB.OnTextCooldowns.Add(message.Author.Id);
             LevelingDB.SaveChanges();
         }
 

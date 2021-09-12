@@ -117,6 +117,7 @@ namespace Dexter.Services
 
             LevelingDB.OnTextCooldowns.Add(message.Author.Id);
             LevelingDB.SaveChanges();
+
         }
 
         /// <summary>

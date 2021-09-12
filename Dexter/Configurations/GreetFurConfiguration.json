@@ -3,7 +3,7 @@
   "CredentialFile": "Credentials.json",
   "TokenFile": "Token",
   "SpreadSheetID": "1nOJCMRLuZqY3gJGx-1Stj5Peq1vZaQvGL9wNUXEuE68",
-  "FortnightSpreadsheet": "Sheet1",
+  "FortnightSpreadsheet": "Testing",
   "TheBigPictureSpreadsheet": "The Big Picture",
   "IDColumnIndex": "B",
   "TotalID": "F",
@@ -16,5 +16,9 @@
     "W2": 22,
     "Manager": 29
   },
-  "AwooRole": 815091090117885974
+  "AwooRole": 815091090117885974,
+  "GreetFurMinimumDailyMessages": 10,
+  "GreetFurActiveWithMute": true,
+  "GreetFurMutePattern": "^!mute\\s(<@!?)?[0-9]{18}>?(\\s|$)",
+  "FirstTrackingDay": 18190
 }

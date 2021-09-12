@@ -70,6 +70,29 @@ namespace Dexter.Configurations
 
         public ulong AwooRole { get; set; }
 
+        /// <summary>
+        /// The minimum amount of messages a GreetFur must have in meet and greet to be considered active.
+        /// </summary>
+
+        public int GreetFurMinimumDailyMessages { get; set; }
+
+        /// <summary>
+        /// Whether GreetFurs should be considered active for a day by simply having muted a user.
+        /// </summary>
+
+        public bool GreetFurActiveWithMute { get; set; }
+
+        /// <summary>
+        /// The regular expression that matches a mute command that GreetFurs can use.
+        /// </summary>
+
+        public string GreetFurMutePattern { get; set; }
+
+        /// <summary>
+        /// The day since UNIX time where the first measuring of GreetFur activity was taken (Monday of Week 1)
+        /// </summary>
+
+        public int FirstTrackingDay { get; set; }
     }
 
 }

@@ -23,7 +23,7 @@ namespace Dexter.Databases.GreetFur
         /// <summary>
         /// Unique user identifier for the user this record refers to.
         /// </summary>
-        public ulong UserID { get; set; }
+        public ulong UserId { get; set; }
 
         /// <summary>
         /// The amount of days since UNIX time before the day that this record represents.
@@ -39,5 +39,28 @@ namespace Dexter.Databases.GreetFur
         /// Whether the user muted another user via the GreetFur-specific mute command in the selected day.
         /// </summary>
         public bool MutedUser { get; set; }
+
+        /// <summary>
+        /// Converts the record into a human-readable format depicting the completion state of the record.
+        /// </summary>
+        /// <param name="greetFurConfiguration">The configuration file setting standards for completion</param>
+        /// <param name="currentDay">The current day for the user.</param>
+        /// <returns>A short string representation of the completion state of this record.</returns>
+
+        public string ToString(Dexter.Configurations.GreetFurConfiguration greetFurConfiguration, int currentDay = int.MaxValue)
+        {
+            string state = "";
+            if (MessageCount >= greetFurConfiguration.GreetFurMinimumDailyMessages || (MutedUser && greetFurConfiguration.GreetFurActiveWithMute))
+                state = "Y";
+            else if (Date == currentDay)
+                state = "?";
+            else if (Date < currentDay)
+                state = "N";
+
+            return string.Format("{0} ({1}{2})",
+                state,
+                MutedUser ? "M" : "",
+                MessageCount);
+        }
     }
 }

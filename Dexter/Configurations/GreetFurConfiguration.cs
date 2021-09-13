@@ -65,6 +65,12 @@ namespace Dexter.Configurations
         public Dictionary<string, int> Information { get; set; }
 
         /// <summary>
+        /// Contains the general template for new cells in the fortnight sheet.
+        /// </summary>
+
+        public Dictionary<int, string> FortnightTemplates { get; set; }
+
+        /// <summary>
         /// The AWOO role ID is used for finding if a GreetFur is attempting to mute someone already in the server.
         /// </summary>
 

@@ -165,6 +165,8 @@ namespace Dexter.Services
                 bool managerToggle = true;
                 for (int i = 1; i < data.Values.Count; i++)
                 {
+                    if (data.Values[i].Count <= GreetFurConfiguration.Information["ManagerList"])
+                        break;
                     if (!string.IsNullOrEmpty(data.Values[i][GreetFurConfiguration.Information["ManagerList"]]?.ToString()))
                     {
                         managerToggle = !managerToggle;
@@ -222,7 +224,7 @@ namespace Dexter.Services
         {
             ulong id = records[0].UserId;
             int day = GreetFurDB.GetDayForUser(id);
-            string[] result = new string[records.Length];
+            string[] result = new string[GreetFurConfiguration.FortnightTemplates.Keys.Max() + 1];
 
             int firstcol = GreetFurConfiguration.Information["Notes"] - records.Length;
             for (int i = firstcol; i < firstcol + result.Length; i++)

@@ -13,7 +13,7 @@ namespace Dexter.Commands
     public partial class GreetFurCommands
     {
 
-        [Command("updatesheet")]
+        [Command("updatesheet", RunMode = RunMode.Async)]
         [Summary("Updates the values of the active spreadsheet tracking system for GreetFurs.")]
         [Alias("updatespreadsheet")]
         [RequireModerator]

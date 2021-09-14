@@ -110,11 +110,14 @@ namespace Dexter.Services
                 .Where(sheet => sheet.Properties.Title == GreetFurConfiguration.FortnightSpreadsheet)
                 .FirstOrDefault();
 
-            ValueRange data = await sheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
-                $"{currentFortnight.Properties.Title}!A1:{currentFortnight.Properties.GridProperties.RowCount}")
+            string dataRequestRange = $"{currentFortnight.Properties.Title}";
+            string updateRangeName = $"{currentFortnight.Properties.Title}!A2:{GreetFurCommands.IntToLetters(GreetFurConfiguration.Information["Notes"])}{currentFortnight.Properties.GridProperties.RowCount}";
+            ValueRange data = await sheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID, dataRequestRange)
+                .ExecuteAsync();
+            ValueRange toUpdate = await sheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID, updateRangeName)
                 .ExecuteAsync();
 
-            List<ulong> ids = new(data.Values.Count);
+            List<ulong> ids = new(toUpdate.Values.Count);
             int today = (int)(DateTimeOffset.Now.ToUnixTimeSeconds() / (60 * 60 * 24));
             int daysSinceTracking = today - GreetFurConfiguration.FirstTrackingDay;
 
@@ -122,21 +125,32 @@ namespace Dexter.Services
             int firstDataIndex = GreetFurConfiguration.Information["Notes"] - TRACKING_LENGTH;
             Console.Out.WriteLine("Completed initial setup");
             
-            for (int i = 1; i < data.Values.Count; i++)
+            for (int i = 0; i < toUpdate.Values.Count; i++)
             {
-                if (ulong.TryParse(data.Values[i][GreetFurConfiguration.Information["IDs"]].ToString(), out ulong gfid))
+                string[] newRow = new string[firstDataIndex + TRACKING_LENGTH];
+                if (ulong.TryParse(toUpdate.Values[i][GreetFurConfiguration.Information["IDs"]].ToString(), out ulong gfid))
                 {
+                    newRow[GreetFurConfiguration.Information["IDs"]] = gfid.ToString();
                     ids.Add(gfid);
                     GreetFurRecord[] records = GreetFurDB.GetRecentActivity(gfid, firstDay, TRACKING_LENGTH, true);
                     int localDay = GreetFurDB.GetDayForUser(gfid);
+
+                    IUser u = DiscordSocketClient.GetUser(gfid);
+                    if (u is not null)
+                        newRow[GreetFurConfiguration.Information["Users"]] = $"{u.Username}#{u.Discriminator}";
+
+                    Console.Out.WriteLine($"toUpdateSize = {toUpdate.Values.Count}, fdi = {firstDataIndex}");
+
                     for (int d = 0; d < TRACKING_LENGTH; d++)
                     {
-                        if ((string)data.Values[i][firstDataIndex + d] != "Exempt")
+                        if (firstDataIndex + d >= toUpdate.Values[i].Count || toUpdate.Values[i][firstDataIndex + d] as string != "Exempt")
                         {
+                            Console.Out.WriteLine($"i = {i}; d = {d}, data = {string.Join(", ", toUpdate.Values[i])}");
                             string newValue = DayFormat(records[d], localDay);
-                            data.Values[i][firstDataIndex + d] = newValue;
+                            newRow[firstDataIndex + d] = newValue;
                         }
                     }
+                    toUpdate.Values[i] = newRow;
                     Console.Out.WriteLine($"Completed update for ID {gfid}");
                 } 
                 else
@@ -146,14 +160,13 @@ namespace Dexter.Services
             }
             Console.Out.WriteLine("Completed base update setup");
 
-            UpdateRequest req = sheetsService.Spreadsheets.Values.Update(data, GreetFurConfiguration.SpreadSheetID,
-                $"{currentFortnight.Properties.Title}!A1:{GreetFurCommands.IntToLetters(currentFortnight.Properties.GridProperties.ColumnCount)}{currentFortnight.Properties.GridProperties.RowCount}");
+            UpdateRequest req = sheetsService.Spreadsheets.Values.Update(toUpdate, GreetFurConfiguration.SpreadSheetID, updateRangeName);
             req.ValueInputOption = UpdateRequest.ValueInputOptionEnum.USERENTERED;
             await req.ExecuteAsync();
 
             if (options.HasFlag(GreetFurOptions.AddNewRows))
             {
-                ValueRange range = new ValueRange();
+                ValueRange range = new();
                 List<string[]> rows = new();
 
                 Dictionary<ulong, List<GreetFurRecord>> newActivity = GreetFurDB.GetAllRecentActivity(firstDay, TRACKING_LENGTH);
@@ -190,11 +203,18 @@ namespace Dexter.Services
                             withGaps[i] = kvp.Value[inData++];
                         }   
                     }
-                    rows.Add(RowFromRecords(withGaps, rowNumber++, managerToggle));
+                    Console.Out.WriteLine(string.Join<GreetFurRecord>(" .. ", withGaps));
+                    rows.Add(RowFromRecords(withGaps, ++rowNumber, managerToggle));
+                }
+
+                foreach (string[] row in rows)
+                {
+                    Console.Out.WriteLine(string.Join(", ", row));
                 }
 
                 range.Values = rows.ToArray();
                 AppendRequest appendReq = sheetsService.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.FortnightSpreadsheet);
+                appendReq.ValueInputOption = AppendRequest.ValueInputOptionEnum.USERENTERED;
                 await appendReq.ExecuteAsync();
             }
         }
@@ -227,14 +247,18 @@ namespace Dexter.Services
             string[] result = new string[GreetFurConfiguration.FortnightTemplates.Keys.Max() + 1];
 
             int firstcol = GreetFurConfiguration.Information["Notes"] - records.Length;
-            for (int i = firstcol; i < firstcol + result.Length; i++)
+            for (int i = firstcol; i < firstcol + records.Length; i++)
             {
-                result[i] = DayFormat(records[i], day);
+                Console.Out.Write($"Resolving column {i} ... ");
+                result[i] = DayFormat(records[i - firstcol], day);
+                Console.Out.WriteLine($"Resolved column {i}");
             }
 
             foreach(int i in GreetFurConfiguration.FortnightTemplates.Keys)
             {
+                Console.Out.Write($"Resolving column {i} ... ");
                 result[i] = ResolveFormat(GreetFurConfiguration.FortnightTemplates[i], id, row, managerToggle);
+                Console.Out.WriteLine($"Resolved column {i}");
             }
 
             return result;
@@ -294,7 +318,7 @@ namespace Dexter.Services
                     case "{Tag}":
                     {
                         IUser u = DiscordSocketClient.GetUser(userId);
-                        sb.Append(u?.Username ?? "Unknown#????");
+                        sb.Append((u?.Username ?? "Unknown") + "#" + (u?.Discriminator ?? "????"));
                         break;
                     }
                 }

@@ -49,18 +49,44 @@ namespace Dexter.Databases.GreetFur
 
         public string ToString(Dexter.Configurations.GreetFurConfiguration greetFurConfiguration, int currentDay = int.MaxValue)
         {
-            string state = "";
+            string state;
             if (MessageCount >= greetFurConfiguration.GreetFurMinimumDailyMessages || (MutedUser && greetFurConfiguration.GreetFurActiveWithMute))
                 state = "Y";
             else if (Date == currentDay)
                 state = "?";
             else if (Date < currentDay)
                 state = "N";
+            else
+                return "";
 
             return string.Format("{0} ({1}{2})",
                 state,
                 MutedUser ? "M" : "",
                 MessageCount);
+        }
+
+        /// <summary>
+        /// Creates a string representation of the data held in the record.
+        /// </summary>
+        /// <returns>A string representing the values held in the record.</returns>
+
+        public override string ToString()
+        {
+            return ToString(true);
+        }
+
+        /// <summary>
+        /// Creates a string representation of the data held in the record.
+        /// </summary>
+        /// <param name="shortened">Whether to use a short format.</param>
+        /// <returns>A string representing the values held in the record.</returns>
+
+        public string ToString(bool shortened)
+        {
+        if (shortened)
+            return $"{UserId}-{Date}; {(MutedUser ? "M" : "")}{MessageCount}";
+        else
+            return $"{RecordId}: {UserId} day {Date}; {MessageCount} messages {(MutedUser ? "with" : "without")} mute.";
         }
     }
 }

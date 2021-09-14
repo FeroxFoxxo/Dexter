@@ -1,4 +1,5 @@
 ﻿using Dexter.Attributes.Methods;
+using Dexter.Databases.Levels;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
@@ -40,7 +41,19 @@ namespace Dexter.Commands
                 return;
             }
 
-            if (!await LevelingService.UpdateRoles(user, true))
+            UserLevel ul = LevelingDB.Levels.Find(user.Id);
+
+            if (ul is null)
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Unable to find level")
+                    .WithDescription("We don't have any records of you obtaining XP in the server! Try again once you've leveled up.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+            int level = ul.TotalLevel(LevelingConfiguration);
+
+            if (!await LevelingService.UpdateRoles(user, true, level))
             {
                 await Context.Channel.SendMessageAsync("Your roles are already up to date!");
             }

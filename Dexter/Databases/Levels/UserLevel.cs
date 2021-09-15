@@ -1,4 +1,5 @@
-﻿using Dexter.Configurations;
+using System;
+using Dexter.Configurations;
 using Dexter.Helpers;
 using System.ComponentModel.DataAnnotations;
 

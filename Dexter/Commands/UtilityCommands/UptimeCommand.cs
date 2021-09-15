@@ -1,4 +1,6 @@
-﻿using Dexter.Enums;
+using System;
+using System.Threading.Tasks;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
 using Humanizer;

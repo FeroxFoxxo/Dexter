@@ -1,4 +1,4 @@
-﻿namespace Dexter.Extensions
+namespace Dexter.Extensions
 {
 
     /// <summary>

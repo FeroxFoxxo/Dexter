@@ -1,4 +1,5 @@
-﻿using Dexter.Attributes.Methods;
+using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Databases.FunTopics;
 using Discord.Commands;
 using System.Runtime.InteropServices;

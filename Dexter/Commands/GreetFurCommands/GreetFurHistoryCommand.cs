@@ -1,14 +1,13 @@
-﻿using Dexter.Databases.GreetFur;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Databases.GreetFur;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {

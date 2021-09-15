@@ -1,4 +1,7 @@
-﻿using Dexter.Configurations;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
 using Dexter.Databases.Proposals;
 using Dexter.Enums;
@@ -86,8 +89,8 @@ namespace Dexter.Abstractions
                 DenyJSON = JsonConvert.SerializeObject(DenyCallbackParameters);
 
             return await ProposalService.SendAdminConfirmation(JSON, CallbackMethod.Target.GetType().Name,
-                CallbackMethod.Method.Name, Author, Proposal, DenyJSON, DenyCallbackMethod != null ? DenyCallbackMethod.Target.GetType().Name : null,
-                DenyCallbackMethod != null ? DenyCallbackMethod.Method.Name : null);
+                CallbackMethod.Method.Name, Author, Proposal, DenyJSON, DenyCallbackMethod?.Target.GetType().Name,
+                DenyCallbackMethod?.Method.Name);
         }
 
         /// <summary>

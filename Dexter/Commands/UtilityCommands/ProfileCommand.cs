@@ -1,4 +1,8 @@
-﻿using Dexter.Attributes.Methods;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Databases.UserProfiles;
 using Dexter.Enums;
 using Dexter.Extensions;
@@ -60,7 +64,7 @@ namespace Dexter.Commands
                 .SendEmbed(Context.Channel);
         }
 
-        private string[] GetLastNameRecords(NameRecord[] FullArray, int MaxCount)
+        private static string[] GetLastNameRecords(NameRecord[] FullArray, int MaxCount)
         {
             List<NameRecord> List = FullArray.ToList();
             List.Sort((a, b) => b.SetTime.CompareTo(a.SetTime));

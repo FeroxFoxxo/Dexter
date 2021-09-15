@@ -59,10 +59,40 @@ namespace Dexter.Configurations
         public string TotalID { get; set; }
 
         /// <summary>
+        /// The minimum amount of GreetFur messages in MNG for a GreetFur to have been considered active.
+        /// </summary>
+
+        public int GreetFurMinimumDailyMessages { get; set; }
+
+        /// <summary>
+        /// Whether to consider a GreetFur active if they have muted someone within a day.
+        /// </summary>
+
+        public bool GreetFurActiveWithMute { get; set; }
+
+        /// <summary>
+        /// The regular expression pattern that matches GreetFur-specific mutes.
+        /// </summary>
+
+        public string GreetFurMutePattern { get; set; }
+
+        /// <summary>
+        /// The first day since UNIX time that tracking for GreetFur activity started (defines week 1)
+        /// </summary>
+
+        public int FirstTrackingDay { get; set; }
+
+        /// <summary>
         /// The Information dictionary stores all the column indexes and their respective names.
         /// </summary>
 
         public Dictionary<string, int> Information { get; set; }
+
+        /// <summary>
+        /// The Cells dictionary stores all relevant individual cells in the spreadsheet.
+        /// </summary>
+
+        public Dictionary<string, string> Cells { get; set; }
 
         /// <summary>
         /// Contains the general template for new cells in the fortnight sheet.
@@ -76,29 +106,6 @@ namespace Dexter.Configurations
 
         public ulong AwooRole { get; set; }
 
-        /// <summary>
-        /// The minimum amount of messages a GreetFur must have in meet and greet to be considered active.
-        /// </summary>
-
-        public int GreetFurMinimumDailyMessages { get; set; }
-
-        /// <summary>
-        /// Whether GreetFurs should be considered active for a day by simply having muted a user.
-        /// </summary>
-
-        public bool GreetFurActiveWithMute { get; set; }
-
-        /// <summary>
-        /// The regular expression that matches a mute command that GreetFurs can use.
-        /// </summary>
-
-        public string GreetFurMutePattern { get; set; }
-
-        /// <summary>
-        /// The day since UNIX time where the first measuring of GreetFur activity was taken (Monday of Week 1)
-        /// </summary>
-
-        public int FirstTrackingDay { get; set; }
     }
 
 }

@@ -88,7 +88,7 @@ namespace Dexter.Services
 
             if (Regex.IsMatch(msg.Content, GreetFurConfiguration.GreetFurMutePattern))
             {
-                GreetFurDB.AddActivity(user.Id, 0, true);
+                GreetFurDB.AddActivity(user.Id, 0, ActivityFlags.MutedUser);
             } 
             else if (msg.Channel.Id == MNGConfiguration.MeetNGreetChannel)
             {
@@ -100,9 +100,10 @@ namespace Dexter.Services
         /// Updates the currently active activity tracking spreadsheet to include the latest relevant information about user activity.
         /// </summary>
         /// <param name="options">Request options to modify the rendering and modification of the GreetFur sheet.</param>
+        /// <param name="week">An override for the first week to display.</param>
         /// <returns>A <see cref="Task"/> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task UpdateRemoteSpreadsheet(GreetFurOptions options = GreetFurOptions.None)
+        public async Task UpdateRemoteSpreadsheet(GreetFurOptions options = GreetFurOptions.None, int week = -1)
         {
             Spreadsheet spreadsheet = await sheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
 
@@ -121,8 +122,25 @@ namespace Dexter.Services
             int today = (int)(DateTimeOffset.Now.ToUnixTimeSeconds() / (60 * 60 * 24));
             int daysSinceTracking = today - GreetFurConfiguration.FirstTrackingDay;
 
-            int firstDay = today - (daysSinceTracking % TRACKING_LENGTH) - (int)(options & GreetFurOptions.DisplayLastFull) * TRACKING_LENGTH;
+            int firstDay;
+            if (week > 0)
+            {
+                firstDay = GreetFurConfiguration.FirstTrackingDay + 7 * --week;
+            }
+            else
+            {
+                firstDay = today - (daysSinceTracking % TRACKING_LENGTH) - (int)(options & GreetFurOptions.DisplayLastFull) * TRACKING_LENGTH;
+            }
             int firstDataIndex = GreetFurConfiguration.Information["Notes"] - TRACKING_LENGTH;
+
+            DateTimeOffset firstDTO = DateTimeOffset.FromUnixTimeSeconds((long)firstDay * 60 * 60 * 24);
+            string firstDayName = firstDTO.ToString("MMM dd yyyy");
+            string dateRangeName = $"{GreetFurConfiguration.FortnightSpreadsheet}!{GreetFurConfiguration.Cells["FirstDay"]}";
+            ValueRange firstDayCell = new() {Range = dateRangeName, Values = new string[][] { new string[] { firstDayName } } };
+            UpdateRequest req = sheetsService.Spreadsheets.Values.Update(firstDayCell, GreetFurConfiguration.SpreadSheetID, dateRangeName);
+            req.ValueInputOption = UpdateRequest.ValueInputOptionEnum.USERENTERED;
+            await req.ExecuteAsync();
+
             Console.Out.WriteLine("Completed initial setup");
             
             for (int i = 0; i < toUpdate.Values.Count; i++)
@@ -139,19 +157,38 @@ namespace Dexter.Services
                     if (u is not null)
                         newRow[GreetFurConfiguration.Information["Users"]] = $"{u.Username}#{u.Discriminator}";
 
-                    Console.Out.WriteLine($"toUpdateSize = {toUpdate.Values.Count}, fdi = {firstDataIndex}");
-
                     for (int d = 0; d < TRACKING_LENGTH; d++)
                     {
-                        if (firstDataIndex + d >= toUpdate.Values[i].Count || toUpdate.Values[i][firstDataIndex + d] as string != "Exempt")
+                        bool isReadable = firstDataIndex + d < toUpdate.Values[i].Count;
+                        bool isExempt = isReadable && toUpdate.Values[i][firstDataIndex + d] as string == "Exempt";
+                        
+                        if (options.HasFlag(GreetFurOptions.ReadExemptions))
                         {
-                            Console.Out.WriteLine($"i = {i}; d = {d}, data = {string.Join(", ", toUpdate.Values[i])}");
-                            string newValue = DayFormat(records[d], localDay);
-                            newRow[firstDataIndex + d] = newValue;
-                        }
+                            if (isExempt)
+                            {
+                                if (!records[d].IsExempt)
+                                {
+                                    records[d].IsExempt = true;
+                                    if (records[d].RecordId == 0)
+                                    {
+                                        GreetFurDB.AddActivity(gfid, 0, ActivityFlags.Exempt, records[d].Date);
+                                    }
+                                    else
+                                    {
+                                        GreetFurDB.SaveChanges();
+                                    }
+                                }
+                            }
+                            else if (records[d].IsExempt)
+                            {
+                                records[d].IsExempt = false;
+                                GreetFurDB.SaveChanges();
+                            }
+                        }                       
+
+                        newRow[firstDataIndex + d] = DayFormat(records[d], localDay);
                     }
                     toUpdate.Values[i] = newRow;
-                    Console.Out.WriteLine($"Completed update for ID {gfid}");
                 } 
                 else
                 {
@@ -160,7 +197,7 @@ namespace Dexter.Services
             }
             Console.Out.WriteLine("Completed base update setup");
 
-            UpdateRequest req = sheetsService.Spreadsheets.Values.Update(toUpdate, GreetFurConfiguration.SpreadSheetID, updateRangeName);
+            req = sheetsService.Spreadsheets.Values.Update(toUpdate, GreetFurConfiguration.SpreadSheetID, updateRangeName);
             req.ValueInputOption = UpdateRequest.ValueInputOptionEnum.USERENTERED;
             await req.ExecuteAsync();
 
@@ -185,7 +222,6 @@ namespace Dexter.Services
                         managerToggle = !managerToggle;
                     }
                 }
-                Console.Out.WriteLine("Calculated manager toggle");
 
                 int rowNumber = data.Values.Count;
                 foreach(KeyValuePair<ulong, List<GreetFurRecord>> kvp in newActivity)
@@ -196,14 +232,13 @@ namespace Dexter.Services
                     {
                         if (kvp.Value.Count <= inData || kvp.Value[inData].Date != firstDay + i)
                         {
-                            withGaps[i] = new GreetFurRecord() { Date = firstDay + i, MessageCount = 0, MutedUser = false, RecordId = 0, UserId = kvp.Key };
+                            withGaps[i] = new GreetFurRecord() {UserId = kvp.Key , Date = firstDay + i, MessageCount = 0, Activity = ActivityFlags.None, RecordId = 0};
                         } 
                         else
                         {
                             withGaps[i] = kvp.Value[inData++];
                         }   
                     }
-                    Console.Out.WriteLine(string.Join<GreetFurRecord>(" .. ", withGaps));
                     rows.Add(RowFromRecords(withGaps, ++rowNumber, managerToggle));
                 }
 
@@ -237,7 +272,11 @@ namespace Dexter.Services
             /// <summary>
             /// Whether to add rows for IDs represented in the history that are not represented in the spreadsheet.
             /// </summary>
-            AddNewRows = 2
+            AddNewRows = 2,
+            /// <summary>
+            /// Whether to read exemptions and log them to records while reading the sheet.
+            /// </summary>
+            ReadExemptions = 4
         }
 
         private string[] RowFromRecords(GreetFurRecord[] records, int row, bool managerToggle = false)
@@ -249,16 +288,12 @@ namespace Dexter.Services
             int firstcol = GreetFurConfiguration.Information["Notes"] - records.Length;
             for (int i = firstcol; i < firstcol + records.Length; i++)
             {
-                Console.Out.Write($"Resolving column {i} ... ");
                 result[i] = DayFormat(records[i - firstcol], day);
-                Console.Out.WriteLine($"Resolved column {i}");
             }
 
             foreach(int i in GreetFurConfiguration.FortnightTemplates.Keys)
             {
-                Console.Out.Write($"Resolving column {i} ... ");
                 result[i] = ResolveFormat(GreetFurConfiguration.FortnightTemplates[i], id, row, managerToggle);
-                Console.Out.WriteLine($"Resolved column {i}");
             }
 
             return result;
@@ -268,6 +303,8 @@ namespace Dexter.Services
         {
             if (r is null)
                 return "";
+
+            if (r.IsExempt) return "Exempt";
 
             if (day < 0)
             {
@@ -326,6 +363,23 @@ namespace Dexter.Services
             sb.Append(format[lastindex..]);
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Sets specific parameters when reading exeptions from the spreadsheet.
+        /// </summary>
+
+        [Flags]
+        public enum ExemptionReadOptions
+        {
+            /// <summary>
+            /// Represents a default request
+            /// </summary>
+            None = 0,
+            /// <summary>
+            /// Represents that eligible exemptions in the range that aren't logged in the spreadsheet should be removed from records.
+            /// </summary>
+            Remove = 1
         }
 
         /// <summary>

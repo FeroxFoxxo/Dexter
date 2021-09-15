@@ -69,6 +69,19 @@ namespace Dexter.Databases.GreetFur
         }
 
         /// <summary>
+        /// Gets all logged activity for a given user.
+        /// </summary>
+        /// <param name="greetFurId">The ID of the user to query for.</param>
+        /// <returns>A list (sorted by date) containing all records linked to the given <paramref name="greetFurId"/>.</returns>
+
+        public List<GreetFurRecord> GetAllActivity(ulong greetFurId)
+        {
+            List<GreetFurRecord> result = Records.AsQueryable().Where(r => r.UserId == greetFurId).ToList();
+            result.Sort((a, b) => a.Date.CompareTo(b.Date));
+            return result;
+        }
+
+        /// <summary>
         /// Gets a number of days of activity for a user from a given <paramref name="day"/> up to a given <paramref name="length"/>.
         /// </summary>
         /// <param name="greetFurId">The ID of the target user to query activity for.</param>
@@ -110,11 +123,11 @@ namespace Dexter.Databases.GreetFur
         /// </summary>
         /// <param name="greetFurId">The ID of the target user to update.</param>
         /// <param name="increment">The amount of new messages to log.</param>
-        /// <param name="mutedUser">Whether the user has muted another member.</param>
+        /// <param name="activity">Used to log different types of activity.</param>
         /// <param name="date">The date and time to modify a record for.</param>
         /// <returns>The <see cref="GreetFurRecord"/> that was modified.</returns>
 
-        public GreetFurRecord AddActivity(ulong greetFurId, int increment = 1, bool mutedUser = false, DateTimeOffset date = default)
+        public GreetFurRecord AddActivity(ulong greetFurId, int increment = 1, ActivityFlags activity = ActivityFlags.None, DateTimeOffset date = default)
         {
             if (date == default)
             {
@@ -122,6 +135,20 @@ namespace Dexter.Databases.GreetFur
             }
             int day = GetDayFromDate(date);
 
+            return AddActivity(greetFurId, increment, activity, day);
+        }
+
+        /// <summary>
+        /// Adds new activity to a target user for the specified <paramref name="day"/>.
+        /// </summary>
+        /// <param name="greetFurId">The ID of the target user to update.</param>
+        /// <param name="increment">The amount of new messages to log.</param>
+        /// <param name="activity">Used to log different types of activity.</param>
+        /// <param name="day">The amount of days since UNIX time that precede this record.</param>
+        /// <returns>The <see cref="GreetFurRecord"/> that was modified.</returns>
+        
+        public GreetFurRecord AddActivity(ulong greetFurId, int increment, ActivityFlags activity, int day)
+        {
             GreetFurRecord r = GetActivity(greetFurId, day);
             if (r is null)
             {
@@ -131,13 +158,13 @@ namespace Dexter.Databases.GreetFur
                     UserId = greetFurId,
                     Date = day,
                     MessageCount = 0,
-                    MutedUser = false
+                    Activity = ActivityFlags.None
                 };
                 Records.Add(r);
             }
 
             r.MessageCount += increment;
-            r.MutedUser |= mutedUser;
+            r.Activity |= activity;
 
             SaveChanges();
             return r;

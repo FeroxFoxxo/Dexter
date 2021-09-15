@@ -1,6 +1,7 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.GreetFur;
+using Dexter.Databases.UserProfiles;
 using Dexter.Services;
 using Google.Apis.Sheets.v4;
 
@@ -27,6 +28,12 @@ namespace Dexter.Commands
         public GreetFurConfiguration GreetFurConfiguration { get; set; }
 
         /// <summary>
+        /// A Configuration file containing linguistic information used to parse time zones.
+        /// </summary>
+
+        public LanguageConfiguration LanguageConfiguration { get; set; }
+
+        /// <summary>
         /// A wrapper for useful GreetFur data and a wrapper for spreadsheet manipulation and access.
         /// </summary>
 
@@ -37,6 +44,12 @@ namespace Dexter.Commands
         /// </summary>
 
         public GreetFurDB GreetFurDB { get; set; }
+
+        /// <summary>
+        /// A database with information about GreetFur profile preferences.
+        /// </summary>
+
+        public ProfilesDB ProfilesDB { get; set; }
 
         /// <summary>
         /// A reference to the command module responsible for muting users.

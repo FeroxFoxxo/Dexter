@@ -59,10 +59,46 @@ namespace Dexter.Configurations
         public string TotalID { get; set; }
 
         /// <summary>
+        /// The minimum amount of GreetFur messages in MNG for a GreetFur to have been considered active.
+        /// </summary>
+
+        public int GreetFurMinimumDailyMessages { get; set; }
+
+        /// <summary>
+        /// Whether to consider a GreetFur active if they have muted someone within a day.
+        /// </summary>
+
+        public bool GreetFurActiveWithMute { get; set; }
+
+        /// <summary>
+        /// The regular expression pattern that matches GreetFur-specific mutes.
+        /// </summary>
+
+        public string GreetFurMutePattern { get; set; }
+
+        /// <summary>
+        /// The first day since UNIX time that tracking for GreetFur activity started (defines week 1)
+        /// </summary>
+
+        public int FirstTrackingDay { get; set; }
+
+        /// <summary>
         /// The Information dictionary stores all the column indexes and their respective names.
         /// </summary>
 
         public Dictionary<string, int> Information { get; set; }
+
+        /// <summary>
+        /// The Cells dictionary stores all relevant individual cells in the spreadsheet.
+        /// </summary>
+
+        public Dictionary<string, string> Cells { get; set; }
+
+        /// <summary>
+        /// Contains the general template for new cells in the fortnight sheet.
+        /// </summary>
+
+        public Dictionary<int, string> FortnightTemplates { get; set; }
 
         /// <summary>
         /// The AWOO role ID is used for finding if a GreetFur is attempting to mute someone already in the server.

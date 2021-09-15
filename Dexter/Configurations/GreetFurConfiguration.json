@@ -3,18 +3,45 @@
   "CredentialFile": "Credentials.json",
   "TokenFile": "Token",
   "SpreadSheetID": "1nOJCMRLuZqY3gJGx-1Stj5Peq1vZaQvGL9wNUXEuE68",
-  "FortnightSpreadsheet": "Sheet1",
+  "FortnightSpreadsheet": "Testing",
   "TheBigPictureSpreadsheet": "The Big Picture",
   "IDColumnIndex": "B",
   "TotalID": "F",
   "Information": {
+    "Users": 0,
+    "IDs": 1,
     "Notes": 16,
     "Yes": 18,
     "No": 19,
     "Exempts": 20,
     "W1": 21,
     "W2": 22,
-    "Manager": 29
+    "Manager": 29,
+    "ManagerList": 31
   },
-  "AwooRole": 815091090117885974
+  "Cells": {
+    "FirstDay": "C1"
+  },
+  "FortnightTemplates": {
+    "0": "{Tag}",
+    "1": "{Id}",
+    "17": "=IF(ROW(R{N})=LOOKUP(AC{N},AE:AE,AG:AG),LOOKUP(AC{N},AE:AE,AF:AF),IF(AC{N}=AC{N+1},\"\",\"_____________\"))",
+    "18": "=IF($Z$7,COUNTIF($C{N}:$P{N}, \"Y*\"),\"\")",
+    "19": "=IF($Z$7,COUNTIF($C{N}:$P{N}, \"N*\"),\"\")",
+    "20": "=IF($Z$7,COUNTIF($C{N}:$P{N}, \"=Exempt\"),\"\")",
+    "21": "=IF($Z$8,COUNTIF($C{N}:$I{N}, \"Y*\"),\"\")",
+    "22": "=IF($Z$8,COUNTIF($J{N}:$P{N}, \"Y*\"),\"\")",
+    "23": "=IF($Z$5,IF($AA4,1,0),IF($Z$4,IF($AB{N},1,0),IF($Z$2,IF($X{N-1}=1,0,1),$X{N-1})))",
+    "26": "FALSE",
+    "27": "{Manager}",
+    "28": "=IF(AB{N}=AB{N-1},AC{N-1},AC{N-1}+1)",
+    "29": "=LOOKUP(AC{N},AE:AE,AF:AF)",
+    "30": "=IF(OR(AE{N-1}=\"\",AF{N}=\"\"),\"\",AE{N-1}+1)",
+    "32": "=IF(AF{N}=\"\",\"\",CEILING(LABELLOC(AC$2:AC, AE{N}) + 1))"
+  },
+  "AwooRole": 815091090117885974,
+  "GreetFurMinimumDailyMessages": 10,
+  "GreetFurActiveWithMute": true,
+  "GreetFurMutePattern": "^!mute\\s(<@!?)?[0-9]{18}>?(\\s|$)",
+  "FirstTrackingDay": 18190
 }

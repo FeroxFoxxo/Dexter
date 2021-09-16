@@ -24,6 +24,12 @@ namespace Dexter.Services
         public LevelingConfiguration LevelingConfiguration { get; set; }
 
         /// <summary>
+        /// Grants access to the debugging tools used to print information to the terminal.
+        /// </summary>
+
+        public LoggingService LoggingService { get; set; }
+
+        /// <summary>
         /// A dedicated random number generator used for uniformly random XP determination.
         /// </summary>
 
@@ -210,11 +216,34 @@ namespace Dexter.Services
             /// <summary>
             /// A dictionary containing the roles changed for the user. Items contained under <see langword="true"/> habe been added. Items contained under <see langword="false"/> have been removed. 
             /// </summary>
-            public readonly Dictionary<bool, IRole[]> rolesChanged;
+            public readonly Dictionary<bool, IEnumerable<IRole>> rolesChanged;
             /// <summary>
             /// The calculated level that the role modification is attempting to match.
             /// </summary>
             public readonly int readLevel;
+
+            /// <summary>
+            /// Creates a new response with the given parameters.
+            /// </summary>
+            /// <param name="target"></param>
+            /// <param name="success"></param>
+            /// <param name="result"></param>
+            /// <param name="rolesChanged"></param>
+            /// <param name="readLevel"></param>
+
+            public RoleModificationResponse(IGuildUser target, bool success, string result = "", Dictionary<bool, IEnumerable<IRole>> rolesChanged = null, int readLevel = -1)
+            {
+                this.target = target;
+                this.success = success;
+                this.result = result;
+                if (rolesChanged is not null)
+                    this.rolesChanged = rolesChanged;
+                else
+                    this.rolesChanged = new Dictionary<bool, IEnumerable<IRole>>() { { false, Array.Empty<IRole>() }, { true, Array.Empty<IRole>() } };
+                this.readLevel = readLevel;
+
+                this.readLevel = readLevel;
+            }
 
             /// <summary>
             /// Gives a description of the response in a human-readable format.
@@ -230,7 +259,7 @@ namespace Dexter.Services
                     foreach (IRole r in rolesChanged[true]) added.Add(r.Name);
 
                     StringBuilder txt = new();
-                    txt.Append($"Changed roles for {target.Username} to match level {readLevel}.");
+                    txt.Append($"Changed roles for {target?.Username ?? "Unknown"} to match level {readLevel}.");
                     if (added.Count > 0) txt.Append($"\nAdded roles: {string.Join(", ", added)}.");
                     if (removed.Count > 0) txt.Append($"\nRemoved roles: {string.Join(", ", removed)}.");
                     if (!string.IsNullOrEmpty(result)) txt.Append($"\nAdditional info: {result}.");
@@ -239,8 +268,20 @@ namespace Dexter.Services
                 }
                 else
                 {
-                    return $"Changed no roles for {target.Username}; perceived level: {readLevel}. Result {result}.";
+                    return $"Changed no roles for {target?.Username ?? "Unknown"}; perceived level: {readLevel}. Result: {result}.";
                 }
+            }
+
+            /// <summary>
+            /// Logs the message using a logging service.
+            /// </summary>
+            /// <param name="logger">The logging service to use.</param>
+            /// <returns>An awaitable <see cref="Task"/> object.</returns>
+
+            public async Task<RoleModificationResponse> Log(LoggingService logger)
+            {
+                await logger.LogMessageAsync(new LogMessage(LogSeverity.Warning, "UpdateRoles", this.ToString()));
+                return this;
             }
         }
 
@@ -250,22 +291,24 @@ namespace Dexter.Services
         /// <param name="user">The user to modify the role list for.</param>
         /// <param name="removeExtra">Whether to remove roles above the rank of the user.</param>
         /// <param name="level">The level of the user, autocalculated if below 0.</param>
-        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully; and yields a <see cref="RoleModificationResponse"/> with information about the completed operation.</returns>
 
         public async Task<RoleModificationResponse> UpdateRolesWithInfo(IGuildUser user, bool removeExtra = false, int level = -1)
         {
-            if (user is null || !LevelingConfiguration.HandleRoles) return false;
+            if (user is null) return await new RoleModificationResponse(user, false, "Received user is null!").Log(LoggingService);
+            if (!LevelingConfiguration.HandleRoles) return new RoleModificationResponse(user, false, "Dexter does not manage roles in this server!");
 
             if (level < 0)
             {
                 UserLevel ul = LevelingDB.Levels.Find(user.Id);
 
-                if (ul is null) return false;
+                if (ul is null) return new RoleModificationResponse(user, false, "No level data to fetch! User has no leveling records.", readLevel: 0);
                 level = ul.TotalLevel(LevelingConfiguration);
             }
 
             List<IRole> toAdd = new();
             List<IRole> toRemove = new();
+            List<IRole> foundLeveledRoles = new();
 
             SocketGuild guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
             HashSet<ulong> userRoles = user.RoleIds.ToHashSet();
@@ -282,8 +325,13 @@ namespace Dexter.Services
                 if (level >= rank.Key && !userRoles.Contains(rank.Value))
                     toAdd.Add(guild.GetRole(rank.Value));
 
-                else if (removeExtra && level < rank.Key && userRoles.Contains(rank.Value))
-                    toRemove.Add(guild.GetRole(rank.Value));
+                else if (userRoles.Contains(rank.Value))
+                {
+                    IRole r = guild.GetRole(rank.Value);
+                    foundLeveledRoles.Add(r);
+                    if (removeExtra && level < rank.Key)
+                        toRemove.Add(r);
+                }
             }
 
             if (user.RoleIds.Contains(LevelingConfiguration.NicknameDisabledRole))
@@ -309,7 +357,16 @@ namespace Dexter.Services
                 throw new NullReferenceException("At least one of the specified roles in configuration that should be applied does not exist!");
             }
 
-            return toAdd.Count > 0 || toRemove.Count > 0;
+            bool success = toAdd.Count > 0 || toRemove.Count > 0;
+            List<string> rolesFoundNames = new();
+            foreach (IRole r in foundLeveledRoles)
+            {
+                rolesFoundNames.Add(r.Name);
+            }
+            string rolesFoundExpression = rolesFoundNames.Count == 0 ? "" : $"Found roles: [{string.Join(", ", rolesFoundNames)}]";
+            string message = (success ? "" : "No role modifications are necessary; updated no roles. ") + rolesFoundExpression;
+            Dictionary<bool, IEnumerable<IRole>> mods = new Dictionary<bool, IEnumerable<IRole>>() { { false, toRemove }, { true, toAdd } };
+            return new RoleModificationResponse(user, success, message, mods, level);
         }
 
         /// <summary>

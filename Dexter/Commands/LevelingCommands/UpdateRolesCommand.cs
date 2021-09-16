@@ -3,6 +3,7 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
+using static Dexter.Services.LevelingService;
 
 namespace Dexter.Commands
 {
@@ -20,15 +21,6 @@ namespace Dexter.Commands
 
         public async Task UpdateRolesCommand()
         {
-
-            if (!LevelingConfiguration.HandleRoles)
-            {
-                await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle("Dexter Role Handling is disabled.")
-                    .WithDescription("Dexter is not currently responsible for handling roles! This command is disabled.")
-                    .SendEmbed(Context.Channel);
-                return;
-            }
             IGuildUser user = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id);
 
             if (user is null)
@@ -40,15 +32,17 @@ namespace Dexter.Commands
                 return;
             }
 
-            if (!await LevelingService.UpdateRoles(user, true))
+            RoleModificationResponse response = await LevelingService.UpdateRolesWithInfo(user, true);
+
+            if (!response.success)
             {
-                await Context.Channel.SendMessageAsync("Your roles are already up to date!");
+                await Context.Channel.SendMessageAsync(response.ToString());
             }
             else
             {
                 await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle("Successfully Updated Roles!")
-                    .WithDescription("Your roles have been updated to those adequate for your current Dexter level!")
+                    .WithTitle("Operation Successful!")
+                    .WithDescription(response.ToString())
                     .SendEmbed(Context.Channel);
             }
 

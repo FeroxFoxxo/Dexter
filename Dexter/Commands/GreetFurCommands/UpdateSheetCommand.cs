@@ -54,16 +54,12 @@ namespace Dexter.Commands
                     case "-w":
                     case "--week":
                         if (++i < splitArgs.Length)
-                        {
                             if (!int.TryParse(splitArgs[i], out week))
                             {
                                 errors.Add($"Value {splitArgs[i].Replace('@', '-')} can't be parsed to a valid week number!");
                             }
-                        }
                         else
-                        {
                             errors.Add("Missing numeric parameter for \"week\".");
-                        }
                         break;
                     case "-re":
                     case "--read-exemptions":

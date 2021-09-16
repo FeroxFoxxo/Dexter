@@ -5,6 +5,7 @@ using Dexter.Databases.Levels;
 using Dexter.Databases.UserRestrictions;
 using Discord;
 using Discord.WebSocket;
+using System.Text;
 
 namespace Dexter.Services
 {
@@ -129,6 +130,129 @@ namespace Dexter.Services
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         public async Task<bool> UpdateRoles(IGuildUser user, bool removeExtra = false, int level = -1)
+        {
+            if (user is null || !LevelingConfiguration.HandleRoles) return false;
+
+            if (level < 0)
+            {
+                UserLevel ul = LevelingDB.Levels.Find(user.Id);
+
+                if (ul is null) return false;
+                level = ul.TotalLevel(LevelingConfiguration);
+            }
+
+            List<IRole> toAdd = new();
+            List<IRole> toRemove = new();
+
+            SocketGuild guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
+            HashSet<ulong> userRoles = user.RoleIds.ToHashSet();
+
+            if (LevelingConfiguration.MemberRoleLevel > 0
+                && level >= LevelingConfiguration.MemberRoleLevel
+                && !userRoles.Contains(LevelingConfiguration.MemberRoleID))
+            {
+                toAdd.Add(guild.GetRole(LevelingConfiguration.MemberRoleID));
+            }
+
+            foreach (KeyValuePair<int, ulong> rank in LevelingConfiguration.Levels)
+            {
+                if (level >= rank.Key && !userRoles.Contains(rank.Value))
+                    toAdd.Add(guild.GetRole(rank.Value));
+
+                else if (removeExtra && level < rank.Key && userRoles.Contains(rank.Value))
+                    toRemove.Add(guild.GetRole(rank.Value));
+            }
+
+            if (user.RoleIds.Contains(LevelingConfiguration.NicknameDisabledRole))
+            {
+                SocketRole replRole = guild.GetRole(LevelingConfiguration.NicknameDisabledReplacement);
+
+                if (user.RoleIds.Contains(LevelingConfiguration.NicknameDisabledReplacement))
+                    toRemove.Add(replRole);
+
+                if (toAdd.Contains(replRole))
+                    toAdd.Remove(replRole);
+            }
+
+            try
+            {
+                if (toAdd.Count > 0)
+                    await user.AddRolesAsync(toAdd);
+                if (toRemove.Count > 0)
+                    await user.RemoveRolesAsync(toRemove);
+            }
+            catch (NullReferenceException)
+            {
+                throw new NullReferenceException("At least one of the specified roles in configuration that should be applied does not exist!");
+            }
+
+            return toAdd.Count > 0 || toRemove.Count > 0;
+        }
+
+        /// <summary>
+        /// Represents the result of a role modification operation.
+        /// </summary>
+
+        public class RoleModificationResponse
+        {
+            /// <summary>
+            /// The target user of the role modification.
+            /// </summary>
+            public readonly IGuildUser target;
+            /// <summary>
+            /// Whether the role update was successful.
+            /// </summary>
+            public readonly bool success;
+            /// <summary>
+            /// The result of the operation; such as an error description or important extra information.
+            /// </summary>
+            public readonly string result;
+            /// <summary>
+            /// A dictionary containing the roles changed for the user. Items contained under <see langword="true"/> habe been added. Items contained under <see langword="false"/> have been removed. 
+            /// </summary>
+            public readonly Dictionary<bool, IRole[]> rolesChanged;
+            /// <summary>
+            /// The calculated level that the role modification is attempting to match.
+            /// </summary>
+            public readonly int readLevel;
+
+            /// <summary>
+            /// Gives a description of the response in a human-readable format.
+            /// </summary>
+            /// <returns>A string containing a human-readable description of the content of the object.</returns>
+            public override string ToString()
+            {
+                if (success)
+                {
+                    List<string> removed = new();
+                    List<string> added = new();
+                    foreach (IRole r in rolesChanged[false]) removed.Add(r.Name);
+                    foreach (IRole r in rolesChanged[true]) added.Add(r.Name);
+
+                    StringBuilder txt = new();
+                    txt.Append($"Changed roles for {target.Username} to match level {readLevel}.");
+                    if (added.Count > 0) txt.Append($"\nAdded roles: {string.Join(", ", added)}.");
+                    if (removed.Count > 0) txt.Append($"\nRemoved roles: {string.Join(", ", removed)}.");
+                    if (!string.IsNullOrEmpty(result)) txt.Append($"\nAdditional info: {result}.");
+
+                    return txt.ToString();
+                }
+                else
+                {
+                    return $"Changed no roles for {target.Username}; perceived level: {readLevel}. Result {result}.";
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates the ranked roles a user has based on their level.
+        /// </summary>
+        /// <param name="user">The user to modify the role list for.</param>
+        /// <param name="removeExtra">Whether to remove roles above the rank of the user.</param>
+        /// <param name="level">The level of the user, autocalculated if below 0.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
+
+        public async Task<RoleModificationResponse> UpdateRolesWithInfo(IGuildUser user, bool removeExtra = false, int level = -1)
         {
             if (user is null || !LevelingConfiguration.HandleRoles) return false;
 

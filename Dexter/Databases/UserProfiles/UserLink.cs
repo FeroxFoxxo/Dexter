@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+using System;
+using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

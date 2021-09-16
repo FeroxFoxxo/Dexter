@@ -1,4 +1,5 @@
-﻿namespace Dexter.Databases.Games
+using System.Collections.Generic;
+namespace Dexter.Databases.Games
 {
 
     /// <summary>

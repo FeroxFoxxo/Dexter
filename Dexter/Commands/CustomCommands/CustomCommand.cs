@@ -1,4 +1,7 @@
-﻿using Dexter.Attributes.Methods;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Configurations;
 using Dexter.Databases.CustomCommands;
 using Dexter.Enums;

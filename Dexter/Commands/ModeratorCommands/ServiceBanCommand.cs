@@ -1,4 +1,7 @@
-﻿using Dexter.Attributes.Methods;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Databases.UserRestrictions;
 using Dexter.Enums;
 using Dexter.Extensions;
@@ -120,7 +123,7 @@ namespace Dexter.Commands
             }
         }
 
-        private Restriction ParseRestriction(string[] Input, out bool[] Success)
+        private static Restriction ParseRestriction(string[] Input, out bool[] Success)
         {
             Restriction Result = Restriction.None;
             Success = new bool[Input.Length];

@@ -1,4 +1,4 @@
-﻿namespace Dexter.Helpers
+namespace Dexter.Helpers
 {
 
     /// <summary>
@@ -17,7 +17,7 @@
         /// <param name="Item">The item to append to <paramref name="Array"/>.</param>
         /// <param name="OverrideDefault">In case you're using a nonstandard default for your array (empty elements).</param>
 
-        public void AddLinear<T>(ref T[] Array, T Item, T OverrideDefault = default)
+        public static void AddLinear<T>(ref T[] Array, T Item, T OverrideDefault = default)
         {
             if (!Array[^1].Equals(OverrideDefault))
             {
@@ -46,7 +46,7 @@
         /// <param name="Item">The item to look for in <paramref name="Array"/>, the first occurrence of which will be removed.</param>
         /// <returns><see langword="true"/> if <paramref name="Item"/> was found, otherwise <see langword="false"/>.</returns>
 
-        public bool RemoveLinear<T>(ref T[] Array, T Item)
+        public static bool RemoveLinear<T>(ref T[] Array, T Item)
         {
             bool Found = false;
             int LastNonDefault = 0;

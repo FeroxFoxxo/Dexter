@@ -1,4 +1,4 @@
-﻿namespace Dexter.Databases.Proposals
+namespace Dexter.Databases.Proposals
 {
 
     /// <summary>

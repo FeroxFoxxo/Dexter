@@ -1,4 +1,8 @@
-﻿using Dexter.Attributes.Methods;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Configurations;
 using Dexter.Extensions;
 using Dexter.Helpers;
@@ -198,11 +202,11 @@ namespace Dexter.Commands
             {
                 StringBuilder b = new();
                 if (roll >= underlineMin && roll <= underlineMax) b.Append("__");
-                if (roll >= italicizeMin && roll <= italicizeMax) b.Append("*");
+                if (roll >= italicizeMin && roll <= italicizeMax) b.Append('*');
                 if (roll >= highlightMin && roll <= highlightMax) b.Append("**");
                 b.Append(roll);
                 if (roll >= highlightMin && roll <= highlightMax) b.Append("**");
-                if (roll >= italicizeMin && roll <= italicizeMax) b.Append("*");
+                if (roll >= italicizeMin && roll <= italicizeMax) b.Append('*');
                 if (roll >= underlineMin && roll <= underlineMax) b.Append("__");
                 return b.ToString();
             }

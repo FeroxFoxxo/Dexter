@@ -1,11 +1,10 @@
-﻿using Dexter.Attributes.Methods;
-using Discord;
-using Discord.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
+using Discord;
+using Discord.Commands;
 using static Dexter.Services.GreetFurService;
 
 namespace Dexter.Commands
@@ -54,16 +53,12 @@ namespace Dexter.Commands
                     case "-w":
                     case "--week":
                         if (++i < splitArgs.Length)
-                        {
                             if (!int.TryParse(splitArgs[i], out week))
                             {
                                 errors.Add($"Value {splitArgs[i].Replace('@', '-')} can't be parsed to a valid week number!");
                             }
-                        }
                         else
-                        {
                             errors.Add("Missing numeric parameter for \"week\".");
-                        }
                         break;
                     case "-re":
                     case "--read-exemptions":

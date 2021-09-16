@@ -1,4 +1,5 @@
-﻿namespace Dexter.Attributes.Classes
+using System;
+namespace Dexter.Attributes.Classes
 {
 
     /// <summary>

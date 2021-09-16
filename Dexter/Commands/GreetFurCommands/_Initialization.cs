@@ -1,9 +1,8 @@
-﻿using Dexter.Abstractions;
+using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.GreetFur;
 using Dexter.Databases.UserProfiles;
 using Dexter.Services;
-using Google.Apis.Sheets.v4;
 
 namespace Dexter.Commands
 {

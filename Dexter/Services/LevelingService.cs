@@ -1,4 +1,8 @@
-﻿using Dexter.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
 using Dexter.Databases.Levels;
@@ -101,7 +105,7 @@ namespace Dexter.Services
                     }
             }
 
-            LevelingDB.OnTextCooldowns = new();
+            LevelingDB.onTextCooldowns = new();
             LevelingDB.SaveChanges();
         }
 
@@ -112,7 +116,7 @@ namespace Dexter.Services
 
             if (message.Channel is IDMChannel || LevelingConfiguration.DisabledTCs.Contains(message.Channel.Id)) return;
 
-            if (LevelingDB.OnTextCooldowns.Contains(message.Author.Id)) return;
+            if (LevelingDB.onTextCooldowns.Contains(message.Author.Id)) return;
 
             await LevelingDB.IncrementUserXP(
                 Random.Next(LevelingConfiguration.TextMinXPGiven, LevelingConfiguration.TextMaxXPGiven + 1),
@@ -122,7 +126,7 @@ namespace Dexter.Services
                 LevelingConfiguration.TextSendLevelUpMessage
                 );
 
-            LevelingDB.OnTextCooldowns.Add(message.Author.Id);
+            LevelingDB.onTextCooldowns.Add(message.Author.Id);
             LevelingDB.SaveChanges();
 
         }

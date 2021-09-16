@@ -1,4 +1,4 @@
-﻿namespace Dexter.Databases.Configurations
+namespace Dexter.Databases.Configurations
 {
 
     /// <summary>

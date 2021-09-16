@@ -1,4 +1,7 @@
-﻿using Dexter.Abstractions;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using Dexter.Abstractions;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;

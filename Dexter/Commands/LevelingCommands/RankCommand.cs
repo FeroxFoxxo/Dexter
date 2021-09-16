@@ -1,4 +1,9 @@
-﻿using Dexter.Attributes.Methods;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Configurations;
 using Dexter.Databases.Levels;
 using Dexter.Enums;
@@ -13,6 +18,7 @@ using System.Drawing.Text;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Net.Http;
 
 namespace Dexter.Commands
 {

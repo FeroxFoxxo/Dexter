@@ -1,4 +1,7 @@
-﻿using Dexter.Configurations;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Dexter.Configurations;
 using Dexter.Databases.Games;
 using Dexter.Extensions;
 using Discord;

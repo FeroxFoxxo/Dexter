@@ -1,4 +1,6 @@
-﻿using Dexter.Configurations;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Dexter.Configurations;
 using Dexter.Databases.CustomCommands;
 using Dexter.Enums;
 using Dexter.Extensions;

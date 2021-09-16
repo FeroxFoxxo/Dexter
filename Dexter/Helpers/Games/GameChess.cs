@@ -1,4 +1,9 @@
-﻿using Dexter.Configurations;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Configurations;
 using Dexter.Databases.Games;
 using Dexter.Extensions;
 using Discord;
@@ -161,7 +166,7 @@ namespace Dexter.Helpers.Games
             }
         }
 
-        private GameInstance game;
+        private readonly GameInstance game;
 
         /// <summary>
         /// Creates a new instance of a chess game given a generic GameInstance <paramref name="game"/>

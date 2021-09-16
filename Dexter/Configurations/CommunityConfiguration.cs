@@ -1,4 +1,5 @@
-﻿using Dexter.Abstractions;
+using System.Collections.Generic;
+using Dexter.Abstractions;
 using Dexter.Databases.CommunityEvents;
 
 namespace Dexter.Configurations

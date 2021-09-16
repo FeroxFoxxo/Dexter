@@ -1,11 +1,10 @@
-﻿using Dexter.Attributes.Methods;
-using Discord;
-using Discord.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
+using Discord;
+using Discord.Commands;
 using static Dexter.Services.GreetFurService;
 
 namespace Dexter.Commands

@@ -1,4 +1,7 @@
-﻿using Dexter.Configurations;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Configurations;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;

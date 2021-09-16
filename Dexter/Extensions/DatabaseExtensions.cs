@@ -1,4 +1,6 @@
-﻿using Dexter.Databases.FunTopics;
+using System;
+using System.Linq;
+using Dexter.Databases.FunTopics;
 using Dexter.Enums;
 using Microsoft.EntityFrameworkCore;
 

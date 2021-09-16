@@ -1,4 +1,4 @@
-﻿using Dexter.Helpers.Games;
+using Dexter.Helpers.Games;
 using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.Games

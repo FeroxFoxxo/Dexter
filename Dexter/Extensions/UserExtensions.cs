@@ -1,4 +1,6 @@
-﻿using Dexter.Configurations;
+using System;
+using System.Linq;
+using Dexter.Configurations;
 using Dexter.Enums;
 using Discord;
 using Discord.WebSocket;

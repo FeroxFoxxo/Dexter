@@ -1,4 +1,5 @@
-﻿using Dexter.Configurations;
+using System.Threading.Tasks;
+using Dexter.Configurations;
 using Dexter.Databases.Games;
 using Discord;
 using Discord.WebSocket;

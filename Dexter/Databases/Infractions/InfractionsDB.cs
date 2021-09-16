@@ -1,4 +1,5 @@
-﻿using Dexter.Abstractions;
+using System.Linq;
+using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Enums;
 using Microsoft.EntityFrameworkCore;

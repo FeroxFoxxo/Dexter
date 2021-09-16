@@ -1,4 +1,8 @@
-﻿using Dexter.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Enums;
 using Dexter.Extensions;
@@ -7,6 +11,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using System.Reflection;
+using System.Net.Http;
 
 namespace Dexter.Services
 {

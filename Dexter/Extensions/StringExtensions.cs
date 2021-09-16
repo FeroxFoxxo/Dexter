@@ -1,9 +1,14 @@
-﻿using Dexter.Configurations;
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Configurations;
 using Discord;
 using Discord.WebSocket;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Net.Http;
 
 namespace Dexter.Extensions
 {

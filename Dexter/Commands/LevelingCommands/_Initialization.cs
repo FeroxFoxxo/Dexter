@@ -19,6 +19,12 @@ namespace Dexter.Commands
         public LevelingService LevelingService { get; set; }
 
         /// <summary>
+        /// Grants access to the console logging service for debugging.
+        /// </summary>
+
+        public LoggingService LoggingService { get; set; }
+
+        /// <summary>
         /// Holds all configuration specifically relevant to the Leveling System.
         /// </summary>
 

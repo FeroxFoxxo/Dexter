@@ -23,6 +23,7 @@ namespace Dexter.Commands
         [ExtendedSummary("Updates the values of the active spreadsheet tracking for GreetFurs; you may extend the functionality of the command by using specific arguments:\n" +
             "**-l** or **--last**: Sets the spreadsheet to the latest full spreadsheet period\n" +
             "**-n** or **--new**: Adds any untracked users with recent activity to the Greetfur spreadsheet\n" +
+            "**-s** or **--safe**: No non-empty cells will be overridden by the update operation\n" +
             "**-w [week]** or **--week [week]**: Sets the first week of the Spreadsheet to a week given by its number since tracking started.\n" +
             "**-re** or **--read-exemptions**: Reads all \"Exempt\" entries in the sheet and saves them to the relevant users for the time period requested (current by default, can be overridden with --last or --week)")]
         [Alias("updatespreadsheet")]
@@ -59,6 +60,10 @@ namespace Dexter.Commands
                             }
                         else
                             errors.Add("Missing numeric parameter for \"week\".");
+                        break;
+                    case "-s":
+                    case "--safe":
+                        opt |= GreetFurOptions.Safe;
                         break;
                     case "-re":
                     case "--read-exemptions":

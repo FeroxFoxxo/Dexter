@@ -20,7 +20,42 @@ namespace Dexter.Commands
     public partial class GreetFurCommands
     {
         const string SUMMARY = "Sets variables for a GreetFur's activity in the records for a given period of time.";
-        const string HELPSUMMARY = "";
+        const string HELPSUMMARY = "Edits GreetFur activity for a given period of time to a given value.\n" +
+            "SYNTAX: `setgreetfuractivity [User] [TimeActivity1] (TimeActivity2) (TimeActivity3) (...)`\n" +
+            "Where **TimeActivity** is a time period followed by an activity expression\n" +
+            "A time period may be expressed as a `day` or as `day-day` (two days separated by a hyphen (-), indicating a multi-day period); a day can be expressed as `w[WeekNumber][Weekday]` OR `(yyyy/)mm/dd`\n" +
+            "An activity expression is an optional set of flags ('E' for Exempt; 'M' for Mute; 'F' for Force) followed (without a space) by a number of messages.\n" +
+            "*Use `setgreetfuractivity examples` to see a list of example usages.";
+
+        /// <summary>
+        /// Used for examples.
+        /// </summary>
+        /// <param name="arg">An argument to follow the command, usually "examples".</param>
+        /// <returns>A <see cref="Task"/> object, which can be awaited until the method completes successfully.</returns>
+
+        [Command("setgreetfuractivity")]
+        [Alias("setgfactivity", "setactivity")]
+        [Summary("Use the argument \"examples\" to see examples of the use of this command.")]
+        [RequireModerator]
+        [BotChannel]
+
+        public async Task SetGreetFurActivityCommand(string arg)
+        {   
+            switch(arg.ToLower())
+            {
+                case "examples":
+                case "example":
+                case "eg":
+                case "e.g.":
+                    await BuildEmbed(EmojiEnum.Sign)
+                        .WithTitle("Command Use Examples")
+                        .WithDescription("`setgreetfuractivity @User w79mo-w80su E` - records a two-week exemption starting on Week 79's Monday.\n" +
+                            "`setgreetfuractivity @User 2019/11/23-2021/05/15 18 05/16-05/27 E11 05/28 M7 05/29-09/10 36` - sets activity divided into various chunks, with mute flags and exemptions with activity.\n" +
+                            "`setgreetfuractivity @User w95Monday-w96Wednesday F0` - force-deletes a user's activity; removing all exemptions, mutes, and logged messages for the selected time period.")
+                        .SendEmbed(Context.Channel);
+                    return;
+            }
+        }
 
         /// <summary>
         /// Alters a GreetFur's activity based on input arguments.
@@ -30,8 +65,6 @@ namespace Dexter.Commands
         /// <returns>A <see cref="Task"/> object, which can be awaited until the method completes successfully.</returns>
 
         [Command("setgreetfuractivity")]
-        [Summary(SUMMARY)]
-        [ExtendedSummary(HELPSUMMARY)]
         [Alias("setgfactivity", "setactivity")]
         [RequireModerator]
         [BotChannel]

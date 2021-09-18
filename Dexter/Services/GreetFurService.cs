@@ -90,6 +90,9 @@ namespace Dexter.Services
             if (user.GetPermissionLevel(DiscordSocketClient, BotConfiguration) < PermissionLevel.GreetFur)
                 return;
 
+            if (user.IsBot)
+                return;
+
             if (Regex.IsMatch(msg.Content, GreetFurConfiguration.GreetFurMutePattern))
             {
                 GreetFurDB.AddActivity(user.Id, 0, ActivityFlags.MutedUser);

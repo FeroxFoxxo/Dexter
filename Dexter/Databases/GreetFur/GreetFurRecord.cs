@@ -98,6 +98,8 @@ namespace Dexter.Databases.GreetFur
             string state;
             if (MessageCount >= greetFurConfiguration.GreetFurMinimumDailyMessages || (MutedUser && greetFurConfiguration.GreetFurActiveWithMute))
                 state = "Y";
+            else if (IsExempt)
+                return "Exempt";
             else if (Date == currentDay)
                 state = "?";
             else if (Date < currentDay)

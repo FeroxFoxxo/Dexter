@@ -125,9 +125,10 @@ namespace Dexter.Databases.GreetFur
         /// <param name="increment">The amount of new messages to log.</param>
         /// <param name="activity">Used to log different types of activity.</param>
         /// <param name="date">The date and time to modify a record for.</param>
+        /// <param name="save">Whether to save the database after the opertaion is completed.</param>
         /// <returns>The <see cref="GreetFurRecord"/> that was modified.</returns>
 
-        public GreetFurRecord AddActivity(ulong greetFurId, int increment = 1, ActivityFlags activity = ActivityFlags.None, DateTimeOffset date = default)
+        public GreetFurRecord AddActivity(ulong greetFurId, int increment = 1, ActivityFlags activity = ActivityFlags.None, DateTimeOffset date = default, bool save = true)
         {
             if (date == default)
             {
@@ -135,7 +136,7 @@ namespace Dexter.Databases.GreetFur
             }
             int day = GetDayFromDate(date);
 
-            return AddActivity(greetFurId, increment, activity, day);
+            return AddActivity(greetFurId, increment, activity, day, save);
         }
 
         /// <summary>
@@ -145,9 +146,10 @@ namespace Dexter.Databases.GreetFur
         /// <param name="increment">The amount of new messages to log.</param>
         /// <param name="activity">Used to log different types of activity.</param>
         /// <param name="day">The amount of days since UNIX time that precede this record.</param>
+        /// <param name="save">Whether to save the database after the opertaion is completed.</param>
         /// <returns>The <see cref="GreetFurRecord"/> that was modified.</returns>
         
-        public GreetFurRecord AddActivity(ulong greetFurId, int increment, ActivityFlags activity, int day)
+        public GreetFurRecord AddActivity(ulong greetFurId, int increment, ActivityFlags activity, int day, bool save = true)
         {
             GreetFurRecord r = GetActivity(greetFurId, day);
             if (r is null)
@@ -166,7 +168,8 @@ namespace Dexter.Databases.GreetFur
             r.MessageCount += increment;
             r.Activity |= activity;
 
-            SaveChanges();
+            if (save)
+                SaveChanges();
             return r;
         }
 

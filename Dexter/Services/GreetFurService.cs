@@ -304,8 +304,6 @@ namespace Dexter.Services
             if (r is null)
                 return "";
 
-            if (r.IsExempt) return "Exempt";
-
             if (day < 0)
             {
                 day = GreetFurDB.GetDayForUser(r.UserId);

@@ -6,7 +6,9 @@ using Dexter.Extensions;
 using Dexter.Services;
 using Discord;
 using Discord.Commands;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -196,10 +198,6 @@ namespace Dexter.Commands
                 {
                     Match m;
                     m = Regex.Match(s, @"w([0-9]{1,11})(mo|tu|we|th|fr|sa|su)[a-z]*", RegexOptions.IgnoreCase);
-                    foreach (Group g in m.Groups)
-                    {
-                        Console.Out.WriteLine(g.Value);
-                    }
 
                     if (m.Success)
                     {

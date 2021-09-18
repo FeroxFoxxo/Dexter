@@ -88,6 +88,7 @@ namespace Dexter.Commands
                 if (waitingChannel is null)
                 {
                     IRole vcRequiredRole = Context.Guild.GetRole(BotConfiguration.UnifursalRoleID);
+                    IRole greetFurRole = Context.Guild.GetRole(BotConfiguration.GreetFurRoleID);
 
                     waitingChannel = await Context.Guild.CreateVoiceChannelAsync(UtilityConfiguration.WaitingVCName);
 
@@ -98,7 +99,8 @@ namespace Dexter.Commands
                     await waitingChannel.AddPermissionOverwriteAsync(awooRole, OverwritePermissions.DenyAll(waitingChannel).Modify(viewChannel: PermValue.Allow, connect: PermValue.Allow));
 
                     await waitingChannel.AddPermissionOverwriteAsync(vcRequiredRole, OverwritePermissions.DenyAll(waitingChannel).Modify(viewChannel: PermValue.Allow, connect: PermValue.Allow, moveMembers: PermValue.Allow));
-                    
+                    await waitingChannel.AddPermissionOverwriteAsync(greetFurRole, OverwritePermissions.DenyAll(waitingChannel).Modify(viewChannel: PermValue.Allow, connect: PermValue.Allow, moveMembers: PermValue.Allow));
+
                     await waitingChannel.AddPermissionOverwriteAsync(staffRole, OverwritePermissions.InheritAll.Modify(manageChannel: PermValue.Allow, viewChannel: PermValue.Allow, connect: PermValue.Allow, speak: PermValue.Allow, muteMembers: PermValue.Allow, deafenMembers: PermValue.Allow, moveMembers: PermValue.Allow, useVoiceActivation: PermValue.Allow));
                 }
 

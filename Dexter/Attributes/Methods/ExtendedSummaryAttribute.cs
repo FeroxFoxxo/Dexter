@@ -1,4 +1,5 @@
-﻿namespace Dexter.Attributes.Methods
+using System;
+namespace Dexter.Attributes.Methods
 {
 
     /// <summary>

@@ -1,10 +1,13 @@
-﻿using Dexter.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Abstractions;
 using Dexter.Configurations;
-using Dexter.Databases.Games;
 using Dexter.Databases.GreetFur;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Dexter.Helpers.Games;
 using Discord;
 using Discord.WebSocket;
 using Google.Apis.Sheets.v4.Data;
@@ -16,6 +19,7 @@ using Google.Apis.Services;
 using Dexter.Commands;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource;
 using System.Text;
+using System.Threading;
 
 namespace Dexter.Services
 {
@@ -160,7 +164,11 @@ namespace Dexter.Services
                     for (int d = 0; d < TRACKING_LENGTH; d++)
                     {
                         bool isReadable = firstDataIndex + d < toUpdate.Values[i].Count;
-                        bool isExempt = isReadable && toUpdate.Values[i][firstDataIndex + d] as string == "Exempt";
+
+                        string ogText = "";
+                        if (isReadable)
+                            ogText = toUpdate.Values[i][firstDataIndex + d] as string;
+                        bool isExempt = ogText == "Exempt";
                         
                         if (options.HasFlag(GreetFurOptions.ReadExemptions))
                         {
@@ -184,9 +192,12 @@ namespace Dexter.Services
                                 records[d].IsExempt = false;
                                 GreetFurDB.SaveChanges();
                             }
-                        }                       
+                        }
 
-                        newRow[firstDataIndex + d] = DayFormat(records[d], localDay);
+                        if (options.HasFlag(GreetFurOptions.Safe) && !string.IsNullOrEmpty(ogText))
+                            newRow[firstDataIndex + d] = ogText;
+                        else 
+                            newRow[firstDataIndex + d] = DayFormat(records[d], localDay);
                     }
                     toUpdate.Values[i] = newRow;
                 } 
@@ -274,9 +285,13 @@ namespace Dexter.Services
             /// </summary>
             AddNewRows = 2,
             /// <summary>
+            /// If enabled, the update operation will never overwrite cells that contain information.
+            /// </summary>
+            Safe = 4,
+            /// <summary>
             /// Whether to read exemptions and log them to records while reading the sheet.
             /// </summary>
-            ReadExemptions = 4
+            ReadExemptions = 8
         }
 
         private string[] RowFromRecords(GreetFurRecord[] records, int row, bool managerToggle = false)

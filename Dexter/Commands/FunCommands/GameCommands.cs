@@ -1,4 +1,8 @@
-﻿using Dexter.Attributes.Methods;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Databases.Games;
 using Dexter.Enums;
 using Dexter.Extensions;
@@ -461,7 +465,7 @@ namespace Dexter.Commands
             return true;
         }
 
-        private bool UnbanPlayer(ulong PlayerID, GameInstance Instance)
+        private static bool UnbanPlayer(ulong PlayerID, GameInstance Instance)
         {
             if (Instance is null) return false;
 

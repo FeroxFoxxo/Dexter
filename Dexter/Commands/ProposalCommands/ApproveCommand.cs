@@ -1,4 +1,5 @@
-﻿using Dexter.Attributes.Methods;
+using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Databases.Proposals;
 using Dexter.Services;
 using Discord;

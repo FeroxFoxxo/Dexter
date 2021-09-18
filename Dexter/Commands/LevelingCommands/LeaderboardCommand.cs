@@ -1,4 +1,9 @@
-﻿using Dexter.Configurations;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Configurations;
 using Dexter.Databases.Levels;
 using Dexter.Extensions;
 using Dexter.Helpers;
@@ -63,7 +68,7 @@ namespace Dexter.Commands
         /// </summary>
         /// <param name="levels">The Leaderboard items to include in the leaderboard.</param>
         /// <returns>A string containing the path to the generated file.</returns>
-        public string LeaderboardPath(IEnumerable<LeaderboardItem> levels)
+        public static string LeaderboardPath(IEnumerable<LeaderboardItem> levels)
         {
             const string tempCacheFileName = "leaderboard.html";
 
@@ -102,7 +107,7 @@ namespace Dexter.Commands
 
         public class LeaderboardItem
         {
-            private int rank;
+            private readonly int rank;
             /// <summary>
             /// The userlevel corresponding to the user whose rank is <see cref="rank"/> on text.
             /// </summary>
@@ -111,8 +116,8 @@ namespace Dexter.Commands
             /// The userlevel corresponding to the user whose rank is <see cref="rank"/> on voice.
             /// </summary>
             public readonly UserLevel voice;
-            private DiscordSocketClient client;
-            private LevelingConfiguration config;
+            private readonly DiscordSocketClient client;
+            private readonly LevelingConfiguration config;
 
             /// <summary>
             /// Standard constructor of the class.

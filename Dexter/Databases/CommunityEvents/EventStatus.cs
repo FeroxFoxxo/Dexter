@@ -1,4 +1,4 @@
-﻿namespace Dexter.Databases.CommunityEvents
+namespace Dexter.Databases.CommunityEvents
 {
 
     /// <summary>

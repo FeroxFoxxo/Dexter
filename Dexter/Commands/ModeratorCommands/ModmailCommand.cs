@@ -1,4 +1,7 @@
-﻿using Dexter.Databases.Mail;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Databases.Mail;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;

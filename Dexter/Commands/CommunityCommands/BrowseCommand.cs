@@ -1,4 +1,8 @@
-﻿using Dexter.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Abstractions;
 using Dexter.Attributes.Methods;
 using Dexter.Databases.CommunityEvents;
 using Dexter.Databases.FunTopics;
@@ -176,7 +180,7 @@ namespace Dexter.Commands
 
         private EmbedBuilder[] BuildGamesEmbeds(GameInstance[] Games)
         {
-            if (Games.Length == 0) return new EmbedBuilder[0];
+            if (Games.Length == 0) return Array.Empty<EmbedBuilder>();
             EmbedBuilder[] Embeds = new EmbedBuilder[(Games.Length - 1) / GamesPerEmbed + 1];
 
             for (int i = 0; i < Embeds.Length; i++)
@@ -222,7 +226,7 @@ namespace Dexter.Commands
             return $"`{Game.GameID:D2}`|{GameTypeConversion.GameEmoji[Game.Type]}|`{ToLength(15, Game.Title)}`|`{ToLength(15, MasterName)}`|`{Players.Length:D2}`|{(Game.Password.Length > 0 ? "🔑" : "")}";
         }
 
-        private string ToLength(int Length, string S)
+        private static string ToLength(int Length, string S)
         {
             if (S.Length < Length) return S.PadRight(Length);
             return S.TruncateTo(Length);
@@ -230,9 +234,9 @@ namespace Dexter.Commands
 
         const int EventsPerEmbed = 5;
 
-        private EmbedBuilder[] BuildEventsEmbeds(CommunityEvent[] Events)
+        private static EmbedBuilder[] BuildEventsEmbeds(CommunityEvent[] Events)
         {
-            if (Events.Length == 0) return new EmbedBuilder[0];
+            if (Events.Length == 0) return Array.Empty<EmbedBuilder>();
             EmbedBuilder[] Embeds = new EmbedBuilder[(Events.Length - 1) / EventsPerEmbed + 1];
             int counter = 0;
 

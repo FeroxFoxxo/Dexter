@@ -1,4 +1,8 @@
-﻿using Dexter.Databases.FunTopics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Databases.FunTopics;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;

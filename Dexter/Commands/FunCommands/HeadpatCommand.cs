@@ -1,4 +1,9 @@
-﻿using AnimatedGif;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using AnimatedGif;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
@@ -7,6 +12,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Image = System.Drawing.Image;
+using System.Net.Http;
 
 namespace Dexter.Commands
 {

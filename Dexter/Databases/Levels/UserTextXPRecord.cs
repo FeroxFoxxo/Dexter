@@ -1,4 +1,4 @@
-﻿namespace Dexter.Databases.Levels
+namespace Dexter.Databases.Levels
 {
 
     /// <summary>

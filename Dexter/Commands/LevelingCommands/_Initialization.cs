@@ -1,4 +1,4 @@
-﻿using Dexter.Abstractions;
+using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Levels;
 using Dexter.Services;
@@ -17,6 +17,12 @@ namespace Dexter.Commands
         /// </summary>
 
         public LevelingService LevelingService { get; set; }
+
+        /// <summary>
+        /// Grants access to the console logging service for debugging.
+        /// </summary>
+
+        public LoggingService LoggingService { get; set; }
 
         /// <summary>
         /// Holds all configuration specifically relevant to the Leveling System.

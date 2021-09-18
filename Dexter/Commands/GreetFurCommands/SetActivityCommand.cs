@@ -6,8 +6,10 @@ using Dexter.Extensions;
 using Dexter.Services;
 using Discord;
 using Discord.Commands;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using static Dexter.Helpers.LanguageHelper;
 
 namespace Dexter.Commands

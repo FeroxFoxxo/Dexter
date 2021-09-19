@@ -73,8 +73,8 @@ namespace Dexter.Services
             catch (HttpException)
             {
                 await Debug.LogMessageAsync(
-                    LogSeverity.Warning,
-                    "Unable to change the bot's profile picture due to ratelimiting!"
+                    "Unable to change the bot's profile picture due to ratelimiting!",
+                    LogSeverity.Warning
                 );
             }
 

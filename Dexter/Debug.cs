@@ -34,7 +34,7 @@ namespace Dexter
         /// </summary>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public static async Task LogMessageAsync(LogSeverity Severity, string Message)
+        public static async Task LogMessageAsync(string Message, LogSeverity Severity = LogSeverity.Info)
         {
             MemberInfo Base = new StackFrame(4).GetMethod().DeclaringType;
 

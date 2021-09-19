@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 using System.Text.Json;
-using Interactivity;
+using Fergun.Interactive;
 
 namespace Dexter
 {
@@ -85,11 +85,7 @@ namespace Dexter
                 new CommandServiceConfig { IgnoreExtraArgs = true }
             );
 
-            ServiceCollection.AddSingleton<InteractivityService>();
-
-            ServiceCollection.AddSingleton(
-                new InteractivityConfig { DefaultTimeout = TimeSpan.FromSeconds(20), RunOnGateway = false }
-            );
+            ServiceCollection.AddSingleton<InteractiveService>();
 
             bool HasErrored = false;
 
@@ -111,9 +107,9 @@ namespace Dexter
                             ServiceCollection.AddSingleton(Type);
 
                             await Debug.LogMessageAsync (
-                                LogSeverity.Warning,
                                 $" This application does not have a configuration file for {Type.Name}! " +
-                                $"A mock JSON class has been created in its place..."
+                                $"A mock JSON class has been created in its place...",
+                                LogSeverity.Warning
                             );
                         }
                         else
@@ -134,8 +130,8 @@ namespace Dexter
                             catch (JsonException Exception)
                             {
                                 await Debug.LogMessageAsync(
-                                    LogSeverity.Error,
-                                    $" Unable to initialize {Type.Name}! Ran into: {Exception.InnerException}."
+                                    $" Unable to initialize {Type.Name}! Ran into: {Exception.InnerException}.",
+                                    LogSeverity.Error
                                 );
 
                                 HasErrored = true;

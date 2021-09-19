@@ -203,7 +203,10 @@ namespace Dexter.Services
                         }
 
                         // If the error is not an ObjectNotFound error, we log the message to the console with the appropriate data.
-                        await Debug.LogMessageAsync(LogSeverity.Warning, $"Unknown statement reached!\nCommand: {(commandInfo.IsSpecified ? commandInfo.Value.Name : null)}\nresult: {result}");
+                        await Debug.LogMessageAsync
+                            ($"Unknown statement reached!\nCommand: {(commandInfo.IsSpecified ? commandInfo.Value.Name : null)}\nresult: {result}",
+                            LogSeverity.Warning
+                        );
 
                         EmbedBuilder commandErrorEmbed;
 

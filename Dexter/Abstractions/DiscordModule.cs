@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
@@ -13,8 +12,8 @@ using Discord.Commands;
 using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;
-using Interactivity;
-using Interactivity.Pagination;
+using Fergun.Interactive;
+using Fergun.Interactive.Pagination;
 using Newtonsoft.Json;
 
 namespace Dexter.Abstractions
@@ -36,7 +35,7 @@ namespace Dexter.Abstractions
         /// <summary>
         /// The Interactivity class is used to create a reaction menu for the CreateReactionMenu method.
         /// </summary>
-        public InteractivityService Interactivity { get; set; }
+        public InteractiveService Interactive { get; set; }
 
         /// <summary>
         /// The TimerService class is used to create a timer for wait until an expiration time has been reached.
@@ -177,13 +176,14 @@ namespace Dexter.Abstractions
                 PageBuilderMenu[i] = PageBuilder.FromEmbedBuilder(EmbedBuilder[i]);
 
             Paginator Paginator = new StaticPaginatorBuilder()
-                .WithUsers(Context.User)
                 .WithPages(PageBuilderMenu)
-                .WithFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
                 .WithDefaultEmotes()
+                .WithFooter(PaginatorFooter.PageNumber)
+                .WithActionOnCancellation(ActionOnStop.DeleteInput)
+                .WithActionOnTimeout(ActionOnStop.DeleteInput)
                 .Build();
 
-            await Interactivity.SendPaginatorAsync(Paginator, Channel);
+            _ = Task.Run(async () => await Interactive.SendPaginatorAsync(Paginator, Context.Channel, TimeSpan.FromMinutes(10)));
         }
 
     }

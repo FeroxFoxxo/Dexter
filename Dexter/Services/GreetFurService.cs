@@ -401,8 +401,8 @@ namespace Dexter.Services
             if (!File.Exists(GreetFurConfiguration.CredentialFile))
             {
                 await Debug.LogMessageAsync(
-                    LogSeverity.Error,
-                    $"GreetFur SpreadSheet credential file {GreetFurConfiguration.CredentialFile} does not exist!"
+                    $"GreetFur SpreadSheet credential file {GreetFurConfiguration.CredentialFile} does not exist!",
+                    LogSeverity.Error
                 );
                 return;
             }

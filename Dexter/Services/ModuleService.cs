@@ -114,8 +114,8 @@ namespace Dexter.Services
 
             // Logs the number of currently enabled modules to the console.
             await Debug.LogMessageAsync(
-                LogSeverity.Info,
-                $"Initialized the module service with {Essentials} essential module(s) and {Others} other module(s)."
+                $"Initialized the module service with {Essentials} essential module(s) and {Others} other module(s).",
+                LogSeverity.Info
             );
         }
 

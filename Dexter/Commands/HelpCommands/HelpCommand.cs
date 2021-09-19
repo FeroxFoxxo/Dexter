@@ -27,7 +27,6 @@ namespace Dexter.Commands
         /// The information for this command is pulled from the "ExtendedSummary" attribute (default to "Summary").
         /// </param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-
         [Command("help")]
         [Summary("Displays all avaliable commands.")]
         [Alias("commands")]
@@ -67,7 +66,7 @@ namespace Dexter.Commands
                     {
                         PreconditionResult Result = await CommandInfo.CheckPreconditionsAsync(Context, ServiceCollection.BuildServiceProvider());
 
-                        if (Result.IsSuccess)
+                        if (Result.IsSuccess && CommandInfo.Summary != string.Empty)
                         {
                             string Field = $"**{BotConfiguration.Prefix}{string.Join("/", CommandInfo.Aliases.ToArray())}:** {CommandInfo.Summary}\n\n";
 

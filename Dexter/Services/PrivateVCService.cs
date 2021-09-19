@@ -74,8 +74,8 @@ namespace Dexter.Services
             else
             {
                 await Debug.LogMessageAsync(
-                    LogSeverity.Error,
-                    "Help! CategoryChannel is not set in the config files. Aborting!!"
+                    "Help! CategoryChannel is not set in the config files. Aborting!!",
+                    LogSeverity.Error
                 );
             }
 

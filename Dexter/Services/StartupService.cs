@@ -68,7 +68,7 @@ namespace Dexter.Services
             if (!string.IsNullOrEmpty(Token))
                 await RunBot(Token);
             else
-                await Debug.LogMessageAsync (LogSeverity.Error, $"The login token in the command line arguments was not set~!");
+                await Debug.LogMessageAsync ($"The login token in the command line arguments was not set~!", LogSeverity.Error);
         }
 
         /// <summary>

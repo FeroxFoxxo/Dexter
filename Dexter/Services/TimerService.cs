@@ -121,8 +121,8 @@ namespace Dexter.Services
                         catch (Exception Exception)
                         {
                             await Debug.LogMessageAsync(
-                                LogSeverity.Error,
-                                Exception.StackTrace
+                                Exception.StackTrace,
+                                LogSeverity.Error
                             );
                         }
                     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,22 +28,14 @@ namespace Dexter.Services
         {
             if (before.Value.Roles == after.Roles) return;
 
-            bool isAfterPatreon = false;
-
-            foreach (ulong patreonRoleID in UtilityConfiguration.ColorChangeRoles)
-            {
-                if (after.Roles.Any(r => r.Id == patreonRoleID))
-                {
-                    isAfterPatreon = true;
-                }
-            }
-
-            if (isAfterPatreon) return;
+            int tierAfter = Commands.UtilityCommands.GetRoleChangePerms(after, UtilityConfiguration);
 
             List<SocketRole> toRemove = new();
             foreach (SocketRole role in after.Roles)
             {
-                if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix))
+                int roleTier = Commands.UtilityCommands.GetColorRoleTier(role.Id, UtilityConfiguration);
+                if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix)
+                    && roleTier < tierAfter)
                 {
                     toRemove.Add(role);
                 }

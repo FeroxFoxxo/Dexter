@@ -13,6 +13,7 @@ using Discord.WebSocket;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
+using Dexter.Configurations;
 
 namespace Dexter.Commands
 {
@@ -61,6 +62,7 @@ namespace Dexter.Commands
 
             IEnumerable<IRole> roles = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Roles.ToArray();
             Dictionary<ulong, IRole> colorRoleIDs = new();
+            Dictionary<ulong, int> colorRoleTiers = new();
 
             IRole toAdd = null;
             bool found = false;
@@ -69,6 +71,7 @@ namespace Dexter.Commands
                 if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix))
                 {
                     colorRoleIDs.Add(role.Id, role);
+                    colorRoleTiers.Add(role.Id, GetColorRoleTier(role.Id));
                     if (!found && role.Name.ToLower().EndsWith(colorname.ToLower()))
                     {
                         toAdd = role;
@@ -76,13 +79,13 @@ namespace Dexter.Commands
                     }
                 }
             }
-            bool canChangeColor = CanChangeColor(user);
-            if (!canChangeColor || colorname.ToLower() == "none")
+            int colorChangePerms = GetRoleChangePerms(user);
+            if (colorChangePerms < 1 || colorname.ToLower() == "none")
             {
                 if (!await TryRemoveRoles(user, colorRoleIDs)) return;
 
-                if (!canChangeColor)
-                    await Context.Channel.SendMessageAsync("You don't have the necessary roles to change your color role!");
+                if (colorChangePerms < 1)
+                    await Context.Channel.SendMessageAsync("You don't have the necessary roles to change your color role to the selected one!");
                 else
                     await Context.Channel.SendMessageAsync("Removed color roles!");
                 return;
@@ -92,7 +95,7 @@ namespace Dexter.Commands
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Color not found")
-                    .WithDescription($"Unable to find the specified color \"{colorname}\". To see a list of colors and their names, use the `color list` command.")
+                    .WithDescription($"Unable to find the specified color \"{colorname}\". To see a list of colors and their names, use the `{BotConfiguration.Prefix}color list` command.")
                     .SendEmbed(Context.Channel);
                 return;
             }
@@ -103,6 +106,16 @@ namespace Dexter.Commands
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Locked Role!")
                     .WithDescription($"In order to unlock this role, you must first get <@&{UtilityConfiguration.LockedColors[toAdd.Id]}>.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+
+            int requiredPerm = colorRoleTiers[toAdd.Id];
+            if (colorChangePerms < requiredPerm)
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Insufficient Role Privileges!")
+                    .WithDescription($"The role you selected requires a color access tier of {requiredPerm}; your current color access tier is {colorChangePerms}")
                     .SendEmbed(Context.Channel);
                 return;
             }
@@ -122,6 +135,23 @@ namespace Dexter.Commands
                 .WithTitle("Successfully added new role!")
                 .WithDescription($"Changed your color role to: {toAdd.Name}.")
                 .SendEmbed(Context.Channel);
+        }
+
+        private int GetColorRoleTier(ulong roleId)
+        {
+            return GetColorRoleTier(roleId, UtilityConfiguration);
+        }
+
+        /// <summary>
+        /// Gets the color role permission tier required to change to a given role.
+        /// </summary>
+        /// <param name="roleId">The ID of the role to get an ID for.</param>
+        /// <param name="config">The Utility configuration that determines the tier of given roles.</param>
+        /// <returns>The numeric tier of the given role.</returns>
+
+        public static int GetColorRoleTier(ulong roleId, UtilityConfiguration config)
+        {
+            return config.LockedColors.ContainsKey(roleId) ? 1 : 2;
         }
 
         private async Task<bool> TryRemoveRoles(IGuildUser user, Dictionary<ulong, IRole> colorRoleIDs)
@@ -289,15 +319,29 @@ namespace Dexter.Commands
             return role.Name[UtilityConfiguration.ColorRolePrefix.Length..];
         }
 
-        private bool CanChangeColor(IGuildUser user)
+        private int GetRoleChangePerms(IGuildUser user)
         {
-            if (user is null) return false;
+            return GetRoleChangePerms(user, UtilityConfiguration);
+        }
 
-            foreach (ulong roleId in user.RoleIds.ToArray())
+        /// <summary>
+        /// Gets the tier attached to someone's ability to set their color role.
+        /// </summary>
+        /// <param name="user">The user to read roles and permissions for.</param>
+        /// <param name="config">The static UtilityConfiguration file which has information about roles.</param>
+        /// <returns>A numeric tier of <paramref name="user"/>'s abilities to change roles.</returns>
+
+        public static int GetRoleChangePerms(IGuildUser user, UtilityConfiguration config)
+        {
+            if (user is null) return 0;
+
+            int value = 0;
+            foreach (KeyValuePair<ulong, int> role in config.ColorChangeRoles)
             {
-                if (UtilityConfiguration.ColorChangeRoles.Contains(roleId)) return true;
+                if (value >= role.Value) continue;
+                if (user.RoleIds.Contains(role.Key)) value = role.Value;
             }
-            return false;
+            return value;
         }
     }
 

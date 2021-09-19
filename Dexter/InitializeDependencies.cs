@@ -71,7 +71,9 @@ namespace Dexter
             DiscordSocketClient DiscordSocketClient = new(
                 new DiscordSocketConfig
                 {
-                    MessageCacheSize = 5000
+                    MessageCacheSize = 1000,
+                    GatewayIntents = GatewayIntents.All,
+                    AlwaysDownloadUsers = true
                 }
             );
 

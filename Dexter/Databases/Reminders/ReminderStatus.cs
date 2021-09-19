@@ -1,4 +1,4 @@
-﻿namespace Dexter.Databases.Reminders
+namespace Dexter.Databases.Reminders
 {
 
     /// <summary>

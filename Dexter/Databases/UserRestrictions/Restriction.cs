@@ -1,4 +1,5 @@
-﻿namespace Dexter.Databases.UserRestrictions
+using System;
+namespace Dexter.Databases.UserRestrictions
 {
 
     /// <summary>

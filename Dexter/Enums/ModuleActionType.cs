@@ -1,4 +1,4 @@
-﻿namespace Dexter.Enums
+namespace Dexter.Enums
 {
 
     /// <summary>

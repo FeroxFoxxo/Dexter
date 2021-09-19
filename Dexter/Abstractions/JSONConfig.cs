@@ -1,4 +1,4 @@
-﻿namespace Dexter.Abstractions
+namespace Dexter.Abstractions
 {
 
     /// <summary>

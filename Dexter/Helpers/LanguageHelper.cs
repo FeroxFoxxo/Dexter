@@ -1,4 +1,7 @@
-﻿using Dexter.Configurations;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Dexter.Configurations;
 using Humanizer;
 using System.Globalization;
 using System.Text;
@@ -566,7 +569,7 @@ namespace Dexter.Helpers
         /// <param name="inputList">The list of objects to enumerate.</param>
         /// <returns>A string with the enumeration expressed in a human-readable form.</returns>
 
-        public static string Enumerate(IEnumerable<object> inputList)
+        public static string Enumerate(this IEnumerable<object> inputList)
         {
             switch(inputList.Count())
             {

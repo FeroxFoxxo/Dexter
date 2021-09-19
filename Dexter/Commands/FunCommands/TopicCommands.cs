@@ -1,4 +1,5 @@
-﻿using Dexter.Attributes.Methods;
+using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Databases.FunTopics;
 using Discord.Commands;
 using System.Runtime.InteropServices;
@@ -24,6 +25,7 @@ namespace Dexter.Commands
                     "`EDIT [TOPIC ID] [TOPIC]` - edits a topic in the database.\n" +
                     "`REMOVE [TOPIC ID]` - removes a topic from the database.")]
         [CommandCooldown(120)]
+        [GameChannelRestricted]
 
         public async Task TopicCommand([Optional][Remainder] string Command)
         {
@@ -46,6 +48,7 @@ namespace Dexter.Commands
                     "`REMOVE [WYR ID]` - removes a wyr from the database.")]
         [Alias("would you rather", "wouldyourather")]
         [CommandCooldown(120)]
+        [GameChannelRestricted]
 
         public async Task WYRCommand([Optional][Remainder] string Command)
         {
@@ -67,7 +70,8 @@ namespace Dexter.Commands
                     "`EDIT [FACT ID] [NEW FACT]` - edits a fun fact in the database.\n" +
                     "`REMOVE [FACT ID]` - removes a fun fact from the database.")]
         [Alias("fact", "sciencefact")]
-        [CommandCooldown(120)]
+        [CommandCooldown(45)]
+        [GameChannelRestricted]
 
         public async Task FunFactCommand([Optional][Remainder] string Command)
         {
@@ -89,7 +93,8 @@ namespace Dexter.Commands
                     "`EDIT [JOKE ID] [NEW JOKE]` - edits a joke in the database.\n" +
                     "`REMOVE [JOKE ID]` - removes a joke from the database.")]
         [Alias("pun")]
-        [CommandCooldown(120)]
+        [CommandCooldown(45)]
+        [GameChannelRestricted]
 
         public async Task JokeCommand([Optional][Remainder] string Command)
         {

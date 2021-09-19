@@ -1,4 +1,9 @@
-﻿using Dexter.Configurations;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Configurations;
 using Dexter.Databases.Games;
 using Dexter.Extensions;
 using Discord;
@@ -27,7 +32,7 @@ namespace Dexter.Helpers.Games
             }
         }
 
-        private GameInstance game;
+        private readonly GameInstance game;
 
         public GameMinesweeper(GameInstance game)
         {
@@ -174,7 +179,7 @@ namespace Dexter.Helpers.Games
             }
         }
 
-        private char[,] GenerateBoard(int height, int width, int mineCount, Random rnd)
+        private static char[,] GenerateBoard(int height, int width, int mineCount, Random rnd)
         {
 
             char[,] board = new char[height, width];
@@ -210,7 +215,7 @@ namespace Dexter.Helpers.Games
             return board;
         }
 
-        private char[,] GenerateNewState(int height, int width)
+        private static char[,] GenerateNewState(int height, int width)
         {
             char[,] state = new char[height, width];
 
@@ -225,7 +230,7 @@ namespace Dexter.Helpers.Games
             return state;
         }
 
-        private bool CheckWin(char[,] state, char[,] board)
+        private static bool CheckWin(char[,] state, char[,] board)
         {
             for (int i = 0; i < state.GetLength(0); i++)
             {
@@ -237,7 +242,7 @@ namespace Dexter.Helpers.Games
             return true;
         }
 
-        private bool CheckNew(char[,] state)
+        private static bool CheckNew(char[,] state)
         {
             for (int i = 0; i < state.GetLength(0); i++)
             {
@@ -286,7 +291,7 @@ namespace Dexter.Helpers.Games
             return false;
         }
 
-        private HashSet<Tuple<int, int>> SmartProbe(char[,] state, int x, int y)
+        private static HashSet<Tuple<int, int>> SmartProbe(char[,] state, int x, int y)
         {
             int flags = 0;
             int goal = int.Parse(state[y, x].ToString());
@@ -486,7 +491,7 @@ namespace Dexter.Helpers.Games
             {'F', "CellFlag"}
         };
 
-        private System.Drawing.Image[] GetLabels(int length, bool isNumber)
+        private static System.Drawing.Image[] GetLabels(int length, bool isNumber)
         {
             System.Drawing.Image[] result = new System.Drawing.Image[length];
 
@@ -639,7 +644,7 @@ namespace Dexter.Helpers.Games
                     "PRO TIP! Type `auto` to automatically probe any cells deemed safe by surrounding flags and danger levels.");
         }
 
-        Dictionary<string, string> Difficulties = new()
+        readonly Dictionary<string, string> Difficulties = new()
         {
             {"beginner", "10 10 10"},
             {"intermediate", "16 16 40"},

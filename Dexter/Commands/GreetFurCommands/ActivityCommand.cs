@@ -1,4 +1,8 @@
-﻿using Dexter.Attributes.Methods;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
@@ -23,28 +27,34 @@ namespace Dexter.Commands
 
         public async Task GreetFurActivity()
         {
-            if (SheetsService == null)
-                await SetupGoogleSheets();
-
-            Spreadsheet Spreadsheet = await SheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
-
-            Sheet CurrentFortnight = Spreadsheet.Sheets
-                .Where(Sheet => Sheet.Properties.Title == GreetFurConfiguration.FortnightSpreadsheet)
-                .FirstOrDefault();
-
-            ValueRange Columns = await SheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
-                $"{CurrentFortnight.Properties.Title}!{GreetFurConfiguration.IDColumnIndex}1:{CurrentFortnight.Properties.GridProperties.RowCount}")
-                .ExecuteAsync();
-
-            int IndexOfUser = -1;
-
-            for (int Index = 0; Index < Columns.Values.Count; Index++)
+            if (GreetFurService.sheetsService is null)
             {
-                if (Columns.Values[Index][0].Equals(Context.User.Id.ToString()))
-                    IndexOfUser = Index + 1;
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Unable to access Spreadsheet Service")
+                    .WithDescription("The Spreadsheet Service required to access GreetFur activity data is currently unavailable.")
+                    .SendEmbed(Context.Channel);
+                return;
             }
 
-            if (IndexOfUser == -1)
+            Spreadsheet spreadsheets = await GreetFurService.sheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
+
+            Sheet currentFortnight = spreadsheets.Sheets
+                .Where(sheet => sheet.Properties.Title == GreetFurConfiguration.FortnightSpreadsheet)
+                .FirstOrDefault();
+
+            ValueRange columns = await GreetFurService.sheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
+                $"{currentFortnight.Properties.Title}!{GreetFurConfiguration.IDColumnIndex}1:{currentFortnight.Properties.GridProperties.RowCount}")
+                .ExecuteAsync();
+
+            int indexOfUser = -1;
+
+            for (int i = 0; i < columns.Values.Count; i++)
+            {
+                if (columns.Values[i][0].Equals(Context.User.Id.ToString()))
+                    indexOfUser = i + 1;
+            }
+
+            if (indexOfUser == -1)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to Find GreetFur")
@@ -53,38 +63,38 @@ namespace Dexter.Commands
                 return;
             }
 
-            ValueRange Rows = await SheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
-                $"{CurrentFortnight.Properties.Title}!A{IndexOfUser}:{IntToLetters(CurrentFortnight.Properties.GridProperties.ColumnCount)}")
+            ValueRange rows = await GreetFurService.sheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
+                $"{currentFortnight.Properties.Title}!A{indexOfUser}:{IntToLetters(currentFortnight.Properties.GridProperties.ColumnCount)}")
                 .ExecuteAsync();
 
-            IList<object> Information = Rows.Values[0];
+            IList<object> information = rows.Values[0];
 
-            decimal Yes = int.Parse(Information[GreetFurConfiguration.Information["Yes"]].ToString());
-            decimal No = int.Parse(Information[GreetFurConfiguration.Information["No"]].ToString());
+            decimal yes = int.Parse(information[GreetFurConfiguration.Information["Yes"]].ToString());
+            decimal no = int.Parse(information[GreetFurConfiguration.Information["No"]].ToString());
 
-            decimal Ratio = Yes + No;
+            decimal ratio = yes + no;
 
-            decimal Activity;
+            decimal activity;
 
-            if (Ratio > 0)
-                Activity = Math.Round(Yes / Ratio * 100);
+            if (ratio > 0)
+                activity = Math.Round(yes / ratio * 100);
             else
-                Activity = 100;
+                activity = 100;
 
-            string Notes = Information[GreetFurConfiguration.Information["Notes"]].ToString();
+            string Notes = information[GreetFurConfiguration.Information["Notes"]].ToString();
 
-            await BuildEmbed(Activity >= 66 ? EmojiEnum.Love : Activity > 33 ? EmojiEnum.Wut : EmojiEnum.Annoyed)
+            await BuildEmbed(activity >= 66 ? EmojiEnum.Love : activity > 33 ? EmojiEnum.Wut : EmojiEnum.Annoyed)
                 .WithAuthor(Context.User)
                 .WithTitle("GreetFur Activity")
                 .WithDescription($"**Name:** {Context.User.GetUserInformation()}\n" +
-                                 $"**Manager:** {Information[GreetFurConfiguration.Information["Manager"]]}\n" +
+                                 $"**Manager:** {information[GreetFurConfiguration.Information["Manager"]]}\n" +
                                  (string.IsNullOrEmpty(Notes) ? "" : $"**Notes:** {Notes}"))
-                .AddField("Yes", Information[GreetFurConfiguration.Information["Yes"]], true)
-                .AddField("No", Information[GreetFurConfiguration.Information["No"]], true)
-                .AddField("Exempts", Information[GreetFurConfiguration.Information["Exempts"]], true)
-                .AddField("Week 1", Information[GreetFurConfiguration.Information["W1"]], true)
-                .AddField("Week 2", Information[GreetFurConfiguration.Information["W2"]], true)
-                .AddField("Activity", $"{Activity}%", true)
+                .AddField("Yes", information[GreetFurConfiguration.Information["Yes"]], true)
+                .AddField("No", information[GreetFurConfiguration.Information["No"]], true)
+                .AddField("Exempts", information[GreetFurConfiguration.Information["Exempts"]], true)
+                .AddField("Week 1", information[GreetFurConfiguration.Information["W1"]], true)
+                .AddField("Week 2", information[GreetFurConfiguration.Information["W2"]], true)
+                .AddField("Activity", $"{activity}%", true)
                 .SendEmbed(Context.Channel);
         }
 

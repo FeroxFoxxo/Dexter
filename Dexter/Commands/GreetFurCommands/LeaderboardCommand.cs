@@ -1,5 +1,10 @@
-﻿using Dexter.Attributes.Methods;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dexter.Attributes.Methods;
 using Dexter.Enums;
+using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Google.Apis.Sheets.v4.Data;
@@ -24,16 +29,22 @@ namespace Dexter.Commands
 
         public async Task GreetFurLeaderboard()
         {
-            if (SheetsService == null)
-                await SetupGoogleSheets();
+            if (GreetFurService.sheetsService is null)
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Unable to access Spreadsheet Service")
+                    .WithDescription("The Spreadsheet Service required to access GreetFur activity data is currently unavailable.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
 
-            Spreadsheet Spreadsheet = await SheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
+            Spreadsheet Spreadsheet = await GreetFurService.sheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
 
             Sheet TheBigPicture = Spreadsheet.Sheets
                 .Where(Sheet => Sheet.Properties.Title == GreetFurConfiguration.TheBigPictureSpreadsheet)
                 .FirstOrDefault();
 
-            ValueRange Columns = await SheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
+            ValueRange Columns = await GreetFurService.sheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
                 $"{TheBigPicture.Properties.Title}!A2:{GreetFurConfiguration.TotalID}{TheBigPicture.Properties.GridProperties.RowCount}")
                 .ExecuteAsync();
 

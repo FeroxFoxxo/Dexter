@@ -21,12 +21,6 @@ namespace Dexter.Services
     {
 
         /// <summary>
-        /// The LoggingService instance is used to log information on the currently enabled modules for use when we start up.
-        /// </summary>
-
-        public LoggingService LoggingService { get; set; }
-
-        /// <summary>
         /// The CommandService tracks all the currently enabled commands and their delegates.
         /// </summary>
 
@@ -119,8 +113,9 @@ namespace Dexter.Services
             }
 
             // Logs the number of currently enabled modules to the console.
-            await LoggingService.LogMessageAsync(
-                new LogMessage(LogSeverity.Info, "Modules", $"Initialized the module service with {Essentials} essential module(s) and {Others} other module(s).")
+            await Debug.LogMessageAsync(
+                LogSeverity.Info,
+                $"Initialized the module service with {Essentials} essential module(s) and {Others} other module(s)."
             );
         }
 

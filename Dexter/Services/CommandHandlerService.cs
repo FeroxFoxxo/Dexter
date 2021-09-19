@@ -45,12 +45,6 @@ namespace Dexter.Services
         public CustomCommandDB CustomCommandDB { get; set; }
 
         /// <summary>
-        /// The LoggingService is used to log unexpected errors that may occur on command execution.
-        /// </summary>
-
-        public LoggingService LoggingService { get; set; }
-
-        /// <summary>
         /// The ProposalConfiguration is used to operate the suggestion service and confugure voting thresholds.
         /// </summary>
 
@@ -209,7 +203,7 @@ namespace Dexter.Services
                         }
 
                         // If the error is not an ObjectNotFound error, we log the message to the console with the appropriate data.
-                        await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Warning, GetType().Name.Prettify(), $"Unknown statement reached!\nCommand: {(commandInfo.IsSpecified ? commandInfo.Value.Name : null)}\nresult: {result}"));
+                        await Debug.LogMessageAsync(LogSeverity.Warning, $"Unknown statement reached!\nCommand: {(commandInfo.IsSpecified ? commandInfo.Value.Name : null)}\nresult: {result}");
 
                         EmbedBuilder commandErrorEmbed;
 

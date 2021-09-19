@@ -31,12 +31,6 @@ namespace Dexter.Services
         public EventTimersDB EventTimersDB { get; set; }
 
         /// <summary>
-        /// The global service responsible for logging information into the DiscordSocketClient and console for debugging purposes.
-        /// </summary>
-
-        public LoggingService LoggingService { get; set; }
-
-        /// <summary>
         /// The ServiceProvider is where our dependencies are stored - used to execute an object when a timer is run.
         /// </summary>
 
@@ -126,8 +120,9 @@ namespace Dexter.Services
                         }
                         catch (Exception Exception)
                         {
-                            await LoggingService.LogMessageAsync(
-                                new LogMessage(LogSeverity.Error, GetType().Name, Exception.Message, exception: Exception)
+                            await Debug.LogMessageAsync(
+                                LogSeverity.Error,
+                                Exception.StackTrace
                             );
                         }
                     }

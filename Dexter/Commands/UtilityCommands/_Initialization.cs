@@ -17,12 +17,6 @@ namespace Dexter.Commands
     {
 
         /// <summary>
-        /// Allows logging necessary data pertaining to issues or important information during interaction with the command environment.
-        /// </summary>
-
-        public LoggingService LoggingService { get; set; }
-
-        /// <summary>
         /// Holds all relevant settings and configuration for the Utility Commands Module.
         /// </summary>
 

@@ -26,12 +26,6 @@ namespace Dexter.Services
     {
 
         /// <summary>
-        /// An instance of the Logging Service, which we use to log if the token has not been set to the console.
-        /// </summary>
-
-        public LoggingService LoggingService { get; set; }
-
-        /// <summary>
         /// The ServiceProvider is where our dependencies are stored - given to get an initialized class.
         /// </summary>
 
@@ -74,7 +68,7 @@ namespace Dexter.Services
             if (!string.IsNullOrEmpty(Token))
                 await RunBot(Token);
             else
-                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Startup", $"The login token in the command line arguments was not set~!"));
+                await Debug.LogMessageAsync (LogSeverity.Error, $"The login token in the command line arguments was not set~!");
         }
 
         /// <summary>

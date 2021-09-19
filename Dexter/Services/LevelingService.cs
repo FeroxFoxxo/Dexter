@@ -28,12 +28,6 @@ namespace Dexter.Services
         public LevelingConfiguration LevelingConfiguration { get; set; }
 
         /// <summary>
-        /// Grants access to the debugging tools used to print information to the terminal.
-        /// </summary>
-
-        public LoggingService LoggingService { get; set; }
-
-        /// <summary>
         /// A dedicated random number generator used for uniformly random XP determination.
         /// </summary>
 
@@ -279,12 +273,11 @@ namespace Dexter.Services
             /// <summary>
             /// Logs the message using a logging service.
             /// </summary>
-            /// <param name="logger">The logging service to use.</param>
             /// <returns>An awaitable <see cref="Task"/> object.</returns>
 
-            public async Task<RoleModificationResponse> Log(LoggingService logger)
+            public async Task<RoleModificationResponse> Log()
             {
-                await logger.LogMessageAsync(new LogMessage(LogSeverity.Warning, "UpdateRoles", this.ToString()));
+                await Debug.LogMessageAsync (LogSeverity.Warning, ToString());
                 return this;
             }
         }
@@ -299,7 +292,7 @@ namespace Dexter.Services
 
         public async Task<RoleModificationResponse> UpdateRolesWithInfo(IGuildUser user, bool removeExtra = false, int level = -1)
         {
-            if (user is null) return await new RoleModificationResponse(user, false, "Received user is null!").Log(LoggingService);
+            if (user is null) return await new RoleModificationResponse(user, false, "Received user is null!").Log();
             if (!LevelingConfiguration.HandleRoles) return new RoleModificationResponse(user, false, "Dexter does not manage roles in this server!");
 
             if (level < 0)

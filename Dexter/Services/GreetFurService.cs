@@ -50,12 +50,6 @@ namespace Dexter.Services
         public MNGConfiguration MNGConfiguration { get; set; }
 
         /// <summary>
-        /// Provides access to the console to log relevant events and errors.
-        /// </summary>
-
-        public LoggingService LoggingService { get; set; }
-
-        /// <summary>
         /// Manages the Google Sheets section of GreetFur record-keeping.
         /// </summary>
 
@@ -406,8 +400,10 @@ namespace Dexter.Services
         {
             if (!File.Exists(GreetFurConfiguration.CredentialFile))
             {
-                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, GetType().Name,
-                    $"GreetFur SpreadSheet credential file {GreetFurConfiguration.CredentialFile} does not exist!"));
+                await Debug.LogMessageAsync(
+                    LogSeverity.Error,
+                    $"GreetFur SpreadSheet credential file {GreetFurConfiguration.CredentialFile} does not exist!"
+                );
                 return;
             }
 

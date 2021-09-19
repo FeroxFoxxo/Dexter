@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 using System.Text.Json;
+using Interactivity;
 
 namespace Dexter
 {
@@ -67,8 +68,9 @@ namespace Dexter
 
             ServiceCollection.AddSingleton<Random>();
 
-            // Adds an instance of the DiscordSocketClient to the collection, specifying the cache it should retain should be 1000 messages in size.
-            DiscordSocketClient DiscordSocketClient = new(
+            ServiceCollection.AddSingleton<DiscordSocketClient>();
+
+            ServiceCollection.AddSingleton(
                 new DiscordSocketConfig
                 {
                     MessageCacheSize = 1000,
@@ -77,26 +79,17 @@ namespace Dexter
                 }
             );
 
-            ServiceCollection.AddSingleton(DiscordSocketClient);
+            ServiceCollection.AddSingleton<CommandService>();
 
-            // Adds an instance of the CommandService, which is what calls our various commands.
-            CommandService CommandService = new(
-                new CommandServiceConfig
-                {
-                    IgnoreExtraArgs = true
-                }
+            ServiceCollection.AddSingleton(
+                new CommandServiceConfig { IgnoreExtraArgs = true }
             );
 
-            ServiceCollection.AddSingleton(CommandService);
+            ServiceCollection.AddSingleton<InteractivityService>();
 
-            // Adds an instance of LoggingService, which allows us to log to the console.
-            LoggingService LoggingService = new()
-            {
-                DiscordSocketClient = DiscordSocketClient,
-                CommandService = CommandService
-            };
-
-            ServiceCollection.AddSingleton(LoggingService);
+            ServiceCollection.AddSingleton(
+                new InteractivityConfig { DefaultTimeout = TimeSpan.FromSeconds(20), RunOnGateway = false }
+            );
 
             bool HasErrored = false;
 
@@ -115,11 +108,13 @@ namespace Dexter
                                 )
                             );
 
-                            ServiceCollection.TryAddSingleton(Type);
+                            ServiceCollection.AddSingleton(Type);
 
-                            await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Warning, "Initialization",
+                            await Debug.LogMessageAsync (
+                                LogSeverity.Warning,
                                 $" This application does not have a configuration file for {Type.Name}! " +
-                                $"A mock JSON class has been created in its place..."));
+                                $"A mock JSON class has been created in its place..."
+                            );
                         }
                         else
                         {
@@ -138,8 +133,10 @@ namespace Dexter
                             }
                             catch (JsonException Exception)
                             {
-                                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Initialization",
-                                    $" Unable to initialize {Type.Name}! Ran into: {Exception.InnerException}."));
+                                await Debug.LogMessageAsync(
+                                    LogSeverity.Error,
+                                    $" Unable to initialize {Type.Name}! Ran into: {Exception.InnerException}."
+                                );
 
                                 HasErrored = true;
                             }
@@ -202,6 +199,10 @@ namespace Dexter
                     .ToList().ForEach(
                 Type => (ServiceProvider.GetService(Type) as Service).Initialize()
             );
+
+
+            ServiceProvider.GetRequiredService<DiscordSocketClient>().Log += Debug.LogMessageAsync;
+            ServiceProvider.GetRequiredService<CommandService>().Log += Debug.LogMessageAsync;
 
             // Runs the bot using the token specified as a commands line argument.
             await ServiceProvider.GetRequiredService<StartupService>().StartAsync(Token, Version);

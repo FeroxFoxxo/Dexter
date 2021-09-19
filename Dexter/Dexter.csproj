@@ -21,6 +21,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="AnimatedGif" Version="1.0.5" />
+		<PackageReference Include="Discord.InteractivityAddon" Version="2.4.1-preview-2021092110.1" />
 		<PackageReference Include="Discord.Net.Labs" Version="3.0.3" />
 		<PackageReference Include="Figgle" Version="0.4.0" />
 		<PackageReference Include="Genbox.WolframAlpha" Version="3.0.0-alpha3" />

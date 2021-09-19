@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
@@ -12,6 +13,8 @@ using Discord.Commands;
 using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;
+using Interactivity;
+using Interactivity.Pagination;
 using Newtonsoft.Json;
 
 namespace Dexter.Abstractions
@@ -31,9 +34,9 @@ namespace Dexter.Abstractions
         public ProposalService ProposalService { get; set; }
 
         /// <summary>
-        /// The ReactionMenuService class is used to create a reaction menu for the CreateReactionMenu method.
+        /// The Interactivity class is used to create a reaction menu for the CreateReactionMenu method.
         /// </summary>
-        public ReactionMenuService ReactionMenuService { get; set; }
+        public InteractivityService Interactivity { get; set; }
 
         /// <summary>
         /// The TimerService class is used to create a timer for wait until an expiration time has been reached.
@@ -162,13 +165,25 @@ namespace Dexter.Abstractions
         /// <summary>
         /// The Create Reaction Menu method creates a reaction menu with pages that you can use to navigate the embeds.
         /// </summary>
-        /// <param name="EmbedBuilders">The embeds that you wish to create the reaction menu from.</param>
+        /// <param name="EmbedBuilder">The embeds that you wish to create the reaction menu from.</param>
         /// <param name="Channel">The channel that the reaction menu should be sent to.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task CreateReactionMenu(EmbedBuilder[] EmbedBuilders, ISocketMessageChannel Channel)
+        public async Task CreateReactionMenu(EmbedBuilder[] EmbedBuilder, ISocketMessageChannel Channel)
         {
-            await ReactionMenuService.CreateReactionMenu(EmbedBuilders, Channel);
+            PageBuilder[] PageBuilderMenu = new PageBuilder[EmbedBuilder.Length];
+
+            for (int i = 0; i < EmbedBuilder.Length; i++)
+                PageBuilderMenu[i] = PageBuilder.FromEmbedBuilder(EmbedBuilder[i]);
+
+            Paginator Paginator = new StaticPaginatorBuilder()
+                .WithUsers(Context.User)
+                .WithPages(PageBuilderMenu)
+                .WithFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
+                .WithDefaultEmotes()
+                .Build();
+
+            await Interactivity.SendPaginatorAsync(Paginator, Channel);
         }
 
     }

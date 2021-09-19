@@ -32,7 +32,7 @@ namespace Dexter.Extensions
 
         public static System.Drawing.Color ToGraphicsColor(this Discord.Color color)
         {
-            return System.Drawing.Color.FromArgb(unchecked((int)(color.RawValue + 0xFF000000)));
+            return Color.FromArgb(unchecked((int)(color.RawValue + 0xFF000000)));
         }
 
         private static readonly string tempCachePath = Path.Join(Directory.GetCurrentDirectory(), "ImageCache", "tempImage.png");

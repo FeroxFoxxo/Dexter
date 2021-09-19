@@ -259,7 +259,7 @@ namespace Dexter.Commands
                         try
                         {
                             DateTimeOffset newDay = new(year, month, day, 0, 0, 0, TimeSpan.Zero);
-                            days.Add(Databases.GreetFur.GreetFurDB.GetDayFromDate(newDay));
+                            days.Add(GreetFurDB.GetDayFromDate(newDay));
                             continue;
                         }
                         catch (Exception e)

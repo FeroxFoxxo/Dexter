@@ -23,12 +23,6 @@ namespace Dexter.Services
         public UtilityConfiguration UtilityConfiguration { get; set; }
 
         /// <summary>
-        /// Logs to the console if the voice channel does not exist.
-        /// </summary>
-        
-        public LoggingService LoggingService { get; set; }
-
-        /// <summary>
         /// The Initialize void hooks the Client.Ready event to the CheckRemoveVCs method.
         /// </summary>
 
@@ -79,7 +73,10 @@ namespace Dexter.Services
             }
             else
             {
-                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Private VC Service", "Help! CategoryChannel is not set in the config files. Aborting!!"));
+                await Debug.LogMessageAsync(
+                    LogSeverity.Error,
+                    "Help! CategoryChannel is not set in the config files. Aborting!!"
+                );
             }
 
         }

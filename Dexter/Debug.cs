@@ -1,12 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
-using Dexter.Abstractions;
 using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
 
-namespace Dexter.Services
+namespace Dexter
 {
 
     /// <summary>
@@ -14,49 +13,39 @@ namespace Dexter.Services
     /// to the console and logging file for debugging purposes.
     /// </summary>
 
-    public class LoggingService : Service
+    public static class Debug
     {
-
-        /// <summary>
-        /// The CommandService is used to hook into the Log delegate to run LogMessageAsync.
-        /// </summary>
-
-        public CommandService CommandService { get; set; }
 
         /// <summary>
         /// The LogFile is the string of the location of the logfile. It can be used to locate and send the logfile.
         /// </summary>
 
-        public string LogFile = Path.Combine(Directory.GetCurrentDirectory(), "Logs", $"{DateTime.UtcNow:yyyy-MM-dd}.log");
+        public static readonly string LogFile = Path.Combine(Directory.GetCurrentDirectory(), "Logs", $"{DateTime.UtcNow:yyyy-MM-dd}.log");
 
         /// <summary>
         /// The LockLogFile is an object that locks the current thread to ensure there is thread-saftey while writing to console.
         /// </summary>
 
-        public readonly object LockLogFile = new();
+        private static readonly object LockLogFile = new();
 
         /// <summary>
-        /// The Initialize override hooks into both the Commands.Log event and the Client.Log event to run LogMessageAsync.
-        /// </summary>
-
-        public override void Initialize()
-        {
-            DiscordSocketClient.Log += LogMessageAsync;
-            CommandService.Log += LogMessageAsync;
-        }
-
-        /// <summary>
-        /// The TryLogMessage method sees if the command output is locked and, if so, adds it to a list of backlogged messages.
+        /// The LogMessage method sees if the command output is locked and, if so, adds it to a list of backlogged messages.
         /// If it is not blocked it simply outputs the message to the console, running through any previously blocked messages
         /// </summary>
-        /// <param name="LogMessage">The LogMessage field which gives us information about the message, for example the type of
-        /// exception we have run into, the severity of the exception and the message of the exception to log.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task LogMessageAsync(LogMessage LogMessage)
+        public static async Task LogMessageAsync(LogSeverity Severity, string Message)
         {
-            // We finally log the message to the console and file if it is not locked.
-            await LogToFile(LogMessage);
+            MemberInfo Base = new StackFrame(4).GetMethod().DeclaringType;
+
+            string MethodName = Base.Name;
+
+            int Index = MethodName.IndexOf(">d__");
+
+            if (Index != -1)
+                MethodName = MethodName.Substring(0, Index).Replace("<", "");
+
+            await LogMessageAsync (new LogMessage(Severity, $"{Base.DeclaringType.Name}.{MethodName}", Message));
         }
 
         /// <summary>
@@ -82,7 +71,7 @@ namespace Dexter.Services
         /// exception we have run into, the severity of the exception and the message of the exception to log.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        private async Task LogToFile(LogMessage LogMessage)
+        public static async Task LogMessageAsync (LogMessage LogMessage)
         {
             // We first get the log directory and check to see if the file and folder exist. If not, create.
             string TemporaryLogDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");

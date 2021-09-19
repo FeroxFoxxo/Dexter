@@ -33,12 +33,6 @@ namespace Dexter.Services
         public ProfilingConfiguration ProfilingConfiguration { get; set; }
 
         /// <summary>
-        /// A reference to the global logging service used to log messages from both DiscordSocketClient and to the console for debugging purposes.
-        /// </summary>
-
-        public LoggingService LoggingService { get; set; }
-
-        /// <summary>
         /// The Random instance is used to pick a random file from the given directory
         /// </summary>
 
@@ -78,8 +72,9 @@ namespace Dexter.Services
             }
             catch (HttpException)
             {
-                await LoggingService.LogMessageAsync(
-                    new LogMessage(LogSeverity.Warning, GetType().Name, "Unable to change the bot's profile picture due to ratelimiting!")
+                await Debug.LogMessageAsync(
+                    LogSeverity.Warning,
+                    "Unable to change the bot's profile picture due to ratelimiting!"
                 );
             }
 

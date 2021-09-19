@@ -4,6 +4,7 @@ using Dexter.Databases.Mail;
 using Dexter.Databases.Reminders;
 using Dexter.Databases.UserProfiles;
 using Dexter.Services;
+using Discord.Commands;
 using Genbox.WolframAlpha;
 
 namespace Dexter.Commands
@@ -69,6 +70,13 @@ namespace Dexter.Commands
         /// </summary>
         
         public LevelingConfiguration LevelingConfiguration { get; set; }
+
+
+        /// <summary>
+        /// Service responsible for parsing and overall managing interaction with commands issued by users.
+        /// </summary>
+
+        public CommandService CommandService { get; set; }
 
     }
 

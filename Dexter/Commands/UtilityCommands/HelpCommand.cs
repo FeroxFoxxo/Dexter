@@ -16,7 +16,7 @@ using System.Text.RegularExpressions;
 namespace Dexter.Commands
 {
 
-    public partial class HelpCommands
+    public partial class UtilityCommands
     {
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Dexter.Commands
                     {
                         PreconditionResult Result = await CommandInfo.CheckPreconditionsAsync(Context, ServiceCollection.BuildServiceProvider());
 
-                        if (Result.IsSuccess && CommandInfo.Summary != string.Empty)
+                        if (Result.IsSuccess && !string.IsNullOrWhiteSpace(CommandInfo.Summary))
                         {
                             string Field = $"**{BotConfiguration.Prefix}{string.Join("/", CommandInfo.Aliases.ToArray())}:** {CommandInfo.Summary}\n\n";
 

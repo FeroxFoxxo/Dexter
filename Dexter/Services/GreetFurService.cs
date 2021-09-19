@@ -229,12 +229,11 @@ namespace Dexter.Services
                 bool managerToggle = true;
                 for (int i = 1; i < data.Values.Count; i++)
                 {
-                    if (data.Values[i].Count <= GreetFurConfiguration.Information["ManagerList"])
+                    if (data.Values[i].Count <= GreetFurConfiguration.Information["ManagerList"]
+                        || string.IsNullOrEmpty(data.Values[i][GreetFurConfiguration.Information["ManagerList"]]?.ToString()))
                         break;
-                    if (!string.IsNullOrEmpty(data.Values[i][GreetFurConfiguration.Information["ManagerList"]]?.ToString()))
-                    {
+                    else
                         managerToggle = !managerToggle;
-                    }
                 }
 
                 int rowNumber = data.Values.Count;

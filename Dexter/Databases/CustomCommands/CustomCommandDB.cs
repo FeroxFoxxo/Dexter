@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dexter.Abstractions;
@@ -33,10 +34,10 @@ namespace Dexter.Databases.CustomCommands
             if (cmdByName is not null)
                 return cmdByName;
 
-            CustomCommand[] cmdByAlias = CustomCommands.AsQueryable().Where(customcmd => customcmd.Alias.Contains(name)).ToArray();
+            CustomCommand[] cmdByAlias = CustomCommands.AsQueryable().Where(customcmd => (customcmd.Alias ?? "").Contains(name)).ToArray();
 
             foreach (CustomCommand command in cmdByAlias)
-                if (JsonConvert.DeserializeObject<List<string>>(command.Alias).Contains(name))
+                if (JsonConvert.DeserializeObject<List<string>>(command.Alias ?? "[]").Contains(name))
                     return command;
 
             return null;

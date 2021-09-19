@@ -88,21 +88,21 @@ namespace Dexter.Commands
                 return;
             }
 
+            if (toAdd is null)
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Color not found")
+                    .WithDescription($"Unable to find the specified color \"{colorname}\". To see a list of colors and their names, use the `color list` command.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+
             if (UtilityConfiguration.LockedColors.ContainsKey(toAdd.Id)
                 && !user.RoleIds.Contains(UtilityConfiguration.LockedColors[toAdd.Id]))
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Locked Role!")
                     .WithDescription($"In order to unlock this role, you must first get <@&{UtilityConfiguration.LockedColors[toAdd.Id]}>.")
-                    .SendEmbed(Context.Channel);
-                return;
-            }
-
-            if (toAdd is null)
-            {
-                await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle("Color not found")
-                    .WithDescription($"Unable to find the specified color \"{colorname}\". To see a list of colors and their names, use the `color list` command.")
                     .SendEmbed(Context.Channel);
                 return;
             }

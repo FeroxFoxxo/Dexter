@@ -48,6 +48,25 @@ namespace Dexter.Configurations
         public string TheBigPictureSpreadsheet { get; set; }
 
         /// <summary>
+        /// Holds the column name of the column in The Big Picture which holds usernames (Tags).
+        /// </summary>
+
+        public string TheBigPictureNames { get; set; }
+
+        /// <summary>
+        /// Holds the column name of the column in The Big Picture which holds user IDs.
+        /// </summary>
+
+        public string TheBigPictureIDs { get; set; }
+
+        /// <summary>
+        /// The maximum amount of weeks that The Big Picture holds.<br/>
+        /// Any attempt to write data of weeks beyond this cap to The Big Picture will result in the process being aborted.
+        /// </summary>
+
+        public int TheBigPictureWeekCap { get; set; }
+
+        /// <summary>
         /// The IDColumnIndex is the index of the column that contains all the UserIDs.
         /// </summary>
 

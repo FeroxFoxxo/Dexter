@@ -209,12 +209,13 @@ namespace Dexter.Services
             req.ValueInputOption = UpdateRequest.ValueInputOptionEnum.USERENTERED;
             await req.ExecuteAsync();
 
+            Dictionary<ulong, List<GreetFurRecord>> newActivity = null;
             if (options.HasFlag(GreetFurOptions.AddNewRows))
             {
                 ValueRange range = new();
                 List<string[]> rows = new();
 
-                Dictionary<ulong, List<GreetFurRecord>> newActivity = GreetFurDB.GetAllRecentActivity(firstDay, TRACKING_LENGTH);
+                newActivity = GreetFurDB.GetAllRecentActivity(firstDay, TRACKING_LENGTH);
 
                 foreach (ulong id in ids) {
                     newActivity.Remove(id);
@@ -246,7 +247,7 @@ namespace Dexter.Services
                             withGaps[i] = kvp.Value[inData++];
                         }   
                     }
-                    rows.Add(RowFromRecords(withGaps, ++rowNumber, managerToggle));
+                    rows.Add(await RowFromRecords(withGaps, ++rowNumber, managerToggle));
                 }
 
                 foreach (string[] row in rows)
@@ -258,6 +259,37 @@ namespace Dexter.Services
                 AppendRequest appendReq = sheetsService.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.FortnightSpreadsheet);
                 appendReq.ValueInputOption = AppendRequest.ValueInputOptionEnum.USERENTERED;
                 await appendReq.ExecuteAsync();
+            }
+
+            if (options.HasFlag(GreetFurOptions.ManageTheBigPicture) && week + 1 < GreetFurConfiguration.TheBigPictureWeekCap)
+            {
+                string tbpNamesA1 = $"{GreetFurConfiguration.TheBigPictureSpreadsheet}!{GreetFurConfiguration.IDColumnIndex}:{GreetFurConfiguration.IDColumnIndex}";
+                string tbpIDsA1 = $"{GreetFurConfiguration.TheBigPictureSpreadsheet}!{GreetFurConfiguration.TheBigPictureNames}:{GreetFurConfiguration.TheBigPictureNames}";
+                string tbpWeeksA1 = $"{GreetFurConfiguration.TheBigPictureSpreadsheet}!{GreetFurCommands.IntToLetters(week + GreetFurConfiguration.Information["TBPWeekStart"] - 1)}:{GreetFurCommands.IntToLetters(week + GreetFurConfiguration.Information["TBPWeekStart"])}";
+
+                BatchGetRequest batchreq = sheetsService.Spreadsheets.Values.BatchGet(GreetFurConfiguration.SpreadSheetID);
+                batchreq.Ranges = new Google.Apis.Util.Repeatable<string>(new string[] { tbpNamesA1, tbpIDsA1, tbpWeeksA1 });
+                BatchGetValuesResponse batchresp = await batchreq.ExecuteAsync();
+                ValueRange[] ranges = batchresp.ValueRanges.ToArray();
+
+                HashSet<ulong> foundIDs = new();
+                for (int i = 0; i < ranges[1].Values.Count; i++)
+                {
+                    if (!ulong.TryParse(ranges[1].Values[i][0]?.ToString() ?? "", out ulong id))
+                        continue;
+
+                    foundIDs.Add(id);
+
+
+                }
+
+                if (options.HasFlag(GreetFurOptions.AddNewRows))
+                {
+                    if (newActivity is null)
+                        newActivity = GreetFurDB.GetAllRecentActivity(firstDay, TRACKING_LENGTH);
+
+
+                }
             }
         }
 
@@ -287,10 +319,14 @@ namespace Dexter.Services
             /// <summary>
             /// Whether to read exemptions and log them to records while reading the sheet.
             /// </summary>
-            ReadExemptions = 8
+            ReadExemptions = 8,
+            /// <summary>
+            /// Whether to also update the big picture (never forced).
+            /// </summary>
+            ManageTheBigPicture = 16
         }
 
-        private string[] RowFromRecords(GreetFurRecord[] records, int row, bool managerToggle = false)
+        private async Task<string[]> RowFromRecords(GreetFurRecord[] records, int row, bool managerToggle = false)
         {
             ulong id = records[0].UserId;
             int day = GreetFurDB.GetDayForUser(id);
@@ -304,7 +340,7 @@ namespace Dexter.Services
 
             foreach(int i in GreetFurConfiguration.FortnightTemplates.Keys)
             {
-                result[i] = ResolveFormat(GreetFurConfiguration.FortnightTemplates[i], id, row, managerToggle);
+                result[i] = await ResolveFormat(GreetFurConfiguration.FortnightTemplates[i], id, row, managerToggle);
             }
 
             return result;
@@ -322,10 +358,11 @@ namespace Dexter.Services
             return r.ToString(GreetFurConfiguration, day);
         }
 
-        private string ResolveFormat(string format, ulong userId, int row, bool managerToggle)
+        private async Task<string> ResolveFormat(string format, ulong userId, int row, bool managerToggle)
         {
             MatchCollection matches = Regex.Matches(format, @"\{[^{}]*\}");
             StringBuilder sb = new();
+            IUser u;
 
             int lastindex = 0;
             foreach(Match m in matches)
@@ -350,23 +387,17 @@ namespace Dexter.Services
                         sb.Append(managerToggle ? "TRUE" : "FALSE");
                         break;
                     case "{User}":
-                    {
-                        IUser u = DiscordSocketClient.GetUser(userId);
+                        u = await DiscordSocketClient.Rest.GetUserAsync(userId);
                         sb.Append(u?.Username ?? "Unknown");
                         break;
-                    }
                     case "{Discriminator}":
-                    {
-                        IUser u = DiscordSocketClient.GetUser(userId);
+                        u = await DiscordSocketClient.Rest.GetUserAsync(userId);
                         sb.Append(u?.Discriminator ?? "????");
                         break;
-                    }
                     case "{Tag}":
-                    {
-                        IUser u = DiscordSocketClient.GetUser(userId);
+                        u = await DiscordSocketClient.Rest.GetUserAsync(userId);
                         sb.Append((u?.Username ?? "Unknown") + "#" + (u?.Discriminator ?? "????"));
                         break;
-                    }
                 }
             }
             sb.Append(format[lastindex..]);

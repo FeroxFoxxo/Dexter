@@ -62,7 +62,7 @@ namespace Dexter.Commands
             IUser User = null;
 
             if (ModMail != null)
-                User = DiscordSocketClient.GetUser(ModMail.UserID);
+                User = DiscordShardedClient.GetUser(ModMail.UserID);
 
             if (ModMail == null || User == null)
             {
@@ -72,7 +72,7 @@ namespace Dexter.Commands
                 }
                 if (ulong.TryParse(Token, out ulong UserID) && UserID != 0)
                 {
-                    User = DiscordSocketClient.GetUser(UserID);
+                    User = DiscordShardedClient.GetUser(UserID);
 
                     if (User is not null)
                     {
@@ -89,7 +89,7 @@ namespace Dexter.Commands
             }
             else
             {
-                SocketChannel SocketChannel = DiscordSocketClient.GetChannel(ModerationConfiguration.ModMailChannelID);
+                SocketChannel SocketChannel = DiscordShardedClient.GetChannel(ModerationConfiguration.ModMailChannelID);
 
                 if (SocketChannel is SocketTextChannel TextChannel)
                 {
@@ -102,7 +102,7 @@ namespace Dexter.Commands
                             await MailMSG.ModifyAsync(MailMSGs => MailMSGs.Embed = MailMessage.Embeds.FirstOrDefault().ToEmbedBuilder()
                                 .WithColor(Color.Green)
                                 .AddField($"Replied By: {Context.User.Username}", Message.Length > 300 ? $"{Message.Substring(0, 300)} ..." : Message)
-                                .Build()
+                                                    .Build()
                             );
                         }
                         catch (InvalidOperationException)

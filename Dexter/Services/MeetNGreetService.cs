@@ -38,19 +38,8 @@ namespace Dexter.Services
 
         public override void Initialize()
         {
-            DiscordSocketClient.MessageDeleted += MNGMessageDeleted;
-            DiscordSocketClient.MessageUpdated += MNGMessageUpdated;
-            DiscordSocketClient.Ready += CreateWebhook;
-        }
-
-        /// <summary>
-        /// The Create Webhook method runs on Ready and is what initializes our webhook.
-        /// </summary>
-        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-
-        public async Task CreateWebhook()
-        {
-            DiscordWebhookClient = await CreateOrGetWebhook(MNGConfiguration.WebhookChannel, MNGConfiguration.WebhookName);
+            DiscordShardedClient.MessageDeleted += MNGMessageDeleted;
+            DiscordShardedClient.MessageUpdated += MNGMessageUpdated;
         }
 
         /// <summary>
@@ -76,14 +65,13 @@ namespace Dexter.Services
             if (CachedMessage.Author.IsBot)
                 return;
 
-            if (DiscordWebhookClient != null)
-                await BuildEmbed(EmojiEnum.Unknown)
-                    .WithAuthor(CachedMessage.Author)
-                    .WithDescription($"**Message edited in <#{SocketMessageChannel.Id}>** [Jump to message](https://discordapp.com/channels/{ (NewMessage.Channel as SocketGuildChannel).Guild.Id }/{ NewMessage.Channel.Id }/{ NewMessage.Id })")
-                    .AddField("Before", CachedMessage.Content.Length > 1000 ? string.Concat(CachedMessage.Content.AsSpan(0, 1000), "...") : CachedMessage.Content)
-                    .AddField("After", NewMessage.Content.Length > 1000 ? string.Concat(NewMessage.Content.AsSpan(0, 1000), "...") : NewMessage.Content)
-                    .WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")
-                    .SendEmbed(DiscordWebhookClient);
+            await BuildEmbed(EmojiEnum.Unknown)
+                .WithAuthor(CachedMessage.Author)
+                .WithDescription($"**Message edited in <#{SocketMessageChannel.Id}>** [Jump to message](https://discordapp.com/channels/{ (NewMessage.Channel as SocketGuildChannel).Guild.Id }/{ NewMessage.Channel.Id }/{ NewMessage.Id })")
+                .AddField("Before", CachedMessage.Content.Length > 1000 ? string.Concat(CachedMessage.Content.AsSpan(0, 1000), "...") : CachedMessage.Content)
+                .AddField("After", NewMessage.Content.Length > 1000 ? string.Concat(NewMessage.Content.AsSpan(0, 1000), "...") : NewMessage.Content)
+                .WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")
+                .SendEmbed(await CreateOrGetWebhook(MNGConfiguration.WebhookChannel, MNGConfiguration.WebhookName));
         }
 
         /// <summary>
@@ -107,12 +95,11 @@ namespace Dexter.Services
             if (CachedMessage.Author.IsBot)
                 return;
 
-            if (DiscordWebhookClient != null)
-                await BuildEmbed(EmojiEnum.Unknown)
-                    .WithAuthor(CachedMessage.Author)
-                    .WithDescription($"**Message sent by <@{CachedMessage.Author.Id}> deleted in in <#{Channel.Id}>**\n{(CachedMessage.Content.Length > 1900 ? string.Concat(CachedMessage.Content.AsSpan(0, 1900), "...") : CachedMessage.Content)}")
-                    .WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")
-                    .SendEmbed(DiscordWebhookClient);
+            await BuildEmbed(EmojiEnum.Unknown)
+                .WithAuthor(CachedMessage.Author)
+                .WithDescription($"**Message sent by <@{CachedMessage.Author.Id}> deleted in in <#{Channel.Id}>**\n{(CachedMessage.Content.Length > 1900 ? string.Concat(CachedMessage.Content.AsSpan(0, 1900), "...") : CachedMessage.Content)}")
+                .WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")
+                .SendEmbed(await CreateOrGetWebhook(MNGConfiguration.WebhookChannel, MNGConfiguration.WebhookName));
         }
 
     }

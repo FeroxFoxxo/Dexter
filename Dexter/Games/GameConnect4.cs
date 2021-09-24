@@ -129,7 +129,7 @@ namespace Dexter.Games
         /// <param name="client">SocketClient used to parse UserIDs.</param>
         /// <returns>An Embed detailing the various aspects of the game in its current instance.</returns>
 
-        public override EmbedBuilder GetStatus(DiscordSocketClient client)
+        public override EmbedBuilder GetStatus(DiscordShardedClient client)
         {
             return BuildEmbed(EmojiEnum.Unknown)
                 .WithColor(Color.Blue)
@@ -337,7 +337,7 @@ namespace Dexter.Games
         /// <param name="funConfiguration">The configuration file containing relevant game information.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration)
+        public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordShardedClient client, FunConfiguration funConfiguration)
         {
             if (message.Channel is IDMChannel) return;
             Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);

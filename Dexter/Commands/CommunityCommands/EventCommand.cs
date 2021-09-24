@@ -58,7 +58,7 @@ namespace Dexter.Commands
             IGuildUser User = Context.User as IGuildUser;
             if (Context.Channel is IDMChannel)
             {
-                User = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id);
+                User = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id);
 
                 if (User == null)
                 {
@@ -118,7 +118,7 @@ namespace Dexter.Commands
                     Event = await ValidateCommunityEventByID(Params);
                     if (Event == null) return;
 
-                    if (!(User.Id == Event.ProposerID || User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) == PermissionLevel.Administrator))
+                    if (!(User.Id == Event.ProposerID || User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) == PermissionLevel.Administrator))
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Missing permissions!")
@@ -142,7 +142,7 @@ namespace Dexter.Commands
                     Event = await ValidateCommunityEventByID(EventParam);
                     if (Event == null) return;
 
-                    if (!(User.Id == Event.ProposerID || User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) == PermissionLevel.Administrator))
+                    if (!(User.Id == Event.ProposerID || User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) == PermissionLevel.Administrator))
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Missing permissions!")
@@ -158,7 +158,7 @@ namespace Dexter.Commands
                     Event = await ValidateCommunityEventByID(EventParam);
                     if (Event == null) return;
 
-                    if (User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) < PermissionLevel.Moderator)
+                    if (User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) < PermissionLevel.Moderator)
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Oop! Don't go there~")
@@ -186,7 +186,7 @@ namespace Dexter.Commands
                             TargetUser = Context.Message.MentionedUsers.FirstOrDefault();
                             if (TargetUser == null && ulong.TryParse(SearchString, out ulong TargetID))
                             {
-                                TargetUser = DiscordSocketClient.GetUser(TargetID);
+                                TargetUser = DiscordShardedClient.GetUser(TargetID);
                             }
 
                             if (TargetUser != null) Events.AddRange(GetEvents(TargetUser));
@@ -217,7 +217,7 @@ namespace Dexter.Commands
                         await BuildEmbed(EmojiEnum.Love)
                             .WithTitle("1 Event Found!")
                             .WithDescription($"**{(Events[0].EventType == EventType.Official ? "Official" : "Community")} Event #{Events[0].ID}:** \n{Events[0].Description}")
-                            .AddField("Author:", DiscordSocketClient.GetUser(Events[0].ProposerID).GetUserInformation())
+                            .AddField("Author:", DiscordShardedClient.GetUser(Events[0].ProposerID).GetUserInformation())
                             .AddField("Time Proposed:", DateTimeOffset.FromUnixTimeSeconds(Events[0].DateTimeProposed).Humanize(), true)
                             .AddField("Status:", Events[0].Status.ToString(), true)
                             .AddField("Release Time:", DateTimeOffset.FromUnixTimeSeconds(Events[0].DateTimeRelease).Humanize(), true)

@@ -53,9 +53,9 @@ namespace Dexter.Abstractions
         public BotConfiguration BotConfiguration { get; set; }
 
         /// <summary>
-        /// The DiscordSocketClient is used to create the webhook for the webhook on create or get.
+        /// The DiscordShardedClient is used to create the webhook for the webhook on create or get.
         /// </summary>
-        public DiscordSocketClient DiscordSocketClient { get; set; }
+        public DiscordShardedClient DiscordShardedClient { get; set; }
 
         /// <summary>
         /// The Build Embed method is a generic method that simply calls upon the EMBED BUILDER extension method.
@@ -108,7 +108,7 @@ namespace Dexter.Abstractions
             if (ChannelID <= 0)
                 return null;
 
-            SocketChannel Channel = DiscordSocketClient.GetChannel(ChannelID);
+            SocketChannel Channel = DiscordShardedClient.GetChannel(ChannelID);
 
             if (Channel is SocketTextChannel TextChannel)
             {
@@ -181,7 +181,7 @@ namespace Dexter.Abstractions
                 .WithFooter(PaginatorFooter.PageNumber)
                 .WithActionOnCancellation(ActionOnStop.DeleteInput)
                 .WithActionOnTimeout(ActionOnStop.DeleteInput)
-                .Build();
+                                    .Build();
 
             _ = Task.Run(async () => await Interactive.SendPaginatorAsync(Paginator, Channel, TimeSpan.FromMinutes(10)));
         }

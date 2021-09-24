@@ -66,7 +66,7 @@ namespace Dexter.Abstractions
         /// <param name="funConfiguration">The FunConfiguration parameters.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public abstract Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration);
+        public abstract Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordShardedClient client, FunConfiguration funConfiguration);
 
         /// <summary>
         /// Sets a local <paramref name="field"/> to a given <paramref name="value"/>.
@@ -85,7 +85,7 @@ namespace Dexter.Abstractions
         /// <param name="client">SocketClient used to parse UserIDs.</param>
         /// <returns>An Embed detailing the various aspects of the game in its current instance.</returns>
 
-        public abstract EmbedBuilder GetStatus(DiscordSocketClient client);
+        public abstract EmbedBuilder GetStatus(DiscordShardedClient client);
 
         /// <summary>
         /// Resets the game, setting it on a default status.

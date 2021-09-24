@@ -214,7 +214,7 @@ namespace Dexter.Commands
 
         private string StringifyGame(GameInstance Game)
         {
-            IGuildUser Master = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(Game.Master);
+            IGuildUser Master = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(Game.Master);
             string MasterName;
             if (Master is null) MasterName = "Unknown";
             else MasterName = Master.Nickname ?? Master.Username;
@@ -275,7 +275,7 @@ namespace Dexter.Commands
                 {
                     if (i >= topics.Count) break;
                     FunTopic t = topics[i].obj;
-                    IUser topicProvider = DiscordSocketClient.GetUser(t.ProposerID);
+                    IUser topicProvider = DiscordShardedClient.GetUser(t.ProposerID);
                     string userStr = topicProvider is null ? "Unknown" : topicProvider.Username;
                     embed.AddField($"{t.TopicType} #{t.TopicID} by {userStr} ({Math.Round(topics[i].weight * 10000) / 100}%)", t.Topic.TruncateTo(maxDescLength));
                 }

@@ -60,7 +60,7 @@ namespace Dexter.Extensions
                 .WithThumbnailUrl(botConfiguration.ThumbnailURLs[(int)thumbnails])
                 .WithColor(Color)
                 .WithCurrentTimestamp()
-                .WithFooter($"USFurries {name}");
+                .WithFooter($"USFurries {name} Module");
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Dexter.Extensions
             {
                 IUserMessage message = await fallback.SendMessageAsync(user.Mention, embed: embedBuilder
                     .WithAuthor($"Psst, {user.Username}! Please unblock me or allow direct messages from {fallback.Guild.Name}. <3")
-                    .Build());
+                                        .Build());
 
                 _ = Task.Run(async () =>
                 {

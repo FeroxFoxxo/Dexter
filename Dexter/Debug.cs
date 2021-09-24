@@ -11,7 +11,7 @@ namespace Dexter
 {
 
     /// <summary>
-    /// The LoggingService is used to log messages from both the DiscordSocketClient and CommandService
+    /// The LoggingService is used to log messages from both the DiscordShardedClient and CommandService
     /// to the console and logging file for debugging purposes.
     /// </summary>
 

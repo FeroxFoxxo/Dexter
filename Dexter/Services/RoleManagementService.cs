@@ -23,7 +23,7 @@ namespace Dexter.Services
         /// </summary>
         public override void Initialize()
         {
-            DiscordSocketClient.GuildMemberUpdated += CheckUserColorRoles;
+            DiscordShardedClient.GuildMemberUpdated += CheckUserColorRoles;
         }
 
         private async Task CheckUserColorRoles(Cacheable<SocketGuildUser, ulong> before, SocketGuildUser after)

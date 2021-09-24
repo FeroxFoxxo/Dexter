@@ -30,9 +30,9 @@ namespace Dexter.Services
 
         public override void Initialize()
         {
-            DiscordSocketClient.GuildMemberUpdated += RecordNicknameChange;
-            DiscordSocketClient.UserUpdated += RecordUserNameChange;
-            DiscordSocketClient.UserJoined += RecordUserJoin;
+            DiscordShardedClient.GuildMemberUpdated += RecordNicknameChange;
+            DiscordShardedClient.UserUpdated += RecordUserNameChange;
+            DiscordShardedClient.UserJoined += RecordUserJoin;
         }
 
         private async Task RecordUserNameChange(SocketUser Before, SocketUser After)

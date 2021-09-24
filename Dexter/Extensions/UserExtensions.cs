@@ -19,13 +19,13 @@ namespace Dexter.Extensions
         /// The GetPermissionLevel returns the highest permission the user has access to for commands.
         /// </summary>
         /// <param name="User">The User of which you want to get the permission level of.</param>
-        /// <param name="DiscordSocketClient">The instance of the DiscordSocketUser which is used to get the main guild.</param>
+        /// <param name="DiscordShardedClient">The instance of the DiscordSocketUser which is used to get the main guild.</param>
         /// <param name="BotConfiguration">The instance of the bot configuration which is used to get the role ID for roles.</param>
         /// <returns>What permission level the user has, in the form from the PermissionLevel enum.</returns>
 
-        public static PermissionLevel GetPermissionLevel(this IUser User, DiscordSocketClient DiscordSocketClient, BotConfiguration BotConfiguration)
+        public static PermissionLevel GetPermissionLevel(this IUser User, DiscordShardedClient DiscordShardedClient, BotConfiguration BotConfiguration)
         {
-            IGuildUser GuildUser = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(User.Id);
+            IGuildUser GuildUser = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(User.Id);
 
             if (GuildUser == null)
                 return PermissionLevel.Default;
@@ -51,7 +51,7 @@ namespace Dexter.Extensions
         /// <param name="config">The relevant configuration that contains patreon role IDs and the relevant guild.</param>
         /// <returns><c>0</c> if the user has no patreon status; otherwise returns the tier of their current patreon subscription.</returns>
 
-        public static int GetPatreonTier(this IUser user, DiscordSocketClient client, BotConfiguration config)
+        public static int GetPatreonTier(this IUser user, DiscordShardedClient client, BotConfiguration config)
         {
             IGuildUser guser = client.GetGuild(config.GuildID).GetUser(user.Id);
 

@@ -51,16 +51,16 @@ namespace Dexter.Commands
             string ProxyURL = string.Empty;
 
             if (Attachment != null)
-                ProxyURL = await Attachment.ProxyUrl.GetProxiedImage(Tracker, DiscordSocketClient, ProposalService.ProposalConfiguration);
+                ProxyURL = await Attachment.ProxyUrl.GetProxiedImage(Tracker, DiscordShardedClient, ProposalService.ProposalConfiguration);
 
-            IUserMessage UsrMessage = await (DiscordSocketClient.GetChannel(ModerationConfiguration.ModMailChannelID) as ITextChannel).SendMessageAsync(
+            IUserMessage UsrMessage = await (DiscordShardedClient.GetChannel(ModerationConfiguration.ModMailChannelID) as ITextChannel).SendMessageAsync(
                 embed: BuildEmbed(EmojiEnum.Unknown)
                     .WithTitle($"Anonymous Modmail #{ModMailDB.ModMail.Count() + 1}")
                     .WithDescription(Message)
                     .WithImageUrl(ProxyURL)
 
                     .WithFooter(Tracker)
-                    .Build()
+                                        .Build()
             );
 
             ModMail ModMail = new()
@@ -80,7 +80,7 @@ namespace Dexter.Commands
                 .WithDescription($"Haiya! Your message has been sent to the staff team.\n\n" +
                     $"Your modmail token is: `{ModMail.Tracker}`, which is what the moderators use to reply to you. " +
                     $"Only give this out to a moderator if you wish to be identified.\n\n" +
-                    $"Thank you~! - {DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Name} Staff Team <3")
+                    $"Thank you~! - {DiscordShardedClient.GetGuild(BotConfiguration.GuildID).Name} Staff Team <3")
                 .WithFooter(ModMail.Tracker)
                 .SendEmbed(Context.Channel);
         }

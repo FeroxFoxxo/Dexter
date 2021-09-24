@@ -107,7 +107,7 @@ namespace Dexter.Commands
                 return;
             }
 
-            IUser User = DiscordSocketClient.GetUser(FunTopic.ProposerID);
+            IUser User = DiscordShardedClient.GetUser(FunTopic.ProposerID);
 
             string Topic = new Regex(@"(^[a-z])|[?!.:;]\s+(.)", RegexOptions.ExplicitCapture)
                 .Replace(FunTopic.Topic.ToLower(), String => String.Value.ToUpper());
@@ -154,7 +154,7 @@ namespace Dexter.Commands
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle($"Unable To Add {Name}!")
                     .WithDescription($"The {Name.ToLower()} `{FunTopic.Topic}` " +
-                    $"has already been suggested by {DiscordSocketClient.GetUser(FunTopic.ProposerID).GetUserInformation()}!")
+                    $"has already been suggested by {DiscordShardedClient.GetUser(FunTopic.ProposerID).GetUserInformation()}!")
                     .SendEmbed(Context.Channel);
                 return;
             }
@@ -295,7 +295,7 @@ namespace Dexter.Commands
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"{TopicType} #{FunTopic.TopicID}")
                 .WithDescription(FunTopic.Topic)
-                .AddField("Proposer:", DiscordSocketClient.GetUser(FunTopic.ProposerID))
+                .AddField("Proposer:", DiscordShardedClient.GetUser(FunTopic.ProposerID))
                 .AddField("Status:", $"{FunTopic.EntryType}d")
                 .SendEmbed(Context.Channel);
         }

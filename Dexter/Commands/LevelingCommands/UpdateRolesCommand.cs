@@ -22,7 +22,7 @@ namespace Dexter.Commands
 
         public async Task UpdateRolesCommand()
         {
-            IGuildUser user = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id);
+            IGuildUser user = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id);
 
             if (user is null)
             {

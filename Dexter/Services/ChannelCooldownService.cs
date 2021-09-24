@@ -37,7 +37,7 @@ namespace Dexter.Services
 
         public override void Initialize()
         {
-            DiscordSocketClient.MessageReceived += MessageReceived;
+            DiscordShardedClient.MessageReceived += MessageReceived;
         }
 
         /// <summary>

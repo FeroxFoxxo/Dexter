@@ -84,6 +84,12 @@ namespace Dexter.Configurations
         public ulong GreetFurMuteChannel { get; set; }
 
         /// <summary>
+        /// The name of the webhook that is used to send GreetFur mutes into the related channel.
+        /// </summary>
+
+        public string GreetFurMuteWebhookName { get; set; }
+
+        /// <summary>
         /// The first day since UNIX time that tracking for GreetFur activity started (defines week 1)
         /// </summary>
 

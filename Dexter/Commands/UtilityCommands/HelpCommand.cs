@@ -40,7 +40,7 @@ namespace Dexter.Commands
 
                 Embeds.Add(
                     BuildEmbed(EmojiEnum.Love)
-                        .WithTitle($"{DiscordSocketClient.CurrentUser.Username} Help")
+                        .WithTitle($"{DiscordShardedClient.CurrentUser.Username} Help")
                         .WithDescription($"{BotConfiguration.Help}")
                 );
 
@@ -49,7 +49,7 @@ namespace Dexter.Commands
                 HelpAbstraction HelpAbstraction = new()
                 {
                     BotConfiguration = BotConfiguration,
-                    DiscordSocketClient = DiscordSocketClient
+                    DiscordShardedClient = DiscordShardedClient
                 };
 
                 ServiceCollection.AddSingleton(HelpAbstraction);
@@ -88,7 +88,7 @@ namespace Dexter.Commands
                 }
 
                 List<string> Pages = new();
-                string PreviousPage = $"{DiscordSocketClient.CurrentUser.Username} Help";
+                string PreviousPage = $"{DiscordShardedClient.CurrentUser.Username} Help";
                 int PageNumber = 0;
 
                 foreach (EmbedBuilder Embed in Embeds)

@@ -35,7 +35,7 @@ namespace Dexter.Services
 
         public override void Initialize()
         {
-            DiscordSocketClient.MessageReceived += HandleMessage;
+            DiscordShardedClient.MessageReceived += HandleMessage;
         }
 
         private async Task HandleMessage(SocketMessage Message)
@@ -56,7 +56,7 @@ namespace Dexter.Services
 
             if (Game is null) return;
 
-            await Game.HandleMessage(Message, GamesDB, DiscordSocketClient, FunConfiguration);
+            await Game.HandleMessage(Message, GamesDB, DiscordShardedClient, FunConfiguration);
         }
     }
 }

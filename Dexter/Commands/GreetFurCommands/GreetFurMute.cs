@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
+using Dexter.Databases.Infractions;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
@@ -21,7 +22,8 @@ namespace Dexter.Commands
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("gfmute")]
-        [Summary("Mutes someone indefinitely and notifies the staff.")]
+        [Summary("Mutes someone for 7 days and notifies the staff. " +
+            "To unmute, use the normal ~unmute [Infraction ID] command.")]
         [RequireGreetFur]
 
         public async Task GreetFurMute(IGuildUser User, [Remainder] string Reason)
@@ -41,19 +43,14 @@ namespace Dexter.Commands
             }
             else
             {
-                await ModeratorCommands.MuteUser(User, TimeSpan.FromSeconds(0));
-
-                await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle($"Muted {User.Username}#{User.Discriminator}")
-                    .WithDescription($"{User.GetUserInformation()} has been muted for `{Reason}`")
-                    .SendEmbed(Context.Channel);
-
                 await BuildEmbed(EmojiEnum.Unknown)
                     .WithAuthor(Context.User)
-                    .AddField("User", $"<@{User.Id}>")
-                    .AddField("GreetFur", $"<@{Context.User.Id}>")
-                    .AddField("Reason", Reason)
-                    .SendEmbed(DiscordSocketClient.GetChannel(GreetFurConfiguration.GreetFurMuteChannel) as ITextChannel);
+                    .AddField("User", $"<@{User.Id}>", true)
+                    .AddField("GreetFur", $"<@{Context.User.Id}>", true)
+                    .AddField("Reason", Reason, true)
+                    .SendEmbed(await CreateOrGetWebhook(GreetFurConfiguration.GreetFurMuteChannel, GreetFurConfiguration.GreetFurMuteWebhookName));
+
+                await ModeratorCommands.IssueInfraction(0, User, TimeSpan.FromDays(1), Reason, Context);
             }
         }
 

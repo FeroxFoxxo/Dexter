@@ -34,7 +34,7 @@ namespace Dexter.Commands
 
         public async Task InfractionsCommand(ulong UserID)
         {
-            IUser User = DiscordSocketClient.GetUser(UserID);
+            IUser User = DiscordShardedClient.GetUser(UserID);
 
             if (User == null)
             {
@@ -68,7 +68,7 @@ namespace Dexter.Commands
 
             if (IsUserSpecified)
             {
-                if ((Context.User as IGuildUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator)
+                if ((Context.User as IGuildUser).GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator)
                 {
                     EmbedBuilder[] Warnings = GetWarnings(User.Id, Context.User.Id, User.Mention, User.Username, true);
 

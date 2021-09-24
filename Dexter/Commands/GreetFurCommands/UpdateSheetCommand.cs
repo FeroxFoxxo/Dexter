@@ -84,7 +84,7 @@ namespace Dexter.Commands
                     m.Embed = BuildEmbed(Enums.EmojiEnum.Annoyed)
                     .WithTitle("Errors:")
                     .WithDescription(string.Join('\n', errors))
-                    .Build();
+                                        .Build();
                 });
                 return;
             }

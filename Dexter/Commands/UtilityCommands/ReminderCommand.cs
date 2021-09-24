@@ -229,7 +229,7 @@ namespace Dexter.Commands
             Reminder Reminder = ReminderDB.GetReminder(int.Parse(Args["ID"]));
             if (Reminder == null || Reminder.Status != ReminderStatus.Pending) return;
 
-            IUser Issuer = DiscordSocketClient.GetUser(Reminder.IssuerID);
+            IUser Issuer = DiscordShardedClient.GetUser(Reminder.IssuerID);
             if (Issuer == null) return;
 
             Reminder.Status = ReminderStatus.Released;

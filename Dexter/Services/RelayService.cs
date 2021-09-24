@@ -25,7 +25,7 @@ namespace Dexter.Services
         
         public override void Initialize()
         {
-            DiscordSocketClient.MessageReceived += CheckRelay;
+            DiscordShardedClient.MessageReceived += CheckRelay;
         }
 
         /// <summary>

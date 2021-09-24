@@ -63,7 +63,7 @@ namespace Dexter.Services
 
         public override async void Initialize()
         {
-            DiscordSocketClient.MessageReceived += HandleMessage;
+            DiscordShardedClient.MessageReceived += HandleMessage;
 
             await SetupGoogleSheets();
         }
@@ -81,7 +81,7 @@ namespace Dexter.Services
             if (msg.Author is not IGuildUser user)
                 return;
 
-            if (user.GetPermissionLevel(DiscordSocketClient, BotConfiguration) < PermissionLevel.GreetFur)
+            if (user.GetPermissionLevel(DiscordShardedClient, BotConfiguration) < PermissionLevel.GreetFur)
                 return;
 
             if (user.IsBot)
@@ -154,7 +154,7 @@ namespace Dexter.Services
                     GreetFurRecord[] records = GreetFurDB.GetRecentActivity(gfid, firstDay, TRACKING_LENGTH, true);
                     int localDay = GreetFurDB.GetDayForUser(gfid);
 
-                    IUser u = DiscordSocketClient.GetUser(gfid);
+                    IUser u = DiscordShardedClient.GetUser(gfid);
                     if (u is not null)
                         newRow[GreetFurConfiguration.Information["Users"]] = $"{u.Username}#{u.Discriminator}";
 
@@ -351,19 +351,19 @@ namespace Dexter.Services
                         break;
                     case "{User}":
                     {
-                        IUser u = DiscordSocketClient.GetUser(userId);
+                        IUser u = DiscordShardedClient.GetUser(userId);
                         sb.Append(u?.Username ?? "Unknown");
                         break;
                     }
                     case "{Discriminator}":
                     {
-                        IUser u = DiscordSocketClient.GetUser(userId);
+                        IUser u = DiscordShardedClient.GetUser(userId);
                         sb.Append(u?.Discriminator ?? "????");
                         break;
                     }
                     case "{Tag}":
                     {
-                        IUser u = DiscordSocketClient.GetUser(userId);
+                        IUser u = DiscordShardedClient.GetUser(userId);
                         sb.Append((u?.Username ?? "Unknown") + "#" + (u?.Discriminator ?? "????"));
                         break;
                     }

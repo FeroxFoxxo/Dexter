@@ -66,7 +66,7 @@ namespace Dexter.Commands
             BorkdayDB.SaveChanges();
 
             IRole Role = Context.Guild.GetRole(
-                User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator ?
+                User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator ?
                     ModerationConfiguration.StaffBorkdayRoleID : ModerationConfiguration.BorkdayRoleID
             );
 
@@ -106,7 +106,7 @@ namespace Dexter.Commands
             ulong UserID = Convert.ToUInt64(Parameters["User"]);
             ulong RoleID = Convert.ToUInt64(Parameters["Role"]);
 
-            IGuild Guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
+            IGuild Guild = DiscordShardedClient.GetGuild(BotConfiguration.GuildID);
 
             IGuildUser User = await Guild.GetUserAsync(UserID);
 

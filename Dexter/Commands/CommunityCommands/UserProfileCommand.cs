@@ -572,7 +572,7 @@ namespace Dexter.Commands
 
             UserProfile profile = ProfilesDB.GetOrCreateProfile(user.Id);
 
-            bool allowed = Context.User.Id == user.Id || Context.User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator;
+            bool allowed = Context.User.Id == user.Id || Context.User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator;
             if (!allowed)
             {
                 switch (profile.Settings.Privacy)
@@ -611,7 +611,7 @@ namespace Dexter.Commands
         public async Task FriendCommand(string action, ulong userID)
         {
 
-            IUser target = DiscordSocketClient.GetUser(userID);
+            IUser target = DiscordShardedClient.GetUser(userID);
 
             if (target is null)
             {
@@ -1054,7 +1054,7 @@ namespace Dexter.Commands
 
         public async Task ConfigLinkCommand(ulong userID, string attribute = "", [Remainder] string value = "")
         {
-            IUser target = DiscordSocketClient.GetUser(userID);
+            IUser target = DiscordShardedClient.GetUser(userID);
 
             if (target is null)
             {
@@ -1084,7 +1084,7 @@ namespace Dexter.Commands
 
         private async Task DisplayProfileInformation(UserProfile profile)
         {
-            IUser user = DiscordSocketClient.GetUser(profile.UserID);
+            IUser user = DiscordShardedClient.GetUser(profile.UserID);
 
             if (user is null) { await Context.Channel.SendMessageAsync("Unable to find user information!"); }
 
@@ -1226,15 +1226,15 @@ namespace Dexter.Commands
                 return;
             }
 
-            IGuildUser user = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(id);
+            IGuildUser user = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(id);
             if (user is null) return;
 
             UserProfile profile = ProfilesDB.GetOrCreateProfile(id);
 
             if (profile.Settings?.GiveBorkdayRole ?? false)
             {
-                IRole role = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(
-                    user.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator ?
+                IRole role = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetRole(
+                    user.GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator ?
                         ModerationConfiguration.StaffBorkdayRoleID : ModerationConfiguration.BorkdayRoleID
                 );
 
@@ -1268,7 +1268,7 @@ namespace Dexter.Commands
             {
                 try
                 {
-                    IUser friend = DiscordSocketClient.GetUser(uid);
+                    IUser friend = DiscordShardedClient.GetUser(uid);
                     await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Color.Gold)
                         .WithThumbnailUrl(user.GetTrueAvatarUrl())
@@ -1294,7 +1294,7 @@ namespace Dexter.Commands
             ulong userID = Convert.ToUInt64(args["User"]);
             ulong roleID = Convert.ToUInt64(args["Role"]);
 
-            IGuild guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
+            IGuild guild = DiscordShardedClient.GetGuild(BotConfiguration.GuildID);
             IGuildUser user = await guild?.GetUserAsync(userID);
 
             if (user is null) return;
@@ -1319,11 +1319,11 @@ namespace Dexter.Commands
 
             foreach (ulong userID in users)
             {
-                IUser user = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(userID);
+                IUser user = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(userID);
 
                 if (user is null)
                 {
-                    user = DiscordSocketClient.GetUser(userID);
+                    user = DiscordShardedClient.GetUser(userID);
                     if (user is null) continue;
                 }
 

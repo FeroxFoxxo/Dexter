@@ -498,7 +498,7 @@ namespace Dexter.Games
             return result;
         }
 
-        public override EmbedBuilder GetStatus(DiscordSocketClient client)
+        public override EmbedBuilder GetStatus(DiscordShardedClient client)
         {
             return BuildEmbed(EmojiEnum.Unknown)
                 .WithColor(Discord.Color.Blue)
@@ -673,7 +673,7 @@ namespace Dexter.Games
             return new Tuple<int, int>(input.Item1, y);
         }
 
-        public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration)
+        public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordShardedClient client, FunConfiguration funConfiguration)
         {
             bool deletePerms = message.Channel is not IDMChannel;
             if (message.Author.Id != Game.Master) return;

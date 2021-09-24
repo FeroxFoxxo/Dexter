@@ -321,7 +321,7 @@ namespace Dexter.Commands
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    await (DiscordSocketClient.GetGuild(LevelingConfiguration.CustomImageDumpsGuild)
+                    await (DiscordShardedClient.GetGuild(LevelingConfiguration.CustomImageDumpsGuild)
                         .GetChannel(LevelingConfiguration.CustomImageDumpsChannel) as ITextChannel)
                         .SendMessageAsync(url);
                     prefs.Background = url;

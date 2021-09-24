@@ -34,7 +34,7 @@ namespace Dexter.Commands
             switch (cmdType.ToLower())
             {
                 case "patreon":
-                    if (DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id).GetPatreonTier(DiscordSocketClient, BotConfiguration) < CustomCommandsConfiguration.MinimumPatreonTierForCustomCommands)
+                    if (DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id).GetPatreonTier(DiscordShardedClient, BotConfiguration) < CustomCommandsConfiguration.MinimumPatreonTierForCustomCommands)
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Insufficient Permissions")
@@ -45,7 +45,7 @@ namespace Dexter.Commands
                     cct = UserCommandSource.Patreon;
                     break;
                 case "staff":
-                    if (DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id).GetPermissionLevel(DiscordSocketClient, BotConfiguration) < PermissionLevel.Moderator)
+                    if (DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id).GetPermissionLevel(DiscordShardedClient, BotConfiguration) < PermissionLevel.Moderator)
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Insufficient Permissions")
@@ -144,7 +144,7 @@ namespace Dexter.Commands
 
         public bool IsCustomCommandActive(CustomCommand cc)
         {
-            return IsCustomCommandActive(cc, DiscordSocketClient, BotConfiguration, CustomCommandsConfiguration);
+            return IsCustomCommandActive(cc, DiscordShardedClient, BotConfiguration, CustomCommandsConfiguration);
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace Dexter.Commands
         /// <param name="botConfig">The botconfiguration required for patreon and staff roles</param>
         /// <param name="ccConfig">The custom command configuration required to know the patreon requirements to have an active command</param>
         /// <returns><see langword="true"/> if the command has a valid active user.</returns>
-        public static bool IsCustomCommandActive(CustomCommand cc, DiscordSocketClient client, BotConfiguration botConfig, CustomCommandsConfiguration ccConfig)
+        public static bool IsCustomCommandActive(CustomCommand cc, DiscordShardedClient client, BotConfiguration botConfig, CustomCommandsConfiguration ccConfig)
         {
             if (cc.User == 0) return true;
             IGuildUser user = client.GetGuild(botConfig.GuildID).GetUser(cc.User);

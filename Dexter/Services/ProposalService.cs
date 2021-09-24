@@ -63,9 +63,9 @@ namespace Dexter.Services
 
         public override void Initialize()
         {
-            DiscordSocketClient.MessageReceived += MessageReceived;
-            DiscordSocketClient.ReactionAdded += ReactionAdded;
-            DiscordSocketClient.ReactionRemoved += ReactionRemoved;
+            DiscordShardedClient.MessageReceived += MessageReceived;
+            DiscordShardedClient.ReactionAdded += ReactionAdded;
+            DiscordShardedClient.ReactionRemoved += ReactionRemoved;
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace Dexter.Services
                     .WithTitle($"{Proposal.ProposalType.ToString().Prettify()} {Proposal.ProposalStatus}.")
                     .WithDescription($"The {Proposal.ProposalType.ToString().Prettify().ToLower()} `{Proposal.Tracker}` was successfully {Proposal.ProposalStatus.ToString().ToLower()} by {Approver.Mention}.")
                     .AddField(!string.IsNullOrEmpty(Reason), "Reason", Reason)
-                    .SendDMAttachedEmbed(MessageChannel, BotConfiguration, DiscordSocketClient.GetUser(Proposal.Proposer), BuildProposal(Proposal));
+                    .SendDMAttachedEmbed(MessageChannel, BotConfiguration, DiscordShardedClient.GetUser(Proposal.Proposer), BuildProposal(Proposal));
             }
         }
 
@@ -214,7 +214,7 @@ namespace Dexter.Services
                 Proposer = ReceivedMessage.Author.Id,
                 ProposalType = ProposalType.Suggestion,
                 Username = ReceivedMessage.Author.Username,
-                AvatarURL = await ReceivedMessage.Author.GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordSocketClient, ProposalConfiguration)
+                AvatarURL = await ReceivedMessage.Author.GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordShardedClient, ProposalConfiguration)
             };
 
             Attachment Attachment = ReceivedMessage.Attachments.FirstOrDefault();
@@ -231,7 +231,7 @@ namespace Dexter.Services
                     return;
                 }
 
-                Proposal.ProxyURL = await Attachment.ProxyUrl.GetProxiedImage($"{Proposal.Tracker}", DiscordSocketClient, ProposalConfiguration);
+                Proposal.ProxyURL = await Attachment.ProxyUrl.GetProxiedImage($"{Proposal.Tracker}", DiscordShardedClient, ProposalConfiguration);
             }
 
             RestUserMessage Embed = await ReceivedMessage.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
@@ -263,7 +263,7 @@ namespace Dexter.Services
             await ReceivedMessage.DeleteAsync();
 
             // Add the related emoji specified in the ProposalConfiguration to the suggestion.
-            SocketGuild Guild = DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild);
+            SocketGuild Guild = DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild);
 
             foreach (string Emoji in ProposalConfiguration.SuggestionEmoji)
             {
@@ -321,7 +321,7 @@ namespace Dexter.Services
                 ProposalStatus = ProposalStatus.Suggested,
                 ProposalType = ProposalType.AdminConfirmation,
                 Proposer = Author,
-                AvatarURL = await DiscordSocketClient.GetUser(Author).GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordSocketClient, ProposalConfiguration)
+                AvatarURL = await DiscordShardedClient.GetUser(Author).GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordShardedClient, ProposalConfiguration)
             };
 
             // Creates a new AdminConfirmation object with the related fields.
@@ -336,7 +336,7 @@ namespace Dexter.Services
                 DenyCallbackParameters = DenyJSON
             };
 
-            RestUserMessage Embed = await (DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as SocketTextChannel).SendMessageAsync(embed: BuildProposal(Proposal).Build());
+            RestUserMessage Embed = await (DiscordShardedClient.GetChannel(BotConfiguration.ModerationLogChannelID) as SocketTextChannel).SendMessageAsync(embed: BuildProposal(Proposal).Build());
 
             // Set the message ID in the suggestion object to the ID of the embed.
             Proposal.MessageID = Embed.Id;
@@ -372,66 +372,15 @@ namespace Dexter.Services
 
             // Check the current amount of upvotes the message has.
             ReactionMetadata Upvotes = UserMessage.Reactions[
-                await DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild)
+                await DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild)
                 .GetEmoteAsync(ProposalConfiguration.Emoji["Upvote"])
             ];
 
             // Check the current amount of downvotes the message has.
             ReactionMetadata Downvotes = UserMessage.Reactions[
-                await DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild)
+                await DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild)
                 .GetEmoteAsync(ProposalConfiguration.Emoji["Downvote"])
             ];
-
-            // Check if the suggestion has enough upvotes to trigger the suggestion to pass,
-            // or if the suggestion has enough downvotes to force it to deny itself.
-            switch (CheckVotes(Upvotes, Downvotes))
-            {
-                case SuggestionVotes.Pass:
-                    // Set the suggestion to pending if it has passed.
-                    await UpdateProposal(Proposal, ProposalStatus.Pending);
-
-                    // Create a new embed in the staff suggestions channel of the current suggestion.
-                    RestUserMessage StaffSuggestion = await (UserMessage.Channel as SocketGuildChannel).Guild
-                        .GetTextChannel(ProposalConfiguration.StaffSuggestionsChannel)
-                        .SendMessageAsync(embed: BuildProposal(Proposal).Build());
-
-                    Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
-
-                    // Check if the suggestion is not null.
-                    if (Suggestion == null)
-                        throw new Exception("Suggestion does not exist in database! Aborting...");
-
-                    Suggestion.TimerToken = await CreateEventTimer(
-                        DeclineStaffSuggestion,
-                        new() { { "Suggestion", Proposal.Tracker } },
-                        ProposalConfiguration.IdleDeclineTime,
-                        TimerType.Expire
-                    );
-
-                    // Set the staff message ID in the suggestions database to the new suggestion.
-                    Suggestion.StaffMessageID = StaffSuggestion.Id;
-
-                    ProposalDB.SaveChanges();
-
-                    // Get the staff suggestions channel and add the related emoji to the message.
-                    SocketGuild EmojiCacheGuild = DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild);
-
-                    foreach (string Emoji in ProposalConfiguration.StaffSuggestionEmoji)
-                    {
-                        GuildEmote EmoteStaff = await EmojiCacheGuild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
-                        await StaffSuggestion.AddReactionAsync(EmoteStaff);
-                    }
-
-                    break;
-                case SuggestionVotes.Fail:
-                    // If the suggestion has been declined by the community, set the reason of the suggestion to be
-                    // "Declined by the community." and update the suggestion to a status of having been declined.
-                    Proposal.Reason = "Declined by the community.";
-                    await UpdateProposal(Proposal, ProposalStatus.Declined);
-                    break;
-                case SuggestionVotes.Remain:
-                    break;
-            }
 
             // Run through the emote that has been applied to the suggestions channel to see if the ID of the emote matches one of our designated suggestion emoji. 
             if (Reaction.Emote is Emote Emote)
@@ -443,13 +392,66 @@ namespace Dexter.Services
                             case "Upvote":
                             case "Downvote":
                                 // If an upvote or downvote has been applied by the suggestor, remove it.
-                                if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator)
+                                if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator)
                                     return true;
                                 else
+                                {
+                                    // Check if the suggestion has enough upvotes to trigger the suggestion to pass,
+                                    // or if the suggestion has enough downvotes to force it to deny itself.
+                                    switch (CheckVotes(Upvotes, Downvotes))
+                                    {
+                                        case SuggestionVotes.Pass:
+                                            // Set the suggestion to pending if it has passed.
+                                            await UpdateProposal(Proposal, ProposalStatus.Pending);
+
+                                            // Create a new embed in the staff suggestions channel of the current suggestion.
+                                            RestUserMessage StaffSuggestion = await (UserMessage.Channel as SocketGuildChannel).Guild
+                                                .GetTextChannel(ProposalConfiguration.StaffSuggestionsChannel)
+                                                .SendMessageAsync(embed: BuildProposal(Proposal).Build());
+
+                                            Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
+
+                                            // Check if the suggestion is not null.
+                                            if (Suggestion == null)
+                                                throw new Exception("Suggestion does not exist in database! Aborting...");
+
+                                            Suggestion.TimerToken = await CreateEventTimer(
+                                                DeclineStaffSuggestion,
+                                                new() { { "Suggestion", Proposal.Tracker } },
+                                                ProposalConfiguration.IdleDeclineTime,
+                                                TimerType.Expire
+                                            );
+
+                                            // Set the staff message ID in the suggestions database to the new suggestion.
+                                            Suggestion.StaffMessageID = StaffSuggestion.Id;
+
+                                            ProposalDB.SaveChanges();
+
+                                            // Get the staff suggestions channel and add the related emoji to the message.
+                                            SocketGuild EmojiCacheGuild = DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild);
+
+                                            foreach (string Emoji in ProposalConfiguration.StaffSuggestionEmoji)
+                                            {
+                                                GuildEmote EmoteStaff = await EmojiCacheGuild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
+                                                await StaffSuggestion.AddReactionAsync(EmoteStaff);
+                                            }
+
+                                            break;
+                                        case SuggestionVotes.Fail:
+                                            // If the suggestion has been declined by the community, set the reason of the suggestion to be
+                                            // "Declined by the community." and update the suggestion to a status of having been declined.
+                                            Proposal.Reason = "Declined by the community.";
+                                            await UpdateProposal(Proposal, ProposalStatus.Declined);
+                                            break;
+                                        case SuggestionVotes.Remain:
+                                            break;
+                                    }
+
                                     return false;
+                                }
                             case "Bin":
                                 // If the suggestion has had the bin icon applied by the user, set the status of the suggestion to "deleted" and delete the message.
-                                if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator)
+                                if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator)
                                 {
                                     await UpdateProposal(Proposal, ProposalStatus.Deleted);
                                     await UserMessage.DeleteAsync();
@@ -485,18 +487,18 @@ namespace Dexter.Services
 
             Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
 
-            IMessage StaffMessage = await (DiscordSocketClient.GetChannel(ProposalConfiguration.StaffSuggestionsChannel) as ITextChannel)
+            IMessage StaffMessage = await (DiscordShardedClient.GetChannel(ProposalConfiguration.StaffSuggestionsChannel) as ITextChannel)
                 .GetMessageAsync(Suggestion.StaffMessageID);
 
             // Check the current amount of upvotes the message has.
             ReactionMetadata Upvotes = StaffMessage.Reactions[
-                await DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild)
+                await DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild)
                 .GetEmoteAsync(ProposalConfiguration.Emoji["Upvote"])
             ];
 
             // Check the current amount of downvotes the message has.
             ReactionMetadata Downvotes = StaffMessage.Reactions[
-                await DiscordSocketClient.GetGuild(ProposalConfiguration.StorageGuild)
+                await DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild)
                 .GetEmoteAsync(ProposalConfiguration.Emoji["Downvote"])
             ];
 
@@ -599,7 +601,7 @@ namespace Dexter.Services
             if (Channel == 0 || MessageID == 0)
                 return;
 
-            SocketChannel SocketChannel = DiscordSocketClient.GetChannel(Channel);
+            SocketChannel SocketChannel = DiscordShardedClient.GetChannel(Channel);
 
             if (SocketChannel is SocketTextChannel TextChannel)
             {
@@ -677,7 +679,7 @@ namespace Dexter.Services
                 _ => Color.Teal
             };
 
-            IUser User = DiscordSocketClient.GetUser(Proposal.Proposer);
+            IUser User = DiscordShardedClient.GetUser(Proposal.Proposer);
 
             return BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle(Proposal.ProposalStatus.ToString().ToUpper())

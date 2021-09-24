@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 using System.Text.Json;
 using Fergun.Interactive;
+using Discord.Rest;
 
 namespace Dexter
 {
@@ -29,63 +30,74 @@ namespace Dexter
         /// The Main method is the entrance to the program. Arguments can be added to this method and supplied
         /// through the command line of the application when it starts. It is an asynchronous task.
         /// </summary>
-        /// <param name="Token">[OPTIONAL] The token of the bot. Defaults to the one specified in the BotCommands if not set.</param>
-        /// <param name="ParsedVersion">[OPTIONAL] The version of the bot specified by the release pipeline, is 0 by default.</param>
-        /// <param name="WorkingDirectory">[OPTIONAL] The directory you wish the databases and configurations to be in. By default this is the build directory.</param>
+        /// <param name="token">[OPTIONAL] The token of the bot. Defaults to the one specified in the BotCommands if not set.</param>
+        /// <param name="parsedVersion">[OPTIONAL] The version of the bot specified by the release pipeline, is 0 by default.</param>
+        /// <param name="workingDirectory">[OPTIONAL] The directory you wish the databases and configurations to be in. By default this is the build directory.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public static async Task Main(string Token, int ParsedVersion, string WorkingDirectory)
+        public static async Task Main(string token, int parsedVersion, string workingDirectory)
         {
-            // Set title to "Starting..."
             Console.Title = "Starting...";
 
-            string Version = string.Empty;
+            string version = string.Empty;
 
             // Sets the version based on the release pipeline version.
-            string Versioning = Math.Abs(Math.Round(Convert.ToSingle(ParsedVersion) / 100 - .001, 2)).ToString();
+            string versioning = Math.Abs(Math.Round(Convert.ToSingle(parsedVersion) / 100 - .001, 2)).ToString();
 
-            if (Versioning.Split('.').Length <= 1)
-                Version = $"{Versioning}.0.0";
-            else if (Versioning.Split('.')[1].Length == 1)
-                Version = $"{Versioning[0..^1]}{Versioning[^1].ToString()}.0";
+            if (versioning.Split('.').Length <= 1)
+                version = $"{versioning}.0.0";
+            else if (versioning.Split('.')[1].Length == 1)
+                version = $"{versioning[0..^1]}{versioning[^1].ToString()}.0";
             else
-                Version = $"{Versioning[0..^1]}.{Versioning[^1].ToString()}";
+                version = $"{versioning[0..^1]}.{versioning[^1].ToString()}";
 
-            if (Version == "0.0.0")
-                Version = ".DEVELOPER";
+            if (version == "0.0.0")
+                version = ".DEVELOPER";
 
             // Sets the current, active directory to the working directory specified in the azure cloud.
-            if (!string.IsNullOrEmpty(WorkingDirectory))
-                Directory.SetCurrentDirectory(WorkingDirectory);
+            if (!string.IsNullOrEmpty(workingDirectory))
+                Directory.SetCurrentDirectory(workingDirectory);
 
-            string DatabaseDirectory = Path.Join(Directory.GetCurrentDirectory(), "Databases");
+            string databaseDirectory = Path.Join(Directory.GetCurrentDirectory(), "Databases");
 
-            if (!Directory.Exists(DatabaseDirectory))
-                Directory.CreateDirectory(DatabaseDirectory);
+            if (!Directory.Exists(databaseDirectory))
+                Directory.CreateDirectory(databaseDirectory);
 
             // Creates a ServiceCollection of the depencencies the project needs.
-            ServiceCollection ServiceCollection = new();
+            ServiceCollection serviceCollection = new();
 
-            ServiceCollection.AddSingleton<Random>();
+            serviceCollection.AddSingleton<Random>();
 
-            ServiceCollection.AddSingleton<DiscordSocketClient>();
+            serviceCollection.AddSingleton<DiscordShardedClient>();
 
-            ServiceCollection.AddSingleton(
-                new DiscordSocketConfig
+            serviceCollection.AddSingleton(provider =>
+            {
+                var restClient = new DiscordRestClient ();
+                restClient.LoginAsync(TokenType.Bot, token).GetAwaiter().GetResult();
+                int shards = restClient.GetRecommendedShardCountAsync().GetAwaiter().GetResult();
+
+                var client = new DiscordShardedClient(new DiscordSocketConfig
                 {
-                    MessageCacheSize = 1000,
-                    GatewayIntents = GatewayIntents.All,
-                    AlwaysDownloadUsers = true
-                }
-            );
+                    AlwaysDownloadUsers = true,
+                    MessageCacheSize = 200,
+                    TotalShards = shards,
+                    LogLevel = LogSeverity.Debug
+                });
 
-            ServiceCollection.AddSingleton<CommandService>();
+                return client;
+            });
 
-            ServiceCollection.AddSingleton(
+            serviceCollection.AddSingleton<CommandService>();
+
+            serviceCollection.AddSingleton(
                 new CommandServiceConfig { IgnoreExtraArgs = true }
             );
 
-            ServiceCollection.AddSingleton<InteractiveService>();
+            serviceCollection.AddSingleton(provider =>
+            {
+                var client = provider.GetRequiredService<DiscordShardedClient>();
+                return new InteractiveService(client, TimeSpan.FromMinutes(5));
+            });
 
             bool HasErrored = false;
 
@@ -104,7 +116,7 @@ namespace Dexter
                                 )
                             );
 
-                            ServiceCollection.AddSingleton(Type);
+                            serviceCollection.AddSingleton(Type);
 
                             await Debug.LogMessageAsync (
                                 $" This application does not have a configuration file for {Type.Name}! " +
@@ -122,7 +134,7 @@ namespace Dexter
                                     new JsonSerializerOptions() { WriteIndented = true }
                                 );
 
-                                ServiceCollection.AddSingleton(
+                                serviceCollection.AddSingleton(
                                     Type,
                                     JSON
                                 );
@@ -146,11 +158,11 @@ namespace Dexter
             Assembly.GetExecutingAssembly().GetTypes()
                     .Where(Type => (Type.IsSubclassOf(typeof(DiscordModule)) || Type.IsSubclassOf(typeof(Service)) || Type.IsSubclassOf(typeof(Database))) && !Type.IsAbstract)
                     .ToList().ForEach(
-                Type => ServiceCollection.TryAddSingleton(Type)
+                Type => serviceCollection.TryAddSingleton(Type)
             );
 
             // Builds the service collection.
-            ServiceProvider ServiceProvider = ServiceCollection.BuildServiceProvider();
+            ServiceProvider ServiceProvider = serviceCollection.BuildServiceProvider();
 
             // Draws "STARTING..." in the color of cyan.
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -197,11 +209,11 @@ namespace Dexter
             );
 
 
-            ServiceProvider.GetRequiredService<DiscordSocketClient>().Log += Debug.LogMessageAsync;
+            ServiceProvider.GetRequiredService<DiscordShardedClient>().Log += Debug.LogMessageAsync;
             ServiceProvider.GetRequiredService<CommandService>().Log += Debug.LogMessageAsync;
 
             // Runs the bot using the token specified as a commands line argument.
-            await ServiceProvider.GetRequiredService<StartupService>().StartAsync(Token, Version);
+            await ServiceProvider.GetRequiredService<StartupService>().StartAsync(token, version);
 
             // Sets the bot to continue running forever until the process is culled.
             await Task.Delay(-1);

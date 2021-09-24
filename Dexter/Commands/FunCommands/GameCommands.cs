@@ -213,7 +213,7 @@ namespace Dexter.Commands
                         await Context.Message.ReplyAsync("This game doesn't exist or isn't active!");
                         return;
                     }
-                    await game.ToGameProper(BotConfiguration).GetStatus(DiscordSocketClient).SendEmbed(Context.Channel);
+                    await game.ToGameProper(BotConfiguration).GetStatus(DiscordShardedClient).SendEmbed(Context.Channel);
                     return;
                 case "reset":
                     if (game is null || game.ToGameProper(BotConfiguration) is null)
@@ -560,7 +560,7 @@ namespace Dexter.Commands
                     }
                     else if (ulong.TryParse(value, out id))
                     {
-                        master = DiscordSocketClient.GetUser(id);
+                        master = DiscordShardedClient.GetUser(id);
                         if (master is null)
                         {
                             feedback = $"The ID provided ({id}) doesn't map to any user.";
@@ -602,7 +602,7 @@ namespace Dexter.Commands
 
             foreach (Player p in players)
             {
-                IUser user = DiscordSocketClient.GetUser(p.UserID);
+                IUser user = DiscordShardedClient.GetUser(p.UserID);
                 if (user is null) continue;
                 board.Append($"{(board.Length > 0 ? "\n" : "")}{user.Username.TruncateTo(16),-16}| {p.Score:G4}, ♥×{p.Lives}");
             }

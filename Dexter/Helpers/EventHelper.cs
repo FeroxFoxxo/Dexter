@@ -57,7 +57,7 @@ namespace Dexter.Commands
             ulong ProposalMessage = 0;
             if (EventType == EventType.UserHosted)
             {
-                IMessageChannel MessageChannel = DiscordSocketClient.GetChannel(CommunityConfiguration.EventsNotificationsChannel) as IMessageChannel;
+                IMessageChannel MessageChannel = DiscordShardedClient.GetChannel(CommunityConfiguration.EventsNotificationsChannel) as IMessageChannel;
                 Embed EventInfo = CreateEventProposalEmbed(ID, Status, Proposer, Release.ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone)), Description).Build();
                 IMessage Proposal = await MessageChannel.SendMessageAsync(
                     text: ProposalText,
@@ -115,7 +115,7 @@ namespace Dexter.Commands
         public async Task ApproveEventCallback(int EventID, string Reason = "")
         {
             CommunityEvent Event = GetEvent(EventID);
-            IUser Proposer = DiscordSocketClient.GetUser(Event.ProposerID);
+            IUser Proposer = DiscordShardedClient.GetUser(Event.ProposerID);
 
             if (Event == null) return;
 
@@ -180,7 +180,7 @@ namespace Dexter.Commands
         public async Task DeclineEventCallback(int EventID, string Reason = "")
         {
             CommunityEvent Event = GetEvent(EventID);
-            IUser Proposer = DiscordSocketClient.GetUser(Event.ProposerID);
+            IUser Proposer = DiscordShardedClient.GetUser(Event.ProposerID);
 
             if (Event == null) return;
 
@@ -231,7 +231,7 @@ namespace Dexter.Commands
             if (Event.Status is EventStatus.Denied or EventStatus.Removed or EventStatus.Released) return;
             if (Event.Status == EventStatus.Expired && CommunityConfiguration.FailOnOverdueApproval) return;
 
-            IUser User = DiscordSocketClient.GetUser(Event.ProposerID);
+            IUser User = DiscordShardedClient.GetUser(Event.ProposerID);
 
             if (Event.Status == EventStatus.Pending)
             {
@@ -252,7 +252,7 @@ namespace Dexter.Commands
                 Event.Status = EventStatus.Released;
 
                 ulong ChannelID = Event.EventType == EventType.Official ? CommunityConfiguration.OfficialEventsChannel : CommunityConfiguration.CommunityEventsChannel;
-                IMessageChannel Channel = DiscordSocketClient.GetChannel(ChannelID) as IMessageChannel;
+                IMessageChannel Channel = DiscordShardedClient.GetChannel(ChannelID) as IMessageChannel;
 
                 string RoleMention = $"<@&{(Event.EventType == EventType.Official ? CommunityConfiguration.OfficialEventsNotifiedRole : CommunityConfiguration.CommunityEventsNotifiedRole)}>";
                 string ProposalText = $"**New {(Event.EventType == EventType.Official ? "Official" : "Community")} Event >>>** {RoleMention} \n" +
@@ -396,7 +396,7 @@ namespace Dexter.Commands
 
             if (Event.EventType == EventType.Official) return;
 
-            SocketChannel ProposalChannel = DiscordSocketClient.GetChannel(CommunityConfiguration.EventsNotificationsChannel);
+            SocketChannel ProposalChannel = DiscordShardedClient.GetChannel(CommunityConfiguration.EventsNotificationsChannel);
 
             IUserMessage Proposal = null;
             if (ProposalChannel is SocketTextChannel TextChannel)
@@ -457,7 +457,7 @@ namespace Dexter.Commands
 
         private EmbedBuilder CreateEventProposalEmbed(CommunityEvent Event)
         {
-            IUser Author = DiscordSocketClient.GetUser(Event.ProposerID);
+            IUser Author = DiscordShardedClient.GetUser(Event.ProposerID);
             DateTimeOffset Release = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
 
             return CreateEventProposalEmbed(Event.ID, Event.Status, Author, Release, Event.Description, Event.ResolveReason);
@@ -521,7 +521,7 @@ namespace Dexter.Commands
             int ExpectedPages = (Events.Count() + CommunityConfiguration.MaxEventsPerMenu - 1) / CommunityConfiguration.MaxEventsPerMenu;
 
             EmbedBuilder[] Pages = new EmbedBuilder[ExpectedPages];
-            IUser Author = DiscordSocketClient.GetUser(Events.First().ProposerID);
+            IUser Author = DiscordShardedClient.GetUser(Events.First().ProposerID);
 
             int Page = 1;
             int Count = CommunityConfiguration.MaxEventsPerMenu;

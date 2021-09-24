@@ -77,9 +77,9 @@ namespace Dexter.Commands
 
             ModMail ModMail = ModMailDB.ModMail.Find(Token);
 
-            IUser User = DiscordSocketClient.GetUser(ModMail.UserID);
+            IUser User = DiscordShardedClient.GetUser(ModMail.UserID);
 
-            ITextChannel TextChannel = DiscordSocketClient.GetChannel(ModerationConfiguration.ModMailChannelID) as ITextChannel;
+            ITextChannel TextChannel = DiscordShardedClient.GetChannel(ModerationConfiguration.ModMailChannelID) as ITextChannel;
 
             IMessage ModmailMessage = await TextChannel.GetMessageAsync(ModMail.MessageID);
 
@@ -107,7 +107,7 @@ namespace Dexter.Commands
                     $"Hi, a moderator has unlocked your modmail message for `{ModMail.Tracker}`. " +
                     $"This will be due to it breaking server or Discord TOS rules and us needing to identify you. " +
                     $"We only do this in extreme circumstances. You will likely be notified of this shortly.\n" +
-                    $"- {DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Name} Staff Team")
+                    $"- {DiscordShardedClient.GetGuild(BotConfiguration.GuildID).Name} Staff Team")
                     .AddField("Reason: ", Reason)
                 .SendEmbed(await User.CreateDMChannelAsync());
         }

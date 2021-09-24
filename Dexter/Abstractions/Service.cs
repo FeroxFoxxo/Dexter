@@ -35,9 +35,9 @@ namespace Dexter.Abstractions
         public BotConfiguration BotConfiguration { get; set; }
 
         /// <summary>
-        /// The DiscordSocketClient is used to create the webhook for the webhook on create or get.
+        /// The DiscordShardedClient is used to create the webhook for the webhook on create or get.
         /// </summary>
-        public DiscordSocketClient DiscordSocketClient { get; set; }
+        public DiscordShardedClient DiscordShardedClient { get; set; }
 
         /// <summary>
         /// The TimerService class is used to create a timer for wait until an expiration time has been reached.
@@ -64,7 +64,7 @@ namespace Dexter.Abstractions
 
                 try
                 {
-                    SocketChannel Channel = DiscordSocketClient.GetChannel(ChannelID);
+                    SocketChannel Channel = DiscordShardedClient.GetChannel(ChannelID);
 
                     if (Channel is SocketTextChannel TextChannel)
                     {

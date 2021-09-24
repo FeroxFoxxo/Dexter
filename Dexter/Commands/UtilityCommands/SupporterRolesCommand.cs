@@ -45,7 +45,7 @@ namespace Dexter.Commands
             IGuildUser user;
             if (Context.User is not IGuildUser)
             {
-                user = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id);
+                user = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id);
                 if (user is null)
                 {
                     await BuildEmbed(EmojiEnum.Annoyed)
@@ -60,7 +60,7 @@ namespace Dexter.Commands
                 user = (IGuildUser)Context.User;
             }
 
-            IEnumerable<IRole> roles = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Roles.ToArray();
+            IEnumerable<IRole> roles = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).Roles.ToArray();
             Dictionary<ulong, IRole> colorRoleIDs = new();
             Dictionary<ulong, int> colorRoleTiers = new();
 
@@ -211,7 +211,7 @@ namespace Dexter.Commands
 
         private async Task ReloadColorList(bool verbose = false)
         {
-            List<SocketRole> roles = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Roles.ToList();
+            List<SocketRole> roles = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).Roles.ToList();
             roles.Sort((ra, rb) => rb.Position.CompareTo(ra.Position));
             List<IRole> colorRoles = new();
 

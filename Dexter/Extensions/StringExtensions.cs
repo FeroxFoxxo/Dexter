@@ -81,10 +81,10 @@ namespace Dexter.Extensions
             if (Index != -1)
                 methodName = methodName.Substring(0, Index).Replace("<", "");
 
-            if (name != "AsyncMethodBuilderCore" && name != "AsyncTaskMethodBuilder" && name != "EmbedExtensions")
-                return new KeyValuePair<string, string> ( name, methodName );
-            else
+            if (name.Contains("AsyncMethodBuilderCore") || name.Contains("AsyncTaskMethodBuilder") || name.Contains("EmbedExtensions"))
                 return GetLastMethodCalled(SearchHeight + 1);
+            else
+                return new KeyValuePair<string, string> ( name, methodName );
         }
 
         /// <summary>
@@ -92,11 +92,11 @@ namespace Dexter.Extensions
         /// </summary>
         /// <param name="ImageURL">The URL of the target image.</param>
         /// <param name="ImageName">The Name to give the image once downloaded.</param>
-        /// <param name="DiscordSocketClient">A Discord Socket Client service to parse the storage channel.</param>
+        /// <param name="DiscordShardedClient">A Discord Socket Client service to parse the storage channel.</param>
         /// <param name="ProposalConfiguration">Configuration holding the storage channel ID.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public static async Task<string> GetProxiedImage(this string ImageURL, string ImageName, DiscordSocketClient DiscordSocketClient, ProposalConfiguration ProposalConfiguration)
+        public static async Task<string> GetProxiedImage(this string ImageURL, string ImageName, DiscordShardedClient DiscordShardedClient, ProposalConfiguration ProposalConfiguration)
         {
             string ImageCacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
 
@@ -113,7 +113,7 @@ namespace Dexter.Extensions
                 await response.Content.CopyToAsync(fs);
             }
             
-            ITextChannel Channel = DiscordSocketClient.GetChannel(ProposalConfiguration.StorageChannelID) as ITextChannel;
+            ITextChannel Channel = DiscordShardedClient.GetChannel(ProposalConfiguration.StorageChannelID) as ITextChannel;
 
             IUserMessage AttachmentMSG = await Channel.SendFileAsync(FilePath);
 

@@ -9,6 +9,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Net.Http;
+using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Dexter.Extensions
 {
@@ -54,15 +56,47 @@ namespace Dexter.Extensions
         }
 
         /// <summary>
+        /// Gets the class of the last method that had been called.
+        /// </summary>
+        /// <param name="SearchHeight">The height backwards that you would like to see the call come from.</param>
+        /// <returns>The last called class + method</returns>
+        
+        public static KeyValuePair<string, string> GetLastMethodCalled(int SearchHeight)
+        {
+            SearchHeight += 1;
+
+            Type mBase = new StackTrace().GetFrame(SearchHeight).GetMethod().DeclaringType;
+
+            string name;
+
+            if (mBase.DeclaringType != null)
+                name = mBase.DeclaringType.Name;
+            else
+                name = mBase.Name;
+
+            string methodName = mBase.Name;
+
+            int Index = methodName.IndexOf(">d__");
+
+            if (Index != -1)
+                methodName = methodName.Substring(0, Index).Replace("<", "");
+
+            if (name.Contains("AsyncMethodBuilderCore") || name.Contains("AsyncTaskMethodBuilder") || name.Contains("EmbedExtensions"))
+                return GetLastMethodCalled(SearchHeight + 1);
+            else
+                return new KeyValuePair<string, string> ( name, methodName );
+        }
+
+        /// <summary>
         /// Obtains a Proxied URL from a given Image URL.
         /// </summary>
         /// <param name="ImageURL">The URL of the target image.</param>
         /// <param name="ImageName">The Name to give the image once downloaded.</param>
-        /// <param name="DiscordSocketClient">A Discord Socket Client service to parse the storage channel.</param>
+        /// <param name="DiscordShardedClient">A Discord Socket Client service to parse the storage channel.</param>
         /// <param name="ProposalConfiguration">Configuration holding the storage channel ID.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public static async Task<string> GetProxiedImage(this string ImageURL, string ImageName, DiscordSocketClient DiscordSocketClient, ProposalConfiguration ProposalConfiguration)
+        public static async Task<string> GetProxiedImage(this string ImageURL, string ImageName, DiscordShardedClient DiscordShardedClient, ProposalConfiguration ProposalConfiguration)
         {
             string ImageCacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
 
@@ -79,7 +113,7 @@ namespace Dexter.Extensions
                 await response.Content.CopyToAsync(fs);
             }
             
-            ITextChannel Channel = DiscordSocketClient.GetChannel(ProposalConfiguration.StorageChannelID) as ITextChannel;
+            ITextChannel Channel = DiscordShardedClient.GetChannel(ProposalConfiguration.StorageChannelID) as ITextChannel;
 
             IUserMessage AttachmentMSG = await Channel.SendFileAsync(FilePath);
 

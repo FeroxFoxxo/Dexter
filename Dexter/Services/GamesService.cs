@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Games;
-using Dexter.Helpers.Games;
 using Discord;
 using Discord.WebSocket;
 
@@ -36,7 +35,7 @@ namespace Dexter.Services
 
         public override void Initialize()
         {
-            DiscordSocketClient.MessageReceived += HandleMessage;
+            DiscordShardedClient.MessageReceived += HandleMessage;
         }
 
         private async Task HandleMessage(SocketMessage Message)
@@ -53,11 +52,11 @@ namespace Dexter.Services
 
             if (Instance is null) return;
 
-            IGameTemplate Game = Instance.ToGameProper();
+            GameTemplate Game = Instance.ToGameProper(BotConfiguration);
 
             if (Game is null) return;
 
-            await Game.HandleMessage(Message, GamesDB, DiscordSocketClient, FunConfiguration);
+            await Game.HandleMessage(Message, GamesDB, DiscordShardedClient, FunConfiguration);
         }
     }
 }

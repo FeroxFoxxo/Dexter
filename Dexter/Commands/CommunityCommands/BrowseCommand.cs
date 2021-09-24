@@ -172,7 +172,7 @@ namespace Dexter.Commands
             }
             else
             {
-                await CreateReactionMenu(embeds, Context.Channel);
+                CreateReactionMenu(embeds, Context.Channel);
             }
         }
 
@@ -187,14 +187,12 @@ namespace Dexter.Commands
             {
                 GameInstance[] RelevantGames = Games[(i * GamesPerEmbed)..((i + 1) * GamesPerEmbed > Games.Length ? Games.Length : (i + 1) * GamesPerEmbed)];
 
-                Embeds[i] = new EmbedBuilder()
-                    .WithColor(Color.Magenta)
-                    .WithTitle($"Active Games - Page {i + 1}/{Embeds.Length}")
+                Embeds[i] =
+                    BuildEmbed(EmojiEnum.Unknown)
+                    .WithTitle($"Active Games")
                     .WithDescription($"Here are a couple of games and some info about them, 'PC' is 'Player Count'. Each game type has an emoji to represent it!\n" +
                     $"{Header}\n" +
-                    $"{StringifyGames(RelevantGames)}")
-                    .WithFooter($"{i + 1}/{Embeds.Length}")
-                    .WithCurrentTimestamp();
+                    $"{StringifyGames(RelevantGames)}");
             }
 
             return Embeds;
@@ -216,7 +214,7 @@ namespace Dexter.Commands
 
         private string StringifyGame(GameInstance Game)
         {
-            IGuildUser Master = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(Game.Master);
+            IGuildUser Master = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(Game.Master);
             string MasterName;
             if (Master is null) MasterName = "Unknown";
             else MasterName = Master.Nickname ?? Master.Username;
@@ -234,7 +232,7 @@ namespace Dexter.Commands
 
         const int EventsPerEmbed = 5;
 
-        private static EmbedBuilder[] BuildEventsEmbeds(CommunityEvent[] Events)
+        private EmbedBuilder[] BuildEventsEmbeds(CommunityEvent[] Events)
         {
             if (Events.Length == 0) return Array.Empty<EmbedBuilder>();
             EmbedBuilder[] Embeds = new EmbedBuilder[(Events.Length - 1) / EventsPerEmbed + 1];
@@ -244,16 +242,14 @@ namespace Dexter.Commands
             {
                 CommunityEvent[] RelevantEvents = Events[(i * GamesPerEmbed)..((i + 1) * GamesPerEmbed > Events.Length ? Events.Length : (i + 1) * GamesPerEmbed)];
 
-                Embeds[i] = new EmbedBuilder()
-                    .WithColor(Color.Magenta)
-                    .WithTitle($"Upcoming Events - Page {i + 1}/{Embeds.Length}")
-                    .WithDescription("Here are a couple of events:")
-                    .WithFooter($"{i + 1}/{Embeds.Length}")
-                    .WithCurrentTimestamp();
+                Embeds[i] = BuildEmbed(EmojiEnum.Unknown)
+                    .WithTitle($"Upcoming Events")
+                    .WithDescription("Here are a couple of events:");
 
                 foreach (CommunityEvent Event in RelevantEvents)
                 {
                     TimeSpan TimeUntil = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).Subtract(DateTimeOffset.Now);
+
                     Embeds[i].AddField($"Event {++counter} (ID {Event.ID})",
                         $"{Event.Description.TruncateTo(100)}\n" +
                         $"**Release**: {TimeUntil.Humanize(2, maxUnit: Humanizer.Localisation.TimeUnit.Year)} from now.");
@@ -271,17 +267,15 @@ namespace Dexter.Commands
             for (int p = 0; p < CommunityConfiguration.BrowseTopicsMaxPages; p++)
             {
                 int initial = p * CommunityConfiguration.BrowseTopicsPerPage;
-                EmbedBuilder embed = new EmbedBuilder()
-                    .WithColor(Color.Magenta)
-                    .WithTitle($"Filtered Topics - Page {p + 1}/{embeds.Length}")
-                    .WithDescription($"Displaying topics similar to `{filters.TruncateTo(128)}`")
-                    .WithFooter($"{p + 1}/{embeds.Length}")
-                    .WithCurrentTimestamp();
+                EmbedBuilder embed = BuildEmbed(EmojiEnum.Unknown)
+                    .WithTitle($"Filtered Topics")
+                    .WithDescription($"Displaying topics similar to `{filters.TruncateTo(128)}`");
+
                 for (int i = initial; i < initial + CommunityConfiguration.BrowseTopicsPerPage; i++)
                 {
                     if (i >= topics.Count) break;
                     FunTopic t = topics[i].obj;
-                    IUser topicProvider = DiscordSocketClient.GetUser(t.ProposerID);
+                    IUser topicProvider = DiscordShardedClient.GetUser(t.ProposerID);
                     string userStr = topicProvider is null ? "Unknown" : topicProvider.Username;
                     embed.AddField($"{t.TopicType} #{t.TopicID} by {userStr} ({Math.Round(topics[i].weight * 10000) / 100}%)", t.Topic.TruncateTo(maxDescLength));
                 }

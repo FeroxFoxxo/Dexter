@@ -6,6 +6,7 @@ using Dexter.Commands;
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
 using Dexter.Databases.Infractions;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Webhook;
@@ -54,9 +55,8 @@ namespace Dexter.Services
 
         public override void Initialize()
         {
-            DiscordSocketClient.ReactionRemoved += ReactionRemovedLog;
-            DiscordSocketClient.Ready += CreateWebhook;
-            DiscordSocketClient.Ready += DexterProfileChecks;
+            DiscordShardedClient.ReactionRemoved += ReactionRemovedLog;
+            DiscordShardedClient.ShardReady += (DiscordSocketClient _) => DexterProfileChecks();
         }
 
         /// <summary>
@@ -83,16 +83,6 @@ namespace Dexter.Services
         }
 
         /// <summary>
-        /// The Create Webhook method runs on Ready and is what initializes our webhook.
-        /// </summary>
-        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-
-        public async Task CreateWebhook()
-        {
-            DiscordWebhookClient = await CreateOrGetWebhook(ModerationConfiguration.WebhookChannel, ModerationConfiguration.WebhookName);
-        }
-
-        /// <summary>
         /// The ReactionRemovedLog records if a reaction has been quickly removed from a message, as is important to find if someone has been spamming reactions.
         /// </summary>
         /// <param name="UserMessage">An instance of the message the reaction has been removed from.</param>
@@ -113,16 +103,13 @@ namespace Dexter.Services
             if (string.IsNullOrEmpty(CachedMessage.Content))
                 return;
 
-            if (DiscordWebhookClient != null)
-                await new EmbedBuilder()
-                    .WithAuthor(Reaction.User.Value)
-                    .WithDescription($"**Reaction removed in <#{MessageChannel.Id}> by {Reaction.User.GetValueOrDefault().GetUserInformation()}**")
-                    .AddField("Message", CachedMessage.Content.Length > 50 ? string.Concat(CachedMessage.Content.AsSpan(0, 50), "...") : CachedMessage.Content)
-                    .AddField("Reaction Removed", Reaction.Emote)
-                    .WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")
-                    .WithCurrentTimestamp()
-                    .WithColor(Color.Blue)
-                    .SendEmbed(DiscordWebhookClient);
+            await BuildEmbed(EmojiEnum.Unknown)
+                .WithAuthor(Reaction.User.Value)
+                .WithDescription($"**Reaction removed in <#{MessageChannel.Id}> by {Reaction.User.GetValueOrDefault().GetUserInformation()}**")
+                .AddField("Message", CachedMessage.Content.Length > 50 ? string.Concat(CachedMessage.Content.AsSpan(0, 50), "...") : CachedMessage.Content)
+                .AddField("Reaction Removed", Reaction.Emote)
+                .WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")
+                .SendEmbed(await CreateOrGetWebhook(ModerationConfiguration.WebhookChannel, ModerationConfiguration.WebhookName));
         }
 
     }

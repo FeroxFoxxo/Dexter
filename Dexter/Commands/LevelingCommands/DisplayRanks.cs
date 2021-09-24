@@ -34,7 +34,7 @@ namespace Dexter.Commands
         private SortedDictionary<int, IRole> GetRankedRoles()
         {
             SortedDictionary<int, IRole> result = new();
-            IGuild guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
+            IGuild guild = DiscordShardedClient.GetGuild(BotConfiguration.GuildID);
 
             foreach (KeyValuePair<int, ulong> roleEntry in LevelingConfiguration.Levels)
             {

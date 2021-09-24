@@ -30,7 +30,13 @@ namespace Dexter.Databases.FunTopics
         /// A topic that contains an introductory statement and a punchline inteded for comedy.
         /// </summary>
 
-        Joke
+        Joke,
+
+        /// <summary>
+        /// A topic that contains a famous quote.
+        /// </summary>
+
+        Quote
 
     }
 

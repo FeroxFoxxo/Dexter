@@ -30,8 +30,7 @@ namespace Dexter.Commands
                     .WithTitle("Whoops! This is on us. <3")
                     .WithDescription("It looks like one of our developers forgot to set an API key to use this service. " +
                     "We appologise for the inconvenience~!")
-                    .WithCurrentTimestamp()
-                    .WithFooter("USFurries Developer Team")
+
                     .SendEmbed(Context.Channel);
 
                 return;

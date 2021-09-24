@@ -49,7 +49,7 @@ namespace Dexter.Services
 
         public override void Initialize()
         {
-            DiscordSocketClient.Ready += DisplayStartupVersionAsync;
+            DiscordShardedClient.ShardReady += (DiscordSocketClient _) => DisplayStartupVersionAsync();
         }
 
         /// <summary>
@@ -79,8 +79,8 @@ namespace Dexter.Services
 
         public async Task RunBot(string Token)
         {
-            await DiscordSocketClient.LoginAsync(TokenType.Bot, Token);
-            await DiscordSocketClient.StartAsync();
+            await DiscordShardedClient.LoginAsync(TokenType.Bot, Token);
+            await DiscordShardedClient.StartAsync();
         }
 
         /// <summary>
@@ -91,14 +91,14 @@ namespace Dexter.Services
 
         public async Task DisplayStartupVersionAsync()
         {
-            await DiscordSocketClient.SetActivityAsync(new Game(BotConfiguration.BotStatus));
+            await DiscordShardedClient.SetActivityAsync(new Game(BotConfiguration.BotStatus));
 
             if (HasStarted)
                 return;
 
-            SocketChannel LoggingChannel = DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID);
+            SocketChannel LoggingChannel = DiscordShardedClient.GetChannel(BotConfiguration.ModerationLogChannelID);
 
-            Console.Title = $"{DiscordSocketClient.CurrentUser.Username} v{Version} (Discord.Net v{DiscordConfig.Version})";
+            Console.Title = $"{DiscordShardedClient.CurrentUser.Username} v{Version} (Discord.Net v{DiscordConfig.Version})";
 
             if (LoggingChannel == null || LoggingChannel is not ITextChannel)
                 return;
@@ -149,7 +149,7 @@ namespace Dexter.Services
             if (BotConfiguration.EnableStartupAlert || NulledConfigurations.Count > 0)
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Startup complete!")
-                    .WithDescription($"This is **{DiscordSocketClient.CurrentUser.Username} v{Version}** running **Discord.Net v{DiscordConfig.Version}**!")
+                    .WithDescription($"This is **{DiscordShardedClient.CurrentUser.Username} v{Version}** running **Discord.Net v{DiscordConfig.Version}**!")
                     .AddField("Latest Commit:", LastCommit.Length > 1000 ? $"{LastCommit.Substring(0, 1000)}..." : LastCommit)
                     .AddField(NulledConfigurations.Count > 0, "Unapplied Configurations:", UnsetConfigurations.Length > 600 ? $"{UnsetConfigurations.Substring(0, 600)}..." : UnsetConfigurations)
                     .SendEmbed(LoggingChannel as ITextChannel);

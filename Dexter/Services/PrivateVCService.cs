@@ -28,8 +28,8 @@ namespace Dexter.Services
 
         public override void Initialize()
         {
-            DiscordSocketClient.Ready += CheckRemoveVCs;
-            DiscordSocketClient.UserVoiceStateUpdated += async (_, oldVoiceChannel, newVoiceChannel) => {
+            DiscordShardedClient.ShardReady += (DiscordSocketClient _) => CheckRemoveVCs();
+            DiscordShardedClient.UserVoiceStateUpdated += async (_, oldVoiceChannel, newVoiceChannel) => {
                 if (oldVoiceChannel.VoiceChannel is not null
                 && oldVoiceChannel.VoiceChannel.CategoryId == UtilityConfiguration.PrivateCategoryID)
                     await CheckRemoveVCs();
@@ -43,9 +43,7 @@ namespace Dexter.Services
 
         public async Task CheckRemoveVCs()
         {
-            SocketCategoryChannel? categoryChannel = DiscordSocketClient.GetChannel(UtilityConfiguration.PrivateCategoryID) as SocketCategoryChannel;
-
-            if (categoryChannel != null)
+            if (DiscordShardedClient.GetChannel(UtilityConfiguration.PrivateCategoryID) is SocketCategoryChannel categoryChannel)
             {
                 IEnumerable<SocketVoiceChannel> voiceChannels = categoryChannel.Guild.VoiceChannels.Where((SocketVoiceChannel check) => check.CategoryId == UtilityConfiguration.PrivateCategoryID && check.Name != UtilityConfiguration.WaitingVCName);
 

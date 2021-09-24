@@ -34,7 +34,7 @@ namespace Dexter.Commands
             ulong idToMuzzle;
             if (!string.IsNullOrEmpty(argID))
             {
-                if (Context.User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) < PermissionLevel.Moderator)
+                if (Context.User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) < PermissionLevel.Moderator)
                 {
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Insufficient permissions")

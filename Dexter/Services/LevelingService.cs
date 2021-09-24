@@ -56,8 +56,8 @@ namespace Dexter.Services
             if (Timer != null)
                 TimerService.EventTimersDB.EventTimers.Remove(Timer);
 
-            DiscordSocketClient.MessageReceived += HandleMessage;
-            DiscordSocketClient.UserJoined += HandleJoin;
+            DiscordShardedClient.MessageReceived += HandleMessage;
+            DiscordShardedClient.UserJoined += HandleJoin;
 
             await CreateEventTimer(AddLevels, new(), LevelingConfiguration.XPIncrementTime, TimerType.Interval);
         }
@@ -72,7 +72,7 @@ namespace Dexter.Services
         {
             // Voice leveling up.
 
-            IReadOnlyCollection<SocketVoiceChannel> vcs = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).VoiceChannels;
+            IReadOnlyCollection<SocketVoiceChannel> vcs = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).VoiceChannels;
 
             foreach (SocketVoiceChannel voiceChannel in vcs)
             {
@@ -93,7 +93,7 @@ namespace Dexter.Services
                             Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven + 1),
                             false,
                             uservc,
-                            DiscordSocketClient.GetChannel(LevelingConfiguration.VoiceTextChannel) as ITextChannel,
+                            DiscordShardedClient.GetChannel(LevelingConfiguration.VoiceTextChannel) as ITextChannel,
                             LevelingConfiguration.VoiceSendLevelUpMessage
                         );
                     }
@@ -148,7 +148,7 @@ namespace Dexter.Services
             List<IRole> toAdd = new();
             List<IRole> toRemove = new();
 
-            SocketGuild guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
+            SocketGuild guild = DiscordShardedClient.GetGuild(BotConfiguration.GuildID);
             HashSet<ulong> userRoles = user.RoleIds.ToHashSet();
 
             if (LevelingConfiguration.MemberRoleLevel > 0
@@ -307,7 +307,7 @@ namespace Dexter.Services
             List<IRole> toRemove = new();
             List<IRole> foundLeveledRoles = new();
 
-            SocketGuild guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
+            SocketGuild guild = DiscordShardedClient.GetGuild(BotConfiguration.GuildID);
             HashSet<ulong> userRoles = user.RoleIds.ToHashSet();
 
             if (LevelingConfiguration.MemberRoleLevel > 0
@@ -362,7 +362,7 @@ namespace Dexter.Services
             }
             string rolesFoundExpression = rolesFoundNames.Count == 0 ? "" : $"Found roles: [{string.Join(", ", rolesFoundNames)}]";
             string message = (success ? "" : "No role modifications are necessary; updated no roles. ") + rolesFoundExpression;
-            Dictionary<bool, IEnumerable<IRole>> mods = new Dictionary<bool, IEnumerable<IRole>>() { { false, toRemove }, { true, toAdd } };
+            Dictionary<bool, IEnumerable<IRole>> mods = new() { { false, toRemove }, { true, toAdd } };
             return new RoleModificationResponse(user, success, message, mods, level);
         }
 

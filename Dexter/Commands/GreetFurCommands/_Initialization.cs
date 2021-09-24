@@ -1,6 +1,7 @@
 using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.GreetFur;
+using Dexter.Databases.Infractions;
 using Dexter.Databases.UserProfiles;
 using Dexter.Services;
 

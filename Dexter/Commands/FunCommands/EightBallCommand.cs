@@ -28,7 +28,7 @@ namespace Dexter.Commands
 
             string[] Responses = FunConfiguration.EightBall[Result];
 
-            Emote Emoji = await DiscordSocketClient.GetGuild(FunConfiguration.EmojiGuildID).GetEmoteAsync(FunConfiguration.EmojiIDs[FunConfiguration.EightBallEmoji[Result]]);
+            Emote Emoji = await DiscordShardedClient.GetGuild(FunConfiguration.EmojiGuildID).GetEmoteAsync(FunConfiguration.EmojiIDs[FunConfiguration.EightBallEmoji[Result]]);
 
             await Context.Channel.SendMessageAsync($"{Responses[new Random().Next(Responses.Length)]}, **{Context.User}** {Emoji}");
         }

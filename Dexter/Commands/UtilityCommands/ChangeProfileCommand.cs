@@ -22,7 +22,7 @@ namespace Dexter.Commands
 
         public async Task ChangeProfile()
         {
-            await DiscordSocketClient.CurrentUser
+            await DiscordShardedClient.CurrentUser
                 .ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(ProfileService.GetRandomPFP()));
 
             await BuildEmbed(EmojiEnum.Love)

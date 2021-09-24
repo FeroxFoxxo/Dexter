@@ -1,15 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using Dexter.Extensions;
 using Discord;
 
 namespace Dexter
 {
 
     /// <summary>
-    /// The LoggingService is used to log messages from both the DiscordSocketClient and CommandService
+    /// The LoggingService is used to log messages from both the DiscordShardedClient and CommandService
     /// to the console and logging file for debugging purposes.
     /// </summary>
 
@@ -36,16 +38,9 @@ namespace Dexter
 
         public static async Task LogMessageAsync(string Message, LogSeverity Severity = LogSeverity.Info)
         {
-            MemberInfo Base = new StackFrame(4).GetMethod().DeclaringType;
+            KeyValuePair<string, string> method = StringExtensions.GetLastMethodCalled(4);
 
-            string MethodName = Base.Name;
-
-            int Index = MethodName.IndexOf(">d__");
-
-            if (Index != -1)
-                MethodName = MethodName.Substring(0, Index).Replace("<", "");
-
-            await LogMessageAsync (new LogMessage(Severity, $"{Base.DeclaringType.Name}.{MethodName}", Message));
+            await LogMessageAsync (new LogMessage(Severity, $"{method.Key}.{method.Value}", Message));
         }
 
         /// <summary>

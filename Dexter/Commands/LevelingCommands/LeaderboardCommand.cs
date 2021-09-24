@@ -55,7 +55,7 @@ namespace Dexter.Commands
             List<LeaderboardItem> lbitems = new();
             for (int i = min - 1; i < max && i < Math.Min(textLevels.Count, voiceLevels.Count); i++)
             {
-                lbitems.Add(new(i + 1, textLevels[i], voiceLevels[i], DiscordSocketClient, LevelingConfiguration));
+                lbitems.Add(new(i + 1, textLevels[i], voiceLevels[i], DiscordShardedClient, LevelingConfiguration));
             }
 
             string file = await LeaderboardPath(lbitems);
@@ -116,7 +116,7 @@ namespace Dexter.Commands
             /// The userlevel corresponding to the user whose rank is <see cref="rank"/> on voice.
             /// </summary>
             public readonly UserLevel voice;
-            private readonly DiscordSocketClient client;
+            private readonly DiscordShardedClient client;
             private readonly LevelingConfiguration config;
 
             /// <summary>
@@ -125,10 +125,10 @@ namespace Dexter.Commands
             /// <param name="rank">The rank the object represents</param>
             /// <param name="text">The UserLevel who this text rank corresponds to.</param>
             /// <param name="voice">The UserLevel who this voice rank corresponds to.</param>
-            /// <param name="client">The standard DiscordSocketClient necessary for user parsing.</param>
+            /// <param name="client">The standard DiscordShardedClient necessary for user parsing.</param>
             /// <param name="config">The standard LevelingConfig necessary for level calculations.</param>
 
-            public LeaderboardItem(int rank, UserLevel text, UserLevel voice, DiscordSocketClient client, LevelingConfiguration config)
+            public LeaderboardItem(int rank, UserLevel text, UserLevel voice, DiscordShardedClient client, LevelingConfiguration config)
             {
                 this.rank = rank;
                 this.text = text;

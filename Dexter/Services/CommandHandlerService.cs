@@ -62,7 +62,7 @@ namespace Dexter.Services
 
         public override void Initialize()
         {
-            DiscordSocketClient.MessageReceived += HandleCommandAsync;
+            DiscordShardedClient.MessageReceived += HandleCommandAsync;
             CommandService.CommandExecuted += SendCommandError;
         }
 
@@ -87,7 +87,7 @@ namespace Dexter.Services
                 return;
 
             // Finally, if all prerequesites have returned correctly, we run and parse the command with an instance of our socket command context and our services.
-            await CommandService.ExecuteAsync(new SocketCommandContext(DiscordSocketClient, message), argumentPosition, ServiceProvider);
+            await CommandService.ExecuteAsync(new ShardedCommandContext(DiscordShardedClient, message), argumentPosition, ServiceProvider);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace Dexter.Services
 
                         if (customCommand != null)
                         {
-                            if (customCommand.Reply.Length > 0 && Commands.CustomCommands.IsCustomCommandActive(customCommand, DiscordSocketClient, BotConfiguration, CustomCommandsConfiguration))
+                            if (customCommand.Reply.Length > 0 && Commands.CustomCommands.IsCustomCommandActive(customCommand, DiscordShardedClient, BotConfiguration, CustomCommandsConfiguration))
                             {
                                 string reply = customCommand.Reply;
 
@@ -150,7 +150,7 @@ namespace Dexter.Services
                                 List<string> userMentions = new();
                                 foreach(ulong id in commandContext.Message.MentionedUserIds)
                                 {
-                                    IUser user = DiscordSocketClient.GetUser(id);
+                                    IUser user = DiscordShardedClient.GetUser(id);
                                     if (user is not null)
                                         userMentions.Add(user.Mention);
                                 }

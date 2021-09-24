@@ -25,7 +25,7 @@ namespace Dexter.Commands
 
         public async Task RunTopic(string Command, TopicType TopicType)
         {
-            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2").Substring(1);
+            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2")[1..];
 
             if (!string.IsNullOrEmpty(Command))
             {
@@ -107,7 +107,7 @@ namespace Dexter.Commands
                 return;
             }
 
-            IUser User = DiscordSocketClient.GetUser(FunTopic.ProposerID);
+            IUser User = DiscordShardedClient.GetUser(FunTopic.ProposerID);
 
             string Topic = new Regex(@"(^[a-z])|[?!.:;]\s+(.)", RegexOptions.ExplicitCapture)
                 .Replace(FunTopic.Topic.ToLower(), String => String.Value.ToUpper());
@@ -116,7 +116,7 @@ namespace Dexter.Commands
                 .WithAuthor(Context.User)
                 .WithTitle($"{Context.Client.CurrentUser.Username} Asks")
                 .WithDescription(Topic)
-                .WithFooter($"{Name} Written by {(User == null ? "Unknown" : User.Username)} • " +
+                .WithFooter($"{Name} written by {(User == null ? "Unknown" : User.Username)} • " +
                     $"Add a {Name.ToLower()} using {BotConfiguration.Prefix}{TopicType.ToString().ToLower()} add {Name.ToUpper()}")
                 .SendEmbed(Context.Channel);
         }
@@ -154,7 +154,7 @@ namespace Dexter.Commands
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle($"Unable To Add {Name}!")
                     .WithDescription($"The {Name.ToLower()} `{FunTopic.Topic}` " +
-                    $"has already been suggested by {DiscordSocketClient.GetUser(FunTopic.ProposerID).GetUserInformation()}!")
+                    $"has already been suggested by {DiscordShardedClient.GetUser(FunTopic.ProposerID).GetUserInformation()}!")
                     .SendEmbed(Context.Channel);
                 return;
             }
@@ -295,7 +295,7 @@ namespace Dexter.Commands
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"{TopicType} #{FunTopic.TopicID}")
                 .WithDescription(FunTopic.Topic)
-                .AddField("Proposer:", DiscordSocketClient.GetUser(FunTopic.ProposerID))
+                .AddField("Proposer:", DiscordShardedClient.GetUser(FunTopic.ProposerID))
                 .AddField("Status:", $"{FunTopic.EntryType}d")
                 .SendEmbed(Context.Channel);
         }

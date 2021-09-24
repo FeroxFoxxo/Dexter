@@ -98,7 +98,7 @@ namespace Dexter.Commands
                     BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"Unrecorded Mute Applied!")
                         .WithDescription($"You have been muted in `{Context.Guild.Name}` for `{Reason}` for a time of `{Time.Humanize(2)}`. We hope you enjoy your time. <3")
-                        .WithCurrentTimestamp()
+    
                 );
         }
 
@@ -134,10 +134,14 @@ namespace Dexter.Commands
         /// <param name="User">The target user.</param>
         /// <param name="Time">The duration of the mute.</param>
         /// <param name="Reason">A string description of the reason why the mute was issued.</param>
+        /// <param name="Context">If accessed outside this module, context is needed..</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task IssueInfraction(short PointsDeducted, IGuildUser User, TimeSpan Time, [Remainder] string Reason)
+        public async Task IssueInfraction(short PointsDeducted, IGuildUser User, TimeSpan Time, string Reason, SocketCommandContext Context = null)
         {
+            if (Context == null)
+                Context = this.Context;
+
             if (Reason.Length > 750)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
@@ -171,23 +175,23 @@ namespace Dexter.Commands
 
             if (Notification.Length > 0)
             {
-                await (DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
+                await (DiscordShardedClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
                     .SendMessageAsync($"**Frequently Warned User >>>** <@&{BotConfiguration.AdministratorRoleID}>",
                         embed: BuildEmbed(EmojiEnum.Wut)
                         .WithTitle($"Frequent Rule Breaker Inbound!")
                         .WithDescription($"Haiya!\n{Notification}Perhaps this is something the <@&{BotConfiguration.AdministratorRoleID}> can dwell on. <3")
-                        .WithCurrentTimestamp().Build()
+                        .Build()
                 );
             }
 
             if (FinalWarnsDB.IsUserFinalWarned(User) && PointsDeducted >= ModerationConfiguration.FinalWarnNotificationThreshold)
             {
-                await (DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
+                await (DiscordShardedClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
                     .SendMessageAsync($"**Final Warned User Infraction >>>** <@&{BotConfiguration.AdministratorRoleID}> <@{Context.User.Id}>",
                         embed: BuildEmbed(EmojiEnum.Wut)
                         .WithTitle($"Final Warned User has been {(Time.TotalSeconds > 0 ? "muted" : "warned")}!")
                         .WithDescription($"Haiya! User <@{User.Id}> has been {(Time.TotalSeconds > 0 ? "muted" : "warned")} for `{Reason}` and has lost {PointsDeducted} point{(PointsDeducted != 1 ? "s" : "")}. They currently have {DexterProfile.InfractionAmount - PointsDeducted} point{(DexterProfile.InfractionAmount - PointsDeducted != 1 ? "s" : "")}.")
-                        .WithCurrentTimestamp().Build()
+                        .Build()
                 );
             }
 
@@ -218,7 +222,7 @@ namespace Dexter.Commands
                 {
                     Time = Time.Add(AdditionalTime.Value);
 
-                    Reason += $"\n**Automatic mute of {AdditionalTime.Value.Humanize(2)} applied in addition by {DiscordSocketClient.CurrentUser.Username} for frequent warnings and/or rulebreaks.**";
+                    Reason += $"\n**Automatic mute of {AdditionalTime.Value.Humanize(2)} applied in addition by {DiscordShardedClient.CurrentUser.Username} for frequent warnings and/or rulebreaks.**";
                 }
 
                 if (Time.TotalSeconds > 0)
@@ -261,14 +265,12 @@ namespace Dexter.Commands
                        $"{(TotalInfractions == 1 ? "infraction" : "infractions")}** and has had **{PointsDeducted} {(PointsDeducted == 1 ? "point" : "points")} deducted.**")
                    .AddField("Issued By", Context.User.GetUserInformation())
                    .AddField(Time.TotalSeconds > 0, "Total Mute Time", $"{Time.Humanize(2)}.")
-                   .WithCurrentTimestamp() :
+                   .AddField("Reason", Reason) :
 
                 // If we are in a public channel we don't want the user's warnings public.
                 BuildEmbed(EmojiEnum.Love)
-                    .WithTitle($"{InfractionType.ToString().Humanize()} issued!")
-                    .WithDescription($"{(InfractionType == InfractionType.Warning ? "Warned" : "Muted")} {User.GetUserInformation()} {(InfractionType == InfractionType.Mute ? $" for **{Time.Humanize(2)}**" : "")}."))
-
-                .AddField("Reason", Reason)
+                    .WithTitle($"{(InfractionType == InfractionType.Warning ? "Warned" : "Muted")} {User.Username}#{User.Discriminator}")
+                    .WithDescription($"<@{User.Id}> has been {(InfractionType == InfractionType.Warning ? "warned" : "muted")} by <@{Context.User.Id}> {(InfractionType == InfractionType.Mute ? $" for **{Time.Humanize(2)}**" : "")} due to `{Reason}`"))
 
                 // Send the embed into the channel.
                 .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,
@@ -276,13 +278,16 @@ namespace Dexter.Commands
                     // Send the warning notification to the user.
                     BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"You were issued a {(InfractionType == InfractionType.Warning ? "warning" : $"mute{(InfractionType == InfractionType.Mute ? $" of {Time.Humanize(2)}" : "")}")} from {Context.Guild.Name}.")
-                        .WithDescription($"You have had a total of {TotalInfractions} {(TotalInfractions == 1 ? "infraction" : "infractions")} and are on {DexterProfile.InfractionAmount} {(DexterProfile.InfractionAmount == 1 ? "point" : "points")}, you regain one point every 24 hours. " +
+                        .WithDescription(
+                            PointsDeducted == 0 ? "Please hold on! A moderator will likely be right with you-" :
+
+                            $"You have had a total of {TotalInfractions} {(TotalInfractions == 1 ? "infraction" : "infractions")} and are on {DexterProfile.InfractionAmount} {(DexterProfile.InfractionAmount == 1 ? "point" : "points")}, you regain one point every 24 hours. " +
                             (InfractionType == InfractionType.Warning ?
                             "Please note that whenever we warn you verbally, you will receive a logged warning. This is not indicative of a mute or ban." :
                             $"Please read over the <#{ModerationConfiguration.RulesAndInfoChannel}> channel if you have not already done so, even if it's just for a refresher, as to make sure your behaviour meets the standards of the server. <3")
                         )
                         .AddField("Reason", Reason)
-                        .WithCurrentTimestamp()
+    
                 );
         }
 
@@ -346,13 +351,13 @@ namespace Dexter.Commands
             }
             catch (Discord.Net.HttpException Error)
             {
-                await (DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
+                await (DiscordShardedClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
                     .SendMessageAsync($"**Missing Role Management Permissions >>>** <@&{BotConfiguration.AdministratorRoleID}>",
                         embed: BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Error!")
                         .WithDescription($"Couldn't mute user <@{User.Id}> ({User.Id}) for {Time.Humanize()}.")
                         .AddField("Error:", Error.Message)
-                        .WithCurrentTimestamp().Build()
+                        .Build()
                 );
             }
 
@@ -375,7 +380,7 @@ namespace Dexter.Commands
         {
             ulong UserID = ulong.Parse(Parameters["UserID"]);
 
-            IGuild Guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
+            IGuild Guild = DiscordShardedClient.GetGuild(BotConfiguration.GuildID);
 
             IGuildUser User = await Guild.GetUserAsync(UserID);
 

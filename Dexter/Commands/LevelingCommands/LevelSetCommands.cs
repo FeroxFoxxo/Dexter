@@ -118,7 +118,7 @@ namespace Dexter.Commands
                     return;
             }
 
-            await LevelingService.UpdateRoles(DiscordSocketClient.GetGuild(BotConfiguration.GuildID)?.GetUser(user.Id), true);
+            await LevelingService.UpdateRoles(DiscordShardedClient.GetGuild(BotConfiguration.GuildID)?.GetUser(user.Id), true);
             LevelingDB.SaveChanges();
         }
 
@@ -183,7 +183,7 @@ namespace Dexter.Commands
                 .WithDescription($"The {(isTextXP ? "text" : "voice")} XP for user {user.Mention} has been {(amount >= 0 ? "increased" : "decreased")} by {Math.Abs(amount)}!")
                 .SendEmbed(Context.Channel);
 
-            await LevelingService.UpdateRoles(DiscordSocketClient.GetGuild(BotConfiguration.GuildID)?.GetUser(user.Id), true);
+            await LevelingService.UpdateRoles(DiscordShardedClient.GetGuild(BotConfiguration.GuildID)?.GetUser(user.Id), true);
             LevelingDB.SaveChanges();
         }
     }

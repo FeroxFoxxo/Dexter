@@ -70,8 +70,8 @@ namespace Dexter.Commands
                 $"If you wish to undo this; use the command `{BotConfiguration.Prefix}transferxp {idto} {idfrom} {textxp} {voicexp}`.")
                 .SendEmbed(Context.Channel);
 
-            IGuildUser? userfrom = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(idfrom);
-            IGuildUser? userto = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(idto);
+            IGuildUser? userfrom = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(idfrom);
+            IGuildUser? userto = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(idto);
 
             if (userfrom is not null) await LevelingService.UpdateRoles(userfrom, true);
             if (userto is not null) await LevelingService.UpdateRoles(userto, true);

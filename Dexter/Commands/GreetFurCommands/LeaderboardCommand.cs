@@ -71,20 +71,19 @@ namespace Dexter.Commands
 
             for (int Embeds = 0; Embeds < Math.Ceiling(Convert.ToDecimal(GreetFurs.Count) / 20); Embeds++)
             {
-                EmbedBuilder Embed = BuildEmbed(EmojiEnum.Love)
-                    .WithTitle("GreetFur Leaderboard.");
-
                 string Description = string.Empty;
 
                 for (int i = 0; i < 20 && i < GreetFurs.Count - Embeds * 20; i++)
                     Description += GreetFurs[i + Embeds * 20];
 
-                Embed.WithDescription(Description);
-
-                EmbedList.Add(Embed);
+                EmbedList.Add(
+                    BuildEmbed(EmojiEnum.Love)
+                    .WithTitle("GreetFur Leaderboard.")
+                    .WithDescription(Description)
+                );
             }
 
-            await CreateReactionMenu(EmbedList.ToArray(), Context.Channel);
+            CreateReactionMenu(EmbedList.ToArray(), Context.Channel);
         }
 
     }

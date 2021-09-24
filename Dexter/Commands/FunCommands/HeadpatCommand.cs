@@ -75,7 +75,7 @@ namespace Dexter.Commands
 
             using (Discord.Image EmoteImage = new(FilePath))
             {
-                IGuild Guild = DiscordSocketClient.GetGuild(FunConfiguration.HeadpatStorageGuild);
+                IGuild Guild = DiscordShardedClient.GetGuild(FunConfiguration.HeadpatStorageGuild);
 
                 Console.WriteLine(NameOfUser.Length);
                 Console.WriteLine(EmoteImage);

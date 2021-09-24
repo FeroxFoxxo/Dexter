@@ -21,7 +21,7 @@ namespace Dexter.Abstractions
         /// Serves as an interface between the command and the guild.
         /// </summary>
 
-        public DiscordSocketClient DiscordSocketClient { get; set; }
+        public DiscordShardedClient DiscordShardedClient { get; set; }
 
     }
 

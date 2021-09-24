@@ -53,9 +53,9 @@ namespace Dexter.Abstractions
         public BotConfiguration BotConfiguration { get; set; }
 
         /// <summary>
-        /// The DiscordSocketClient is used to create the webhook for the webhook on create or get.
+        /// The DiscordShardedClient is used to create the webhook for the webhook on create or get.
         /// </summary>
-        public DiscordSocketClient DiscordSocketClient { get; set; }
+        public DiscordShardedClient DiscordShardedClient { get; set; }
 
         /// <summary>
         /// The Build Embed method is a generic method that simply calls upon the EMBED BUILDER extension method.
@@ -65,7 +65,7 @@ namespace Dexter.Abstractions
 
         public EmbedBuilder BuildEmbed(EmojiEnum Thumbnail)
         {
-            return new EmbedBuilder().BuildEmbed(Thumbnail, BotConfiguration);
+            return new EmbedBuilder().BuildEmbed(Thumbnail, BotConfiguration, EmbedCallingType.Command);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace Dexter.Abstractions
             if (ChannelID <= 0)
                 return null;
 
-            SocketChannel Channel = DiscordSocketClient.GetChannel(ChannelID);
+            SocketChannel Channel = DiscordShardedClient.GetChannel(ChannelID);
 
             if (Channel is SocketTextChannel TextChannel)
             {
@@ -168,7 +168,7 @@ namespace Dexter.Abstractions
         /// <param name="Channel">The channel that the reaction menu should be sent to.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task CreateReactionMenu(EmbedBuilder[] EmbedBuilder, ISocketMessageChannel Channel)
+        public void CreateReactionMenu(EmbedBuilder[] EmbedBuilder, ISocketMessageChannel Channel)
         {
             PageBuilder[] PageBuilderMenu = new PageBuilder[EmbedBuilder.Length];
 
@@ -181,9 +181,9 @@ namespace Dexter.Abstractions
                 .WithFooter(PaginatorFooter.PageNumber)
                 .WithActionOnCancellation(ActionOnStop.DeleteInput)
                 .WithActionOnTimeout(ActionOnStop.DeleteInput)
-                .Build();
+                                    .Build();
 
-            _ = Task.Run(async () => await Interactive.SendPaginatorAsync(Paginator, Context.Channel, TimeSpan.FromMinutes(10)));
+            _ = Task.Run(async () => await Interactive.SendPaginatorAsync(Paginator, Channel, TimeSpan.FromMinutes(10)));
         }
 
     }

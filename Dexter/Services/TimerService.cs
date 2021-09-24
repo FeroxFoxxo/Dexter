@@ -54,7 +54,7 @@ namespace Dexter.Services
 
         public override void Initialize()
         {
-            DiscordSocketClient.Ready += HasTimerStarted;
+            DiscordShardedClient.ShardReady += (DiscordSocketClient _) => HasTimerStarted();
         }
 
         /// <summary>

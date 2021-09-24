@@ -1,4 +1,4 @@
-{
+﻿{
   "AdministratorRoleID": 796371963811332107,
   "DeveloperRoleID": 795545764909678593,
   "ModeratorRoleID": 679632649807069232,
@@ -27,7 +27,7 @@
   "DisallowedChannels": [
     792657918309695498
   ],
-  "Help": "Dexter is the official USFurries Discord bot, used to moderate the server and provide useful tools. Made with love. <3\n\nIf you wish to help in the bot's development, you can find his repository here: https://github.com/FeroxFoxxo/Dexter.",
+  "Help": "Dexter is the official USFurries Discord bot, used to moderate the server and provide useful tools. Made with love. 💙\n\nIf you wish to help in the bot's development, you can find his repository here: https://github.com/FeroxFoxxo/Dexter.",
   "TrackerLength": 6,
   "RandomCharacters": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
   "CommitAPICall": "https://api.github.com/repos/FeroxFoxxo/Dexter/commits",

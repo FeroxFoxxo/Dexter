@@ -8,6 +8,8 @@ using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
 using System.Text;
+using Dexter.Enums;
+using Dexter.Abstractions;
 
 namespace Dexter.Helpers.Games
 {
@@ -16,40 +18,20 @@ namespace Dexter.Helpers.Games
     /// Represents an instance of a tic tac toe game.
     /// </summary>
 
-    public class GameTicTacToe : IGameTemplate
+    public class GameTicTacToe : GameTemplate
     {
-
-        /// <summary>
-        /// The game instance that this specific game is attached to.
-        /// </summary>
-
-        public GameInstance game;
-
-        /// <summary>
-        /// Creates a new instance of a hangman game based on a generic game instance.
-        /// </summary>
-        /// <param name="Game">The generic game instance to inherit from.</param>
-
-        public GameTicTacToe(GameInstance Game)
-        {
-            this.game = Game;
-            if (string.IsNullOrWhiteSpace(Game.Data)) Game.Data = EmptyData;
-        }
-
-        //Data structure: "term, guess, lives, maxlives, lettersmissed";
-        const string EmptyData = "---------, 0, 0, 0, O";
 
         private string StrState
         {
             get
             {
-                return game.Data.Split(", ")[0];
+                return Game.Data.Split(", ")[0];
             }
             set
             {
-                string[] NewValue = game.Data.Split(", ");
+                string[] NewValue = Game.Data.Split(", ");
                 NewValue[0] = value;
-                game.Data = string.Join(", ", NewValue);
+                Game.Data = string.Join(", ", NewValue);
             }
         }
 
@@ -82,14 +64,14 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return ulong.Parse(game.Data.Split(", ")[1]);
+                return ulong.Parse(Game.Data.Split(", ")[1]);
             }
             set
             {
                 string ProcessedValue = value.ToString();
-                string[] NewValue = game.Data.Split(", ");
+                string[] NewValue = Game.Data.Split(", ");
                 NewValue[1] = ProcessedValue;
-                game.Data = string.Join(", ", NewValue);
+                Game.Data = string.Join(", ", NewValue);
             }
         }
 
@@ -97,14 +79,14 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return ulong.Parse(game.Data.Split(", ")[2]);
+                return ulong.Parse(Game.Data.Split(", ")[2]);
             }
             set
             {
                 string ProcessedValue = value.ToString();
-                string[] NewValue = game.Data.Split(", ");
+                string[] NewValue = Game.Data.Split(", ");
                 NewValue[2] = ProcessedValue;
-                game.Data = string.Join(", ", NewValue);
+                Game.Data = string.Join(", ", NewValue);
             }
         }
 
@@ -112,14 +94,14 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return ulong.Parse(game.Data.Split(", ")[3]);
+                return ulong.Parse(Game.Data.Split(", ")[3]);
             }
             set
             {
                 string ProcessedValue = value.ToString();
-                string[] NewValue = game.Data.Split(", ");
+                string[] NewValue = Game.Data.Split(", ");
                 NewValue[3] = ProcessedValue;
-                game.Data = string.Join(", ", NewValue);
+                Game.Data = string.Join(", ", NewValue);
             }
         }
 
@@ -127,14 +109,14 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return game.Data.Split(", ")[4][0];
+                return Game.Data.Split(", ")[4][0];
             }
             set
             {
                 string ProcessedValue = value.ToString();
-                string[] NewValue = game.Data.Split(", ");
+                string[] NewValue = Game.Data.Split(", ");
                 NewValue[4] = ProcessedValue;
-                game.Data = string.Join(", ", NewValue);
+                Game.Data = string.Join(", ", NewValue);
             }
         }
 
@@ -144,17 +126,17 @@ namespace Dexter.Helpers.Games
         /// <param name="Client">SocketClient used to parse UserIDs.</param>
         /// <returns>An Embed detailing the various aspects of the game in its current instance.</returns>
 
-        public EmbedBuilder GetStatus(DiscordSocketClient Client)
+        public override EmbedBuilder GetStatus(DiscordSocketClient Client)
         {
-            return new EmbedBuilder()
+            return BuildEmbed(EmojiEnum.Unknown)
                 .WithColor(Color.Blue)
-                .WithTitle($"{game.Title} (Game {game.GameID})")
-                .WithDescription($"{game.Description}\n{DisplayState()}")
+                .WithTitle($"{Game.Title} (Game {Game.GameID})")
+                .WithDescription($"{Game.Description}\n{DisplayState()}")
                 .AddField($"{OChar} Player", $"{(PlayerO == default ? "-" : $"<@{PlayerO}>")}", true)
                 .AddField($"{XChar} Player", $"{(PlayerX == default ? "-" : $"<@{PlayerX}>")}", true)
                 .AddField($"Turn", $"{ToEmoji[Turn]}", true)
-                .AddField("Master", Client.GetUser(game.Master)?.GetUserInformation() ?? "<N/A>")
-                .AddField(game.Banned.Length > 0, "Banned Players", game.BannedMentions.TruncateTo(500));
+                .AddField("Master", Client.GetUser(Game.Master)?.GetUserInformation() ?? "<N/A>")
+                .AddField(Game.Banned.Length > 0, "Banned Players", Game.BannedMentions.TruncateTo(500));
         }
 
         const string EChar = "⬜";
@@ -185,12 +167,12 @@ namespace Dexter.Helpers.Games
         /// <param name="funConfiguration">Settings related to the fun module, which contain the default lives parameter.</param>
         /// <param name="gamesDB">The database containing player information, set to <see langword="null"/> to avoid resetting scores.</param>
 
-        public void Reset(FunConfiguration funConfiguration, GamesDB gamesDB)
+        public override void Reset(FunConfiguration funConfiguration, GamesDB gamesDB)
         {
-            game.Data = EmptyData;
-            game.LastUserInteracted = game.Master;
+            Game.Data = EmptyData;
+            Game.LastUserInteracted = Game.Master;
             if (gamesDB is null) return;
-            Player[] Players = gamesDB.GetPlayersFromInstance(game.GameID);
+            Player[] Players = gamesDB.GetPlayersFromInstance(Game.GameID);
             foreach (Player p in Players)
             {
                 p.Score = 0;
@@ -208,7 +190,7 @@ namespace Dexter.Helpers.Games
         /// <param name="feedback">In case this operation wasn't possible, its reason, or useful feedback even if the operation was successful.</param>
         /// <returns><see langword="true"/> if the operation was successful, otherwise <see langword="false"/>.</returns>
 
-        public bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback)
+        public override bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback)
         {
             feedback = $"TicTacToe doesn't implement any special fields! {field} isn't a valid default field.";
             return false;
@@ -220,9 +202,9 @@ namespace Dexter.Helpers.Games
         /// <param name="funConfiguration"></param>
         /// <returns></returns>
 
-        public EmbedBuilder Info(FunConfiguration funConfiguration)
+        public override EmbedBuilder Info(FunConfiguration funConfiguration)
         {
-            return new EmbedBuilder()
+            return BuildEmbed(EmojiEnum.Unknown)
                 .WithColor(Color.Magenta)
                 .WithTitle("How To Play: TicTacToe")
                 .WithDescription("**Step 1:** Create a new board by typing `board`.\n" +
@@ -281,7 +263,7 @@ namespace Dexter.Helpers.Games
         /// <param name="funConfiguration">The configuration file containing relevant game information.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration)
+        public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration)
         {
             if (message.Channel is IDMChannel) return;
             Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
@@ -320,7 +302,7 @@ namespace Dexter.Helpers.Games
                             return;
                     }
 
-                    if (!skip && prevPlayer is not null && prevPlayer.Playing == game.GameID)
+                    if (!skip && prevPlayer is not null && prevPlayer.Playing == Game.GameID)
                     {
                         await message.Channel.SendMessageAsync($"Can't claim token since player <@{prevPlayer.UserID}> is actively controlling it.");
                         return;
@@ -387,7 +369,7 @@ namespace Dexter.Helpers.Games
                     StrState = "---------";
                     Turn = 'O';
                     player.Score += 1;
-                    await new EmbedBuilder()
+                    await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Color.Green)
                         .WithTitle($"{ToEmoji[args[0].First()]} wins!")
                         .WithDescription("Create a new board if you wish to play again, or pass your token control to a different player.")
@@ -400,7 +382,7 @@ namespace Dexter.Helpers.Games
                     BoardID = 0;
                     StrState = "---------";
                     Turn = 'O';
-                    await new EmbedBuilder()
+                    await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Color.LightOrange)
                         .WithTitle("Draw!")
                         .WithDescription("No more tokens can be placed. Create a new board if you wish to play again, or pass your token control to a different player.")
@@ -426,7 +408,7 @@ namespace Dexter.Helpers.Games
                     return;
                 }
                 Player otherPlayer = gamesDB.GetOrCreatePlayer(otherUser.Id);
-                if (otherPlayer.Playing != game.GameID)
+                if (otherPlayer.Playing != Game.GameID)
                 {
                     await message.Channel.SendMessageAsync("That user isn't playing in this game session!");
                     return;
@@ -435,7 +417,7 @@ namespace Dexter.Helpers.Games
                 switch (args[1])
                 {
                     case "O":
-                        if (message.Author.Id != game.Master && message.Author.Id != PlayerO)
+                        if (message.Author.Id != Game.Master && message.Author.Id != PlayerO)
                         {
                             await message.Channel.SendMessageAsync("You aren't the master nor controlling the circle token!");
                             return;
@@ -443,7 +425,7 @@ namespace Dexter.Helpers.Games
                         PlayerO = otherPlayer.UserID;
                         break;
                     case "X":
-                        if (message.Author.Id != game.Master && message.Author.Id != PlayerX)
+                        if (message.Author.Id != Game.Master && message.Author.Id != PlayerX)
                         {
                             await message.Channel.SendMessageAsync("You aren't the master nor controlling the cross token!");
                             return;
@@ -461,7 +443,7 @@ namespace Dexter.Helpers.Games
 
             if (args[0] == "SWAP")
             {
-                if (message.Author.Id != game.Master)
+                if (message.Author.Id != Game.Master)
                 {
                     await message.Channel.SendMessageAsync("Only the game master can swap the tokens!");
                     return;
@@ -488,5 +470,17 @@ namespace Dexter.Helpers.Games
             { "C2", new Tuple<int, int>(1, 2) },
             { "C3", new Tuple<int, int>(0, 2) }
         };
+
+        /// <summary>
+        /// The initializer for the game class, setting both the instance information and the bot configuration.
+        /// </summary>
+        /// <param name="game">The current instance of the game.</param>
+        /// <param name="botConfiguration">An instance of the bot's configuraiton.</param>
+
+        //Data structure: "term, guess, lives, maxlives, lettersmissed";
+
+        public GameTicTacToe(GameInstance game, BotConfiguration botConfiguration) : base(game, botConfiguration, "---------, 0, 0, 0, O")
+        {
+        }
     }
 }

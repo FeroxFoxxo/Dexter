@@ -45,7 +45,7 @@ namespace Dexter.Commands
                         "Many countries use a mechanism called **Daylight Saving Time** (DST), whereby time gets advanced for 1 hour during the summer half of the year.\n" +
                         "When inputting your time zone, make sure to check whether your local area uses DST or not, and specify the correct time zone.\n" +
                         $"Dexter is running in {TimeZoneData.ToTimeZoneExpression(DateTimeOffset.Now.Offset)}.")
-                    .WithCurrentTimestamp()
+
                     .SendEmbed(Context.Channel);
                 return;
             }

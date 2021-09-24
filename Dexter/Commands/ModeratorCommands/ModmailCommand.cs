@@ -58,7 +58,7 @@ namespace Dexter.Commands
                     .WithTitle($"Anonymous Modmail #{ModMailDB.ModMail.Count() + 1}")
                     .WithDescription(Message)
                     .WithImageUrl(ProxyURL)
-                    .WithCurrentTimestamp()
+
                     .WithFooter(Tracker)
                     .Build()
             );
@@ -82,7 +82,6 @@ namespace Dexter.Commands
                     $"Only give this out to a moderator if you wish to be identified.\n\n" +
                     $"Thank you~! - {DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Name} Staff Team <3")
                 .WithFooter(ModMail.Tracker)
-                .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
         }
 

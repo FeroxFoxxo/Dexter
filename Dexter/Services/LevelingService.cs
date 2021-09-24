@@ -362,7 +362,7 @@ namespace Dexter.Services
             }
             string rolesFoundExpression = rolesFoundNames.Count == 0 ? "" : $"Found roles: [{string.Join(", ", rolesFoundNames)}]";
             string message = (success ? "" : "No role modifications are necessary; updated no roles. ") + rolesFoundExpression;
-            Dictionary<bool, IEnumerable<IRole>> mods = new Dictionary<bool, IEnumerable<IRole>>() { { false, toRemove }, { true, toAdd } };
+            Dictionary<bool, IEnumerable<IRole>> mods = new() { { false, toRemove }, { true, toAdd } };
             return new RoleModificationResponse(user, success, message, mods, level);
         }
 

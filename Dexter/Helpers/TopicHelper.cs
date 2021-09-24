@@ -25,7 +25,7 @@ namespace Dexter.Commands
 
         public async Task RunTopic(string Command, TopicType TopicType)
         {
-            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2").Substring(1);
+            string Name = Regex.Replace(TopicType.ToString(), "([A-Z])([a-z]*)", " $1$2")[1..];
 
             if (!string.IsNullOrEmpty(Command))
             {

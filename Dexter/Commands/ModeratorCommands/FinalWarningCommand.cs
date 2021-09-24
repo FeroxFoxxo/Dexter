@@ -75,7 +75,7 @@ namespace Dexter.Commands
                     .WithDescription(Reason)
                     .AddField("Points Deducted:", PointsDeducted, true)
                     .AddField("Mute Duration:", MuteDuration.Humanize(), true)
-                    .WithCurrentTimestamp()
+
                     .SendEmbed(await User.CreateDMChannelAsync());
 
                 await BuildEmbed(EmojiEnum.Love)
@@ -85,7 +85,7 @@ namespace Dexter.Commands
                     .AddField("Points Deducted:", PointsDeducted, true)
                     .AddField("Issued By:", Context.User.GetUserInformation())
                     .AddField("Reason:", Reason)
-                    .WithCurrentTimestamp()
+
                     .SendEmbed(Context.Channel);
             }
             catch (HttpException)
@@ -132,7 +132,6 @@ namespace Dexter.Commands
                 .WithTitle("Final warn successfully revoked.")
                 .WithDescription($"Successfully revoked final warning for user {User.GetUserInformation()}. You can still query records about this final warning.")
                 .AddField(Reason.Length > 0, "Reason:", Reason)
-                .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
 
             try
@@ -141,7 +140,7 @@ namespace Dexter.Commands
                     .WithTitle("Your final warning has been revoked!")
                     .WithDescription("The staff team has convened and decided to revoke your final warning. Be careful, you can't receive more than two final warnings! A third one is an automatic ban.")
                     .AddField(Reason.Length > 0, "Reason:", Reason)
-                    .WithCurrentTimestamp()
+
                     .SendEmbed(await User.CreateDMChannelAsync());
             }
             catch (HttpException)

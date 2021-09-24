@@ -7,6 +7,8 @@ using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
 using System.Text;
+using Dexter.Abstractions;
+using Dexter.Enums;
 
 namespace Dexter.Helpers.Games
 {
@@ -15,41 +17,20 @@ namespace Dexter.Helpers.Games
     /// Represents an instance of a hangman game.
     /// </summary>
 
-    public class GameHangman : IGameTemplate
+    public class GameHangman : GameTemplate
     {
-
-        /// <summary>
-        /// The game instance that this specific game is attached to.
-        /// </summary>
-
-        public GameInstance game;
-
-        /// <summary>
-        /// Creates a new instance of a hangman game based on a generic game instance.
-        /// </summary>
-        /// <param name="game">The generic game instance to inherit from.</param>
-
-        public GameHangman(GameInstance game)
-        {
-            this.game = game;
-            if (string.IsNullOrWhiteSpace(game.Data)) game.Data = EmptyData;
-        }
-
-        //Data structure: "term, guess, lives, maxlives, lettersmissed";
-        const string EmptyData = "Default, _______, 6, 6, ";
-
         private string Term
         {
             get
             {
-                return game.Data.Split(", ")[0].Replace(GameInstance.CommaRepresentation, ",");
+                return Game.Data.Split(", ")[0].Replace(GameInstance.CommaRepresentation, ",");
             }
             set
             {
                 string processedValue = value.Replace(",", GameInstance.CommaRepresentation);
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[0] = processedValue;
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -57,14 +38,14 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return game.Data.Split(", ")[1].Replace(GameInstance.CommaRepresentation, ",");
+                return Game.Data.Split(", ")[1].Replace(GameInstance.CommaRepresentation, ",");
             }
             set
             {
                 string processedValue = value.Replace(",", GameInstance.CommaRepresentation);
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[1] = processedValue;
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -72,16 +53,16 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return int.Parse(game.Data.Split(", ")[2]);
+                return int.Parse(Game.Data.Split(", ")[2]);
             }
             set
             {
                 if (value < 0) return;
                 if (value > MaxLives) MaxLives = value;
                 string processedValue = value.ToString();
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[2] = processedValue;
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -89,15 +70,15 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return int.Parse(game.Data.Split(", ")[3]);
+                return int.Parse(Game.Data.Split(", ")[3]);
             }
             set
             {
                 if (value < 1) return;
                 string processedValue = value.ToString();
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[3] = processedValue;
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
                 if (Lives > value) Lives = value;
             }
         }
@@ -106,15 +87,15 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                string s = game.Data.Split(", ")[4];
+                string s = Game.Data.Split(", ")[4];
                 if (s == "-") return "";
                 return s;
             }
             set
             {
-                string[] NewValue = game.Data.Split(", ");
+                string[] NewValue = Game.Data.Split(", ");
                 NewValue[4] = value.Length == 0 ? "-" : value;
-                game.Data = string.Join(", ", NewValue);
+                Game.Data = string.Join(", ", NewValue);
             }
         }
 
@@ -124,17 +105,17 @@ namespace Dexter.Helpers.Games
         /// <param name="Client">SocketClient used to parse UserIDs.</param>
         /// <returns>An Embed detailing the various aspects of the game in its current instance.</returns>
 
-        public EmbedBuilder GetStatus(DiscordSocketClient Client)
+        public override EmbedBuilder GetStatus(DiscordSocketClient Client)
         {
-            return new EmbedBuilder()
+            return BuildEmbed(EmojiEnum.Unknown)
                 .WithColor(Color.Blue)
-                .WithTitle($"{game.Title} (Game {game.GameID})")
-                .WithDescription($"{game.Description}\n**Term**: {DiscordifyGuess()}")
+                .WithTitle($"{Game.Title} (Game {Game.GameID})")
+                .WithDescription($"{Game.Description}\n**Term**: {DiscordifyGuess()}")
                 .AddField("Lives", LivesExpression(), true)
                 .AddField("Wrong Guesses", MistakesExpression(), true)
                 .AddField("Available Guesses", MissingLettersExpression(), true)
-                .AddField("Master", Client.GetUser(game.Master)?.GetUserInformation() ?? "<N/A>")
-                .AddField(game.Banned.Length > 0, "Banned Players", game.BannedMentions.TruncateTo(500));
+                .AddField("Master", Client.GetUser(Game.Master)?.GetUserInformation() ?? "<N/A>")
+                .AddField(Game.Banned.Length > 0, "Banned Players", Game.BannedMentions.TruncateTo(500));
         }
 
         private void RegisterMistake(char c)
@@ -205,13 +186,13 @@ namespace Dexter.Helpers.Games
         /// <param name="FunConfiguration">Settings related to the fun module, which contain the default lives parameter.</param>
         /// <param name="GamesDB">The database containing player information, set to <see langword="null"/> to avoid resetting scores.</param>
 
-        public void Reset(FunConfiguration FunConfiguration, GamesDB GamesDB)
+        public override void Reset(FunConfiguration FunConfiguration, GamesDB GamesDB)
         {
-            game.Data = EmptyData;
-            game.LastUserInteracted = game.Master;
+            Game.Data = EmptyData;
+            Game.LastUserInteracted = Game.Master;
             Lives = MaxLives = FunConfiguration.HangmanDefaultLives;
             if (GamesDB is null) return;
-            Player[] Players = GamesDB.GetPlayersFromInstance(game.GameID);
+            Player[] Players = GamesDB.GetPlayersFromInstance(Game.GameID);
             foreach (Player p in Players)
             {
                 p.Score = 0;
@@ -231,7 +212,7 @@ namespace Dexter.Helpers.Games
         /// <param name="feedback">In case this operation wasn't possible, its reason, or useful feedback even if the operation was successful.</param>
         /// <returns><see langword="true"/> if the operation was successful, otherwise <see langword="false"/>.</returns>
 
-        public bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback)
+        public override bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback)
         {
             feedback = "";
             int n;
@@ -317,9 +298,9 @@ namespace Dexter.Helpers.Games
         /// <param name="funConfiguration"></param>
         /// <returns></returns>
 
-        public EmbedBuilder Info(FunConfiguration funConfiguration)
+        public override EmbedBuilder Info(FunConfiguration funConfiguration)
         {
-            return new EmbedBuilder()
+            return BuildEmbed(EmojiEnum.Unknown)
                 .WithColor(Color.Magenta)
                 .WithTitle("How To Play: Hangman")
                 .WithDescription("**Step 1**: Set a TERM! The master can choose a term in DMs with the `game SET TERM [Term]` command.\n" +
@@ -367,7 +348,7 @@ namespace Dexter.Helpers.Games
         /// <param name="funConfiguration">The configuration file containing relevant game information.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration)
+        public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration)
         {
             if (message.Channel is IDMChannel) return;
             Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
@@ -375,13 +356,13 @@ namespace Dexter.Helpers.Games
             string msg = message.Content.Replace("@", "@-");
             if (msg.ToLower() == "pass")
             {
-                if (game.LastUserInteracted == message.Author.Id)
+                if (Game.LastUserInteracted == message.Author.Id)
                 {
                     await message.Channel.SendMessageAsync($"It's not your turn, {message.Author.Mention}!");
                     return;
                 }
 
-                game.LastUserInteracted = message.Author.Id;
+                Game.LastUserInteracted = message.Author.Id;
                 await message.Channel.SendMessageAsync($"{message.Author.Mention} passed their turn!");
                 await message.DeleteAsync();
                 return;
@@ -406,12 +387,12 @@ namespace Dexter.Helpers.Games
                     await message.Channel.SendMessageAsync(DiscordifyGuess());
                     return;
                 }
-                if (message.Author.Id == game.Master)
+                if (message.Author.Id == Game.Master)
                 {
                     await message.Channel.SendMessageAsync("The game master isn't allowed to guess their own word.");
                     return;
                 }
-                if (game.LastUserInteracted == message.Author.Id)
+                if (Game.LastUserInteracted == message.Author.Id)
                 {
                     await message.Channel.SendMessageAsync("You've already guessed! Let someone else play, if it's only you, have the master pass their turn.");
                     return;
@@ -441,15 +422,14 @@ namespace Dexter.Helpers.Games
                         return;
                     }
 
-                    game.LastUserInteracted = message.Author.Id;
+                    Game.LastUserInteracted = message.Author.Id;
                     int count = GuessChar(c);
                     if (count > 0)
                     {
-                        int score = 0;
                         string scoreExpression = "";
                         if (ScorePerLetter.ContainsKey(char.ToUpper(c)))
                         {
-                            score = count * ScorePerLetter[char.ToUpper(c)];
+                            int score = count * ScorePerLetter[char.ToUpper(c)];
                             scoreExpression = $" (+{score}P)";
                             player.Score += score;
                         }
@@ -460,7 +440,7 @@ namespace Dexter.Helpers.Games
 
                         if (!Guess.Contains('_'))
                         {
-                            await new EmbedBuilder()
+                            await BuildEmbed(EmojiEnum.Unknown)
                                 .WithColor(Color.Green)
                                 .WithTitle("Victory!")
                                 .WithDescription($"The term was {Term}! \nThe master can now choose a new term or offer their position to another player with the `game set master [Player]` command.")
@@ -475,7 +455,7 @@ namespace Dexter.Helpers.Games
                         await message.DeleteAsync();
                         if (Lives == 0)
                         {
-                            await new EmbedBuilder()
+                            await BuildEmbed(EmojiEnum.Unknown)
                                 .WithColor(Color.Red)
                                 .WithTitle("Defeat!")
                                 .WithDescription($"The term was {Term}! \nThe master can now choose a new term or offer their position to another player with the `game set master [Player]` command.")
@@ -487,7 +467,7 @@ namespace Dexter.Helpers.Games
                 }
                 if (newGuess.Length > 1)
                 {
-                    game.LastUserInteracted = message.Author.Id;
+                    Game.LastUserInteracted = message.Author.Id;
                     if (!ConsiderEqual(newGuess, Term))
                     {
                         await message.Channel.SendMessageAsync($"{message.Author.Mention} guessed the term to be \"{newGuess}\"!\n" +
@@ -498,7 +478,7 @@ namespace Dexter.Helpers.Games
                     int score = ValueDifference(Guess, Term);
                     player.Score += score;
                     Guess = Term;
-                    await new EmbedBuilder()
+                    await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Color.Green)
                         .WithTitle($"Correct! (+{score} Point{(score > 1 ? "s" : "")})")
                         .WithDescription($"The term was {Term}! \nThe master can now choose a new term or offer their position to another player with the `game set master [Player]` command.\n")
@@ -568,5 +548,16 @@ namespace Dexter.Helpers.Games
             {'Y', 4},
             {'Z', 10}
         };
+
+        /// <summary>
+        /// The initializer for the game class, setting both the instance information and the bot configuration.
+        /// </summary>
+        /// <param name="game">The current instance of the game.</param>
+        /// <param name="botConfiguration">An instance of the bot's configuraiton.</param>
+
+        //Data structure: "term, guess, lives, maxlives, lettersmissed";
+        public GameHangman(GameInstance game, BotConfiguration botConfiguration) : base(game, botConfiguration, "Default, _______, 6, 6, ")
+        {
+        }
     }
 }

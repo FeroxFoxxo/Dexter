@@ -78,7 +78,7 @@ namespace Dexter.Commands
                             {
                                 Embeds.Add(CurrentBuilder);
                                 Description = string.Empty;
-                                CurrentBuilder = new EmbedBuilder().WithTitle(ModuleName).WithDescription(Description += Field).WithColor(Color.Green);
+                                CurrentBuilder = BuildEmbed(EmojiEnum.Unknown).WithTitle(ModuleName).WithDescription(Description += Field);
                             }
                         }
                     }

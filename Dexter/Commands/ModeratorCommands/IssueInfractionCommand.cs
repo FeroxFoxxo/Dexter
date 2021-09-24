@@ -98,7 +98,7 @@ namespace Dexter.Commands
                     BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"Unrecorded Mute Applied!")
                         .WithDescription($"You have been muted in `{Context.Guild.Name}` for `{Reason}` for a time of `{Time.Humanize(2)}`. We hope you enjoy your time. <3")
-                        .WithCurrentTimestamp()
+    
                 );
         }
 
@@ -176,7 +176,7 @@ namespace Dexter.Commands
                         embed: BuildEmbed(EmojiEnum.Wut)
                         .WithTitle($"Frequent Rule Breaker Inbound!")
                         .WithDescription($"Haiya!\n{Notification}Perhaps this is something the <@&{BotConfiguration.AdministratorRoleID}> can dwell on. <3")
-                        .WithCurrentTimestamp().Build()
+    .Build()
                 );
             }
 
@@ -187,7 +187,7 @@ namespace Dexter.Commands
                         embed: BuildEmbed(EmojiEnum.Wut)
                         .WithTitle($"Final Warned User has been {(Time.TotalSeconds > 0 ? "muted" : "warned")}!")
                         .WithDescription($"Haiya! User <@{User.Id}> has been {(Time.TotalSeconds > 0 ? "muted" : "warned")} for `{Reason}` and has lost {PointsDeducted} point{(PointsDeducted != 1 ? "s" : "")}. They currently have {DexterProfile.InfractionAmount - PointsDeducted} point{(DexterProfile.InfractionAmount - PointsDeducted != 1 ? "s" : "")}.")
-                        .WithCurrentTimestamp().Build()
+    .Build()
                 );
             }
 
@@ -260,8 +260,7 @@ namespace Dexter.Commands
                        $"{(InfractionType == InfractionType.Mute ? $" for **{Time.Humanize(2)}**" : "")} who currently has **{TotalInfractions} " +
                        $"{(TotalInfractions == 1 ? "infraction" : "infractions")}** and has had **{PointsDeducted} {(PointsDeducted == 1 ? "point" : "points")} deducted.**")
                    .AddField("Issued By", Context.User.GetUserInformation())
-                   .AddField(Time.TotalSeconds > 0, "Total Mute Time", $"{Time.Humanize(2)}.")
-                   .WithCurrentTimestamp() :
+                   .AddField(Time.TotalSeconds > 0, "Total Mute Time", $"{Time.Humanize(2)}.") :
 
                 // If we are in a public channel we don't want the user's warnings public.
                 BuildEmbed(EmojiEnum.Love)
@@ -282,7 +281,7 @@ namespace Dexter.Commands
                             $"Please read over the <#{ModerationConfiguration.RulesAndInfoChannel}> channel if you have not already done so, even if it's just for a refresher, as to make sure your behaviour meets the standards of the server. <3")
                         )
                         .AddField("Reason", Reason)
-                        .WithCurrentTimestamp()
+    
                 );
         }
 
@@ -352,7 +351,7 @@ namespace Dexter.Commands
                         .WithTitle("Error!")
                         .WithDescription($"Couldn't mute user <@{User.Id}> ({User.Id}) for {Time.Humanize()}.")
                         .AddField("Error:", Error.Message)
-                        .WithCurrentTimestamp().Build()
+    .Build()
                 );
             }
 

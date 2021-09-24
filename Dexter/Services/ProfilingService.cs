@@ -114,7 +114,6 @@ namespace Dexter.Services
                             .WithTitle("Backup Successfully Concluded.")
                             .WithDescription($"Haiya! The backup for {DateTime.UtcNow.ToShortDateString()} has been built " +
                                 $"with a file size of {string.Format("{0:0.##} {1}", FileLength, Sizes[Order])}.")
-                            .WithCurrentTimestamp()
                             .WithFooter($"Profiling took {Stopwatch.Elapsed.Humanize()}")
                             .Build()
                     );

@@ -44,7 +44,6 @@ namespace Dexter.Commands
                 .WithTitle("Infractions Purge Confimation")
                 .WithDescription($"Heya! I've send the infractions purge for {User.GetUserInformation()} to the administrators for approval.")
                 .AddField("Purge instantiated by", Context.User.GetUserInformation())
-                .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
         }
 
@@ -69,7 +68,6 @@ namespace Dexter.Commands
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Infractions Purged")
                 .WithDescription($"Heya! I've purged {Count} warnings from your account. You now have a clean slate! <3")
-                .WithCurrentTimestamp()
                 .SendEmbed(await Client.GetUser(UserID).CreateDMChannelAsync());
         }
 

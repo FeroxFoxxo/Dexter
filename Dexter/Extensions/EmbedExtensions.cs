@@ -35,11 +35,14 @@ namespace Dexter.Extensions
                 EmojiEnum.Love => Color.Green,
                 EmojiEnum.Sign => Color.Blue,
                 EmojiEnum.Wut => Color.Teal,
-                EmojiEnum.Unknown => Color.Orange,
+                EmojiEnum.Unknown => Color.Magenta,
                 _ => Color.Magenta
             };
 
-            return EmbedBuilder.WithThumbnailUrl(BotConfiguration.ThumbnailURLs[(int)Thumbnails]).WithColor(Color);
+            return EmbedBuilder
+                .WithThumbnailUrl(BotConfiguration.ThumbnailURLs[(int)Thumbnails])
+                .WithColor(Color)
+                .WithCurrentTimestamp();
         }
 
         /// <summary>

@@ -7,10 +7,10 @@ using Dexter.Databases.Games;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Helpers;
-using Dexter.Helpers.Games;
 using Discord;
 using Discord.Commands;
 using System.Text;
+using Dexter.Abstractions;
 
 namespace Dexter.Commands
 {
@@ -107,7 +107,7 @@ namespace Dexter.Commands
                     return;
                 case "help":
                 case "info":
-                    if (game is null || game.ToGameProper() is null)
+                    if (game is null || game.ToGameProper(BotConfiguration) is null)
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("You aren't in a game!")
@@ -115,7 +115,7 @@ namespace Dexter.Commands
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    await game.ToGameProper().Info(FunConfiguration).SendEmbed(Context.Channel);
+                    await game.ToGameProper(BotConfiguration).Info(FunConfiguration).SendEmbed(Context.Channel);
                     return;
                 case "leaderboard":
                 case "points":
@@ -208,15 +208,15 @@ namespace Dexter.Commands
                         game = GamesDB.Games.Find(gameID);
                     }
 
-                    if (game is null || game.ToGameProper() is null)
+                    if (game is null || game.ToGameProper(BotConfiguration) is null)
                     {
                         await Context.Message.ReplyAsync("This game doesn't exist or isn't active!");
                         return;
                     }
-                    await game.ToGameProper().GetStatus(DiscordSocketClient).SendEmbed(Context.Channel);
+                    await game.ToGameProper(BotConfiguration).GetStatus(DiscordSocketClient).SendEmbed(Context.Channel);
                     return;
                 case "reset":
-                    if (game is null || game.ToGameProper() is null)
+                    if (game is null || game.ToGameProper(BotConfiguration) is null)
                     {
                         await Context.Message.ReplyAsync("You're not in an implemented game!");
                         return;
@@ -229,7 +229,7 @@ namespace Dexter.Commands
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    game.ToGameProper().Reset(FunConfiguration, GamesDB);
+                    game.ToGameProper(BotConfiguration).Reset(FunConfiguration, GamesDB);
                     GamesDB.SaveChanges();
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Game successfully reset!")
@@ -406,7 +406,7 @@ namespace Dexter.Commands
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to find game!")
                     .WithDescription($"No game exists with ID {gameID}.")
-                    .WithCurrentTimestamp()
+
                     .SendEmbed(Context.Channel);
                 return;
             }
@@ -416,7 +416,6 @@ namespace Dexter.Commands
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Game removed!")
                 .WithDescription($"Game #{gameID} was successfully removed and all players in it were kicked.")
-                .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
             return;
         }
@@ -511,7 +510,7 @@ namespace Dexter.Commands
             Join(master, result, out _);
             GamesDB.SaveChanges();
 
-            IGameTemplate game = result.ToGameProper();
+            GameTemplate game = result.ToGameProper(BotConfiguration);
             if (game is not null) game.Reset(FunConfiguration, GamesDB);
             return result;
         }
@@ -584,7 +583,7 @@ namespace Dexter.Commands
                     feedback = $"Success! Master set to {master.Mention}";
                     return true;
                 default:
-                    IGameTemplate game = instance.ToGameProper();
+                    GameTemplate game = instance.ToGameProper(BotConfiguration);
                     if (game is null)
                     {
                         feedback = "Game mode is not set! This is weird... you should probably make a new game session";
@@ -608,8 +607,7 @@ namespace Dexter.Commands
                 board.Append($"{(board.Length > 0 ? "\n" : "")}{user.Username.TruncateTo(16),-16}| {p.Score:G4}, ♥×{p.Lives}");
             }
 
-            return new EmbedBuilder()
-                .WithColor(Color.Gold)
+            return BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle($"Leaderboard for {instance.Title}")
                 .WithDescription($"`{board}`");
         }

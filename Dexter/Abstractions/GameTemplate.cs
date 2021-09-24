@@ -1,34 +1,61 @@
 using System.Threading.Tasks;
 using Dexter.Configurations;
 using Dexter.Databases.Games;
+using Dexter.Enums;
+using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
 
-namespace Dexter.Helpers.Games
+namespace Dexter.Abstractions
 {
 
     /// <summary>
     /// Represents a standardized form of a game, with the minimum set of globally required methods.
     /// </summary>
 
-    public interface IGameTemplate
+    public abstract class GameTemplate
     {
+        
+        /// <summary>
+        /// Current game instance, initialized in GameTemplate.
+        /// </summary>
+
+        public readonly GameInstance Game;
 
         /// <summary>
-        /// Represents the general status and data of a game.
+        /// The data that an empty game will contain.
         /// </summary>
-        /// <param name="client">SocketClient used to parse UserIDs.</param>
-        /// <returns>An Embed detailing the various aspects of the game in its current instance.</returns>
 
-        public abstract EmbedBuilder GetStatus(DiscordSocketClient client);
+        public readonly string EmptyData;
+
+        private readonly BotConfiguration BotConfiguration;
 
         /// <summary>
-        /// Resets the game, setting it on a default status.
+        /// Initializes an instatnce of Game.
         /// </summary>
-        /// <param name="funConfiguration">The general module configuration, if required.</param>
-        /// <param name="gamesDB">The Games database, used to reset scores if appropriate.</param>
+        /// <param name="game">The current instance of the game with its data.</param>
+        /// <param name="botConfiguration">The current instance of the bot configuration.</param>
+        /// <param name="emptyData">The empty data that should be given on a new game being init.</param>
 
-        public abstract void Reset(FunConfiguration funConfiguration, GamesDB gamesDB);
+        public GameTemplate (GameInstance game, BotConfiguration botConfiguration, string emptyData)
+        {
+            this.Game = game;
+            this.BotConfiguration = botConfiguration;
+            EmptyData = emptyData;
+
+            if (string.IsNullOrWhiteSpace(game.Data)) game.Data = emptyData;
+        }
+
+        /// <summary>
+        /// The Build Embed method is a generic method that simply calls upon the EMBED BUILDER extension method.
+        /// </summary>
+        /// <param name="Thumbnail">The thumbnail that you would like to be applied to the embed.</param>
+        /// <returns>A new embed builder with the specified attributes applied to the embed.</returns>
+
+        public EmbedBuilder BuildEmbed(EmojiEnum Thumbnail)
+        {
+            return new EmbedBuilder().BuildEmbed(Thumbnail, BotConfiguration);
+        }
 
         /// <summary>
         /// Handles a message given by the event manager when a player that is in this game sends a message in the appropriate channel.
@@ -51,6 +78,22 @@ namespace Dexter.Helpers.Games
         /// <returns><see langword="true"/> if the operation was successful, otherwise <see langword="false"/>.</returns>
 
         public abstract bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback);
+
+        /// <summary>
+        /// Represents the general status and data of a game.
+        /// </summary>
+        /// <param name="client">SocketClient used to parse UserIDs.</param>
+        /// <returns>An Embed detailing the various aspects of the game in its current instance.</returns>
+
+        public abstract EmbedBuilder GetStatus(DiscordSocketClient client);
+
+        /// <summary>
+        /// Resets the game, setting it on a default status.
+        /// </summary>
+        /// <param name="funConfiguration">The general module configuration, if required.</param>
+        /// <param name="game">The Games database, used to reset scores if appropriate.</param>
+
+        public abstract void Reset(FunConfiguration funConfiguration, GamesDB game);
 
         /// <summary>
         /// Gets the general information, format, additional set parameters and playing Guide for the game.

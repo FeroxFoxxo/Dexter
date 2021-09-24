@@ -38,7 +38,6 @@ namespace Dexter.Commands
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"Successfully Unmuted {User.Username}.")
                 .WithDescription($"Heya! I have successfully unmuted {User.GetUserInformation()}. Give them a headpat. <3")
-                .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
         }
 
@@ -81,7 +80,6 @@ namespace Dexter.Commands
                 .AddField("Issued by", Issuer == null ? $"Unknown ({Infraction.Issuer})" : Issuer.GetUserInformation())
                 .AddField("Revoked by", Context.User.GetUserInformation())
                 .AddField("Reason", Infraction.Reason)
-                .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
         }
 

@@ -11,6 +11,8 @@ using Discord.WebSocket;
 using System.Drawing;
 using System.Text;
 using System.Text.RegularExpressions;
+using Dexter.Enums;
+using Dexter.Abstractions;
 
 namespace Dexter.Helpers.Games
 {
@@ -19,23 +21,21 @@ namespace Dexter.Helpers.Games
     /// Represents a game of Chess.
     /// </summary>
 
-    public class GameChess : IGameTemplate
+    public class GameChess : GameTemplate
     {
-
-        private const string EmptyData = StartingPos + ", -, 0, 0, 0, 0, NN, standard, 0";
         private const string StartingPos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
         private string BoardRaw
         {
             get
             {
-                return game.Data.Split(", ")[0];
+                return Game.Data.Split(", ")[0];
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[0] = value;
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -43,13 +43,13 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return game.Data.Split(", ")[1];
+                return Game.Data.Split(", ")[1];
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[1] = value;
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -57,13 +57,13 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return ulong.Parse(game.Data.Split(", ")[2]);
+                return ulong.Parse(Game.Data.Split(", ")[2]);
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[2] = value.ToString();
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -71,13 +71,13 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return ulong.Parse(game.Data.Split(", ")[3]);
+                return ulong.Parse(Game.Data.Split(", ")[3]);
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[3] = value.ToString();
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -85,13 +85,13 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return ulong.Parse(game.Data.Split(", ")[4]);
+                return ulong.Parse(Game.Data.Split(", ")[4]);
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[4] = value.ToString();
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -99,13 +99,13 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return ulong.Parse(game.Data.Split(", ")[5]);
+                return ulong.Parse(Game.Data.Split(", ")[5]);
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[5] = value.ToString();
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -113,13 +113,13 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return game.Data.Split(", ")[6];
+                return Game.Data.Split(", ")[6];
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[6] = value;
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -127,13 +127,13 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return game.Data.Split(", ")[7];
+                return Game.Data.Split(", ")[7];
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[7] = value;
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -148,13 +148,13 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return (ViewMode)int.Parse(game.Data.Split(", ")[8]);
+                return (ViewMode)int.Parse(Game.Data.Split(", ")[8]);
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[8] = ((int)value).ToString();
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -166,37 +166,24 @@ namespace Dexter.Helpers.Games
             }
         }
 
-        private readonly GameInstance game;
-
-        /// <summary>
-        /// Creates a new instance of a chess game given a generic GameInstance <paramref name="game"/>
-        /// </summary>
-        /// <param name="game">The generic GameInstance from which to generate the chess game.</param>
-
-        public GameChess(GameInstance game)
-        {
-            this.game = game;
-            if (string.IsNullOrEmpty(game.Data)) game.Data = EmptyData;
-        }
-
         /// <summary>
         /// Represents the general status and data of a Chess Game.
         /// </summary>
         /// <param name="client">SocketClient used to parse UserIDs.</param>
         /// <returns>An Embed detailing the various aspects of the game in its current instance.</returns>
 
-        public EmbedBuilder GetStatus(DiscordSocketClient client)
+        public override EmbedBuilder GetStatus(DiscordSocketClient client)
         {
-            return new EmbedBuilder()
+            return BuildEmbed(EmojiEnum.Unknown)
                 .WithColor(Discord.Color.Blue)
-                .WithTitle($"{game.Title} (Game {game.GameID})")
-                .WithDescription($"{game.Description}")
+                .WithTitle($"{Game.Title} (Game {Game.GameID})")
+                .WithDescription($"{Game.Description}")
                 .AddField("White", $"<@{PlayerWhite}>", true)
                 .AddField("Black", $"<@{PlayerBlack}>", true)
                 .AddField("Turn", $"{(IsWhitesTurn ? "White" : "Black")}", true)
                 .AddField("FEN Expression", BoardRaw)
-                .AddField("Master", client.GetUser(game.Master)?.GetUserInformation() ?? "<N/A>")
-                .AddField(game.Banned.Length > 0, "Banned Players", game.BannedMentions.TruncateTo(500));
+                .AddField("Master", client.GetUser(Game.Master)?.GetUserInformation() ?? "<N/A>")
+                .AddField(Game.Banned.Length > 0, "Banned Players", Game.BannedMentions.TruncateTo(500));
         }
 
         /// <summary>
@@ -205,9 +192,9 @@ namespace Dexter.Helpers.Games
         /// <param name="funConfiguration">The configuration file holding relevant information for the game.</param>
         /// <returns>An <see cref="EmbedBuilder"/> object holding the stylized information.</returns>
 
-        public EmbedBuilder Info(FunConfiguration funConfiguration)
+        public override EmbedBuilder Info(FunConfiguration funConfiguration)
         {
-            return new EmbedBuilder()
+            return BuildEmbed(EmojiEnum.Unknown)
                 .WithColor(Discord.Color.Magenta)
                 .WithTitle("How to Play: Chess")
                 .WithDescription("**Step 1.** Create a board by typing `board` in chat.\n" +
@@ -231,18 +218,18 @@ namespace Dexter.Helpers.Games
         /// <param name="funConfiguration">The configuration file holding all relevant parameters for Games.</param>
         /// <param name="gamesDB">The games database where relevant data concerning games and players is stored.</param>
 
-        public void Reset(FunConfiguration funConfiguration, GamesDB gamesDB)
+        public override void Reset(FunConfiguration funConfiguration, GamesDB gamesDB)
         {
             ulong white = PlayerWhite;
             ulong black = PlayerBlack;
             ulong dumpID = DumpID;
-            game.Data = EmptyData;
+            Game.Data = EmptyData;
             PlayerWhite = white;
             PlayerBlack = black;
             DumpID = dumpID;
             if (gamesDB is not null)
             {
-                foreach (Player p in gamesDB.GetPlayersFromInstance(game.GameID))
+                foreach (Player p in gamesDB.GetPlayersFromInstance(Game.GameID))
                 {
                     p.Score = 0;
                     p.Lives = 0;
@@ -259,7 +246,7 @@ namespace Dexter.Helpers.Games
         /// <param name="feedback">The result of the operation, explained in a humanized way.</param>
         /// <returns><see langword="true"/> if the change was successful, otherwise <see langword="false"/>.</returns>
 
-        public bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback)
+        public override bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback)
         {
             switch (field.ToLower())
             {
@@ -323,7 +310,7 @@ namespace Dexter.Helpers.Games
         /// <param name="funConfiguration">The configuration settings attached to the Fun Commands module.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration)
+        public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration)
         {
             if (message.Channel is IDMChannel) return;
             Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
@@ -335,7 +322,7 @@ namespace Dexter.Helpers.Games
 
             if (!Board.TryParseBoard(BoardRaw, out Board board, out string boardCorruptedError))
             {
-                await new EmbedBuilder()
+                await BuildEmbed(EmojiEnum.Unknown)
                     .WithColor(Discord.Color.Red)
                     .WithTitle("Corrupted Board State")
                     .WithDescription($"Your current board state can't be parsed to a valid board, it has the following error:\n" +
@@ -365,7 +352,7 @@ namespace Dexter.Helpers.Games
             {
                 if (args.Length == 1)
                 {
-                    await new EmbedBuilder()
+                    await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Discord.Color.Blue)
                         .WithTitle("Auxiliary Information: Chess")
                         .WithDescription($"Please specify one of the following categories when requesting information:\n{AuxiliaryInfo}")
@@ -376,7 +363,7 @@ namespace Dexter.Helpers.Games
                 switch (args[1])
                 {
                     case "moves":
-                        await new EmbedBuilder()
+                        await BuildEmbed(EmojiEnum.Unknown)
                             .WithColor(Discord.Color.Blue)
                             .WithTitle("Auxiliary Information: Chess Moves")
                             .WithDescription("Moves in chess can be expressed in one of two ways:\n" +
@@ -391,7 +378,7 @@ namespace Dexter.Helpers.Games
                             .SendEmbed(message.Channel);
                         return;
                     case "view":
-                        await new EmbedBuilder()
+                        await BuildEmbed(EmojiEnum.Unknown)
                             .WithColor(Discord.Color.Blue)
                             .WithTitle("Auxiliary Information: Chess Views")
                             .WithDescription("There are two ways a game master can modify the way the game is viewed.\n" +
@@ -402,7 +389,7 @@ namespace Dexter.Helpers.Games
                         return;
                     case "chess":
                     case "rules":
-                        await new EmbedBuilder()
+                        await BuildEmbed(EmojiEnum.Unknown)
                             .WithColor(Discord.Color.Blue)
                             .WithTitle("Auxiliary Information: Chess Rules")
                             .WithDescription("We heavily recommend you check out [this article on chess.com](https://www.chess.com/learn-how-to-play-chess) for an in-depth tutorial; but if you just want to read, here's a quick rundown.\n" +
@@ -417,7 +404,7 @@ namespace Dexter.Helpers.Games
                             .SendEmbed(message.Channel);
                         return;
                     case "positions":
-                        await new EmbedBuilder()
+                        await BuildEmbed(EmojiEnum.Unknown)
                             .WithColor(Discord.Color.Blue)
                             .WithTitle("Auxiliary Information: Chess Positions")
                             .WithDescription("Here are a couple predefined custom chess positions you can play.\n" +
@@ -426,7 +413,7 @@ namespace Dexter.Helpers.Games
                             .SendEmbed(message.Channel);
                         return;
                     default:
-                        await new EmbedBuilder()
+                        await BuildEmbed(EmojiEnum.Unknown)
                             .WithColor(Discord.Color.Red)
                             .WithTitle("Invalid Auxiliary Information Provided")
                             .WithDescription("Please make sure to use the following categories: `moves`, `view`, or `chess`.")
@@ -458,7 +445,7 @@ namespace Dexter.Helpers.Games
                             return;
                     }
 
-                    if (!skip && prevPlayer is not null && prevPlayer.Playing == game.GameID)
+                    if (!skip && prevPlayer is not null && prevPlayer.Playing == Game.GameID)
                     {
                         await message.Channel.SendMessageAsync($"Can't claim color since player <@{prevPlayer.UserID}> is actively controlling it.");
                         return;
@@ -493,7 +480,7 @@ namespace Dexter.Helpers.Games
                 }
                 if (resign)
                 {
-                    await new EmbedBuilder()
+                    await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Discord.Color.Gold)
                         .WithTitle($"{(isWhite ? "White" : "Black")} resigns!")
                         .WithDescription($"The victory goes for {(isWhite ? "Black" : "White")}! The board has been reset, you can play again by typing `board`. The game master can swap colors by typing `swap`.")
@@ -527,7 +514,7 @@ namespace Dexter.Helpers.Games
                 {
                     if (Agreements == "DD")
                     {
-                        await new EmbedBuilder()
+                        await BuildEmbed(EmojiEnum.Unknown)
                             .WithColor(Discord.Color.Orange)
                             .WithTitle($"Draw!")
                             .WithDescription($"No winners this game, but also no losers! The board has been reset, you can play again by typing `board`. The game master can swap colors by typing `swap`.")
@@ -590,7 +577,7 @@ namespace Dexter.Helpers.Games
                 {
                     BoardID = 0;
                     player.Score += 1;
-                    await new EmbedBuilder()
+                    await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Discord.Color.Green)
                         .WithTitle($"{(!board.isWhitesTurn ? "White" : "Black")} wins!")
                         .WithDescription("Create a new board if you wish to play again, or pass your color control to a different player.")
@@ -601,7 +588,7 @@ namespace Dexter.Helpers.Games
 
                 if (outcome == Outcome.Draw)
                 {
-                    await new EmbedBuilder()
+                    await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Discord.Color.LightOrange)
                         .WithTitle("Draw!")
                         .WithDescription($"Stalemate reached {(board.isWhitesTurn ? "White" : "Black")} has no legal moves but isn't in check. Create a new board if you wish to play again, or pass your color control to a different player.")
@@ -612,7 +599,7 @@ namespace Dexter.Helpers.Games
 
                 if (outcome == Outcome.FiftyMoveRule)
                 {
-                    await new EmbedBuilder()
+                    await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Discord.Color.LightOrange)
                         .WithTitle("Draw!")
                         .WithDescription("50 moves went by without advancing a pawn or capturing a piece, the game is declared a draw. \nCreate a new board if you wish to play again, or pass your color control to a different player.")
@@ -622,7 +609,7 @@ namespace Dexter.Helpers.Games
 
                 if (outcome == Outcome.InsufficientMaterial)
                 {
-                    await new EmbedBuilder()
+                    await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Discord.Color.LightOrange)
                         .WithTitle("Draw!")
                         .WithDescription("Neither player has sufficient material to deliver checkmate, the game is declared a draw. \nCreate a new board if you wish to play again, or pass your color control to a different player.")
@@ -648,7 +635,7 @@ namespace Dexter.Helpers.Games
                     return;
                 }
                 Player otherPlayer = gamesDB.GetOrCreatePlayer(otherUser.Id);
-                if (otherPlayer.Playing != game.GameID)
+                if (otherPlayer.Playing != Game.GameID)
                 {
                     await message.Channel.SendMessageAsync("That user isn't playing in this game session!");
                     return;
@@ -658,7 +645,7 @@ namespace Dexter.Helpers.Games
                 {
                     case "w":
                     case "white":
-                        if (message.Author.Id != game.Master && message.Author.Id != PlayerWhite)
+                        if (message.Author.Id != Game.Master && message.Author.Id != PlayerWhite)
                         {
                             await message.Channel.SendMessageAsync($"You aren't the master nor controlling the white pieces!");
                             return;
@@ -667,7 +654,7 @@ namespace Dexter.Helpers.Games
                         break;
                     case "b":
                     case "black":
-                        if (message.Author.Id != game.Master && message.Author.Id != PlayerBlack)
+                        if (message.Author.Id != Game.Master && message.Author.Id != PlayerBlack)
                         {
                             await message.Channel.SendMessageAsync($"You aren't the master nor controlling the black pieces!");
                             return;
@@ -685,7 +672,7 @@ namespace Dexter.Helpers.Games
 
             if (args[0] == "swap")
             {
-                if (message.Author.Id != game.Master)
+                if (message.Author.Id != Game.Master)
                 {
                     await message.Channel.SendMessageAsync("Only the game master can swap the colors!");
                     return;
@@ -704,7 +691,7 @@ namespace Dexter.Helpers.Games
         private async Task<string> CreateBoardDisplay(Board board, Move lastMove, DiscordSocketClient client, FunConfiguration funConfiguration)
         {
             string imageChacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
-            string filepath = Path.Join(imageChacheDir, $"Chess{game.Master}.png");
+            string filepath = Path.Join(imageChacheDir, $"Chess{Game.Master}.png");
             System.Drawing.Image image = RenderBoard(board, lastMove);
             image.Save(filepath);
             if (DumpID != 0)
@@ -761,32 +748,26 @@ namespace Dexter.Helpers.Games
                     {
                         if (lastMove.isEnPassant)
                         {
-                            using (System.Drawing.Image captureMark = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{CaptureImage}.png")))
+                            using System.Drawing.Image captureMark = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{CaptureImage}.png"));
+                            foreach (int n in lastMove.ToEnPassant())
                             {
-                                foreach (int n in lastMove.ToEnPassant())
-                                {
-                                    if (whiteside) g.DrawImage(captureMark, (n % 8) * CellSize, (n / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
-                                    else g.DrawImage(captureMark, (7 - n % 8) * CellSize, (7 - n / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
-                                }
+                                if (whiteside) g.DrawImage(captureMark, (n % 8) * CellSize, (n / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
+                                else g.DrawImage(captureMark, (7 - n % 8) * CellSize, (7 - n / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
                             }
                         }
                         else
                         {
-                            using (System.Drawing.Image captureMark = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{CaptureImage}.png")))
-                            {
-                                if (whiteside) g.DrawImage(captureMark, (lastMove.target % 8) * CellSize, (lastMove.target / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
-                                else g.DrawImage(captureMark, (7 - lastMove.target % 8) * CellSize, (7 - lastMove.target / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
-                            }
+                            using System.Drawing.Image captureMark = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{CaptureImage}.png"));
+                            if (whiteside) g.DrawImage(captureMark, (lastMove.target % 8) * CellSize, (lastMove.target / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
+                            else g.DrawImage(captureMark, (7 - lastMove.target % 8) * CellSize, (7 - lastMove.target / 8) * CellSize, CellSize + 2 * Offset, CellSize + 2 * Offset);
                         }
                     }
 
-                    using (System.Drawing.Image danger = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{DangerImage}.png")))
+                    using System.Drawing.Image danger = System.Drawing.Image.FromFile(Path.Join(ChessPath, Theme, $"{DangerImage}.png"));
+                    foreach (int n in lastMove.ToDanger(board))
                     {
-                        foreach (int n in lastMove.ToDanger(board))
-                        {
-                            if (whiteside) g.DrawImage(danger, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
-                            else g.DrawImage(danger, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
-                        }
+                        if (whiteside) g.DrawImage(danger, Offset + (n % 8) * CellSize, Offset + (n / 8) * CellSize, CellSize, CellSize);
+                        else g.DrawImage(danger, Offset + (7 - n % 8) * CellSize, Offset + (7 - n / 8) * CellSize, CellSize, CellSize);
                     }
                 }
 
@@ -814,6 +795,14 @@ namespace Dexter.Helpers.Games
         private const string CaptureImage = "CaptureMarker";
         private const string DangerImage = "SquareDanger";
         private readonly string[] PiecePrefixes = new string[] { "W", "B" };
+
+        /// <summary>
+        /// The initializer for the game class, setting both the instance information and the bot configuration.
+        /// </summary>
+        /// <param name="game">The current instance of the game.</param>
+        /// <param name="botConfiguration">An instance of the bot's configuraiton.</param>
+        public GameChess(GameInstance game, BotConfiguration botConfiguration) : base(game, botConfiguration, StartingPos + ", -, 0, 0, 0, 0, NN, standard, 0") {
+        }
 
         private static Tuple<int, int> ToMatrixCoords(int pos)
         {

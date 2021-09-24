@@ -39,7 +39,7 @@ namespace Dexter.Commands
                     BuildEmbed(EmojiEnum.Unknown)
                     .WithTitle($"Message From {Context.Guild.Name}")
                     .WithDescription(Message)
-                    .WithCurrentTimestamp()
+
                 );
         }
 
@@ -84,7 +84,7 @@ namespace Dexter.Commands
                     .WithTitle("Could Not Find Token!")
                     .WithDescription("Haiya! I couldn't find the modmail for the given token. Are you sure this exists in the database? " +
                         "The token should be given as the footer of the embed. Make sure this is the token and not the modmail number.")
-                    .WithCurrentTimestamp()
+
                     .SendEmbed(Context.Channel);
             }
             else
@@ -126,7 +126,7 @@ namespace Dexter.Commands
                         BuildEmbed(EmojiEnum.Unknown)
                         .WithTitle($"Modmail From {Context.Guild.Name}")
                         .WithDescription(Message)
-                        .WithCurrentTimestamp()
+    
                         .WithFooter(Token)
                     );
             }

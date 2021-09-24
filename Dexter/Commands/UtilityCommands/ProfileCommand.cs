@@ -193,9 +193,8 @@ namespace Dexter.Commands
                 }
 
                 result[p] = BuildEmbed(EmojiEnum.Sign)
-                    .WithTitle($"{title} Page {p + 1}/{result.Length}")
-                    .WithDescription(content.Length == 0 ? "Nothing to see here, folks." : content.Remove(content.Length - 1, 1).ToString())
-                    .WithFooter($"{p + 1}/{result.Length}");
+                    .WithTitle($"{title}")
+                    .WithDescription(content.Length == 0 ? "Nothing to see here, folks." : content.Remove(content.Length - 1, 1).ToString());
             }
 
             return result;

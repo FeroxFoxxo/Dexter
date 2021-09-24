@@ -100,7 +100,7 @@ namespace Dexter.Commands
                     .WithTitle($"Event #{ID} Successfully Suggested!")
                     .WithDescription($"Your suggestion went through! You will be informed when it is approved or declined. You can always check the status with `{BotConfiguration.Prefix}event get id {ID}`")
                     .AddField("Release Time: ", $"{Release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z} ({Release.Humanize()})")
-                    .WithCurrentTimestamp()
+
                     .SendEmbed(Context.Channel);
             }
         }
@@ -126,7 +126,7 @@ namespace Dexter.Commands
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("This Event has already expired!")
                         .WithDescription("Expired events can't be approved (FailOnOverdueApproval configuration is activated)")
-                        .WithCurrentTimestamp()
+    
                         .SendEmbed(Context.Channel);
                     return;
                 }
@@ -135,7 +135,7 @@ namespace Dexter.Commands
                     await BuildEmbed(EmojiEnum.Sign)
                         .WithTitle("This Event is overdue!")
                         .WithDescription("The event will be released immediately (FailOnOverDueApproval configuration is off)")
-                        .WithCurrentTimestamp()
+    
                         .SendEmbed(Context.Channel);
 
                     Event.Status = EventStatus.Approved;
@@ -160,7 +160,6 @@ namespace Dexter.Commands
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Event approved for release!")
                 .WithDescription($"Event #{Event.ID} will be released at {Release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z} ({Release.Humanize()}).")
-                .WithCurrentTimestamp()
                 .SendDMAttachedEmbed(Context.Channel, BotConfiguration, Proposer,
                     BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Your Event has been Approved!")
@@ -194,7 +193,6 @@ namespace Dexter.Commands
             await BuildEmbed(EmojiEnum.Annoyed)
                 .WithTitle("Event has been declined!")
                 .WithDescription($"Event #{Event.ID} has been declined.")
-                .WithCurrentTimestamp()
                 .SendDMAttachedEmbed(Context.Channel, BotConfiguration, Proposer,
                     BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Your Event has been Declined!")
@@ -244,7 +242,7 @@ namespace Dexter.Commands
                     await BuildEmbed(EmojiEnum.Sign)
                         .WithTitle("Event Expired")
                         .WithDescription($"One of your events expired without the admins giving their feedback in time! \n{Event.Description}")
-                        .WithCurrentTimestamp()
+    
                         .SendEmbed(await User.CreateDMChannelAsync());
                 }
                 catch (HttpException) { }
@@ -284,7 +282,7 @@ namespace Dexter.Commands
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Event already released!")
                     .WithDescription("You can't remove an event that has already been released!")
-                    .WithCurrentTimestamp()
+
                     .SendEmbed(Context.Channel);
             }
 
@@ -299,7 +297,6 @@ namespace Dexter.Commands
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Event was successfully removed!")
                 .WithDescription($"The event \"{Event.Description}\" has been removed from the proposal system.")
-                .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
         }
 
@@ -330,7 +327,7 @@ namespace Dexter.Commands
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Event is not pending!")
                         .WithDescription($"This event has already been {Event.Status}; and thus can't be edited. \nYou can remove this event and propose a new one if you wish to change it.")
-                        .WithCurrentTimestamp()
+    
                         .SendEmbed(Context.Channel);
                     return;
                 }
@@ -345,7 +342,6 @@ namespace Dexter.Commands
                 .WithTitle("Event was successfully edited!")
                 .WithDescription($"Event #{Event.ID}'s description has been changed to: \n" +
                     $"{Event.Description}")
-                .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
         }
 
@@ -456,8 +452,7 @@ namespace Dexter.Commands
                 .AddField(Status == EventStatus.Pending, "Approval/Decline:", $"`{BotConfiguration.Prefix}event <approve|decline> {ID}`")
                 .AddField(IncludeResolutionInfo, "Resolution:", $"{BotConfiguration.Prefix}event [approve/decline] {ID}")
                 .AddField(ResolveReason.Length > 0, "Reason:", ResolveReason)
-                .WithFooter(ID.ToString())
-                .WithCurrentTimestamp();
+                .WithFooter(ID.ToString());
         }
 
         private EmbedBuilder CreateEventProposalEmbed(CommunityEvent Event)
@@ -536,8 +531,7 @@ namespace Dexter.Commands
                 {
                     Pages[Page - 1] = BuildEmbed(EmojiEnum.Sign)
                         .WithAuthor(Author)
-                        .WithTitle($"Events - Page {Page}/{ExpectedPages}")
-                        .WithFooter($"{Page++}/{ExpectedPages}");
+                        .WithTitle($"Events");
                     Count = 1;
                 }
 

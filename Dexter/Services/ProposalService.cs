@@ -98,7 +98,6 @@ namespace Dexter.Services
                     .WithTitle($"{Proposal.ProposalType.ToString().Prettify()} {Proposal.ProposalStatus}.")
                     .WithDescription($"The {Proposal.ProposalType.ToString().Prettify().ToLower()} `{Proposal.Tracker}` was successfully {Proposal.ProposalStatus.ToString().ToLower()} by {Approver.Mention}.")
                     .AddField(!string.IsNullOrEmpty(Reason), "Reason", Reason)
-                    .WithCurrentTimestamp()
                     .SendDMAttachedEmbed(MessageChannel, BotConfiguration, DiscordSocketClient.GetUser(Proposal.Proposer), BuildProposal(Proposal));
             }
         }
@@ -680,7 +679,7 @@ namespace Dexter.Services
 
             IUser User = DiscordSocketClient.GetUser(Proposal.Proposer);
 
-            return new EmbedBuilder()
+            return BuildEmbed(EmojiEnum.Unknown)
                 .WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
                 .WithColor(Color)
                 .WithThumbnailUrl(Proposal.AvatarURL)
@@ -689,7 +688,6 @@ namespace Dexter.Services
                 .WithImageUrl(Proposal.ProxyURL)
                 .AddField(!string.IsNullOrEmpty(Proposal.Reason), "Reason:", Proposal.Reason)
                 .WithAuthor(string.IsNullOrEmpty(Proposal.Username) ? User == null ? "Unknown" : User.Username : Proposal.Username, Proposal.AvatarURL)
-                .WithCurrentTimestamp()
                 .WithFooter(Proposal.Tracker);
         }
 

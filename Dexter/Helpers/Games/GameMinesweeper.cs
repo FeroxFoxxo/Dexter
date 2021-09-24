@@ -10,13 +10,13 @@ using Discord;
 using Discord.WebSocket;
 using System.Drawing;
 using System.Text;
+using Dexter.Abstractions;
+using Dexter.Enums;
 
 namespace Dexter.Helpers.Games
 {
-    class GameMinesweeper : IGameTemplate
+    class GameMinesweeper : GameTemplate
     {
-
-        const string EmptyData = "???/???/???, XXX/X8X/XXX, 0, 3, 3, 8";
         const int MaxWidth = 26;
         const int MaxHeight = 18;
         const int MinWidth = 3;
@@ -32,24 +32,17 @@ namespace Dexter.Helpers.Games
             }
         }
 
-        private readonly GameInstance game;
-
-        public GameMinesweeper(GameInstance game)
-        {
-            this.game = game;
-        }
-
         private string StateRaw
         {
             get
             {
-                return game.Data.Split(", ")[0];
+                return Game.Data.Split(", ")[0];
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[0] = value;
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -57,13 +50,13 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return game.Data.Split(", ")[1];
+                return Game.Data.Split(", ")[1];
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[1] = value;
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -71,13 +64,13 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return ulong.Parse(game.Data.Split(", ")[2]);
+                return ulong.Parse(Game.Data.Split(", ")[2]);
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[2] = value.ToString();
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -85,13 +78,13 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return int.Parse(game.Data.Split(", ")[3]);
+                return int.Parse(Game.Data.Split(", ")[3]);
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[3] = value.ToString();
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -99,13 +92,13 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return int.Parse(game.Data.Split(", ")[4]);
+                return int.Parse(Game.Data.Split(", ")[4]);
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[4] = value.ToString();
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -113,13 +106,13 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                return int.Parse(game.Data.Split(", ")[5]);
+                return int.Parse(Game.Data.Split(", ")[5]);
             }
             set
             {
-                string[] newValue = game.Data.Split(", ");
+                string[] newValue = Game.Data.Split(", ");
                 newValue[5] = value.ToString();
-                game.Data = string.Join(", ", newValue);
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -504,24 +497,24 @@ namespace Dexter.Helpers.Games
             return result;
         }
 
-        public EmbedBuilder GetStatus(DiscordSocketClient client)
+        public override EmbedBuilder GetStatus(DiscordSocketClient client)
         {
-            return new EmbedBuilder()
+            return BuildEmbed(EmojiEnum.Unknown)
                 .WithColor(Discord.Color.Blue)
-                .WithTitle($"{game.Title} (Game {game.GameID})")
-                .WithDescription($"{game.Description}")
+                .WithTitle($"{Game.Title} (Game {Game.GameID})")
+                .WithDescription($"{Game.Description}")
                 .AddField("Dimensions", $"{Width}×{Height}", true)
                 .AddField("Mines", $"{Mines}💣", true)
-                .AddField("Master", client.GetUser(game.Master)?.GetUserInformation() ?? "<N/A>")
-                .AddField(game.Banned.Length > 0, "Banned Players", game.BannedMentions.TruncateTo(500));
+                .AddField("Master", client.GetUser(Game.Master)?.GetUserInformation() ?? "<N/A>")
+                .AddField(Game.Banned.Length > 0, "Banned Players", Game.BannedMentions.TruncateTo(500));
         }
 
-        public void Reset(FunConfiguration funConfiguration, GamesDB gamesDB)
+        public override void Reset(FunConfiguration funConfiguration, GamesDB gamesDB)
         {
-            game.Data = EmptyData;
-            game.LastUserInteracted = game.Master;
+            Game.Data = EmptyData;
+            Game.LastUserInteracted = Game.Master;
             if (gamesDB is null) return;
-            Player[] players = gamesDB.GetPlayersFromInstance(game.GameID);
+            Player[] players = gamesDB.GetPlayersFromInstance(Game.GameID);
             foreach (Player p in players)
             {
                 p.Score = 0;
@@ -529,7 +522,7 @@ namespace Dexter.Helpers.Games
             }
         }
 
-        public bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback)
+        public override bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback)
         {
             bool nonNumeric = false;
             string nonNumericFeedback = $"This field is numeric, unable to parse \"{value}\" into an integer value.\n" +
@@ -627,9 +620,9 @@ namespace Dexter.Helpers.Games
             return false;
         }
 
-        public EmbedBuilder Info(FunConfiguration funConfiguration)
+        public override EmbedBuilder Info(FunConfiguration funConfiguration)
         {
-            return new EmbedBuilder()
+            return BuildEmbed(EmojiEnum.Unknown)
                 .WithColor(Discord.Color.Magenta)
                 .WithTitle("How to Play: Minesweeper")
                 .WithDescription("**Step 1**: Set your desired parameters for the board using the `~game set [field] [value]` command. These fields are `width`, `height` and `mines`.\n" +
@@ -650,6 +643,10 @@ namespace Dexter.Helpers.Games
             {"intermediate", "16 16 40"},
             {"advanced", "26 18 99"}
         };
+
+        public GameMinesweeper(GameInstance game, BotConfiguration botConfiguration) : base(game, botConfiguration, "???/???/???, XXX/X8X/XXX, 0, 3, 3, 8")
+        {
+        }
 
         private bool TryParsePos(string input, out Tuple<int, int> result)
         {
@@ -675,10 +672,10 @@ namespace Dexter.Helpers.Games
             return new Tuple<int, int>(input.Item1, y);
         }
 
-        public async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration)
+        public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordSocketClient client, FunConfiguration funConfiguration)
         {
             bool deletePerms = message.Channel is not IDMChannel;
-            if (message.Author.Id != game.Master) return;
+            if (message.Author.Id != Game.Master) return;
 
             string msg = message.Content.ToLower().Replace("@", "@-");
             string[] args = msg.Split(' ');
@@ -697,7 +694,7 @@ namespace Dexter.Helpers.Games
             {
                 if (board is not null) await board.DeleteAsync();
                 string imageChacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
-                string filepath = Path.Join(imageChacheDir, $"Minesweeper{game.Master}_SOLUTION.png");
+                string filepath = Path.Join(imageChacheDir, $"Minesweeper{Game.Master}_SOLUTION.png");
                 System.Drawing.Image image = RenderMatrixImage(Board);
                 image.Save(filepath);
                 IUserMessage newBoard = await message.Channel.SendFileAsync(filepath);
@@ -806,7 +803,7 @@ namespace Dexter.Helpers.Games
             {
                 if (board is not null) await board.DeleteAsync();
                 string imageChacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
-                string filepath = Path.Join(imageChacheDir, $"Minesweeper{game.Master}.png");
+                string filepath = Path.Join(imageChacheDir, $"Minesweeper{Game.Master}.png");
                 System.Drawing.Image image = RenderMatrixImage(State);
                 image.Save(filepath);
                 IUserMessage newBoard = await message.Channel.SendFileAsync(filepath);
@@ -817,7 +814,7 @@ namespace Dexter.Helpers.Games
             if (isLoss)
             {
                 _ = Mines > MaxMines ? MaxMines : Mines;
-                await new EmbedBuilder()
+                await BuildEmbed(EmojiEnum.Unknown)
                     .WithColor(Discord.Color.Red)
                     .WithTitle("Defeat!")
                     .WithDescription($"Whoops! You probed a mine! Better luck next time.")
@@ -831,7 +828,7 @@ namespace Dexter.Helpers.Games
             if (CheckWin(State, Board))
             {
                 int mines = Mines > MaxMines ? MaxMines : Mines;
-                await new EmbedBuilder()
+                await BuildEmbed(EmojiEnum.Unknown)
                     .WithColor(Discord.Color.Green)
                     .WithTitle("Victory!")
                     .WithDescription($"Cleared the board! ({Width}x{Height}) with {mines} mine{(mines != 1 ? "s" : "")}!")

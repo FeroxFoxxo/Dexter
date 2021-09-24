@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Dexter.Abstractions;
 using Dexter.Configurations;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Webhook;
@@ -76,14 +77,12 @@ namespace Dexter.Services
                 return;
 
             if (DiscordWebhookClient != null)
-                await new EmbedBuilder()
+                await BuildEmbed(EmojiEnum.Unknown)
                     .WithAuthor(CachedMessage.Author)
                     .WithDescription($"**Message edited in <#{SocketMessageChannel.Id}>** [Jump to message](https://discordapp.com/channels/{ (NewMessage.Channel as SocketGuildChannel).Guild.Id }/{ NewMessage.Channel.Id }/{ NewMessage.Id })")
                     .AddField("Before", CachedMessage.Content.Length > 1000 ? string.Concat(CachedMessage.Content.AsSpan(0, 1000), "...") : CachedMessage.Content)
                     .AddField("After", NewMessage.Content.Length > 1000 ? string.Concat(NewMessage.Content.AsSpan(0, 1000), "...") : NewMessage.Content)
                     .WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")
-                    .WithCurrentTimestamp()
-                    .WithColor(Color.Blue)
                     .SendEmbed(DiscordWebhookClient);
         }
 
@@ -109,12 +108,10 @@ namespace Dexter.Services
                 return;
 
             if (DiscordWebhookClient != null)
-                await new EmbedBuilder()
+                await BuildEmbed(EmojiEnum.Unknown)
                     .WithAuthor(CachedMessage.Author)
                     .WithDescription($"**Message sent by <@{CachedMessage.Author.Id}> deleted in in <#{Channel.Id}>**\n{(CachedMessage.Content.Length > 1900 ? string.Concat(CachedMessage.Content.AsSpan(0, 1900), "...") : CachedMessage.Content)}")
                     .WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")
-                    .WithCurrentTimestamp()
-                    .WithColor(Color.Blue)
                     .SendEmbed(DiscordWebhookClient);
         }
 

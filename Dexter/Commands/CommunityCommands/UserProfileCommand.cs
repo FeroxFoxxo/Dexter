@@ -706,8 +706,7 @@ namespace Dexter.Commands
 
                             if (profile.Settings.BlockRequests)
                             {
-                                await new EmbedBuilder()
-                                    .WithColor(Color.Orange)
+                                await BuildEmbed(EmojiEnum.Unknown)
                                     .WithTitle("User has silent friend requests!")
                                     .WithDescription($"User {user.Mention} now has a pending friend request from you, but they weren't notified of it. They can check their active friend requests with `{BotConfiguration.Prefix}friend requests`.\n" +
                                     $"To accept your request, they must use the `{BotConfiguration.Prefix}friend add {Context.User.Id}` command.")
@@ -717,8 +716,7 @@ namespace Dexter.Commands
 
                             try
                             {
-                                await new EmbedBuilder()
-                                    .WithColor(Color.Green)
+                                await BuildEmbed(EmojiEnum.Love)
                                     .WithTitle("Incoming Friend Request!")
                                     .WithThumbnailUrl(Context.User.GetTrueAvatarUrl())
                                     .WithAuthor(Context.User)
@@ -991,8 +989,7 @@ namespace Dexter.Commands
 
             if (string.IsNullOrEmpty(attribute))
             {
-                await new EmbedBuilder()
-                    .WithColor(Color.Purple)
+                await BuildEmbed(EmojiEnum.Unknown)
                     .WithThumbnailUrl(user.GetTrueAvatarUrl())
                     .WithTitle($"Friend Settings")
                     .WithDescription($"Link settings with user {user.Mention}:\n" +
@@ -1094,8 +1091,7 @@ namespace Dexter.Commands
             bool TZSuccess = TimeZoneData.TryParse(profile.TimeZone, LanguageConfiguration, out TimeZoneData TZ);
             bool TZDSTSuccess = TimeZoneData.TryParse(profile.TimeZoneDST, LanguageConfiguration, out TimeZoneData TZDST);
 
-            await new EmbedBuilder()
-                .WithColor(Color.DarkPurple)
+            await BuildEmbed(EmojiEnum.Unknown)
                 .WithThumbnailUrl(user.GetTrueAvatarUrl())
                 .WithTitle($"{((user as IGuildUser)?.Nickname ?? user.Username).Possessive()} Profile")
                 .WithDescription($"Custom user profile for user: {user.GetUserInformation()}")
@@ -1256,7 +1252,7 @@ namespace Dexter.Commands
 
                 try
                 {
-                    await new EmbedBuilder()
+                    await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Color.Gold)
                         .WithThumbnailUrl(user.GetTrueAvatarUrl())
                         .WithTitle("🎂 Happy Borkday 🎂")
@@ -1273,7 +1269,7 @@ namespace Dexter.Commands
                 try
                 {
                     IUser friend = DiscordSocketClient.GetUser(uid);
-                    await new EmbedBuilder()
+                    await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Color.Gold)
                         .WithThumbnailUrl(user.GetTrueAvatarUrl())
                         .WithTitle("🎂 Borkday Time 🎂")
@@ -1342,14 +1338,13 @@ namespace Dexter.Commands
                 inPage++;
             }
 
-            int page = 0;
             foreach (StringBuilder sb in userlists)
             {
-                embeds.Add(new EmbedBuilder()
-                    .WithColor(Color.Purple)
-                    .WithTitle($"{title} - Page {++page}/{userlists.Count}")
+                embeds.Add(
+                    BuildEmbed(EmojiEnum.Unknown)
+                    .WithTitle(title)
                     .WithDescription($"{description}\n {sb}")
-                    .WithFooter($"{page}/{userlists.Count}"));
+                );
             }
 
             return embeds.ToArray();

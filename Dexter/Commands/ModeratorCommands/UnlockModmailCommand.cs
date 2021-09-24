@@ -47,7 +47,7 @@ namespace Dexter.Commands
                         "Modmail unlock reasons should only be brief and concise. " +
                         "Unlocks usually follow a given warning or a DM response. " +
                         "You should write your full write up in that. <3")
-                    .WithCurrentTimestamp()
+
                     .SendEmbed(Context.Channel);
                 return;
             }

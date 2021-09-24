@@ -6,6 +6,7 @@ using Dexter.Commands;
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
 using Dexter.Databases.Infractions;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Webhook;
@@ -114,14 +115,13 @@ namespace Dexter.Services
                 return;
 
             if (DiscordWebhookClient != null)
-                await new EmbedBuilder()
+                await BuildEmbed(EmojiEnum.Unknown)
                     .WithAuthor(Reaction.User.Value)
                     .WithDescription($"**Reaction removed in <#{MessageChannel.Id}> by {Reaction.User.GetValueOrDefault().GetUserInformation()}**")
                     .AddField("Message", CachedMessage.Content.Length > 50 ? string.Concat(CachedMessage.Content.AsSpan(0, 50), "...") : CachedMessage.Content)
                     .AddField("Reaction Removed", Reaction.Emote)
                     .WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")
-                    .WithCurrentTimestamp()
-                    .WithColor(Color.Blue)
+
                     .SendEmbed(DiscordWebhookClient);
         }
 

@@ -43,9 +43,7 @@ namespace Dexter.Services
 
         public async Task CheckRemoveVCs()
         {
-            SocketCategoryChannel? categoryChannel = DiscordSocketClient.GetChannel(UtilityConfiguration.PrivateCategoryID) as SocketCategoryChannel;
-
-            if (categoryChannel != null)
+            if (DiscordSocketClient.GetChannel(UtilityConfiguration.PrivateCategoryID) is SocketCategoryChannel categoryChannel)
             {
                 IEnumerable<SocketVoiceChannel> voiceChannels = categoryChannel.Guild.VoiceChannels.Where((SocketVoiceChannel check) => check.CategoryId == UtilityConfiguration.PrivateCategoryID && check.Name != UtilityConfiguration.WaitingVCName);
 

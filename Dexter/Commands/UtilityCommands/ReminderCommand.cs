@@ -185,7 +185,7 @@ namespace Dexter.Commands
                     else
                     {
                         EmbedBuilder[] Embeds = BuildReminderEmbeds(Reminders);
-                        await CreateReactionMenu(Embeds, Context.Channel);
+                        CreateReactionMenu(Embeds, Context.Channel);
                     }
                     return;
                 default:

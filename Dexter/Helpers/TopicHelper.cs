@@ -116,7 +116,7 @@ namespace Dexter.Commands
                 .WithAuthor(Context.User)
                 .WithTitle($"{Context.Client.CurrentUser.Username} Asks")
                 .WithDescription(Topic)
-                .WithFooter($"{Name} Written by {(User == null ? "Unknown" : User.Username)} • " +
+                .WithFooter($"{Name} written by {(User == null ? "Unknown" : User.Username)} • " +
                     $"Add a {Name.ToLower()} using {BotConfiguration.Prefix}{TopicType.ToString().ToLower()} add {Name.ToUpper()}")
                 .SendEmbed(Context.Channel);
         }

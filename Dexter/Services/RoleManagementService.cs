@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Abstractions;
 using Dexter.Configurations;
@@ -9,6 +7,10 @@ using Discord.WebSocket;
 
 namespace Dexter.Services
 {
+    /// <summary>
+    /// The RoleManagementService adds the given roles to the user if they join the server.
+    /// </summary>
+
     public class RoleManagementService : Service
     {
         /// <summary>

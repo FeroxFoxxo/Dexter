@@ -41,7 +41,7 @@ namespace Dexter.Commands
                 EmbedBuilder[] Warnings = GetWarnings(UserID, Context.User.Id, $"<@{UserID}>", $"Unknown ({UserID})", true);
 
                 if (Warnings.Length > 1)
-                    await CreateReactionMenu(Warnings, Context.Channel);
+                    CreateReactionMenu(Warnings, Context.Channel);
                 else
                     await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
             }
@@ -73,7 +73,7 @@ namespace Dexter.Commands
                     EmbedBuilder[] Warnings = GetWarnings(User.Id, Context.User.Id, User.Mention, User.Username, true);
 
                     if (Warnings.Length > 1)
-                        await CreateReactionMenu(Warnings, Context.Channel);
+                        CreateReactionMenu(Warnings, Context.Channel);
                     else
                         await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
                 }

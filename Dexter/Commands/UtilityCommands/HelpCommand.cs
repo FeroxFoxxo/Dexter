@@ -105,7 +105,7 @@ namespace Dexter.Commands
                     string.Join('\n', Pages.ToArray())
                 );
 
-                await CreateReactionMenu(Embeds.ToArray(), Context.Channel);
+                CreateReactionMenu(Embeds.ToArray(), Context.Channel);
             }
             else
             {

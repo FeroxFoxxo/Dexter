@@ -13,6 +13,13 @@ namespace Dexter.Commands
     public partial class GreetFurCommands
     {
 
+        /// <summary>
+        /// The GreetFur mute command mutes users that do not have the Awoo role, and notify staff if they are Awoo.
+        /// </summary>
+        /// <param name="User">The user that the GreetFur has muted, as a Guild User instance.</param>
+        /// <param name="Reason">The reason for the mute of the user, to be attached to the mute notification.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
         [Command("gfmute")]
         [Summary("Mutes someone indefinitely and notifies the staff.")]
         [RequireGreetFur]
@@ -44,8 +51,9 @@ namespace Dexter.Commands
                     .WithTitle($"Muted {User.Username}#{User.Discriminator}")
                     .WithDescription($"{User.GetUserInformation()} has been muted for {Reason}")
                     .WithCurrentTimestamp()
-                    .WithFooter("USFurries")
+                    .WithFooter("USFurries GreetFur Team")
                     .SendEmbed(Context.Channel);
+
 
             }
         }

@@ -125,7 +125,7 @@ namespace Dexter.Commands
             }
             else
             {
-                await CreateReactionMenu(Menu, Context.Channel);
+                CreateReactionMenu(Menu, Context.Channel);
             }
         }
 

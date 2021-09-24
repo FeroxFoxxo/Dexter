@@ -1,5 +1,10 @@
 namespace Dexter.Databases.CommunityEvents
 {
+    
+    /// <summary>
+    /// EventType declares whether an event that is created for the server is made by the staff team or community.
+    /// </summary>
+
     public enum EventType
     {
 

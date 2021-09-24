@@ -1073,7 +1073,7 @@ namespace Dexter.Commands
             }
             else
             {
-                await CreateReactionMenu(pages, Context.Channel);
+                CreateReactionMenu(pages, Context.Channel);
             }
             return;
         }

@@ -168,7 +168,7 @@ namespace Dexter.Abstractions
         /// <param name="Channel">The channel that the reaction menu should be sent to.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task CreateReactionMenu(EmbedBuilder[] EmbedBuilder, ISocketMessageChannel Channel)
+        public void CreateReactionMenu(EmbedBuilder[] EmbedBuilder, ISocketMessageChannel Channel)
         {
             PageBuilder[] PageBuilderMenu = new PageBuilder[EmbedBuilder.Length];
 
@@ -183,7 +183,7 @@ namespace Dexter.Abstractions
                 .WithActionOnTimeout(ActionOnStop.DeleteInput)
                 .Build();
 
-            _ = Task.Run(async () => await Interactive.SendPaginatorAsync(Paginator, Context.Channel, TimeSpan.FromMinutes(10)));
+            _ = Task.Run(async () => await Interactive.SendPaginatorAsync(Paginator, Channel, TimeSpan.FromMinutes(10)));
         }
 
     }

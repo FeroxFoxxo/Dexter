@@ -89,7 +89,14 @@ namespace Dexter.Commands
                     {
                         case "timezone":
                         case "tz":
-                            string[] segments = value.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                            string[] segments;
+                            char separator;
+                            if (value.Contains('|'))
+                                separator = '|';
+                            else
+                                separator = ' ';
+
+                            segments = value.Split(separator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
                             TimeZoneData tz;
                             TimeZoneData tzdst;
@@ -135,7 +142,7 @@ namespace Dexter.Commands
                                 string rulesError = "";
                                 if (segments.Length >= 3)
                                 {
-                                    rulesParsed = DaylightShiftRules.TryParse(segments[2], LanguageConfiguration, out rulesError, out tzrules);
+                                    rulesParsed = DaylightShiftRules.TryParse(string.Join(separator, segments[2..]), LanguageConfiguration, out rulesError, out tzrules);
                                     if (rulesParsed)
                                     {
                                         profile.DSTRules = tzrules;

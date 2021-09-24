@@ -44,7 +44,7 @@ namespace Dexter.Commands
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to fetch Guild User")
-                    .WithDescription($"The ID {(user is null ? "UNKNOWN_USER_ID" : user.Id.ToString())} has returned no valid Guild User from the Discord Rest API. {DiscordSocketClient.CurrentUser.Username} probably lacks access to the given user.")
+                    .WithDescription($"The ID {(user is null ? "UNKNOWN_USER_ID" : user.Id.ToString())} has returned no valid Guild User from the Discord Rest API. {DiscordSocketClient.CurrentUser.Username} probably lacks access to the given user or the user is not in the server.")
                     .SendEmbed(Context.Channel);
                 return;
             }

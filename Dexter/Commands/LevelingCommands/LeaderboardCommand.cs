@@ -58,7 +58,7 @@ namespace Dexter.Commands
                 lbitems.Add(new(i + 1, textLevels[i], voiceLevels[i], DiscordSocketClient, LevelingConfiguration));
             }
 
-            string file = LeaderboardPath(lbitems);
+            string file = await LeaderboardPath(lbitems);
             await Context.Channel.SendFileAsync(file);
             File.Delete(file);
         }
@@ -68,7 +68,7 @@ namespace Dexter.Commands
         /// </summary>
         /// <param name="levels">The Leaderboard items to include in the leaderboard.</param>
         /// <returns>A string containing the path to the generated file.</returns>
-        public static string LeaderboardPath(IEnumerable<LeaderboardItem> levels)
+        public static async Task<string> LeaderboardPath(IEnumerable<LeaderboardItem> levels)
         {
             const string tempCacheFileName = "leaderboard.html";
 
@@ -88,7 +88,7 @@ namespace Dexter.Commands
                 {
                     foreach (LeaderboardItem li in levels)
                     {
-                        leaderboardOutput.Write(li.ToString(levelTemplate));
+                        leaderboardOutput.Write(await li.ToString(levelTemplate));
                     }
                 }
                 else
@@ -137,10 +137,12 @@ namespace Dexter.Commands
                 this.config = config;
             }
 
-            private string ReplaceAll(string template, bool isText)
+            private async Task<string> ReplaceAll(string template, bool isText)
             {
                 UserLevel reference = isText ? text : voice;
                 IUser user = client.GetUser(reference.UserID);
+                if (user is null)
+                    user = await client.Rest.GetUserAsync(reference.UserID);
                 string name;
                 string avatarurl;
                 if (user is not null)
@@ -179,10 +181,10 @@ namespace Dexter.Commands
             /// <param name="template">The HTML template with annotations to change into their corresponding values.</param>
             /// <returns>A fully formed HTML expression which contains the text and hidden voice rank item.</returns>
 
-            public string ToString(string template)
+            public async Task<string> ToString(string template)
             {
-                return $"{ReplaceAll(template, true)}"
-                    + $"{ReplaceAll(template, false)}";
+                return $"{await ReplaceAll(template, true)}"
+                    + $"{await ReplaceAll(template, false)}";
             }
         }
     }

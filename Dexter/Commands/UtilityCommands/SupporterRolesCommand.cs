@@ -42,22 +42,14 @@ namespace Dexter.Commands
                 return;
             }
 
-            IGuildUser user;
-            if (Context.User is not IGuildUser)
+            Discord.Rest.RestGuildUser user = await DiscordSocketClient.Rest.GetGuildUserAsync(BotConfiguration.GuildID, Context.User.Id);
+            if (user is null)
             {
-                user = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id);
-                if (user is null)
-                {
-                    await BuildEmbed(EmojiEnum.Annoyed)
-                        .WithTitle("Unable to find user!")
-                        .WithDescription("This could be due to caching errors, but I couldn't find you in the server! Try again later, if this persists, contact the developer team or an administrator.")
-                        .SendEmbed(Context.Channel);
-                    return;
-                }
-            }
-            else
-            {
-                user = (IGuildUser)Context.User;
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Unable to find user!")
+                    .WithDescription("This could be due to caching errors, but I couldn't find you in the server! Try again later, if this persists, contact the developer team or an administrator.")
+                    .SendEmbed(Context.Channel);
+                return;
             }
 
             IEnumerable<IRole> roles = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).Roles.ToArray();
@@ -65,29 +57,39 @@ namespace Dexter.Commands
             Dictionary<ulong, int> colorRoleTiers = new();
 
             IRole toAdd = null;
-            bool found = false;
             foreach (IRole role in roles)
             {
                 if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix))
                 {
                     colorRoleIDs.Add(role.Id, role);
                     colorRoleTiers.Add(role.Id, GetColorRoleTier(role.Id));
-                    if (!found && role.Name.ToLower().EndsWith(colorname.ToLower()))
+                    if (toAdd is null && role.Name.ToLower().EndsWith(colorname.ToLower()))
                     {
                         toAdd = role;
-                        found = true;
                     }
                 }
             }
+
             int colorChangePerms = GetRoleChangePerms(user);
             if (colorChangePerms < 1 || colorname.ToLower() == "none")
             {
-                if (!await TryRemoveRoles(user, colorRoleIDs)) return;
+                IEnumerable<IRole> removed = await TryRemoveRolesAndGet(user, colorRoleIDs);
+                if (removed is null) return;
 
                 if (colorChangePerms < 1)
                     await Context.Channel.SendMessageAsync("You don't have the necessary roles to change your color role to the selected one!");
                 else
-                    await Context.Channel.SendMessageAsync("Removed color roles!");
+                {
+                    if (removed.Any())
+                    {
+                        List<string> roleNames = new();
+                        foreach (IRole role in removed)
+                            roleNames.Add(role.Name);
+                        await Context.Channel.SendMessageAsync($"Removed color roles! [{string.Join(", ", roleNames)}]");
+                    }
+                    else
+                        await Context.Channel.SendMessageAsync($"No roles found to remove!");
+                }
                 return;
             }
 
@@ -123,7 +125,8 @@ namespace Dexter.Commands
             if (!await TryRemoveRoles(user, colorRoleIDs)) return;
             try
             {
-                await user.AddRoleAsync(toAdd);
+                await user.AddRoleAsync(toAdd, new RequestOptions { RetryMode = RetryMode.AlwaysRetry });
+                Console.Out.WriteLine($"Adding {toAdd}");
             }
             catch
             {
@@ -156,8 +159,14 @@ namespace Dexter.Commands
 
         private async Task<bool> TryRemoveRoles(IGuildUser user, Dictionary<ulong, IRole> colorRoleIDs)
         {
+            return await TryRemoveRolesAndGet(user, colorRoleIDs) is not null;
+        }
+
+        private async Task<IEnumerable<IRole>> TryRemoveRolesAndGet(IGuildUser user, Dictionary<ulong, IRole> colorRoleIDs)
+        {
             List<IRole> toRemove = new();
-            foreach (ulong roleID in user.RoleIds.ToArray())
+            ulong[] userRoles = user.RoleIds.ToArray();
+            foreach (ulong roleID in userRoles)
             {
                 if (colorRoleIDs.ContainsKey(roleID))
                 {
@@ -165,23 +174,22 @@ namespace Dexter.Commands
                 }
             }
 
-            if (!toRemove.Any()) return true;
+            if (!toRemove.Any()) return Array.Empty<IRole>();
 
             try
             {
                 await user.RemoveRolesAsync(toRemove);
-                return true;
+                return toRemove;
             }
             catch (HttpException e)
             {
                 await Context.Channel.SendMessageAsync($"Missing permissions for role management! {e}");
-                return false;
+                return null;
             }
         }
 
         private async Task PrintColorOptions()
         {
-
             string imageChacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
             string filepath = Path.Join(imageChacheDir, $"ColorsList.jpg");
 

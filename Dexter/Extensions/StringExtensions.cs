@@ -9,6 +9,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Net.Http;
+using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Dexter.Extensions
 {
@@ -51,6 +53,38 @@ namespace Dexter.Extensions
             foreach (string Unsafe in SensitiveCharacters)
                 Text = Text.Replace(Unsafe, $"\\{Unsafe}");
             return Text;
+        }
+
+        /// <summary>
+        /// Gets the class of the last method that had been called.
+        /// </summary>
+        /// <param name="SearchHeight">The height backwards that you would like to see the call come from.</param>
+        /// <returns>The last called class + method</returns>
+        
+        public static KeyValuePair<string, string> GetLastMethodCalled(int SearchHeight)
+        {
+            SearchHeight += 1;
+
+            Type mBase = new StackTrace().GetFrame(SearchHeight).GetMethod().DeclaringType;
+
+            string name;
+
+            if (mBase.DeclaringType != null)
+                name = mBase.DeclaringType.Name;
+            else
+                name = mBase.Name;
+
+            string methodName = mBase.Name;
+
+            int Index = methodName.IndexOf(">d__");
+
+            if (Index != -1)
+                methodName = methodName.Substring(0, Index).Replace("<", "");
+
+            if (name != "AsyncMethodBuilderCore" && name != "AsyncTaskMethodBuilder" && name != "EmbedExtensions")
+                return new KeyValuePair<string, string> ( name, methodName );
+            else
+                return GetLastMethodCalled(SearchHeight + 1);
         }
 
         /// <summary>

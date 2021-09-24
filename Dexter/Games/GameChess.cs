@@ -13,8 +13,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Dexter.Enums;
 using Dexter.Abstractions;
+using Dexter.Helpers;
 
-namespace Dexter.Helpers.Games
+namespace Dexter.Games
 {
 
     /// <summary>
@@ -1843,7 +1844,7 @@ namespace Dexter.Helpers.Games
                 output.squares = new char[8, 8];
                 for (int i = 0; i < 64; i++)
                 {
-                    output.squares.SetValue((Char)squares[i / 8, i % 8], new int[] { i / 8, i % 8 });
+                    output.squares.SetValue((char)squares[i / 8, i % 8], new int[] { i / 8, i % 8 });
                 }
                 output.isWhitesTurn = (bool)isWhitesTurn;
                 output.castling = new bool[4];

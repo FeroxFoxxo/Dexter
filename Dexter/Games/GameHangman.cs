@@ -9,8 +9,9 @@ using Discord.WebSocket;
 using System.Text;
 using Dexter.Abstractions;
 using Dexter.Enums;
+using Dexter.Helpers;
 
-namespace Dexter.Helpers.Games
+namespace Dexter.Games
 {
 
     /// <summary>

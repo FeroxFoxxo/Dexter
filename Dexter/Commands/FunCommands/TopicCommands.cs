@@ -33,6 +33,28 @@ namespace Dexter.Commands
         }
 
         /// <summary>
+        /// Returns a random topic from the database if the command provided is an empty string or null object.
+        /// Otherwise, provides a list of options to suggest edits to the already-existing topics in the database.
+        /// </summary>
+        /// <remarks>This command has a 2-minute cooldown.</remarks>
+        /// <param name="Command"></param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
+        [Command("quote")]
+        [Summary("A quote command - perfect for when chat has died!\n" +
+                    "`ADD [QUOTE]` - adds a quote to the database.\n" +
+                    "`GET [QUOTE]` - gets a quote by name from the database.\n" +
+                    "`EDIT [QUOTE ID] [QUOTE]` - edits a quote in the database.\n" +
+                    "`REMOVE [QUOTE ID]` - removes a quote from the database.")]
+        [CommandCooldown(120)]
+        [GameChannelRestricted]
+
+        public async Task QuoteCommand([Optional][Remainder] string Command)
+        {
+            await RunTopic(Command, TopicType.Quote);
+        }
+
+        /// <summary>
         /// Returns a random would-you-rather from the database if the command provided is an empty string or null object.
         /// Otherwise, provides a list of options to suggest edits to the already-existing would-you-rather questions in the database.
         /// </summary>

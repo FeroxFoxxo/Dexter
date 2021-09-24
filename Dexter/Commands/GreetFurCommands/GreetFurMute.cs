@@ -32,13 +32,11 @@ namespace Dexter.Commands
                     .WithTitle($"Unable To Mute {User.Username}#{User.Discriminator}")
                     .WithDescription("This user is above the member role. As such, GreetFurs are unable to punish them. " +
                         "Please consult the GreetFur information channel for more information.")
-
                     .SendEmbed(Context.Channel);
 
                 await BuildEmbed(EmojiEnum.Wut)
                     .WithTitle("Improper GreetFur Mute")
                     .WithDescription($"Hi, GreetFur {Context.User.GetUserInformation()} has tried run the ~gfmute command on {User.GetUserInformation()} for `{Reason}`. Probably best to keep an eye out for them...")
-
                     .SendEmbed(Context.Guild.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel);
             }
             else
@@ -47,11 +45,15 @@ namespace Dexter.Commands
 
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"Muted {User.Username}#{User.Discriminator}")
-                    .WithDescription($"{User.GetUserInformation()} has been muted for {Reason}")
-
+                    .WithDescription($"{User.GetUserInformation()} has been muted for `{Reason}`")
                     .SendEmbed(Context.Channel);
 
-
+                await BuildEmbed(EmojiEnum.Unknown)
+                    .WithAuthor(Context.User)
+                    .AddField("User", $"<@{User.Id}>")
+                    .AddField("GreetFur", $"<@{Context.User.Id}>")
+                    .AddField("Reason", Reason)
+                    .SendEmbed(DiscordSocketClient.GetChannel(GreetFurConfiguration.GreetFurMuteChannel) as ITextChannel);
             }
         }
 

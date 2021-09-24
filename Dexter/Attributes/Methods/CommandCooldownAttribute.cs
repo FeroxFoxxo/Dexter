@@ -74,7 +74,7 @@ namespace Dexter.Attributes.Methods
                 {
                     DateTime Time = DateTime.UnixEpoch.AddSeconds(Cooldown.TimeOfCooldown + CooldownTimer);
 
-                    await new EmbedBuilder().BuildEmbed(EmojiEnum.Wut, ServiceProvider.GetService<BotConfiguration>())
+                    await new EmbedBuilder().BuildEmbed(EmojiEnum.Wut, ServiceProvider.GetService<BotConfiguration>(), EmbedCallingType.Command)
                         .WithAuthor($"Hiya, {CommandContext.User.Username}!")
                         .WithTitle($"Please wait {Time.Humanize()} until you are able to use this command.")
                         .WithDescription("Thanks for your patience, we really do appreciate it. <3")

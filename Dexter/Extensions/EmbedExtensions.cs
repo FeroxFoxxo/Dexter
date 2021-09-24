@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
@@ -22,14 +23,16 @@ namespace Dexter.Extensions
         /// <summary>
         /// Builds an embed with the attributes specified by the emoji enum.
         /// </summary>
-        /// <param name="EmbedBuilder">The EmbedBuilder which you wish to be built upon.</param>
-        /// <param name="Thumbnails">The type of EmbedBuilder you wish it to be, specified by an enum of possibilities.</param>
-        /// <param name="BotConfiguration">The BotConfiguration which is used to find the thumbnail of the embed.</param>
+        /// <param name="embedBuilder">The EmbedBuilder which you wish to be built upon.</param>
+        /// <param name="thumbnails">The type of EmbedBuilder you wish it to be, specified by an enum of possibilities.</param>
+        /// <param name="botConfiguration">The BotConfiguration which is used to find the thumbnail of the embed.</param>
+        /// <param name="calledType">The EmbedCallingType that the embed was called to be made from.</param>
         /// <returns>The built embed, with the thumbnail and color applied.</returns>
 
-        public static EmbedBuilder BuildEmbed(this EmbedBuilder EmbedBuilder, EmojiEnum Thumbnails, BotConfiguration BotConfiguration)
+        public static EmbedBuilder BuildEmbed(this EmbedBuilder embedBuilder, EmojiEnum thumbnails,
+            BotConfiguration botConfiguration, EmbedCallingType calledType)
         {
-            Color Color = Thumbnails switch
+            Color Color = thumbnails switch
             {
                 EmojiEnum.Annoyed => Color.Red,
                 EmojiEnum.Love => Color.Green,
@@ -39,88 +42,104 @@ namespace Dexter.Extensions
                 _ => Color.Magenta
             };
 
-            return EmbedBuilder
-                .WithThumbnailUrl(BotConfiguration.ThumbnailURLs[(int)Thumbnails])
+            string name = StringExtensions.GetLastMethodCalled(2).Key;
+
+            string delete = calledType switch
+            {
+                EmbedCallingType.Command => "Commands",
+                EmbedCallingType.Service => "Service",
+                EmbedCallingType.Game => "Game",
+                _ => ""
+            };
+
+            name = name.Replace(delete, "");
+
+            name = string.Concat(name.Select(x => char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
+
+            return embedBuilder
+                .WithThumbnailUrl(botConfiguration.ThumbnailURLs[(int)thumbnails])
                 .WithColor(Color)
-                .WithCurrentTimestamp();
+                .WithCurrentTimestamp()
+                .WithFooter($"USFurries {name}");
         }
 
         /// <summary>
         /// Builds an EmbedBuilder and sends it to the specified IMessageChannel.
         /// </summary>
-        /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
-        /// <param name="MessageChannel">The IMessageChannel you wish to send the embed to.</param>
+        /// <param name="embedBuilder">The EmbedBuilder you wish to send.</param>
+        /// <param name="messageChannel">The IMessageChannel you wish to send the embed to.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, IMessageChannel MessageChannel) =>
-            await MessageChannel.SendMessageAsync(embed: EmbedBuilder.Build());
+        public static async Task SendEmbed(this EmbedBuilder embedBuilder, IMessageChannel messageChannel) =>
+            await messageChannel.SendMessageAsync(embed: embedBuilder.Build());
 
         /// <summary>
         /// Builds an EmbedBuilder and sends it to the specified DiscordWebhookClient channel.
         /// </summary>
-        /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
-        /// <param name="DiscordWebhookClient">The DiscordWebhookClient you wish to send the embed to.</param>
+        /// <param name="embedBuilder">The EmbedBuilder you wish to send.</param>
+        /// <param name="discordWebhookClient">The DiscordWebhookClient you wish to send the embed to.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, DiscordWebhookClient DiscordWebhookClient) =>
-            await DiscordWebhookClient.SendMessageAsync(embeds: new Embed[1] { EmbedBuilder.Build() });
+        public static async Task SendEmbed(this EmbedBuilder embedBuilder, DiscordWebhookClient discordWebhookClient) =>
+            await discordWebhookClient.SendMessageAsync(embeds: new Embed[1] { embedBuilder.Build() });
 
         /// <summary>
         /// Builds an EmbedBuilder and sends it to the specified IMessageChannel and sends an embed to the user specified.
         /// </summary>
-        /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
-        /// <param name="MessageChannel">The IMessageChannel you wish to send the embed to.</param>
-        /// <param name="BotConfiguration">The BotConfiguration which is used to find the thumbnail of the embed.</param>
-        /// <param name="User">The IUser you wish to send the DM embed to.</param>
-        /// <param name="DMEmbedBuilder">The Embed you wish to send to the user.</param>
+        /// <param name="embedBuilder">The EmbedBuilder you wish to send.</param>
+        /// <param name="messageChannel">The IMessageChannel you wish to send the embed to.</param>
+        /// <param name="botConfiguration">The BotConfiguration which is used to find the thumbnail of the embed.</param>
+        /// <param name="user">The IUser you wish to send the DM embed to.</param>
+        /// <param name="dmEmbedBuilder">The Embed you wish to send to the user.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public static async Task SendDMAttachedEmbed(this EmbedBuilder EmbedBuilder, IMessageChannel MessageChannel,
-                BotConfiguration BotConfiguration, IUser User, EmbedBuilder DMEmbedBuilder)
+        public static async Task SendDMAttachedEmbed(this EmbedBuilder embedBuilder, IMessageChannel messageChannel,
+                BotConfiguration botConfiguration, IUser user, EmbedBuilder dmEmbedBuilder)
         {
 
-            if (User == null)
-                EmbedBuilder.AddField("Failed", "I cannot notify this fluff as they have left the server!");
+            if (user == null)
+                embedBuilder.AddField("Failed", "I cannot notify this fluff as they have left the server!");
             else
             {
                 try
                 {
-                    IMessageChannel DMChannel = await User.CreateDMChannelAsync();
-                    await DMChannel.SendMessageAsync(embed: DMEmbedBuilder.Build());
+                    IMessageChannel dmChannel = await user.CreateDMChannelAsync();
+                    await dmChannel.SendMessageAsync(embed: dmEmbedBuilder.Build());
                 }
                 catch
                 {
-                    EmbedBuilder.BuildEmbed(EmojiEnum.Annoyed, BotConfiguration);
-                    EmbedBuilder.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
+                    embedBuilder.BuildEmbed(EmojiEnum.Annoyed, botConfiguration, EmbedCallingType.Command);
+                    embedBuilder.AddField("Failed", "This fluff may have either blocked DMs from the server or me!");
                 }
             }
 
-            await EmbedBuilder.SendEmbed(MessageChannel);
+            await embedBuilder.SendEmbed(messageChannel);
         }
 
         /// <summary>
         /// Builds an EmbedBuilder and sends it to the specified IUser.
         /// </summary>
-        /// <param name="EmbedBuilder">The EmbedBuilder you wish to send.</param>
-        /// <param name="User">The IUser you wish to send the embed to.</param>
-        /// <param name="Fallback">The Fallback is the channel it will send the embed to if the user has blocked DMs.</param>
+        /// <param name="embedBuilder">The EmbedBuilder you wish to send.</param>
+        /// <param name="user">The IUser you wish to send the embed to.</param>
+        /// <param name="fallback">The Fallback is the channel it will send the embed to if the user has blocked DMs.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public static async Task SendEmbed(this EmbedBuilder EmbedBuilder, IUser User, ITextChannel Fallback)
+        public static async Task SendEmbed(this EmbedBuilder embedBuilder, IUser user, ITextChannel fallback)
         {
             try
             {
-                await User.SendMessageAsync(embed: EmbedBuilder.Build());
+                await user.SendMessageAsync(embed: embedBuilder.Build());
             }
             catch (HttpException)
             {
-                IUserMessage Message = await Fallback.SendMessageAsync(User.Mention, embed: EmbedBuilder
-                    .WithAuthor($"Psst, {User.Username}! Please unblock me or allow direct messages from {Fallback.Guild.Name}. <3")
+                IUserMessage message = await fallback.SendMessageAsync(user.Mention, embed: embedBuilder
+                    .WithAuthor($"Psst, {user.Username}! Please unblock me or allow direct messages from {fallback.Guild.Name}. <3")
                     .Build());
+
                 _ = Task.Run(async () =>
                 {
                     await Task.Delay(5000);
-                    await Message.DeleteAsync();
+                    await message.DeleteAsync();
                 });
             }
         }
@@ -128,46 +147,46 @@ namespace Dexter.Extensions
         /// <summary>
         /// The AddField method adds a field to an EmbedBuilder if a given condition is true.
         /// </summary>
-        /// <param name="EmbedBuilder">The EmbedBuilder you wish to add the field to.</param>
-        /// <param name="Condition">The condition which must be true to add the field.</param>
-        /// <param name="Name">The name of the field you wish to add.</param>
-        /// <param name="Value">The description of the field you wish to add.</param>
-        /// <param name="InLine">Sets the inline parameter of the Embed Field.</param>
+        /// <param name="embedBuilder">The EmbedBuilder you wish to add the field to.</param>
+        /// <param name="condition">The condition which must be true to add the field.</param>
+        /// <param name="name">The name of the field you wish to add.</param>
+        /// <param name="value">The description of the field you wish to add.</param>
+        /// <param name="inLine">Sets the inline parameter of the Embed Field.</param>
         /// <returns>The embed with the field added to it if true.</returns>
 
-        public static EmbedBuilder AddField(this EmbedBuilder EmbedBuilder, bool Condition, string Name, object Value, bool InLine = false)
+        public static EmbedBuilder AddField(this EmbedBuilder embedBuilder, bool condition, string name, object value, bool inLine = false)
         {
-            if (Condition)
-                EmbedBuilder.AddField(Name, Value, InLine);
+            if (condition)
+                embedBuilder.AddField(name, value, inLine);
 
-            return EmbedBuilder;
+            return embedBuilder;
         }
 
         /// <summary>
         /// The GetParametersForCommand adds fields to an embed containing the parameters and summary of the command.
         /// </summary>
-        /// <param name="EmbedBuilder">The EmbedBuilder you wish to add the fields to.</param>
-        /// <param name="CommandInfo">The command of which you wish to search for.</param>
-        /// <param name="BotConfiguration">The BotConfiguration, which is used to find the prefix for the parameter.</param>
+        /// <param name="embedBuilder">The EmbedBuilder you wish to add the fields to.</param>
+        /// <param name="commandInfo">The command of which you wish to search for.</param>
+        /// <param name="botConfiguration">The BotConfiguration, which is used to find the prefix for the parameter.</param>
         /// <returns>The embed with the parameter fields for the command added.</returns>
 
-        public static EmbedBuilder GetParametersForCommand(this EmbedBuilder EmbedBuilder, CommandInfo CommandInfo, BotConfiguration BotConfiguration)
+        public static EmbedBuilder GetParametersForCommand(this EmbedBuilder embedBuilder, CommandInfo commandInfo, BotConfiguration botConfiguration)
         {
-            string CommandDescription = string.Empty;
+            string commandDescription = string.Empty;
 
-            if (CommandInfo.Parameters.Count > 0)
-                CommandDescription = $"Parameters: {string.Join(", ", CommandInfo.Parameters.Select(p => p.Name))}";
+            if (commandInfo.Parameters.Count > 0)
+                commandDescription = $"Parameters: {string.Join(", ", commandInfo.Parameters.Select(p => p.Name))}";
 
-            Attribute ExtendedSummary = CommandInfo.Attributes.Where(Attribute => Attribute is ExtendedSummaryAttribute).FirstOrDefault();
+            Attribute extendedSummary = commandInfo.Attributes.Where(Attribute => Attribute is ExtendedSummaryAttribute).FirstOrDefault();
 
-            if (ExtendedSummary is not null)
-                CommandDescription += $"\nSummary: {(ExtendedSummary as ExtendedSummaryAttribute).ExtendedSummary}";
-            else if (!string.IsNullOrEmpty(CommandInfo.Summary))
-                CommandDescription += $"\nSummary: {CommandInfo.Summary}";
+            if (extendedSummary is not null)
+                commandDescription += $"\nSummary: {(extendedSummary as ExtendedSummaryAttribute).ExtendedSummary}";
+            else if (!string.IsNullOrEmpty(commandInfo.Summary))
+                commandDescription += $"\nSummary: {commandInfo.Summary}";
 
-            EmbedBuilder.AddField(string.Join(", ", CommandInfo.Aliases.Select(Name => $"{BotConfiguration.Prefix}{Name}")), CommandDescription);
+            embedBuilder.AddField(string.Join(", ", commandInfo.Aliases.Select(Name => $"{botConfiguration.Prefix}{Name}")), commandDescription);
 
-            return EmbedBuilder;
+            return embedBuilder;
         }
 
     }

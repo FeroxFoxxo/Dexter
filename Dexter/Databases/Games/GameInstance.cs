@@ -1,6 +1,6 @@
 using Dexter.Abstractions;
 using Dexter.Configurations;
-using Dexter.Helpers.Games;
+using Dexter.Games;
 using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.Games

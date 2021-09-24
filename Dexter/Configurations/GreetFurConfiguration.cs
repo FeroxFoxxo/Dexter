@@ -78,6 +78,12 @@ namespace Dexter.Configurations
         public string GreetFurMutePattern { get; set; }
 
         /// <summary>
+        /// The channel of which a mute is sent into if a GreetFur triggers it.
+        /// </summary>
+
+        public ulong GreetFurMuteChannel { get; set; }
+
+        /// <summary>
         /// The first day since UNIX time that tracking for GreetFur activity started (defines week 1)
         /// </summary>
 

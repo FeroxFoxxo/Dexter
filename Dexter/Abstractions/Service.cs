@@ -112,7 +112,7 @@ namespace Dexter.Abstractions
 
         public EmbedBuilder BuildEmbed(EmojiEnum Thumbnail)
         {
-            return new EmbedBuilder().BuildEmbed(Thumbnail, BotConfiguration);
+            return new EmbedBuilder().BuildEmbed(Thumbnail, BotConfiguration, EmbedCallingType.Service);
         }
 
     }

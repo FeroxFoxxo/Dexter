@@ -43,7 +43,7 @@ namespace Dexter.Commands
                 if (Warnings.Length > 1)
                     CreateReactionMenu(Warnings, Context.Channel);
                 else
-                    await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
+                    await Warnings.FirstOrDefault().SendEmbed(Context.Channel);
             }
             else
                 await InfractionsCommand(User);
@@ -75,7 +75,7 @@ namespace Dexter.Commands
                     if (Warnings.Length > 1)
                         CreateReactionMenu(Warnings, Context.Channel);
                     else
-                        await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
+                        await Warnings.FirstOrDefault().SendEmbed(Context.Channel);
                 }
                 else
                 {

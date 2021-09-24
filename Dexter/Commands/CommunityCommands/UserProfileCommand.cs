@@ -1274,7 +1274,6 @@ namespace Dexter.Commands
                         .WithThumbnailUrl(user.GetTrueAvatarUrl())
                         .WithTitle("🎂 Borkday Time 🎂")
                         .WithDescription($"Hey there! It's {user.Mention}'{(user.Username.EndsWith('s') ? "" : "s")} birthday! Thought you'd like to know and celebrate! :3")
-                        .WithCurrentTimestamp()
                         .SendEmbed(await friend.CreateDMChannelAsync());
                 }
                 catch { }

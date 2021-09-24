@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,18 +7,21 @@ using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
 using System.Text;
-using Dexter.Enums;
 using Dexter.Abstractions;
+using Dexter.Helpers;
+using Dexter.Enums;
 
-namespace Dexter.Helpers.Games
+namespace Dexter.Games
 {
 
     /// <summary>
     /// Represents an instance of a tic tac toe game.
     /// </summary>
 
-    public class GameTicTacToe : GameTemplate
+    public class GameConnect4 : GameTemplate
     {
+
+        const string EmptyBoard = "-------/-------/-------/-------/-------/-------";
 
         private string StrState
         {
@@ -29,9 +31,9 @@ namespace Dexter.Helpers.Games
             }
             set
             {
-                string[] NewValue = Game.Data.Split(", ");
-                NewValue[0] = value;
-                Game.Data = string.Join(", ", NewValue);
+                string[] newValue = Game.Data.Split(", ");
+                newValue[0] = value;
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -39,24 +41,25 @@ namespace Dexter.Helpers.Games
         {
             get
             {
-                char[,] Result = new char[3, 3];
-                string Raw = StrState;
-                for (int i = 0; i < 3; i++)
+                char[,] result = new char[6, 7];
+                string[] raw = StrState.Split('/');
+                for (int i = 0; i < 6; i++)
                 {
-                    for (int j = 0; j < 3; j++)
-                        Result[i, j] = Raw[i * 3 + j];
+                    for (int j = 0; j < 7; j++)
+                        result[i, j] = raw[i][j];
                 }
-                return Result;
+                return result;
             }
             set
             {
-                StringBuilder Builder = new(9);
-                for (int i = 0; i < 3; i++)
+                StringBuilder builder = new(60);
+                for (int i = 0; i < 6; i++)
                 {
-                    for (int j = 0; j < 3; j++)
-                        Builder.Append(value[i, j]);
+                    for (int j = 0; j < 7; j++)
+                        builder.Append(value[i, j]);
+                    if (i != 5) builder.Append('/');
                 }
-                StrState = Builder.ToString();
+                StrState = builder.ToString();
             }
         }
 
@@ -68,14 +71,14 @@ namespace Dexter.Helpers.Games
             }
             set
             {
-                string ProcessedValue = value.ToString();
-                string[] NewValue = Game.Data.Split(", ");
-                NewValue[1] = ProcessedValue;
-                Game.Data = string.Join(", ", NewValue);
+                string processedValue = value.ToString();
+                string[] newValue = Game.Data.Split(", ");
+                newValue[1] = processedValue;
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
-        private ulong PlayerO
+        private ulong PlayerRed
         {
             get
             {
@@ -83,14 +86,14 @@ namespace Dexter.Helpers.Games
             }
             set
             {
-                string ProcessedValue = value.ToString();
-                string[] NewValue = Game.Data.Split(", ");
-                NewValue[2] = ProcessedValue;
-                Game.Data = string.Join(", ", NewValue);
+                string processedValue = value.ToString();
+                string[] newValue = Game.Data.Split(", ");
+                newValue[2] = processedValue;
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
-        private ulong PlayerX
+        private ulong PlayerYellow
         {
             get
             {
@@ -98,10 +101,10 @@ namespace Dexter.Helpers.Games
             }
             set
             {
-                string ProcessedValue = value.ToString();
-                string[] NewValue = Game.Data.Split(", ");
-                NewValue[3] = ProcessedValue;
-                Game.Data = string.Join(", ", NewValue);
+                string processedValue = value.ToString();
+                string[] newValue = Game.Data.Split(", ");
+                newValue[3] = processedValue;
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
@@ -113,50 +116,60 @@ namespace Dexter.Helpers.Games
             }
             set
             {
-                string ProcessedValue = value.ToString();
-                string[] NewValue = Game.Data.Split(", ");
-                NewValue[4] = ProcessedValue;
-                Game.Data = string.Join(", ", NewValue);
+                string processedValue = value.ToString();
+                string[] newValue = Game.Data.Split(", ");
+                newValue[4] = processedValue;
+                Game.Data = string.Join(", ", newValue);
             }
         }
 
         /// <summary>
-        /// Represents the general status and data of a Hangman Game.
+        /// Represents the general status and data of a Connect 4 Game.
         /// </summary>
-        /// <param name="Client">SocketClient used to parse UserIDs.</param>
+        /// <param name="client">SocketClient used to parse UserIDs.</param>
         /// <returns>An Embed detailing the various aspects of the game in its current instance.</returns>
 
-        public override EmbedBuilder GetStatus(DiscordSocketClient Client)
+        public override EmbedBuilder GetStatus(DiscordSocketClient client)
         {
             return BuildEmbed(EmojiEnum.Unknown)
                 .WithColor(Color.Blue)
                 .WithTitle($"{Game.Title} (Game {Game.GameID})")
                 .WithDescription($"{Game.Description}\n{DisplayState()}")
-                .AddField($"{OChar} Player", $"{(PlayerO == default ? "-" : $"<@{PlayerO}>")}", true)
-                .AddField($"{XChar} Player", $"{(PlayerX == default ? "-" : $"<@{PlayerX}>")}", true)
+                .AddField($"{YellowChar} Player", $"{(PlayerYellow == default ? "-" : $"<@{PlayerYellow}>")}", true)
+                .AddField($"{RedChar} Player", $"{(PlayerRed == default ? "-" : $"<@{PlayerRed}>")}", true)
                 .AddField($"Turn", $"{ToEmoji[Turn]}", true)
-                .AddField("Master", Client.GetUser(Game.Master)?.GetUserInformation() ?? "<N/A>")
+                .AddField("Master", client.GetUser(Game.Master)?.GetUserInformation() ?? "<N/A>")
                 .AddField(Game.Banned.Length > 0, "Banned Players", Game.BannedMentions.TruncateTo(500));
         }
 
-        const string EChar = "⬜";
-        const string OChar = "⭕";
-        const string XChar = "❌";
+        const string EChar = "⚫️";
+        const string YellowChar = "🟡";
+        const string RedChar = "🔴";
         private readonly Dictionary<char, string> ToEmoji = new() {
             {'-', EChar},
-            {'O', OChar},
-            {'X', XChar}
+            {'Y', YellowChar},
+            {'R', RedChar}
         };
+
+        /// <summary>
+        /// The initializer for the game class, setting both the instance information and the bot configuration.
+        /// </summary>
+        /// <param name="game">The current instance of the game.</param>
+        /// <param name="botConfiguration">An instance of the bot's configuraiton.</param>
+        public GameConnect4(GameInstance game, BotConfiguration botConfiguration) : base(game, botConfiguration, "-------/-------/-------/-------/-------/-------, 0, 0, 0, Y")
+        {
+        }
 
         private string DisplayState()
         {
             char[,] icons = State;
             StringBuilder builder = new();
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 6; i++)
             {
-                for (int j = 0; j < 3; j++)
+                builder.Append('|');
+                for (int j = 0; j < 7; j++)
                     builder.Append(ToEmoji[icons[i, j]]);
-                builder.Append('\n');
+                builder.Append($"|{(i == 5 ? ToEmoji[Turn] : "\n")}");
             }
             return builder.ToString();
         }
@@ -172,8 +185,8 @@ namespace Dexter.Helpers.Games
             Game.Data = EmptyData;
             Game.LastUserInteracted = Game.Master;
             if (gamesDB is null) return;
-            Player[] Players = gamesDB.GetPlayersFromInstance(Game.GameID);
-            foreach (Player p in Players)
+            Player[] players = gamesDB.GetPlayersFromInstance(Game.GameID);
+            foreach (Player p in players)
             {
                 p.Score = 0;
                 p.Lives = 0;
@@ -192,7 +205,7 @@ namespace Dexter.Helpers.Games
 
         public override bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback)
         {
-            feedback = $"TicTacToe doesn't implement any special fields! {field} isn't a valid default field.";
+            feedback = $"Connect 4 doesn't implement any special fields! {field} isn't a valid default field.";
             return false;
         }
 
@@ -206,48 +219,109 @@ namespace Dexter.Helpers.Games
         {
             return BuildEmbed(EmojiEnum.Unknown)
                 .WithColor(Color.Magenta)
-                .WithTitle("How To Play: TicTacToe")
+                .WithTitle("How To Play: Connect 4")
                 .WithDescription("**Step 1:** Create a new board by typing `board`.\n" +
-                    "**Step 2:** Claim your token, type `claim <O|X>` to claim circles or crosses respectively.\n" +
-                    "**Step 3:** `O` starts! type `(<O|X>) [POS]` to draw your token at a given position.\n" +
+                    "**Step 2:** Claim your token, type `claim <Y|R>` to claim Yellow or Red respectively.\n" +
+                    "**Step 3:** `Y` starts! type `[POS]` to drop your token at a given position.\n" +
                     "Positions are the following:\n" +
                     "```\n" +
-                    "A3 B3 C3\n" +
-                    "A2 B2 C2\n" +
-                    "A1 B1 C1\n" +
+                    "1 2 3 4 5 6 7\n" +
+                    "↓ ↓ ↓ ↓ ↓ ↓ ↓\n" +
                     "```\n" +
-                    "Keep playing until you fill the board or get a line of three.\n" +
-                    "You can pass the token by typing `pass <O|X> [Player]` to give control of a token to another player (only the master or the player with that token can do this).\n" +
-                    "Alternatively, the master can type `swap` to swap player tokens.");
+                    "Keep playing until you fill the board or get a line of four.\n" +
+                    "You can pass the token by typing `pass <Y|R> [Player]` to give control of a token to another player (only the master or the player with that token can do this).\n" +
+                    "Alternatively, the master can type `swap` to swap player tokens, essentially exchanging turns.");
         }
 
-        private bool PlaceToken(int x, int y, char token)
+        private bool PlaceToken(int x, char token)
         {
-            if (State[x, y] != '-') return false;
-            char[] newState = StrState.ToCharArray();
-            newState[x * 3 + y] = token;
-            StrState = string.Join("", newState);
+            char[,] state = State; int y;
+            x--;
+            for (y = 5; y >= -1; y--)
+            {
+                if (y == -1) return false;
+                if (state[y, x] == '-') break;
+            }
+            state[y, x] = token;
+            State = state;
             return true;
         }
 
         private bool CheckWin()
         {
             char[,] state = State;
-            for (int i = 0; i < 3; i++)
+            int count = 0;
+            char pattern = '-';
+            for (int y = 0; y < 6; y++)
             {
-                if (state[i, 0] != '-' && state[i, 0] == state[i, 1] && state[i, 1] == state[i, 2]) return true;
-                if (state[0, i] != '-' && state[0, i] == state[1, i] && state[1, i] == state[2, i]) return true;
+                for (int x = 0; x < 7; x++)
+                {
+                    if (state[y, x] == pattern) count++;
+                    else
+                    {
+                        count = 1;
+                        pattern = state[y, x];
+                    }
+                    if (count == 4 && pattern != '-') return true;
+                }
+                count = 0;
             }
-            if (state[0, 0] != '-' && state[0, 0] == state[1, 1] && state[1, 1] == state[2, 2]) return true;
-            if (state[0, 2] != '-' && state[0, 2] == state[1, 1] && state[1, 1] == state[2, 0]) return true;
+            for (int x = 0; x < 7; x++)
+            {
+                for (int y = 0; y < 6; y++)
+                {
+                    if (state[y, x] == pattern) count++;
+                    else
+                    {
+                        count = 1;
+                        pattern = state[y, x];
+                    }
+                    if (count == 4 && pattern != '-') return true;
+                }
+                count = 0;
+            }
+            for (int xbase = -2; xbase < 4; xbase++)
+            {
+                int x = xbase;
+                for (int y = 0; y < 6; y++)
+                {
+                    if (x < 0 || x >= 7) { x++; continue; }
+                    if (state[y, x] == pattern) count++;
+                    else
+                    {
+                        count = 1;
+                        pattern = state[y, x];
+                    }
+                    if (count == 4 && pattern != '-') return true;
+                    x++;
+                }
+                count = 0;
+            }
+            for (int xbase = -2; xbase < 4; xbase++)
+            {
+                int x = xbase;
+                for (int y = 5; y >= 0; y--)
+                {
+                    if (x < 0 || x >= 7) { x++; continue; }
+                    if (state[y, x] == pattern) count++;
+                    else
+                    {
+                        count = 1;
+                        pattern = state[y, x];
+                    }
+                    if (count == 4 && pattern != '-') return true;
+                    x++;
+                }
+                count = 0;
+            }
             return false;
         }
 
         private bool CheckDraw()
         {
             char[,] state = State;
-            for (int i = 0; i < 3; i++)
-                for (int j = 0; j < 3; j++)
+            for (int i = 0; i < 6; i++)
+                for (int j = 0; j < 7; j++)
                 {
                     if (state[i, j] == '-') return false;
                 }
@@ -289,16 +363,18 @@ namespace Dexter.Helpers.Games
                     bool skip = false;
                     switch (args[1])
                     {
-                        case "O":
-                            if (PlayerO == 0) skip = true;
-                            else prevPlayer = gamesDB.Players.Find(PlayerO);
+                        case "YELLOW":
+                        case "Y":
+                            if (PlayerYellow == 0) skip = true;
+                            else prevPlayer = gamesDB.Players.Find(PlayerYellow);
                             break;
-                        case "X":
-                            if (PlayerX == 0) skip = true;
-                            else prevPlayer = gamesDB.Players.Find(PlayerX);
+                        case "RED":
+                        case "R":
+                            if (PlayerRed == 0) skip = true;
+                            else prevPlayer = gamesDB.Players.Find(PlayerRed);
                             break;
                         default:
-                            await message.Channel.SendMessageAsync($"\"{args[1]}\" is not a valid token! Use 'O' or 'X'.");
+                            await message.Channel.SendMessageAsync($"\"{args[1]}\" is not a valid token! Use 'Y' or 'R'.");
                             return;
                     }
 
@@ -308,25 +384,17 @@ namespace Dexter.Helpers.Games
                         return;
                     }
 
-                    if (args[1] == "O") PlayerO = message.Author.Id;
-                    else PlayerX = message.Author.Id;
+                    if (args[1].StartsWith("R")) PlayerRed = message.Author.Id;
+                    else PlayerYellow = message.Author.Id;
 
-                    await message.Channel.SendMessageAsync($"<@{message.Author.Id}> will play with {(args[1] == "O" ? "circles" : "crosses")}!");
+                    await message.Channel.SendMessageAsync($"<@{message.Author.Id}> will play with {(args[1].StartsWith("Y") ? "yellow" : "red")}!");
                     return;
                 }
                 await message.Channel.SendMessageAsync("You need to specify what token you'd like to claim!");
                 return;
             }
 
-            if (args.Length > 0 && Positions.ContainsKey(args[0]))
-            {
-                args = new string[] {
-                    Turn.ToString(),
-                    args[0]
-                };
-            }
-
-            if (args.Length > 1 && args[0] is "O" or "X")
+            if (int.TryParse(args[0], out int pos))
             {
                 if (board is null)
                 {
@@ -334,54 +402,49 @@ namespace Dexter.Helpers.Games
                     return;
                 }
 
-                if (Turn != args[0].First())
+                if ((Turn == 'R' && message.Author.Id != PlayerRed) || (Turn == 'Y' && message.Author.Id != PlayerYellow))
                 {
-                    await message.Channel.SendMessageAsync($"It's not your turn!");
+                    await message.Channel.SendMessageAsync($"You don't control the {(Turn == 'Y' ? "yellow" : "red")} tokens!");
                     return;
                 }
 
-                if ((args[0] == "O" && message.Author.Id != PlayerO) || (args[0] == "X" && message.Author.Id != PlayerX))
+                if (pos < 1 || pos > 7)
                 {
-                    await message.Channel.SendMessageAsync($"You don't control this token!");
+                    await message.Channel.SendMessageAsync($"Position {pos} is not valid! It must be between 1 and 7.");
                     return;
                 }
 
-                if (!Positions.ContainsKey(args[1]))
+                if (!PlaceToken(pos, Turn))
                 {
-                    await message.Channel.SendMessageAsync($"Unable to parse position \"{args[1]}\"! Make sure you use a valid expression (see game info).");
-                    return;
-                }
-                Tuple<int, int> pos = Positions[args[1]];
-
-                if (!PlaceToken(pos.Item1, pos.Item2, args[0].First()))
-                {
-                    await message.Channel.SendMessageAsync($"This position is currently occupied!");
+                    await message.Channel.SendMessageAsync($"This position has no free spaces!");
                     return;
                 }
 
                 await message.DeleteAsync();
+                Turn = Turn == 'Y' ? 'R' : 'Y';
                 await board.ModifyAsync(m => m.Content = DisplayState());
-                Turn = Turn == 'O' ? 'X' : 'O';
 
                 if (CheckWin())
                 {
+                    Turn = Turn == 'Y' ? 'R' : 'Y';
                     BoardID = 0;
-                    StrState = "---------";
-                    Turn = 'O';
+                    StrState = EmptyBoard;
                     player.Score += 1;
                     await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Color.Green)
-                        .WithTitle($"{ToEmoji[args[0].First()]} wins!")
+                        .WithTitle($"{ToEmoji[Turn]} wins!")
                         .WithDescription("Create a new board if you wish to play again, or pass your token control to a different player.")
                         .SendEmbed(message.Channel);
+                    Turn = 'Y';
                     return;
                 }
 
                 if (CheckDraw())
                 {
+                    Turn = Turn == 'Y' ? 'R' : 'Y';
                     BoardID = 0;
-                    StrState = "---------";
-                    Turn = 'O';
+                    StrState = EmptyBoard;
+                    Turn = 'Y';
                     await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Color.LightOrange)
                         .WithTitle("Draw!")
@@ -416,28 +479,30 @@ namespace Dexter.Helpers.Games
 
                 switch (args[1])
                 {
-                    case "O":
-                        if (message.Author.Id != Game.Master && message.Author.Id != PlayerO)
+                    case "R":
+                    case "RED":
+                        if (message.Author.Id != Game.Master && message.Author.Id != PlayerRed)
                         {
-                            await message.Channel.SendMessageAsync("You aren't the master nor controlling the circle token!");
+                            await message.Channel.SendMessageAsync($"You aren't the master nor controlling the {RedChar} token!");
                             return;
                         }
-                        PlayerO = otherPlayer.UserID;
+                        PlayerRed = otherPlayer.UserID;
                         break;
-                    case "X":
-                        if (message.Author.Id != Game.Master && message.Author.Id != PlayerX)
+                    case "Y":
+                    case "YELLOW":
+                        if (message.Author.Id != Game.Master && message.Author.Id != PlayerYellow)
                         {
-                            await message.Channel.SendMessageAsync("You aren't the master nor controlling the cross token!");
+                            await message.Channel.SendMessageAsync($"You aren't the master nor controlling the {YellowChar} token!");
                             return;
                         }
-                        PlayerX = otherPlayer.UserID;
+                        PlayerYellow = otherPlayer.UserID;
                         break;
                     default:
                         await message.Channel.SendMessageAsync($"Unable to parse {args[1]} into a valid token!");
                         return;
                 }
 
-                await message.Channel.SendMessageAsync($"{otherUser.Mention} now controls token {args[1]}!");
+                await message.Channel.SendMessageAsync($"{otherUser.Mention} now controls token {(args[1][0] == 'Y' ? YellowChar : RedChar)}!");
                 return;
             }
 
@@ -449,38 +514,14 @@ namespace Dexter.Helpers.Games
                     return;
                 }
 
-                ulong temp = PlayerO;
-                PlayerO = PlayerX;
-                PlayerX = temp;
+                ulong temp = PlayerRed;
+                PlayerRed = PlayerYellow;
+                PlayerYellow = temp;
                 await message.Channel.SendMessageAsync($"Tokens have been swapped!\n" +
-                    $"{OChar}: <@{PlayerO}>\n" +
-                    $"{XChar}: <@{PlayerX}>");
+                    $"{RedChar}: <@{PlayerRed}>\n" +
+                    $"{YellowChar}: <@{PlayerYellow}>");
                 return;
             }
-        }
-
-        private readonly Dictionary<string, Tuple<int, int>> Positions = new() {
-            { "A1", new Tuple<int, int>(2, 0) },
-            { "A2", new Tuple<int, int>(1, 0) },
-            { "A3", new Tuple<int, int>(0, 0) },
-            { "B1", new Tuple<int, int>(2, 1) },
-            { "B2", new Tuple<int, int>(1, 1) },
-            { "B3", new Tuple<int, int>(0, 1) },
-            { "C1", new Tuple<int, int>(2, 2) },
-            { "C2", new Tuple<int, int>(1, 2) },
-            { "C3", new Tuple<int, int>(0, 2) }
-        };
-
-        /// <summary>
-        /// The initializer for the game class, setting both the instance information and the bot configuration.
-        /// </summary>
-        /// <param name="game">The current instance of the game.</param>
-        /// <param name="botConfiguration">An instance of the bot's configuraiton.</param>
-
-        //Data structure: "term, guess, lives, maxlives, lettersmissed";
-
-        public GameTicTacToe(GameInstance game, BotConfiguration botConfiguration) : base(game, botConfiguration, "---------, 0, 0, 0, O")
-        {
         }
     }
 }

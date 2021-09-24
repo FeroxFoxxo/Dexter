@@ -39,12 +39,12 @@ namespace Dexter.Commands
             if (user == null)
                 user = Context.User;
 
-            IGuildUser guildUser = await DiscordSocketClient.Rest.GetGuildUserAsync(Context.Guild.Id, user.Id, new RequestOptions() { RetryMode = RetryMode.AlwaysRetry });
+            IGuildUser guildUser = await DiscordShardedClient.Rest.GetGuildUserAsync(Context.Guild.Id, user.Id, new RequestOptions() { RetryMode = RetryMode.AlwaysRetry });
             if (guildUser is null)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to fetch Guild User")
-                    .WithDescription($"The ID {(user is null ? "UNKNOWN_USER_ID" : user.Id.ToString())} has returned no valid Guild User from the Discord Rest API. {DiscordSocketClient.CurrentUser.Username} probably lacks access to the given user.")
+                    .WithDescription($"The ID {(user is null ? "UNKNOWN_USER_ID" : user.Id.ToString())} has returned no valid Guild User from the Discord Rest API. {DiscordShardedClient.CurrentUser.Username} probably lacks access to the given user.")
                     .SendEmbed(Context.Channel);
                 return;
             }
@@ -97,7 +97,7 @@ namespace Dexter.Commands
                 return;
             }
 
-            IUser u = await DiscordSocketClient.Rest.GetUserAsync(userId);
+            IUser u = await DiscordShardedClient.Rest.GetUserAsync(userId);
 
             if (u is null)
             {
@@ -172,7 +172,7 @@ namespace Dexter.Commands
             }
             else
             {
-                CreateReactionMenu(menu, Context.Channel);
+                await CreateReactionMenu(Menu, Context.Channel);
             }
         }
 
@@ -193,8 +193,9 @@ namespace Dexter.Commands
                 }
 
                 result[p] = BuildEmbed(EmojiEnum.Sign)
-                    .WithTitle($"{title}")
-                    .WithDescription(content.Length == 0 ? "Nothing to see here, folks." : content.Remove(content.Length - 1, 1).ToString());
+                    .WithTitle($"{title} Page {p + 1}/{result.Length}")
+                    .WithDescription(content.Length == 0 ? "Nothing to see here, folks." : content.Remove(content.Length - 1, 1).ToString())
+                    .WithFooter($"{p + 1}/{result.Length}");
             }
 
             return result;

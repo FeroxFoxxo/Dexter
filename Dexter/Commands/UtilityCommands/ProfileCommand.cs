@@ -172,7 +172,7 @@ namespace Dexter.Commands
             }
             else
             {
-                await CreateReactionMenu(menu, Context.Channel);
+                CreateReactionMenu(menu, Context.Channel);
             }
         }
 

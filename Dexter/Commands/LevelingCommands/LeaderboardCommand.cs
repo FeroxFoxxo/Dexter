@@ -24,7 +24,7 @@ namespace Dexter.Commands
         /// <param name="max">The last page to display</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        [Command("levels")]
+        [Command("levels", RunMode = RunMode.Async)]
         [Alias("leaderboard")]
         [Summary("Usage: `levels (min) (max)`")]
 
@@ -58,7 +58,9 @@ namespace Dexter.Commands
                 lbitems.Add(new(i + 1, textLevels[i], voiceLevels[i], DiscordShardedClient, LevelingConfiguration));
             }
 
-            string file = await LeaderboardPath(lbitems);
+            IUserMessage feedbackMsg = await Context.Channel.SendMessageAsync("Preparing leaderboard items...");
+            string file = await LeaderboardPath(lbitems, feedbackMsg);
+            await feedbackMsg.ModifyAsync(m => m.Content = "Leaderboard constructed successfully!");
             await Context.Channel.SendFileAsync(file);
             File.Delete(file);
         }
@@ -67,8 +69,10 @@ namespace Dexter.Commands
         /// Creates a leaderboard HTML file in the cached images directory and returns the path to it.
         /// </summary>
         /// <param name="levels">The Leaderboard items to include in the leaderboard.</param>
+        /// <param name="progress">The progress message to update every given interval.</param>
+        /// <param name="updateInterval">The update interval between edits of the feedback message.</param>
         /// <returns>A string containing the path to the generated file.</returns>
-        public static async Task<string> LeaderboardPath(IEnumerable<LeaderboardItem> levels)
+        public static async Task<string> LeaderboardPath(IEnumerable<LeaderboardItem> levels, IUserMessage progress = null, int updateInterval = 20)
         {
             const string tempCacheFileName = "leaderboard.html";
 
@@ -82,6 +86,8 @@ namespace Dexter.Commands
             using StreamWriter leaderboardOutput = new(finalPath);
 
             string line = leaderboardTemplate.ReadLine();
+            int count = 0;
+            int max = levels.Count();
             while (line is not null)
             {
                 if (line.Contains("$LIST"))
@@ -89,6 +95,8 @@ namespace Dexter.Commands
                     foreach (LeaderboardItem li in levels)
                     {
                         leaderboardOutput.Write(await li.ToString(levelTemplate));
+                        if (progress is not null && ++count % updateInterval == 0)
+                            await progress.ModifyAsync(m => m.Content = $"Completed {count}/{max} items.");
                     }
                 }
                 else

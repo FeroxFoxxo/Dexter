@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
 using Discord;
 using Discord.Commands;
+using Discord.Rest;
 using static Dexter.Services.LevelingService;
 
 namespace Dexter.Commands
@@ -22,7 +23,9 @@ namespace Dexter.Commands
 
         public async Task ForceUpdateRolesCommand(IGuildUser target)
         {
-            RoleModificationResponse response = await LevelingService.UpdateRolesWithInfo(target, true);
+            RestGuildUser restTarget = await DiscordShardedClient.Rest.GetGuildUserAsync(Context.Guild?.Id ?? BotConfiguration.GuildID, target.Id);
+
+            RoleModificationResponse response = await LevelingService.UpdateRolesWithInfo(restTarget, true);
             await Context.Channel.SendMessageAsync(response.ToString());
         }
 

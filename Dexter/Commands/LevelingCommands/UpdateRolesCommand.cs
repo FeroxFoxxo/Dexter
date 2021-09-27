@@ -4,6 +4,7 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
+using Discord.Rest;
 using static Dexter.Services.LevelingService;
 
 namespace Dexter.Commands
@@ -22,13 +23,13 @@ namespace Dexter.Commands
 
         public async Task UpdateRolesCommand()
         {
-            IGuildUser user = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(Context.User.Id);
+            RestGuildUser user = await DiscordShardedClient.Rest.GetGuildUserAsync(Context.Guild?.Id ?? BotConfiguration.GuildID, Context.User.Id);
 
             if (user is null)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to find user in the server!")
-                    .WithDescription("This may be due to caching, try again later.")
+                    .WithDescription("You must be in the server for this command to work. If you are, this error may be due to caching, try again later.")
                     .SendEmbed(Context.Channel);
                 return;
             }

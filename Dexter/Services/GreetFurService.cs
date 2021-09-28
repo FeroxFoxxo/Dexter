@@ -217,10 +217,6 @@ namespace Dexter.Services
 
                 newActivity = GreetFurDB.GetAllRecentActivity(firstDay, TRACKING_LENGTH);
 
-                foreach (ulong id in ids) {
-                    newActivity.Remove(id);
-                } 
-
                 bool managerToggle = true;
                 for (int i = 1; i < data.Values.Count; i++)
                 {
@@ -231,9 +227,13 @@ namespace Dexter.Services
                         managerToggle = !managerToggle;
                 }
 
+                HashSet<ulong> activityIDs = ids.ToHashSet();
+
                 int rowNumber = data.Values.Count;
                 foreach(KeyValuePair<ulong, List<GreetFurRecord>> kvp in newActivity)
                 {
+                    if (activityIDs.Contains(kvp.Key)) continue;
+
                     GreetFurRecord[] withGaps = new GreetFurRecord[TRACKING_LENGTH];
                     int inData = 0;
                     for (int i = 0; i < TRACKING_LENGTH; i++)
@@ -272,23 +272,63 @@ namespace Dexter.Services
                 BatchGetValuesResponse batchresp = await batchreq.ExecuteAsync();
                 ValueRange[] ranges = batchresp.ValueRanges.ToArray();
 
-                HashSet<ulong> foundIDs = new();
+                List<ulong> foundIDs = new();
                 for (int i = 0; i < ranges[1].Values.Count; i++)
                 {
-                    if (!ulong.TryParse(ranges[1].Values[i][0]?.ToString() ?? "", out ulong id))
+                    if (!ulong.TryParse(ranges[1].Values[i][0]?.ToString() ?? "", out ulong id) || id == 0)
+                    {
+                        foundIDs.Add(0);
                         continue;
-
+                    }
                     foundIDs.Add(id);
 
+                    GreetFurRecord[] records = GreetFurDB.GetRecentActivity(id, firstDay);
+                    double[] yesPerWeek = new double[2];
+                    object[] transformed = new object[2];
+                    int dPerWeek = records.Length / 2;
 
+                    for (int w = 0; w < 2; w++)
+                    {
+                        for (int d = 0; d < dPerWeek; d++)
+                        {
+                            if (records[w * dPerWeek + d].IsYes(GreetFurConfiguration))
+                            {
+                                yesPerWeek[w]++;
+                            }
+                        }
+
+                        if (w < ranges[2].Values[i].Count && ranges[2].Values[i][w] is double n)
+                            yesPerWeek[w] = Math.Max(yesPerWeek[w], n);
+
+                        transformed[w] = yesPerWeek[w];
+                    }
+                    ranges[2].Values[i] = transformed;
                 }
+
+                UpdateRequest weekValuesUpdate = sheetsService.Spreadsheets.Values.Update(ranges[2], GreetFurConfiguration.SpreadSheetID, tbpWeeksA1);
+                weekValuesUpdate.ValueInputOption = UpdateRequest.ValueInputOptionEnum.RAW;
+                await weekValuesUpdate.ExecuteAsync();
 
                 if (options.HasFlag(GreetFurOptions.AddNewRows))
                 {
+                    HashSet<ulong> tbpFoundIDs = foundIDs.ToHashSet();
+
                     if (newActivity is null)
                         newActivity = GreetFurDB.GetAllRecentActivity(firstDay, TRACKING_LENGTH);
 
+                    List<string[]> newRows = new();
+                    int row = ranges[1].Values.Count; 
 
+                    foreach (ulong id in newActivity.Keys)
+                    {
+                        if (tbpFoundIDs.Contains(id)) continue;
+
+                        Dictionary<int, int> activity = new();
+                        // Set values in activity
+                        newRows.Add(await TBPRowFromRecords(id, activity, row++));
+                    }
+
+                    //Run append request
                 }
             }
         }
@@ -332,15 +372,43 @@ namespace Dexter.Services
             int day = GreetFurDB.GetDayForUser(id);
             string[] result = new string[GreetFurConfiguration.FortnightTemplates.Keys.Max() + 1];
 
-            int firstcol = GreetFurConfiguration.Information["Notes"] - records.Length;
-            for (int i = firstcol; i < firstcol + records.Length; i++)
+            int firstCol = GreetFurConfiguration.Information["Notes"] - records.Length;
+            for (int i = firstCol; i < firstCol + records.Length; i++)
             {
-                result[i] = DayFormat(records[i - firstcol], day);
+                result[i] = DayFormat(records[i - firstCol], day);
             }
 
-            foreach(int i in GreetFurConfiguration.FortnightTemplates.Keys)
+            foreach(KeyValuePair<int, string> kvp in GreetFurConfiguration.FortnightTemplates)
             {
-                result[i] = await ResolveFormat(GreetFurConfiguration.FortnightTemplates[i], id, row, managerToggle);
+                result[kvp.Key] = await ResolveFormat(kvp.Value, id, row, managerToggle);
+            }
+
+            return result;
+        }
+
+        const int WEEK_LENGTH = 7;
+        private async Task<string[]> TBPRowFromRecords(ulong userId, Dictionary<int, int> activity, int row)
+        {
+            int firstCol = GreetFurConfiguration.Information["TBPWeekStart"];
+            int length = firstCol + activity.Keys.Max();
+            string[] result = new string[length];
+
+            foreach (KeyValuePair<int, string> kvp in GreetFurConfiguration.TBPTemplate)
+            {
+                result[kvp.Key] = await ResolveFormat(kvp.Value, userId, row, false);
+            }
+
+            int day = GreetFurDB.GetDayForUser(userId);
+            int week = (day - GreetFurConfiguration.FirstTrackingDay) / WEEK_LENGTH + 1;
+
+            for (int wcol = firstCol; wcol < firstCol + week && wcol < result.Length; wcol++)
+            {
+                result[wcol] = "0";
+            }
+
+            foreach(KeyValuePair<int, int> kvp in activity)
+            {
+                result[firstCol + kvp.Key - 1] = kvp.Value.ToString();
             }
 
             return result;

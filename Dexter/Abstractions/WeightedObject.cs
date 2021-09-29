@@ -13,6 +13,7 @@ namespace Dexter.Abstractions
         /// The object held in this instance.
         /// </summary>
         public T obj;
+
         /// <summary>
         /// The weight attached to this object.
         /// </summary>

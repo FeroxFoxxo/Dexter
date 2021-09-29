@@ -24,7 +24,7 @@ namespace Dexter.Commands
         /// <param name="max">The last page to display</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        [Command("levels")]
+        [Command("levels", RunMode = RunMode.Async)]
         [Alias("leaderboard")]
         [Summary("Usage: `levels (min) (max)`")]
 
@@ -55,10 +55,12 @@ namespace Dexter.Commands
             List<LeaderboardItem> lbitems = new();
             for (int i = min - 1; i < max && i < Math.Min(textLevels.Count, voiceLevels.Count); i++)
             {
-                lbitems.Add(new(i + 1, textLevels[i], voiceLevels[i], DiscordSocketClient, LevelingConfiguration));
+                lbitems.Add(new(i + 1, textLevels[i], voiceLevels[i], DiscordShardedClient, LevelingConfiguration));
             }
 
-            string file = LeaderboardPath(lbitems);
+            IUserMessage feedbackMsg = await Context.Channel.SendMessageAsync("Preparing leaderboard items...");
+            string file = await LeaderboardPath(lbitems, feedbackMsg);
+            await feedbackMsg.ModifyAsync(m => m.Content = "Leaderboard constructed successfully!");
             await Context.Channel.SendFileAsync(file);
             File.Delete(file);
         }
@@ -67,8 +69,10 @@ namespace Dexter.Commands
         /// Creates a leaderboard HTML file in the cached images directory and returns the path to it.
         /// </summary>
         /// <param name="levels">The Leaderboard items to include in the leaderboard.</param>
+        /// <param name="progress">The progress message to update every given interval.</param>
+        /// <param name="updateInterval">The update interval between edits of the feedback message.</param>
         /// <returns>A string containing the path to the generated file.</returns>
-        public static string LeaderboardPath(IEnumerable<LeaderboardItem> levels)
+        public static async Task<string> LeaderboardPath(IEnumerable<LeaderboardItem> levels, IUserMessage progress = null, int updateInterval = 20)
         {
             const string tempCacheFileName = "leaderboard.html";
 
@@ -82,13 +86,17 @@ namespace Dexter.Commands
             using StreamWriter leaderboardOutput = new(finalPath);
 
             string line = leaderboardTemplate.ReadLine();
+            int count = 0;
+            int max = levels.Count();
             while (line is not null)
             {
                 if (line.Contains("$LIST"))
                 {
                     foreach (LeaderboardItem li in levels)
                     {
-                        leaderboardOutput.Write(li.ToString(levelTemplate));
+                        leaderboardOutput.Write(await li.ToString(levelTemplate));
+                        if (progress is not null && ++count % updateInterval == 0)
+                            await progress.ModifyAsync(m => m.Content = $"Completed {count}/{max} items.");
                     }
                 }
                 else
@@ -116,7 +124,7 @@ namespace Dexter.Commands
             /// The userlevel corresponding to the user whose rank is <see cref="rank"/> on voice.
             /// </summary>
             public readonly UserLevel voice;
-            private readonly DiscordSocketClient client;
+            private readonly DiscordShardedClient client;
             private readonly LevelingConfiguration config;
 
             /// <summary>
@@ -125,10 +133,10 @@ namespace Dexter.Commands
             /// <param name="rank">The rank the object represents</param>
             /// <param name="text">The UserLevel who this text rank corresponds to.</param>
             /// <param name="voice">The UserLevel who this voice rank corresponds to.</param>
-            /// <param name="client">The standard DiscordSocketClient necessary for user parsing.</param>
+            /// <param name="client">The standard DiscordShardedClient necessary for user parsing.</param>
             /// <param name="config">The standard LevelingConfig necessary for level calculations.</param>
 
-            public LeaderboardItem(int rank, UserLevel text, UserLevel voice, DiscordSocketClient client, LevelingConfiguration config)
+            public LeaderboardItem(int rank, UserLevel text, UserLevel voice, DiscordShardedClient client, LevelingConfiguration config)
             {
                 this.rank = rank;
                 this.text = text;
@@ -137,10 +145,12 @@ namespace Dexter.Commands
                 this.config = config;
             }
 
-            private string ReplaceAll(string template, bool isText)
+            private async Task<string> ReplaceAll(string template, bool isText)
             {
                 UserLevel reference = isText ? text : voice;
                 IUser user = client.GetUser(reference.UserID);
+                if (user is null)
+                    user = await client.Rest.GetUserAsync(reference.UserID);
                 string name;
                 string avatarurl;
                 if (user is not null)
@@ -179,10 +189,10 @@ namespace Dexter.Commands
             /// <param name="template">The HTML template with annotations to change into their corresponding values.</param>
             /// <returns>A fully formed HTML expression which contains the text and hidden voice rank item.</returns>
 
-            public string ToString(string template)
+            public async Task<string> ToString(string template)
             {
-                return $"{ReplaceAll(template, true)}"
-                    + $"{ReplaceAll(template, false)}";
+                return $"{await ReplaceAll(template, true)}"
+                    + $"{await ReplaceAll(template, false)}";
             }
         }
     }

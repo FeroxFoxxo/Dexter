@@ -12,6 +12,8 @@ using Discord.Commands;
 using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;
+using Fergun.Interactive;
+using Fergun.Interactive.Pagination;
 using Newtonsoft.Json;
 
 namespace Dexter.Abstractions
@@ -31,9 +33,9 @@ namespace Dexter.Abstractions
         public ProposalService ProposalService { get; set; }
 
         /// <summary>
-        /// The ReactionMenuService class is used to create a reaction menu for the CreateReactionMenu method.
+        /// The Interactivity class is used to create a reaction menu for the CreateReactionMenu method.
         /// </summary>
-        public ReactionMenuService ReactionMenuService { get; set; }
+        public InteractiveService Interactive { get; set; }
 
         /// <summary>
         /// The TimerService class is used to create a timer for wait until an expiration time has been reached.
@@ -51,9 +53,9 @@ namespace Dexter.Abstractions
         public BotConfiguration BotConfiguration { get; set; }
 
         /// <summary>
-        /// The DiscordSocketClient is used to create the webhook for the webhook on create or get.
+        /// The DiscordShardedClient is used to create the webhook for the webhook on create or get.
         /// </summary>
-        public DiscordSocketClient DiscordSocketClient { get; set; }
+        public DiscordShardedClient DiscordShardedClient { get; set; }
 
         /// <summary>
         /// The Build Embed method is a generic method that simply calls upon the EMBED BUILDER extension method.
@@ -63,7 +65,7 @@ namespace Dexter.Abstractions
 
         public EmbedBuilder BuildEmbed(EmojiEnum Thumbnail)
         {
-            return new EmbedBuilder().BuildEmbed(Thumbnail, BotConfiguration);
+            return new EmbedBuilder().BuildEmbed(Thumbnail, BotConfiguration, EmbedCallingType.Command);
         }
 
         /// <summary>
@@ -106,7 +108,7 @@ namespace Dexter.Abstractions
             if (ChannelID <= 0)
                 return null;
 
-            SocketChannel Channel = DiscordSocketClient.GetChannel(ChannelID);
+            SocketChannel Channel = DiscordShardedClient.GetChannel(ChannelID);
 
             if (Channel is SocketTextChannel TextChannel)
             {
@@ -162,13 +164,26 @@ namespace Dexter.Abstractions
         /// <summary>
         /// The Create Reaction Menu method creates a reaction menu with pages that you can use to navigate the embeds.
         /// </summary>
-        /// <param name="EmbedBuilders">The embeds that you wish to create the reaction menu from.</param>
+        /// <param name="EmbedBuilder">The embeds that you wish to create the reaction menu from.</param>
         /// <param name="Channel">The channel that the reaction menu should be sent to.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task CreateReactionMenu(EmbedBuilder[] EmbedBuilders, ISocketMessageChannel Channel)
+        public void CreateReactionMenu(EmbedBuilder[] EmbedBuilder, ISocketMessageChannel Channel)
         {
-            await ReactionMenuService.CreateReactionMenu(EmbedBuilders, Channel);
+            PageBuilder[] PageBuilderMenu = new PageBuilder[EmbedBuilder.Length];
+
+            for (int i = 0; i < EmbedBuilder.Length; i++)
+                PageBuilderMenu[i] = PageBuilder.FromEmbedBuilder(EmbedBuilder[i]);
+
+            Paginator Paginator = new StaticPaginatorBuilder()
+                .WithPages(PageBuilderMenu)
+                .WithDefaultEmotes()
+                .WithFooter(PaginatorFooter.PageNumber)
+                .WithActionOnCancellation(ActionOnStop.DeleteInput)
+                .WithActionOnTimeout(ActionOnStop.DeleteInput)
+                                    .Build();
+
+            _ = Task.Run(async () => await Interactive.SendPaginatorAsync(Paginator, Channel, TimeSpan.FromMinutes(10)));
         }
 
     }

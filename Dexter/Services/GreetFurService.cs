@@ -50,12 +50,6 @@ namespace Dexter.Services
         public MNGConfiguration MNGConfiguration { get; set; }
 
         /// <summary>
-        /// Provides access to the console to log relevant events and errors.
-        /// </summary>
-
-        public LoggingService LoggingService { get; set; }
-
-        /// <summary>
         /// Manages the Google Sheets section of GreetFur record-keeping.
         /// </summary>
 
@@ -69,7 +63,7 @@ namespace Dexter.Services
 
         public override async void Initialize()
         {
-            DiscordSocketClient.MessageReceived += HandleMessage;
+            DiscordShardedClient.MessageReceived += HandleMessage;
 
             await SetupGoogleSheets();
         }
@@ -87,7 +81,10 @@ namespace Dexter.Services
             if (msg.Author is not IGuildUser user)
                 return;
 
-            if (user.GetPermissionLevel(DiscordSocketClient, BotConfiguration) < PermissionLevel.GreetFur)
+            if (user.GetPermissionLevel(DiscordShardedClient, BotConfiguration) < PermissionLevel.GreetFur)
+                return;
+
+            if (user.IsBot)
                 return;
 
             if (Regex.IsMatch(msg.Content, GreetFurConfiguration.GreetFurMutePattern))
@@ -157,14 +154,18 @@ namespace Dexter.Services
                     GreetFurRecord[] records = GreetFurDB.GetRecentActivity(gfid, firstDay, TRACKING_LENGTH, true);
                     int localDay = GreetFurDB.GetDayForUser(gfid);
 
-                    IUser u = DiscordSocketClient.GetUser(gfid);
+                    IUser u = DiscordShardedClient.GetUser(gfid);
                     if (u is not null)
                         newRow[GreetFurConfiguration.Information["Users"]] = $"{u.Username}#{u.Discriminator}";
 
                     for (int d = 0; d < TRACKING_LENGTH; d++)
                     {
                         bool isReadable = firstDataIndex + d < toUpdate.Values[i].Count;
-                        bool isExempt = isReadable && toUpdate.Values[i][firstDataIndex + d] as string == "Exempt";
+
+                        string ogText = "";
+                        if (isReadable)
+                            ogText = toUpdate.Values[i][firstDataIndex + d] as string;
+                        bool isExempt = ogText == "Exempt";
                         
                         if (options.HasFlag(GreetFurOptions.ReadExemptions))
                         {
@@ -188,9 +189,12 @@ namespace Dexter.Services
                                 records[d].IsExempt = false;
                                 GreetFurDB.SaveChanges();
                             }
-                        }                       
+                        }
 
-                        newRow[firstDataIndex + d] = DayFormat(records[d], localDay);
+                        if (options.HasFlag(GreetFurOptions.Safe) && !string.IsNullOrEmpty(ogText))
+                            newRow[firstDataIndex + d] = ogText;
+                        else 
+                            newRow[firstDataIndex + d] = DayFormat(records[d], localDay);
                     }
                     toUpdate.Values[i] = newRow;
                 } 
@@ -219,12 +223,11 @@ namespace Dexter.Services
                 bool managerToggle = true;
                 for (int i = 1; i < data.Values.Count; i++)
                 {
-                    if (data.Values[i].Count <= GreetFurConfiguration.Information["ManagerList"])
+                    if (data.Values[i].Count <= GreetFurConfiguration.Information["ManagerList"]
+                        || string.IsNullOrEmpty(data.Values[i][GreetFurConfiguration.Information["ManagerList"]]?.ToString()))
                         break;
-                    if (!string.IsNullOrEmpty(data.Values[i][GreetFurConfiguration.Information["ManagerList"]]?.ToString()))
-                    {
+                    else
                         managerToggle = !managerToggle;
-                    }
                 }
 
                 int rowNumber = data.Values.Count;
@@ -278,9 +281,13 @@ namespace Dexter.Services
             /// </summary>
             AddNewRows = 2,
             /// <summary>
+            /// If enabled, the update operation will never overwrite cells that contain information.
+            /// </summary>
+            Safe = 4,
+            /// <summary>
             /// Whether to read exemptions and log them to records while reading the sheet.
             /// </summary>
-            ReadExemptions = 4
+            ReadExemptions = 8
         }
 
         private string[] RowFromRecords(GreetFurRecord[] records, int row, bool managerToggle = false)
@@ -307,8 +314,6 @@ namespace Dexter.Services
         {
             if (r is null)
                 return "";
-
-            if (r.IsExempt) return "Exempt";
 
             if (day < 0)
             {
@@ -346,19 +351,19 @@ namespace Dexter.Services
                         break;
                     case "{User}":
                     {
-                        IUser u = DiscordSocketClient.GetUser(userId);
+                        IUser u = DiscordShardedClient.GetUser(userId);
                         sb.Append(u?.Username ?? "Unknown");
                         break;
                     }
                     case "{Discriminator}":
                     {
-                        IUser u = DiscordSocketClient.GetUser(userId);
+                        IUser u = DiscordShardedClient.GetUser(userId);
                         sb.Append(u?.Discriminator ?? "????");
                         break;
                     }
                     case "{Tag}":
                     {
-                        IUser u = DiscordSocketClient.GetUser(userId);
+                        IUser u = DiscordShardedClient.GetUser(userId);
                         sb.Append((u?.Username ?? "Unknown") + "#" + (u?.Discriminator ?? "????"));
                         break;
                     }
@@ -395,8 +400,10 @@ namespace Dexter.Services
         {
             if (!File.Exists(GreetFurConfiguration.CredentialFile))
             {
-                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, GetType().Name,
-                    $"GreetFur SpreadSheet credential file {GreetFurConfiguration.CredentialFile} does not exist!"));
+                await Debug.LogMessageAsync(
+                    $"GreetFur SpreadSheet credential file {GreetFurConfiguration.CredentialFile} does not exist!",
+                    LogSeverity.Error
+                );
                 return;
             }
 

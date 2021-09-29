@@ -40,8 +40,7 @@ namespace Dexter.Commands
                         "Looks like we ran into an error! " +
                         "Your private channel name must be between 1-100 characters long. " +
                         $"Your current channel name is {vcName.Length} characters long.")
-                    .WithCurrentTimestamp()
-                    .WithFooter("USFurries Level Rewards")
+
                     .SendEmbed(Context.Channel);
             }
             else if (Context.Guild.Channels.Where(channel => channel.Name == vcName).FirstOrDefault() != null)
@@ -52,8 +51,7 @@ namespace Dexter.Commands
                         "Looks like we ran into an error! " +
                         "Please ensure your channel name does not equal the name of another channel, " +
                         "as this leads to confusion for other members. Please make sure this is different!!")
-                    .WithCurrentTimestamp()
-                    .WithFooter("USFurries Level Rewards")
+
                     .SendEmbed(Context.Channel);
             }
             else if (vcName == UtilityConfiguration.WaitingVCName)
@@ -64,8 +62,7 @@ namespace Dexter.Commands
                         "Looks like we ran into an error! " +
                         "Please ensure your channel name does not equal the name of another channel, " +
                         "as this leads to confusion for other members. Please make sure this is different!!")
-                    .WithCurrentTimestamp()
-                    .WithFooter("USFurries Level Rewards")
+
                     .SendEmbed(Context.Channel);
             }
             else if (user.VoiceChannel == null)
@@ -74,8 +71,7 @@ namespace Dexter.Commands
                     .WithTitle("You're not in a voice channel!")
                     .WithDescription(
                         "Haiya! To be able to create a voice channel, you have to be in one first! This is so Dexter can drag you in. Please join a VC and then run this command!")
-                    .WithCurrentTimestamp()
-                    .WithFooter("USFurries Level Rewards")
+
                     .SendEmbed(Context.Channel);
             }
             else
@@ -88,6 +84,7 @@ namespace Dexter.Commands
                 if (waitingChannel is null)
                 {
                     IRole vcRequiredRole = Context.Guild.GetRole(BotConfiguration.UnifursalRoleID);
+                    IRole greetFurRole = Context.Guild.GetRole(BotConfiguration.GreetFurRoleID);
 
                     waitingChannel = await Context.Guild.CreateVoiceChannelAsync(UtilityConfiguration.WaitingVCName);
 
@@ -98,7 +95,8 @@ namespace Dexter.Commands
                     await waitingChannel.AddPermissionOverwriteAsync(awooRole, OverwritePermissions.DenyAll(waitingChannel).Modify(viewChannel: PermValue.Allow, connect: PermValue.Allow));
 
                     await waitingChannel.AddPermissionOverwriteAsync(vcRequiredRole, OverwritePermissions.DenyAll(waitingChannel).Modify(viewChannel: PermValue.Allow, connect: PermValue.Allow, moveMembers: PermValue.Allow));
-                    
+                    await waitingChannel.AddPermissionOverwriteAsync(greetFurRole, OverwritePermissions.DenyAll(waitingChannel).Modify(viewChannel: PermValue.Allow, connect: PermValue.Allow, moveMembers: PermValue.Allow));
+
                     await waitingChannel.AddPermissionOverwriteAsync(staffRole, OverwritePermissions.InheritAll.Modify(manageChannel: PermValue.Allow, viewChannel: PermValue.Allow, connect: PermValue.Allow, speak: PermValue.Allow, muteMembers: PermValue.Allow, deafenMembers: PermValue.Allow, moveMembers: PermValue.Allow, useVoiceActivation: PermValue.Allow));
                 }
 
@@ -124,8 +122,7 @@ namespace Dexter.Commands
                     .WithDescription("Haiya! Your private voice channel has sucessfully been created. " +
                         "You should have full permission to edit it, move members and much more! " +
                         "Have fun~!")
-                    .WithCurrentTimestamp()
-                    .WithFooter("USFurries Level Rewards")
+
                     .SendEmbed(Context.Channel);
             }
         }

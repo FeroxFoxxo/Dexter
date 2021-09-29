@@ -33,12 +33,6 @@ namespace Dexter.Services
         public ProfilingConfiguration ProfilingConfiguration { get; set; }
 
         /// <summary>
-        /// A reference to the global logging service used to log messages from both DiscordSocketClient and to the console for debugging purposes.
-        /// </summary>
-
-        public LoggingService LoggingService { get; set; }
-
-        /// <summary>
         /// The Random instance is used to pick a random file from the given directory
         /// </summary>
 
@@ -74,12 +68,13 @@ namespace Dexter.Services
 
             try
             {
-                await DiscordSocketClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP()));
+                await DiscordShardedClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP()));
             }
             catch (HttpException)
             {
-                await LoggingService.LogMessageAsync(
-                    new LogMessage(LogSeverity.Warning, GetType().Name, "Unable to change the bot's profile picture due to ratelimiting!")
+                await Debug.LogMessageAsync(
+                    "Unable to change the bot's profile picture due to ratelimiting!",
+                    LogSeverity.Warning
                 );
             }
 
@@ -113,15 +108,14 @@ namespace Dexter.Services
 
                 Stopwatch.Stop();
 
-                await (DiscordSocketClient.GetChannel(ProfilingConfiguration.DatabaseBackupChannel) as ITextChannel)
+                await (DiscordShardedClient.GetChannel(ProfilingConfiguration.DatabaseBackupChannel) as ITextChannel)
                     .SendFileAsync(BackupZip, embed:
                         BuildEmbed(EmojiEnum.Love)
                             .WithTitle("Backup Successfully Concluded.")
                             .WithDescription($"Haiya! The backup for {DateTime.UtcNow.ToShortDateString()} has been built " +
                                 $"with a file size of {string.Format("{0:0.##} {1}", FileLength, Sizes[Order])}.")
-                            .WithCurrentTimestamp()
                             .WithFooter($"Profiling took {Stopwatch.Elapsed.Humanize()}")
-                            .Build()
+                                                .Build()
                     );
             }
         }

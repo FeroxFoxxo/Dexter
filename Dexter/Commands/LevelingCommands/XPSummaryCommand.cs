@@ -86,7 +86,7 @@ namespace Dexter.Commands
                         List<string> roleNames = new();
                         foreach (KeyValuePair<int, ulong> levelRole in LevelingConfiguration.Levels)
                         {
-                            SocketRole r = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(levelRole.Value);
+                            SocketRole r = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetRole(levelRole.Value);
                             if (r.Name.ToLower().Replace(" ", "") == value.ToLower()
                                 || r.Name.ToLower().Replace(' ', '_') == value.ToLower())
                             {
@@ -140,7 +140,7 @@ namespace Dexter.Commands
                 int maxLevel = 0;
                 foreach (KeyValuePair<int, ulong> levelRole in LevelingConfiguration.Levels)
                 {
-                    SocketRole r = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(levelRole.Value);
+                    SocketRole r = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetRole(levelRole.Value);
                     if (levelRole.Key > totalLevel)
                     {
                         targetRankLevel = levelRole.Key;
@@ -154,7 +154,7 @@ namespace Dexter.Commands
                 if (!found)
                 {
                     targetRankLevel = maxLevel;
-                    targetRankName = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(LevelingConfiguration.Levels[maxLevel]).Name;
+                    targetRankName = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetRole(LevelingConfiguration.Levels[maxLevel]).Name;
                 }
             }
             long targetrankxp = LevelingConfiguration.GetXPForLevel(targetRankLevel);

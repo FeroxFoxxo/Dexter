@@ -12,9 +12,10 @@
   "ColorListRowHeight": 125,
   "ColorListDisplayByRows": false,
   "ColorListFontSize": 60,
-  "ColorChangeRoles": [
-    853691823197257778
-  ],
+  "ColorChangeRoles": {
+    "888985313572184084": 1,
+    "853691823197257778": 2
+  },
   "PrivateCategoryID": 871997282533380126,
   "WaitingVCName": "✨ Waiting Room ✨"
 }

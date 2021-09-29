@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Abstractions;
 using Dexter.Configurations;
@@ -8,6 +7,10 @@ using Discord.WebSocket;
 
 namespace Dexter.Services
 {
+    /// <summary>
+    /// The RoleManagementService adds the given roles to the user if they join the server.
+    /// </summary>
+
     public class RoleManagementService : Service
     {
         /// <summary>
@@ -20,29 +23,21 @@ namespace Dexter.Services
         /// </summary>
         public override void Initialize()
         {
-            DiscordSocketClient.GuildMemberUpdated += CheckUserColorRoles;
+            DiscordShardedClient.GuildMemberUpdated += CheckUserColorRoles;
         }
 
         private async Task CheckUserColorRoles(Cacheable<SocketGuildUser, ulong> before, SocketGuildUser after)
         {
             if (before.Value.Roles == after.Roles) return;
 
-            bool isAfterPatreon = false;
-
-            foreach (ulong patreonRoleID in UtilityConfiguration.ColorChangeRoles)
-            {
-                if (after.Roles.Any(r => r.Id == patreonRoleID))
-                {
-                    isAfterPatreon = true;
-                }
-            }
-
-            if (isAfterPatreon) return;
+            int tierAfter = Commands.UtilityCommands.GetRoleChangePerms(after, UtilityConfiguration);
 
             List<SocketRole> toRemove = new();
             foreach (SocketRole role in after.Roles)
             {
-                if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix))
+                int roleTier = Commands.UtilityCommands.GetColorRoleTier(role.Id, UtilityConfiguration);
+                if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix)
+                    && roleTier < tierAfter)
                 {
                     toRemove.Add(role);
                 }

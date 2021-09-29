@@ -44,7 +44,7 @@ namespace Dexter.Commands
         {
             ulong UserID = Convert.ToUInt64(Parameters["User"]);
 
-            IGuildUser User = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(UserID);
+            IGuildUser User = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(UserID);
 
             if (User == null)
                 return;

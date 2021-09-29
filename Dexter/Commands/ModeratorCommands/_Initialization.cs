@@ -39,10 +39,10 @@ namespace Dexter.Commands
         public RelayDB RelayDB { get; set; }
 
         /// <summary>
-        /// The Client is an instance of the DiscordSocketClient, used to get a user on callback.
+        /// The Client is an instance of the DiscordShardedClient, used to get a user on callback.
         /// </summary>
 
-        public DiscordSocketClient Client { get; set; }
+        public DiscordShardedClient Client { get; set; }
 
         /// <summary>
         /// The ChannelCooldownConfiguration stores the length of time a commission cooldown lasts for.

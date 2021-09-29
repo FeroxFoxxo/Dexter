@@ -23,19 +23,13 @@ namespace Dexter.Services
         public UtilityConfiguration UtilityConfiguration { get; set; }
 
         /// <summary>
-        /// Logs to the console if the voice channel does not exist.
-        /// </summary>
-        
-        public LoggingService LoggingService { get; set; }
-
-        /// <summary>
         /// The Initialize void hooks the Client.Ready event to the CheckRemoveVCs method.
         /// </summary>
 
         public override void Initialize()
         {
-            DiscordSocketClient.Ready += CheckRemoveVCs;
-            DiscordSocketClient.UserVoiceStateUpdated += async (_, oldVoiceChannel, newVoiceChannel) => {
+            DiscordShardedClient.ShardReady += (DiscordSocketClient _) => CheckRemoveVCs();
+            DiscordShardedClient.UserVoiceStateUpdated += async (_, oldVoiceChannel, newVoiceChannel) => {
                 if (oldVoiceChannel.VoiceChannel is not null
                 && oldVoiceChannel.VoiceChannel.CategoryId == UtilityConfiguration.PrivateCategoryID)
                     await CheckRemoveVCs();
@@ -49,9 +43,7 @@ namespace Dexter.Services
 
         public async Task CheckRemoveVCs()
         {
-            SocketCategoryChannel? categoryChannel = DiscordSocketClient.GetChannel(UtilityConfiguration.PrivateCategoryID) as SocketCategoryChannel;
-
-            if (categoryChannel != null)
+            if (DiscordShardedClient.GetChannel(UtilityConfiguration.PrivateCategoryID) is SocketCategoryChannel categoryChannel)
             {
                 IEnumerable<SocketVoiceChannel> voiceChannels = categoryChannel.Guild.VoiceChannels.Where((SocketVoiceChannel check) => check.CategoryId == UtilityConfiguration.PrivateCategoryID && check.Name != UtilityConfiguration.WaitingVCName);
 
@@ -79,7 +71,10 @@ namespace Dexter.Services
             }
             else
             {
-                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Private VC Service", "Help! CategoryChannel is not set in the config files. Aborting!!"));
+                await Debug.LogMessageAsync(
+                    "Help! CategoryChannel is not set in the config files. Aborting!!",
+                    LogSeverity.Error
+                );
             }
 
         }

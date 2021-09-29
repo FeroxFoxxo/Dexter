@@ -25,43 +25,90 @@ namespace Dexter.Commands
         /// Sends information concerning the profile of a target user.
         /// This information contains: Username, nickname, account creation and latest join date, and status.
         /// </summary>
-        /// <param name="User">The target user</param>
+        /// <param name="user">The target user</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("profile", RunMode = RunMode.Async)]
         [Summary("Gets the profile of the user mentioned or yours.")]
         [Alias("userinfo")]
+        [Priority(2)]
         [BotChannel]
 
-        public async Task ProfileCommand([Optional] IUser User)
+        public async Task ProfileCommand([Optional] IUser user)
         {
-            if (User == null)
-                User = Context.User;
+            if (user == null)
+                user = Context.User;
 
-            IGuildUser GuildUser = await DiscordSocketClient.Rest.GetGuildUserAsync(Context.Guild.Id, User.Id);
-            DateTimeOffset Joined = UserRecordsService.GetUserJoin(GuildUser);
+            IGuildUser guildUser = await DiscordShardedClient.Rest.GetGuildUserAsync(Context.Guild.Id, user.Id, new RequestOptions() { RetryMode = RetryMode.AlwaysRetry });
+            if (guildUser is null)
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Unable to fetch Guild User")
+                    .WithDescription($"The ID {(user is null ? "UNKNOWN_USER_ID" : user.Id.ToString())} has returned no valid Guild User from the Discord Rest API. {DiscordShardedClient.CurrentUser.Username} probably lacks access to the given user or the user is not in the server.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+            DateTimeOffset joined = UserRecordsService.GetUserJoin(guildUser);
 
-            UserProfile Profile = ProfilesDB.Profiles.Find(User.Id);
+            UserProfile profile = ProfilesDB.Profiles.Find(user.Id);
 
-            string[] LastNicknames = GetLastNameRecords(UserRecordsService.GetNameRecords(User, NameType.Nickname), 5);
-            string[] LastUsernames = GetLastNameRecords(UserRecordsService.GetNameRecords(User, NameType.Username), 5);
+            string[] lastNicknames = GetLastNameRecords(UserRecordsService.GetNameRecords(user, NameType.Nickname), 5);
+            string[] lastUsernames = GetLastNameRecords(UserRecordsService.GetNameRecords(user, NameType.Username), 5);
 
-            SocketRole RoleInst = Context.Guild.Roles.Where(Role => Role.Position == Context.Guild.GetUser(User.Id).Hierarchy).FirstOrDefault();
+            SocketRole roleInst = Context.Guild.Roles.Where(r => r.Position == Context.Guild.GetUser(user.Id).Hierarchy).FirstOrDefault();
 
-            string Role = RoleInst != null ? RoleInst.Name : "";
+            string role = roleInst != null ? roleInst.Name : "";
 
             await BuildEmbed(EmojiEnum.Unknown)
-                .WithTitle($"User Profile For {GuildUser.Username}#{GuildUser.Discriminator}")
-                .WithThumbnailUrl(GuildUser.GetTrueAvatarUrl())
-                .AddField("Username", GuildUser.GetUserInformation(), true)
-                .AddField(!string.IsNullOrEmpty(GuildUser.Nickname), "Nickname", GuildUser.Nickname, true)
-                .AddField("Created", $"{GuildUser.CreatedAt:MM/dd/yyyy HH:mm:ss} ({(DateTime.Now - GuildUser.CreatedAt.DateTime).Humanize(2, maxUnit: TimeUnit.Year)} ago)")
-                .AddField(Joined != default, "Joined", $"{Joined:MM/dd/yyyy HH:mm:ss} ({DateTimeOffset.Now.Subtract(Joined).Humanize(2, maxUnit: TimeUnit.Year)} ago)")
-                .AddField(Profile != null && Profile.BorkdayTime != default, "Last Birthday", new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Profile != null ? Profile.BorkdayTime : 0).ToLongDateString())
-                .AddField(!string.IsNullOrEmpty(Role), "Top Role", Role)
-                .AddField(LastNicknames.Length > 1, $"Last {LastNicknames.Length} Nicknames:", string.Join(", ", LastNicknames))
-                .AddField(LastUsernames.Length > 1, $"Last {LastUsernames.Length} Usernames:", string.Join(", ", LastUsernames))
+                .WithTitle($"User Profile For {guildUser.Username}#{guildUser.Discriminator}")
+                .WithThumbnailUrl(guildUser.GetTrueAvatarUrl())
+                .AddField("Username", guildUser.GetUserInformation(), true)
+                .AddField(!string.IsNullOrEmpty(guildUser.Nickname), "Nickname", guildUser.Nickname, true)
+                .AddField("Created", $"{guildUser.CreatedAt:MM/dd/yyyy HH:mm:ss} ({(DateTime.Now - guildUser.CreatedAt.DateTime).Humanize(2, maxUnit: TimeUnit.Year)} ago)")
+                .AddField(joined != default, "Joined", $"{joined:MM/dd/yyyy HH:mm:ss} ({DateTimeOffset.Now.Subtract(joined).Humanize(2, maxUnit: TimeUnit.Year)} ago)")
+                .AddField(profile != null && profile.BorkdayTime != default, "Last Birthday", new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(profile != null ? profile.BorkdayTime : 0).ToLongDateString())
+                .AddField(!string.IsNullOrEmpty(role), "Top Role", role)
+                .AddField(lastNicknames.Length > 1, $"Last {lastNicknames.Length} Nicknames:", string.Join(", ", lastNicknames))
+                .AddField(lastUsernames.Length > 1, $"Last {lastUsernames.Length} Usernames:", string.Join(", ", lastUsernames))
                 .SendEmbed(Context.Channel);
+        }
+
+        /// <summary>
+        /// Sends information concerning the profile of a target user.
+        /// This information contains: Username, nickname, account creation and latest join date, and status.
+        /// </summary>
+        /// <param name="userId">The target user's ID.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
+        [Command("profile", RunMode = RunMode.Async)]
+        [Summary("Gets the profile of the user mentioned by ID.")]
+        [Alias("userinfo")]
+        [Priority(1)]
+        [BotChannel]
+
+        public async Task ProfileCommand(ulong userId)
+        {
+            if (userId == 0)
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Invalid ID")
+                    .WithDescription("The provided ID cannot be 0.")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+
+            IUser u = await DiscordShardedClient.Rest.GetUserAsync(userId);
+
+            if (u is null)
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("User not found")
+                    .WithDescription($"No User can be found with ID {userId}")
+                    .SendEmbed(Context.Channel);
+                return;
+            }
+
+            await ProfileCommand(u);
         }
 
         private static string[] GetLastNameRecords(NameRecord[] FullArray, int MaxCount)
@@ -95,71 +142,71 @@ namespace Dexter.Commands
         }
 
         /// <summary>
-        /// Gets a list of usernames given a <paramref name="User"/>.
+        /// Gets a list of usernames given a <paramref name="user"/>.
         /// </summary>
-        /// <param name="User">The user whose usernames are to be queried.</param>
+        /// <param name="user">The user whose usernames are to be queried.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         [Command("usernames")]
         [Summary("gets the usernames a user has had over time.")]
         [BotChannel]
 
-        public async Task UsernamesCommand([Optional] IUser User)
+        public async Task UsernamesCommand([Optional] IUser user)
         {
-            await RunNamesCommands(User, NameType.Username);
+            await RunNamesCommands(user, NameType.Username);
         }
 
-        private async Task RunNamesCommands(IUser User, NameType NameType)
+        private async Task RunNamesCommands(IUser user, NameType nameType)
         {
-            if (User == null)
-                User = Context.User;
+            if (user == null)
+                user = Context.User;
 
-            List<NameRecord> Names = UserRecordsService.GetNameRecords(User, NameType).ToList();
-            Names.Sort((a, b) => b.SetTime.CompareTo(a.SetTime));
+            List<NameRecord> names = UserRecordsService.GetNameRecords(user, nameType).ToList();
+            names.Sort((a, b) => b.SetTime.CompareTo(a.SetTime));
 
-            EmbedBuilder[] Menu = BuildNicknameEmbeds(Names.ToArray(), $"{NameType} Record for User {User.Username}#{User.Discriminator}");
+            EmbedBuilder[] menu = BuildNicknameEmbeds(names.ToArray(), $"{nameType} Record for User {user.Username}#{user.Discriminator}");
 
-            if (Menu.Length == 1)
+            if (menu.Length == 1)
             {
-                await Menu[0].SendEmbed(Context.Channel);
+                await menu[0].SendEmbed(Context.Channel);
             }
             else
             {
-                await CreateReactionMenu(Menu, Context.Channel);
+                CreateReactionMenu(menu, Context.Channel);
             }
         }
 
         private const int MaxRowsPerEmbed = 16;
 
-        private EmbedBuilder[] BuildNicknameEmbeds(NameRecord[] Names, string Title = "Names:")
+        private EmbedBuilder[] BuildNicknameEmbeds(NameRecord[] names, string title = "Names:")
         {
-            int Count = Names.Length;
-            EmbedBuilder[] Result = new EmbedBuilder[(Count - 1) / MaxRowsPerEmbed + 1];
+            int count = names.Length;
+            EmbedBuilder[] result = new EmbedBuilder[(count - 1) / MaxRowsPerEmbed + 1];
 
-            for (int p = 0; p < Result.Length; p++)
+            for (int p = 0; p < result.Length; p++)
             {
-                StringBuilder Content = new();
+                StringBuilder content = new();
 
-                foreach (NameRecord n in Names[(p * MaxRowsPerEmbed)..((p + 1) * MaxRowsPerEmbed > Count ? Count : (p + 1) * MaxRowsPerEmbed)])
+                foreach (NameRecord n in names[(p * MaxRowsPerEmbed)..((p + 1) * MaxRowsPerEmbed > count ? count : (p + 1) * MaxRowsPerEmbed)])
                 {
-                    Content.Append(n.Expression() + "\n");
+                    content.Append(n.Expression() + "\n");
                 }
 
-                Result[p] = BuildEmbed(EmojiEnum.Sign)
-                    .WithTitle($"{Title} Page {p + 1}/{Result.Length}")
-                    .WithDescription(Content.Length == 0 ? "Nothing to see here, folks." : Content.Remove(Content.Length - 1, 1).ToString())
-                    .WithFooter($"{p + 1}/{Result.Length}");
+                result[p] = BuildEmbed(EmojiEnum.Sign)
+                    .WithTitle($"{title} Page {p + 1}/{result.Length}")
+                    .WithDescription(content.Length == 0 ? "Nothing to see here, folks." : content.Remove(content.Length - 1, 1).ToString())
+                    .WithFooter($"{p + 1}/{result.Length}");
             }
 
-            return Result;
+            return result;
         }
 
         /// <summary>
         /// Removes Names from the database given a set of arguments to match for.
         /// </summary>
-        /// <param name="User">The User to match for, only names whose UserID match this user's will be removed.</param>
-        /// <param name="NameType">Whether to remove USERNAMEs or NICKNAMEs.</param>
-        /// <param name="Arguments">Optionally include parsing mode (reg or lit) plus the expression to look for in each specific name.</param>
+        /// <param name="user">The User to match for, only names whose UserID match this user's will be removed.</param>
+        /// <param name="nameType">Whether to remove USERNAMEs or NICKNAMEs.</param>
+        /// <param name="arguments">Optionally include parsing mode (reg or lit) plus the expression to look for in each specific name.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
         [Command("clearnames")]
@@ -172,47 +219,47 @@ namespace Dexter.Commands
         [BotChannel]
         [RequireModerator]
 
-        public async Task ClearNamesCommand(IUser User, string NameType, [Remainder] string Arguments)
+        public async Task ClearNamesCommand(IUser user, string nameType, [Remainder] string arguments)
         {
-            NameType EnumNameType;
+            NameType enumNameType;
 
-            switch (NameType.ToLower())
+            switch (nameType.ToLower())
             {
                 case "nick":
                 case "nickname":
-                    EnumNameType = Databases.UserProfiles.NameType.Nickname;
+                    enumNameType = Databases.UserProfiles.NameType.Nickname;
                     break;
                 case "user":
                 case "username":
-                    EnumNameType = Databases.UserProfiles.NameType.Username;
+                    enumNameType = Databases.UserProfiles.NameType.Username;
                     break;
                 default:
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Unable to parse Name Type argument!")
-                        .WithDescription($"Couldn't parse expression \"{NameType}\", make sure you use either NICK or USER, optionally followed by NAME")
+                        .WithDescription($"Couldn't parse expression \"{nameType}\", make sure you use either NICK or USER, optionally followed by NAME")
                         .SendEmbed(Context.Channel);
                     return;
             }
 
-            bool IsRegex = false;
-            string Term = Arguments.Split(" ").FirstOrDefault().ToLower();
-            string Name;
+            bool isRegex = false;
+            string term = arguments.Split(" ").FirstOrDefault().ToLower();
+            string name;
 
-            switch (Term)
+            switch (term)
             {
                 case "reg":
-                    IsRegex = true;
-                    Name = Arguments[Term.Length..].Trim();
+                    isRegex = true;
+                    name = arguments[term.Length..].Trim();
                     break;
                 case "lit":
-                    Name = Arguments[Term.Length..].Trim();
+                    name = arguments[term.Length..].Trim();
                     break;
                 default:
-                    Name = Arguments;
+                    name = arguments;
                     break;
             }
 
-            if (string.IsNullOrEmpty(Name))
+            if (string.IsNullOrEmpty(name))
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("You must provide a name!")
@@ -221,24 +268,24 @@ namespace Dexter.Commands
                 return;
             }
 
-            List<NameRecord> Removed = UserRecordsService.RemoveNames(User, EnumNameType, Name, IsRegex);
+            List<NameRecord> removed = UserRecordsService.RemoveNames(user, enumNameType, name, isRegex);
 
-            if (Removed.Count == 0)
+            if (removed.Count == 0)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("No names found following your query.")
-                    .WithDescription($"I wasn't able to find any name \"{Name}\" for this user! Make sure what you typed is correctly capitalized.")
+                    .WithDescription($"I wasn't able to find any name \"{name}\" for this user! Make sure what you typed is correctly capitalized.")
                     .SendEmbed(Context.Channel);
                 return;
             }
             else
             {
-                Removed.Sort((a, b) => a.Name.CompareTo(b.Name));
+                removed.Sort((a, b) => a.Name.CompareTo(b.Name));
 
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Names successfully deleted!")
-                    .WithDescription($"This user had {Removed.Count} name{(Removed.Count != 1 ? "s" : "")} following this pattern:\n" +
-                        $"{LanguageHelper.TruncateTo(string.Join(", ", Removed).ToString(), 2000)}")
+                    .WithDescription($"This user had {removed.Count} name{(removed.Count != 1 ? "s" : "")} following this pattern:\n" +
+                        $"{LanguageHelper.TruncateTo(string.Join(", ", removed).ToString(), 2000)}")
                     .SendEmbed(Context.Channel);
                 return;
             }

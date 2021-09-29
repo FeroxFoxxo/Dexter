@@ -569,7 +569,7 @@ namespace Dexter.Helpers
         /// <param name="inputList">The list of objects to enumerate.</param>
         /// <returns>A string with the enumeration expressed in a human-readable form.</returns>
 
-        public static string Enumerate(IEnumerable<object> inputList)
+        public static string Enumerate(this IEnumerable<object> inputList)
         {
             switch(inputList.Count())
             {
@@ -715,7 +715,7 @@ namespace Dexter.Helpers
 
             if (!string.IsNullOrEmpty(TimeZoneSegment))
             {
-                if (TimeZoneSegment.Contains("+") || TimeZoneSegment.Contains("-") || LanguageConfiguration.TimeZones.ContainsKey(TimeZoneSegment))
+                if (TimeZoneSegment.Contains('+') || TimeZoneSegment.Contains('-') || LanguageConfiguration.TimeZones.ContainsKey(TimeZoneSegment))
                 {
                     if (TimeZoneData.TryParse(TimeZoneSegment, LanguageConfiguration, out TimeZone))
                     {
@@ -1210,7 +1210,7 @@ namespace Dexter.Helpers
         /// <summary>
         /// Gets the appropriate TimeSpan from a given TimeUnit.
         /// </summary>
-        public static Dictionary<TimeUnit, TimeSpan> UnitToTime = new()
+        private static readonly Dictionary<TimeUnit, TimeSpan> UnitToTime = new()
         {
             { TimeUnit.Millisecond, TimeSpan.FromMilliseconds(1)},
             { TimeUnit.Second, TimeSpan.FromSeconds(1)},

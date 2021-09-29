@@ -37,7 +37,7 @@ namespace Dexter.Commands
         {
             CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
-            if (Context.User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) < PermissionLevel.Moderator && Command.User != Context.User.Id)
+            if (Context.User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) < PermissionLevel.Moderator && Command.User != Context.User.Id)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Insufficient Permissions")

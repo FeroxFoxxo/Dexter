@@ -38,7 +38,7 @@ namespace Dexter.Commands
 
         public async Task RankCommand(ulong userID)
         {
-            IUser user = DiscordSocketClient.GetUser(userID);
+            IUser user = DiscordShardedClient.GetUser(userID);
 
             if (user is null)
             {
@@ -222,7 +222,7 @@ namespace Dexter.Commands
             using Font fontDefault = new(fontfamily, 40, GraphicsUnit.Pixel);
             using Font fontMini = new(fontfamily, 22, GraphicsUnit.Pixel);
 
-            IUser user = DiscordSocketClient.GetUser(ul.UserID);
+            IUser user = DiscordShardedClient.GetUser(ul.UserID);
             if (user is null)
                 throw new NullReferenceException($"Unable to obtain User from UserLevel object with ID {ul.UserID}.");
 

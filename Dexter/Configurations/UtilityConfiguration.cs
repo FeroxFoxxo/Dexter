@@ -72,16 +72,16 @@ namespace Dexter.Configurations
         public int ColorListFontSize { get; set; }
 
         /// <summary>
-        /// The set of role IDs for roles which grant permission to change your color role.
+        /// The set of role IDs for roles which grant a given permission level to change roles. "0" means no perms (default), "1" means only ranked color roles. "2" means all roles.
         /// </summary>
 
-        public ulong[] ColorChangeRoles { get; set; }
+        public Dictionary<ulong, int> ColorChangeRoles { get; set; }
 
         /// <summary>
         /// The snowflake ID for the private voice chat category.
         /// </summary>
         
-        public ulong PrivateCategoryID { get; set;  }
+        public ulong PrivateCategoryID { get; set; }
 
 
         /// <summary>

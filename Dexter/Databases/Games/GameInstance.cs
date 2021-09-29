@@ -1,4 +1,6 @@
-using Dexter.Helpers.Games;
+using Dexter.Abstractions;
+using Dexter.Configurations;
+using Dexter.Games;
 using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.Games
@@ -86,25 +88,26 @@ namespace Dexter.Databases.Games
         }
 
         /// <summary>
-        /// Any additional game-specific data managed at a per-<see cref="IGameTemplate"/> level.
+        /// Any additional game-specific data managed at a per-<see cref="GameTemplate"/> level.
         /// </summary>
 
         public string Data { get; set; }
 
-        /// <summary>
-        /// Converts the generic GameInstance into the <see cref="IGameTemplate"/> indicated by <see cref="Type"/>
-        /// </summary>
-        /// <returns>The <see cref="IGameTemplate"/> corresponding to this GameInstance, or <see langword="null"/> if the gameType is unknown.</returns>
 
-        public IGameTemplate ToGameProper()
+        /// <summary>
+        /// Converts the generic GameInstance into the <see cref="GameTemplate"/> indicated by <see cref="Type"/>
+        /// </summary>
+        /// <returns>The <see cref="GameTemplate"/> corresponding to this GameInstance, or <see langword="null"/> if the gameType is unknown.</returns>
+
+        public GameTemplate ToGameProper(BotConfiguration botConfiguration)
         {
             return (Type) switch
             {
-                GameType.Hangman => new GameHangman(this),
-                GameType.TicTacToe => new GameTicTacToe(this),
-                GameType.Connect4 => new GameConnect4(this),
-                GameType.Minesweeper => new GameMinesweeper(this),
-                GameType.Chess => new GameChess(this),
+                GameType.Hangman => new GameHangman(this, botConfiguration),
+                GameType.TicTacToe => new GameTicTacToe(this, botConfiguration),
+                GameType.Connect4 => new GameConnect4(this, botConfiguration),
+                GameType.Minesweeper => new GameMinesweeper(this, botConfiguration),
+                GameType.Chess => new GameChess(this, botConfiguration),
                 _ => null
             };
         }

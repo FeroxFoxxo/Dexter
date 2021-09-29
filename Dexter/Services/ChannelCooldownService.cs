@@ -37,7 +37,7 @@ namespace Dexter.Services
 
         public override void Initialize()
         {
-            DiscordSocketClient.MessageReceived += MessageReceived;
+            DiscordShardedClient.MessageReceived += MessageReceived;
         }
 
         /// <summary>
@@ -79,7 +79,6 @@ namespace Dexter.Services
                                 $"Please take a lookie over the channel pins regarding the regulations of this channel if you haven't already <3")
                             .AddField("Last Message Sent:", $"{CooldownTime.ToLongTimeString()}, {CooldownTime.ToLongDateString()}")
                             .WithFooter($"Times are in {(TimeZoneInfo.Local.IsDaylightSavingTime(CooldownTime) ? TimeZoneInfo.Local.DaylightName : TimeZoneInfo.Local.StandardName)}.")
-                            .WithCurrentTimestamp()
                             .SendEmbed(SocketMessage.Author, SocketMessage.Channel as ITextChannel);
                     }
                 }

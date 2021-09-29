@@ -57,7 +57,7 @@ namespace Dexter.Commands
 
             if (ModerationConfiguration.FinalWarningsManageRecords)
             {
-                WarningLogID = (await (DiscordSocketClient.GetChannel(ModerationConfiguration.FinalWarningsChannelID) as ITextChannel).SendMessageAsync(
+                WarningLogID = (await (DiscordShardedClient.GetChannel(ModerationConfiguration.FinalWarningsChannelID) as ITextChannel).SendMessageAsync(
                     $"**Final Warning Issued >>>** <@&{BotConfiguration.ModeratorRoleID}>\n" +
                     $"**User**: {User.GetUserInformation()}\n" +
                     $"**Issued on**: {DateTime.Now:MM/dd/yyyy}\n" +
@@ -75,7 +75,7 @@ namespace Dexter.Commands
                     .WithDescription(Reason)
                     .AddField("Points Deducted:", PointsDeducted, true)
                     .AddField("Mute Duration:", MuteDuration.Humanize(), true)
-                    .WithCurrentTimestamp()
+
                     .SendEmbed(await User.CreateDMChannelAsync());
 
                 await BuildEmbed(EmojiEnum.Love)
@@ -85,7 +85,6 @@ namespace Dexter.Commands
                     .AddField("Points Deducted:", PointsDeducted, true)
                     .AddField("Issued By:", Context.User.GetUserInformation())
                     .AddField("Reason:", Reason)
-                    .WithCurrentTimestamp()
                     .SendEmbed(Context.Channel);
             }
             catch (HttpException)
@@ -126,13 +125,12 @@ namespace Dexter.Commands
             }
 
             if (Warn.MessageID != 0)
-                await (await (DiscordSocketClient.GetChannel(ModerationConfiguration.FinalWarningsChannelID) as ITextChannel).GetMessageAsync(Warn.MessageID))?.DeleteAsync();
+                await (await (DiscordShardedClient.GetChannel(ModerationConfiguration.FinalWarningsChannelID) as ITextChannel).GetMessageAsync(Warn.MessageID))?.DeleteAsync();
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Final warn successfully revoked.")
                 .WithDescription($"Successfully revoked final warning for user {User.GetUserInformation()}. You can still query records about this final warning.")
                 .AddField(Reason.Length > 0, "Reason:", Reason)
-                .WithCurrentTimestamp()
                 .SendEmbed(Context.Channel);
 
             try
@@ -141,7 +139,6 @@ namespace Dexter.Commands
                     .WithTitle("Your final warning has been revoked!")
                     .WithDescription("The staff team has convened and decided to revoke your final warning. Be careful, you can't receive more than two final warnings! A third one is an automatic ban.")
                     .AddField(Reason.Length > 0, "Reason:", Reason)
-                    .WithCurrentTimestamp()
                     .SendEmbed(await User.CreateDMChannelAsync());
             }
             catch (HttpException)
@@ -180,7 +177,7 @@ namespace Dexter.Commands
                 .WithTitle("Final warning found!")
                 .WithDescription($"User {User.GetUserInformation()} has {(Warn.EntryType == EntryType.Revoke ? "a **revoked**" : "an **active**")} final warning!")
                 .AddField("Reason:", Warn.Reason)
-                .AddField("Issued by:", DiscordSocketClient.GetUser(Warn.IssuerID).GetUserInformation())
+                .AddField("Issued by:", DiscordShardedClient.GetUser(Warn.IssuerID).GetUserInformation())
                 .AddField("Mute Duration:", TimeSpan.FromSeconds(Warn.MuteDuration).Humanize(), true)
                 .AddField("Points Deducted:", Warn.PointsDeducted, true)
                 .AddField("Issued on:", DateTimeOffset.FromUnixTimeSeconds(Warn.IssueTime).Humanize(), true)

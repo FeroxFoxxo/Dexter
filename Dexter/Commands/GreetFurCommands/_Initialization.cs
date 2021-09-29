@@ -1,6 +1,7 @@
 using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.GreetFur;
+using Dexter.Databases.Infractions;
 using Dexter.Databases.UserProfiles;
 using Dexter.Services;
 
@@ -13,12 +14,6 @@ namespace Dexter.Commands
 
     public partial class GreetFurCommands : DiscordModule
     {
-
-        /// <summary>
-        /// Allows logging necessary data pertaining to issues or important information during interaction with the command environment.
-        /// </summary>
-
-        public LoggingService LoggingService { get; set; }
 
         /// <summary>
         /// Works as an interface between the configuration files attached to the GreetFur module and the commands.

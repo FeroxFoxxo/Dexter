@@ -21,10 +21,10 @@ namespace Dexter.Commands
 
         public async Task LogfileCommand()
         {
-            if (!File.Exists(LoggingService.LogFile))
+            if (!File.Exists(Debug.LogFile))
                 throw new FileNotFoundException();
 
-            await Context.Channel.SendFileAsync(LoggingService.LogFile);
+            await Context.Channel.SendFileAsync(Debug.LogFile);
         }
 
     }

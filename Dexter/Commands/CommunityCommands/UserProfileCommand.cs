@@ -89,7 +89,14 @@ namespace Dexter.Commands
                     {
                         case "timezone":
                         case "tz":
-                            string[] segments = value.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                            string[] segments;
+                            char separator;
+                            if (value.Contains('|'))
+                                separator = '|';
+                            else
+                                separator = ' ';
+
+                            segments = value.Split(separator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
                             TimeZoneData tz;
                             TimeZoneData tzdst;
@@ -135,7 +142,7 @@ namespace Dexter.Commands
                                 string rulesError = "";
                                 if (segments.Length >= 3)
                                 {
-                                    rulesParsed = DaylightShiftRules.TryParse(segments[2], LanguageConfiguration, out rulesError, out tzrules);
+                                    rulesParsed = DaylightShiftRules.TryParse(string.Join(separator, segments[2..]), LanguageConfiguration, out rulesError, out tzrules);
                                     if (rulesParsed)
                                     {
                                         profile.DSTRules = tzrules;
@@ -565,7 +572,7 @@ namespace Dexter.Commands
 
             UserProfile profile = ProfilesDB.GetOrCreateProfile(user.Id);
 
-            bool allowed = Context.User.Id == user.Id || Context.User.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator;
+            bool allowed = Context.User.Id == user.Id || Context.User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator;
             if (!allowed)
             {
                 switch (profile.Settings.Privacy)
@@ -604,7 +611,7 @@ namespace Dexter.Commands
         public async Task FriendCommand(string action, ulong userID)
         {
 
-            IUser target = DiscordSocketClient.GetUser(userID);
+            IUser target = DiscordShardedClient.GetUser(userID);
 
             if (target is null)
             {
@@ -699,8 +706,7 @@ namespace Dexter.Commands
 
                             if (profile.Settings.BlockRequests)
                             {
-                                await new EmbedBuilder()
-                                    .WithColor(Color.Orange)
+                                await BuildEmbed(EmojiEnum.Unknown)
                                     .WithTitle("User has silent friend requests!")
                                     .WithDescription($"User {user.Mention} now has a pending friend request from you, but they weren't notified of it. They can check their active friend requests with `{BotConfiguration.Prefix}friend requests`.\n" +
                                     $"To accept your request, they must use the `{BotConfiguration.Prefix}friend add {Context.User.Id}` command.")
@@ -710,8 +716,7 @@ namespace Dexter.Commands
 
                             try
                             {
-                                await new EmbedBuilder()
-                                    .WithColor(Color.Green)
+                                await BuildEmbed(EmojiEnum.Love)
                                     .WithTitle("Incoming Friend Request!")
                                     .WithThumbnailUrl(Context.User.GetTrueAvatarUrl())
                                     .WithAuthor(Context.User)
@@ -984,8 +989,7 @@ namespace Dexter.Commands
 
             if (string.IsNullOrEmpty(attribute))
             {
-                await new EmbedBuilder()
-                    .WithColor(Color.Purple)
+                await BuildEmbed(EmojiEnum.Unknown)
                     .WithThumbnailUrl(user.GetTrueAvatarUrl())
                     .WithTitle($"Friend Settings")
                     .WithDescription($"Link settings with user {user.Mention}:\n" +
@@ -1050,7 +1054,7 @@ namespace Dexter.Commands
 
         public async Task ConfigLinkCommand(ulong userID, string attribute = "", [Remainder] string value = "")
         {
-            IUser target = DiscordSocketClient.GetUser(userID);
+            IUser target = DiscordShardedClient.GetUser(userID);
 
             if (target is null)
             {
@@ -1073,22 +1077,21 @@ namespace Dexter.Commands
             }
             else
             {
-                await CreateReactionMenu(pages, Context.Channel);
+                CreateReactionMenu(pages, Context.Channel);
             }
             return;
         }
 
         private async Task DisplayProfileInformation(UserProfile profile)
         {
-            IUser user = DiscordSocketClient.GetUser(profile.UserID);
+            IUser user = DiscordShardedClient.GetUser(profile.UserID);
 
             if (user is null) { await Context.Channel.SendMessageAsync("Unable to find user information!"); }
 
             bool TZSuccess = TimeZoneData.TryParse(profile.TimeZone, LanguageConfiguration, out TimeZoneData TZ);
             bool TZDSTSuccess = TimeZoneData.TryParse(profile.TimeZoneDST, LanguageConfiguration, out TimeZoneData TZDST);
 
-            await new EmbedBuilder()
-                .WithColor(Color.DarkPurple)
+            await BuildEmbed(EmojiEnum.Unknown)
                 .WithThumbnailUrl(user.GetTrueAvatarUrl())
                 .WithTitle($"{((user as IGuildUser)?.Nickname ?? user.Username).Possessive()} Profile")
                 .WithDescription($"Custom user profile for user: {user.GetUserInformation()}")
@@ -1223,15 +1226,15 @@ namespace Dexter.Commands
                 return;
             }
 
-            IGuildUser user = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(id);
+            IGuildUser user = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(id);
             if (user is null) return;
 
             UserProfile profile = ProfilesDB.GetOrCreateProfile(id);
 
             if (profile.Settings?.GiveBorkdayRole ?? false)
             {
-                IRole role = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetRole(
-                    user.GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator ?
+                IRole role = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetRole(
+                    user.GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator ?
                         ModerationConfiguration.StaffBorkdayRoleID : ModerationConfiguration.BorkdayRoleID
                 );
 
@@ -1249,7 +1252,7 @@ namespace Dexter.Commands
 
                 try
                 {
-                    await new EmbedBuilder()
+                    await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Color.Gold)
                         .WithThumbnailUrl(user.GetTrueAvatarUrl())
                         .WithTitle("🎂 Happy Borkday 🎂")
@@ -1265,13 +1268,12 @@ namespace Dexter.Commands
             {
                 try
                 {
-                    IUser friend = DiscordSocketClient.GetUser(uid);
-                    await new EmbedBuilder()
+                    IUser friend = DiscordShardedClient.GetUser(uid);
+                    await BuildEmbed(EmojiEnum.Unknown)
                         .WithColor(Color.Gold)
                         .WithThumbnailUrl(user.GetTrueAvatarUrl())
                         .WithTitle("🎂 Borkday Time 🎂")
                         .WithDescription($"Hey there! It's {user.Mention}'{(user.Username.EndsWith('s') ? "" : "s")} birthday! Thought you'd like to know and celebrate! :3")
-                        .WithCurrentTimestamp()
                         .SendEmbed(await friend.CreateDMChannelAsync());
                 }
                 catch { }
@@ -1292,7 +1294,7 @@ namespace Dexter.Commands
             ulong userID = Convert.ToUInt64(args["User"]);
             ulong roleID = Convert.ToUInt64(args["Role"]);
 
-            IGuild guild = DiscordSocketClient.GetGuild(BotConfiguration.GuildID);
+            IGuild guild = DiscordShardedClient.GetGuild(BotConfiguration.GuildID);
             IGuildUser user = await guild?.GetUserAsync(userID);
 
             if (user is null) return;
@@ -1317,11 +1319,11 @@ namespace Dexter.Commands
 
             foreach (ulong userID in users)
             {
-                IUser user = DiscordSocketClient.GetGuild(BotConfiguration.GuildID).GetUser(userID);
+                IUser user = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(userID);
 
                 if (user is null)
                 {
-                    user = DiscordSocketClient.GetUser(userID);
+                    user = DiscordShardedClient.GetUser(userID);
                     if (user is null) continue;
                 }
 
@@ -1335,14 +1337,13 @@ namespace Dexter.Commands
                 inPage++;
             }
 
-            int page = 0;
             foreach (StringBuilder sb in userlists)
             {
-                embeds.Add(new EmbedBuilder()
-                    .WithColor(Color.Purple)
-                    .WithTitle($"{title} - Page {++page}/{userlists.Count}")
+                embeds.Add(
+                    BuildEmbed(EmojiEnum.Unknown)
+                    .WithTitle(title)
                     .WithDescription($"{description}\n {sb}")
-                    .WithFooter($"{page}/{userlists.Count}"));
+                );
             }
 
             return embeds.ToArray();

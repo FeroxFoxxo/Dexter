@@ -36,7 +36,7 @@ namespace Dexter.Databases.Games
         public int Lives { get; set; }
 
         /// <summary>
-        /// Any additional data that can be used locally at a per-<see cref="Helpers.Games.IGameTemplate"/> level.
+        /// Any additional data that can be used locally at a per-<see cref="Abstractions.GameTemplate"/> level.
         /// </summary>
 
         public string Data { get; set; }

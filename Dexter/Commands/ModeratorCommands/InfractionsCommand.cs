@@ -34,16 +34,16 @@ namespace Dexter.Commands
 
         public async Task InfractionsCommand(ulong UserID)
         {
-            IUser User = DiscordSocketClient.GetUser(UserID);
+            IUser User = DiscordShardedClient.GetUser(UserID);
 
             if (User == null)
             {
                 EmbedBuilder[] Warnings = GetWarnings(UserID, Context.User.Id, $"<@{UserID}>", $"Unknown ({UserID})", true);
 
                 if (Warnings.Length > 1)
-                    await CreateReactionMenu(Warnings, Context.Channel);
+                    CreateReactionMenu(Warnings, Context.Channel);
                 else
-                    await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
+                    await Warnings.FirstOrDefault().SendEmbed(Context.Channel);
             }
             else
                 await InfractionsCommand(User);
@@ -68,14 +68,14 @@ namespace Dexter.Commands
 
             if (IsUserSpecified)
             {
-                if ((Context.User as IGuildUser).GetPermissionLevel(DiscordSocketClient, BotConfiguration) >= PermissionLevel.Moderator)
+                if ((Context.User as IGuildUser).GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator)
                 {
                     EmbedBuilder[] Warnings = GetWarnings(User.Id, Context.User.Id, User.Mention, User.Username, true);
 
                     if (Warnings.Length > 1)
-                        await CreateReactionMenu(Warnings, Context.Channel);
+                        CreateReactionMenu(Warnings, Context.Channel);
                     else
-                        await Warnings.FirstOrDefault().WithCurrentTimestamp().SendEmbed(Context.Channel);
+                        await Warnings.FirstOrDefault().SendEmbed(Context.Channel);
                 }
                 else
                 {
@@ -165,7 +165,7 @@ namespace Dexter.Commands
                 if (Index % 5 == 0 && Index != 0)
                 {
                     Embeds.Add(CurrentBuilder);
-                    CurrentBuilder = new EmbedBuilder().AddField(Field).WithColor(Color.Green);
+                    CurrentBuilder = BuildEmbed(EmojiEnum.Unknown).AddField(Field);
                 }
                 else
                 {
@@ -176,7 +176,7 @@ namespace Dexter.Commands
                     catch (Exception)
                     {
                         Embeds.Add(CurrentBuilder);
-                        CurrentBuilder = new EmbedBuilder().AddField(Field).WithColor(Color.Green);
+                        CurrentBuilder = BuildEmbed(EmojiEnum.Unknown).AddField(Field);
                     }
                 }
             }

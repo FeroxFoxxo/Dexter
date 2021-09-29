@@ -42,20 +42,20 @@ namespace Dexter.Databases.Games
         /// An instance of a game of Chess, a game about putting the enemy in checkmate while avoiding the same.
         /// </summary>
 
-        Chess
+        Chess,
 
         /// <summary>
         /// An instance game of Shiritori, a game about coming up with words that start by whatever the previous person's word ends.
         /// </summary>
 
         //[NotImplemented]
-        //Shiritori,
+        Shiritori,
 
         /// <summary>
         /// An instance game of Charades, a game about guessing what a person is trying to nonverbally communicate.
         /// </summary>
 
         //[NotImplemented]
-        //Charades
+        Charades
     }
 }

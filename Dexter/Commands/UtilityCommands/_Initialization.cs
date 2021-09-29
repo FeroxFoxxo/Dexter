@@ -4,6 +4,7 @@ using Dexter.Databases.Mail;
 using Dexter.Databases.Reminders;
 using Dexter.Databases.UserProfiles;
 using Dexter.Services;
+using Discord.Commands;
 using Genbox.WolframAlpha;
 
 namespace Dexter.Commands
@@ -15,12 +16,6 @@ namespace Dexter.Commands
 
     public partial class UtilityCommands : DiscordModule
     {
-
-        /// <summary>
-        /// Allows logging necessary data pertaining to issues or important information during interaction with the command environment.
-        /// </summary>
-
-        public LoggingService LoggingService { get; set; }
 
         /// <summary>
         /// Holds all relevant settings and configuration for the Utility Commands Module.
@@ -75,6 +70,13 @@ namespace Dexter.Commands
         /// </summary>
         
         public LevelingConfiguration LevelingConfiguration { get; set; }
+
+
+        /// <summary>
+        /// Service responsible for parsing and overall managing interaction with commands issued by users.
+        /// </summary>
+
+        public CommandService CommandService { get; set; }
 
     }
 

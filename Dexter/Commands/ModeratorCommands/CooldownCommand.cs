@@ -49,7 +49,7 @@ namespace Dexter.Commands
                                 .WithTitle($"Unable To Issue {TextChannel} Cooldown.")
                                 .WithDescription($"Haiya! The user {User.GetUserInformation()} seems to already be on cooldown. " +
                                     $"This cooldown in was applied on {CooldownTime.ToLongDateString()} at {CooldownTime.ToLongTimeString()}.")
-                                .WithCurrentTimestamp()
+            
                                 .SendEmbed(Context.Channel);
 
                             return;
@@ -71,12 +71,12 @@ namespace Dexter.Commands
                         .WithTitle($"Added {TextChannel} Cooldown!")
                         .WithDescription($"Successfully added cooldown to {User.GetUserInformation()} " +
                             $"at {NewCooldownTime.ToLongTimeString()}, {NewCooldownTime.ToLongDateString()}.")
-                        .WithCurrentTimestamp()
+    
                         .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,
                             BuildEmbed(EmojiEnum.Love)
                                 .WithTitle($"{TextChannel} Cooldown Issued.")
                                 .WithDescription($"Haiya! We've given you a cooldown set at {NewCooldownTime.ToLongTimeString()}, {NewCooldownTime.ToLongDateString()}. <3")
-                                .WithCurrentTimestamp()
+            
                         );
 
                     break;
@@ -94,12 +94,12 @@ namespace Dexter.Commands
                             .WithTitle($"Removed {TextChannel} Cooldown!")
                             .WithDescription($"Successfully removed cooldown from {User.GetUserInformation()}, " +
                                 $"of whose cooldown used to be {CooldownTime.ToLongTimeString()}, {CooldownTime.ToLongDateString()}.")
-                            .WithCurrentTimestamp()
+        
                             .SendDMAttachedEmbed(Context.Channel, BotConfiguration, User, BuildEmbed(EmojiEnum.Love)
                                 .WithTitle($"{TextChannel} Cooldown Revoked.")
                                 .WithDescription($"Haiya! We've revoked your cooldown set at {CooldownTime.ToLongTimeString()}, " +
                                 $"{CooldownTime.ToLongDateString()}. You should now be able to re-send your informtion into the channel. <3")
-                                .WithCurrentTimestamp()
+            
                         );
                     }
                     else
@@ -108,7 +108,7 @@ namespace Dexter.Commands
                             .WithTitle($"Unable To Remove {TextChannel} Cooldown.")
                             .WithDescription($"Haiya! I was unable to remove the cooldown from {User.GetUserInformation()}. " +
                                 $"Are you sure this is the correct ID or that they have a cooldown lain against them?")
-                            .WithCurrentTimestamp()
+        
                             .SendEmbed(Context.Channel);
                     }
 

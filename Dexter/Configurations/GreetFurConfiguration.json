@@ -43,5 +43,7 @@
   "GreetFurMinimumDailyMessages": 10,
   "GreetFurActiveWithMute": true,
   "GreetFurMutePattern": "^!mute\\s(<@!?)?[0-9]{18}>?(\\s|$)",
-  "FirstTrackingDay": 18190
+  "FirstTrackingDay": 18190,
+  "GreetFurMuteChannel": 792658154668294193,
+  "GreetFurMuteWebhookName": "GreetFur Mute"
 }

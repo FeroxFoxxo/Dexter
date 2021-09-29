@@ -26,12 +26,6 @@ namespace Dexter.Services
     {
 
         /// <summary>
-        /// An instance of the Logging Service, which we use to log if the token has not been set to the console.
-        /// </summary>
-
-        public LoggingService LoggingService { get; set; }
-
-        /// <summary>
         /// The ServiceProvider is where our dependencies are stored - given to get an initialized class.
         /// </summary>
 
@@ -55,7 +49,7 @@ namespace Dexter.Services
 
         public override void Initialize()
         {
-            DiscordSocketClient.Ready += DisplayStartupVersionAsync;
+            DiscordShardedClient.ShardReady += (DiscordSocketClient _) => DisplayStartupVersionAsync();
         }
 
         /// <summary>
@@ -74,7 +68,7 @@ namespace Dexter.Services
             if (!string.IsNullOrEmpty(Token))
                 await RunBot(Token);
             else
-                await LoggingService.LogMessageAsync(new LogMessage(LogSeverity.Error, "Startup", $"The login token in the command line arguments was not set~!"));
+                await Debug.LogMessageAsync ($"The login token in the command line arguments was not set~!", LogSeverity.Error);
         }
 
         /// <summary>
@@ -85,8 +79,8 @@ namespace Dexter.Services
 
         public async Task RunBot(string Token)
         {
-            await DiscordSocketClient.LoginAsync(TokenType.Bot, Token);
-            await DiscordSocketClient.StartAsync();
+            await DiscordShardedClient.LoginAsync(TokenType.Bot, Token);
+            await DiscordShardedClient.StartAsync();
         }
 
         /// <summary>
@@ -97,14 +91,14 @@ namespace Dexter.Services
 
         public async Task DisplayStartupVersionAsync()
         {
-            await DiscordSocketClient.SetActivityAsync(new Game(BotConfiguration.BotStatus));
+            await DiscordShardedClient.SetActivityAsync(new Game(BotConfiguration.BotStatus));
 
             if (HasStarted)
                 return;
 
-            SocketChannel LoggingChannel = DiscordSocketClient.GetChannel(BotConfiguration.ModerationLogChannelID);
+            SocketChannel LoggingChannel = DiscordShardedClient.GetChannel(BotConfiguration.ModerationLogChannelID);
 
-            Console.Title = $"{DiscordSocketClient.CurrentUser.Username} v{Version} (Discord.Net v{DiscordConfig.Version})";
+            Console.Title = $"{DiscordShardedClient.CurrentUser.Username} v{Version} (Discord.Net v{DiscordConfig.Version})";
 
             if (LoggingChannel == null || LoggingChannel is not ITextChannel)
                 return;
@@ -155,7 +149,7 @@ namespace Dexter.Services
             if (BotConfiguration.EnableStartupAlert || NulledConfigurations.Count > 0)
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Startup complete!")
-                    .WithDescription($"This is **{DiscordSocketClient.CurrentUser.Username} v{Version}** running **Discord.Net v{DiscordConfig.Version}**!")
+                    .WithDescription($"This is **{DiscordShardedClient.CurrentUser.Username} v{Version}** running **Discord.Net v{DiscordConfig.Version}**!")
                     .AddField("Latest Commit:", LastCommit.Length > 1000 ? $"{LastCommit.Substring(0, 1000)}..." : LastCommit)
                     .AddField(NulledConfigurations.Count > 0, "Unapplied Configurations:", UnsetConfigurations.Length > 600 ? $"{UnsetConfigurations.Substring(0, 600)}..." : UnsetConfigurations)
                     .SendEmbed(LoggingChannel as ITextChannel);

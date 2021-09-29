@@ -101,7 +101,7 @@ namespace Dexter.Commands
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"🎗Created Reminder #{Reminder.ID}🎗")
                         .WithDescription($"The reminder will be released on {Date.HumanizeExtended()}")
-                        .WithCurrentTimestamp()
+    
                         .SendEmbed(Context.Channel);
                     return;
                 case "remove":
@@ -113,7 +113,7 @@ namespace Dexter.Commands
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Reminder is not Pending!")
                             .WithDescription($"This reminder has already been {Reminder.Status}, it can't be removed.")
-                            .WithCurrentTimestamp()
+        
                             .SendEmbed(Context.Channel);
                         return;
                     }
@@ -124,7 +124,7 @@ namespace Dexter.Commands
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"Reminder #{Reminder.ID} successfully removed!")
                         .WithDescription($"You will no longer receive this reminder, but you can still check its information using the `{BotConfiguration.Prefix}reminder get {Reminder.ID}` command.")
-                        .WithCurrentTimestamp()
+    
                         .SendEmbed(Context.Channel);
                     return;
                 case "edit":
@@ -139,7 +139,7 @@ namespace Dexter.Commands
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Reminder is not Pending!")
                             .WithDescription($"This reminder has already been {Reminder.Status}, it can't be edited.")
-                            .WithCurrentTimestamp()
+        
                             .SendEmbed(Context.Channel);
                         return;
                     }
@@ -150,7 +150,7 @@ namespace Dexter.Commands
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"Reminder #{Reminder.ID} successfully edited!")
                         .WithDescription($"The reminder will now appear with the content defined above.")
-                        .WithCurrentTimestamp()
+    
                         .SendEmbed(Context.Channel);
                     return;
                 case "get":
@@ -169,7 +169,7 @@ namespace Dexter.Commands
                         await BuildEmbed(EmojiEnum.Wut)
                             .WithTitle("No upcoming reminders!")
                             .WithDescription("It seems as though you need no assistance with your mental storage allocation process for now!")
-                            .WithCurrentTimestamp()
+        
                             .SendEmbed(Context.Channel);
                     }
                     else if (Reminders.Count == 1)
@@ -185,7 +185,7 @@ namespace Dexter.Commands
                     else
                     {
                         EmbedBuilder[] Embeds = BuildReminderEmbeds(Reminders);
-                        await CreateReactionMenu(Embeds, Context.Channel);
+                        CreateReactionMenu(Embeds, Context.Channel);
                     }
                     return;
                 default:
@@ -229,7 +229,7 @@ namespace Dexter.Commands
             Reminder Reminder = ReminderDB.GetReminder(int.Parse(Args["ID"]));
             if (Reminder == null || Reminder.Status != ReminderStatus.Pending) return;
 
-            IUser Issuer = DiscordSocketClient.GetUser(Reminder.IssuerID);
+            IUser Issuer = DiscordShardedClient.GetUser(Reminder.IssuerID);
             if (Issuer == null) return;
 
             Reminder.Status = ReminderStatus.Released;
@@ -240,7 +240,7 @@ namespace Dexter.Commands
                 await BuildEmbed(EmojiEnum.Sign)
                     .WithTitle("🎗Dexter Reminder!🎗")
                     .WithDescription(Reminder.Message)
-                    .WithCurrentTimestamp()
+
                     .SendEmbed(await Issuer.CreateDMChannelAsync());
             }
             catch { }
@@ -262,8 +262,6 @@ namespace Dexter.Commands
                 if (LastExcluded > ReminderArray.Length) LastExcluded = ReminderArray.Length;
 
                 Embeds[p - 1] = BuildReminderPage(ReminderArray[First..LastExcluded], ref counter);
-
-                Embeds[p - 1].WithTitle($"Reminders - Page {p}/{TotalPages}").WithFooter($"{p}/{TotalPages}");
             }
 
             return Embeds;
@@ -278,8 +276,7 @@ namespace Dexter.Commands
         private EmbedBuilder BuildReminderPage(IEnumerable<Reminder> Reminders, ref int counter)
         {
             EmbedBuilder Builder = BuildEmbed(EmojiEnum.Sign)
-                .WithTitle("Reminders")
-                .WithCurrentTimestamp();
+                .WithTitle("Reminders");
 
             foreach (Reminder r in Reminders)
             {

@@ -316,6 +316,7 @@ namespace Dexter.Services
                     if (newActivity is null)
                         newActivity = GreetFurDB.GetAllRecentActivity(firstDay, TRACKING_LENGTH);
 
+                    ValueRange range = new();
                     List<string[]> newRows = new();
                     int row = ranges[1].Values.Count; 
 
@@ -324,11 +325,24 @@ namespace Dexter.Services
                         if (tbpFoundIDs.Contains(id)) continue;
 
                         Dictionary<int, int> activity = new();
-                        // Set values in activity
+                        foreach(GreetFurRecord record in newActivity[id])
+                        {
+                            if (record.IsYes(GreetFurConfiguration))
+                            {
+                                int recordW = (record.Date - GreetFurConfiguration.FirstTrackingDay) / WEEK_LENGTH + 1;
+                                if (activity.ContainsKey(recordW)) 
+                                    activity[recordW]++;
+                                else 
+                                    activity.Add(recordW, 1);
+                            }
+                        }
                         newRows.Add(await TBPRowFromRecords(id, activity, row++));
                     }
 
-                    //Run append request
+                    range.Values = newRows.ToArray();
+                    AppendRequest appendRequest = sheetsService.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.TheBigPictureSpreadsheet);
+                    appendRequest.ValueInputOption = AppendRequest.ValueInputOptionEnum.USERENTERED;
+                    await appendRequest.ExecuteAsync();
                 }
             }
         }

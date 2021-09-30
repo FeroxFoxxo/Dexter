@@ -81,7 +81,7 @@ namespace Dexter.Extensions
             if (Index != -1)
                 methodName = methodName.Substring(0, Index).Replace("<", "");
 
-            if (name.Contains("AsyncMethodBuilderCore") || name.Contains("AsyncTaskMethodBuilder") || name.Contains("EmbedExtensions") || name.Contains("AwaitTaskContinuation") || name.Contains("ExecutionContext")  || name.Contains("DiscordRestAPIClient"))
+            if (name.Contains("AsyncMethodBuilderCore") || name.Contains("AsyncTaskMethodBuilder") || name.Contains("EmbedExtensions") || name.Contains("AwaitTaskContinuation") || name.Contains("ExecutionContext")  || name.Contains("DiscordRestApiClient"))
                 return GetLastMethodCalled(SearchHeight + 1);
             else
                 return new KeyValuePair<string, string> ( name, methodName );

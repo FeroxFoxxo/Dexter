@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
+using Dexter.Enums;
 using Discord;
 using Discord.Commands;
 using static Dexter.Services.GreetFurService;
@@ -81,7 +82,7 @@ namespace Dexter.Commands
                 await msg.ModifyAsync(m =>
                 {
                     m.Content = "Invalid Syntax";
-                    m.Embed = BuildEmbed(Enums.EmojiEnum.Annoyed)
+                    m.Embed = BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Errors:")
                     .WithDescription(string.Join('\n', errors))
                                         .Build();

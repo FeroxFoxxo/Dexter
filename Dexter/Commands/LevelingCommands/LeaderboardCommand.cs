@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Configurations;
 using Dexter.Databases.Levels;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord;
@@ -32,7 +33,7 @@ namespace Dexter.Commands
         {
             if (min >= max)
             {
-                await BuildEmbed(Enums.EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Invalid range!")
                     .WithDescription($"Argument \"max\" ({max}) must be lower than \"min\" ({min})")
                     .SendEmbed(Context.Channel);
@@ -40,7 +41,7 @@ namespace Dexter.Commands
             }
             if (max - min > LevelingConfiguration.MaxLeaderboardItems)
             {
-                await BuildEmbed(Enums.EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Invalid range!")
                     .WithDescription($"Item count exceeds maximum! You may request up to {LevelingConfiguration.MaxLeaderboardItems} items. You requested {max - min}.")
                     .SendEmbed(Context.Channel);

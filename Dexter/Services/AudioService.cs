@@ -158,7 +158,7 @@ namespace DexterSlash.Services
 			if (queueable is null)
 				return;
 
-			await Interactive.DelayedSendMessageAndDeleteAsync(trackEnd.Player.TextChannel, null, TimeSpan.FromSeconds(10), embed: queueable.GetNowPlaying());
+			await Interactive.DelayedSendMessageAndDeleteAsync(trackEnd.Player.TextChannel, null, TimeSpan.FromSeconds(10), embed: BuildEmbed(Dexter.Enums.EmojiEnum.Unknown).GetNowPlaying(queueable).Build());
 		}
 		
 		private async Task ProtectPlayerIntegrityOnDisconnectAsync(SocketUser user, SocketVoiceState ogState, SocketVoiceState newState)

@@ -1,4 +1,6 @@
 using Dexter.Abstractions;
+using DexterSlash.Services;
+using Victoria.Node;
 
 namespace Dexter.Commands
 {
@@ -10,6 +12,9 @@ namespace Dexter.Commands
     public partial class MusicCommands : DiscordModule
     {
 
+        public LavaNode LavaNode { get; set; }
+
+        public AudioService AudioService {  get; set; }
 
     }
 

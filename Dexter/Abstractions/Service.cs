@@ -7,7 +7,6 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Services;
 using Discord;
-using Discord.Net;
 using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;

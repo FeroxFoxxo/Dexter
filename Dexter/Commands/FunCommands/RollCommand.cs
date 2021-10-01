@@ -9,6 +9,7 @@ using Dexter.Helpers;
 using Discord.Commands;
 using System.Text;
 using System.Text.RegularExpressions;
+using Dexter.Enums;
 
 namespace Dexter.Commands
 {
@@ -40,7 +41,7 @@ namespace Dexter.Commands
             string baseRoll = Regex.Match(roll, @"^([1-9][0-9]*)?[dD][1-9][0-9]*").Value;
             if (string.IsNullOrEmpty(baseRoll))
             {
-                await BuildEmbed(Enums.EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Invalid roll!")
                     .WithDescription($"Please follow a valid roll expression. Type `{BotConfiguration.Prefix}help roll` for more information.")
                     .SendEmbed(Context.Channel);
@@ -56,7 +57,7 @@ namespace Dexter.Commands
             }
             else if (n > FunConfiguration.MaxDieRolls)
             {
-                await BuildEmbed(Enums.EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Excessive Roll Count!")
                     .WithDescription($"{n} is too high! Keep the number of dice to roll below {FunConfiguration.MaxDieRolls}.")
                     .SendEmbed(Context.Channel);
@@ -64,7 +65,7 @@ namespace Dexter.Commands
             }
             if (!int.TryParse(baseRoll[(dIndex + 1)..], out int d))
             {
-                await BuildEmbed(Enums.EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Invalid Face Count!")
                     .WithDescription($"You entered number \"{baseRoll[(dIndex + 1)..]}\", make sure you use an input that is compatible with a 32-bit integer. (<{int.MaxValue})")
                     .SendEmbed(Context.Channel);
@@ -89,7 +90,7 @@ namespace Dexter.Commands
                     rolls = pair.Value(rolls, mod, rollContext);
                     if (rolls.Count > FunConfiguration.MaxDieRolls)
                     {
-                        await BuildEmbed(Enums.EmojiEnum.Annoyed)
+                        await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Modifier caused excess of maximum allowed rolls!")
                             .WithDescription($"The following modifier: `{mod}`, caused rolls to exceed {FunConfiguration.MaxDieRolls}, with a total of {rolls.Count} rolls.")
                             .SendEmbed(Context.Channel);

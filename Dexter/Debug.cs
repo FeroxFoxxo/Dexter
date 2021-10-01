@@ -92,7 +92,20 @@ namespace Dexter
 
         private static async Task LogToConsole(LogMessage LogMessage)
         {
+            // Firstly we switch the log message based on the severity of the error.
+            Console.ForegroundColor = LogMessage.Severity switch
+            {
+                LogSeverity.Info => ConsoleColor.Blue,
+                LogSeverity.Critical => ConsoleColor.DarkRed,
+                LogSeverity.Error => ConsoleColor.Red,
+                LogSeverity.Warning => ConsoleColor.Yellow,
+                LogSeverity.Verbose => ConsoleColor.Magenta,
+                LogSeverity.Debug => ConsoleColor.DarkCyan,
+                _ => ConsoleColor.Red,
+            };
 
+            // Finally we log to the console.
+            await Console.Out.WriteLineAsync(CreateLog(LogMessage));
         }
 
     }

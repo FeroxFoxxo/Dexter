@@ -1,5 +1,6 @@
 ﻿using Dexter.Abstractions;
 using Dexter.Extensions;
+using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using System;
@@ -10,16 +11,26 @@ namespace DexterSlash.Services
     {
 
 		private readonly DiscordShardedClient Client;
+		private readonly CommandService CommandService;
 		private readonly ILogger<LoggingService> Logger;
 
-		public LoggingService(DiscordShardedClient client, ILogger<LoggingService> logger)
+		public LoggingService(DiscordShardedClient client, ILogger<LoggingService> logger, CommandService commandService)
         {
 			Client = client;
 			Logger = logger;
-        }
+			CommandService = commandService;
+		}
 
 		public override void Initialize()
 		{
+			CommandService.Log += async (logMessage) =>
+			{
+				if (logMessage.Message is not null)
+					Logger.Log(logMessage.Severity.ToLogLevel(), logMessage.Exception, logMessage.Message);
+				else
+					Logger.Log(logMessage.Severity.ToLogLevel(), logMessage.Exception, "Internal Exception");
+			};
+
 			Client.Log += async (logMessage) =>
 			{
 				if (logMessage.Message is not null)

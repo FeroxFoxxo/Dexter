@@ -4,6 +4,7 @@ using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
 using Fergun.Interactive;
+using Figgle;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -11,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Victoria;
@@ -51,12 +53,24 @@ namespace Dexter
 			if (!string.IsNullOrEmpty(directory))
 				Directory.SetCurrentDirectory(directory);
 
+			string databaseDirectory = Path.Join(Directory.GetCurrentDirectory(), "Databases");
+
+			if (!Directory.Exists(databaseDirectory))
+				Directory.CreateDirectory(databaseDirectory);
+
 			// Get information on the bot through REST.
 
-			var restClient = new DiscordRestClient();
-			await restClient.LoginAsync(TokenType.Bot, token);
-			var shards = await restClient.GetRecommendedShardCountAsync();
-			var name = Regex.Replace(restClient.CurrentUser.Username, "[^A-Za-z0-9]", "");
+			// Draws "STARTING..." in the color of cyan.
+			Console.ForegroundColor = ConsoleColor.Cyan;
+
+			var botInfo = await GetNameAndShardsOfBot(token);
+
+			var name = botInfo.Key;
+			var shards = botInfo.Value;
+
+			await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(name));
+
+			Console.Title = name;
 
 			// Start the swager instance for debugging.
 
@@ -93,6 +107,9 @@ namespace Dexter
 				)
 			);
 
+
+			builder.Services.AddSingleton<Random>();
+
 			builder.Services.AddSingleton(provider =>
 			{
 				var client = provider.GetRequiredService<DiscordShardedClient>();
@@ -100,6 +117,61 @@ namespace Dexter
 			});
 
 			builder.Services.AddLavaNode(x => { x.SelfDeaf = true; x.Port = 2333; });
+
+			bool HasErrored = false;
+
+			// Finds all JSON configurations and initializes them from their respective files.
+			// If a JSON file is not created, a new one is initialized in its place.
+
+			GetJSONConfigs().ForEach(async Type =>
+					{
+						if (!File.Exists($"Configurations/{Type.Name}.json"))
+						{
+							File.WriteAllText(
+								$"Configurations/{Type.Name}.json",
+								JsonSerializer.Serialize(
+									Activator.CreateInstance(Type),
+									new JsonSerializerOptions() { WriteIndented = true }
+								)
+							);
+
+							builder.Services.AddSingleton(Type);
+
+							await Debug.LogMessageAsync(
+								$" This application does not have a configuration file for {Type.Name}! " +
+								$"A mock JSON class has been created in its place...",
+								LogSeverity.Warning
+							);
+						}
+						else
+						{
+							try
+							{
+								object JSON = JsonSerializer.Deserialize(
+									File.ReadAllText($"Configurations/{Type.Name}.json"),
+									Type,
+									new JsonSerializerOptions() { WriteIndented = true }
+								);
+
+								builder.Services.AddSingleton(
+									Type,
+									JSON
+								);
+							}
+							catch (JsonException Exception)
+							{
+								await Debug.LogMessageAsync(
+									$" Unable to initialize {Type.Name}! Ran into: {Exception.InnerException}.",
+									LogSeverity.Error
+								);
+
+								HasErrored = true;
+							}
+						}
+					});
+
+			if (HasErrored)
+				return;
 
 			GetDatabases().ForEach(t => builder.Services.AddScoped(t));
 
@@ -147,13 +219,25 @@ namespace Dexter
 
 		private static List<Type> GetDatabases() { return GetClassesOfType(typeof(Database)); }
 
+		private static List<Type> GetJSONConfigs() { return GetClassesOfType(typeof(JSONConfig)); }
+
 		private static List<Type> GetServices() { return GetClassesOfType(typeof(Service)); }
 
 		private static List<Type> GetClassesOfType(Type type)
 		{
 			return Assembly.GetExecutingAssembly().GetTypes()
-				.Where(c => c.IsClass && !c.IsAbstract && !c.IsInterface && c.GetInterfaces().Contains(type))
+				.Where(c => c.IsClass && ((!c.IsAbstract && c.IsSubclassOf(type)) || (!c.IsInterface && c.GetInterfaces().Contains(type))))
 				.ToList();
+		}
+
+		private static async Task<KeyValuePair<string, int>> GetNameAndShardsOfBot(string token)
+        {
+			var restClient = new DiscordRestClient();
+			await restClient.LoginAsync(TokenType.Bot, token);
+			var shards = await restClient.GetRecommendedShardCountAsync();
+			var name = Regex.Replace(restClient.CurrentUser.Username, "[^A-Za-z0-9]", "").Replace("NewBot", "");
+
+			return new(name, shards);
 		}
 	}
 }

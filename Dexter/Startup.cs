@@ -173,7 +173,7 @@ namespace Dexter
 			if (HasErrored)
 				return;
 
-			GetDatabases().ForEach(t => builder.Services.AddScoped(t));
+			GetDatabases().ForEach(t => builder.Services.AddSingleton(t));
 
 			GetCommands().ForEach(t => builder.Services.AddSingleton(t));
 
@@ -198,20 +198,25 @@ namespace Dexter
 			);
 
 			// Adds all the commands', databases' and services' dependencies to their properties.
-			app.Services.GetServices(typeof(object)).ToList().ForEach(
-				c => c.GetType().GetProperties().ToList().ForEach(Property =>
+			Assembly.GetExecutingAssembly().GetTypes()
+					.Where(Type => (Type.IsSubclassOf(typeof(DiscordModule)) || Type.IsSubclassOf(typeof(Service)) || Type.IsSubclassOf(typeof(Database))) && !Type.IsAbstract)
+					.ToList().ForEach(
+				Type => Type.GetProperties().ToList().ForEach(Property =>
 				{
 					if (Property.PropertyType == typeof(ServiceProvider))
-						Property.SetValue(c, app.Services);
+						Property.SetValue(app.Services.GetRequiredService(Type), app.Services);
 					else
 					{
 						object Service = app.Services.GetService(Property.PropertyType);
 
 						if (Service != null)
-							Property.SetValue(c, Service);
+						{
+							Property.SetValue(app.Services.GetRequiredService(Type), Service);
+						}
 					}
 				})
 			);
+
 
 			// Connects all the event hooks in initializable modules to their designated delegates.
 			GetServices().ForEach(

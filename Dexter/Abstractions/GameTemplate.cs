@@ -49,12 +49,12 @@ namespace Dexter.Abstractions
         /// <summary>
         /// The Build Embed method is a generic method that simply calls upon the EMBED BUILDER extension method.
         /// </summary>
-        /// <param name="Thumbnail">The thumbnail that you would like to be applied to the embed.</param>
+        /// <param name="thumbnail">The thumbnail that you would like to be applied to the embed.</param>
         /// <returns>A new embed builder with the specified attributes applied to the embed.</returns>
 
-        public EmbedBuilder BuildEmbed(EmojiEnum Thumbnail)
+        public EmbedBuilder BuildEmbed(EmojiEnum thumbnail)
         {
-            return new EmbedBuilder().BuildEmbed(Thumbnail, BotConfiguration, EmbedCallingType.Game);
+            return new EmbedBuilder().BuildEmbed(thumbnail, BotConfiguration, EmbedCallingType.Game);
         }
 
         /// <summary>

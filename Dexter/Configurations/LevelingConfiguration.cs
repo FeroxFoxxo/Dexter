@@ -169,7 +169,7 @@ namespace Dexter.Configurations
         public int MaxLeaderboardItems { get; set; }
 
         /// <summary>
-        /// Indicates which guild ID to use for mee6 XP synchronization for the <see cref="Dexter.Commands.LevelingCommands.LoadLevelsFromMee6Command(int, int, string)"/> method.
+        /// Indicates which guild ID to use for mee6 XP synchronization for the <see cref="Commands.LevelingCommands.LoadLevelsFromMee6Command(int, int, string)"/> method.
         /// </summary>
 
         public ulong Mee6SyncGuildId { get; set; }

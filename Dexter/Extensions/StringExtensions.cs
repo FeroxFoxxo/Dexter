@@ -11,6 +11,9 @@ using System.Text.RegularExpressions;
 using System.Net.Http;
 using System.Diagnostics;
 using System.Collections.Generic;
+using Humanizer.Localisation;
+using Humanizer;
+using Microsoft.Extensions.Logging;
 
 namespace Dexter.Extensions
 {
@@ -55,12 +58,31 @@ namespace Dexter.Extensions
             return Text;
         }
 
+        public static string HumanizeTimeSpan(this TimeSpan t)
+        {
+            return t.Humanize(3, minUnit: TimeUnit.Second, maxUnit: TimeUnit.Day);
+        }
+
+        public static LogLevel ToLogLevel(this LogSeverity severity)
+        {
+            return severity switch
+            {
+                LogSeverity.Critical => LogLevel.Critical,
+                LogSeverity.Error => LogLevel.Error,
+                LogSeverity.Warning => LogLevel.Warning,
+                LogSeverity.Info => LogLevel.Information,
+                LogSeverity.Verbose => LogLevel.Trace,
+                LogSeverity.Debug => LogLevel.Debug,
+                _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null)
+            };
+        }
+
         /// <summary>
         /// Gets the class of the last method that had been called.
         /// </summary>
         /// <param name="SearchHeight">The height backwards that you would like to see the call come from.</param>
         /// <returns>The last called class + method</returns>
-        
+
         public static KeyValuePair<string, string> GetLastMethodCalled(int SearchHeight)
         {
             SearchHeight += 1;
@@ -81,7 +103,17 @@ namespace Dexter.Extensions
             if (Index != -1)
                 methodName = methodName.Substring(0, Index).Replace("<", "");
 
-            if (name.Contains("AsyncMethodBuilderCore") || name.Contains("AsyncTaskMethodBuilder") || name.Contains("EmbedExtensions") || name.Contains("AwaitTaskContinuation") || name.Contains("ExecutionContext")  || name.Contains("DiscordRestApiClient"))
+            string[] asyncBuilders = new string[7] {
+                "AsyncMethodBuilderCore",
+                "AsyncTaskMethodBuilder",
+                "EmbedExtensions",
+                "AwaitTaskContinuation",
+                "ExecutionContext",
+                "DiscordRestApiClient",
+                "Task"
+            };
+
+            if (asyncBuilders.Any(name.Contains))
                 return GetLastMethodCalled(SearchHeight + 1);
             else
                 return new KeyValuePair<string, string> ( name, methodName );

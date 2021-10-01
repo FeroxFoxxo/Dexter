@@ -17,9 +17,9 @@ namespace Dexter.Extensions
         /// Converts a discord role's color into a graphics-readable value (with no transparency)
         /// </summary>
         /// <param name="role">The target role to extract the base color from</param>
-        /// <returns>A <see cref="System.Drawing.Color"/> object that can be used in brushes and the like.</returns>
+        /// <returns>A <see cref="Color"/> object that can be used in brushes and the like.</returns>
 
-        public static System.Drawing.Color ToGraphicsColor(this Discord.IRole role)
+        public static Color ToGraphicsColor(this Discord.IRole role)
         {
             return role.Color.ToGraphicsColor();
         }
@@ -28,9 +28,9 @@ namespace Dexter.Extensions
         /// Converts a discord color into a graphics-readable value (with no transparency)
         /// </summary>
         /// <param name="color">The target color to convert to a Graphics color.</param>
-        /// <returns>A <see cref="System.Drawing.Color"/> object that can be used in brushes and the like.</returns>
+        /// <returns>A <see cref="Color"/> object that can be used in brushes and the like.</returns>
 
-        public static System.Drawing.Color ToGraphicsColor(this Discord.Color color)
+        public static Color ToGraphicsColor(this Discord.Color color)
         {
             return Color.FromArgb(unchecked((int)(color.RawValue + 0xFF000000)));
         }
@@ -44,7 +44,7 @@ namespace Dexter.Extensions
         /// <param name="channel">The channel to send the image to</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public static async Task Send(this System.Drawing.Image image, Discord.IMessageChannel channel)
+        public static async Task Send(this Image image, Discord.IMessageChannel channel)
         {
             image.Save(tempCachePath);
             await channel.SendFileAsync(tempCachePath);
@@ -59,7 +59,7 @@ namespace Dexter.Extensions
         /// <param name="color">The base color to create a transformation off of.</param>
         /// <returns>A color matrix that can be used to recolorize images.</returns>
 
-        public static System.Drawing.Imaging.ColorMatrix ToColorMatrix(this System.Drawing.Color color)
+        public static System.Drawing.Imaging.ColorMatrix ToColorMatrix(this Color color)
         {
             return new System.Drawing.Imaging.ColorMatrix(new float[][] {
                 new float[] {color.R / 255f, 0, 0, 0, 0},

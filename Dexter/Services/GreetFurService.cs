@@ -74,9 +74,7 @@ namespace Dexter.Services
         /// <param name="msg">The message the user sent.</param>
         /// <returns>A <see cref="Task"/> object, which can be awaited until the method completes successfully.</returns>
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         private async Task HandleMessage(SocketMessage msg)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             if (msg.Author is not IGuildUser user)
                 return;

@@ -53,37 +53,6 @@ namespace Dexter.Services
         }
 
         /// <summary>
-        /// The Start Async method runs at the end of the dependencies having been initialized,
-        /// and is what runs the bot using the token and logs if the token doesn't exist to the console.
-        /// </summary>
-        /// <param name="Token">A string, containing the Token from the command line arguments.
-        /// Returns false if does not exist and flows onto the token specified in the BotConfiguration.</param>
-        /// <param name="Version">The current version of the bot, as parsed from the InitializeDependencies class.</param>
-        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-
-        public async Task StartAsync(string Token, string Version)
-        {
-            this.Version = Version;
-
-            if (!string.IsNullOrEmpty(Token))
-                await RunBot(Token);
-            else
-                await Debug.LogMessageAsync ($"The login token in the command line arguments was not set~!", LogSeverity.Error);
-        }
-
-        /// <summary>
-        /// The Run Bot method logs into the bot using the token specified as a parameter and then starts the bot asynchronously.
-        /// </summary>
-        /// <param name="Token">A string containing the token from which we use to log into Discord.</param>
-        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-
-        public async Task RunBot(string Token)
-        {
-            await DiscordShardedClient.LoginAsync(TokenType.Bot, Token);
-            await DiscordShardedClient.StartAsync();
-        }
-
-        /// <summary>
         /// The Display Startup Version Async method runs on ready and is what attempts to log the initialization of the bot
         /// to a specified guild that the bot has sucessfully started and the versionings that it is running.
         /// </summary>

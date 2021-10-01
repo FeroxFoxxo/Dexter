@@ -1,5 +1,4 @@
-using System;
-using System.Diagnostics;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
@@ -9,6 +8,7 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.Webhook;
+using Victoria.Player;
 
 namespace Dexter.Extensions
 {
@@ -160,6 +160,16 @@ namespace Dexter.Extensions
                 embedBuilder.AddField(name, value, inLine);
 
             return embedBuilder;
+        }
+
+        public static Embed GetNowPlaying(this LavaTrack track)
+        {
+            return new EmbedBuilder()
+                .WithColor(Color.Blue)
+                .WithDescription($"🎵 Now playing:\n" +
+                                $"Title: **{track.Title}**\n" +
+                                $"Duration: **{track.Duration.HumanizeTimeSpan()}**")
+                .Build();
         }
 
         /// <summary>

@@ -15,10 +15,10 @@ namespace Dexter.Abstractions
         /// The OnConfiguring method runs on the initialization of the database, and sets the database to use SQLite
         /// and for the SQLite database to be set to the name of the class.
         /// </summary>
-        /// <param name="Options">The Context Options is what this method aims to configure,
+        /// <param name="options">The Context Options is what this method aims to configure,
         /// setting it to use SQLite and set the database name to be the class'.</param>
 
-        protected override void OnConfiguring(DbContextOptionsBuilder Options) => Options.UseSqlite($"Data Source=Databases/{GetType().Name}.db");
+        protected override void OnConfiguring(DbContextOptionsBuilder options) => options.UseSqlite($"Data Source=Databases/{GetType().Name}.db");
 
     }
 

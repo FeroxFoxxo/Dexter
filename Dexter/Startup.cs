@@ -197,6 +197,22 @@ namespace Dexter
 				}
 			);
 
+			// Adds all the commands', databases' and services' dependencies to their properties.
+			app.Services.GetServices(typeof(object)).ToList().ForEach(
+				c => c.GetType().GetProperties().ToList().ForEach(Property =>
+				{
+					if (Property.PropertyType == typeof(ServiceProvider))
+						Property.SetValue(c, app.Services);
+					else
+					{
+						object Service = app.Services.GetService(Property.PropertyType);
+
+						if (Service != null)
+							Property.SetValue(c, Service);
+					}
+				})
+			);
+
 			// Connects all the event hooks in initializable modules to their designated delegates.
 			GetServices().ForEach(
 				Type => (app.Services.GetService(Type) as Service).Initialize()

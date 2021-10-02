@@ -89,7 +89,8 @@ namespace Dexter
                     {
 						IgnoreExtraArgs = true,
 						CaseSensitiveCommands = false,
-						LogLevel = LogSeverity.Debug
+						LogLevel = LogSeverity.Debug,
+						DefaultRunMode = RunMode.Async
                     }
 				)
 			);

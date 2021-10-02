@@ -1,4 +1,5 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
@@ -13,6 +14,9 @@ namespace Dexter.Commands
 
         [Command("stop")]
         [Summary("Displays the current music queue.")]
+        [MusicBotChannel]
+        [RequireDJ]
+
         public async Task StopCommand()
         {
             if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
@@ -45,7 +49,7 @@ namespace Dexter.Commands
                     .WithDescription($"Failed to disconnect from {vcName}. If the issue persists, please contact the developers for support.")
                     .SendEmbed(Context.Channel);
 
-                await Debug.LogMessageAsync($"Failed to disconnect from voice channel '{vcName}' in {Context.Guild.Id} via $leave.", LogSeverity.Error);
+                await Debug.LogMessageAsync($"Failed to disconnect from voice channel '{vcName}' in {Context.Guild.Id}.", LogSeverity.Error);
 
                 return;
             }

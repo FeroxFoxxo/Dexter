@@ -26,7 +26,7 @@ namespace Dexter.Commands
         /// <param name="User">The user whose profile picture is to be used as a base.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        [Command("headpat", RunMode = RunMode.Async)]
+        [Command("headpat")]
         [Summary("Ooh, you've been a good boy? *gives rapid headpats in an emoji*")]
         [Alias("headpats", "petpat", "petpats", "pet", "pat")]
 

@@ -19,7 +19,7 @@ namespace Dexter.Commands
         /// <param name="args">Special sequences that modify the behaviour of the method.</param>
         /// <returns>A <see cref="Task"/> object, which can be awaited until the method completes successfully.</returns>
 
-        [Command("updatesheet", RunMode = RunMode.Async)]
+        [Command("updatesheet")]
         [Summary("Updates the values of the active spreadsheet tracking system for GreetFurs.")]
         [ExtendedSummary("Updates the values of the active spreadsheet tracking for GreetFurs; you may extend the functionality of the command by using specific arguments:\n" +
             "**-l** or **--last**: Sets the spreadsheet to the latest full spreadsheet period\n" +

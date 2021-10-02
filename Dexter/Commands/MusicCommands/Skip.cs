@@ -1,4 +1,5 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
 using System;
@@ -12,7 +13,10 @@ namespace Dexter.Commands
 
         [Command("skip")]
         [Summary("Skips the current song. Pass in a number to skip multiple songs at once.")]
-        public async Task SkipCommand(int? skipCount = null)
+		[MusicBotChannel]
+		[RequireDJ]
+
+		public async Task SkipCommand(int? skipCount = null)
         {
             if (skipCount < 2)
             {

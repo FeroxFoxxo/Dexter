@@ -28,7 +28,7 @@ namespace Dexter.Commands
         /// <param name="Params">The remainder of the command to modify or target events in the database.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        [Command("event", RunMode = RunMode.Async)]
+        [Command("event")]
         [Summary("Create and manage user-hosted events!\n" +
             ">`ADD [TIME] " + TimeEventSeparator + " [EVENT]` - create a new event!\n" +
             ">`REMOVE [EVENT ID]` - remove an event (proposer or admin only)\n" +
@@ -238,7 +238,7 @@ namespace Dexter.Commands
         /// <param name="Args">A string containing a parsable DateTimeOffset and a Description separated by TimeEventSeparator.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        [Command("officialevent", RunMode = RunMode.Async)]
+        [Command("officialevent")]
         [Summary("Creates an official server event!\n" +
             "Syntax: `officialevent [TIME] " + TimeEventSeparator + " [DESCRIPTION]`")]
         [ExtendedSummary("Creates an official server event! \n" +

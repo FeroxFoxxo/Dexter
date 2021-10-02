@@ -15,7 +15,13 @@ namespace Dexter.Enums
         Default,
 
         /// <summary>
-        /// The UNIFURSAL value is given to a user who hold the divine fur role specified in the bot configuration.
+        /// The DJ value is given to a user who hold the dj role specified in the bot configuration.
+        /// </summary>
+
+        DJ,
+
+        /// <summary>
+        /// The UNIFURSAL value is given to a user who hold the unifursal role specified in the bot configuration.
         /// </summary>
 
         Unifursal,

@@ -12,17 +12,18 @@ namespace Dexter.Commands
     public partial class MusicCommands
     {
 
-        [Command("leave")]
-        [Summary("Disconnects me from the current voice channel.")]
+        [Command("clearqueue")]
+        [Alias("clearq")]
+        [Summary("Clears the current music player queue.")]
         [MusicBotChannel]
         [RequireDJ]
 
-        public async Task LeaveCommand()
+        public async Task ClearQueueCommand()
         {
             if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle("Unable to leave VC!")
+                    .WithTitle("Unable to stop songs!")
                     .WithDescription("I couldn't find the music player for this server. " +
                     "Please ensure I am connected to a voice channel before using this command.")
                     .SendEmbed(Context.Channel);
@@ -30,29 +31,29 @@ namespace Dexter.Commands
                 return;
             }
 
-            string vcName = $"**{player.VoiceChannel.Name}**";
-
             try
             {
-                await LavaNode.LeaveAsync(player.VoiceChannel);
+                int songCount = player.Vueue.Count;
+
+                player.Vueue.Clear();
+
+                await player.StopAsync();
 
                 await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle("Unable to leave VC!")
-                    .WithDescription($"Disconnected from `{vcName}`.")
-                    .SendEmbed(Context.Channel);
+                    .WithTitle("Playback halted.")
+                    .WithDescription($"Cleared {songCount} from playing in {player.VoiceChannel.Name}.").SendEmbed(Context.Channel);
             }
             catch (Exception)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle("Unable to leave VC!")
-                    .WithDescription($"Failed to disconnect from {vcName}. If the issue persists, please contact the developers for support.")
+                    .WithTitle("Unable to stop songs!")
+                    .WithDescription($"Failed to clear queue. If the issue persists, please contact the developers for support.")
                     .SendEmbed(Context.Channel);
 
-                await Debug.LogMessageAsync($"Failed to disconnect from voice channel '{vcName}' in {Context.Guild.Id} via $leave.", LogSeverity.Error);
+                await Debug.LogMessageAsync($"Failed to clear queue from voice channel '{player.VoiceChannel.Name}' in {Context.Guild.Id}.", LogSeverity.Error);
 
                 return;
             }
         }
-
     }
 }

@@ -1,4 +1,5 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
 using System.Linq;
@@ -11,7 +12,10 @@ namespace Dexter.Commands
     {
 
         [Command("queue")]
+        [Alias("list")]
         [Summary("Displays the current queue of songs.")]
+        [MusicBotChannel]
+
         public async Task QueueCommand()
         {
             if (!LavaNode.TryGetPlayer(Context.Guild, out var player))

@@ -25,7 +25,7 @@ namespace Dexter.Commands
         /// <param name="max">The last page to display</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        [Command("levels", RunMode = RunMode.Async)]
+        [Command("levels")]
         [Alias("leaderboard")]
         [Summary("Usage: `levels (min) (max)`")]
 

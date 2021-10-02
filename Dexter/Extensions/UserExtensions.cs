@@ -41,6 +41,8 @@ namespace Dexter.Extensions
                 return PermissionLevel.GreetFur;
             else if (GuildUser.RoleIds.Contains(BotConfiguration.UnifursalRoleID))
                 return PermissionLevel.Unifursal;
+            else if (GuildUser.RoleIds.Contains(BotConfiguration.DJRoleID))
+                return PermissionLevel.DJ;
             else
                 return PermissionLevel.Default;
         }

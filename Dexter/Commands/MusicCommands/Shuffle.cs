@@ -1,4 +1,5 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
 using System.Linq;
@@ -12,6 +13,8 @@ namespace Dexter.Commands
 
         [Command("shuffle")]
         [Summary("Shuffles the music queue in a random order.")]
+        [MusicBotChannel]
+
         public async Task ShuffleCommand()
         {
             if (!LavaNode.TryGetPlayer(Context.Guild, out var player))

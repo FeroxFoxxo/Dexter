@@ -12,17 +12,17 @@ namespace Dexter.Commands
     public partial class MusicCommands
     {
 
-        [Command("leave")]
-        [Summary("Disconnects me from the current voice channel.")]
+        [Command("volume")]
+        [Summary("Changes the volume. Values are 0-150 and 100 is the default..")]
         [MusicBotChannel]
         [RequireDJ]
 
-        public async Task LeaveCommand()
+        public async Task VolumeCommand(int volumeLevel = 100)
         {
             if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle("Unable to leave VC!")
+                    .WithTitle("Unable to change volume!")
                     .WithDescription("I couldn't find the music player for this server. " +
                     "Please ensure I am connected to a voice channel before using this command.")
                     .SendEmbed(Context.Channel);
@@ -30,29 +30,27 @@ namespace Dexter.Commands
                 return;
             }
 
-            string vcName = $"**{player.VoiceChannel.Name}**";
-
             try
             {
-                await LavaNode.LeaveAsync(player.VoiceChannel);
+                int oldVolume = player.Volume;
+
+                await player.SetVolumeAsync(volumeLevel);
 
                 await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle("Unable to leave VC!")
-                    .WithDescription($"Disconnected from `{vcName}`.")
-                    .SendEmbed(Context.Channel);
+                    .WithTitle("Volume changed.")
+                    .WithDescription($"Sucessfully changed volume from {oldVolume} to {volumeLevel}").SendEmbed(Context.Channel);
             }
             catch (Exception)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle("Unable to leave VC!")
-                    .WithDescription($"Failed to disconnect from {vcName}. If the issue persists, please contact the developers for support.")
+                    .WithTitle("Unable to change volume!")
+                    .WithDescription($"Failed to change volume to {volumeLevel}. If the issue persists, please contact the developers for support.")
                     .SendEmbed(Context.Channel);
 
-                await Debug.LogMessageAsync($"Failed to disconnect from voice channel '{vcName}' in {Context.Guild.Id} via $leave.", LogSeverity.Error);
+                await Debug.LogMessageAsync($"Failed to change volume in {Context.Guild.Id}.", LogSeverity.Error);
 
                 return;
             }
         }
-
     }
 }

@@ -1,4 +1,5 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Enums;
 using Dexter.Extensions;
 using DexterSlash.Services;
 using Discord;
@@ -18,6 +19,8 @@ namespace Dexter.Commands
 
 		[Command("play")]
 		[Summary("Immediately plays or enqueues the most popular result of the requested search.")]
+		[MusicBotChannel]
+
 		public async Task PlayCommand([Remainder] string search)
 		{
 			if (!await LavaNode.SafeJoinAsync(Context.User, Context.Channel))
@@ -78,6 +81,8 @@ namespace Dexter.Commands
 		}
 
 		[Command("play")]
+		[MusicBotChannel]
+
 		public async Task PlayCommand()
 		{
 			if (!await LavaNode.SafeJoinAsync(Context.User, Context.Channel))

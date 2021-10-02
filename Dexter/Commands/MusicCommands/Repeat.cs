@@ -1,4 +1,5 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
 using System.Threading.Tasks;
@@ -9,15 +10,17 @@ namespace Dexter.Commands
 {
     public partial class MusicCommands
 	{
-		[Command("loop")]
-		[Summary("Allows looping of the currently playing track. Default amount is 1.")]
-		public async Task LoopCommand(int amount = 1)
+		[Command("repeat")]
+		[Summary("Allows repeating of the currently playing track. Default amount is 1.")]
+		[MusicBotChannel]
+
+		public async Task RepeatCommand(int amount = 1)
 		{
 			if (amount < 1)
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to loop songs!")
-					.WithDescription("Invalid input. Cannot loop a track less than once.").SendEmbed(Context.Channel);
+					.WithTitle("Unable to repeat songs!")
+					.WithDescription("Invalid input. Cannot repeat a track less than once.").SendEmbed(Context.Channel);
 
 				return;
 			}
@@ -25,8 +28,8 @@ namespace Dexter.Commands
 			if (amount > 10)
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to loop songs!")
-					.WithDescription("You may only loop a song 10 times at once.").SendEmbed(Context.Channel);
+					.WithTitle("Unable to repeat songs!")
+					.WithDescription("You may only repeat a song 10 times at once.").SendEmbed(Context.Channel);
 
 				return;
 			}
@@ -34,7 +37,7 @@ namespace Dexter.Commands
 			if (!await LavaNode.SafeJoinAsync(Context.User, Context.Channel))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to loop songs!")
+					.WithTitle("Unable to repeat songs!")
 					.WithDescription("Failed to join voice channel. Are you in a voice channel?").SendEmbed(Context.Channel);
 
 				return;
@@ -45,7 +48,7 @@ namespace Dexter.Commands
 				if (player.PlayerState != PlayerState.Playing)
 				{
 					await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to loop songs!")
+					.WithTitle("Unable to repeat songs!")
 					.WithDescription("The player must be actively playing a track in order to loop it.").SendEmbed(Context.Channel);
 
 					return;
@@ -70,8 +73,8 @@ namespace Dexter.Commands
 				string s = amount == 1 ? "" : "s";
 
 				await BuildEmbed(EmojiEnum.Unknown)
-					.WithTitle("🔂 Loop Tracks")
-					.WithDescription($"Successfully looped **{curTrack.Title} {amount}** " + $"time{s}")
+					.WithTitle("🔂 Repeated Tracks")
+					.WithDescription($"Successfully repeated **{curTrack.Title} {amount}** " + $"time{s}")
 					.SendEmbed(Context.Channel);
 			}
 		}

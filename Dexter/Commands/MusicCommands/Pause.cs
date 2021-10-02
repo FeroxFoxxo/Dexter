@@ -1,3 +1,4 @@
+using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
@@ -14,6 +15,8 @@ namespace Dexter.Commands
 
 		[Command("pause")]
 		[Summary("Toggles whether this player is currently paused. Use while songs are playing to pause the player, use while a player is paused to resume it.")]
+		[MusicBotChannel]
+
 		public async Task PauseCommand()
 		{
 			if (!await LavaNode.SafeJoinAsync(Context.User, Context.Channel))

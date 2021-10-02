@@ -1,4 +1,5 @@
-﻿using Dexter.Enums;
+﻿using Dexter.Attributes.Methods;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
@@ -16,8 +17,10 @@ namespace Dexter.Commands
     public partial class MusicCommands
 	{
 
-		[Command("search", RunMode = RunMode.Async)]
+		[Command("search")]
 		[Summary("Searches for the desired song. Returns top 5 most popular results. Click on one of the reaction icons to play the appropriate track.")]
+		[MusicBotChannel]
+
 		public async Task SearchCommand([Remainder] string search)
 		{
 			if (!await LavaNode.SafeJoinAsync(Context.User, Context.Channel))

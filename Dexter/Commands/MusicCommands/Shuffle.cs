@@ -22,8 +22,8 @@ namespace Dexter.Commands
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to shuffle queue!")
                     .WithDescription(
-                    "I couldn't find the music player for this server. Please ensure I am connected to a voice channel " +
-                    "before using this command.").SendEmbed(Context.Channel);
+                    "I couldn't find the music player for this server.\n" +
+                    "Please ensure I am connected to a voice channel before using this command.").SendEmbed(Context.Channel);
 
                 return;
             }
@@ -33,7 +33,7 @@ namespace Dexter.Commands
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to shuffle queue!")
                     .WithDescription(
-                    "There aren't any songs in the queue. " +
+                    "There aren't any songs in the queue.\n" +
                     "Please add songs to the queue with the `play` command and try again.").SendEmbed(Context.Channel);
 
                 return;

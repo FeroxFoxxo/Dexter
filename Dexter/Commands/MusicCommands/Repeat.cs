@@ -20,7 +20,7 @@ namespace Dexter.Commands
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to repeat songs!")
-					.WithDescription("Invalid input. Cannot repeat a track less than once.").SendEmbed(Context.Channel);
+					.WithDescription("Invalid input.\nCannot repeat a track less than once.").SendEmbed(Context.Channel);
 
 				return;
 			}
@@ -38,7 +38,7 @@ namespace Dexter.Commands
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to repeat songs!")
-					.WithDescription("Failed to join voice channel. Are you in a voice channel?").SendEmbed(Context.Channel);
+					.WithDescription("Failed to join voice channel.\nAre you in a voice channel?").SendEmbed(Context.Channel);
 
 				return;
 			}

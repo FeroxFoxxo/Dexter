@@ -23,7 +23,7 @@ namespace Dexter.Commands
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to stop songs!")
-                    .WithDescription("I couldn't find the music player for this server. " +
+                    .WithDescription("I couldn't find the music player for this server.\n" +
                     "Please ensure I am connected to a voice channel before using this command.")
                     .SendEmbed(Context.Channel);
 
@@ -46,7 +46,7 @@ namespace Dexter.Commands
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to stop songs!")
-                    .WithDescription($"Failed to disconnect from {vcName}. If the issue persists, please contact the developers for support.")
+                    .WithDescription($"Failed to disconnect from {vcName}.\nIf the issue persists, please contact the developers for support.")
                     .SendEmbed(Context.Channel);
 
                 await Debug.LogMessageAsync($"Failed to disconnect from voice channel '{vcName}' in {Context.Guild.Id}.", LogSeverity.Error);

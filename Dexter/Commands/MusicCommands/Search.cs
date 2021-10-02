@@ -27,7 +27,7 @@ namespace Dexter.Commands
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 						.WithTitle($"Unable to search for `{search}`!")
-						.WithDescription("Failed to join voice channel. Are you in a voice channel?")
+						.WithDescription("Failed to join voice channel.\nAre you in a voice channel?")
 						.SendEmbed(Context.Channel);
 
 				return;
@@ -43,11 +43,11 @@ namespace Dexter.Commands
 				}
 				catch (Exception)
 				{
-					await Debug.LogMessageAsync("Lavalink is not connected! Failing with embed error...", LogSeverity.Error);
+					await Debug.LogMessageAsync("Lavalink is not connected!\nFailing with embed error...", LogSeverity.Error);
 
 					await BuildEmbed(EmojiEnum.Annoyed)
 						.WithTitle($"Unable to search for `{search}`!")
-						.WithDescription("Failure: lavalink dependency missing. Please check the console logs for more details.")
+						.WithDescription("Failure: lavalink dependency missing.\nPlease check the console logs for more details.")
 						.SendEmbed(Context.Channel);
 
 					return;

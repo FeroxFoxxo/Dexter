@@ -31,7 +31,7 @@ namespace Dexter.Commands
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to skip song!")
-					.WithDescription("I couldn't find the music player for this server. " +
+					.WithDescription("I couldn't find the music player for this server.\n" +
 					"Please ensure I am connected to a voice channel before using this command.").SendEmbed(Context.Channel);
 
                 return;

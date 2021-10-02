@@ -23,7 +23,7 @@ namespace Dexter.Commands
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to pause the player!")
-					.WithDescription("Failed to join voice channel. Are you in a voice channel?").SendEmbed(Context.Channel);
+					.WithDescription("Failed to join voice channel.\nAre you in a voice channel?").SendEmbed(Context.Channel);
 
 				return;
 			}

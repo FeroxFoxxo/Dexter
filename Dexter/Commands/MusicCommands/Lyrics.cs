@@ -67,7 +67,7 @@ namespace Dexter.Commands
 
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle($"Unable to play `{song}`!")
-					.WithDescription("Failure: lavalink dependency missing. Please check the console logs for more details.")
+					.WithDescription("Failure: lavalink dependency missing.\nPlease check the console logs for more details.")
 					.SendEmbed(Context.Channel);
 
 				return;

@@ -23,7 +23,7 @@ namespace Dexter.Commands
                 await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Could not display queue.")
                         .WithDescription(
-                    "I couldn't find the music player for this server. " +
+                    "I couldn't find the music player for this server.\n" +
                     "Please ensure I am connected to a voice channel before using this command.").SendEmbed(Context.Channel);
 
                 return;

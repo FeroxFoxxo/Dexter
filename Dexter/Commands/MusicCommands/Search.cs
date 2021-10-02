@@ -17,7 +17,8 @@ namespace Dexter.Commands
     public partial class MusicCommands
 	{
 
-		[Command("search")]
+		[Command("play")]
+		[Alias("search")]
 		[Summary("Searches for the desired song. Returns top 5 most popular results. Click on one of the reaction icons to play the appropriate track.")]
 		[MusicBotChannel]
 
@@ -103,6 +104,8 @@ namespace Dexter.Commands
 				if (result.IsSuccess)
 				{
 					var newTrack = topResults.ElementAt(result.Value.Value);
+
+					await result.Message.DeleteAsync();
 
 					if (player.Vueue.Count == 0 && player.PlayerState != PlayerState.Playing)
 					{

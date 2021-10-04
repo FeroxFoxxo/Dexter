@@ -7,6 +7,7 @@ using Fergun.Interactive;
 using Figgle;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using SpotifyAPI.Web;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,16 +32,18 @@ namespace Dexter
 
         public static string Token { get => p_Token; }
 
-        /// <summary>
-        /// The Main method is the entrance to the program. Arguments can be added to this method and supplied
-        /// through the command line of the application when it starts. It is an asynchronous task.
-        /// </summary>
-        /// <param name="token">[OPTIONAL] The token of the bot. Defaults to the one specified in the BotCommands if not set.</param>
-        /// <param name="version">[OPTIONAL] The version of the bot specified by the release pipeline.</param>
-        /// <param name="directory">[OPTIONAL] The directory you wish the databases and configurations to be in. By default this is the build directory.</param>
-        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+		/// <summary>
+		/// The Main method is the entrance to the program. Arguments can be added to this method and supplied
+		/// through the command line of the application when it starts. It is an asynchronous task.
+		/// </summary>
+		/// <param name="token">[OPTIONAL] The token of the bot. Defaults to the one specified in the BotCommands if not set.</param>
+		/// <param name="version">[OPTIONAL] The version of the bot specified by the release pipeline.</param>
+		/// <param name="directory">[OPTIONAL] The directory you wish the databases and configurations to be in. By default this is the build directory.</param>
+		/// <param name="spotifyID">[OPTIONAL] Spotify CLIENT_ID from developer.spotify.com/dashboard.</param>
+		/// <param name="spotifySecret">[OPTIONAL] Spotify CLIENT_SECRET from developer.spotify.com/dashboard.</param>
+		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public static async Task Main(string token, string version, string directory)
+		public static async Task Main(string token, string version, string directory, string spotifyID, string spotifySecret)
 		{
 			p_Token = token;
 
@@ -81,6 +84,20 @@ namespace Dexter
 				c.SwaggerDoc(version, new() { Title = name, Version = version });
 			});
 
+			// Init spotify API.
+
+			if (!string.IsNullOrEmpty(spotifyID) && !string.IsNullOrEmpty(spotifySecret))
+			{
+				var config = SpotifyClientConfig.CreateDefault();
+
+				var request = new ClientCredentialsRequest(spotifyID, spotifySecret);
+				var response = await new OAuthClient(config).RequestToken(request);
+
+				builder.Services.AddSingleton(new SpotifyClient(config.WithToken(response.AccessToken)));
+			}
+			else
+				builder.Services.AddSingleton(new SpotifyClient("UNKNOWN"));
+
 			// Initialize our dependencies for the bot.
 
 			builder.Services.AddSingleton(
@@ -107,7 +124,6 @@ namespace Dexter
 					}
 				)
 			);
-
 
 			builder.Services.AddSingleton<Random>();
 

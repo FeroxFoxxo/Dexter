@@ -1,5 +1,8 @@
 using Dexter.Abstractions;
+using Dexter.Configurations;
 using DexterSlash.Services;
+using SpotifyAPI.Web;
+using System;
 using Victoria.Node;
 
 namespace Dexter.Commands
@@ -14,7 +17,9 @@ namespace Dexter.Commands
 
         public LavaNode LavaNode { get; set; }
 
-        public AudioService AudioService {  get; set; }
+        public AudioService AudioService { get; set; }
+
+        public SpotifyClient SpotifyAPI { get; set; }
 
     }
 

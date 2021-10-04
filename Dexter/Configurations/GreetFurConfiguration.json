@@ -3,8 +3,8 @@
   "CredentialFile": "Credentials.json",
   "TokenFile": "Token",
   "SpreadSheetID": "1nOJCMRLuZqY3gJGx-1Stj5Peq1vZaQvGL9wNUXEuE68",
-  "FortnightSpreadsheet": "Testing",
-  "TheBigPictureSpreadsheet": "The Big Picture",
+  "FortnightSpreadsheet": "ActivityTesting",
+  "TheBigPictureSpreadsheet": "TBPTesting",
   "TheBigPictureNames": "A",
   "TheBigPictureIDs": "C",
   "TheBigPictureWeekCap": 120,
@@ -43,14 +43,14 @@
     "30": "=IF(OR(AE{N-1}=\"\",AF{N}=\"\"),\"\",AE{N-1}+1)",
     "32": "=IF(AF{N}=\"\",\"\",CEILING(LABELLOC(AC$2:AC, AE{N}) + 1))"
   },
-  "TBPTemplates": {
-    "0": "{Tag}",
+  "TBPTemplate": {
+    "0": "{Username}",
     "1": "=IF(Activity!$B{N}=C{N},Activity!$B{N},\"-\")",
     "2": "{Id}",
     "3": "FALSE",
     "4": "{N-1}",
-    "5": "SUM(G{N}:{N})"
-  }
+    "5": "=SUM(G{N}:{N})"
+  },
   "AwooRole": 815091090117885974,
   "GreetFurMinimumDailyMessages": 10,
   "GreetFurActiveWithMute": true,

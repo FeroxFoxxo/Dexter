@@ -345,3 +345,20 @@ log.txt
 /Non-Release Files
 /Dexter/Images/Games/Chess/Chess.rar
 desktop.ini
+/Dexter/Databases/RestrictionsDB.db
+/Dexter/Databases/ReminderDB.db
+/Dexter/Databases/RelayDB.db
+/Dexter/Databases/ProposalDB.db
+/Dexter/Databases/ProfilesDB.db
+/Dexter/Databases/ModMailDB.db
+/Dexter/Databases/LevelingDB.db
+/Dexter/Databases/InfractionsDB.db
+/Dexter/Databases/GreetFurDB.db
+/Dexter/Databases/GamesDB.db
+/Dexter/Databases/FunTopicsDB.db
+/Dexter/Databases/FinalWarnsDB.db
+/Dexter/Databases/EventTimersDB.db
+/Dexter/Databases/CustomCommandDB.db
+/Dexter/Databases/CooldownDB.db
+/Dexter/Databases/ConfigurationDB.db
+/Dexter/Databases/CommunityEventsDB.db

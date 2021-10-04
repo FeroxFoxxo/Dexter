@@ -47,6 +47,12 @@ namespace Dexter.Configurations
         public ulong GreetFurRoleID { get; set; }
 
         /// <summary>
+        /// The DJ ROLE ID is the snowflake ID of the role that the djs have.
+        /// </summary>
+
+        public ulong DJRoleID { get; set; }
+
+        /// <summary>
         /// The UNIFURSAL ROLE ID is the snowflake ID of the role that the unifusal + members have.
         /// </summary>
 
@@ -144,6 +150,8 @@ namespace Dexter.Configurations
         /// </summary>
 
         public short StandardTimeZone { get; set; }
+
+        public ulong MusicChannelID { get; set; }
 
     }
 

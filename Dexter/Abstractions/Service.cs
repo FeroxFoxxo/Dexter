@@ -7,7 +7,6 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Dexter.Services;
 using Discord;
-using Discord.Net;
 using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;
@@ -54,65 +53,76 @@ namespace Dexter.Abstractions
         /// The Create Or Get Webhook finds the given channel and, when provided a name, attempts to find a webhook
         /// with that said name. If the webhook can not be found, it creates a new webhook in the channel with the set name.
         /// </summary>
-        /// <param name="ChannelID">The Channel ID is the snowflake ID of the channel which you wish the webhook to be made in.</param>
-        /// <param name="WebhookName">The Webhook Name is the identifier of the webhook, and is what the webhook will be called.</param>
+        /// <param name="channelID">The Channel ID is the snowflake ID of the channel which you wish the webhook to be made in.</param>
+        /// <param name="webhookName">The Webhook Name is the identifier of the webhook, and is what the webhook will be called.</param>
         /// <returns>The DiscordWebhookClient of the webhook that has been gotten or created.</returns>
 
-        public async Task<DiscordWebhookClient> CreateOrGetWebhook(ulong ChannelID, string WebhookName)
+        public async Task<DiscordWebhookClient> CreateOrGetWebhook(ulong channelID, string webhookName)
         {
-            if (ChannelID > 0)
+            if (channelID <= 0)
+                return null;
 
-                try
-                {
-                    SocketChannel Channel = DiscordShardedClient.GetChannel(ChannelID);
+            SocketChannel channel = DiscordShardedClient.GetChannel(channelID);
 
-                    if (Channel is SocketTextChannel TextChannel)
-                    {
-                        foreach (RestWebhook RestWebhook in await TextChannel.GetWebhooksAsync())
-                            if (RestWebhook.Name.Equals(WebhookName))
-                                return new DiscordWebhookClient(RestWebhook.Id, RestWebhook.Token);
+            if (channel is SocketTextChannel textChannel)
+            {
+                foreach (RestWebhook restWebhook in await textChannel.GetWebhooksAsync())
+                    if (restWebhook.Name.Equals(webhookName))
+                        return new DiscordWebhookClient(restWebhook.Id, restWebhook.Token);
 
-                        RestWebhook Webhook = await TextChannel.CreateWebhookAsync(WebhookName, ProfileService.GetRandomPFP());
+                RestWebhook webhook = await textChannel.CreateWebhookAsync(webhookName, ProfileService.GetRandomPFP());
 
-                        return new DiscordWebhookClient(Webhook.Id, Webhook.Token);
-                    }
+                return new DiscordWebhookClient(webhook.Id, webhook.Token);
+            }
 
-                    throw new Exception($"The webhook {WebhookName} could not be initialized in the given channel {Channel} due to it being of type {Channel.GetType().Name}.");
-
-                }
-                catch (HttpException) { }
-
-            return null;
+            throw new Exception($"The webhook {webhookName} could not be initialized in the given channel {channel} due to it being of type {channel.GetType().Name}.");
         }
 
         /// <summary>
         /// The Create Event Timer method is a generic method that will await for an expiration time to be reached
         /// before continuing execution of the code set in the CallbackMethod parameter.
         /// </summary>
-        /// <param name="CallbackMethod">The method you wish to callback once expired.</param>
-        /// <param name="CallbackParameters">The parameters you wish to callback with once expired.</param>
-        /// <param name="SecondsTillExpiration">The count in seconds until the timer will expire.</param>
-        /// <param name="TimerType">The given type of the timer, specifying if it should be removed after the set time (EXPIRE) or continue in the set interval.</param>
-        /// <returns>The token assosiated with the timed event for use to refer to.</returns>
+        /// <param name="callbackMethod">The method you wish to callback once expired.</param>
+        /// <param name="callbackParameters">The parameters you wish to callback with once expired.</param>
+        /// <param name="secondsTillExpiration">The count in seconds until the timer will expire.</param>
+        /// <param name="timerType">The given type of the timer, specifying if it should be removed after the set time (EXPIRE) or continue in the set interval.</param>
+        /// <returns>The token associated with the timed event for future reference.</returns>
 
-        public async Task<string> CreateEventTimer(Func<Dictionary<string, string>, Task> CallbackMethod,
-                Dictionary<string, string> CallbackParameters, int SecondsTillExpiration, TimerType TimerType)
+        public async Task<string> CreateEventTimer(Func<Dictionary<string, string>, Task> callbackMethod,
+                Dictionary<string, string> callbackParameters, int secondsTillExpiration, TimerType timerType)
         {
 
-            string JSON = JsonConvert.SerializeObject(CallbackParameters);
+            return await CreateEventTimer(callbackMethod, callbackParameters, secondsTillExpiration, timerType, TimerService);
+        }
 
-            return await TimerService.AddTimer(JSON, CallbackMethod.Target.GetType().Name, CallbackMethod.Method.Name, SecondsTillExpiration, TimerType);
+        /// <summary>
+        /// The Create Event Timer method is a generic method that will await for an expiration time to be reached
+        /// before continuing execution of the code set in the CallbackMethod parameter.
+        /// </summary>
+        /// <param name="callbackMethod">The method you wish to callback once expired.</param>
+        /// <param name="callbackParameters">The parameters you wish to callback with once expired.</param>
+        /// <param name="secondsTillExpiration">The count in seconds until the timer will expire.</param>
+        /// <param name="timerType">The given type of the timer, specifying if it should be removed after the set time (EXPIRE) or continue in the set interval.</param>
+        /// <param name="timerService">The service used to access the database and related infrastructure to store the mute.</param>
+        /// <returns>The token associated with the timed event for future reference.</returns>
+
+        public static async Task<string> CreateEventTimer(Func<Dictionary<string, string>, Task> callbackMethod,
+                Dictionary<string, string> callbackParameters, int secondsTillExpiration, TimerType timerType, TimerService timerService)
+        {
+            string json = JsonConvert.SerializeObject(callbackParameters);
+
+            return await timerService.AddTimer(json, callbackMethod.Target.GetType().Name, callbackMethod.Method.Name, secondsTillExpiration, timerType);
         }
 
         /// <summary>
         /// The Build Embed method is a generic method that simply calls upon the EMBED BUILDER extension method.
         /// </summary>
-        /// <param name="Thumbnail">The thumbnail that you would like to be applied to the embed.</param>
+        /// <param name="thumbnail">The thumbnail that you would like to be applied to the embed.</param>
         /// <returns>A new embed builder with the specified attributes applied to the embed.</returns>
 
-        public EmbedBuilder BuildEmbed(EmojiEnum Thumbnail)
+        public EmbedBuilder BuildEmbed(EmojiEnum thumbnail)
         {
-            return new EmbedBuilder().BuildEmbed(Thumbnail, BotConfiguration, EmbedCallingType.Service);
+            return new EmbedBuilder().BuildEmbed(thumbnail, BotConfiguration, EmbedCallingType.Command);
         }
 
     }

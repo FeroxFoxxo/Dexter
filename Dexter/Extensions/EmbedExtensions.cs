@@ -1,5 +1,5 @@
-using System;
-using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
@@ -9,6 +9,7 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.Webhook;
+using Victoria.Player;
 
 namespace Dexter.Extensions
 {
@@ -160,6 +161,89 @@ namespace Dexter.Extensions
                 embedBuilder.AddField(name, value, inLine);
 
             return embedBuilder;
+        }
+
+        public static EmbedBuilder GetNowPlaying(this EmbedBuilder builder, LavaTrack track)
+        {
+            return builder.WithTitle("🎵 Now playing").WithDescription(
+                                $"Title: **{track.Title}**\n" +
+                                $"Duration: **{track.Duration.HumanizeTimeSpan()}**");
+        }
+
+        public static EmbedBuilder GetQueuedTrack(this EmbedBuilder builder, LavaTrack track, int queueSize)
+        {
+            return builder.WithTitle("⏳ Queued").WithDescription(
+                                $"Title: **{track.Title}**\n" +
+                                $"Duration: **{track.Duration.HumanizeTimeSpan()}**\n" +
+                                $"Queue Position: **{queueSize}**.");
+        }
+
+        public static EmbedBuilder[] GetQueue(this LavaPlayer player, string title, BotConfiguration botConfiguration)
+        {
+
+            EmbedBuilder CurrentBuilder = new EmbedBuilder()
+                .BuildEmbed(EmojiEnum.Unknown, botConfiguration, EmbedCallingType.Command).WithTitle(title);
+
+            List<EmbedBuilder> Embeds = new();
+
+            if (player.Track != null)
+            {
+                string trackDurCur, trackDurTotal;
+
+                if (player.Track.Duration.TotalMinutes > 60)
+                {
+                    trackDurCur = player.Track.Position.ToString("hh\\:mm\\:ss");
+                    trackDurTotal = player.Track.Duration.ToString("hh\\:mm\\:ss");
+                }
+                else
+                {
+                    trackDurCur = player.Track.Position.ToString("mm\\:ss");
+                    trackDurTotal = player.Track.Duration.ToString("mm\\:ss");
+                }
+
+                CurrentBuilder.WithDescription("**Now Playing:**\n" +
+                                  $"Title: **{player.Track.Title}** " +
+                                  $"[{trackDurCur} / {trackDurTotal}]\n\n" +
+                                  "Up Next ⬇️");
+            }
+
+            LavaTrack[] tracks = player.Vueue.ToArray();
+
+            if (tracks.Length == 0)
+            {
+                CurrentBuilder.WithDescription(CurrentBuilder.Description += "\n\n*No tracks enqueued.*");
+            }
+
+            for (int Index = 0; Index < tracks.Length; Index++)
+            {
+                EmbedFieldBuilder Field = new EmbedFieldBuilder()
+                    .WithName($"#{Index}. **{tracks[Index].Title}**")
+                    .WithValue($"{tracks[Index].Author} ({tracks[Index].Duration:mm\\:ss})");
+
+                if (Index % 5 == 0 && Index != 0)
+                {
+                    Embeds.Add(CurrentBuilder);
+                    CurrentBuilder = new EmbedBuilder()
+                        .BuildEmbed(EmojiEnum.Unknown, botConfiguration, EmbedCallingType.Command).AddField(Field);
+                }
+                else
+                {
+                    try
+                    {
+                        CurrentBuilder.AddField(Field);
+                    }
+                    catch (Exception)
+                    {
+                        Embeds.Add(CurrentBuilder);
+                        CurrentBuilder = new EmbedBuilder()
+                            .BuildEmbed(EmojiEnum.Unknown, botConfiguration, EmbedCallingType.Command).AddField(Field);
+                    }
+                }
+            }
+
+            Embeds.Add(CurrentBuilder);
+
+            return Embeds.ToArray();
         }
 
         /// <summary>

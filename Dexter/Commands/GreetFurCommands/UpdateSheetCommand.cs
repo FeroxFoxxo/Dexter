@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
+using Dexter.Enums;
 using Discord;
 using Discord.Commands;
 using static Dexter.Services.GreetFurService;
@@ -18,7 +19,7 @@ namespace Dexter.Commands
         /// <param name="args">Special sequences that modify the behaviour of the method.</param>
         /// <returns>A <see cref="Task"/> object, which can be awaited until the method completes successfully.</returns>
 
-        [Command("updatesheet", RunMode = RunMode.Async)]
+        [Command("updatesheet")]
         [Summary("Updates the values of the active spreadsheet tracking system for GreetFurs.")]
         [ExtendedSummary("Updates the values of the active spreadsheet tracking for GreetFurs; you may extend the functionality of the command by using specific arguments:\n" +
             "**-l** or **--last**: Sets the spreadsheet to the latest full spreadsheet period\n" +
@@ -86,7 +87,7 @@ namespace Dexter.Commands
                 await msg.ModifyAsync(m =>
                 {
                     m.Content = "Invalid Syntax";
-                    m.Embed = BuildEmbed(Enums.EmojiEnum.Annoyed)
+                    m.Embed = BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Errors:")
                     .WithDescription(string.Join('\n', errors))
                                         .Build();

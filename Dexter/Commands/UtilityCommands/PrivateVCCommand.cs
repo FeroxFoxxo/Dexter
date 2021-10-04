@@ -18,7 +18,7 @@ namespace Dexter.Commands
         /// <param name="vcName">The name of the VC that the user wishes to create.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        [Command("createvc", RunMode = RunMode.Async)]
+        [Command("createvc")]
         [Summary("Creates a personal VC [UNIFURSAL+ ONLY].")]
         [ExtendedSummary("Usage: `createvc [Channel Name]`\n" +
             "This command creates a new private voice channels that only those you drag in will be able to interact in. You must be in a voice channel when you use this command so the bot can drag you in.\n" +

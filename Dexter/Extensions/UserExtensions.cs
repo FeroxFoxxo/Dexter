@@ -1,9 +1,11 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Dexter.Configurations;
 using Dexter.Enums;
 using Discord;
 using Discord.WebSocket;
+using Victoria.Node;
 
 namespace Dexter.Extensions
 {
@@ -39,6 +41,8 @@ namespace Dexter.Extensions
                 return PermissionLevel.GreetFur;
             else if (GuildUser.RoleIds.Contains(BotConfiguration.UnifursalRoleID))
                 return PermissionLevel.Unifursal;
+            else if (GuildUser.RoleIds.Contains(BotConfiguration.DJRoleID))
+                return PermissionLevel.DJ;
             else
                 return PermissionLevel.Default;
         }
@@ -85,6 +89,31 @@ namespace Dexter.Extensions
         public static string GetTrueAvatarUrl(this IUser User, ushort DefaultSize = 128)
         {
             return string.IsNullOrEmpty(User.GetAvatarUrl(size: DefaultSize)) ? User.GetDefaultAvatarUrl() : User.GetAvatarUrl(size: DefaultSize);
+        }
+
+        public static async Task<bool> SafeJoinAsync(this LavaNode lavaNode, SocketUser user, ISocketMessageChannel channel)
+        {
+            if (user is not SocketGuildUser guildUser || channel is not ITextChannel textChannel)
+                return false;
+
+            var voiceChannel = ((IVoiceState)guildUser).VoiceChannel;
+
+            if (voiceChannel == null)
+                return false;
+
+            if (!lavaNode.HasPlayer(guildUser.Guild))
+            {
+                try
+                {
+                    await (await lavaNode.JoinAsync(voiceChannel, textChannel)).SetVolumeAsync(100);
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
     }

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
 using Dexter.Databases.Levels;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
@@ -24,7 +25,7 @@ namespace Dexter.Commands
         /// <param name="arg">Special arguments that modify loading such as FORCE</param>
         /// <returns>A <c>Task</c> object, which can be awaited until it completes successfully.</returns>
 
-        [Command("loadlevels", RunMode = RunMode.Async)]
+        [Command("loadlevels")]
         [Summary("Loads levels from a json file into the system. To force replacement of levels that already exist type \"FORCE\" after the command.")]
         [RequireAdministrator]
 
@@ -41,7 +42,7 @@ namespace Dexter.Commands
             }
             catch (FileNotFoundException e)
             {
-                await BuildEmbed(Enums.EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("No levels file!")
                     .WithDescription(e.Message)
                     .SendEmbed(Context.Channel);
@@ -100,7 +101,7 @@ namespace Dexter.Commands
                 return;
             }
 
-            await BuildEmbed(Enums.EmojiEnum.Annoyed)
+            await BuildEmbed(EmojiEnum.Annoyed)
                 .WithTitle("No loaded levels!")
                 .WithDescription("All inputs in the data are either registered or have less XP than in the database. If you wish to force an overwrite, type \"FORCE\" after the command.")
                 .SendEmbed(Context.Channel);
@@ -133,7 +134,7 @@ namespace Dexter.Commands
         /// <param name="args">Other arguments that modify the loading mode like TRANSFORM or FORCE</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        [Command("webloadlevels", RunMode = RunMode.Async)]
+        [Command("webloadlevels")]
         [Summary("Usage: `webloadlevels [minpage] [maxpage] (Args)`. Loads levels from the mee6 API into the system. To force replacement of levels that already exist type \"FORCE\" after the command.")]
         [RequireAdministrator]
 
@@ -143,7 +144,7 @@ namespace Dexter.Commands
 
             if (min > max)
             {
-                await BuildEmbed(Enums.EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Invalid range!")
                     .WithDescription($"*max* must exceed *min*. Received *min* of {min} and *max* of {max}")
                     .SendEmbed(Context.Channel);
@@ -234,7 +235,7 @@ namespace Dexter.Commands
             }
             catch (HttpException e)
             {
-                await BuildEmbed(Enums.EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("HTTP Exception Reached")
                     .WithDescription($"Error {e.HttpCode}: {e.Message}.\n" +
                         $"Completed task up to page {--page}. Assigning {count} new values from {total} total processed entries.")

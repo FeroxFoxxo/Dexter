@@ -17,7 +17,7 @@ namespace Dexter.Attributes.Methods
 
         /// <summary>
         /// The constructor for the class, extending upon base the permission
-        /// to be checked to be the administrator permission.
+        /// to be checked to be the greetfur permission.
         /// </summary>
 
         public RequireGreetFurAttribute() : base(PermissionLevel.GreetFur) { }

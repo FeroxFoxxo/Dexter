@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Dexter.Abstractions
 {
@@ -14,6 +13,7 @@ namespace Dexter.Abstractions
         /// The object held in this instance.
         /// </summary>
         public T obj;
+
         /// <summary>
         /// The weight attached to this object.
         /// </summary>

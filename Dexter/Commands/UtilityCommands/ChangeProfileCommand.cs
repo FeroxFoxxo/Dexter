@@ -16,7 +16,7 @@ namespace Dexter.Commands
         /// </summary>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        [Command("changepfp", RunMode = RunMode.Async)]
+        [Command("changepfp")]
         [Summary("Changes the profile picture of the bot to a random image from a selection made for him.")]
         [RequireModerator]
 

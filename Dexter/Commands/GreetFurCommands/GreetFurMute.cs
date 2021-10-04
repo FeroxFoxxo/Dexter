@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
-using Dexter.Databases.Infractions;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;

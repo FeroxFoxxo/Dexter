@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 namespace Dexter.Commands
 {
 
-    public partial class FunCommands
+    public partial class TopicCommands
     {
 
         /// <summary>

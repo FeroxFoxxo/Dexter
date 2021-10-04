@@ -28,7 +28,7 @@ namespace Dexter.Commands
         /// <param name="user">The target user</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        [Command("profile", RunMode = RunMode.Async)]
+        [Command("profile")]
         [Summary("Gets the profile of the user mentioned or yours.")]
         [Alias("userinfo")]
         [Priority(2)]
@@ -80,7 +80,7 @@ namespace Dexter.Commands
         /// <param name="userId">The target user's ID.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        [Command("profile", RunMode = RunMode.Async)]
+        [Command("profile")]
         [Summary("Gets the profile of the user mentioned by ID.")]
         [Alias("userinfo")]
         [Priority(1)]

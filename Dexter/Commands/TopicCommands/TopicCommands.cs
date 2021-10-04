@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 namespace Dexter.Commands
 {
 
-    public partial class FunCommands
+    public partial class TopicCommands
     {
 
         /// <summary>

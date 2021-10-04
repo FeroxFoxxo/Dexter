@@ -17,7 +17,7 @@ namespace Dexter.Commands
         /// <param name="Question">A properly formatted stringified math expression.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        [Command("ask", RunMode = RunMode.Async)]
+        [Command("ask")]
         [Summary("Evaluates mathematical expressions and answers questions!")]
         [Alias("math", "calc", "calculate")]
         [CommandCooldown(15)]

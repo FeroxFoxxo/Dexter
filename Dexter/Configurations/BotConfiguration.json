@@ -5,6 +5,7 @@
   "GreetFurRoleID": 808587693881688064,
   "DivineFurRoleID": 871729807090655232,
   "UnifursalRoleID": 886354632367034419,
+  "DJRoleID": 893721086817075240,
   "PatreonRoleIDs": [
     853691823197257778
   ],
@@ -34,5 +35,6 @@
   "EnableDatabaseBackups": false,
   "BotStatus": "use ~modmail in DMs to send the staff a message anonymously!",
   "PingDevelopers": false,
-  "StandardTimeZone": -4
+  "StandardTimeZone": -4,
+  "MusicChannelID": 792657895014793246
 }

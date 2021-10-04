@@ -25,7 +25,8 @@ namespace Dexter.Commands
             "**-n** or **--new**: Adds any untracked users with recent activity to the Greetfur spreadsheet\n" +
             "**-s** or **--safe**: No non-empty cells will be overridden by the update operation\n" +
             "**-w [week]** or **--week [week]**: Sets the first week of the Spreadsheet to a week given by its number since tracking started.\n" +
-            "**-re** or **--read-exemptions**: Reads all \"Exempt\" entries in the sheet and saves them to the relevant users for the time period requested (current by default, can be overridden with --last or --week)")]
+            "**-re** or **--read-exemptions**: Reads all \"Exempt\" entries in the sheet and saves them to the relevant users for the time period requested (current by default, can be overridden with --last or --week)\n" +
+            "**-tbp** or **--the-big-picture**: Updates the big picture with the same data as the activity sheet.")]
         [Alias("updatespreadsheet")]
         [RequireModerator]
 
@@ -68,6 +69,10 @@ namespace Dexter.Commands
                     case "-re":
                     case "--read-exemptions":
                         opt |= GreetFurOptions.ReadExemptions;
+                        break;
+                    case "-tbp":
+                    case "--the-big-picture":
+                        opt |= GreetFurOptions.ManageTheBigPicture;
                         break;
                     default:
                         errors.Add($"Unrecognized argument: {splitArgs[i].Replace('@', '-')}");

@@ -112,6 +112,11 @@ namespace Dexter.Services
                 .Where(sheet => sheet.Properties.Title == GreetFurConfiguration.FortnightSpreadsheet)
                 .FirstOrDefault();
 
+            if (currentFortnight is null)
+            {
+                throw new NullReferenceException($"Unable to find the activity spreadsheet (\"{GreetFurConfiguration.FortnightSpreadsheet}\"). Check the remote spreadsheet and confirm that the name is correct!");
+            }
+
             string dataRequestRange = $"{currentFortnight.Properties.Title}";
             string updateRangeName = $"{currentFortnight.Properties.Title}!A2:{GreetFurCommands.IntToLetters(GreetFurConfiguration.Information["Notes"])}{currentFortnight.Properties.GridProperties.RowCount}";
             ValueRange data = await sheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID, dataRequestRange)
@@ -131,6 +136,7 @@ namespace Dexter.Services
             else
             {
                 firstDay = today - (daysSinceTracking % TRACKING_LENGTH) - (int)(options & GreetFurOptions.DisplayLastFull) * TRACKING_LENGTH;
+                week = daysSinceTracking / WEEK_LENGTH;
             }
             int firstDataIndex = GreetFurConfiguration.Information["Notes"] - TRACKING_LENGTH;
 
@@ -141,8 +147,6 @@ namespace Dexter.Services
             UpdateRequest req = sheetsService.Spreadsheets.Values.Update(firstDayCell, GreetFurConfiguration.SpreadSheetID, dateRangeName);
             req.ValueInputOption = UpdateRequest.ValueInputOptionEnum.USERENTERED;
             await req.ExecuteAsync();
-
-            Console.Out.WriteLine("Completed initial setup");
             
             for (int i = 0; i < toUpdate.Values.Count; i++)
             {
@@ -203,22 +207,18 @@ namespace Dexter.Services
                     ids.Add(0);
                 }
             }
-            Console.Out.WriteLine("Completed base update setup");
 
             req = sheetsService.Spreadsheets.Values.Update(toUpdate, GreetFurConfiguration.SpreadSheetID, updateRangeName);
             req.ValueInputOption = UpdateRequest.ValueInputOptionEnum.USERENTERED;
             await req.ExecuteAsync();
 
+            Dictionary<ulong, List<GreetFurRecord>> newActivity = null;
             if (options.HasFlag(GreetFurOptions.AddNewRows))
             {
                 ValueRange range = new();
                 List<string[]> rows = new();
 
-                Dictionary<ulong, List<GreetFurRecord>> newActivity = GreetFurDB.GetAllRecentActivity(firstDay, TRACKING_LENGTH);
-
-                foreach (ulong id in ids) {
-                    newActivity.Remove(id);
-                } 
+                newActivity = GreetFurDB.GetAllRecentActivity(firstDay, TRACKING_LENGTH);
 
                 bool managerToggle = true;
                 for (int i = 1; i < data.Values.Count; i++)
@@ -230,9 +230,13 @@ namespace Dexter.Services
                         managerToggle = !managerToggle;
                 }
 
+                HashSet<ulong> activityIDs = ids.ToHashSet();
+
                 int rowNumber = data.Values.Count;
                 foreach(KeyValuePair<ulong, List<GreetFurRecord>> kvp in newActivity)
                 {
+                    if (activityIDs.Contains(kvp.Key)) continue;
+
                     GreetFurRecord[] withGaps = new GreetFurRecord[TRACKING_LENGTH];
                     int inData = 0;
                     for (int i = 0; i < TRACKING_LENGTH; i++)
@@ -246,18 +250,109 @@ namespace Dexter.Services
                             withGaps[i] = kvp.Value[inData++];
                         }   
                     }
-                    rows.Add(RowFromRecords(withGaps, ++rowNumber, managerToggle));
-                }
-
-                foreach (string[] row in rows)
-                {
-                    Console.Out.WriteLine(string.Join(", ", row));
+                    rows.Add(await RowFromRecords(withGaps, ++rowNumber, managerToggle));
                 }
 
                 range.Values = rows.ToArray();
                 AppendRequest appendReq = sheetsService.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.FortnightSpreadsheet);
                 appendReq.ValueInputOption = AppendRequest.ValueInputOptionEnum.USERENTERED;
                 await appendReq.ExecuteAsync();
+            }
+
+            if (options.HasFlag(GreetFurOptions.ManageTheBigPicture) && week + 1 < GreetFurConfiguration.TheBigPictureWeekCap)
+            {
+                Sheet theBigPictureSheet = spreadsheet.Sheets
+                    .Where(sheet => sheet.Properties.Title == GreetFurConfiguration.TheBigPictureSpreadsheet)
+                    .FirstOrDefault();
+
+                if (theBigPictureSheet is null)
+                {
+                    throw new NullReferenceException($"Unable to find The Big Picture spreadsheet (\"{GreetFurConfiguration.TheBigPictureSpreadsheet}\"). Check the remote spreadsheet and confirm that the name is correct!");
+                }
+
+                int tbpRows = theBigPictureSheet.Properties.GridProperties.RowCount ?? -1;
+
+                string tbpNamesA1 = $"{GreetFurConfiguration.TheBigPictureSpreadsheet}!{GreetFurConfiguration.TheBigPictureNames}1:{GreetFurConfiguration.TheBigPictureNames}{tbpRows}";
+                string tbpIDsA1 = $"{GreetFurConfiguration.TheBigPictureSpreadsheet}!{GreetFurConfiguration.TheBigPictureIDs}1:{GreetFurConfiguration.TheBigPictureIDs}{tbpRows}";
+                string tbpWeeksA1 = $"{GreetFurConfiguration.TheBigPictureSpreadsheet}!{GreetFurCommands.IntToLetters(week + GreetFurConfiguration.Information["TBPWeekStart"] - 1)}1:{GreetFurCommands.IntToLetters(week + GreetFurConfiguration.Information["TBPWeekStart"])}{tbpRows}";
+
+                BatchGetRequest batchreq = sheetsService.Spreadsheets.Values.BatchGet(GreetFurConfiguration.SpreadSheetID);
+                batchreq.Ranges = new Google.Apis.Util.Repeatable<string>(new string[] { tbpNamesA1, tbpIDsA1, tbpWeeksA1 });
+                BatchGetValuesResponse batchresp = await batchreq.ExecuteAsync();
+                ValueRange[] ranges = batchresp.ValueRanges.ToArray();
+
+                List<ulong> foundIDs = new();
+                for (int i = 0; i < ranges[1].Values.Count; i++)
+                {
+                    if (!ulong.TryParse(ranges[1].Values[i][0]?.ToString().Split('/').Last() ?? "", out ulong id) || id == 0)
+                    {
+                        foundIDs.Add(0);
+                        continue;
+                    }
+                    foundIDs.Add(id);
+
+                    GreetFurRecord[] records = GreetFurDB.GetRecentActivity(id, firstDay);
+                    double[] yesPerWeek = new double[2];
+                    object[] transformed = new object[2];
+                    int dPerWeek = records.Length / 2;
+
+                    for (int w = 0; w < 2; w++)
+                    {
+                        for (int d = 0; d < dPerWeek; d++)
+                        {
+                            if (records[w * dPerWeek + d].IsYes(GreetFurConfiguration))
+                            {
+                                yesPerWeek[w]++;
+                            }
+                        }
+                        if (w < ranges[2].Values[i].Count && int.TryParse(ranges[2].Values[i][w].ToString(), out int n))
+                            yesPerWeek[w] = Math.Max(yesPerWeek[w], n);
+
+                        transformed[w] = yesPerWeek[w];
+                    }
+                    ranges[2].Values[i] = transformed;
+                }
+
+                UpdateRequest weekValuesUpdate = sheetsService.Spreadsheets.Values.Update(ranges[2], GreetFurConfiguration.SpreadSheetID, tbpWeeksA1);
+                weekValuesUpdate.ValueInputOption = UpdateRequest.ValueInputOptionEnum.RAW;
+                await weekValuesUpdate.ExecuteAsync();
+
+                if (options.HasFlag(GreetFurOptions.AddNewRows))
+                {
+                    HashSet<ulong> tbpFoundIDs = foundIDs.ToHashSet();
+
+                    if (newActivity is null)
+                        newActivity = GreetFurDB.GetAllRecentActivity(firstDay, TRACKING_LENGTH);
+
+                    ValueRange range = new();
+                    List<string[]> newRows = new();
+                    int row = ranges[1].Values.Count; 
+
+                    foreach (ulong id in newActivity.Keys)
+                    {
+                        if (tbpFoundIDs.Contains(id)) continue;
+
+                        Dictionary<int, int> activity = new();
+                        foreach(GreetFurRecord record in newActivity[id])
+                        {
+                            if (record.IsYes(GreetFurConfiguration))
+                            {
+                                int recordW = (record.Date - GreetFurConfiguration.FirstTrackingDay) / WEEK_LENGTH + 1;
+                                if (activity.ContainsKey(recordW)) 
+                                    activity[recordW]++;
+                                else 
+                                    activity.Add(recordW, 1);
+                            }
+                        }
+                        if (activity.Count > 0)
+                            newRows.Add(await TBPRowFromRecords(id, activity, ++row));
+                    }
+
+                    range.Values = newRows.ToArray();
+                    AppendRequest appendRequest = sheetsService.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.TheBigPictureSpreadsheet);
+                    appendRequest.ValueInputOption = AppendRequest.ValueInputOptionEnum.USERENTERED;
+                    await appendRequest.ExecuteAsync();
+                }
             }
         }
 
@@ -287,24 +382,58 @@ namespace Dexter.Services
             /// <summary>
             /// Whether to read exemptions and log them to records while reading the sheet.
             /// </summary>
-            ReadExemptions = 8
+            ReadExemptions = 8,
+            /// <summary>
+            /// Whether to also update the big picture (never forced).
+            /// </summary>
+            ManageTheBigPicture = 16
         }
 
-        private string[] RowFromRecords(GreetFurRecord[] records, int row, bool managerToggle = false)
+        private async Task<string[]> RowFromRecords(GreetFurRecord[] records, int row, bool managerToggle = false)
         {
             ulong id = records[0].UserId;
             int day = GreetFurDB.GetDayForUser(id);
             string[] result = new string[GreetFurConfiguration.FortnightTemplates.Keys.Max() + 1];
 
-            int firstcol = GreetFurConfiguration.Information["Notes"] - records.Length;
-            for (int i = firstcol; i < firstcol + records.Length; i++)
+            int firstCol = GreetFurConfiguration.Information["Notes"] - records.Length;
+            for (int i = firstCol; i < firstCol + records.Length; i++)
             {
-                result[i] = DayFormat(records[i - firstcol], day);
+                result[i] = DayFormat(records[i - firstCol], day);
             }
 
-            foreach(int i in GreetFurConfiguration.FortnightTemplates.Keys)
+            foreach(KeyValuePair<int, string> kvp in GreetFurConfiguration.FortnightTemplates)
             {
-                result[i] = ResolveFormat(GreetFurConfiguration.FortnightTemplates[i], id, row, managerToggle);
+                result[kvp.Key] = await ResolveFormat(kvp.Value, id, row, managerToggle);
+            }
+
+            return result;
+        }
+
+        const int WEEK_LENGTH = 7;
+        private async Task<string[]> TBPRowFromRecords(ulong userId, Dictionary<int, int> activity, int row)
+        {
+            if (activity.Count == 0)
+            {
+                return null;
+            }
+
+            int firstCol = GreetFurConfiguration.Information["TBPWeekStart"];
+            int length = GreetFurConfiguration.TheBigPictureWeekCap + firstCol;
+            string[] result = new string[length];
+
+            foreach (KeyValuePair<int, string> kvp in GreetFurConfiguration.TBPTemplate)
+            {
+                result[kvp.Key] = await ResolveFormat(kvp.Value, userId, row, false);
+            }
+
+            for (int wcol = firstCol; wcol < result.Length; wcol++)
+            {
+                result[wcol] = "0";
+            }
+
+            foreach(KeyValuePair<int, int> kvp in activity)
+            {
+                result[firstCol + kvp.Key - 1] = kvp.Value.ToString();
             }
 
             return result;
@@ -322,10 +451,11 @@ namespace Dexter.Services
             return r.ToString(GreetFurConfiguration, day);
         }
 
-        private string ResolveFormat(string format, ulong userId, int row, bool managerToggle)
+        private async Task<string> ResolveFormat(string format, ulong userId, int row, bool managerToggle)
         {
             MatchCollection matches = Regex.Matches(format, @"\{[^{}]*\}");
             StringBuilder sb = new();
+            IUser u;
 
             int lastindex = 0;
             foreach(Match m in matches)
@@ -350,23 +480,21 @@ namespace Dexter.Services
                         sb.Append(managerToggle ? "TRUE" : "FALSE");
                         break;
                     case "{User}":
-                    {
-                        IUser u = DiscordShardedClient.GetUser(userId);
+                    case "{Username}":
+                        u = await DiscordShardedClient.Rest.GetUserAsync(userId);
                         sb.Append(u?.Username ?? "Unknown");
                         break;
-                    }
                     case "{Discriminator}":
-                    {
-                        IUser u = DiscordShardedClient.GetUser(userId);
+                        u = await DiscordShardedClient.Rest.GetUserAsync(userId);
                         sb.Append(u?.Discriminator ?? "????");
                         break;
-                    }
                     case "{Tag}":
-                    {
-                        IUser u = DiscordShardedClient.GetUser(userId);
+                        u = await DiscordShardedClient.Rest.GetUserAsync(userId);
                         sb.Append((u?.Username ?? "Unknown") + "#" + (u?.Discriminator ?? "????"));
                         break;
-                    }
+                    default:
+                        sb.Append(m.Value);
+                        break;
                 }
             }
             sb.Append(format[lastindex..]);

@@ -1,3 +1,4 @@
+using Dexter.Configurations;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -89,10 +90,10 @@ namespace Dexter.Databases.GreetFur
         /// <param name="currentDay">The current day for the user.</param>
         /// <returns>A short string representation of the completion state of this record.</returns>
 
-        public string ToString(Dexter.Configurations.GreetFurConfiguration greetFurConfiguration, int currentDay = int.MaxValue)
+        public string ToString(GreetFurConfiguration greetFurConfiguration, int currentDay = int.MaxValue)
         {
             string state;
-            if (MessageCount >= greetFurConfiguration.GreetFurMinimumDailyMessages || (MutedUser && greetFurConfiguration.GreetFurActiveWithMute))
+            if (IsYes(greetFurConfiguration))
                 state = "Y";
             else if (IsExempt)
                 return "Exempt";
@@ -131,6 +132,17 @@ namespace Dexter.Databases.GreetFur
             return $"{UserId}-{Date}; {(MutedUser ? "M" : "")}{MessageCount}";
         else
             return $"{RecordId}: {UserId} day {Date}; {MessageCount} messages {(MutedUser ? "with" : "without")} mute.";
+        }
+
+        /// <summary>
+        /// Checks whether the required activity quota has been achieved by the user in this record object.
+        /// </summary>
+        /// <param name="config">The GreetFur Configuration file containing relevant information defining whether a user's activity is considered as an active day or not.</param>
+        /// <returns><see langword="true"/> if the user's activity matches a "Yes", otherwise <see langword="false"/>.</returns>
+
+        public bool IsYes(GreetFurConfiguration config)
+        {
+            return MessageCount >= config.GreetFurMinimumDailyMessages || (MutedUser && config.GreetFurActiveWithMute);
         }
     }
 

@@ -15,7 +15,6 @@ namespace Dexter.Commands
         [Command("join")]
         [Summary("Tells me to join the voice channel you are currently in.")]
         [MusicBotChannel]
-        [RequireDJ]
 
         public async Task JoinCommand()
         {

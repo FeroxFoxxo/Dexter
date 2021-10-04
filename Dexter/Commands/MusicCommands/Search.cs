@@ -78,6 +78,9 @@ namespace Dexter.Commands
 
 				for (int i = 0; i < topResults.Count; i++)
 				{
+					if (options.ContainsKey(topResults[i].Title))
+						continue;
+
 					options.Add(topResults[i].Title, i);
 
 					embedFields.Add(new() {

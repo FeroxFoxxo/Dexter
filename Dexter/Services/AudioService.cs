@@ -133,7 +133,7 @@ namespace DexterSlash.Services
 					value = DisconnectTokens[player.VoiceChannel.Id];
 				}
 
-				await Task.Delay(TimeSpan.FromSeconds(10), value.Token);
+				await Task.Delay(TimeSpan.FromSeconds(15), value.Token);
 
 				if (value.IsCancellationRequested)
 					return;
@@ -145,10 +145,10 @@ namespace DexterSlash.Services
 					.WithColor(Color.Gold)
 					.WithDescription("🎵 No more songs in queue, disconnecting!");
 
+				await LavaNode.LeaveAsync(player.VoiceChannel);
+
 				await Interactive.DelayedSendMessageAndDeleteAsync
 					(player.TextChannel, deleteDelay: TimeSpan.FromSeconds(10), embed: dcEmbed.Build());
-
-				await LavaNode.LeaveAsync(player.VoiceChannel);
 
 				return;
 			}

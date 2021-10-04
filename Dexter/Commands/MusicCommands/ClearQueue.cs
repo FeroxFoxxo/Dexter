@@ -23,7 +23,7 @@ namespace Dexter.Commands
             if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle("Unable to stop songs!")
+                    .WithTitle("Unable to clear queue!")
                     .WithDescription("I couldn't find the music player for this server.\n" +
                     "Please ensure I am connected to a voice channel before using this command.")
                     .SendEmbed(Context.Channel);
@@ -46,7 +46,7 @@ namespace Dexter.Commands
             catch (Exception)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle("Unable to stop songs!")
+                    .WithTitle("Unable to clear queue!")
                     .WithDescription($"Failed to clear queue.\nIf the issue persists, please contact the developers for support.")
                     .SendEmbed(Context.Channel);
 

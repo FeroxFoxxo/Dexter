@@ -39,7 +39,7 @@ namespace Dexter.Attributes.Methods
                 ServiceProvider.GetRequiredService<BotConfiguration>().MusicChannelID == CommandContext.Channel.Id || CommandContext.Channel.GetType() == typeof(SocketDMChannel) ?
                     PreconditionResult.FromSuccess() :
                     PreconditionResult.FromError($"Heya! You're not permitted to use the command `{CommandInfo.Name}` " +
-                    $"in the channel `#{CommandContext.Channel}`. Please use a designated bot channel instead <3"));
+                    $"in the channel `#{CommandContext.Channel}`. Please use a designated music channel instead <3"));
         }
 
     }

@@ -4,7 +4,6 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Node;
@@ -15,6 +14,15 @@ namespace Dexter.Commands
 {
     public partial class MusicCommands
 	{
+		
+		[Command("lyrics")]
+		[Summary("Replies with the lyrics to the song provided.")]
+		[MusicBotChannel]
+
+		public async Task LyricsCommand([Remainder] string song)
+		{
+			await SendLyricsFromTrack(song);
+		}
 
 		[Command("lyrics")]
 		[Summary("Replies with the lyrics to the current track that is playing.")]
@@ -25,7 +33,7 @@ namespace Dexter.Commands
 			if (!await LavaNode.SafeJoinAsync(Context.User, Context.Channel))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to pause the player!")
+					.WithTitle("Unable to find lyrics!")
 					.WithDescription("Failed to join voice channel. Are you in a voice channel?")
 					.SendEmbed(Context.Channel);
 
@@ -45,15 +53,11 @@ namespace Dexter.Commands
 					return;
 				}
 
-				await SendLyricsFromTrack(player.Track);
+				await SendLyricsFromTrack(player.Track.Title);
 			}
 		}
 
-		[Command("lyrics")]
-		[Summary("Replies with the lyrics to the song provided.")]
-		[MusicBotChannel]
-
-		public async Task LyricsCommand([Remainder] string song)
+		public async Task SendLyricsFromTrack(string song)
 		{
 			SearchResponse searchResult;
 
@@ -66,33 +70,56 @@ namespace Dexter.Commands
 				await Debug.LogMessageAsync("Lavalink is not connected! Failing with embed error...", LogSeverity.Error);
 
 				await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle($"Unable to play `{song}`!")
+					.WithTitle($"Unable to find lyrics for `{song}`!")
 					.WithDescription("Failure: lavalink dependency missing.\nPlease check the console logs for more details.")
 					.SendEmbed(Context.Channel);
 
 				return;
 			}
 
-			await SendLyricsFromTrack(searchResult.Tracks.FirstOrDefault());
-		}
-
-		public async Task SendLyricsFromTrack (LavaTrack track)
-		{
-			var lyrics = await track.FetchLyricsFromGeniusAsync();
-
-			if (string.IsNullOrWhiteSpace(lyrics))
+			foreach (var track in searchResult.Tracks)
 			{
-				await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to find song!")
-					.WithDescription($"No lyrics found for {track.Title}.")
-					.SendEmbed(Context.Channel);
+				if (track is null)
+				{
+					continue;
+				}
 
-				return;
+				try
+				{
+					var lyrics = await track.FetchLyricsFromGeniusAsync();
+
+					if (!string.IsNullOrWhiteSpace(lyrics))
+					{
+						await BuildEmbed(EmojiEnum.Unknown)
+							.WithTitle($"🎶 {track.Title} Lyrics (GENIUS)")
+							.WithDescription(lyrics.Length > 1700 ? lyrics.Substring(0, 1700) : lyrics)
+							.SendEmbed(Context.Channel);
+						return;
+					}
+
+				}
+				catch (Exception) { }
+
+				try
+				{
+					var lyrics = await track.FetchLyricsFromOvhAsync();
+
+					if (!string.IsNullOrWhiteSpace(lyrics))
+					{
+						await BuildEmbed(EmojiEnum.Unknown)
+							.WithTitle($"🎶 {track.Title} Lyrics (OHV)")
+							.WithDescription(lyrics.Length > 1700 ? lyrics.Substring(0, 1700) : lyrics)
+							.SendEmbed(Context.Channel);
+						return;
+					}
+
+				}
+				catch (Exception) { }
 			}
 
-			await BuildEmbed(EmojiEnum.Unknown)
-				.WithTitle($"🎶 {track.Title} Lyrics")
-				.WithDescription(lyrics.Length > 1700 ? lyrics.Substring(0, 1700) : lyrics)
+			await BuildEmbed(EmojiEnum.Annoyed)
+				.WithTitle("Unable to find song!")
+				.WithDescription($"No lyrics found for:\n**{song}**.")
 				.SendEmbed(Context.Channel);
 		}
 

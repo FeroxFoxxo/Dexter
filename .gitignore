@@ -362,3 +362,4 @@ desktop.ini
 /Dexter/Databases/CooldownDB.db
 /Dexter/Databases/ConfigurationDB.db
 /Dexter/Databases/CommunityEventsDB.db
+*.gz

@@ -13,6 +13,7 @@ using Discord.WebSocket;
 using Humanizer;
 using System.Diagnostics;
 using System.IO.Compression;
+using Microsoft.Extensions.Logging;
 
 namespace Dexter.Services
 {
@@ -45,6 +46,11 @@ namespace Dexter.Services
         public string CurrentPFP { get; private set; }
 
         /// <summary>
+        /// The Logger instance for the current class that has been injected through DI.
+        /// </summary>
+        public ILogger<ProfilingService> Logger { get; set; }
+
+        /// <summary>
         /// The Initialize void hooks the Client.Ready event to the ChangePFP method.
         /// </summary>
 
@@ -72,9 +78,8 @@ namespace Dexter.Services
             }
             catch (HttpException)
             {
-                await Debug.LogMessageAsync(
-                    "Unable to change the bot's profile picture due to ratelimiting!",
-                    LogSeverity.Warning
+                Logger.LogWarning(
+                    "Unable to change the bot's profile picture due to ratelimiting!"
                 );
             }
 

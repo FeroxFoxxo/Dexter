@@ -5,6 +5,7 @@ using Discord;
 using Discord.Commands;
 using Fergun.Interactive;
 using Fergun.Interactive.Selection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,94 +37,115 @@ namespace Dexter.Commands
 
 			if (LavaNode.TryGetPlayer(Context.Guild, out var player))
 			{
-				SearchResponse searchResult;
+				if(Uri.TryCreate(search, UriKind.Absolute, out Uri uriResult))
+                {
+					string baseUrl = uriResult.GetLeftPart(UriPartial.Authority);
 
-				try
-				{
+					Console.WriteLine(baseUrl);
+				}
+
+				await SearchSingleTrack (search, player);
+			}
+		}
+
+		public async Task SearchSingleTrack(string search, LavaPlayer player)
+		{
+			SearchResponse searchResult;
+
+			try
+			{
+				if (search.Contains("soundcloud") || (search.Contains("sound") && search.Contains("cloud")))
+                {
+                    searchResult = await LavaNode.SearchAsync(SearchType.SoundCloud, search);
+
+					if (searchResult.Tracks.FirstOrDefault() is null)
+						searchResult = await LavaNode.SearchAsync(SearchType.YouTube, search);
+				}
+				else
 					searchResult = await LavaNode.SearchAsync(SearchType.YouTube, search);
-				}
-				catch (Exception)
+			}
+			catch (Exception)
+			{
+				Logger.LogError("Lavalink is not connected!\nFailing with embed error...");
+
+				await BuildEmbed(EmojiEnum.Annoyed)
+					.WithTitle($"Unable to search for `{search}`!")
+					.WithDescription("Failure: lavalink dependency missing.\nPlease check the console logs for more details.")
+					.SendEmbed(Context.Channel);
+
+				return;
+			}
+
+			var track = searchResult.Tracks.FirstOrDefault();
+
+			if (track == null)
+			{
+				await BuildEmbed(EmojiEnum.Annoyed)
+					.WithTitle($"Unable to search for `{search}`!")
+					.WithDescription("The requested search returned no results.")
+					.SendEmbed(Context.Channel);
+
+				return;
+			}
+
+			var topResults = searchResult.Tracks.Count <= 5 ? searchResult.Tracks.ToList() : searchResult.Tracks.Take(5).ToList();
+
+			string line1 = topResults.Count <= 5
+				? $"I found {topResults.Count} tracks matching your search."
+				: $"I found {searchResult.Tracks.Count:N0} tracks matching your search, here are the top 5.";
+
+			var embedFields = new List<EmbedFieldBuilder>();
+
+			var options = new Dictionary<string, int>();
+
+			for (int i = 0; i < topResults.Count; i++)
+			{
+				if (options.ContainsKey(topResults[i].Title))
+					continue;
+
+				options.Add(topResults[i].Title, i);
+
+				embedFields.Add(new()
 				{
-					await Debug.LogMessageAsync("Lavalink is not connected!\nFailing with embed error...", LogSeverity.Error);
+					Name = $"#{i + 1}. {topResults[i].Title}",
+					Value = $"Uploader: {topResults[i].Author}\n" + $"Duration: {topResults[i].Duration.HumanizeTimeSpan()}"
+				});
+			}
 
-					await BuildEmbed(EmojiEnum.Annoyed)
-						.WithTitle($"Unable to search for `{search}`!")
-						.WithDescription("Failure: lavalink dependency missing.\nPlease check the console logs for more details.")
-						.SendEmbed(Context.Channel);
+			var embed = BuildEmbed(EmojiEnum.Unknown)
+				.WithTitle("Search Results:")
+				.WithDescription($"{Context.User.Mention}, {line1}")
+				.WithFields(embedFields)
+				.Build();
 
-					return;
-				}
+			var result = await Interactive.SendSelectionAsync(
+				new SelectionBuilder<KeyValuePair<string, int>>()
+					.WithSelectionPage(PageBuilder.FromEmbed(embed))
+					.WithOptions(options)
+					.WithInputType(InputType.SelectMenus)
+					.WithDeletion(DeletionOptions.Invalid)
+					.Build()
+				, Context.Channel, TimeSpan.FromMinutes(2));
 
-				var track = searchResult.Tracks.FirstOrDefault();
+			if (result.IsSuccess)
+			{
+				var newTrack = topResults.ElementAt(result.Value.Value);
 
-				if (track == null)
+				await result.Message.DeleteAsync();
+
+				if (player.Vueue.Count == 0 && player.PlayerState != PlayerState.Playing)
 				{
-					await BuildEmbed(EmojiEnum.Annoyed)
-						.WithTitle($"Unable to search for `{search}`!")
-						.WithDescription("The requested search returned no results.")
-						.SendEmbed(Context.Channel);
-
-					return;
+					await player.PlayAsync(newTrack);
+					await BuildEmbed(EmojiEnum.Unknown).GetNowPlaying(newTrack).SendEmbed(Context.Channel);
 				}
-
-				var topResults = searchResult.Tracks.Count <= 5 ? searchResult.Tracks.ToList() : searchResult.Tracks.Take(5).ToList();
-
-				string line1 = topResults.Count <= 5
-					? $"I found {topResults.Count} tracks matching your search."
-					: $"I found {searchResult.Tracks.Count:N0} tracks matching your search, here are the top 5.";
-
-				var embedFields = new List<EmbedFieldBuilder>();
-
-				var options = new Dictionary<string, int>();
-
-				for (int i = 0; i < topResults.Count; i++)
+				else
 				{
-					if (options.ContainsKey(topResults[i].Title))
-						continue;
-
-					options.Add(topResults[i].Title, i);
-
-					embedFields.Add(new() {
-						Name = $"#{i + 1}. {topResults[i].Title}",
-						Value = $"Uploader: {topResults[i].Author}\n" + $"Duration: {topResults[i].Duration.HumanizeTimeSpan()}"
-					});
-				}
-
-				var embed = BuildEmbed(EmojiEnum.Unknown)
-					.WithTitle("Search Results:")
-					.WithDescription($"{Context.User.Mention}, {line1}")
-					.WithFields(embedFields)
-					.Build();
-
-				var result = await Interactive.SendSelectionAsync (
-					new SelectionBuilder<KeyValuePair<string, int>>()
-						.WithSelectionPage(PageBuilder.FromEmbed(embed))
-						.WithOptions(options)
-						.WithInputType(InputType.SelectMenus)
-						.WithDeletion(DeletionOptions.Invalid)
-						.Build()
-					, Context.Channel, TimeSpan.FromMinutes(2));
-
-				if (result.IsSuccess)
-				{
-					var newTrack = topResults.ElementAt(result.Value.Value);
-
-					await result.Message.DeleteAsync();
-
-					if (player.Vueue.Count == 0 && player.PlayerState != PlayerState.Playing)
+					lock (AudioService.Locker)
 					{
-						await player.PlayAsync(newTrack);
-						await BuildEmbed(EmojiEnum.Unknown).GetNowPlaying(newTrack).SendEmbed(Context.Channel);
+						player.Vueue.Enqueue(newTrack);
 					}
-					else
-					{
-						lock (AudioService.Locker)
-						{
-							player.Vueue.Enqueue(newTrack);
-						}
 
-						await BuildEmbed(EmojiEnum.Unknown).GetQueuedTrack(newTrack, player.Vueue.Count).SendEmbed(Context.Channel);
-					}
+					await BuildEmbed(EmojiEnum.Unknown).GetQueuedTrack(newTrack, player.Vueue.Count).SendEmbed(Context.Channel);
 				}
 			}
 		}

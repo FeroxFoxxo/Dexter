@@ -12,6 +12,7 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
+using Microsoft.Extensions.Logging;
 
 namespace Dexter.Services
 {
@@ -55,6 +56,8 @@ namespace Dexter.Services
         /// </summary>
 
         public CustomCommandsConfiguration CustomCommandsConfiguration { get; set; }
+
+        public ILogger<CommandHandlerService> Logger { get; set; }
 
         /// <summary>
         /// The Initialize override hooks into both the Client's MessageReceived event and the CommandService's CommandExecuted event.
@@ -203,10 +206,7 @@ namespace Dexter.Services
                         }
 
                         // If the error is not an ObjectNotFound error, we log the message to the console with the appropriate data.
-                        await Debug.LogMessageAsync
-                            ($"Unknown statement reached!\nCommand: {(commandInfo.IsSpecified ? commandInfo.Value.Name : null)}\nresult: {result}",
-                            LogSeverity.Warning
-                        );
+                        Logger.LogWarning  ($"Unknown statement reached!\nCommand: {(commandInfo.IsSpecified ? commandInfo.Value.Name : null)}\nresult: {result}");
 
                         EmbedBuilder commandErrorEmbed;
 

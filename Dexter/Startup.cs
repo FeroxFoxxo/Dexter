@@ -6,7 +6,9 @@ using Discord.WebSocket;
 using Fergun.Interactive;
 using Figgle;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using SpotifyAPI.Web;
 using System;
 using System.Collections.Generic;
@@ -73,7 +75,7 @@ namespace Dexter
 
 			await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(name));
 
-			Console.Title = name;
+			Console.Title = $"{name} v{version} (Discord.Net v{DiscordConfig.Version})";
 
 			// Start the swager instance for debugging.
 
@@ -135,7 +137,15 @@ namespace Dexter
 
 			builder.Services.AddLavaNode(x => { x.SelfDeaf = true; x.Port = 2333; });
 
-			bool HasErrored = false;
+			bool hasErrored = false;
+
+			var builtConfig = new ConfigurationBuilder()
+				.AddJsonFile("appsettings.json")
+				.AddCommandLine(Array.Empty<string>())
+				.Build();
+
+			var logger = new LoggerConfiguration()
+				.CreateLogger();
 
 			// Finds all JSON configurations and initializes them from their respective files.
 			// If a JSON file is not created, a new one is initialized in its place.
@@ -154,7 +164,7 @@ namespace Dexter
 
 							builder.Services.AddSingleton(Type);
 
-							await Debug.LogMessageAsync(
+							logger.Error(
 								$" This application does not have a configuration file for {Type.Name}! " +
 								$"A mock JSON class has been created in its place...",
 								LogSeverity.Warning
@@ -177,17 +187,17 @@ namespace Dexter
 							}
 							catch (JsonException Exception)
 							{
-								await Debug.LogMessageAsync(
+								logger.Error(
 									$" Unable to initialize {Type.Name}! Ran into: {Exception.InnerException}.",
 									LogSeverity.Error
 								);
 
-								HasErrored = true;
+								hasErrored = true;
 							}
 						}
 					});
 
-			if (HasErrored)
+			if (hasErrored)
 				return;
 
 			GetDatabases().ForEach(t => builder.Services.AddSingleton(t));
@@ -208,27 +218,27 @@ namespace Dexter
 			GetDatabases().ForEach(
 				DBType =>
 				{
-					Database EntityDatabase = (Database) app.Services.GetRequiredService(DBType);
+					Database entityDatabase = (Database) app.Services.GetRequiredService(DBType);
 
-					EntityDatabase.Database.EnsureCreated();
+					entityDatabase.Database.EnsureCreated();
 				}
 			);
 
 			// Adds all the commands', databases' and services' dependencies to their properties.
 			Assembly.GetExecutingAssembly().GetTypes()
-					.Where(Type => (Type.IsSubclassOf(typeof(DiscordModule)) || Type.IsSubclassOf(typeof(Service)) || Type.IsSubclassOf(typeof(Database))) && !Type.IsAbstract)
+					.Where(type => (type.IsSubclassOf(typeof(DiscordModule)) || type.IsSubclassOf(typeof(Service)) || type.IsSubclassOf(typeof(Database))) && !type.IsAbstract)
 					.ToList().ForEach(
-				Type => Type.GetProperties().ToList().ForEach(Property =>
+				type => type.GetProperties().ToList().ForEach(property =>
 				{
-					if (Property.PropertyType == typeof(ServiceProvider))
-						Property.SetValue(app.Services.GetRequiredService(Type), app.Services);
+					if (property.PropertyType == typeof(ServiceProvider))
+						property.SetValue(app.Services.GetRequiredService(type), app.Services);
 					else
 					{
-						object Service = app.Services.GetService(Property.PropertyType);
+						object service = app.Services.GetService(property.PropertyType);
 
-						if (Service != null)
+						if (service != null)
 						{
-							Property.SetValue(app.Services.GetRequiredService(Type), Service);
+							property.SetValue(app.Services.GetRequiredService(type), service);
 						}
 					}
 				})
@@ -237,7 +247,7 @@ namespace Dexter
 
 			// Connects all the event hooks in initializable modules to their designated delegates.
 			GetServices().ForEach(
-				Type => (app.Services.GetService(Type) as Service).Initialize()
+				type => (app.Services.GetService(type) as Service).Initialize()
 			);
 
 			app.UseSwagger();

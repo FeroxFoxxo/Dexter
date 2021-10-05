@@ -1,8 +1,8 @@
 ﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using Victoria;
@@ -67,7 +67,7 @@ namespace Dexter.Commands
 			}
 			catch (Exception)
 			{
-				await Debug.LogMessageAsync("Lavalink is not connected! Failing with embed error...", LogSeverity.Error);
+				Logger.LogError("Lavalink is not connected! Failing with embed error...");
 
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle($"Unable to find lyrics for `{song}`!")

@@ -277,7 +277,6 @@ namespace Dexter.Services
 
             public async Task<RoleModificationResponse> Log()
             {
-                await Debug.LogMessageAsync (ToString(), LogSeverity.Warning);
                 return this;
             }
         }

@@ -1,8 +1,7 @@
 using Dexter.Abstractions;
-using Dexter.Configurations;
 using DexterSlash.Services;
+using Microsoft.Extensions.Logging;
 using SpotifyAPI.Web;
-using System;
 using Victoria.Node;
 
 namespace Dexter.Commands
@@ -20,6 +19,8 @@ namespace Dexter.Commands
         public AudioService AudioService { get; set; }
 
         public SpotifyClient SpotifyAPI { get; set; }
+
+        public ILogger<MusicCommands> Logger { get; set; }
 
     }
 

@@ -1,8 +1,8 @@
 ﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using Victoria.Node;
@@ -47,7 +47,7 @@ namespace Dexter.Commands
                     .WithDescription($"Failed to change volume to {volumeLevel}.\nIf the issue persists, please contact the developers for support.")
                     .SendEmbed(Context.Channel);
 
-                await Debug.LogMessageAsync($"Failed to change volume in {Context.Guild.Id}.", LogSeverity.Error);
+                Logger.LogError($"Failed to change volume in {Context.Guild.Id}.");
 
                 return;
             }

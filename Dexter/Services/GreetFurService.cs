@@ -20,6 +20,7 @@ using Dexter.Commands;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource;
 using System.Text;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Dexter.Services
 {
@@ -54,6 +55,8 @@ namespace Dexter.Services
         /// </summary>
 
         public SheetsService sheetsService;
+
+        public ILogger<GreetFurService> Logger { get; set; }
 
         private const int TRACKING_LENGTH = 14;
 
@@ -526,7 +529,7 @@ namespace Dexter.Services
         {
             if (!File.Exists(GreetFurConfiguration.CredentialFile))
             {
-                await Debug.LogMessageAsync(
+                Logger.LogError(
                     $"GreetFur SpreadSheet credential file {GreetFurConfiguration.CredentialFile} does not exist!",
                     LogSeverity.Error
                 );

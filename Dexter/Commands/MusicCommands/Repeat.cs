@@ -11,10 +11,10 @@ namespace Dexter.Commands
     public partial class MusicCommands
 	{
 		[Command("repeat")]
-		[Summary("Allows repeating of the currently playing track. Default amount is 1.")]
+		[Summary("Allows repeating of the currently playing track.")]
 		[MusicBotChannel]
 
-		public async Task RepeatCommand(int amount = 1)
+		public async Task RepeatCommand(int amount)
 		{
 			if (amount < 1)
 			{

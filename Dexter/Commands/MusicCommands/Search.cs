@@ -186,14 +186,14 @@ namespace Dexter.Commands
 
 					var embedFields = new List<EmbedFieldBuilder>();
 
-					var options = new Dictionary<string, int>();
+					var options = new List<string>();
 
 					for (int i = 0; i < topResults.Count; i++)
 					{
-						if (options.ContainsKey(topResults[i].Title))
+						if (options.Contains(topResults[i].Title))
 							continue;
 
-						options.Add(topResults[i].Title, i);
+						options.Add(topResults[i].Title);
 
 						embedFields.Add(new()
 						{
@@ -209,7 +209,7 @@ namespace Dexter.Commands
 						.Build();
 
 					var result = await Interactive.SendSelectionAsync(
-						new SelectionBuilder<KeyValuePair<string, int>>()
+						new SelectionBuilder<string>()
 							.WithSelectionPage(PageBuilder.FromEmbed(embed))
 							.WithOptions(options)
 							.WithInputType(InputType.SelectMenus)
@@ -217,7 +217,7 @@ namespace Dexter.Commands
 							.Build()
 						, Context.Channel, TimeSpan.FromMinutes(2));
 
-					await SearchSingleTrack(result.Value.Key, player, SearchType.YouTube);
+					await SearchSingleTrack(result.Value, player, SearchType.YouTube);
 
 					await result.Message.DeleteAsync();
 				}

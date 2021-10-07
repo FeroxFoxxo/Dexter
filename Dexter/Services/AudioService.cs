@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Victoria.Node;
@@ -165,6 +166,12 @@ namespace DexterSlash.Services
 		{
 			if (!AllShardsReady(Client))
 				return;
+
+			if (!user.IsBot)
+				if (ogState.VoiceChannel is not null)
+					if (ogState.VoiceChannel.Users.Where(user => user.Id == Client.CurrentUser.Id).FirstOrDefault() is not null)
+						if (ogState.VoiceChannel.Users.Count <= 1)
+							await LavaNode.LeaveAsync(ogState.VoiceChannel ?? newState.VoiceChannel);
 
 			if (user.Id != Client.CurrentUser.Id || newState.VoiceChannel != null)
 				return;

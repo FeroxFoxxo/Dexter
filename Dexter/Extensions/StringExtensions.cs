@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using Humanizer.Localisation;
 using Humanizer;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 namespace Dexter.Extensions
 {
@@ -89,6 +90,9 @@ namespace Dexter.Extensions
 
             Type mBase = new StackTrace().GetFrame(SearchHeight).GetMethod().DeclaringType;
 
+            if (mBase.Assembly != Assembly.GetExecutingAssembly())
+                return GetLastMethodCalled(SearchHeight + 1);
+
             string name;
 
             if (mBase.DeclaringType != null)
@@ -103,20 +107,7 @@ namespace Dexter.Extensions
             if (Index != -1)
                 methodName = methodName.Substring(0, Index).Replace("<", "");
 
-            string[] asyncBuilders = new string[7] {
-                "AsyncMethodBuilderCore",
-                "AsyncTaskMethodBuilder",
-                "EmbedExtensions",
-                "AwaitTaskContinuation",
-                "ExecutionContext",
-                "DiscordRestApiClient",
-                "Task"
-            };
-
-            if (asyncBuilders.Any(name.Contains))
-                return GetLastMethodCalled(SearchHeight + 1);
-            else
-                return new KeyValuePair<string, string> ( name, methodName );
+            return new KeyValuePair<string, string>(name, methodName);
         }
 
         /// <summary>

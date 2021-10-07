@@ -29,12 +29,9 @@ namespace Dexter.Commands
                 return;
             }
 
-            var Embeds = player.GetQueue("🎶 Music Queue", BotConfiguration);
+            var embeds = player.GetQueue("🎶 Music Queue", BotConfiguration);
 
-            if (Embeds.Length > 1)
-                CreateReactionMenu(Embeds, Context.Channel);
-            else
-                await Embeds.FirstOrDefault().SendEmbed(Context.Channel);
+            CreateReactionMenu(embeds, Context.Channel);
         }
 
     }

@@ -5,6 +5,11 @@ using Discord.Rest;
 using Discord.WebSocket;
 using Fergun.Interactive;
 using Figgle;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Services;
+using Google.Apis.Sheets.v4;
+using Google.Apis.Util.Store;
+using Google.Apis.YouTube.v3;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +22,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Victoria;
 
@@ -65,7 +71,6 @@ namespace Dexter
 
 			// Get information on the bot through REST.
 
-			// Draws "STARTING..." in the color of cyan.
 			Console.ForegroundColor = ConsoleColor.Cyan;
 
 			var botInfo = await GetNameAndShardsOfBot(token);
@@ -76,6 +81,12 @@ namespace Dexter
 			await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(name));
 
 			Console.Title = $"{name} v{version} (Discord.Net v{DiscordConfig.Version})";
+
+			// Create basic logger for init.
+
+			var logger = new LoggerConfiguration()
+				.WriteTo.Console()
+				.CreateLogger();
 
 			// Start the swager instance for debugging.
 
@@ -99,6 +110,52 @@ namespace Dexter
 			}
 			else
 				builder.Services.AddSingleton(new SpotifyClient("UNKNOWN"));
+
+			// Init google API.
+
+			if (!File.Exists("Credentials.json"))
+			{
+				logger.Error(
+					$"Credential file 'Credentials.json' does not exist!"
+				);
+
+				// Create Google Sheets API service.
+				builder.Services.AddSingleton<SheetsService>();
+
+				// Create Youtube API service.
+				builder.Services.AddSingleton<YouTubeService>();
+			}
+			else
+			{
+				// Open the FileStream to the related file.
+				using FileStream stream = new("Credentials.json", FileMode.Open, FileAccess.Read);
+
+				// The file token.json stores the user's access and refresh tokens, and is created
+				// automatically when the authorization flow completes for the first time.
+
+				UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+					GoogleClientSecrets.FromStream(stream).Secrets,
+					new [] { SheetsService.Scope.Spreadsheets, YouTubeService.Scope.YoutubeReadonly },
+					"admin",
+					CancellationToken.None,
+					new FileDataStore("Token", true),
+					new PromptCodeReceiver()
+				);
+
+				// Create Google Sheets API service.
+				builder.Services.AddSingleton(new SheetsService(new BaseClientService.Initializer()
+				{
+					HttpClientInitializer = credential,
+					ApplicationName = name,
+				}));
+
+				// Create Youtube API service.
+				builder.Services.AddSingleton(new YouTubeService(new BaseClientService.Initializer()
+				{
+					HttpClientInitializer = credential,
+					ApplicationName = name,
+				}));
+			}
 
 			// Initialize our dependencies for the bot.
 
@@ -138,14 +195,6 @@ namespace Dexter
 			builder.Services.AddLavaNode(x => { x.SelfDeaf = true; x.Port = 2333; });
 
 			bool hasErrored = false;
-
-			var builtConfig = new ConfigurationBuilder()
-				.AddJsonFile("appsettings.json")
-				.AddCommandLine(Array.Empty<string>())
-				.Build();
-
-			var logger = new LoggerConfiguration()
-				.CreateLogger();
 
 			// Finds all JSON configurations and initializes them from their respective files.
 			// If a JSON file is not created, a new one is initialized in its place.

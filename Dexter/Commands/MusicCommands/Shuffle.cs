@@ -41,12 +41,9 @@ namespace Dexter.Commands
 
             player.Vueue.Shuffle();
 
-            var Embeds = player.GetQueue("🔀 Queue Shuffle", BotConfiguration);
+            var embeds = player.GetQueue("🔀 Queue Shuffle", BotConfiguration);
 
-            if (Embeds.Length > 1)
-                CreateReactionMenu(Embeds, Context.Channel);
-            else
-                await Embeds.FirstOrDefault().SendEmbed(Context.Channel);
+            CreateReactionMenu(embeds, Context.Channel);
         }
 
     }

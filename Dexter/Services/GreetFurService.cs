@@ -54,7 +54,7 @@ namespace Dexter.Services
         /// Manages the Google Sheets section of GreetFur record-keeping.
         /// </summary>
 
-        public SheetsService sheetsService;
+        public SheetsService SheetsService { get; set; }
 
         public ILogger<GreetFurService> Logger { get; set; }
 
@@ -67,8 +67,6 @@ namespace Dexter.Services
         public override async void Initialize()
         {
             DiscordShardedClient.MessageReceived += HandleMessage;
-
-            await SetupGoogleSheets();
         }
 
         /// <summary>
@@ -107,7 +105,7 @@ namespace Dexter.Services
 
         public async Task UpdateRemoteSpreadsheet(GreetFurOptions options = GreetFurOptions.None, int week = -1)
         {
-            Spreadsheet spreadsheet = await sheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
+            Spreadsheet spreadsheet = await SheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
 
             Sheet currentFortnight = spreadsheet.Sheets
                 .Where(sheet => sheet.Properties.Title == GreetFurConfiguration.FortnightSpreadsheet)
@@ -120,9 +118,9 @@ namespace Dexter.Services
 
             string dataRequestRange = $"{currentFortnight.Properties.Title}";
             string updateRangeName = $"{currentFortnight.Properties.Title}!A2:{GreetFurCommands.IntToLetters(GreetFurConfiguration.Information["Notes"])}{currentFortnight.Properties.GridProperties.RowCount}";
-            ValueRange data = await sheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID, dataRequestRange)
+            ValueRange data = await SheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID, dataRequestRange)
                 .ExecuteAsync();
-            ValueRange toUpdate = await sheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID, updateRangeName)
+            ValueRange toUpdate = await SheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID, updateRangeName)
                 .ExecuteAsync();
 
             List<ulong> ids = new(toUpdate.Values.Count);
@@ -145,7 +143,7 @@ namespace Dexter.Services
             string firstDayName = firstDTO.ToString("MMM dd yyyy");
             string dateRangeName = $"{GreetFurConfiguration.FortnightSpreadsheet}!{GreetFurConfiguration.Cells["FirstDay"]}";
             ValueRange firstDayCell = new() {Range = dateRangeName, Values = new string[][] { new string[] { firstDayName } } };
-            UpdateRequest req = sheetsService.Spreadsheets.Values.Update(firstDayCell, GreetFurConfiguration.SpreadSheetID, dateRangeName);
+            UpdateRequest req = SheetsService.Spreadsheets.Values.Update(firstDayCell, GreetFurConfiguration.SpreadSheetID, dateRangeName);
             req.ValueInputOption = UpdateRequest.ValueInputOptionEnum.USERENTERED;
             await req.ExecuteAsync();
             
@@ -209,7 +207,7 @@ namespace Dexter.Services
                 }
             }
 
-            req = sheetsService.Spreadsheets.Values.Update(toUpdate, GreetFurConfiguration.SpreadSheetID, updateRangeName);
+            req = SheetsService.Spreadsheets.Values.Update(toUpdate, GreetFurConfiguration.SpreadSheetID, updateRangeName);
             req.ValueInputOption = UpdateRequest.ValueInputOptionEnum.USERENTERED;
             await req.ExecuteAsync();
 
@@ -255,7 +253,7 @@ namespace Dexter.Services
                 }
 
                 range.Values = rows.ToArray();
-                AppendRequest appendReq = sheetsService.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.FortnightSpreadsheet);
+                AppendRequest appendReq = SheetsService.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.FortnightSpreadsheet);
                 appendReq.ValueInputOption = AppendRequest.ValueInputOptionEnum.USERENTERED;
                 await appendReq.ExecuteAsync();
             }
@@ -277,7 +275,7 @@ namespace Dexter.Services
                 string tbpIDsA1 = $"{GreetFurConfiguration.TheBigPictureSpreadsheet}!{GreetFurConfiguration.TheBigPictureIDs}1:{GreetFurConfiguration.TheBigPictureIDs}{tbpRows}";
                 string tbpWeeksA1 = $"{GreetFurConfiguration.TheBigPictureSpreadsheet}!{GreetFurCommands.IntToLetters(week + GreetFurConfiguration.Information["TBPWeekStart"] - 1)}1:{GreetFurCommands.IntToLetters(week + GreetFurConfiguration.Information["TBPWeekStart"])}{tbpRows}";
 
-                BatchGetRequest batchreq = sheetsService.Spreadsheets.Values.BatchGet(GreetFurConfiguration.SpreadSheetID);
+                BatchGetRequest batchreq = SheetsService.Spreadsheets.Values.BatchGet(GreetFurConfiguration.SpreadSheetID);
                 batchreq.Ranges = new Google.Apis.Util.Repeatable<string>(new string[] { tbpNamesA1, tbpIDsA1, tbpWeeksA1 });
                 BatchGetValuesResponse batchresp = await batchreq.ExecuteAsync();
                 ValueRange[] ranges = batchresp.ValueRanges.ToArray();
@@ -314,7 +312,7 @@ namespace Dexter.Services
                     ranges[2].Values[i] = transformed;
                 }
 
-                UpdateRequest weekValuesUpdate = sheetsService.Spreadsheets.Values.Update(ranges[2], GreetFurConfiguration.SpreadSheetID, tbpWeeksA1);
+                UpdateRequest weekValuesUpdate = SheetsService.Spreadsheets.Values.Update(ranges[2], GreetFurConfiguration.SpreadSheetID, tbpWeeksA1);
                 weekValuesUpdate.ValueInputOption = UpdateRequest.ValueInputOptionEnum.RAW;
                 await weekValuesUpdate.ExecuteAsync();
 
@@ -350,7 +348,7 @@ namespace Dexter.Services
                     }
 
                     range.Values = newRows.ToArray();
-                    AppendRequest appendRequest = sheetsService.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.TheBigPictureSpreadsheet);
+                    AppendRequest appendRequest = SheetsService.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.TheBigPictureSpreadsheet);
                     appendRequest.ValueInputOption = AppendRequest.ValueInputOptionEnum.USERENTERED;
                     await appendRequest.ExecuteAsync();
                 }
@@ -518,45 +516,6 @@ namespace Dexter.Services
             /// Represents that eligible exemptions in the range that aren't logged in the spreadsheet should be removed from records.
             /// </summary>
             Remove = 1
-        }
-
-        /// <summary>
-        /// Sets up the service and dependencies required to access the data on Google Sheets servers for use in other commands.
-        /// </summary>
-        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
-
-        public async Task SetupGoogleSheets()
-        {
-            if (!File.Exists(GreetFurConfiguration.CredentialFile))
-            {
-                Logger.LogError(
-                    $"GreetFur SpreadSheet credential file {GreetFurConfiguration.CredentialFile} does not exist!",
-                    LogSeverity.Error
-                );
-                return;
-            }
-
-            // Open the FileStream to the related file.
-            using FileStream stream = new(GreetFurConfiguration.CredentialFile, FileMode.Open, FileAccess.Read);
-
-            // The file token.json stores the user's access and refresh tokens, and is created
-            // automatically when the authorization flow completes for the first time.
-
-            UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                GoogleClientSecrets.FromStream(stream).Secrets,
-                new string[1] { SheetsService.Scope.Spreadsheets },
-                "admin",
-                CancellationToken.None,
-                new FileDataStore(GreetFurConfiguration.TokenFile, true),
-                new PromptCodeReceiver()
-            );
-
-            // Create Google Sheets API service.
-            sheetsService = new SheetsService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = GreetFurConfiguration.ApplicationName,
-            });
         }
     }
 }

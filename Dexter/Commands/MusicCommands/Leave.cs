@@ -37,8 +37,8 @@ namespace Dexter.Commands
                 await LavaNode.LeaveAsync(player.VoiceChannel);
 
                 await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle("Unable to leave VC!")
-                    .WithDescription($"Disconnected from `{vcName}`.")
+                    .WithTitle("Sucessfully left voice channel!")
+                    .WithDescription($"Disconnected from {vcName}.")
                     .SendEmbed(Context.Channel);
             }
             catch (Exception)
@@ -48,7 +48,7 @@ namespace Dexter.Commands
                     .WithDescription($"Failed to disconnect from {vcName}.\nIf the issue persists, please contact the developers for support.")
                     .SendEmbed(Context.Channel);
 
-                Logger.LogError($"Failed to disconnect from voice channel '{vcName}' in {Context.Guild.Id} via $leave.");
+                Logger.LogError($"Failed to disconnect from voice channel {vcName} in {Context.Guild.Id} via $leave.");
 
                 return;
             }

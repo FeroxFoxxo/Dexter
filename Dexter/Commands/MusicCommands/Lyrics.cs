@@ -1,9 +1,11 @@
 ﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
+using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Node;
@@ -70,7 +72,7 @@ namespace Dexter.Commands
 				Logger.LogError("Lavalink is not connected! Failing with embed error...");
 
 				await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle($"Unable to find lyrics for `{song}`!")
+					.WithTitle($"Unable to find lyrics for {song}!")
 					.WithDescription("Failure: lavalink dependency missing.\nPlease check the console logs for more details.")
 					.SendEmbed(Context.Channel);
 
@@ -90,10 +92,7 @@ namespace Dexter.Commands
 
 					if (!string.IsNullOrWhiteSpace(lyrics))
 					{
-						await BuildEmbed(EmojiEnum.Unknown)
-							.WithTitle($"🎶 {track.Title} Lyrics (GENIUS)")
-							.WithDescription(lyrics.Length > 1700 ? lyrics.Substring(0, 1700) : lyrics)
-							.SendEmbed(Context.Channel);
+						SendLyricsEmbed(lyrics, "GENIUS", track.Title);
 						return;
 					}
 
@@ -106,10 +105,7 @@ namespace Dexter.Commands
 
 					if (!string.IsNullOrWhiteSpace(lyrics))
 					{
-						await BuildEmbed(EmojiEnum.Unknown)
-							.WithTitle($"🎶 {track.Title} Lyrics (OHV)")
-							.WithDescription(lyrics.Length > 1700 ? lyrics.Substring(0, 1700) : lyrics)
-							.SendEmbed(Context.Channel);
+						SendLyricsEmbed(lyrics, "OHV", track.Title);
 						return;
 					}
 
@@ -121,6 +117,19 @@ namespace Dexter.Commands
 				.WithTitle("Unable to find song!")
 				.WithDescription($"No lyrics found for:\n**{song}**.")
 				.SendEmbed(Context.Channel);
+		}
+
+		private void SendLyricsEmbed (string fullLyrics, string name, string trackTitle)
+		{
+			List<EmbedBuilder> embeds = new();
+
+			foreach (var lyrics in fullLyrics.Split('['))
+				if (lyrics.Length > 0)
+					embeds.Add(BuildEmbed(EmojiEnum.Unknown)
+						.WithTitle($"🎶 {trackTitle} Lyrics ({name})")
+						.WithDescription($"[{(lyrics.Length > 1700 ? lyrics.Substring(0, 1700) : lyrics)}"));
+
+			CreateReactionMenu(embeds.ToArray(), Context.Channel);
 		}
 
 	}

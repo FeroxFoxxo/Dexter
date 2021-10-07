@@ -35,7 +35,7 @@ namespace Dexter.Commands
 					await player.ResumeAsync();
 					await BuildEmbed(EmojiEnum.Love)
 						.WithTitle("Resumed the player.")
-						.WithDescription($"Successfully resumed `{player.Track.Title}`")
+						.WithDescription($"Successfully resumed {player.Track.Title}")
 						.SendEmbed(Context.Channel);
 				}
 				else if (player.PlayerState == PlayerState.Playing)
@@ -43,7 +43,7 @@ namespace Dexter.Commands
 					await player.PauseAsync();
 					await BuildEmbed(EmojiEnum.Love)
 						.WithTitle("Paused the player.")
-						.WithDescription($"Successfully paused `{player.Track.Title}`")
+						.WithDescription($"Successfully paused {player.Track.Title}")
 						.SendEmbed(Context.Channel);
 				}
 				else

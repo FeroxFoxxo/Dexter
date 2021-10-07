@@ -180,11 +180,7 @@ namespace Dexter.Extensions
 
         public static EmbedBuilder[] GetQueue(this LavaPlayer player, string title, BotConfiguration botConfiguration)
         {
-
-            EmbedBuilder CurrentBuilder = new EmbedBuilder()
-                .BuildEmbed(EmojiEnum.Unknown, botConfiguration, EmbedCallingType.Command).WithTitle(title);
-
-            List<EmbedBuilder> Embeds = new();
+            var embeds = player.Vueue.ToArray().GetQueueFromTrackArray(title, botConfiguration);
 
             if (player.Track != null)
             {
@@ -201,13 +197,20 @@ namespace Dexter.Extensions
                     trackDurTotal = player.Track.Duration.ToString("mm\\:ss");
                 }
 
-                CurrentBuilder.WithDescription("**Now Playing:**\n" +
+                embeds.First().WithDescription("**Now Playing:**\n" +
                                   $"Title: **{player.Track.Title}** " +
                                   $"[{trackDurCur} / {trackDurTotal}]\n\n" +
                                   "Up Next ⬇️");
             }
 
-            LavaTrack[] tracks = player.Vueue.ToArray();
+            return embeds;
+        }
+        public static EmbedBuilder[] GetQueueFromTrackArray(this LavaTrack[] tracks, string title, BotConfiguration botConfiguration)
+        {
+            EmbedBuilder CurrentBuilder = new EmbedBuilder()
+                .BuildEmbed(EmojiEnum.Unknown, botConfiguration, EmbedCallingType.Command).WithTitle(title);
+
+            List<EmbedBuilder> Embeds = new();
 
             if (tracks.Length == 0)
             {
@@ -217,7 +220,7 @@ namespace Dexter.Extensions
             for (int Index = 0; Index < tracks.Length; Index++)
             {
                 EmbedFieldBuilder Field = new EmbedFieldBuilder()
-                    .WithName($"#{Index}. **{tracks[Index].Title}**")
+                    .WithName($"#{Index + 1}. **{tracks[Index].Title}**")
                     .WithValue($"{tracks[Index].Author} ({tracks[Index].Duration:mm\\:ss})");
 
                 if (Index % 5 == 0 && Index != 0)

@@ -50,7 +50,7 @@ namespace Dexter.Commands
                     .WithDescription($"Failed to clear queue.\nIf the issue persists, please contact the developers for support.")
                     .SendEmbed(Context.Channel);
 
-                Logger.LogError($"Failed to clear queue from voice channel '{player.VoiceChannel.Name}' in {Context.Guild.Id}.");
+                Logger.LogError($"Failed to clear queue from voice channel {player.VoiceChannel.Name} in {Context.Guild.Id}.");
 
                 return;
             }

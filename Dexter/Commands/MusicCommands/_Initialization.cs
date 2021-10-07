@@ -1,5 +1,6 @@
 using Dexter.Abstractions;
 using DexterSlash.Services;
+using Google.Apis.YouTube.v3;
 using Microsoft.Extensions.Logging;
 using SpotifyAPI.Web;
 using Victoria.Node;
@@ -21,6 +22,8 @@ namespace Dexter.Commands
         public SpotifyClient SpotifyAPI { get; set; }
 
         public ILogger<MusicCommands> Logger { get; set; }
+
+        public YouTubeService YouTubeService { get; set; }
 
     }
 

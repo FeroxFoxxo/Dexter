@@ -22,7 +22,7 @@ namespace Dexter.Commands
 	{
 
 		[Command("play")]
-		[Alias("search")]
+		[Alias("search", "p")]
 		[Summary("Searches for the desired song. Returns top 5 most popular results. Click on one of the reaction icons to play the appropriate track.")]
 		[MusicBotChannel]
 

@@ -1,5 +1,5 @@
 using Dexter.Abstractions;
-using DexterSlash.Services;
+using Dexter.Services;
 using Google.Apis.YouTube.v3;
 using Microsoft.Extensions.Logging;
 using SpotifyAPI.Web;

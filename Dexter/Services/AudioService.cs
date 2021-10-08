@@ -14,7 +14,7 @@ using Victoria.Node;
 using Victoria.Node.EventArgs;
 using Victoria.Player;
 
-namespace DexterSlash.Services
+namespace Dexter.Services
 {
     public class AudioService : Service
 	{

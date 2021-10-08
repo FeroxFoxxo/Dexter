@@ -12,6 +12,7 @@ namespace Dexter.Commands
     {
 
         [Command("nowplaying")]
+        [Alias("np")]
         [Summary("Display the currently playing song.")]
         [MusicBotChannel]
 

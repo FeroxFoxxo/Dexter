@@ -119,11 +119,17 @@ namespace Dexter.Commands
 					}
 					else if (baseUrl.Contains("spotify"))
 					{
+						var config = SpotifyClientConfig.CreateDefault();
+
+						var response = await new OAuthClient(config).RequestToken(ClientCredentialsRequest);
+
+						var spotifyAPI = new SpotifyClient(config.WithToken(response.AccessToken));
+
 						string id = abUrl.Split('/').Last().Split('?').First();
 
 						if (abUrl.Contains("playlist"))
 						{
-							var playlist = await SpotifyAPI.Playlists.GetItems(id);
+							var playlist = await spotifyAPI.Playlists.GetItems(id);
 
 							List<string> songs = new();
 
@@ -147,7 +153,7 @@ namespace Dexter.Commands
 						}
 						else if (abUrl.Contains("track"))
 						{
-							var track = await SpotifyAPI.Tracks.Get(id);
+							var track = await spotifyAPI.Tracks.Get(id);
 
 							await SearchSingleTrack($"{track.Artists.First().Name} {track.Name}", player, SearchType.YouTube);
 						}

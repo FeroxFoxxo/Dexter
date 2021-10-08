@@ -101,12 +101,7 @@ namespace Dexter
 
 			if (!string.IsNullOrEmpty(spotifyID) && !string.IsNullOrEmpty(spotifySecret))
 			{
-				var config = SpotifyClientConfig.CreateDefault();
-
-				var request = new ClientCredentialsRequest(spotifyID, spotifySecret);
-				var response = await new OAuthClient(config).RequestToken(request);
-
-				builder.Services.AddSingleton(new SpotifyClient(config.WithToken(response.AccessToken)));
+				builder.Services.AddSingleton(new ClientCredentialsRequest(spotifyID, spotifySecret));
 			}
 			else
 				builder.Services.AddSingleton(new SpotifyClient("UNKNOWN"));

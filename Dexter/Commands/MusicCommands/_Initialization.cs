@@ -19,11 +19,11 @@ namespace Dexter.Commands
 
         public AudioService AudioService { get; set; }
 
-        public SpotifyClient SpotifyAPI { get; set; }
-
         public ILogger<MusicCommands> Logger { get; set; }
 
         public YouTubeService YouTubeService { get; set; }
+
+        public ClientCredentialsRequest ClientCredentialsRequest { get; set; }
 
     }
 

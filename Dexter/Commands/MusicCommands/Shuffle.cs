@@ -12,6 +12,7 @@ namespace Dexter.Commands
     {
 
         [Command("shuffle")]
+        [Alias("reshuffle")]
         [Summary("Shuffles the music queue in a random order.")]
         [MusicBotChannel]
 

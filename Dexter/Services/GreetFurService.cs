@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Abstractions;
@@ -13,13 +12,9 @@ using Discord.WebSocket;
 using Google.Apis.Sheets.v4.Data;
 using Google.Apis.Sheets.v4;
 using System.Text.RegularExpressions;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Util.Store;
-using Google.Apis.Services;
 using Dexter.Commands;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource;
 using System.Text;
-using System.Threading;
 using Microsoft.Extensions.Logging;
 
 namespace Dexter.Services

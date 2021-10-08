@@ -17,7 +17,7 @@ namespace Dexter.Commands
 
         public LavaNode LavaNode { get; set; }
 
-        public AudioService AudioService { get; set; }
+        public MusicService AudioService { get; set; }
 
         public ILogger<MusicCommands> Logger { get; set; }
 

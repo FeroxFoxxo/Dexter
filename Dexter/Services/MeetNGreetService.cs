@@ -65,6 +65,9 @@ namespace Dexter.Services
             if (CachedMessage.Author.IsBot)
                 return;
 
+            if (CachedMessage.Content == NewMessage.Content)
+                return;
+
             await BuildEmbed(EmojiEnum.Unknown)
                 .WithAuthor(CachedMessage.Author)
                 .WithDescription($"**Message edited in <#{SocketMessageChannel.Id}>** [Jump to message](https://discordapp.com/channels/{ (NewMessage.Channel as SocketGuildChannel).Guild.Id }/{ NewMessage.Channel.Id }/{ NewMessage.Id })")

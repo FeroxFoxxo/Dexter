@@ -16,11 +16,11 @@ using Victoria.Player;
 
 namespace Dexter.Services
 {
-    public class AudioService : Service
+    public class MusicService : Service
 	{
 		private readonly DiscordShardedClient Client;
 		private readonly LavaNode LavaNode;
-		private readonly ILogger<AudioService> Logger;
+		private readonly ILogger<MusicService> Logger;
 		private readonly ConcurrentDictionary<ulong, CancellationTokenSource> DisconnectTokens;
 		private readonly InteractiveService Interactive;
 
@@ -28,7 +28,7 @@ namespace Dexter.Services
 
 		public object Locker;
 
-		public AudioService (DiscordShardedClient client, LavaNode lavaNode, ILogger<AudioService> logger, InteractiveService interactive)
+		public MusicService (DiscordShardedClient client, LavaNode lavaNode, ILogger<MusicService> logger, InteractiveService interactive)
         {
 			Client = client;
 			LavaNode = lavaNode;

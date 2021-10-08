@@ -5,7 +5,6 @@ using Dexter.Abstractions;
 using Dexter.Attributes.Classes;
 using Dexter.Databases.Configurations;
 using Dexter.Extensions;
-using Discord;
 using Discord.Commands;
 using System.Reflection;
 using Microsoft.Extensions.Logging;

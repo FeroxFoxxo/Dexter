@@ -56,7 +56,7 @@ namespace Dexter.Commands
                             else
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle($"Error Removing {Name}.")
-                                    .WithDescription($"No {Name.ToLower()} ID provided! To use this command please use the syntax of `remove [ID]`.")
+                                    .WithDescription($"No {Name.ToLower()} ID provided! To use this command please use the syntax of `remove ID`.")
                                     .SendEmbed(Context.Channel);
                             break;
                         case Enums.ActionType.Edit:
@@ -65,7 +65,7 @@ namespace Dexter.Commands
                             else
                                 await BuildEmbed(EmojiEnum.Annoyed)
                                     .WithTitle($"Error Editing {Name}.")
-                                    .WithDescription($"No {Name.ToLower()} ID provided! To use this command please use the syntax of `edit [ID] [{Name.ToUpper()}]`.")
+                                    .WithDescription($"No {Name.ToLower()} ID provided! To use this command please use the syntax of `edit ID {Name.ToUpper()}`.")
                                     .SendEmbed(Context.Channel);
                             break;
                         case Enums.ActionType.Unknown:
@@ -102,7 +102,7 @@ namespace Dexter.Commands
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle($"No {Name}s!")
                     .WithDescription($"Heya! I could not find any {Name.ToLower()}s in the database. " +
-                        $"To add a {Name.ToLower()} to the database, please use `{BotConfiguration.Prefix}{TopicType.ToString().ToLower()} add [{Name.ToUpper()}]`.")
+                        $"To add a {Name.ToLower()} to the database, please use `{BotConfiguration.Prefix}{TopicType.ToString().ToLower()} add {Name.ToUpper()}`.")
                     .SendEmbed(Context.Channel);
                 return;
             }
@@ -224,7 +224,7 @@ namespace Dexter.Commands
                     .WithTitle($"Unable To Remove {Name}.")
                     .WithDescription($"The {Name.ToLower()} {TopicID} does not exist in the database! " +
                     $"Please use the `{BotConfiguration.Prefix}{TopicType.ToString().ToLower()} get " +
-                    $"[{Name.ToUpper()}]` command to get the ID of a {Name.ToLower()}.")
+                    $"{Name.ToUpper()}` command to get the ID of a {Name.ToLower()}.")
                     .SendEmbed(Context.Channel);
                 return;
             }
@@ -323,7 +323,7 @@ namespace Dexter.Commands
                     .WithTitle($"Unable To Edit {Name}.")
                     .WithDescription($"The {Name.ToLower()} {TopicID} does not exist in the database! " +
                         $"Please use the `{BotConfiguration.Prefix}{Name.ToLower()} get " +
-                        $"[{Name.ToUpper()}]` command to get the ID of a {Name.ToLower()}.")
+                        $"{Name.ToUpper()}` command to get the ID of a {Name.ToLower()}.")
                     .SendEmbed(Context.Channel);
             }
 

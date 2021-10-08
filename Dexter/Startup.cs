@@ -11,7 +11,6 @@ using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
 using Google.Apis.YouTube.v3;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using SpotifyAPI.Web;

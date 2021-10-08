@@ -158,7 +158,6 @@ namespace Dexter
 				new CommandService(
 					new CommandServiceConfig()
                     {
-						IgnoreExtraArgs = true,
 						CaseSensitiveCommands = false,
 						LogLevel = LogSeverity.Debug,
 						DefaultRunMode = RunMode.Async

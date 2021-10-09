@@ -8,6 +8,7 @@ using Dexter.Helpers;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Victoria.Node;
 
 namespace Dexter.Attributes.Methods
 {
@@ -49,7 +50,7 @@ namespace Dexter.Attributes.Methods
         /// <returns>The result of the checked permission, returning successful if it is able to be run or an error if not.
         /// This error is then thrown to the Command Handler Service to log to the user.</returns>
 
-        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, CommandInfo CommandInfo, IServiceProvider ServiceProvider)
+        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, CommandInfo CommandInfo, IServiceProvider ServiceProvider)
         {
             BotConfiguration BotConfiguration = ServiceProvider.GetService<BotConfiguration>();
 
@@ -62,13 +63,32 @@ namespace Dexter.Attributes.Methods
                 DiscordShardedClient = ServiceProvider.GetService<HelpAbstraction>().DiscordShardedClient;
 
             if (BotConfiguration == null)
-                return Task.FromResult(PreconditionResult.FromSuccess());
+                return PreconditionResult.FromSuccess();
 
-            return Task.FromResult(CommandContext.User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel
+            if (PermissionLevel == PermissionLevel.DJ)
+            {
+                if (ServiceProvider.GetService<HelpAbstraction>() != null)
+                    return PreconditionResult.FromSuccess();
+                else
+                {
+                    if (ServiceProvider.GetService<LavaNode>().TryGetPlayer(CommandContext.Guild, out var player))
+                    {
+                        int uCount = 0;
+                        
+                        await foreach (var _ in player.VoiceChannel.GetUsersAsync())
+                            uCount++;
+
+                        if (uCount <= 2)
+                            return PreconditionResult.FromSuccess();
+                    }
+                }
+            }
+
+            return CommandContext.User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel
                 ? PreconditionResult.FromSuccess()
                 : PreconditionResult.FromError($"Haiya! To run the `{CommandInfo.Name}` command you need to have the " +
                 $"`{PermissionLevel}` role! Are you sure you're {LanguageHelper.GuessIndefiniteArticle(PermissionLevel.ToString())} " +
-                $"`{PermissionLevel.ToString().ToLower()}`? <3"));
+                $"`{PermissionLevel.ToString().ToLower()}`? <3");
         }
 
     }

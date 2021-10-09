@@ -5,9 +5,9 @@ using Dexter.Abstractions;
 using Dexter.Attributes.Classes;
 using Dexter.Databases.Configurations;
 using Dexter.Extensions;
-using Discord;
 using Discord.Commands;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 
 namespace Dexter.Services
 {
@@ -37,6 +37,8 @@ namespace Dexter.Services
         /// </summary>
 
         public ConfigurationDB ConfigurationDB { get; set; }
+
+        public ILogger<ModuleService> Logger { get; set; }
 
         /// <summary>
         /// The Initialize method, through reflextion, adds all modules that have been enabled into the Command Service.
@@ -113,9 +115,8 @@ namespace Dexter.Services
             }
 
             // Logs the number of currently enabled modules to the console.
-            await Debug.LogMessageAsync(
-                $"Initialized the module service with {Essentials} essential module(s) and {Others} other module(s).",
-                LogSeverity.Info
+            Logger.LogInformation(
+                $"Initialized the module service with {Essentials} essential module(s) and {Others} other module(s)."
             );
         }
 

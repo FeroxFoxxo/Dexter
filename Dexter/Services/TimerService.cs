@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using System.Data;
 using System.Reflection;
 using Timer = System.Timers.Timer;
+using Microsoft.Extensions.Logging;
 
 namespace Dexter.Services
 {
@@ -47,6 +48,8 @@ namespace Dexter.Services
         /// </summary>
 
         public bool HasStarted = false;
+
+        public ILogger<TimerService> Logger { get; set; }
 
         /// <summary>
         /// The Initialize method hooks the client Ready events and begins to loop through all timers.
@@ -120,7 +123,7 @@ namespace Dexter.Services
                         }
                         catch (Exception Exception)
                         {
-                            await Debug.LogMessageAsync(
+                            Logger.LogError(
                                 Exception.StackTrace,
                                 LogSeverity.Error
                             );

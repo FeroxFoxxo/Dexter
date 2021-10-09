@@ -1,8 +1,8 @@
 ﻿using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using Victoria.Node;
@@ -36,9 +36,13 @@ namespace Dexter.Commands
             {
                 await LavaNode.LeaveAsync(player.VoiceChannel);
 
+                lock (MusicService.LoopLocker)
+                    if (MusicService.LoopedGuilds.ContainsKey(player.VoiceChannel.Guild.Id))
+                        MusicService.LoopedGuilds.Remove(player.VoiceChannel.Guild.Id);
+
                 await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle("Unable to leave VC!")
-                    .WithDescription($"Disconnected from `{vcName}`.")
+                    .WithTitle("Sucessfully left voice channel!")
+                    .WithDescription($"Disconnected from {vcName}.")
                     .SendEmbed(Context.Channel);
             }
             catch (Exception)
@@ -48,7 +52,7 @@ namespace Dexter.Commands
                     .WithDescription($"Failed to disconnect from {vcName}.\nIf the issue persists, please contact the developers for support.")
                     .SendEmbed(Context.Channel);
 
-                await Debug.LogMessageAsync($"Failed to disconnect from voice channel '{vcName}' in {Context.Guild.Id} via $leave.", LogSeverity.Error);
+                Logger.LogError($"Failed to disconnect from voice channel {vcName} in {Context.Guild.Id} via $leave.");
 
                 return;
             }

@@ -16,7 +16,7 @@ namespace Dexter.Commands
         /// <remarks>The probability is set to 1 in 4 - 25%.</remarks>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        [Command("roulette")]
+        [Command("roulette", ignoreExtraArgs: true)]
         [Summary("Test your luck with a 1 in 4 chance you get muzzled!")]
         [Alias("testmyluck")]
         [CommandCooldown(45)]

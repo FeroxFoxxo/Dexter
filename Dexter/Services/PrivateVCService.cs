@@ -5,6 +5,7 @@ using Dexter.Abstractions;
 using Dexter.Configurations;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.Logging;
 
 namespace Dexter.Services
 {
@@ -21,6 +22,8 @@ namespace Dexter.Services
         /// </summary>
 
         public UtilityConfiguration UtilityConfiguration { get; set; }
+
+        public ILogger<PrivateVCService> Logger { get; set; }
 
         /// <summary>
         /// The Initialize void hooks the Client.Ready event to the CheckRemoveVCs method.
@@ -71,7 +74,7 @@ namespace Dexter.Services
             }
             else
             {
-                await Debug.LogMessageAsync(
+                Logger.LogError(
                     "Help! CategoryChannel is not set in the config files. Aborting!!",
                     LogSeverity.Error
                 );

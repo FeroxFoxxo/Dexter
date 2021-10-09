@@ -340,6 +340,7 @@ ASALocalRun/
 healthchecksdb
 
 log.txt
+*.gz
 /Dexter/Properties/launchSettings.json
 /Dexter/Credentials.json
 /Non-Release Files

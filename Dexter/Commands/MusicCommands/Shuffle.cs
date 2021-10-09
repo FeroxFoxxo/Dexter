@@ -12,6 +12,7 @@ namespace Dexter.Commands
     {
 
         [Command("shuffle")]
+        [Alias("reshuffle")]
         [Summary("Shuffles the music queue in a random order.")]
         [MusicBotChannel]
 
@@ -41,12 +42,9 @@ namespace Dexter.Commands
 
             player.Vueue.Shuffle();
 
-            var Embeds = player.GetQueue("🔀 Queue Shuffle", BotConfiguration);
+            var embeds = player.GetQueue("🔀 Queue Shuffle", BotConfiguration, MusicService);
 
-            if (Embeds.Length > 1)
-                CreateReactionMenu(Embeds, Context.Channel);
-            else
-                await Embeds.FirstOrDefault().SendEmbed(Context.Channel);
+            CreateReactionMenu(embeds, Context.Channel);
         }
 
     }

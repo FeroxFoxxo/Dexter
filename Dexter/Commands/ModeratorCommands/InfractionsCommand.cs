@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
 using Dexter.Databases.Infractions;
@@ -40,10 +39,7 @@ namespace Dexter.Commands
             {
                 EmbedBuilder[] Warnings = GetWarnings(UserID, Context.User.Id, $"<@{UserID}>", $"Unknown ({UserID})", true);
 
-                if (Warnings.Length > 1)
-                    CreateReactionMenu(Warnings, Context.Channel);
-                else
-                    await Warnings.FirstOrDefault().SendEmbed(Context.Channel);
+                CreateReactionMenu(Warnings, Context.Channel);
             }
             else
                 await InfractionsCommand(User);
@@ -72,10 +68,7 @@ namespace Dexter.Commands
                 {
                     EmbedBuilder[] Warnings = GetWarnings(User.Id, Context.User.Id, User.Mention, User.Username, true);
 
-                    if (Warnings.Length > 1)
-                        CreateReactionMenu(Warnings, Context.Channel);
-                    else
-                        await Warnings.FirstOrDefault().SendEmbed(Context.Channel);
+                    CreateReactionMenu(Warnings, Context.Channel);
                 }
                 else
                 {

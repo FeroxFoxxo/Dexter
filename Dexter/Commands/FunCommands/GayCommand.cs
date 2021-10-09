@@ -18,7 +18,7 @@ namespace Dexter.Commands
         /// <param name="User">The user to make the measurement about.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        [Command("gay")]
+        [Command("gay", ignoreExtraArgs: true)]
         [Summary("How gay are you? Use this command to find out~!")]
         [Alias("straight", "bisexual")]
         [BotChannel]

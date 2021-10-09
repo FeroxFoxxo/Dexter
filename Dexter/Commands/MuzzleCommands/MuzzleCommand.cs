@@ -22,7 +22,7 @@ namespace Dexter.Commands
         /// <param name="args">Optional parameter, indicates target user.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        [Command("muzzle")]
+        [Command("muzzle", ignoreExtraArgs: true)]
         [Summary("Issue the command, and s i l e n c e ,  T H O T-!")]
         [Alias("muzzleme")]
         [CommandCooldown(60)]

@@ -18,7 +18,7 @@ namespace Dexter.Commands
         /// <param name="User">The target user</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        [Command("unmuzzle")]
+        [Command("unmuzzle", ignoreExtraArgs: true)]
         [Summary("Unmuzzles the specified user.")]
         [RequireModerator]
 

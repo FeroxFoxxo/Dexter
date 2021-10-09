@@ -20,10 +20,10 @@ namespace Dexter.Commands
 
         [Command("topic")]
         [Summary("A topic starter command - perfect for when chat has died!\n" +
-                    "`ADD [TOPIC]` - adds a topic to the database.\n" +
-                    "`GET [TOPIC]` - gets a topic by name from the database.\n" +
-                    "`EDIT [TOPIC ID] [TOPIC]` - edits a topic in the database.\n" +
-                    "`REMOVE [TOPIC ID]` - removes a topic from the database.")]
+                    "`ADD TOPIC` - adds a topic to the database.\n" +
+                    "`GET TOPIC` - gets a topic by name from the database.\n" +
+                    "`EDIT TOPIC_ID TOPIC` - edits a topic in the database.\n" +
+                    "`REMOVE TOPIC_ID` - removes a topic from the database.")]
         [CommandCooldown(120)]
         [GameChannelRestricted]
 
@@ -42,10 +42,10 @@ namespace Dexter.Commands
 
         [Command("quote")]
         [Summary("A quote command - perfect for when chat has died!\n" +
-                    "`ADD [QUOTE]` - adds a quote to the database.\n" +
-                    "`GET [QUOTE]` - gets a quote by name from the database.\n" +
-                    "`EDIT [QUOTE ID] [QUOTE]` - edits a quote in the database.\n" +
-                    "`REMOVE [QUOTE ID]` - removes a quote from the database.")]
+                    "`ADD QUOTE` - adds a quote to the database.\n" +
+                    "`GET QUOTE` - gets a quote by name from the database.\n" +
+                    "`EDIT QUOTE_ID QUOTE` - edits a quote in the database.\n" +
+                    "`REMOVE QUOTE_ID` - removes a quote from the database.")]
         [CommandCooldown(120)]
         [GameChannelRestricted]
 
@@ -64,10 +64,10 @@ namespace Dexter.Commands
 
         [Command("wyr")]
         [Summary("A would-you-rather command comparing two different choices from which a discussion can be made from.\n" +
-                    "`ADD [WYR]` - adds a wyr to the database.\n" +
-                    "`GET [WYR]` - gets a wyr by name from the database.\n" +
-                    "`EDIT [WYR ID] [WYR]` - edits a wyr in the database.\n" +
-                    "`REMOVE [WYR ID]` - removes a wyr from the database.")]
+                    "`ADD WYR` - adds a wyr to the database.\n" +
+                    "`GET WYR` - gets a wyr by name from the database.\n" +
+                    "`EDIT WYR_ID WYR` - edits a wyr in the database.\n" +
+                    "`REMOVE WYR_ID` - removes a wyr from the database.")]
         [Alias("would you rather", "wouldyourather")]
         [CommandCooldown(120)]
         [GameChannelRestricted]
@@ -87,10 +87,10 @@ namespace Dexter.Commands
 
         [Command("funfact")]
         [Summary("A fun fact command that displays and manages curious, interesting, or unexpected facts about reality or the world.\n" +
-                    "`ADD [FACT]` - adds a fun fact to the database.\n" +
-                    "`GET [FACT]` - gets a fun fact by name from the database.\n" +
-                    "`EDIT [FACT ID] [NEW FACT]` - edits a fun fact in the database.\n" +
-                    "`REMOVE [FACT ID]` - removes a fun fact from the database.")]
+                    "`ADD FACT` - adds a fun fact to the database.\n" +
+                    "`GET FACT` - gets a fun fact by name from the database.\n" +
+                    "`EDIT FACT_ID FACT` - edits a fun fact in the database.\n" +
+                    "`REMOVE FACT_ID` - removes a fun fact from the database.")]
         [Alias("fact", "sciencefact")]
         [CommandCooldown(45)]
         [GameChannelRestricted]
@@ -110,10 +110,10 @@ namespace Dexter.Commands
 
         [Command("joke")]
         [Summary("A joke command that displays a funny statement, generally with a punchline; aimed for comedic intent.\n" +
-                    "`ADD [JOKE]` - adds a joke to the database.\n" +
-                    "`GET [JOKE]` - gets a joke by name from the database.\n" +
-                    "`EDIT [JOKE ID] [NEW JOKE]` - edits a joke in the database.\n" +
-                    "`REMOVE [JOKE ID]` - removes a joke from the database.")]
+                    "`ADD JOKE` - adds a joke to the database.\n" +
+                    "`GET JOKE` - gets a joke by name from the database.\n" +
+                    "`EDIT JOKE_ID JOKE` - edits a joke in the database.\n" +
+                    "`REMOVE JOKE_ID` - removes a joke from the database.")]
         [Alias("pun")]
         [CommandCooldown(45)]
         [GameChannelRestricted]

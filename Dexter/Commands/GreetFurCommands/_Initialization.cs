@@ -3,6 +3,7 @@ using Dexter.Configurations;
 using Dexter.Databases.GreetFur;
 using Dexter.Databases.UserProfiles;
 using Dexter.Services;
+using Google.Apis.Sheets.v4;
 
 namespace Dexter.Commands
 {
@@ -31,6 +32,12 @@ namespace Dexter.Commands
         /// </summary>
 
         public GreetFurService GreetFurService { get; set; }
+
+        /// <summary>
+        /// Manages the Google Sheets section of GreetFur record-keeping.
+        /// </summary>
+
+        public SheetsService SheetsService { get; set; }
 
         /// <summary>
         /// A database with information about GreetFur activity records.

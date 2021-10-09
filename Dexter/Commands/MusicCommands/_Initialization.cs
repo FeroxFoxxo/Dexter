@@ -1,8 +1,8 @@
 using Dexter.Abstractions;
-using Dexter.Configurations;
-using DexterSlash.Services;
+using Dexter.Services;
+using Google.Apis.YouTube.v3;
+using Microsoft.Extensions.Logging;
 using SpotifyAPI.Web;
-using System;
 using Victoria.Node;
 
 namespace Dexter.Commands
@@ -17,9 +17,13 @@ namespace Dexter.Commands
 
         public LavaNode LavaNode { get; set; }
 
-        public AudioService AudioService { get; set; }
+        public MusicService MusicService { get; set; }
 
-        public SpotifyClient SpotifyAPI { get; set; }
+        public ILogger<MusicCommands> Logger { get; set; }
+
+        public YouTubeService YouTubeService { get; set; }
+
+        public ClientCredentialsRequest ClientCredentialsRequest { get; set; }
 
     }
 

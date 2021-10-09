@@ -46,6 +46,12 @@ namespace Dexter.Services
         public RestrictionsDB RestrictionsDB { get; set; }
 
         /// <summary>
+        /// Utility Configuration for private VCs.
+        /// </summary>
+
+        public UtilityConfiguration UtilityConfiguration {  get; set; }
+
+        /// <summary>
         /// This method is run when the service is first started; which happens after dependency injection.
         /// </summary>
 
@@ -76,6 +82,9 @@ namespace Dexter.Services
 
             foreach (SocketVoiceChannel voiceChannel in vcs)
             {
+                if (voiceChannel.CategoryId == UtilityConfiguration.PrivateCategoryID)
+                    continue;
+
                 int nonbotusers = 0;
                 foreach (IGuildUser uservc in voiceChannel.Users)
                     if (!(uservc.IsBot 
@@ -277,7 +286,6 @@ namespace Dexter.Services
 
             public async Task<RoleModificationResponse> Log()
             {
-                await Debug.LogMessageAsync (ToString(), LogSeverity.Warning);
                 return this;
             }
         }

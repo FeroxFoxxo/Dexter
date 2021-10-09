@@ -29,7 +29,7 @@ namespace Dexter.Commands
 
         public async Task GreetFurLeaderboard()
         {
-            if (GreetFurService.sheetsService is null)
+            if (SheetsService is null)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to access Spreadsheet Service")
@@ -38,13 +38,13 @@ namespace Dexter.Commands
                 return;
             }
 
-            Spreadsheet Spreadsheet = await GreetFurService.sheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
+            Spreadsheet Spreadsheet = await SheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
 
             Sheet TheBigPicture = Spreadsheet.Sheets
                 .Where(Sheet => Sheet.Properties.Title == GreetFurConfiguration.TheBigPictureSpreadsheet)
                 .FirstOrDefault();
 
-            ValueRange Columns = await GreetFurService.sheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
+            ValueRange Columns = await SheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
                 $"{TheBigPicture.Properties.Title}!A2:{GreetFurConfiguration.TotalID}{TheBigPicture.Properties.GridProperties.RowCount}")
                 .ExecuteAsync();
 

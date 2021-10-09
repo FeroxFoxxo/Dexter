@@ -27,22 +27,13 @@ namespace Dexter.Commands
 
         public async Task GreetFurActivity()
         {
-            if (GreetFurService.sheetsService is null)
-            {
-                await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle("Unable to access Spreadsheet Service")
-                    .WithDescription("The Spreadsheet Service required to access GreetFur activity data is currently unavailable.")
-                    .SendEmbed(Context.Channel);
-                return;
-            }
-
-            Spreadsheet spreadsheets = await GreetFurService.sheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
+            Spreadsheet spreadsheets = await SheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
 
             Sheet currentFortnight = spreadsheets.Sheets
                 .Where(sheet => sheet.Properties.Title == GreetFurConfiguration.FortnightSpreadsheet)
                 .FirstOrDefault();
 
-            ValueRange columns = await GreetFurService.sheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
+            ValueRange columns = await SheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
                 $"{currentFortnight.Properties.Title}!{GreetFurConfiguration.IDColumnIndex}1:{currentFortnight.Properties.GridProperties.RowCount}")
                 .ExecuteAsync();
 
@@ -63,7 +54,7 @@ namespace Dexter.Commands
                 return;
             }
 
-            ValueRange rows = await GreetFurService.sheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
+            ValueRange rows = await SheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
                 $"{currentFortnight.Properties.Title}!A{indexOfUser}:{IntToLetters(currentFortnight.Properties.GridProperties.ColumnCount)}")
                 .ExecuteAsync();
 

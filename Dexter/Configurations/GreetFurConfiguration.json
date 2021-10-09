@@ -1,7 +1,4 @@
 {
-  "ApplicationName": "Dexter",
-  "CredentialFile": "Credentials.json",
-  "TokenFile": "Token",
   "SpreadSheetID": "1nOJCMRLuZqY3gJGx-1Stj5Peq1vZaQvGL9wNUXEuE68",
   "FortnightSpreadsheet": "ActivityTesting",
   "TheBigPictureSpreadsheet": "TBPTesting",

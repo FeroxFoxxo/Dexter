@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
@@ -165,26 +166,31 @@ namespace Dexter.Abstractions
         /// <summary>
         /// The Create Reaction Menu method creates a reaction menu with pages that you can use to navigate the embeds.
         /// </summary>
-        /// <param name="embedBuilder">The embeds that you wish to create the reaction menu from.</param>
+        /// <param name="embeds">The embeds that you wish to create the reaction menu from.</param>
         /// <param name="channel">The channel that the reaction menu should be sent to.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public void CreateReactionMenu(EmbedBuilder[] embedBuilder, ISocketMessageChannel channel)
+        public void CreateReactionMenu(EmbedBuilder[] embeds, ISocketMessageChannel channel)
         {
-            PageBuilder[] pageBuilderMenu = new PageBuilder[embedBuilder.Length];
+            if (embeds.Length > 1)
+            {
+                PageBuilder[] pageBuilderMenu = new PageBuilder[embeds.Length];
 
-            for (int i = 0; i < embedBuilder.Length; i++)
-                pageBuilderMenu[i] = PageBuilder.FromEmbedBuilder(embedBuilder[i]);
+                for (int i = 0; i < embeds.Length; i++)
+                    pageBuilderMenu[i] = PageBuilder.FromEmbedBuilder(embeds[i]);
 
-            Paginator paginator = new StaticPaginatorBuilder()
-                .WithPages(pageBuilderMenu)
-                .WithDefaultEmotes()
-                .WithFooter(PaginatorFooter.PageNumber)
-                .WithActionOnCancellation(ActionOnStop.DeleteInput)
-                .WithActionOnTimeout(ActionOnStop.DeleteInput)
-                                    .Build();
+                Paginator paginator = new StaticPaginatorBuilder()
+                    .WithPages(pageBuilderMenu)
+                    .WithDefaultEmotes()
+                    .WithFooter(PaginatorFooter.PageNumber)
+                    .WithActionOnCancellation(ActionOnStop.DeleteInput)
+                    .WithActionOnTimeout(ActionOnStop.DeleteInput)
+                                        .Build();
 
-            _ = Task.Run(async () => await Interactive.SendPaginatorAsync(paginator, channel, TimeSpan.FromMinutes(10)));
+                _ = Task.Run(async () => await Interactive.SendPaginatorAsync(paginator, channel, TimeSpan.FromMinutes(10)));
+            }
+            else
+                _ = embeds.FirstOrDefault().SendEmbed(Context.Channel);
         }
 
     }

@@ -2,7 +2,6 @@
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
-using System.Linq;
 using System.Threading.Tasks;
 using Victoria.Node;
 
@@ -29,12 +28,9 @@ namespace Dexter.Commands
                 return;
             }
 
-            var Embeds = player.GetQueue("🎶 Music Queue", BotConfiguration);
+            var embeds = player.GetQueue("🎶 Music Queue", BotConfiguration, MusicService);
 
-            if (Embeds.Length > 1)
-                CreateReactionMenu(Embeds, Context.Channel);
-            else
-                await Embeds.FirstOrDefault().SendEmbed(Context.Channel);
+            CreateReactionMenu(embeds, Context.Channel);
         }
 
     }

@@ -67,8 +67,6 @@ namespace Dexter.Services
 
             SocketChannel LoggingChannel = DiscordShardedClient.GetChannel(BotConfiguration.ModerationLogChannelID);
 
-            Console.Title = $"{DiscordShardedClient.CurrentUser.Username} v{Version} (Discord.Net v{DiscordConfig.Version})";
-
             if (LoggingChannel == null || LoggingChannel is not ITextChannel)
                 return;
 

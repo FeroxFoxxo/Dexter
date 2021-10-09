@@ -5,7 +5,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using System;
 
-namespace DexterSlash.Services
+namespace Dexter.Services
 {
     public class LoggingService : Service
     {

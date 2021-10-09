@@ -1,4 +1,5 @@
 ﻿using Dexter.Abstractions;
+using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
@@ -26,7 +27,10 @@ namespace Dexter.Services
 
 		private readonly List<int> ShardsReady;
 
-		public object Locker;
+		public readonly Dictionary<ulong, LoopType> LoopedGuilds;
+
+		public object LoopLocker;
+		public object QueueLocker;
 
 		public MusicService (DiscordShardedClient client, LavaNode lavaNode, ILogger<MusicService> logger, InteractiveService interactive)
         {
@@ -35,7 +39,11 @@ namespace Dexter.Services
 			Logger = logger;
 			Interactive = interactive;
 
-			Locker = new object();
+			LoopLocker = new ();
+			QueueLocker = new ();
+
+			LoopedGuilds = new ();
+
 			ShardsReady = new();
 			DisconnectTokens = new ConcurrentDictionary<ulong, CancellationTokenSource>();
 		}
@@ -73,10 +81,14 @@ namespace Dexter.Services
 			}
 		}
 
-        private async Task OnTrackStarted(TrackStartEventArg<LavaPlayer> trackEvent)
+		private async Task OnTrackStarted(TrackStartEventArg<LavaPlayer> trackEvent)
 		{
 			Logger.LogInformation($"Track started for guild {trackEvent.Player.VoiceChannel.Guild.Id}:\n\t" +
 								   $"[Name: {trackEvent.Track.Title} | Duration: {trackEvent.Track.Duration.HumanizeTimeSpan()}]");
+
+			lock (LoopLocker)
+				if (!LoopedGuilds.ContainsKey(trackEvent.Player.VoiceChannel.Guild.Id))
+					LoopedGuilds.Add(trackEvent.Player.VoiceChannel.Guild.Id, LoopType.Off);
 
 			if (!DisconnectTokens.TryGetValue(trackEvent.Player.VoiceChannel.Id, out var value))
 				return;
@@ -87,24 +99,24 @@ namespace Dexter.Services
 			value.Cancel(true);
 		}
 
-		private async Task OnTrackEnded(TrackEndEventArg<LavaPlayer> trackEnd)
+		private async Task OnTrackEnded(TrackEndEventArg<LavaPlayer> trackEvent)
 		{
-			Logger.LogInformation($"Track ended for guild {trackEnd.Player.VoiceChannel.Guild.Id} " +
-								   $"-> {trackEnd.Player.Vueue.Count:N0} tracks remaining.");
+			Logger.LogInformation($"Track ended for guild {trackEvent.Player.VoiceChannel.Guild.Id} " +
+								   $"-> {trackEvent.Player.Vueue.Count:N0} tracks remaining.");
 
-			if (trackEnd.Reason == TrackEndReason.LoadFailed)
+			if (trackEvent.Reason == TrackEndReason.LoadFailed)
 			{
-				Logger.LogError($"Load failed for track in guild: {trackEnd.Player.VoiceChannel.Guild.Id}\n\t" +
-								 $"Track info: [Name: {trackEnd.Track.Title} | Duration: {trackEnd.Track.Duration.HumanizeTimeSpan()} | " +
-								 $"Url: {trackEnd.Track.Url} | Livestream?: {trackEnd.Track.IsStream}]");
+				Logger.LogError($"Load failed for track in guild: {trackEvent.Player.VoiceChannel.Guild.Id}\n\t" +
+								 $"Track info: [Name: {trackEvent.Track.Title} | Duration: {trackEvent.Track.Duration.HumanizeTimeSpan()} | " +
+								 $"Url: {trackEvent.Track.Url} | Livestream?: {trackEvent.Track.IsStream}]");
 
 				return;
 			}
 
-			if (trackEnd.Reason != TrackEndReason.Stopped && trackEnd.Reason != TrackEndReason.Finished && trackEnd.Reason != TrackEndReason.LoadFailed)
+			if (trackEvent.Reason != TrackEndReason.Stopped && trackEvent.Reason != TrackEndReason.Finished && trackEvent.Reason != TrackEndReason.LoadFailed)
 				return;
 
-			var player = trackEnd.Player;
+			var player = trackEvent.Player;
 
 			if (player == null)
 				return;
@@ -113,12 +125,30 @@ namespace Dexter.Services
 
 			LavaTrack queueable;
 
-			while (true)
-			{
-				canDequeue = player.Vueue.TryDequeue(out queueable);
+			LoopType loopType = LoopType.Off;
 
-				if (queueable != null || !canDequeue)
-					break;
+			lock (LoopLocker)
+				if (LoopedGuilds.ContainsKey(trackEvent.Player.VoiceChannel.Guild.Id))
+					loopType = LoopedGuilds[trackEvent.Player.VoiceChannel.Guild.Id];
+
+			if (loopType == LoopType.All)
+				lock (QueueLocker)
+					player.Vueue.Enqueue(player.Track);
+
+			if (loopType != LoopType.Single)
+			{
+				while (true)
+				{
+					canDequeue = player.Vueue.TryDequeue(out queueable);
+
+					if (queueable != null || !canDequeue)
+						break;
+				}
+			}
+			else
+			{
+				canDequeue = true;
+				queueable = player.Track;
 			}
 
 			if (!canDequeue)
@@ -148,18 +178,22 @@ namespace Dexter.Services
 
 				await LavaNode.LeaveAsync(player.VoiceChannel);
 
+				lock (LoopLocker)
+					if (LoopedGuilds.ContainsKey(trackEvent.Player.VoiceChannel.Guild.Id))
+						LoopedGuilds.Remove(trackEvent.Player.VoiceChannel.Guild.Id);
+
 				await Interactive.DelayedSendMessageAndDeleteAsync
 					(player.TextChannel, deleteDelay: TimeSpan.FromSeconds(10), embed: dcEmbed.Build());
 
 				return;
 			}
 
-			await trackEnd.Player.PlayAsync(queueable);
+			await trackEvent.Player.PlayAsync(queueable);
 
 			if (queueable is null)
 				return;
 
-			await Interactive.DelayedSendMessageAndDeleteAsync(trackEnd.Player.TextChannel, null, TimeSpan.FromSeconds(10), embed: BuildEmbed(Dexter.Enums.EmojiEnum.Unknown).GetNowPlaying(queueable).Build());
+			await Interactive.DelayedSendMessageAndDeleteAsync(trackEvent.Player.TextChannel, null, TimeSpan.FromSeconds(10), embed: BuildEmbed(Dexter.Enums.EmojiEnum.Unknown).GetNowPlaying(queueable).Build());
 		}
 		
 		private async Task ProtectPlayerIntegrityOnDisconnectAsync(SocketUser user, SocketVoiceState ogState, SocketVoiceState newState)
@@ -171,7 +205,14 @@ namespace Dexter.Services
 				if (ogState.VoiceChannel is not null)
 					if (ogState.VoiceChannel.Users.Where(user => user.Id == Client.CurrentUser.Id).FirstOrDefault() is not null)
 						if (ogState.VoiceChannel.Users.Count <= 1)
+						{
 							await LavaNode.LeaveAsync(ogState.VoiceChannel ?? newState.VoiceChannel);
+
+							lock (LoopLocker)
+								if (LoopedGuilds.ContainsKey(ogState.VoiceChannel.Guild.Id))
+									LoopedGuilds.Remove(ogState.VoiceChannel.Guild.Id);
+
+						}
 
 			if (user.Id != Client.CurrentUser.Id || newState.VoiceChannel != null)
 				return;
@@ -179,6 +220,10 @@ namespace Dexter.Services
 			try
 			{
 				await LavaNode.LeaveAsync(ogState.VoiceChannel ?? newState.VoiceChannel);
+
+				lock (LoopLocker)
+					if (LoopedGuilds.ContainsKey(ogState.VoiceChannel.Guild.Id))
+						LoopedGuilds.Remove(ogState.VoiceChannel.Guild.Id);
 			}
 			catch (Exception) { }
 		}

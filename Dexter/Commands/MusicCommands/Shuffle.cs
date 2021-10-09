@@ -42,7 +42,7 @@ namespace Dexter.Commands
 
             player.Vueue.Shuffle();
 
-            var embeds = player.GetQueue("🔀 Queue Shuffle", BotConfiguration);
+            var embeds = player.GetQueue("🔀 Queue Shuffle", BotConfiguration, MusicService);
 
             CreateReactionMenu(embeds, Context.Channel);
         }

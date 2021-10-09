@@ -90,7 +90,7 @@ namespace Dexter.Extensions
 
             Type mBase = new StackTrace().GetFrame(SearchHeight).GetMethod().DeclaringType;
 
-            if (mBase.Assembly != Assembly.GetExecutingAssembly())
+            if (mBase.Assembly != Assembly.GetExecutingAssembly() || mBase.Namespace == typeof(StringExtensions).Namespace)
                 return GetLastMethodCalled(SearchHeight + 1);
 
             string name;

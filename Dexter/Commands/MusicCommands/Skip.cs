@@ -43,7 +43,12 @@ namespace Dexter.Commands
 
 			if (uCount >= 2 && Context.User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) < PermissionLevel.DJ)
 			{
-				// TODO: VOTESKIP
+				await BuildEmbed(EmojiEnum.Annoyed)
+					.WithTitle("Unable to skip song!")
+					.WithDescription("You must have the DJ role to skip tracks.").SendEmbed(Context.Channel);
+
+				// TODO VOTE SKIP
+
 			}
 			else
 			{

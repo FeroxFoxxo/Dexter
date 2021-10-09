@@ -36,6 +36,10 @@ namespace Dexter.Commands
             {
                 await LavaNode.LeaveAsync(player.VoiceChannel);
 
+                lock (MusicService.LoopLocker)
+                    if (MusicService.LoopedGuilds.ContainsKey(player.VoiceChannel.Guild.Id))
+                        MusicService.LoopedGuilds.Remove(player.VoiceChannel.Guild.Id);
+
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Sucessfully left voice channel!")
                     .WithDescription($"Disconnected from {vcName}.")

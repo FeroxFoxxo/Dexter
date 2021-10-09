@@ -252,7 +252,7 @@ namespace Dexter.Commands
 					}
 					else
 					{
-						lock (AudioService.Locker)
+						lock (MusicService.QueueLocker)
 						{
 							player.Vueue.Enqueue(track);
 						}
@@ -263,7 +263,7 @@ namespace Dexter.Commands
 			EmbedBuilder[] embeds;
 
 			if (wasEmpty)
-				embeds = player.GetQueue("🎶 Playlist Music Queue", BotConfiguration);
+				embeds = player.GetQueue("🎶 Playlist Music Queue", BotConfiguration, MusicService);
 			else
 				embeds = tracks.ToArray().GetQueueFromTrackArray("🎶 Playlist Music Queue", BotConfiguration);
 
@@ -293,7 +293,7 @@ namespace Dexter.Commands
 			}
 			else
 			{
-				lock (AudioService.Locker)
+				lock (MusicService.QueueLocker)
 				{
 					player.Vueue.Enqueue(track);
 				}

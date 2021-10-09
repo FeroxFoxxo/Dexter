@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
 using Dexter.Configurations;
 using Dexter.Enums;
+using Dexter.Services;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -178,7 +179,7 @@ namespace Dexter.Extensions
                                 $"Queue Position: **{queueSize}**.");
         }
 
-        public static EmbedBuilder[] GetQueue(this LavaPlayer player, string title, BotConfiguration botConfiguration)
+        public static EmbedBuilder[] GetQueue(this LavaPlayer player, string title, BotConfiguration botConfiguration, MusicService musicService )
         {
             var embeds = player.Vueue.ToArray().GetQueueFromTrackArray(title, botConfiguration);
 
@@ -200,12 +201,20 @@ namespace Dexter.Extensions
                 var timeRem = player.Track.Duration - player.Track.Position +
                     TimeSpan.FromSeconds(player.Vueue.Select(x => x.Duration.TotalSeconds).Sum());
 
-                embeds.First().WithDescription("**Now Playing:**\n" +
-                                  $"Title: **{player.Track.Title}** " +
-                                  $"[{trackDurCur} / {trackDurTotal}]\n\n" +
-                                  $"**Duration Left:** \n" +
-                                  $"{player.Vueue.Count + 1} Tracks [{timeRem.HumanizeTimeSpan()}]\n\n" +
-                                  "Up Next ⬇️");
+                LoopType loopType = LoopType.Off;
+
+                lock (musicService.LoopLocker)
+                    if (musicService.LoopedGuilds.ContainsKey(player.VoiceChannel.Guild.Id))
+                        loopType = musicService.LoopedGuilds[player.VoiceChannel.Guild.Id];
+
+                embeds
+                    .First()
+                    .WithDescription($"**Now {(loopType == LoopType.Off ? "Playing" : "Looping")}:**\n" +
+                        $"{(loopType == LoopType.Single ? "Looped " : "")}Title: **{player.Track.Title}** " +
+                        $"[{trackDurCur} / {trackDurTotal}]\n\n" +
+                        $"**Duration Left:** \n" +
+                        $"{player.Vueue.Count + 1} Tracks [{timeRem.HumanizeTimeSpan()}]\n\n" +
+                        "Up Next ⬇️" + embeds.First().Description);
             }
 
             return embeds;

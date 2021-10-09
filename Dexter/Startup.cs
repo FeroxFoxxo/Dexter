@@ -62,6 +62,8 @@ namespace Dexter
 
 			if (!string.IsNullOrEmpty(directory))
 				Directory.SetCurrentDirectory(directory);
+			else
+				Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
 
 			string databaseDirectory = Path.Join(Directory.GetCurrentDirectory(), "Databases");
 
@@ -103,7 +105,7 @@ namespace Dexter
 				builder.Services.AddSingleton(new ClientCredentialsRequest(spotifyID, spotifySecret));
 			}
 			else
-				builder.Services.AddSingleton(new SpotifyClient("UNKNOWN"));
+				builder.Services.AddSingleton(new ClientCredentialsRequest("UNKNOWN", "UNKNOWN"));
 
 			// Init google API.
 

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,7 +74,19 @@ namespace Dexter.Services
 
 			if (ShardsReady.Count == Client.Shards.Count)
 			{
-				if (!LavaNode.IsConnected) {
+				if (!LavaNode.IsConnected)
+				{
+					if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+					{
+						Process[] pname = Process.GetProcessesByName("javaw");
+
+						if (pname.Length == 0)
+						{
+							Logger.LogError("Lavalink is not set up! Make sure you run the executable in the Lavalink directory, and are running Java 10+.");
+							return;
+						}
+					}
+
 					await LavaNode.ConnectAsync();
 				}
 

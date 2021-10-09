@@ -197,14 +197,20 @@ namespace Dexter.Extensions
                     trackDurTotal = player.Track.Duration.ToString("mm\\:ss");
                 }
 
+                var timeRem = player.Track.Duration - player.Track.Position +
+                    TimeSpan.FromSeconds(player.Vueue.Select(x => x.Duration.TotalSeconds).Sum());
+
                 embeds.First().WithDescription("**Now Playing:**\n" +
                                   $"Title: **{player.Track.Title}** " +
                                   $"[{trackDurCur} / {trackDurTotal}]\n\n" +
+                                  $"**Duration Left:** \n" +
+                                  $"{player.Vueue.Count + 1} Tracks [{timeRem.HumanizeTimeSpan()}]\n\n" +
                                   "Up Next ⬇️");
             }
 
             return embeds;
         }
+
         public static EmbedBuilder[] GetQueueFromTrackArray(this LavaTrack[] tracks, string title, BotConfiguration botConfiguration)
         {
             EmbedBuilder CurrentBuilder = new EmbedBuilder()

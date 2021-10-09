@@ -123,11 +123,14 @@ namespace Dexter.Commands
 		{
 			List<EmbedBuilder> embeds = new();
 
-			foreach (var lyrics in fullLyrics.Split('['))
+			var lyricsList = fullLyrics.Split('[');
+
+			foreach (var lyrics in lyricsList)
 				if (lyrics.Length > 0)
 					embeds.Add(BuildEmbed(EmojiEnum.Unknown)
-						.WithTitle($"🎶 {trackTitle} Lyrics ({name})")
-						.WithDescription($"[{(lyrics.Length > 1700 ? lyrics.Substring(0, 1700) : lyrics)}"));
+						.WithTitle($"🎶 {trackTitle} - {name} Lyrics")
+						.WithDescription($"{(lyricsList.Length == 1 ? "" : "[")}" +
+							$"{(lyrics.Length > 1700 ? lyrics.Substring(0, 1700) : lyrics)}"));
 
 			CreateReactionMenu(embeds.ToArray(), Context.Channel);
 		}

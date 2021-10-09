@@ -142,13 +142,13 @@ namespace Dexter.Services
                             {
                                 string reply = customCommand.Reply;
 
-                                ulong firstMentionedID = commandContext.Message.MentionedUserIds.FirstOrDefault();
+                                ulong firstMentionedID = commandContext.Message.MentionedUserIds?.FirstOrDefault() ?? default;
 
                                 reply = reply.Replace("AUTHOR", (firstMentionedID != default && firstMentionedID != commandContext.User.Id) || !reply.Contains("USER")
                                     ? commandContext.User.Mention : commandContext.Client.CurrentUser.Mention);
 
                                 List<string> userMentions = new();
-                                foreach(ulong id in commandContext.Message.MentionedUserIds)
+                                foreach(ulong id in commandContext.Message.MentionedUserIds ?? Array.Empty<ulong>())
                                 {
                                     IUser user = DiscordShardedClient.GetUser(id);
                                     if (user is not null)

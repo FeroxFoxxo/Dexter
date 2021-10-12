@@ -29,7 +29,7 @@ namespace Dexter.Abstractions
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.UseCollation("utf8mb4");
+            modelBuilder.UseCollation("utf8mb4_bin");
         }
 
     }

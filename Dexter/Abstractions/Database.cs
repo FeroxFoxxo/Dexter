@@ -27,11 +27,6 @@ namespace Dexter.Abstractions
                 options.UseSqlite($"Data Source=Databases/{GetType().Name}.db");
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.UseCollation("utf8mb4_bin");
-        }
-
     }
 
 }

@@ -22,7 +22,7 @@ namespace Dexter.Abstractions
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             if (!string.IsNullOrEmpty(Startup.DBUser) && !string.IsNullOrEmpty(Startup.DBPassword))
-                options.UseMySQL($"server=localhost;database=library;user={Startup.DBUser};password={Startup.DBPassword}");
+                options.UseMySQL($"server=localhost;database={GetType().Name};user={Startup.DBUser};password={Startup.DBPassword}");
             else
                 options.UseSqlite($"Data Source=Databases/{GetType().Name}.db");
         }

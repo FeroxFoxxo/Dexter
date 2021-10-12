@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.InteropServices;
 
 namespace Dexter.Abstractions
 {
@@ -18,7 +19,13 @@ namespace Dexter.Abstractions
         /// <param name="options">The Context Options is what this method aims to configure,
         /// setting it to use SQLite and set the database name to be the class'.</param>
 
-        protected override void OnConfiguring(DbContextOptionsBuilder options) => options.UseSqlite($"Data Source=Databases/{GetType().Name}.db");
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        {
+            if (!string.IsNullOrEmpty(Startup.DBUser) && !string.IsNullOrEmpty(Startup.DBPassword))
+                options.UseMySQL($"server=localhost;database=library;user={Startup.DBUser};password={Startup.DBPassword}");
+            else
+                options.UseSqlite($"Data Source=Databases/{GetType().Name}.db");
+        }
 
     }
 

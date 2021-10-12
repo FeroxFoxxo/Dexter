@@ -35,9 +35,11 @@ namespace Dexter
     public static class Startup
 	{
 
-        private static string p_Token;
+        private static string p_Token, p_DBUser, p_DBPassword;
 
         public static string Token { get => p_Token; }
+		public static string DBUser { get => p_DBUser; }
+		public static string DBPassword { get => p_DBPassword; }
 
 		/// <summary>
 		/// The Main method is the entrance to the program. Arguments can be added to this method and supplied
@@ -48,9 +50,11 @@ namespace Dexter
 		/// <param name="directory">[OPTIONAL] The directory you wish the databases and configurations to be in. By default this is the build directory.</param>
 		/// <param name="spotifyID">[OPTIONAL] Spotify CLIENT_ID from developer.spotify.com/dashboard.</param>
 		/// <param name="spotifySecret">[OPTIONAL] Spotify CLIENT_SECRET from developer.spotify.com/dashboard.</param>
+		/// <param name="dbUser">[OPTIONAL] DBUSER for the MySQL database username.</param>
+		/// <param name="dbPassword">[OPTIONAL] DBPASSWORD for the MySQL database password.</param>
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public static async Task Main(string token, string version, string directory, string spotifyID, string spotifySecret)
+		public static async Task Main(string token, string version, string directory, string spotifyID, string spotifySecret, string dbUser, string dbPassword)
 		{
 			p_Token = token;
 

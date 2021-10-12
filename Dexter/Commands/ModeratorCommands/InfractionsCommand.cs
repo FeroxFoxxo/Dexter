@@ -158,7 +158,7 @@ namespace Dexter.Commands
                 if (Index % 5 == 0 && Index != 0)
                 {
                     Embeds.Add(CurrentBuilder);
-                    CurrentBuilder = BuildEmbed(EmojiEnum.Unknown).AddField(Field);
+                    CurrentBuilder = BuildEmbed(EmojiEnum.Love).AddField(Field);
                 }
                 else
                 {
@@ -169,7 +169,7 @@ namespace Dexter.Commands
                     catch (Exception)
                     {
                         Embeds.Add(CurrentBuilder);
-                        CurrentBuilder = BuildEmbed(EmojiEnum.Unknown).AddField(Field);
+                        CurrentBuilder = BuildEmbed(EmojiEnum.Love).AddField(Field);
                     }
                 }
             }

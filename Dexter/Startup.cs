@@ -58,6 +58,9 @@ namespace Dexter
 		{
 			p_Token = token;
 
+			p_DBUser = dbUser;
+			p_DBPassword = dbPassword;
+
 			// Create new WebApplication which will generate our REST-FUL API.
 
 			var builder = WebApplication.CreateBuilder();

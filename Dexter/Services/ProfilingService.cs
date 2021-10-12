@@ -6,13 +6,9 @@ using System.Threading.Tasks;
 using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
-using Dexter.Enums;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
-using Humanizer;
-using System.Diagnostics;
-using System.IO.Compression;
 using Microsoft.Extensions.Logging;
 
 namespace Dexter.Services

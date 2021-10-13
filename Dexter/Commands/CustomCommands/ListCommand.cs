@@ -41,7 +41,7 @@ namespace Dexter.Commands
                     CurrentType = cc.CommandType;
                 }
 
-                CurrentBuilder.AddField($"{cc.CommandName} {(string.IsNullOrEmpty(cc.Alias) ? "" : $"{cc.Alias.Replace("\"", "")}")}", $"{cc.Reply}{(cc.User > 0 ? $" - by <@{cc.User}>" : "")}");
+                CurrentBuilder.AddField($"{BotConfiguration.Prefix}{cc.CommandName} {(string.IsNullOrEmpty(cc.Alias) ? "" : $"{cc.Alias.Replace("\"", "")}")}", $"{cc.Reply}{(cc.User > 0 ? $" - by <@{cc.User}>" : "")}");
             }
 
             List<CustomCommand> customCommandsList = CustomCommandDB.CustomCommands.ToList();

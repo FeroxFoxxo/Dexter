@@ -78,15 +78,15 @@ namespace Dexter.Commands
             {
                 try
                 {
+                    if (Context.Channel.GetType() != typeof(SocketDMChannel))
+                    {
+                        await BuildEmbed(EmojiEnum.Love)
+                            .WithTitle("Sent infractions log.")
+                            .WithDescription("Heya! I've sent you a log of your infractions. Feel free to take a look over them in your own time! <3")
+                            .SendEmbed(Context.Channel);
+                    }
+
                     await CreateReactionMenu(GetWarnings(Context.User.Id, Context.User.Id, Context.User.Mention, Context.User.Username, false), await Context.User.CreateDMChannelAsync());
-
-                    if (Context.Channel.GetType() == typeof(SocketDMChannel))
-                        return;
-
-                    await BuildEmbed(EmojiEnum.Love)
-                        .WithTitle("Sent infractions log.")
-                        .WithDescription("Heya! I've sent you a log of your infractions. Feel free to take a look over them in your own time! <3")
-                        .SendEmbed(Context.Channel);
                 }
                 catch (HttpException)
                 {

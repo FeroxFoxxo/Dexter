@@ -54,14 +54,18 @@ namespace Dexter.Databases.CustomCommands
         /// A generic custom command type, detached from any specific user
         /// </summary>
         Unspecified,
+
         /// <summary>
         /// The attached user is a patreon supporter of at least the minimum tier for custom commands
         /// </summary>
         Patreon,
+
         /// <summary>
         /// The attached user is a staff member
         /// </summary>
-        Staff
+        Staff,
+
+        Server
     }
 
 }

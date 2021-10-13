@@ -6,6 +6,8 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
 using System.Text;
+using Discord;
+using Humanizer;
 
 namespace Dexter.Commands
 {
@@ -24,20 +26,24 @@ namespace Dexter.Commands
 
         public async Task ListCommands()
         {
-            StringBuilder customCommands = new();
+            Dictionary<UserCommandSource, EmbedBuilder> embeds = new ();
+
+            foreach (var cc in CustomCommandDB.CustomCommands.ToList())
+            {
+                if (!embeds.ContainsKey(cc.CommandType))
+                    embeds.Add(cc.CommandType, BuildEmbed(EmojiEnum.Unknown).WithTitle(cc.CommandType.Humanize()));
+
+                embeds[cc.CommandType].AddField($"{cc.CommandName} {(string.IsNullOrEmpty(cc.Alias) ? "" : $"({cc.Alias})")}{(cc.User > 0 ? $" - by {Context.Client.GetUser(cc.User)}" : "")}", cc.Reply);
+            }
+
+
             List<CustomCommand> customCommandsList = CustomCommandDB.CustomCommands.ToList();
             customCommandsList.Sort((a, b) => a.CommandName.CompareTo(b.CommandName));
-            foreach(CustomCommand cc in customCommandsList)
-            {
-                if (IsCustomCommandActive(cc))
-                    customCommands.Append($"{BotConfiguration.Prefix}{cc.CommandName}{(cc.User == 0 ? "" : $" by <@{cc.User}>")}\n");
-            }
-            //string customCommands = string.Join("\n", CustomCommandDB.CustomCommands.AsQueryable().Select(CustomCommand => BotConfiguration.Prefix + CustomCommand.CommandName));
 
-            await BuildEmbed(EmojiEnum.Love)
-                .WithTitle("Here is a list of usable commands! <3")
-                .WithDescription(customCommands.Length > 0 ? customCommands.ToString() : "No custom commands created!")
-                .SendEmbed(Context.Channel);
+            if (embeds.Count == 0)
+                embeds.Add(UserCommandSource.Unspecified, BuildEmbed(EmojiEnum.Annoyed).WithTitle("Unable to find custom commands!").WithDescription("No custom commands set."));
+
+            CreateReactionMenu(embeds.OrderByDescending(x => (int) x.Key).Select(x => x.Value).ToArray(), Context.Channel);
         }
 
     }

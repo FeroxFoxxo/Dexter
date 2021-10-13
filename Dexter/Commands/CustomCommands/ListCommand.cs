@@ -8,6 +8,7 @@ using Discord.Commands;
 using System.Text;
 using Discord;
 using Humanizer;
+using System;
 
 namespace Dexter.Commands
 {
@@ -26,24 +27,30 @@ namespace Dexter.Commands
 
         public async Task ListCommands()
         {
-            Dictionary<UserCommandSource, EmbedBuilder> embeds = new ();
+            List<EmbedBuilder> embeds = new ();
 
-            foreach (var cc in CustomCommandDB.CustomCommands.ToList())
+            var CurrentType = UserCommandSource.Unspecified;
+            var CurrentBuilder = BuildEmbed(EmojiEnum.Annoyed).WithTitle("Unable to find custom commands!").WithDescription("No custom commands set.");
+
+            foreach (var cc in CustomCommandDB.CustomCommands.ToList().OrderByDescending(x => (int) x.CommandType))
             {
-                if (!embeds.ContainsKey(cc.CommandType))
-                    embeds.Add(cc.CommandType, BuildEmbed(EmojiEnum.Unknown).WithTitle(cc.CommandType.Humanize()));
+                if (CurrentType != cc.CommandType || CurrentBuilder.Fields.Count >= 20)
+                {
+                    embeds.Add(CurrentBuilder);
+                    CurrentBuilder = BuildEmbed(EmojiEnum.Unknown).WithTitle(cc.CommandType.Humanize());
+                    CurrentType = cc.CommandType;
+                }
 
-                embeds[cc.CommandType].AddField($"{cc.CommandName} {(string.IsNullOrEmpty(cc.Alias) ? "" : $"{cc.Alias.Replace("\"", "")}")}", $"{cc.Reply}{(cc.User > 0 ? $" - by {Context.Client.GetUser(cc.User)}" : "")}");
+                CurrentBuilder.AddField($"{cc.CommandName} {(string.IsNullOrEmpty(cc.Alias) ? "" : $"{cc.Alias.Replace("\"", "")}")}{(cc.User > 0 ? $" - by <@{cc.User}>" : "")}", cc.Reply);
             }
-
 
             List<CustomCommand> customCommandsList = CustomCommandDB.CustomCommands.ToList();
             customCommandsList.Sort((a, b) => a.CommandName.CompareTo(b.CommandName));
 
-            if (embeds.Count == 0)
-                embeds.Add(UserCommandSource.Unspecified, BuildEmbed(EmojiEnum.Annoyed).WithTitle("Unable to find custom commands!").WithDescription("No custom commands set."));
+            if (embeds.Count > 1)
+                embeds.RemoveAt(0);
 
-            CreateReactionMenu(embeds.OrderByDescending(x => (int) x.Key).Select(x => x.Value).ToArray(), Context.Channel);
+            CreateReactionMenu(embeds.ToArray(), Context.Channel);
         }
 
     }

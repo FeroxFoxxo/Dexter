@@ -37,7 +37,7 @@ namespace Dexter.Commands
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Bot Version")
-                .WithDescription($"Hello? Is anyone out there-\nThis is **{Context.Client.CurrentUser.Username} v{StartupService.Version}** running **Discord.NET v{DiscordConfig.Version}**")
+                .WithDescription($"Hello? Is anyone out there-\nThis is **{Context.Client.CurrentUser.Username} v{Startup.Version}** running **Discord.NET v{DiscordConfig.Version}**")
                 .AddField("Latest Commit:", LastCommit.Length > 1200 ? $"{LastCommit.Substring(0, 1200)}..." : LastCommit)
                 .SendEmbed(Context.Channel);
         }

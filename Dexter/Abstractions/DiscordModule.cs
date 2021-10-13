@@ -170,7 +170,7 @@ namespace Dexter.Abstractions
         /// <param name="channel">The channel that the reaction menu should be sent to.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public void CreateReactionMenu(EmbedBuilder[] embeds, ISocketMessageChannel channel)
+        public void CreateReactionMenu(EmbedBuilder[] embeds, IMessageChannel channel)
         {
             if (embeds.Length > 1)
             {

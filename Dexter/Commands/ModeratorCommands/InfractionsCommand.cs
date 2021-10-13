@@ -65,11 +65,7 @@ namespace Dexter.Commands
             if (IsUserSpecified)
             {
                 if ((Context.User as IGuildUser).GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator)
-                {
-                    EmbedBuilder[] Warnings = GetWarnings(User.Id, Context.User.Id, User.Mention, User.Username, true);
-
-                    CreateReactionMenu(Warnings, Context.Channel);
-                }
+                    CreateReactionMenu(GetWarnings(User.Id, Context.User.Id, User.Mention, User.Username, true), Context.Channel);
                 else
                 {
                     await BuildEmbed(EmojiEnum.Annoyed)
@@ -80,12 +76,9 @@ namespace Dexter.Commands
             }
             else
             {
-                EmbedBuilder[] Embeds = GetWarnings(Context.User.Id, Context.User.Id, Context.User.Mention, Context.User.Username, false);
-
                 try
                 {
-                    foreach (EmbedBuilder Embed in Embeds)
-                        await Embed.SendEmbed(await Context.User.CreateDMChannelAsync());
+                    CreateReactionMenu(GetWarnings(Context.User.Id, Context.User.Id, Context.User.Mention, Context.User.Username, false), await Context.User.CreateDMChannelAsync());
 
                     if (Context.Channel.GetType() == typeof(SocketDMChannel))
                         return;

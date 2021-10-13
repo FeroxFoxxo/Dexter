@@ -34,14 +34,14 @@ namespace Dexter.Commands
 
             foreach (var cc in CustomCommandDB.CustomCommands.ToList().OrderByDescending(x => (int) x.CommandType))
             {
-                if (CurrentType != cc.CommandType || CurrentBuilder.Fields.Count >= 20)
+                if (CurrentType != cc.CommandType || CurrentBuilder.Fields.Count >= 10)
                 {
                     embeds.Add(CurrentBuilder);
-                    CurrentBuilder = BuildEmbed(EmojiEnum.Unknown).WithTitle(cc.CommandType.Humanize());
+                    CurrentBuilder = BuildEmbed(EmojiEnum.Unknown).WithTitle($"{cc.CommandType.Humanize()} Commands");
                     CurrentType = cc.CommandType;
                 }
 
-                CurrentBuilder.AddField($"{cc.CommandName} {(string.IsNullOrEmpty(cc.Alias) ? "" : $"{cc.Alias.Replace("\"", "")}")}{(cc.User > 0 ? $" - by <@{cc.User}>" : "")}", cc.Reply);
+                CurrentBuilder.AddField($"{cc.CommandName} {(string.IsNullOrEmpty(cc.Alias) ? "" : $"{cc.Alias.Replace("\"", "")}")}", $"{cc.Reply}{(cc.User > 0 ? $" - by <@{cc.User}>" : "")}");
             }
 
             List<CustomCommand> customCommandsList = CustomCommandDB.CustomCommands.ToList();

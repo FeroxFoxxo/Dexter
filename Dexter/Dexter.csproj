@@ -21,7 +21,7 @@
 	<ItemGroup>
 		<PackageReference Include="AnimatedGif" Version="1.0.5" />
 		<PackageReference Include="Discord.Net.Labs" Version="3.1.4" />
-		<PackageReference Include="Fergun.Interactive.Labs" Version="1.2.2" />
+		<PackageReference Include="Fergun.Interactive.Labs" Version="1.2.3" />
 		<PackageReference Include="Figgle" Version="0.4.0" />
 		<PackageReference Include="Genbox.WolframAlpha" Version="3.0.0-alpha3" />
 		<PackageReference Include="Google.Apis.Sheets.v4" Version="1.55.0.2371" />

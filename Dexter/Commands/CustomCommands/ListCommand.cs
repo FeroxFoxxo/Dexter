@@ -33,7 +33,7 @@ namespace Dexter.Commands
                 if (!embeds.ContainsKey(cc.CommandType))
                     embeds.Add(cc.CommandType, BuildEmbed(EmojiEnum.Unknown).WithTitle(cc.CommandType.Humanize()));
 
-                embeds[cc.CommandType].AddField($"{cc.CommandName} {(string.IsNullOrEmpty(cc.Alias) ? "" : $"{cc.Alias.Replace("\"", "")}")}{(cc.User > 0 ? $" - by {Context.Client.GetUser(cc.User)}" : "")}", cc.Reply);
+                embeds[cc.CommandType].AddField($"{cc.CommandName} {(string.IsNullOrEmpty(cc.Alias) ? "" : $"{cc.Alias.Replace("\"", "")}")}", $"{cc.Reply}{(cc.User > 0 ? $" - by {Context.Client.GetUser(cc.User)}" : "")}");
             }
 
 

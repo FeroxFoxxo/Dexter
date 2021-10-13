@@ -35,9 +35,10 @@ namespace Dexter
     public static class Startup
 	{
 
-        private static string p_Token, p_DBUser, p_DBPassword;
+        private static string p_Token, p_DBUser, p_DBPassword, p_Version;
 
-        public static string Token { get => p_Token; }
+		public static string Version { get => p_Version; }
+		public static string Token { get => p_Token; }
 		public static string DBUser { get => p_DBUser; }
 		public static string DBPassword { get => p_DBPassword; }
 
@@ -56,6 +57,7 @@ namespace Dexter
 
 		public static async Task Main(string token, string version, string directory, string spotifyID, string spotifySecret, string dbUser, string dbPassword)
 		{
+			p_Version = version;
 			p_Token = token;
 
 			p_DBUser = dbUser;

@@ -30,13 +30,7 @@ namespace Dexter.Services
         /// </summary>
 
         public ServiceProvider ServiceProvider { get; set; }
-
-        /// <summary>
-        /// The current version of the bot, which as been parsed from the InitializeDependencies method.
-        /// </summary>
-
-        public string Version;
-
+        
         /// <summary>
         /// <see langword="true"/> if the bot has finished its startup process; <see langword="false"/> otherwise.
         /// </summary>
@@ -116,7 +110,7 @@ namespace Dexter.Services
             if (BotConfiguration.EnableStartupAlert || NulledConfigurations.Count > 0)
                 await BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Startup complete!")
-                    .WithDescription($"This is **{DiscordShardedClient.CurrentUser.Username} v{Version}** running **Discord.Net v{DiscordConfig.Version}**!")
+                    .WithDescription($"This is **{DiscordShardedClient.CurrentUser.Username} v{Startup.Version}** running **Discord.Net v{DiscordConfig.Version}**!")
                     .AddField("Latest Commit:", LastCommit.Length > 1000 ? $"{LastCommit.Substring(0, 1000)}..." : LastCommit)
                     .AddField(NulledConfigurations.Count > 0, "Unapplied Configurations:", UnsetConfigurations.Length > 600 ? $"{UnsetConfigurations.Substring(0, 600)}..." : UnsetConfigurations)
                     .SendEmbed(LoggingChannel as ITextChannel);

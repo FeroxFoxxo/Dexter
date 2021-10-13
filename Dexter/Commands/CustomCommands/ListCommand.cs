@@ -44,6 +44,8 @@ namespace Dexter.Commands
                 CurrentBuilder.AddField($"{BotConfiguration.Prefix}{cc.CommandName} {(string.IsNullOrEmpty(cc.Alias) ? "" : $"{cc.Alias.Replace("\"", "")}")}", $"{cc.Reply}{(cc.User > 0 ? $" - by <@{cc.User}>" : "")}");
             }
 
+            embeds.Add(CurrentBuilder);
+
             List<CustomCommand> customCommandsList = CustomCommandDB.CustomCommands.ToList();
             customCommandsList.Sort((a, b) => a.CommandName.CompareTo(b.CommandName));
 

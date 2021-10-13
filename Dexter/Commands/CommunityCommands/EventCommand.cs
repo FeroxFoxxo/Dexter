@@ -226,7 +226,7 @@ namespace Dexter.Commands
                     }
                     else
                     {
-                        CreateReactionMenu(GenerateUserEventsMenu(Events.ToArray()), Context.Channel);
+                        await CreateReactionMenu(GenerateUserEventsMenu(Events.ToArray()), Context.Channel);
                         return;
                     }
             }

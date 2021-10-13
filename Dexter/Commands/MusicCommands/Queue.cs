@@ -30,7 +30,7 @@ namespace Dexter.Commands
 
             var embeds = player.GetQueue("🎶 Music Queue", BotConfiguration, MusicService);
 
-            CreateReactionMenu(embeds, Context.Channel);
+            await CreateReactionMenu(embeds, Context.Channel);
         }
 
     }

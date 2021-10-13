@@ -267,7 +267,7 @@ namespace Dexter.Commands
 			else
 				embeds = tracks.ToArray().GetQueueFromTrackArray("🎶 Playlist Music Queue", BotConfiguration);
 
-			CreateReactionMenu(embeds, Context.Channel);
+			await CreateReactionMenu(embeds, Context.Channel);
 		}
 
 		public async Task SearchSingleTrack(string search, LavaPlayer player, SearchType type)

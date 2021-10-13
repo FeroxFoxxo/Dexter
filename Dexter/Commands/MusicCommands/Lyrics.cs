@@ -92,7 +92,7 @@ namespace Dexter.Commands
 
 					if (!string.IsNullOrWhiteSpace(lyrics))
 					{
-						SendLyricsEmbed(lyrics, "GENIUS", track.Title);
+						await SendLyricsEmbed(lyrics, "GENIUS", track.Title);
 						return;
 					}
 
@@ -105,7 +105,7 @@ namespace Dexter.Commands
 
 					if (!string.IsNullOrWhiteSpace(lyrics))
 					{
-						SendLyricsEmbed(lyrics, "OHV", track.Title);
+						await SendLyricsEmbed(lyrics, "OHV", track.Title);
 						return;
 					}
 
@@ -119,7 +119,7 @@ namespace Dexter.Commands
 				.SendEmbed(Context.Channel);
 		}
 
-		private void SendLyricsEmbed (string fullLyrics, string name, string trackTitle)
+		private async Task SendLyricsEmbed (string fullLyrics, string name, string trackTitle)
 		{
 			List<EmbedBuilder> embeds = new();
 
@@ -132,7 +132,7 @@ namespace Dexter.Commands
 						.WithDescription($"{(lyricsList.Length == 1 ? "" : "[")}" +
 							$"{(lyrics.Length > 1700 ? lyrics.Substring(0, 1700) : lyrics)}"));
 
-			CreateReactionMenu(embeds.ToArray(), Context.Channel);
+			await CreateReactionMenu(embeds.ToArray(), Context.Channel);
 		}
 
 	}

@@ -50,7 +50,7 @@ namespace Dexter.Commands
             if (embeds.Count > 1)
                 embeds.RemoveAt(0);
 
-            CreateReactionMenu(embeds.ToArray(), Context.Channel);
+            await CreateReactionMenu(embeds.ToArray(), Context.Channel);
         }
 
     }

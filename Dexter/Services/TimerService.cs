@@ -106,8 +106,6 @@ namespace Dexter.Services
                             break;
                     }
 
-                    EventTimersDB.SaveChanges();
-
                     Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Timer.CallbackParameters);
                     Type Class = Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.Name.Equals(Timer.CallbackClass)).FirstOrDefault();
 

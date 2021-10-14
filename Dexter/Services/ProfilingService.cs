@@ -6,13 +6,9 @@ using System.Threading.Tasks;
 using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
-using Dexter.Enums;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
-using Humanizer;
-using System.Diagnostics;
-using System.IO.Compression;
 using Microsoft.Extensions.Logging;
 
 namespace Dexter.Services
@@ -68,10 +64,6 @@ namespace Dexter.Services
 
         public async Task ProfileCallback(Dictionary<string, string> Parameters)
         {
-            Stopwatch Stopwatch = new();
-
-            Stopwatch.Start();
-
             try
             {
                 await DiscordShardedClient.CurrentUser.ModifyAsync(ClientProperties => ClientProperties.Avatar = new Image(GetRandomPFP()));
@@ -81,47 +73,6 @@ namespace Dexter.Services
                 Logger.LogWarning(
                     "Unable to change the bot's profile picture due to ratelimiting!"
                 );
-            }
-
-            if (BotConfiguration.EnableDatabaseBackups)
-            {
-                string DatabaseDirectory = Path.Join(Directory.GetCurrentDirectory(), "Databases");
-
-                string BackupPath = Path.Join(Directory.GetCurrentDirectory(), "Backups");
-
-                if (!Directory.Exists(BackupPath))
-                    Directory.CreateDirectory(BackupPath);
-
-                string BackupZip = Path.Join(BackupPath, $"{DateTime.UtcNow:dd-MM-yyyy}.zip");
-
-                if (File.Exists(BackupZip))
-                    File.Delete(BackupZip);
-
-                ZipFile.CreateFromDirectory(DatabaseDirectory, BackupZip, CompressionLevel.Optimal, true);
-
-                string[] Sizes = { "B", "KB", "MB", "GB", "TB" };
-
-                double FileLength = new FileInfo(BackupZip).Length;
-
-                int Order = 0;
-
-                while (FileLength >= 1024 && Order < Sizes.Length - 1)
-                {
-                    Order++;
-                    FileLength /= 1024;
-                }
-
-                Stopwatch.Stop();
-
-                await (DiscordShardedClient.GetChannel(ProfilingConfiguration.DatabaseBackupChannel) as ITextChannel)
-                    .SendFileAsync(BackupZip, embed:
-                        BuildEmbed(EmojiEnum.Love)
-                            .WithTitle("Backup Successfully Concluded.")
-                            .WithDescription($"Haiya! The backup for {DateTime.UtcNow.ToShortDateString()} has been built " +
-                                $"with a file size of {string.Format("{0:0.##} {1}", FileLength, Sizes[Order])}.")
-                            .WithFooter($"Profiling took {Stopwatch.Elapsed.Humanize()}")
-                                                .Build()
-                    );
             }
         }
 

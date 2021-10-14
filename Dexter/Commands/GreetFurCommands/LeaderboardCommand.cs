@@ -83,7 +83,7 @@ namespace Dexter.Commands
                 );
             }
 
-            CreateReactionMenu(EmbedList.ToArray(), Context.Channel);
+            await CreateReactionMenu(EmbedList.ToArray(), Context.Channel);
         }
 
     }

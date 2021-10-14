@@ -72,7 +72,7 @@ namespace Dexter.Commands
                         new Dictionary<string, string>() {
                             { "CommandName", CommandName.ToLower() },
                             { "Reply", Reply },
-                            { "CommandType", UserCommandSource.Unspecified.ToString() },
+                            { "CommandType", UserCommandSource.Server.ToString() },
                             { "User", "0" }
                         },
                         Context.User.Id,

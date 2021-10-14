@@ -34,7 +34,7 @@ namespace Dexter.Abstractions
         public ProposalService ProposalService { get; set; }
 
         /// <summary>
-        /// The Interactivity class is used to create a reaction menu for the CreateReactionMenu method.
+        /// The Interactivity class is used to create a reaction menu for the await CreateReactionMenu method.
         /// </summary>
         public InteractiveService Interactive { get; set; }
 
@@ -170,7 +170,7 @@ namespace Dexter.Abstractions
         /// <param name="channel">The channel that the reaction menu should be sent to.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public void CreateReactionMenu(EmbedBuilder[] embeds, ISocketMessageChannel channel)
+        public async Task CreateReactionMenu(EmbedBuilder[] embeds, IMessageChannel channel)
         {
             if (embeds.Length > 1)
             {
@@ -187,10 +187,10 @@ namespace Dexter.Abstractions
                     .WithActionOnTimeout(ActionOnStop.DeleteInput)
                                         .Build();
 
-                _ = Task.Run(async () => await Interactive.SendPaginatorAsync(paginator, channel, TimeSpan.FromMinutes(10)));
+                await Interactive.SendPaginatorAsync(paginator, channel, TimeSpan.FromMinutes(10));
             }
             else
-                _ = embeds.FirstOrDefault().SendEmbed(Context.Channel);
+                await embeds.FirstOrDefault().SendEmbed(Context.Channel);
         }
 
     }

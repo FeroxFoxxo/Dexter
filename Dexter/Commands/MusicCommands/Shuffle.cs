@@ -44,7 +44,7 @@ namespace Dexter.Commands
 
             var embeds = player.GetQueue("🔀 Queue Shuffle", BotConfiguration, MusicService);
 
-            CreateReactionMenu(embeds, Context.Channel);
+            await CreateReactionMenu(embeds, Context.Channel);
         }
 
     }

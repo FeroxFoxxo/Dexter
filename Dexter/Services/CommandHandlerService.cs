@@ -147,8 +147,8 @@ namespace Dexter.Services
 
                                 ulong firstMentionedID = commandContext.Message.MentionedUserIds?.FirstOrDefault() ?? default;
 
-                                reply = reply.Replace("AUTHOR", (firstMentionedID != default && firstMentionedID != commandContext.User.Id) || !reply.Contains("USER")
-                                    ? commandContext.User.Mention : commandContext.Client.CurrentUser.Mention);
+                                reply = reply.Replace("AUTHOR", (firstMentionedID != default && firstMentionedID != commandContext?.User.Id) || !reply.Contains("USER")
+                                    ? commandContext.User.Mention : commandContext?.Client?.CurrentUser?.Mention ?? "Dexter");
 
                                 List<string> userMentions = new();
                                 foreach(ulong id in commandContext.Message.MentionedUserIds ?? Array.Empty<ulong>())

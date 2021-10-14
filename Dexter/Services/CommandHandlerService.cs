@@ -157,8 +157,10 @@ namespace Dexter.Services
                                     if (user is not null)
                                         userMentions.Add(user.Mention);
                                 }
-                                string userReplacement = !userMentions.Any() ? commandContext.User.Mention : LanguageHelper.Enumerate(userMentions);
-                                reply = reply.Replace("USER", userReplacement);
+
+                                reply = userMentions.Any()
+                                    ? reply.Replace("USER", LanguageHelper.Enumerate(userMentions))
+                                    : reply.Replace("USER", commandContext?.User?.Mention ?? "{Unknown}");
 
                                 await commandContext.Channel.SendMessageAsync(reply);
                             }

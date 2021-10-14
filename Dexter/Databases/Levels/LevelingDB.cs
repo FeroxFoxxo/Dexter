@@ -83,12 +83,22 @@ namespace Dexter.Databases.Levels
         /// <param name="id">The ID of the user to look up.</param>
         /// <param name="settings">The corresponding User Preferences object for this user.</param>
         /// <param name="save">Whether to save the data to the database if a user or preferences object needs to be created.</param>
+        /// <exception cref="InvalidOperationException"></exception>
         /// <returns>A <see cref="UserLevel"/> object containing the obtained XP levels for the given <paramref name="id"/>.</returns>
 
         public UserLevel GetOrCreateLevelData(ulong id, out LevelPreferences settings, bool save = true)
         {
-            UserLevel level = Levels.Find(id);
-            settings = Prefs.Find(id);
+            UserLevel level;
+            try
+            {
+                level = Levels.Find(id);
+                settings = Prefs.Find(id);
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                throw new InvalidOperationException($"An database error occurred while trying to find a level and preferences item for ID {id}:" +
+                    $"\n{e}");
+            }
 
             bool toSave = false;
             if (level is null)

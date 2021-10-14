@@ -36,7 +36,19 @@ namespace Dexter.Commands
 
         public async Task CustomizeLevelsCommand(string attribute = "", [Remainder] string value = "")
         {
-            UserLevel ul = LevelingDB.GetOrCreateLevelData(Context.User.Id, out LevelPreferences prefs);
+            UserLevel ul;
+            LevelPreferences prefs;
+            try
+            {
+                ul = LevelingDB.GetOrCreateLevelData(Context.User.Id, out prefs);
+            }
+            catch (System.Exception e)
+            {
+                await Context.Channel.SendMessageAsync($"Whoops! We had an issue trying to access your data in the database. Try again in a few seconds...\n" +
+                    $"If this error persists, please ping the Development Committee so a solution can be reached!\n" +
+                    $"Exception Trace: {e}");
+                return;
+            }
 
             switch (attribute.ToLower())
             {

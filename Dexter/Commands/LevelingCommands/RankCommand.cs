@@ -19,6 +19,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Net.Http;
+using System.Threading;
 
 namespace Dexter.Commands
 {
@@ -68,9 +69,34 @@ namespace Dexter.Commands
             if (user is null)
             {
                 user = Context.User;
+                if (user is null)
+                {
+                    user = await DiscordShardedClient.Rest.GetUserAsync(user.Id);
+                }
             }
 
-            UserLevel ul = LevelingDB.GetOrCreateLevelData(user.Id, out LevelPreferences settings);
+            UserLevel ul;
+            LevelPreferences settings;
+            try
+            {
+                ul = LevelingDB.GetOrCreateLevelData(Context.User.Id, out settings);
+            }
+            catch (Exception e)
+            {
+                await Task.Delay(500);
+                try
+                {
+                    ul = LevelingDB.GetOrCreateLevelData(Context.User.Id, out settings);
+                }
+                catch
+                {
+                    await Context.Channel.SendMessageAsync($"Whoops! We had an issue trying to access your data in the database. Try again in a few seconds...\n" +
+                        $"If this error persists, please ping the Development Committee so a solution can be reached!\n" +
+                        $"Exception Trace: {e}");
+                    return;
+                }
+            }
+
             int txtlvl = LevelingConfiguration.GetLevelFromXP(ul.TextXP, out long _, out long _);
             int vclvl = LevelingConfiguration.GetLevelFromXP(ul.VoiceXP, out long _, out long _);
             _ = ul.TotalLevel(LevelingConfiguration, txtlvl, vclvl);

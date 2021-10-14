@@ -111,12 +111,12 @@ namespace Dexter.Commands
 
 							var youTubeVideo = searchResponse.Items.FirstOrDefault();
 
-							await SearchSingleTrack($"{youTubeVideo.Snippet.ChannelTitle} {youTubeVideo.Snippet.Title}", player, SearchType.YouTube);
+							await SearchSingleTrack($"{youTubeVideo.Snippet.ChannelTitle} {youTubeVideo.Snippet.Title}", player, false);
 						}
 					}
 					else if (baseUrl.Contains("soundcloud"))
 					{
-						await SearchSingleTrack($"{abUrl.Split('/').TakeLast(2).First()} {abUrl.Split('/').Last()}".Replace('-', ' '), player, SearchType.YouTube);
+						await SearchSingleTrack($"{abUrl.Split('/').TakeLast(2).First()} {abUrl.Split('/').Last()}".Replace('-', ' '), player, false);
 					}
 					else if (baseUrl.Contains("spotify"))
 					{
@@ -156,7 +156,7 @@ namespace Dexter.Commands
 						{
 							var track = await spotifyAPI.Tracks.Get(id);
 
-							await SearchSingleTrack($"{track.Artists.First().Name} {track.Name}", player, SearchType.YouTube);
+							await SearchSingleTrack($"{track.Artists.First().Name} {track.Name}", player, false);
 						}
 						else
 						{
@@ -169,64 +169,7 @@ namespace Dexter.Commands
 				}
 				else
 				{
-					SearchResponse searchResult;
-
-					searchResult = await LavaNode.SearchAsync(SearchType.YouTube, search);
-
-					var track = searchResult.Tracks.FirstOrDefault();
-
-					if (track == null)
-					{
-						await BuildEmbed(EmojiEnum.Annoyed)
-							.WithTitle($"Unable to search!")
-							.WithDescription($"The requested search: **{search}**, returned no results.")
-							.SendEmbed(Context.Channel);
-
-						return;
-					}
-
-					var topResults = searchResult.Tracks.Count <= 5 ? searchResult.Tracks.ToList() : searchResult.Tracks.Take(5).ToList();
-
-					string line1 = topResults.Count <= 5
-						? $"I found {topResults.Count} tracks matching your search."
-						: $"I found {searchResult.Tracks.Count:N0} tracks matching your search, here are the top 5.";
-
-					var embedFields = new List<EmbedFieldBuilder>();
-
-					var options = new List<string>();
-
-					for (int i = 0; i < topResults.Count; i++)
-					{
-						if (options.Contains(topResults[i].Title))
-							continue;
-
-						options.Add(topResults[i].Title);
-
-						embedFields.Add(new()
-						{
-							Name = $"#{i + 1}. {topResults[i].Title}",
-							Value = $"Uploader: {topResults[i].Author}\n" + $"Duration: {topResults[i].Duration.HumanizeTimeSpan()}"
-						});
-					}
-
-					var embed = BuildEmbed(EmojiEnum.Unknown)
-						.WithTitle("Search Results:")
-						.WithDescription($"{Context.User.Mention}, {line1}")
-						.WithFields(embedFields)
-						.Build();
-
-					var result = await Interactive.SendSelectionAsync(
-						new SelectionBuilder<string>()
-							.WithSelectionPage(PageBuilder.FromEmbed(embed))
-							.WithOptions(options)
-							.WithInputType(InputType.SelectMenus)
-							.WithDeletion(DeletionOptions.Invalid)
-							.Build()
-						, Context.Channel, TimeSpan.FromMinutes(2));
-
-					await SearchSingleTrack(result.Value, player, SearchType.YouTube);
-
-					await result.Message.DeleteAsync();
+					await SearchSingleTrack(search, player, true);
 				}
 			}
 		}
@@ -270,20 +213,68 @@ namespace Dexter.Commands
 			await CreateReactionMenu(embeds, Context.Channel);
 		}
 
-		public async Task SearchSingleTrack(string search, LavaPlayer player, SearchType type)
+		public async Task SearchSingleTrack(string search, LavaPlayer player, bool searchList)
 		{
-			SearchResponse searchResult = await LavaNode.SearchAsync(type, search);
+			SearchResponse searchResult;
+
+			searchResult = await LavaNode.SearchAsync(SearchType.YouTube, search);
 
 			var track = searchResult.Tracks.FirstOrDefault();
 
 			if (track == null)
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle($"Unable to search for {search}!")
-					.WithDescription("The requested search returned no results.")
+					.WithTitle($"Unable to search!")
+					.WithDescription($"The requested search: **{search}**, returned no results.")
 					.SendEmbed(Context.Channel);
 
 				return;
+			}
+
+			if (searchList)
+			{
+				var topResults = searchResult.Tracks.Count <= 5 ? searchResult.Tracks.ToList() : searchResult.Tracks.Take(5).ToList();
+
+				string line1 = topResults.Count <= 5
+					? $"I found {topResults.Count} tracks matching your search."
+					: $"I found {searchResult.Tracks.Count:N0} tracks matching your search, here are the top 5.";
+
+				var embedFields = new List<EmbedFieldBuilder>();
+
+				var options = new List<string>();
+
+				for (int i = 0; i < topResults.Count; i++)
+				{
+					if (options.Contains(topResults[i].Title))
+						continue;
+
+					options.Add(topResults[i].Title);
+
+					embedFields.Add(new()
+					{
+						Name = $"#{i + 1}. {topResults[i].Title}",
+						Value = $"Uploader: {topResults[i].Author}\n" + $"Duration: {topResults[i].Duration.HumanizeTimeSpan()}"
+					});
+				}
+
+				var embed = BuildEmbed(EmojiEnum.Unknown)
+					.WithTitle("Search Results:")
+					.WithDescription($"{Context.User.Mention}, {line1}")
+					.WithFields(embedFields)
+					.Build();
+
+				var result = await Interactive.SendSelectionAsync(
+					new SelectionBuilder<string>()
+						.WithSelectionPage(PageBuilder.FromEmbed(embed))
+						.WithOptions(options)
+						.WithInputType(InputType.SelectMenus)
+						.WithDeletion(DeletionOptions.Invalid)
+						.Build()
+					, Context.Channel, TimeSpan.FromMinutes(2));
+
+				await result.Message.DeleteAsync();
+
+				track = searchResult.Tracks.Where(search => result.Value.EndsWith(search.Title)).FirstOrDefault();
 			}
 
 			if (player.Vueue.Count == 0 && player.PlayerState != PlayerState.Playing)

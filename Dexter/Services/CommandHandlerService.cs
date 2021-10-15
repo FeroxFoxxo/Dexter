@@ -147,8 +147,8 @@ namespace Dexter.Services
 
                                 ulong firstMentionedID = commandContext.Message.MentionedUserIds?.FirstOrDefault() ?? default;
 
-                                reply = reply.Replace("AUTHOR", (firstMentionedID != default && firstMentionedID != commandContext.User.Id) || !reply.Contains("USER")
-                                    ? commandContext.User.Mention : commandContext.Client.CurrentUser.Mention);
+                                reply = reply.Replace("AUTHOR", (firstMentionedID != default && firstMentionedID != commandContext?.User.Id) || !reply.Contains("USER")
+                                    ? commandContext.User.Mention : commandContext?.Client?.CurrentUser?.Mention ?? "Dexter");
 
                                 List<string> userMentions = new();
                                 foreach(ulong id in commandContext.Message.MentionedUserIds ?? Array.Empty<ulong>())
@@ -157,8 +157,10 @@ namespace Dexter.Services
                                     if (user is not null)
                                         userMentions.Add(user.Mention);
                                 }
-                                string userReplacement = !userMentions.Any() ? commandContext.User.Mention : LanguageHelper.Enumerate(userMentions);
-                                reply = reply.Replace("USER", userReplacement);
+
+                                reply = userMentions.Any()
+                                    ? reply.Replace("USER", LanguageHelper.Enumerate(userMentions))
+                                    : reply.Replace("USER", commandContext?.User?.Mention ?? "{Unknown}");
 
                                 await commandContext.Channel.SendMessageAsync(reply);
                             }

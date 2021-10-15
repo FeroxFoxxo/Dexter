@@ -274,6 +274,9 @@ namespace Dexter.Commands
 
 				await result.Message.DeleteAsync();
 
+				if (!result.IsSuccess)
+					return;
+
 				track = searchResult.Tracks.Where(search => result.Value.EndsWith(search.Title)).FirstOrDefault();
 			}
 

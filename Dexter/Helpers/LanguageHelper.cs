@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Dexter.Configurations;
 using Humanizer;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -37,127 +37,127 @@ namespace Dexter.Helpers
         }
 
         /// <summary>
-        /// Randomizes special groups of characters in <paramref name="Predicate"/> and fills them in with corresponding terms in <paramref name="TermBanks"/>.
+        /// Randomizes special groups of characters in <paramref name="predicate"/> and fills them in with corresponding terms in <paramref name="termBanks"/>.
         /// </summary>
-        /// <remarks><para>The way to mark an expression for randomization is to wrap it in braces ("{}"). The format of each expression must be as follows: {IDENTIFIERX}, where IDENTIFIER is a key in <paramref name="TermBanks"/> and X is a positive integer value, every expression with the same identifier and value will be swapped for the same term.</para>
+        /// <remarks><para>The way to mark an expression for randomization is to wrap it in braces ("{}"). The format of each expression must be as follows: {IDENTIFIERX}, where IDENTIFIER is a key in <paramref name="termBanks"/> and X is a positive integer value, every expression with the same identifier and value will be swapped for the same term.</para>
         /// <para>Special Identifiers exist, which do not run through terms: 'a' will try to guess the most probable expression of the indefinite article.</para></remarks>
-        /// <param name="Predicate">The message whose terms are to be randomized.</param>
-        /// <param name="TermBanks">A string-string[] dictionary where the keys are the explicit identifier of each TermClass and the values are list of terms those expressions can be substituted with.</param>
-        /// <param name="RNG">A Random Number Generator used to extract random terms from <paramref name="TermBanks"/>.</param>
-        /// <param name="Config">The LanguageConfiguration instance to run this process with.</param>
+        /// <param name="predicate">The message whose terms are to be randomized.</param>
+        /// <param name="termBanks">A string-string[] dictionary where the keys are the explicit identifier of each TermClass and the values are list of terms those expressions can be substituted with.</param>
+        /// <param name="random">A Random Number Generator used to extract random terms from <paramref name="termBanks"/>.</param>
+        /// <param name="config">The LanguageConfiguration instance to run this process with.</param>
         /// <returns>A <c>string</c> holding the new, randomized predicate.</returns>
 
-        public static string RandomizePredicate(string Predicate, Dictionary<string, string[]> TermBanks, Random RNG, LanguageConfiguration Config)
+        public static string RandomizePredicate(string predicate, Dictionary<string, string[]> termBanks, Random random, LanguageConfiguration config)
         {
-            HashSet<TermClass> Terms = new();
+            HashSet<TermClass> terms = new();
 
-            foreach (KeyValuePair<string, string[]> k in TermBanks)
+            foreach (KeyValuePair<string, string[]> k in termBanks)
             {
-                Terms.Add(new TermClass(k.Key, k.Value));
+                terms.Add(new TermClass(k.Key, k.Value));
             }
 
-            StringBuilder NewPredicate = new(Predicate.Length * 2);
+            StringBuilder newPredicate = new(predicate.Length * 2);
 
-            ArticleType ResolveArticle = ArticleType.None;
-            PluralType ResolvePlural = PluralType.None;
-            PossessiveType ResolvePossessive = PossessiveType.None;
+            ArticleType resolveArticle = ArticleType.None;
+            PluralType resolvePlural = PluralType.None;
+            PossessiveType resolvePossessive = PossessiveType.None;
 
-            while (Predicate.Length > 0)
+            while (predicate.Length > 0)
             {
-                int InsertIndex = Predicate.IndexOf(Config.TermInsertionStartIndicator);
-                if (InsertIndex == -1)
+                int insertIndex = predicate.IndexOf(config.TermInsertionStartIndicator);
+                if (insertIndex == -1)
                 {
-                    NewPredicate.Append(Predicate);
+                    newPredicate.Append(predicate);
                     break;
                 }
 
-                int EndIndex = Predicate.IndexOf(Config.TermInsertionEndIndicator);
-                if (EndIndex == -1)
+                int endIndex = predicate.IndexOf(config.TermInsertionEndIndicator);
+                if (endIndex == -1)
                 {
-                    throw new FormatException($"There was an error parsing predicate {Predicate}, unbalanced braces. Please contact the developer team.");
+                    throw new FormatException($"There was an error parsing predicate {predicate}, unbalanced braces. Please contact the developer team.");
                 }
 
-                NewPredicate.Append(Predicate[..InsertIndex]);
+                newPredicate.Append(predicate[..insertIndex]);
 
-                string CompareString = Predicate[(InsertIndex + 1)..EndIndex];
+                string compareString = predicate[(insertIndex + 1)..endIndex];
 
                 //SPECIAL CASES
-                if (CompareString is "a" or "A")
+                if (compareString is "a" or "A")
                 {
-                    ResolveArticle = CompareString == "a" ? ArticleType.Lowercase : ArticleType.Uppercase;
+                    resolveArticle = compareString == "a" ? ArticleType.Lowercase : ArticleType.Uppercase;
                 }
-                else if (CompareString.ToLower() == "plural")
+                else if (compareString.ToLower() == "plural")
                 {
-                    ResolvePlural = PluralType.Plural;
+                    resolvePlural = PluralType.Plural;
                 }
-                else if (CompareString.ToLower() == "\'s")
+                else if (compareString.ToLower() == "\'s")
                 {
-                    ResolvePossessive = PossessiveType.Possessive;
+                    resolvePossessive = PossessiveType.Possessive;
                 }
                 else
                 {
                     //Default case
-                    foreach (TermClass Term in Terms)
+                    foreach (TermClass term in terms)
                     {
-                        int Index = Term.CheckReplace(CompareString, Config);
+                        int index = term.CheckReplace(compareString, config);
 
-                        if (Index == (int)Config.ErrorCodeInvalidArgument)
-                            throw new IndexOutOfRangeException($"There was an error parsing the number in term call \"{CompareString}\" within \"{Predicate}\". Please contact the developer team.");
+                        if (index == (int)config.ErrorCodeInvalidArgument)
+                            throw new IndexOutOfRangeException($"There was an error parsing the number in term call \"{compareString}\" within \"{predicate}\". Please contact the developer team.");
 
-                        if (Index >= 0)
+                        if (index >= 0)
                         {
-                            string newTerm = Term.GetOrGenerateCached(Index, RNG, Config);
+                            string newTerm = term.GetOrGenerateCached(index, random, config);
 
-                            if (ResolvePlural != PluralType.None)
+                            if (resolvePlural != PluralType.None)
                             {
-                                newTerm = newTerm.GuessPlural(Config);
+                                newTerm = newTerm.GuessPlural(config);
                             }
 
-                            if (ResolvePossessive != PossessiveType.None)
+                            if (resolvePossessive != PossessiveType.None)
                             {
                                 newTerm = newTerm.Possessive();
                             }
 
-                            if (ResolveArticle != ArticleType.None)
+                            if (resolveArticle != ArticleType.None)
                             {
-                                newTerm = $"{GuessIndefiniteArticle(newTerm, ResolveArticle == ArticleType.Uppercase)} {newTerm}";
+                                newTerm = $"{GuessIndefiniteArticle(newTerm, resolveArticle == ArticleType.Uppercase)} {newTerm}";
                             }
 
-                            NewPredicate.Append(newTerm);
+                            newPredicate.Append(newTerm);
 
-                            ResolvePlural = PluralType.None;
-                            ResolveArticle = ArticleType.None;
-                            ResolvePossessive = PossessiveType.None;
+                            resolvePlural = PluralType.None;
+                            resolveArticle = ArticleType.None;
+                            resolvePossessive = PossessiveType.None;
                             break;
                         }
                     }
                 }
 
-                Predicate = Predicate[(EndIndex + 1)..];
+                predicate = predicate[(endIndex + 1)..];
             }
 
-            return NewPredicate.ToString();
+            return newPredicate.ToString();
         }
 
         /// <summary>
-        /// Checks whether an "IDENTIFIERX" expression shares an identifier with <paramref name="Term"/>, and returns the index X.
+        /// Checks whether an "IDENTIFIERX" expression shares an identifier with <paramref name="term"/>, and returns the index X.
         /// </summary>
-        /// <param name="Str">The raw form of the identifier-index expression, without braces.</param>
-        /// <param name="Term">The TermClass to compare <paramref name="Str"/> against.</param>
-        /// <param name="Config">The LanguageConfiguration instance to run this process with.</param>
-        /// <returns>The number accompanying the raw expression <paramref name="Str"/> if their identifiers match, Invalid Number Error Code if the term X can't be parsed to a positive integer, -1 otherwise.</returns>
+        /// <param name="str">The raw form of the identifier-index expression, without braces.</param>
+        /// <param name="term">The TermClass to compare <paramref name="str"/> against.</param>
+        /// <param name="config">The LanguageConfiguration instance to run this process with.</param>
+        /// <returns>The number accompanying the raw expression <paramref name="str"/> if their identifiers match, Invalid Number Error Code if the term X can't be parsed to a positive integer, -1 otherwise.</returns>
 
-        private static int CheckReplace(this TermClass Term, string Str, LanguageConfiguration Config)
+        private static int CheckReplace(this TermClass term, string str, LanguageConfiguration config)
         {
-            if (!Str.StartsWith(Term.Identifier))
+            if (!str.StartsWith(term.Identifier))
                 return -1;
 
-            if (int.TryParse(Str[Term.Identifier.Length..], out int Index))
+            if (int.TryParse(str[term.Identifier.Length..], out int index))
             {
-                return Index >= 0 ? Index : (int)Config.ErrorCodeInvalidArgument;
+                return index >= 0 ? index : (int)config.ErrorCodeInvalidArgument;
             }
 
-            return (int)Config.ErrorCodeInvalidArgument;
+            return (int)config.ErrorCodeInvalidArgument;
         }
 
         /// <summary>
@@ -171,40 +171,40 @@ namespace Dexter.Helpers
             private readonly string[] Bank;
             private readonly List<string> Cache;
 
-            public TermClass(string Identifier, string[] Bank)
+            public TermClass(string identifier, string[] bank)
             {
-                this.Identifier = Identifier;
-                this.Bank = Bank;
+                Identifier = identifier;
+                Bank = bank;
                 Cache = new List<string>();
             }
 
             /// <summary>
-            /// Gets a cached term located at <paramref name="Index"/>, if Cache doesn't have those many elements, it generates elements up to <paramref name="Index"/>.
+            /// Gets a cached term located at <paramref name="index"/>, if Cache doesn't have those many elements, it generates elements up to <paramref name="index"/>.
             /// </summary>
-            /// <remarks>The TermClass will attempt to generate new terms that aren't in its cache. To disable this, set <paramref name="MaxRetries"/> to 0.</remarks>
-            /// <param name="Index">The index to get from the cache of terms stored in this TermClass.</param>
-            /// <param name="Generator">A random number generator.</param>
-            /// <param name="Config">The LanguageConfiguration instance to run this process with.</param>
-            /// <param name="MaxRetries">The maximum amount of attempts to generate a novel term from the bank.</param>
-            /// <returns>The term at position <paramref name="Index"/> within the Cache.</returns>
+            /// <remarks>The TermClass will attempt to generate new terms that aren't in its cache. To disable this, set <paramref name="maxRetries"/> to 0.</remarks>
+            /// <param name="index">The index to get from the cache of terms stored in this TermClass.</param>
+            /// <param name="random">A random number generator.</param>
+            /// <param name="config">The LanguageConfiguration instance to run this process with.</param>
+            /// <param name="maxRetries">The maximum amount of attempts to generate a novel term from the bank.</param>
+            /// <returns>The term at position <paramref name="index"/> within the Cache.</returns>
 
-            public string GetOrGenerateCached(int Index, Random Generator, LanguageConfiguration Config, int MaxRetries = -1)
+            public string GetOrGenerateCached(int index, Random random, LanguageConfiguration config, int maxRetries = -1)
             {
-                if (MaxRetries < 0)
-                    MaxRetries = (int)Config.TermRepetitionAversionFactor;
+                if (maxRetries < 0)
+                    maxRetries = (int)config.TermRepetitionAversionFactor;
 
-                while (Cache.Count <= Index)
+                while (Cache.Count <= index)
                 {
-                    Cache.Add(Bank[Generator.Next(Bank.Length)]);
+                    Cache.Add(Bank[random.Next(Bank.Length)]);
 
                     //If this term is already in the cache, try to replace it for a new, random one.
-                    for (int i = 0; i < MaxRetries && Cache.IndexOf(Cache[^1]) < Cache.Count - 1; i++)
+                    for (int i = 0; i < maxRetries && Cache.IndexOf(Cache[^1]) < Cache.Count - 1; i++)
                     {
-                        Cache[^1] = Bank[Generator.Next(Bank.Length)];
+                        Cache[^1] = Bank[random.Next(Bank.Length)];
                     }
                 }
 
-                return Cache[Index];
+                return Cache[index];
             }
         }
 
@@ -261,88 +261,88 @@ namespace Dexter.Helpers
         }
 
         /// <summary>
-        /// Will attempt to guess whether the indefinite article should be 'a' or 'an' based on <paramref name="NextWord"/>.
+        /// Will attempt to guess whether the indefinite article should be 'a' or 'an' based on <paramref name="nextWord"/>.
         /// </summary>
-        /// <param name="NextWord">A string describing what follows the article.</param>
-        /// <param name="Capitalize">Whether to capitalize the first letter of the article.</param>
-        /// <returns>A string, either "a", "an", or "a(n)", where the character 'a' is capitalized if <paramref name="Capitalize"/> is set to <see langword="true"/>.</returns>
+        /// <param name="nextWord">A string describing what follows the article.</param>
+        /// <param name="capitalize">Whether to capitalize the first letter of the article.</param>
+        /// <returns>A string, either "a", "an", or "a(n)", where the character 'a' is capitalized if <paramref name="capitalize"/> is set to <see langword="true"/>.</returns>
 
-        public static string GuessIndefiniteArticle(string NextWord, bool Capitalize = false)
+        public static string GuessIndefiniteArticle(string nextWord, bool capitalize = false)
         {
-            string Relevant = NextWord.Trim().Split(' ')[0].ToLower();
+            string relevant = nextWord.Trim().Split(' ')[0].ToLower();
 
-            return (Relevant[0]) switch
+            return (relevant[0]) switch
             {
-                'a' or 'e' or 'i' or 'o' => Capitalize ? "An" : "an",
-                'h' or 'u' => Capitalize ? "A(n)" : "a(n)",
-                _ => Capitalize ? "A" : "a",
+                'a' or 'e' or 'i' or 'o' => capitalize ? "An" : "an",
+                'h' or 'u' => capitalize ? "A(n)" : "a(n)",
+                _ => capitalize ? "A" : "a",
             };
         }
 
         /// <summary>
         /// Guesses the most likely plural form of a noun from a set of English pluralization rules and irregular plurals.
         /// </summary>
-        /// <param name="Singular">The singular noun to pluralize.</param>
-        /// <param name="Config">The LanguageConfiguration instance to run this process with.</param>
-        /// <returns>A string containing the pluralized form of <paramref name="Singular"/>.</returns>
+        /// <param name="singular">The singular noun to pluralize.</param>
+        /// <param name="config">The LanguageConfiguration instance to run this process with.</param>
+        /// <returns>A string containing the pluralized form of <paramref name="singular"/>.</returns>
 
-        public static string GuessPlural(this string Singular, LanguageConfiguration Config)
+        public static string GuessPlural(this string singular, LanguageConfiguration config)
         {
-            string LowerSingular = Singular.ToLower();
+            string lowerSingular = singular.ToLower();
 
-            if (Config.IrregularPlurals.ContainsKey(LowerSingular))
+            if (config.IrregularPlurals.ContainsKey(lowerSingular))
             {
-                return Config.IrregularPlurals[LowerSingular].MatchCase(Singular);
+                return config.IrregularPlurals[lowerSingular].MatchCase(singular);
             }
-            else if (LowerSingular.EndsWith("on"))
+            else if (lowerSingular.EndsWith("on"))
             {
-                return Singular[..^2] + "a";
+                return singular[..^2] + "a";
             }
-            else if (LowerSingular.EndsWith("um"))
+            else if (lowerSingular.EndsWith("um"))
             {
-                return Singular[..^2] + "a";
+                return singular[..^2] + "a";
             }
-            else if (LowerSingular.EndsWith("us"))
+            else if (lowerSingular.EndsWith("us"))
             {
-                return Singular[..^2] + "i";
+                return singular[..^2] + "i";
             }
-            else if (LowerSingular.EndsWith("is"))
+            else if (lowerSingular.EndsWith("is"))
             {
-                return Singular[..^2] + "es";
+                return singular[..^2] + "es";
             }
-            else if (LowerSingular.EndsWith("ex") || LowerSingular.EndsWith("ix"))
+            else if (lowerSingular.EndsWith("ex") || lowerSingular.EndsWith("ix"))
             {
-                return Singular[..^2] + "ices";
+                return singular[..^2] + "ices";
             }
-            else if (LowerSingular[^1] is 's' or 'z')
+            else if (lowerSingular[^1] is 's' or 'z')
             {
-                if (LowerSingular.Length > 2 && LowerSingular[^3].IsConsonant() && LowerSingular[^2].IsVowel() && LowerSingular[^1].IsConsonant())
+                if (lowerSingular.Length > 2 && lowerSingular[^3].IsConsonant() && lowerSingular[^2].IsVowel() && lowerSingular[^1].IsConsonant())
                 {
-                    return Singular + Singular[^1] + "es";
+                    return singular + singular[^1] + "es";
                 }
                 else
                 {
-                    return Singular + "es";
+                    return singular + "es";
                 }
             }
-            else if (LowerSingular.EndsWith("fe"))
+            else if (lowerSingular.EndsWith("fe"))
             {
-                return Singular[..^2] + "ves";
+                return singular[..^2] + "ves";
             }
-            else if (LowerSingular.EndsWith("f"))
+            else if (lowerSingular.EndsWith("f"))
             {
-                return Singular[..^1] + "ves";
+                return singular[..^1] + "ves";
             }
-            else if (LowerSingular.EndsWith("y"))
+            else if (lowerSingular.EndsWith("y"))
             {
-                return Singular[^2].IsVowel() ? Singular + "s" : Singular[^1] + "ies";
+                return singular[^2].IsVowel() ? singular + "s" : singular[^1] + "ies";
             }
-            else if (LowerSingular[^1] is 'o' or 'x' || LowerSingular.EndsWith("sh") || LowerSingular.EndsWith("ch"))
+            else if (lowerSingular[^1] is 'o' or 'x' || lowerSingular.EndsWith("sh") || lowerSingular.EndsWith("ch"))
             {
-                return Singular + "es";
+                return singular + "es";
             }
 
-            return Singular + "s";
+            return singular + "s";
         }
 
         /// <summary>
@@ -448,119 +448,119 @@ namespace Dexter.Helpers
         public static bool IsConsonant(this char c) { return char.ToLower(c) >= 'a' && char.ToLower(c) <= 'z' && !IsVowel(c); }
 
         /// <summary>
-        /// Matches the case of <paramref name="Input"/> to that of <paramref name="Case"/>.
+        /// Matches the case of <paramref name="input"/> to that of <paramref name="case"/>.
         /// </summary>
-        /// <param name="Input">The sequence of letters to convert to <paramref name="Case"/>.</param>
-        /// <param name="Case">The uppercase-lowercase sequence to follow. If the length differs from <paramref name="Input"/>, case-matching will stop..</param>
-        /// <returns>A string with the same letters as <paramref name="Input"/> and the same case as <paramref name="Case"/>.</returns>
+        /// <param name="input">The sequence of letters to convert to <paramref name="case"/>.</param>
+        /// <param name="case">The uppercase-lowercase sequence to follow. If the length differs from <paramref name="input"/>, case-matching will stop..</param>
+        /// <returns>A string with the same letters as <paramref name="input"/> and the same case as <paramref name="case"/>.</returns>
 
-        public static string MatchCase(this string Input, string Case)
+        public static string MatchCase(this string input, string @case)
         {
-            int Match = Input.Length < Case.Length ? Input.Length : Case.Length;
+            int match = input.Length < @case.Length ? input.Length : @case.Length;
 
-            StringBuilder SB = new(Input.Length);
+            StringBuilder stringBuilder = new(input.Length);
 
-            for (int i = 0; i < Match; i++)
+            for (int i = 0; i < match; i++)
             {
-                SB.Append(Input[i].MatchCase(Case[i]));
+                stringBuilder.Append(input[i].MatchCase(@case[i]));
             }
 
-            if (Match < Input.Length)
+            if (match < input.Length)
             {
-                SB.Append(Input[Match..]);
+                stringBuilder.Append(input[match..]);
             }
 
-            return SB.ToString();
+            return stringBuilder.ToString();
         }
 
         /// <summary>
-        /// Matches the case of <paramref name="Input"/> to that of <paramref name="Case"/>.
+        /// Matches the case of <paramref name="input"/> to that of <paramref name="case"/>.
         /// </summary>
-        /// <param name="Input">The character to convert <paramref name="Case"/>.</param>
-        /// <param name="Case">The uppercase or lowercase character to reference for conversion of <paramref name="Input"/>.</param>
-        /// <returns>The character obtained from <paramref name="Input"/> in the same case as <paramref name="Case"/>.</returns>
+        /// <param name="input">The character to convert <paramref name="case"/>.</param>
+        /// <param name="case">The uppercase or lowercase character to reference for conversion of <paramref name="input"/>.</param>
+        /// <returns>The character obtained from <paramref name="input"/> in the same case as <paramref name="case"/>.</returns>
 
-        public static char MatchCase(this char Input, char Case)
+        public static char MatchCase(this char input, char @case)
         {
-            if (char.IsUpper(Case))
-                return char.ToUpper(Input);
+            if (char.IsUpper(@case))
+                return char.ToUpper(input);
 
-            return char.ToLower(Input);
+            return char.ToLower(input);
         }
 
         /// <summary>
-        /// Obtains the ordinal form of an integer <paramref name="N"/>.
+        /// Obtains the ordinal form of an integer <paramref name="num"/>.
         /// </summary>
-        /// <param name="N">The base number to obtain the ordinal from.</param>
-        /// <returns>The string "<paramref name="N"/>st", "<paramref name="N"/>nd", "<paramref name="N"/>rd" if any are appropriate, otherwise "<paramref name="N"/>th".</returns>
+        /// <param name="num">The base number to obtain the ordinal from.</param>
+        /// <returns>The string "<paramref name="num"/>st", "<paramref name="num"/>nd", "<paramref name="num"/>rd" if any are appropriate, otherwise "<paramref name="num"/>th".</returns>
 
-        public static string Ordinal(this int N)
+        public static string Ordinal(this int num)
         {
-            if (N < 0)
-                N = -N;
+            if (num < 0)
+                num = -num;
 
-            if (N % 100 / 10 == 1)
-                return N + "th";
+            if (num % 100 / 10 == 1)
+                return num + "th";
 
-            return (N % 10) switch
+            return (num % 10) switch
             {
-                1 => N + "st",
-                2 => N + "nd",
-                3 => N + "rd",
-                _ => N + "th"
+                1 => num + "st",
+                2 => num + "nd",
+                3 => num + "rd",
+                _ => num + "th"
             };
         }
 
         /// <summary>
-        /// Adds the appropriate form of the possessive "'s" to a term <paramref name="Input"/>.
+        /// Adds the appropriate form of the possessive "'s" to a term <paramref name="input"/>.
         /// </summary>
-        /// <param name="Input">The noun to add the possessive termination to.</param>
-        /// <returns>"<paramref name="Input"/>'" if <paramref name="Input"/> ends in 's'. "<paramref name="Input"/>'s" otherwise.</returns>
+        /// <param name="input">The noun to add the possessive termination to.</param>
+        /// <returns>"<paramref name="input"/>'" if <paramref name="input"/> ends in 's'. "<paramref name="input"/>'s" otherwise.</returns>
 
-        public static string Possessive(this string Input)
+        public static string Possessive(this string input)
         {
-            return $"{Input}'{(Input.EndsWith('s') ? "" : "s")}";
+            return $"{input}'{(input.EndsWith('s') ? "" : "s")}";
         }
 
         /// <summary>
         /// Creates a human-readable expression of a hexagesimal-base system (such as hours and minutes).
         /// </summary>
-        /// <param name="Value">The decimal value corresponding to the <paramref name="LargeUnit"/>.</param>
-        /// <param name="LargeUnit">The names of the larger unit, [0] is singular and [1] is plural.</param>
-        /// <param name="SmallUnit">The names of the smaller unit, [0] is singular and [1] is plural.</param>
-        /// <param name="Remainder">The decimal value that was disregarded after comparing the units.</param>
-        /// <returns>A humanized expression of <paramref name="Value"/> <paramref name="LargeUnit"/>.</returns>
+        /// <param name="value">The decimal value corresponding to the <paramref name="largeUnit"/>.</param>
+        /// <param name="largeUnit">The names of the larger unit, [0] is singular and [1] is plural.</param>
+        /// <param name="smallUnit">The names of the smaller unit, [0] is singular and [1] is plural.</param>
+        /// <param name="remainder">The decimal value that was disregarded after comparing the units.</param>
+        /// <returns>A humanized expression of <paramref name="value"/> <paramref name="largeUnit"/>.</returns>
 
-        public static string HumanizeSexagesimalUnits(float Value, string[] LargeUnit, string[] SmallUnit, out float Remainder)
+        public static string HumanizeSexagesimalUnits(float value, string[] largeUnit, string[] smallUnit, out float remainder)
         {
-            return HumanizeOffbaseUnits(60, Value, LargeUnit, SmallUnit, out Remainder);
+            return HumanizeOffbaseUnits(60, value, largeUnit, smallUnit, out remainder);
         }
 
         /// <summary>
         /// Creates a human-readable expression of a value in an arbitrary base with multiple Units. (Like feet and inches or degrees and arcminutes)
         /// </summary>
-        /// <param name="Base">The base of the counting system used to differentiate <paramref name="LargeUnit"/> and <paramref name="SmallUnit"/>.</param>
-        /// <param name="Value">The decimal value corresponding to the <paramref name="LargeUnit"/>.</param>
-        /// <param name="LargeUnit">The names of the larger unit, [0] is singular and [1] is plural.</param>
-        /// <param name="SmallUnit">The names of the smaller unit, [0] is singular and [1] is plural.</param>
-        /// <param name="Remainder">The decimal value that was disregarded after comparing the units.</param>
-        /// <returns>A humanized expression of <paramref name="Value"/> <paramref name="LargeUnit"/>.</returns>
+        /// <param name="baseN">The base of the counting system used to differentiate <paramref name="largeUnit"/> and <paramref name="smallUnit"/>.</param>
+        /// <param name="value">The decimal value corresponding to the <paramref name="largeUnit"/>.</param>
+        /// <param name="largeUnit">The names of the larger unit, [0] is singular and [1] is plural.</param>
+        /// <param name="smallUnit">The names of the smaller unit, [0] is singular and [1] is plural.</param>
+        /// <param name="remainder">The decimal value that was disregarded after comparing the units.</param>
+        /// <returns>A humanized expression of <paramref name="value"/> <paramref name="largeUnit"/>.</returns>
 
-        public static string HumanizeOffbaseUnits(int Base, float Value, string[] LargeUnit, string[] SmallUnit, out float Remainder)
+        public static string HumanizeOffbaseUnits(int baseN, float value, string[] largeUnit, string[] smallUnit, out float remainder)
         {
-            List<string> Result = new();
+            List<string> result = new();
 
-            int LargeValue = (int)Value;
-            int SmallValue = (int)Math.Round(Value % 1 * Base);
+            int largeValue = (int)value;
+            int smallValue = (int)Math.Round(value % 1 * baseN);
 
-            Remainder = Value - LargeValue - (float)SmallValue / Base;
+            remainder = value - largeValue - (float)smallValue / baseN;
 
-            if (LargeValue != 0) Result.Add($"{LargeValue} {LargeUnit[LargeValue == 1 ? 0 : 1]}");
-            if (SmallValue != 0) Result.Add($"{SmallValue} {SmallUnit[SmallValue == 1 ? 0 : 1]}");
+            if (largeValue != 0) result.Add($"{largeValue} {largeUnit[largeValue == 1 ? 0 : 1]}");
+            if (smallValue != 0) result.Add($"{smallValue} {smallUnit[smallValue == 1 ? 0 : 1]}");
 
-            if (Result.Count == 0) return $"0 {LargeUnit[1]}";
+            if (result.Count == 0) return $"0 {largeUnit[1]}";
 
-            return string.Join(" and ", Result);
+            return string.Join(" and ", result);
         }
 
         /// <summary>
@@ -591,55 +591,56 @@ namespace Dexter.Helpers
         }
 
         /// <summary>
-        /// Extracts substrings that fit a given url schema from an <paramref name="Input"/> string.
+        /// Extracts substrings that fit a given url schema from an <paramref name="input"/> string.
         /// </summary>
         /// <remarks>All potential links in the string must be encapsulated in parentheses or spaces.</remarks>
-        /// <param name="Input">The string to analyze and extracts urls from.</param>
-        /// <returns>A <c>string[]</c> array containing a collection of substrings that matched the url pattern in <paramref name="Input"/>.</returns>
+        /// <param name="input">The string to analyze and extracts urls from.</param>
+        /// <returns>A <c>string[]</c> array containing a collection of substrings that matched the url pattern in <paramref name="input"/>.</returns>
 
-        public static string[] GetHyperLinks(this string Input)
+        public static string[] GetHyperLinks(this string input)
         {
-            List<string> Matches = new();
+            List<string> matches = new();
 
-            Input = ' ' + Input + ' ';
+            input = ' ' + input + ' ';
 
-            List<int> Openers = new();
-            List<int> Closers = new();
-            for (int i = 0; i < Input.Length; i++)
+            List<int> openers = new();
+            List<int> closers = new();
+
+            for (int i = 0; i < input.Length; i++)
             {
-                switch (Input[i])
+                switch (input[i])
                 {
                     case ' ':
-                        Closers.Add(i);
-                        Matches.AddRange(Input.CheckForLinks(Openers, Closers));
+                        closers.Add(i);
+                        matches.AddRange(input.CheckForLinks(openers, closers));
 
-                        Openers.Clear();
-                        Closers.Clear();
-                        Openers.Add(i);
+                        openers.Clear();
+                        closers.Clear();
+                        openers.Add(i);
                         break;
                     case ')':
-                        Closers.Add(i);
+                        closers.Add(i);
                         break;
                     case '(':
-                        Openers.Add(i);
+                        openers.Add(i);
                         break;
                 }
             }
 
-            return Matches.ToArray();
+            return matches.ToArray();
         }
 
-        private static string[] CheckForLinks(this string Input, IEnumerable<int> Openers, IEnumerable<int> Closers)
+        private static string[] CheckForLinks(this string input, IEnumerable<int> openers, IEnumerable<int> closers)
         {
             List<string> Result = new();
 
-            foreach (int o in Openers)
+            foreach (int o in openers)
             {
-                foreach (int c in Closers)
+                foreach (int c in closers)
                 {
                     if (c > o)
                     {
-                        string s = Input[(o + 1)..c];
+                        string s = input[(o + 1)..c];
                         if (s.IsHyperLink())
                         {
                             Result.Add(s);
@@ -652,14 +653,14 @@ namespace Dexter.Helpers
         }
 
         /// <summary>
-        /// Checks whether a given <paramref name="Input"/> string is a url.
+        /// Checks whether a given <paramref name="input"/> string is a url.
         /// </summary>
-        /// <param name="Input">The string to check.</param>
+        /// <param name="input">The string to check.</param>
         /// <returns><see langword="true"/> if the given string is a url; otherwise <see langword="false"/>.</returns>
 
-        public static bool IsHyperLink(this string Input)
+        public static bool IsHyperLink(this string input)
         {
-            return Regex.IsMatch(Input, @"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&%\$#_=]*)?$");
+            return Regex.IsMatch(input, @"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&%\$#_=]*)?$");
         }
 
         /// <summary>
@@ -684,100 +685,100 @@ namespace Dexter.Helpers
         /// <summary>
         /// Attempts to parse a string expressing a date, time, and offset. All elements except for the hour and minute are optional.
         /// </summary>
-        /// <param name="Input">The stringified expression of the date to be parsed into <paramref name="Time"/>.</param>
-        /// <param name="CultureInfo">The Cultural Context with which to parse the date given in <paramref name="Input"/>.</param>
-        /// <param name="LanguageConfiguration">The Configuration related to parsing linguistic humanized information like time zone abbreviations.</param>
-        /// <param name="Time">The parsed <c>DateTimeOffset</c> extracted from <paramref name="Input"/>.</param>
-        /// <param name="Error">The reason the parsing failed if it did.</param>
+        /// <param name="input">The stringified expression of the date to be parsed into <paramref name="time"/>.</param>
+        /// <param name="culture">The Cultural Context with which to parse the date given in <paramref name="input"/>.</param>
+        /// <param name="config">The Configuration related to parsing linguistic humanized information like time zone abbreviations.</param>
+        /// <param name="time">The parsed <c>DateTimeOffset</c> extracted from <paramref name="input"/>.</param>
+        /// <param name="error">The reason the parsing failed if it did.</param>
         /// <returns><see langword="true"/> if the parsing was successful; otherwise <see langword="false"/>.</returns>
 
-        public static bool TryParseTime(this string Input, CultureInfo CultureInfo, LanguageConfiguration LanguageConfiguration, out DateTimeOffset Time, out string Error)
+        public static bool TryParseTime(this string input, CultureInfo culture, LanguageConfiguration config, out DateTimeOffset time, out string error)
         {
 
-            Error = "";
-            Input = Input.Trim();
-            Time = DateTimeOffset.Now;
+            error = "";
+            input = input.Trim();
+            time = DateTimeOffset.Now;
 
-            string LowerInput = Input.ToLower();
+            string lowerInput = input.ToLower();
 
-            switch (LowerInput)
+            switch (lowerInput)
             {
                 case "now":
-                    Time = DateTimeOffset.Now;
+                    time = DateTimeOffset.Now;
                     return true;
             }
 
-            string TimeZoneMatcher = @"(((UTC|GMT|Z)?[+-][0-9]{1,2}(:[0-9]{2})?)|([A-Z][A-Za-z0-9]*))$";
-            string TimeZoneSegment = Regex.Match(Input, TimeZoneMatcher).Value;
+            string timeZoneMatcher = @"(((UTC|GMT|Z)?[+-][0-9]{1,2}(:[0-9]{2})?)|([A-Z][A-Za-z0-9]*))$";
+            string timeZoneSegment = Regex.Match(input, timeZoneMatcher).Value;
 
-            TimeZoneData TimeZone = null;
-            TimeSpan TimeZoneOffset = DateTimeOffset.Now.Offset;
+            TimeZoneData timeZone = null;
+            TimeSpan timeZoneOffset = DateTimeOffset.Now.Offset;
 
-            if (!string.IsNullOrEmpty(TimeZoneSegment))
+            if (!string.IsNullOrEmpty(timeZoneSegment))
             {
-                if (TimeZoneSegment.Contains('+') || TimeZoneSegment.Contains('-') || LanguageConfiguration.TimeZones.ContainsKey(TimeZoneSegment))
+                if (timeZoneSegment.Contains('+') || timeZoneSegment.Contains('-') || config.TimeZones.ContainsKey(timeZoneSegment))
                 {
-                    if (TimeZoneData.TryParse(TimeZoneSegment, LanguageConfiguration, out TimeZone))
+                    if (TimeZoneData.TryParse(timeZoneSegment, config, out timeZone))
                     {
-                        TimeZoneOffset = TimeZone.TimeOffset;
+                        timeZoneOffset = timeZone.TimeOffset;
                     }
                 }
             }
 
-            if (Regex.IsMatch(LowerInput, @$"(^in)|(from now\s*{TimeZoneMatcher}?[\s.]*$)", RegexOptions.IgnoreCase))
+            if (Regex.IsMatch(lowerInput, @$"(^in)|(from now\s*{timeZoneMatcher}?[\s.]*$)", RegexOptions.IgnoreCase))
             {
-                if (!TryParseSpan(Input, out TimeSpan Span, out string NewError))
+                if (!TryParseSpan(input, out TimeSpan span, out string newError))
                 {
-                    Error = NewError;
+                    error = newError;
                     return false;
                 }
-                Time = Time.Add(Span).Add(TimeSpan.FromMilliseconds(100)).ToOffset(TimeZoneOffset);
+                time = time.Add(span).Add(TimeSpan.FromMilliseconds(100)).ToOffset(timeZoneOffset);
                 return true;
             }
-            else if (Regex.IsMatch(LowerInput, @$"ago\s*{TimeZoneMatcher}?[\s.]*$", RegexOptions.IgnoreCase))
+            else if (Regex.IsMatch(lowerInput, @$"ago\s*{timeZoneMatcher}?[\s.]*$", RegexOptions.IgnoreCase))
             {
-                if (!TryParseSpan(Input, out TimeSpan Span, out string NewError))
+                if (!TryParseSpan(input, out TimeSpan span, out string newError))
                 {
-                    Error = NewError;
+                    error = newError;
                     return false;
                 }
-                Time = Time.Subtract(Span).Subtract(TimeSpan.FromMilliseconds(100)).ToOffset(TimeZoneOffset);
+                time = time.Subtract(span).Subtract(TimeSpan.FromMilliseconds(100)).ToOffset(timeZoneOffset);
                 return true;
             }
 
-            foreach (Match m in Regex.Matches(Input, @"[0-9](st|nd|rd|th)"))
+            foreach (Match m in Regex.Matches(input, @"[0-9](st|nd|rd|th)"))
             {
-                Input = $"{Input[..m.Index]}{m.Value[0]}{(Input.Length > m.Index + m.Length ? Input[(m.Index + m.Length)..] : "")}";
+                input = $"{input[..m.Index]}{m.Value[0]}{(input.Length > m.Index + m.Length ? input[(m.Index + m.Length)..] : "")}";
             }
 
-            string DateStrSegment = Regex.Match(Input, @"(^|\s)(([A-Za-z]{3,}\s[0-9]{1,2})|([0-9]{1,2}\s[A-Za-z]{3,}))((,|\s)\s?[0-9]{2,5}(\s|$))?").Value.Trim();
-            string DateNumSegment = Regex.Match(Input, @"[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,5})?").Value;
-            string TimeSimplifiedSegment = Regex.Match(Input, @"(^|\s)[0-9]{1,2}\s?[pa]m(\s|$)", RegexOptions.IgnoreCase).Value;
-            string TimeSegment = Regex.Match(Input, @"[0-9]{1,2}:[0-9]{1,2}(:[0-9]{1,2}(.[0-9]+)?)?(\s?(a|p)m)?", RegexOptions.IgnoreCase).Value;
+            string dateStrSegment = Regex.Match(input, @"(^|\s)(([A-Za-z]{3,}\s[0-9]{1,2})|([0-9]{1,2}\s[A-Za-z]{3,}))((,|\s)\s?[0-9]{2,5}(\s|$))?").Value.Trim();
+            string dateNumSegment = Regex.Match(input, @"[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,5})?").Value;
+            string timeSimplifiedSegment = Regex.Match(input, @"(^|\s)[0-9]{1,2}\s?[pa]m(\s|$)", RegexOptions.IgnoreCase).Value;
+            string timeSegment = Regex.Match(input, @"[0-9]{1,2}:[0-9]{1,2}(:[0-9]{1,2}(.[0-9]+)?)?(\s?(a|p)m)?", RegexOptions.IgnoreCase).Value;
 
-            DateTimeOffset OffsetNow = DateTimeOffset.Now.ToOffset(TimeZoneOffset);
+            DateTimeOffset offsetNow = DateTimeOffset.Now.ToOffset(timeZoneOffset);
 
-            int Year = OffsetNow.Year;
-            int Month = OffsetNow.Month;
-            int Day = OffsetNow.Day;
-            int Hour = OffsetNow.Hour;
-            int Minute = OffsetNow.Minute;
-            float Second = 0;
+            int year = offsetNow.Year;
+            int month = offsetNow.Month;
+            int day = offsetNow.Day;
+            int hour = offsetNow.Hour;
+            int minute = offsetNow.Minute;
+            float second = 0;
 
-            if (!string.IsNullOrEmpty(DateStrSegment))
+            if (!string.IsNullOrEmpty(dateStrSegment))
             {
-                DateStrSegment = DateStrSegment.Replace(", ", " ").Replace(",", " ");
+                dateStrSegment = dateStrSegment.Replace(", ", " ").Replace(",", " ");
 
-                string[] MDY = DateStrSegment.Split(" ");
+                string[] MDY = dateStrSegment.Split(" ");
                 string dd;
 
-                Month = ParseMonth(MDY[0]);
-                if (Month < 0)
+                month = ParseMonth(MDY[0]);
+                if (month < 0)
                 {
-                    Month = ParseMonth(MDY[1]);
-                    if (Month < 0)
+                    month = ParseMonth(MDY[1]);
+                    if (month < 0)
                     {
-                        Error = $"Failed to parse \"{MDY[0]}\" OR \"{MDY[1]}\" into a valid Month.";
+                        error = $"Failed to parse \"{MDY[0]}\" OR \"{MDY[1]}\" into a valid Month.";
                         return false;
                     }
                     dd = MDY[0];
@@ -787,105 +788,105 @@ namespace Dexter.Helpers
                     dd = MDY[1];
                 }
 
-                if (!int.TryParse(dd, out Day))
+                if (!int.TryParse(dd, out day))
                 {
-                    Error = $"Failed to parse {dd} into a valid Day of the Month.";
+                    error = $"Failed to parse {dd} into a valid Day of the Month.";
                     return false;
                 }
 
-                if (Day < 0 || Day > 31) { return false; }
+                if (day < 0 || day > 31) { return false; }
 
                 if (MDY.Length > 2)
                 {
-                    if (!int.TryParse(MDY[2], out Year))
+                    if (!int.TryParse(MDY[2], out year))
                     {
-                        Error = $"Failed to parse {MDY[2]} into a valid year!";
+                        error = $"Failed to parse {MDY[2]} into a valid year!";
                         return false;
                     }
-                    if (Year < 100) Year += 2000; //YY parsing
-                    if (Year > 10000) Year -= 10000; //Human Era Parsing
-                    if (Year < 100 || Year > 3000)
+                    if (year < 100) year += 2000; //YY parsing
+                    if (year > 10000) year -= 10000; //Human Era Parsing
+                    if (year < 100 || year > 3000)
                     {
-                        Error = $"Year {Year} is outside the range of valid accepted years (must be between 100 and 3000)";
+                        error = $"Year {year} is outside the range of valid accepted years (must be between 100 and 3000)";
                         return false;
                     }
                 }
             }
-            else if (!string.IsNullOrEmpty(DateNumSegment))
+            else if (!string.IsNullOrEmpty(dateNumSegment))
             {
-                if (DateNumSegment.Split("/").Length < 3)
+                if (dateNumSegment.Split("/").Length < 3)
                 {
-                    DateNumSegment += $"/{Year}";
+                    dateNumSegment += $"/{year}";
                 }
 
                 DateTime Subparse;
                 try
                 {
-                    Subparse = DateTime.Parse(DateNumSegment, CultureInfo);
+                    Subparse = DateTime.Parse(dateNumSegment, culture);
                 }
                 catch (FormatException e)
                 {
-                    Error = e.Message;
+                    error = e.Message;
                     return false;
                 }
 
-                Day = Subparse.Day;
-                Month = Subparse.Month;
-                Year = Subparse.Year;
+                day = Subparse.Day;
+                month = Subparse.Month;
+                year = Subparse.Year;
             }
 
             TimeMeridianDiscriminator TMD = TimeMeridianDiscriminator.H24;
 
-            if (!string.IsNullOrEmpty(TimeSimplifiedSegment))
+            if (!string.IsNullOrEmpty(timeSimplifiedSegment))
             {
-                TMD = TimeSimplifiedSegment.Trim()[^2] is 'p' or 'P' ? TimeMeridianDiscriminator.PM : TimeMeridianDiscriminator.AM;
-                Hour = int.Parse(TimeSimplifiedSegment.Trim()[..^2]);
-                Minute = 0;
+                TMD = timeSimplifiedSegment.Trim()[^2] is 'p' or 'P' ? TimeMeridianDiscriminator.PM : TimeMeridianDiscriminator.AM;
+                hour = int.Parse(timeSimplifiedSegment.Trim()[..^2]);
+                minute = 0;
             }
             else
             {
-                if (string.IsNullOrEmpty(TimeSegment))
+                if (string.IsNullOrEmpty(timeSegment))
                 {
-                    if (string.IsNullOrEmpty(DateNumSegment) && string.IsNullOrEmpty(DateStrSegment))
+                    if (string.IsNullOrEmpty(dateNumSegment) && string.IsNullOrEmpty(dateStrSegment))
                     {
-                        Error = "A time or day must be provided! Time segments are formatted as: `hh:mm(:ss) (<am/pm>)`";
+                        error = "A time or day must be provided! Time segments are formatted as: `hh:mm(:ss) (<am/pm>)`";
                         return false;
                     }
                     else
                     {
                         TMD = TimeMeridianDiscriminator.H24;
-                        Hour = 0;
-                        Minute = 0;
-                        Second = 0;
+                        hour = 0;
+                        minute = 0;
+                        second = 0;
                     }
                 }
                 else
                 {
-                    if (TimeSegment[^1] is 'm' or 'M')
+                    if (timeSegment[^1] is 'm' or 'M')
                     {
-                        TMD = TimeSegment[^2] is 'p' or 'P' ? TimeMeridianDiscriminator.PM : TimeMeridianDiscriminator.AM;
-                        TimeSegment = TimeSegment[..^2];
+                        TMD = timeSegment[^2] is 'p' or 'P' ? TimeMeridianDiscriminator.PM : TimeMeridianDiscriminator.AM;
+                        timeSegment = timeSegment[..^2];
                     }
 
-                    string[] hmsf = TimeSegment.Trim().Split(":");
-                    Hour = int.Parse(hmsf[0]);
-                    Minute = int.Parse(hmsf[1]);
+                    string[] hmsf = timeSegment.Trim().Split(":");
+                    hour = int.Parse(hmsf[0]);
+                    minute = int.Parse(hmsf[1]);
 
-                    if (hmsf.Length > 2) Second = float.Parse(hmsf[2]);
+                    if (hmsf.Length > 2) second = float.Parse(hmsf[2]);
                 }
             }
 
-            if (TMD == TimeMeridianDiscriminator.AM && Hour == 12) Hour = 0;
-            else if (TMD == TimeMeridianDiscriminator.PM && Hour != 12) Hour += 12;
+            if (TMD == TimeMeridianDiscriminator.AM && hour == 12) hour = 0;
+            else if (TMD == TimeMeridianDiscriminator.PM && hour != 12) hour += 12;
 
             try
             {
-                Time = new DateTimeOffset(new DateTime(Year, Month, Day, Hour, Minute, (int)Second, (int)(Second % 1 * 1000)), TimeZoneOffset);
+                time = new DateTimeOffset(new DateTime(year, month, day, hour, minute, (int)second, (int)(second % 1 * 1000)), timeZoneOffset);
             }
             catch (ArgumentOutOfRangeException e)
             {
-                Error = $"Impossible to parse to a valid time! Are you sure the month you chose has enough days?\n" +
-                    $"Selected numbers are Year: {Year}, Month: {Month}, Day: {Day}, Hour: {Hour}, Minute: {Minute}, Second: {Second}, Time Zone: {TimeZone?.ToString() ?? TimeZoneData.ToTimeZoneExpression(TimeZoneOffset)}.\n[{e.Message}]";
+                error = $"Impossible to parse to a valid time! Are you sure the month you chose has enough days?\n" +
+                    $"Selected numbers are Year: {year}, Month: {month}, Day: {day}, Hour: {hour}, Minute: {minute}, Second: {second}, Time Zone: {timeZone?.ToString() ?? TimeZoneData.ToTimeZoneExpression(timeZoneOffset)}.\n[{e.Message}]";
                 return false;
             }
 
@@ -1106,17 +1107,17 @@ namespace Dexter.Helpers
         /// <summary>
         /// Attempts to parse a timespan out of humanized terms
         /// </summary>
-        /// <param name="Input">A stringified time expression consisting of a series of numbers followed by units.</param>
-        /// <param name="Span">The output span resulting from the parsing of <paramref name="Input"/>.</param>
-        /// <param name="Error">Empty string if there are no errors, otherwise describes why it failed.</param>
+        /// <param name="input">A stringified time expression consisting of a series of numbers followed by units.</param>
+        /// <param name="span">The output span resulting from the parsing of <paramref name="input"/>.</param>
+        /// <param name="error">Empty string if there are no errors, otherwise describes why it failed.</param>
         /// <returns><see langword="true"/> if the parsing was successful, otherwise <see langword="false"/>.</returns>
 
-        public static bool TryParseSpan(this string Input, out TimeSpan Span, out string Error)
+        public static bool TryParseSpan(this string input, out TimeSpan span, out string error)
         {
-            Error = "";
-            Span = TimeSpan.Zero;
+            error = "";
+            span = TimeSpan.Zero;
 
-            Dictionary<TimeUnit, string> RegExps = new()
+            Dictionary<TimeUnit, string> regExps = new()
             {
                 { TimeUnit.Millisecond, @"(ms)|((milli)(second)?s?)" },
                 { TimeUnit.Second, @"s(ec(ond)?s?)?" },
@@ -1130,26 +1131,26 @@ namespace Dexter.Helpers
                 { TimeUnit.Millenium, @"millenn?i(um|a)" }
             };
 
-            foreach (KeyValuePair<TimeUnit, string> Unit in RegExps)
+            foreach (KeyValuePair<TimeUnit, string> unit in regExps)
             {
-                string Parsable = Regex.Match(Input, $@"[0-9.]+\s*({Unit.Value})(([0-9]+)|\s|$)", RegexOptions.IgnoreCase).Value;
-                if (string.IsNullOrEmpty(Parsable)) continue;
-                for (int i = 0; i < Parsable.Length; i++)
+                string parsable = Regex.Match(input, $@"[0-9.]+\s*({unit.Value})(([0-9]+)|\s|$)", RegexOptions.IgnoreCase).Value;
+                if (string.IsNullOrEmpty(parsable)) continue;
+                for (int i = 0; i < parsable.Length; i++)
                 {
-                    if (!char.IsDigit(Parsable[i]))
+                    if (!char.IsDigit(parsable[i]))
                     {
-                        if (!double.TryParse(Parsable[..i], out double Factor))
+                        if (!double.TryParse(parsable[..i], out double factor))
                         {
-                            Error = $"Failed to parse number \"${Parsable[..i]}\" for unit ${Unit.Key}.";
+                            error = $"Failed to parse number \"${parsable[..i]}\" for unit ${unit.Key}.";
                             return false;
                         }
                         try
                         {
-                            Span = Span.Add(Factor * UnitToTime[Unit.Key]);
+                            span = span.Add(factor * UnitToTime[unit.Key]);
                         }
                         catch (OverflowException e)
                         {
-                            Error = $"Unable to create time! The duration you specified is too long.\n[{e.Message}]";
+                            error = $"Unable to create time! The duration you specified is too long.\n[{e.Message}]";
                             return false;
                         }
                         break;
@@ -1225,92 +1226,92 @@ namespace Dexter.Helpers
         };
 
         /// <summary>
-        /// Searches the list of static time zone abbreviations in <paramref name="LanguageConfiguration"/> to find the closest expressions to <paramref name="Input"/>.
+        /// Searches the list of static time zone abbreviations in <paramref name="config"/> to find the closest expressions to <paramref name="input"/>.
         /// </summary>
-        /// <param name="Input">The search term.</param>
-        /// <param name="LanguageConfiguration">The global language configuration from which to draw time zone abbreviations.</param>
-        /// <returns>A <c>string[]</c> array of time zone abbreviations from <paramref name="LanguageConfiguration"/> which are most similar to <paramref name="Input"/>, sorted by relevance.</returns>
+        /// <param name="input">The search term.</param>
+        /// <param name="config">The global language configuration from which to draw time zone abbreviations.</param>
+        /// <returns>A <c>string[]</c> array of time zone abbreviations from <paramref name="config"/> which are most similar to <paramref name="input"/>, sorted by relevance.</returns>
 
-        public static string[] SearchTimeZone(this string Input, LanguageConfiguration LanguageConfiguration)
+        public static string[] SearchTimeZone(this string input, LanguageConfiguration config)
         {
-            Dictionary<string, int> SearchWeight = new();
+            Dictionary<string, int> searchWeight = new();
 
-            foreach (KeyValuePair<string, TimeZoneData> k in LanguageConfiguration.TimeZones)
+            foreach (KeyValuePair<string, TimeZoneData> k in config.TimeZones)
             {
-                int Weight = 0;
+                int weight = 0;
                 for (int i = 0; i < k.Key.Length; i++)
                 {
-                    if (i < Input.Length)
+                    if (i < input.Length)
                     {
-                        if (Input[i] == k.Key[i]) Weight += 10;
-                        else if (char.ToUpper(Input[i]) == char.ToUpper(k.Key[i])) Weight += 9;
+                        if (input[i] == k.Key[i]) weight += 10;
+                        else if (char.ToUpper(input[i]) == char.ToUpper(k.Key[i])) weight += 9;
                     }
-                    if (Input.Contains(k.Key[i])) Weight += 3;
+                    if (input.Contains(k.Key[i])) weight += 3;
                 }
 
-                if (Input.Length >= 2 && Input[^2] == 'S')
+                if (input.Length >= 2 && input[^2] == 'S')
                 {
-                    if (k.Key.Length >= 2 && k.Key[^2] == 'D') Weight += 8;
-                    else if (k.Key.Length + 1 == Input.Length) Weight += 4;
+                    if (k.Key.Length >= 2 && k.Key[^2] == 'D') weight += 8;
+                    else if (k.Key.Length + 1 == input.Length) weight += 4;
                 }
 
                 if (k.Key.Length >= 2 && k.Key[^2] == 'S')
                 {
-                    if (Input.Length >= 2 && Input[^2] == 'D') Weight += 8;
-                    else if (Input.Length + 1 == k.Key.Length) Weight += 4;
+                    if (input.Length >= 2 && input[^2] == 'D') weight += 8;
+                    else if (input.Length + 1 == k.Key.Length) weight += 4;
                 }
 
-                if (Input.ToUpper() == k.Key.ToUpper()) Weight += 100;
+                if (input.ToUpper() == k.Key.ToUpper()) weight += 100;
 
-                SearchWeight.Add(k.Key, Weight);
+                searchWeight.Add(k.Key, weight);
             }
 
-            List<KeyValuePair<string, int>> WeightedList = SearchWeight.ToList();
-            WeightedList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
+            List<KeyValuePair<string, int>> weightedList = searchWeight.ToList();
+            weightedList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
 
-            string[] SortedResults = new string[WeightedList.Count];
-            for (int i = 0; i < WeightedList.Count; i++)
+            string[] sortedResults = new string[weightedList.Count];
+            for (int i = 0; i < weightedList.Count; i++)
             {
-                SortedResults[i] = WeightedList[i].Key;
+                sortedResults[i] = weightedList[i].Key;
             }
-            return SortedResults;
+            return sortedResults;
         }
 
         /// <summary>
-        /// Searches the list of static time zone data in <paramref name="LanguageConfiguration"/> to find timezones whose offset is closest to <paramref name="Offset"/>.
+        /// Searches the list of static time zone data in <paramref name="config"/> to find timezones whose offset is closest to <paramref name="offset"/>.
         /// </summary>
-        /// <param name="Offset">A TimeSpan representing the difference between UTC and a given time zone.</param>
-        /// <param name="LanguageConfiguration">The configuration required to parse time zone data.</param>
-        /// <param name="ExactMatches">The number of matches in the results that have the exact <paramref name="Offset"/> provided.</param>
-        /// <returns>A <c>string[]</c> array of time zone abbreviations from <paramref name="LanguageConfiguration"/> which are most similar in offset to <paramref name="Offset"/>, sorted by relevance.</returns>
+        /// <param name="offset">A TimeSpan representing the difference between UTC and a given time zone.</param>
+        /// <param name="config">The configuration required to parse time zone data.</param>
+        /// <param name="exactMatches">The number of matches in the results that have the exact <paramref name="offset"/> provided.</param>
+        /// <returns>A <c>string[]</c> array of time zone abbreviations from <paramref name="config"/> which are most similar in offset to <paramref name="offset"/>, sorted by relevance.</returns>
 
-        public static string[] SearchTimeZone(this TimeSpan Offset, LanguageConfiguration LanguageConfiguration, out int ExactMatches)
+        public static string[] SearchTimeZone(this TimeSpan offset, LanguageConfiguration config, out int exactMatches)
         {
-            Dictionary<string, int> SearchWeight = new();
-            ExactMatches = 0;
+            Dictionary<string, int> searchWeight = new();
+            exactMatches = 0;
 
-            foreach (KeyValuePair<string, TimeZoneData> k in LanguageConfiguration.TimeZones)
+            foreach (KeyValuePair<string, TimeZoneData> k in config.TimeZones)
             {
-                int Weight = (int)Math.Abs(k.Value.TimeOffset.Subtract(Offset).TotalMinutes);
+                int weight = (int)Math.Abs(k.Value.TimeOffset.Subtract(offset).TotalMinutes);
 
-                if (Weight == 0) ExactMatches++;
+                if (weight == 0) exactMatches++;
 
-                SearchWeight.Add(k.Key, Weight);
+                searchWeight.Add(k.Key, weight);
             }
 
-            List<KeyValuePair<string, int>> WeightedList = SearchWeight.ToList();
-            WeightedList.Sort((pair1, pair2) =>
+            List<KeyValuePair<string, int>> weightedList = searchWeight.ToList();
+            weightedList.Sort((pair1, pair2) =>
             {
                 if (pair1.Value.CompareTo(pair2.Value) != 0) return pair1.Value.CompareTo(pair2.Value);
                 else return pair1.Key.CompareTo(pair2.Key);
             });
 
-            string[] SortedResults = new string[WeightedList.Count];
-            for (int i = 0; i < WeightedList.Count; i++)
+            string[] sortedResults = new string[weightedList.Count];
+            for (int i = 0; i < weightedList.Count; i++)
             {
-                SortedResults[i] = WeightedList[i].Key;
+                sortedResults[i] = weightedList[i].Key;
             }
-            return SortedResults;
+            return sortedResults;
         }
 
         /// <summary>
@@ -1428,19 +1429,19 @@ namespace Dexter.Helpers
         /// <summary>
         /// Creates a standard expression of a specific time, both absolute and relative to present.
         /// </summary>
-        /// <param name="Time">The DateTimeOffset object to parse.</param>
-        /// <param name="BotConfiguration">The Configuration file holding the StandardTimeZone variable, only required if <paramref name="StandardizeTime"/> is <see langword="true"/>.</param>
-        /// <param name="StandardizeTime">Whether to standardize the time to <paramref name="BotConfiguration"/><c>.StandardTimeZone</c>.</param>
-        /// <returns>A stringified expression of <paramref name="Time"/>.</returns>
+        /// <param name="time">The DateTimeOffset object to parse.</param>
+        /// <param name="config">The Configuration file holding the StandardTimeZone variable, only required if <paramref name="standardizeTime"/> is <see langword="true"/>.</param>
+        /// <param name="standardizeTime">Whether to standardize the time to <paramref name="config"/><c>.StandardTimeZone</c>.</param>
+        /// <returns>A stringified expression of <paramref name="time"/>.</returns>
 
-        public static string HumanizeExtended(this DateTimeOffset Time, BotConfiguration BotConfiguration = null, bool StandardizeTime = false)
+        public static string HumanizeExtended(this DateTimeOffset time, BotConfiguration config = null, bool standardizeTime = false)
         {
-            if (BotConfiguration != null && StandardizeTime)
+            if (config != null && standardizeTime)
             {
-                Time = Time.ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
+                time = time.ToOffset(TimeSpan.FromHours(config.StandardTimeZone));
             }
 
-            return $"{Time:ddd dd MMM yyy 'at' hh:mm tt 'UTC'zzz} ({Time.Humanize()})";
+            return $"{time:ddd dd MMM yyy 'at' hh:mm tt 'UTC'zzz} ({time.Humanize()})";
         }
 
         /// <summary>
@@ -1501,25 +1502,25 @@ namespace Dexter.Helpers
         }
 
         /// <summary>
-        /// Gives a human-readable form of the <paramref name="Offset"/> relative to UTC.
+        /// Gives a human-readable form of the <paramref name="offset"/> relative to UTC.
         /// </summary>
-        /// <param name="Offset">The number of hours offset from UTC.</param>
+        /// <param name="offset">The number of hours offset from UTC.</param>
         /// <returns>A string expressing a human-readable form of the offset relative to UTC.</returns>
 
-        public static string ToTimeZoneExpression(float Offset)
+        public static string ToTimeZoneExpression(float offset)
         {
-            return $"UTC{(Offset >= 0 ? "+" : "")}{(int)Offset}:{Math.Abs(Offset % 1 * 60):00}";
+            return $"UTC{(offset >= 0 ? "+" : "")}{(int)offset}:{Math.Abs(offset % 1 * 60):00}";
         }
 
         /// <summary>
-        /// Gives a human-readable form of the <paramref name="Offset"/> TimeSpan relative to UTC.
+        /// Gives a human-readable form of the <paramref name="offset"/> TimeSpan relative to UTC.
         /// </summary>
-        /// <param name="Offset">The TimeSpan object representing the offset of hours relative to UTC.</param>
+        /// <param name="offset">The TimeSpan object representing the offset of hours relative to UTC.</param>
         /// <returns>A string expressing a human-readable form of the offset relative to UTC.</returns>
 
-        public static string ToTimeZoneExpression(TimeSpan Offset)
+        public static string ToTimeZoneExpression(TimeSpan offset)
         {
-            return ToTimeZoneExpression(Offset.Hours + Offset.Minutes / 60f);
+            return ToTimeZoneExpression(offset.Hours + offset.Minutes / 60f);
         }
 
         /// <summary>

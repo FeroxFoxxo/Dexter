@@ -274,10 +274,10 @@ namespace Dexter.Commands
                 for (int i = initial; i < initial + CommunityConfiguration.BrowseTopicsPerPage; i++)
                 {
                     if (i >= topics.Count) break;
-                    FunTopic t = topics[i].obj;
+                    FunTopic t = topics[i].Obj;
                     IUser topicProvider = DiscordShardedClient.GetUser(t.ProposerID);
                     string userStr = topicProvider is null ? "Unknown" : topicProvider.Username;
-                    embed.AddField($"{t.TopicType} #{t.TopicID} by {userStr} ({Math.Round(topics[i].weight * 10000) / 100}%)", t.Topic.TruncateTo(maxDescLength));
+                    embed.AddField($"{t.TopicType} #{t.TopicID} by {userStr} ({Math.Round(topics[i].Weight * 10000) / 100}%)", t.Topic.TruncateTo(maxDescLength));
                 }
                 embeds[p] = embed;
             }

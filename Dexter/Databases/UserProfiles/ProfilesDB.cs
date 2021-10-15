@@ -36,18 +36,18 @@ namespace Dexter.Databases.UserProfiles
         /// <summary>
         /// Fetches a profile from the database or creates a new one if none exists for the given UserID (filled with default values).
         /// </summary>
-        /// <param name="UserID">The ID of the profile to fetch.</param>
+        /// <param name="userID">The ID of the profile to fetch.</param>
         /// <returns>A UserProfile object detailing the relevant information about the user.</returns>
 
-        public UserProfile GetOrCreateProfile(ulong UserID)
+        public UserProfile GetOrCreateProfile(ulong userID)
         {
-            UserProfile Profile = Profiles.Find(UserID);
+            UserProfile profile = Profiles.Find(userID);
 
-            if (Profile is null)
+            if (profile is null)
             {
-                Profile = new()
+                profile = new()
                 {
-                    UserID = UserID,
+                    UserID = userID,
                     BorkdayTime = 0,
                     DateJoined = 0,
                     TimeZone = "UTC+0:00",
@@ -55,11 +55,11 @@ namespace Dexter.Databases.UserProfiles
                     Settings = new()
                 };
 
-                Profiles.Add(Profile);
+                Profiles.Add(profile);
                 SaveChanges();
             }
 
-            return Profile;
+            return profile;
         }
 
         /// <summary>

@@ -36,32 +36,32 @@ namespace Dexter.Databases.Infractions
         /// The Get Infractions method queries the database for all infractions that have not been revoked
         /// based on the warned user's snowflake ID.
         /// </summary>
-        /// <param name="UserID">The ID of the user you wish to query the infractions of.</param>
+        /// <param name="user">The ID of the user you wish to query the infractions of.</param>
         /// <returns>An array of infraction objects that the user has.</returns>
 
-        public Infraction[] GetInfractions(ulong UserID) =>
+        public Infraction[] GetInfractions(ulong user) =>
             Infractions.AsQueryable()
-            .Where(Warning => Warning.User == UserID && Warning.EntryType != EntryType.Revoke)
+            .Where(Warning => Warning.User == user && Warning.EntryType != EntryType.Revoke)
             .ToArray();
 
         /// <summary>
         /// Gets a user's assigned Dexter profile if it exists. Otherwise, it creates a new profile and links it to them for further use.
         /// </summary>
-        /// <param name="UserID">The user attached to the target Dexter Profile.</param>
+        /// <param name="user">The user attached to the target Dexter Profile.</param>
         /// <returns>The corresponding Dexter Profile of the selected user.</returns>
 
-        public DexterProfile GetOrCreateProfile(ulong UserID)
+        public DexterProfile GetOrCreateProfile(ulong user)
         {
-            DexterProfile DexterProfile = DexterProfiles.Find(UserID);
+            DexterProfile dexterProfile = DexterProfiles.Find(user);
 
-            if (DexterProfile == null)
+            if (dexterProfile == null)
             {
-                DexterProfile = new DexterProfile() { UserID = UserID, InfractionAmount = ModerationConfiguration.MaxPoints, CurrentMute = "", CurrentPointTimer = "" };
-                DexterProfiles.Add(DexterProfile);
+                dexterProfile = new DexterProfile() { UserID = user, InfractionAmount = ModerationConfiguration.MaxPoints, CurrentMute = "", CurrentPointTimer = "" };
+                DexterProfiles.Add(dexterProfile);
                 SaveChanges();
             }
 
-            return DexterProfile;
+            return dexterProfile;
         }
 
 

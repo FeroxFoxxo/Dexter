@@ -1,5 +1,4 @@
 using Dexter.Abstractions;
-using Dexter.Attributes.Classes;
 using Dexter.Services;
 
 namespace Dexter.Commands

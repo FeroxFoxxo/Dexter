@@ -20,54 +20,54 @@ namespace Dexter.Databases.Reminders
         public DbSet<Reminder> Reminders { get; set; }
 
         /// <summary>
-        /// Gets a reminder from the Database by its <paramref name="ReminderID"/>.
+        /// Gets a reminder from the Database by its <paramref name="reminderID"/>.
         /// </summary>
-        /// <param name="ReminderID">The ID of the reminder to fetch.</param>
+        /// <param name="reminderID">The ID of the reminder to fetch.</param>
         /// <returns>A <c>Reminder</c> object if one with the given ID exists, <see langword="null"/> otherwise.</returns>
 
-        public Reminder GetReminder(int ReminderID)
+        public Reminder GetReminder(int reminderID)
         {
-            return Reminders.Find(ReminderID);
+            return Reminders.Find(reminderID);
         }
 
         /// <summary>
-        /// Gets a list of all reminders filtered by IssuerID, where the Issuer is <paramref name="User"/>.
+        /// Gets a list of all reminders filtered by IssuerID, where the Issuer is <paramref name="user"/>.
         /// </summary>
-        /// <param name="User">The Issuer of reminders to filter for.</param>
-        /// <returns>A <c>Reminder[]</c> array, where all Issuers are <paramref name="User"/>.</returns>
+        /// <param name="user">The Issuer of reminders to filter for.</param>
+        /// <returns>A <c>Reminder[]</c> array, where all Issuers are <paramref name="user"/>.</returns>
 
-        public Reminder[] GetRemindersByUser(Discord.IUser User)
+        public Reminder[] GetRemindersByUser(Discord.IUser user)
         {
-            return GetRemindersByUser(User.Id);
+            return GetRemindersByUser(user.Id);
         }
 
         /// <summary>
-        /// Gets a list of all reminders filtered by IssuerID, where the IssuerID is <paramref name="UserID"/>.
+        /// Gets a list of all reminders filtered by IssuerID, where the IssuerID is <paramref name="userID"/>.
         /// </summary>
-        /// <param name="UserID">The ID of the Issuer of reminders to filter for.</param>
-        /// <returns>A <c>Reminder[]</c> array, where all IssuerIDs are <paramref name="UserID"/>.</returns>
+        /// <param name="userID">The ID of the Issuer of reminders to filter for.</param>
+        /// <returns>A <c>Reminder[]</c> array, where all IssuerIDs are <paramref name="userID"/>.</returns>
 
-        public Reminder[] GetRemindersByUser(ulong UserID)
+        public Reminder[] GetRemindersByUser(ulong userID)
         {
-            return Reminders.AsQueryable().Where(r => r.IssuerID == UserID).ToArray();
+            return Reminders.AsQueryable().Where(r => r.IssuerID == userID).ToArray();
         }
 
         /// <summary>
         /// Creates a new reminder from given parameters, adds it to the database, and returns it.
         /// </summary>
-        /// <param name="User">The Issuer of the reminder.</param>
-        /// <param name="Time">The time the reminder should release at.</param>
-        /// <param name="Message">The content of the reminder.</param>
+        /// <param name="user">The Issuer of the reminder.</param>
+        /// <param name="time">The time the reminder should release at.</param>
+        /// <param name="message">The content of the reminder.</param>
         /// <returns>A <c>Reminder</c> object which includes the assigned ID.</returns>
 
-        public Reminder AddReminder(Discord.IUser User, DateTimeOffset Time, string Message)
+        public Reminder AddReminder(Discord.IUser user, DateTimeOffset time, string message)
         {
             Reminder r = new()
             {
                 ID = GenerateToken(),
-                IssuerID = User.Id,
-                DateTimeRelease = Time.ToUnixTimeSeconds(),
-                Message = Message
+                IssuerID = user.Id,
+                DateTimeRelease = time.ToUnixTimeSeconds(),
+                Message = message
             };
 
             Reminders.Add(r);

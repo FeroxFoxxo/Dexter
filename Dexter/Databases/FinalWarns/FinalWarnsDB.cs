@@ -27,88 +27,88 @@ namespace Dexter.Databases.FinalWarns
         public ModerationConfiguration ModerationConfiguration { get; set; }
 
         /// <summary>
-        /// Checks whether an active final warn is logged for <paramref name="User"/>.
+        /// Checks whether an active final warn is logged for <paramref name="user"/>.
         /// </summary>
-        /// <param name="User">The user to query in the database.</param>
+        /// <param name="user">The user to query in the database.</param>
         /// <returns><see langword="true"/> if the user has an active final warn; <see langword="false"/> otherwise.</returns>
 
-        public bool IsUserFinalWarned(IGuildUser User)
+        public bool IsUserFinalWarned(IGuildUser user)
         {
-            FinalWarn Warn = FinalWarns.Find(User.Id);
+            FinalWarn warn = FinalWarns.Find(user.Id);
 
-            return Warn != null && Warn.EntryType == EntryType.Issue;
+            return warn != null && warn.EntryType == EntryType.Issue;
         }
 
         /// <summary>
-        /// Looks for a final warn entry for the target <paramref name="User"/>. If none are found, it creates one. If one is found, it is overwritten by the new parameters.
+        /// Looks for a final warn entry for the target <paramref name="user"/>. If none are found, it creates one. If one is found, it is overwritten by the new parameters.
         /// </summary>
-        /// <param name="PointsDeducted">The amounts of points deducted from the <paramref name="User"/>'s profile when the final warn was issued.</param>
-        /// <param name="Issuer">The staff member who issued the final warning.</param>
-        /// <param name="User">The user who is to receive a final warn.</param>
-        /// <param name="MuteDuration">The duration of the mute attached to the final warn.</param>
-        /// <param name="Reason">The whole reason behind the final warn for <paramref name="User"/>.</param>
-        /// <param name="MessageID">The ID of the message within #final-warnings which records this final warn instance.</param>
+        /// <param name="deducted">The amounts of points deducted from the <paramref name="user"/>'s profile when the final warn was issued.</param>
+        /// <param name="issuer">The staff member who issued the final warning.</param>
+        /// <param name="user">The user who is to receive a final warn.</param>
+        /// <param name="duration">The duration of the mute attached to the final warn.</param>
+        /// <param name="reason">The whole reason behind the final warn for <paramref name="user"/>.</param>
+        /// <param name="msgID">The ID of the message within #final-warnings which records this final warn instance.</param>
         /// <returns>The <c>FinalWarn</c> object added to the database.</returns>
 
-        public FinalWarn SetOrCreateFinalWarn(short PointsDeducted, IGuildUser Issuer, IGuildUser User, TimeSpan MuteDuration, string Reason, ulong MessageID)
+        public FinalWarn SetOrCreateFinalWarn(short deducted, IGuildUser issuer, IGuildUser user, TimeSpan duration, string reason, ulong msgID)
         {
-            FinalWarn Warn = FinalWarns.Find(User.Id);
+            FinalWarn warning = FinalWarns.Find(user.Id);
 
-            FinalWarn NewWarn = new()
+            FinalWarn newWarning = new()
             {
-                IssuerID = Issuer.Id,
-                UserID = User.Id,
-                MuteDuration = MuteDuration.TotalSeconds,
-                Reason = Reason,
+                IssuerID = issuer.Id,
+                UserID = user.Id,
+                MuteDuration = duration.TotalSeconds,
+                Reason = reason,
                 EntryType = EntryType.Issue,
                 IssueTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
-                MessageID = MessageID,
-                PointsDeducted = PointsDeducted
+                MessageID = msgID,
+                PointsDeducted = deducted
             };
 
-            if (Warn == null)
+            if (warning == null)
             {
-                FinalWarns.Add(NewWarn);
+                FinalWarns.Add(newWarning);
             }
             else
             {
-                FinalWarns.Remove(Warn);
-                FinalWarns.Add(NewWarn);
+                FinalWarns.Remove(warning);
+                FinalWarns.Add(newWarning);
             }
 
             SaveChanges();
 
-            return NewWarn;
+            return newWarning;
         }
 
         /// <summary>
-        /// Sets the status of a <paramref name="User"/>'s final warn to Revoked, but doesn't remove it from the database.
+        /// Sets the status of a <paramref name="user"/>'s final warn to Revoked, but doesn't remove it from the database.
         /// </summary>
-        /// <param name="User">The user whose final warn is to be revoked.</param>
-        /// <param name="Warn">The warn found in the database, or <see langword="null"/> if no warn is found.</param>
-        /// <returns><see langword="true"/> if an active final warn was found for the <paramref name="User"/>, whose status was changed to revoked; otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user whose final warn is to be revoked.</param>
+        /// <param name="warning">The warn found in the database, or <see langword="null"/> if no warn is found.</param>
+        /// <returns><see langword="true"/> if an active final warn was found for the <paramref name="user"/>, whose status was changed to revoked; otherwise <see langword="false"/>.</returns>
 
-        public bool TryRevokeFinalWarn(IGuildUser User, out FinalWarn Warn)
+        public bool TryRevokeFinalWarn(IGuildUser user, out FinalWarn warning)
         {
-            Warn = FinalWarns.Find(User.Id);
+            warning = FinalWarns.Find(user.Id);
 
-            if (Warn == null || Warn.EntryType == EntryType.Revoke) return false;
+            if (warning == null || warning.EntryType == EntryType.Revoke) return false;
 
-            Warn.EntryType = EntryType.Revoke;
+            warning.EntryType = EntryType.Revoke;
 
             SaveChanges();
             return true;
         }
 
         /// <summary>
-        /// Sets the status of a <paramref name="User"/>'s final warn to Revoked, but doesn't remove it from the database.
+        /// Sets the status of a <paramref name="user"/>'s final warn to Revoked, but doesn't remove it from the database.
         /// </summary>
-        /// <param name="User">The user whose final warn is to be revoked.</param>
-        /// <returns><see langword="true"/> if an active final warn was found for the <paramref name="User"/>, whose status was changed to revoked; otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The user whose final warn is to be revoked.</param>
+        /// <returns><see langword="true"/> if an active final warn was found for the <paramref name="user"/>, whose status was changed to revoked; otherwise <see langword="false"/>.</returns>
 
-        public bool TryRevokeFinalWarn(IGuildUser User)
+        public bool TryRevokeFinalWarn(IGuildUser user)
         {
-            return TryRevokeFinalWarn(User, out _);
+            return TryRevokeFinalWarn(user, out _);
         }
 
     }

@@ -33,45 +33,45 @@ namespace Dexter.Attributes.Methods
         /// <summary>
         /// The RequirePermissionLevel constructor takes in the level at which a user has to be at to run the command.
         /// </summary>
-        /// <param name="PermissionLevel">The permission level required to run the command.</param>
+        /// <param name="permissionLevel">The permission level required to run the command.</param>
 
-        public RequirePermissionLevelAttribute(PermissionLevel PermissionLevel)
+        public RequirePermissionLevelAttribute(PermissionLevel permissionLevel)
         {
-            this.PermissionLevel = PermissionLevel;
+            PermissionLevel = permissionLevel;
         }
 
         /// <summary>
         /// The CheckPermissionsAsync is an overriden method from its superclass, which checks
         /// to see if a command can be run by a user through their roles that they have applied.
         /// </summary>
-        /// <param name="CommandContext">The Context is used to find the user who has run the command.</param>
-        /// <param name="CommandInfo">The Command is used to find the name of the command that has been run.</param>
-        /// <param name="ServiceProvider">The Services are used to find the role IDs to get the permission level of the user from the BotConfiguration.</param>
+        /// <param name="context">The Context is used to find the user who has run the command.</param>
+        /// <param name="commandInfo">The Command is used to find the name of the command that has been run.</param>
+        /// <param name="services">The Services are used to find the role IDs to get the permission level of the user from the BotConfiguration.</param>
         /// <returns>The result of the checked permission, returning successful if it is able to be run or an error if not.
         /// This error is then thrown to the Command Handler Service to log to the user.</returns>
 
-        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, CommandInfo CommandInfo, IServiceProvider ServiceProvider)
+        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo commandInfo, IServiceProvider services)
         {
-            BotConfiguration BotConfiguration = ServiceProvider.GetService<BotConfiguration>();
+            BotConfiguration botConfiguration = services.GetService<BotConfiguration>();
 
-            if (ServiceProvider.GetService<HelpAbstraction>() != null)
-                BotConfiguration = ServiceProvider.GetService<HelpAbstraction>().BotConfiguration;
+            if (services.GetService<HelpAbstraction>() != null)
+                botConfiguration = services.GetService<HelpAbstraction>().BotConfiguration;
 
-            DiscordShardedClient DiscordShardedClient = ServiceProvider.GetService<DiscordShardedClient>();
+            DiscordShardedClient discordShardedClient = services.GetService<DiscordShardedClient>();
 
-            if (ServiceProvider.GetService<HelpAbstraction>() != null)
-                DiscordShardedClient = ServiceProvider.GetService<HelpAbstraction>().DiscordShardedClient;
+            if (services.GetService<HelpAbstraction>() != null)
+                discordShardedClient = services.GetService<HelpAbstraction>().DiscordShardedClient;
 
-            if (BotConfiguration == null)
+            if (botConfiguration == null)
                 return PreconditionResult.FromSuccess();
 
             if (PermissionLevel == PermissionLevel.DJ)
             {
-                if (ServiceProvider.GetService<HelpAbstraction>() != null)
+                if (services.GetService<HelpAbstraction>() != null)
                     return PreconditionResult.FromSuccess();
                 else
                 {
-                    if (ServiceProvider.GetService<LavaNode>().TryGetPlayer(CommandContext.Guild, out var player))
+                    if (services.GetService<LavaNode>().TryGetPlayer(context.Guild, out var player))
                     {
                         int uCount = 0;
                         
@@ -84,9 +84,9 @@ namespace Dexter.Attributes.Methods
                 }
             }
 
-            return CommandContext.User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel
+            return context.User.GetPermissionLevel(discordShardedClient, botConfiguration) >= PermissionLevel
                 ? PreconditionResult.FromSuccess()
-                : PreconditionResult.FromError($"Haiya! To run the `{CommandInfo.Name}` command you need to have the " +
+                : PreconditionResult.FromError($"Haiya! To run the `{commandInfo.Name}` command you need to have the " +
                 $"`{PermissionLevel}` role! Are you sure you're {LanguageHelper.GuessIndefiniteArticle(PermissionLevel.ToString())} " +
                 $"`{PermissionLevel.ToString().ToLower()}`? <3");
         }

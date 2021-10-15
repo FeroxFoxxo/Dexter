@@ -51,10 +51,10 @@ namespace Dexter.Databases.UserProfiles
             return new NameRecord()
             {
                 Index = -1,
-                Name = this.Name,
-                UserID = this.UserID,
-                SetTime = this.SetTime,
-                Type = this.Type
+                Name = Name,
+                UserID = UserID,
+                SetTime = SetTime,
+                Type = Type
             };
         }
 

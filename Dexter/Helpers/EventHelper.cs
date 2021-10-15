@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Dexter.Databases.CommunityEvents;
 using Dexter.Databases.EventTimers;
 using Dexter.Enums;
@@ -11,6 +7,10 @@ using Discord;
 using Discord.Net;
 using Discord.WebSocket;
 using Humanizer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -19,87 +19,88 @@ namespace Dexter.Commands
     {
 
         /// <summary>
-        /// Sends an event for admin approval (if <paramref name="EventType"/> is Official, it skips this step), and adds it to the database.
+        /// Sends an event for admin approval (if <paramref name="eventType"/> is Official, it skips this step), and adds it to the database.
         /// </summary>
-        /// <param name="EventType">The type of event hosting, either official or user-hosted.</param>
-        /// <param name="Proposer">The User who proposed the event in the first place.</param>
-        /// <param name="Release">The Time when the event is to be released to the public.</param>
-        /// <param name="Description">The event description containing all relevant information as to partake in the event and what it consists on.</param>
+        /// <param name="eventType">The type of event hosting, either official or user-hosted.</param>
+        /// <param name="proposer">The User who proposed the event in the first place.</param>
+        /// <param name="release">The Time when the event is to be released to the public.</param>
+        /// <param name="description">The event description containing all relevant information as to partake in the event and what it consists on.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task AddEvent(EventType EventType, IGuildUser Proposer, DateTimeOffset Release, string Description)
+        public async Task AddEvent(EventType eventType, IGuildUser proposer, DateTimeOffset release, string description)
         {
-            if (Description.Length > 1000)
+            if (description.Length > 1000)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Event description too long!")
-                    .WithDescription($"Try to keep the description under 1000 characters, the current description is {Description.Length} characters long.")
+                    .WithDescription($"Try to keep the description under 1000 characters, the current description is {description.Length} characters long.")
                     .SendEmbed(Context.Channel);
                 return;
             }
 
-            int ID = CommunityEventsDB.GenerateToken();
-            EventStatus Status = EventType == EventType.UserHosted ? EventStatus.Pending : EventStatus.Approved;
+            int id = CommunityEventsDB.GenerateToken();
+            EventStatus status = eventType == EventType.UserHosted ? EventStatus.Pending : EventStatus.Approved;
 
-            string ReleaseTimer = await CreateEventTimer(ReleaseEventCallback,
-                new Dictionary<string, string> { { "ID", ID.ToString() } },
-                (int)Release.Subtract(DateTimeOffset.Now).TotalSeconds,
+            string releaseTimer = await CreateEventTimer(ReleaseEventCallback,
+                new Dictionary<string, string> { { "ID", id.ToString() } },
+                (int)release.Subtract(DateTimeOffset.Now).TotalSeconds,
                 TimerType.Expire);
 
-            string ProposalText = $"**New Event Suggestion >>>** {CommunityConfiguration.EventsNotificationMention}";
+            string proposalText = $"**New Event Suggestion >>>** {CommunityConfiguration.EventsNotificationMention}";
 
-            string Link = Description.GetHyperLinks().FirstOrDefault();
-            if (Link != null && Link.Length > 0)
+            string link = description.GetHyperLinks().FirstOrDefault();
+            if (link != null && link.Length > 0)
             {
-                ProposalText += $"\n{Link}";
+                proposalText += $"\n{link}";
             }
 
-            ulong ProposalMessage = 0;
-            if (EventType == EventType.UserHosted)
+            ulong proposalMessage = 0;
+
+            if (eventType == EventType.UserHosted)
             {
                 IMessageChannel MessageChannel = DiscordShardedClient.GetChannel(CommunityConfiguration.EventsNotificationsChannel) as IMessageChannel;
-                Embed EventInfo = CreateEventProposalEmbed(ID, Status, Proposer, Release.ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone)), Description).Build();
+                Embed EventInfo = CreateEventProposalEmbed(id, status, proposer, release.ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone)), description).Build();
                 IMessage Proposal = await MessageChannel.SendMessageAsync(
-                    text: ProposalText,
+                    text: proposalText,
                     embed: EventInfo);
 
-                ProposalMessage = Proposal.Id;
+                proposalMessage = Proposal.Id;
             }
 
             CommunityEventsDB.Events.Add(
                 new()
                 {
-                    ID = ID,
-                    EventType = EventType,
-                    ProposerID = Proposer.Id,
+                    ID = id,
+                    EventType = eventType,
+                    ProposerID = proposer.Id,
                     DateTimeProposed = DateTimeOffset.Now.ToUnixTimeSeconds(),
-                    DateTimeRelease = Release.ToUnixTimeSeconds(),
-                    Description = Description,
-                    Status = Status,
+                    DateTimeRelease = release.ToUnixTimeSeconds(),
+                    Description = description,
+                    Status = status,
                     ResolveReason = "",
-                    EventProposal = ProposalMessage,
-                    ReleaseTimer = ReleaseTimer
+                    EventProposal = proposalMessage,
+                    ReleaseTimer = releaseTimer
                 });
 
             CommunityEventsDB.SaveChanges();
 
-            await UpdateEventProposal(ID);
+            await UpdateEventProposal(id);
 
-            if (EventType == EventType.Official)
+            if (eventType == EventType.Official)
             {
                 await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle($"Event #{ID} Successfully Programmed!")
+                    .WithTitle($"Event #{id} Successfully Programmed!")
                     .WithDescription($"The official server event has been successfully added to the database and will be displayed in <#{CommunityConfiguration.OfficialEventsChannel}> when its release time comes. \n" +
-                        $"You can always check the information of this event with the command `{BotConfiguration.Prefix}events get id {ID}`")
-                    .AddField("Release Time: ", $"{Release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z} ({Release.Humanize()})")
+                        $"You can always check the information of this event with the command `{BotConfiguration.Prefix}events get id {id}`")
+                    .AddField("Release Time: ", $"{release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z} ({release.Humanize()})")
                     .SendEmbed(Context.Channel);
             }
             else
             {
                 await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle($"Event #{ID} Successfully Suggested!")
-                    .WithDescription($"Your suggestion went through! You will be informed when it is approved or declined. You can always check the status with `{BotConfiguration.Prefix}event get id {ID}`")
-                    .AddField("Release Time: ", $"{Release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z} ({Release.Humanize()})")
+                    .WithTitle($"Event #{id} Successfully Suggested!")
+                    .WithDescription($"Your suggestion went through! You will be informed when it is approved or declined. You can always check the status with `{BotConfiguration.Prefix}event get id {id}`")
+                    .AddField("Release Time: ", $"{release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z} ({release.Humanize()})")
 
                     .SendEmbed(Context.Channel);
             }
@@ -108,18 +109,18 @@ namespace Dexter.Commands
         /// <summary>
         /// A callback method to be called when an event suggestion is approved. It sets the status to approved and handles expired events.
         /// </summary>
-        /// <param name="EventID">The unique numerical ID for the target event.</param>
-        /// <param name="Reason">The optional reason for approval of the event.</param>
+        /// <param name="eventID">The unique numerical ID for the target event.</param>
+        /// <param name="reason">The optional reason for approval of the event.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task ApproveEventCallback(int EventID, string Reason = "")
+        public async Task ApproveEventCallback(int eventID, string reason = "")
         {
-            CommunityEvent Event = GetEvent(EventID);
-            IUser Proposer = DiscordShardedClient.GetUser(Event.ProposerID);
+            CommunityEvent cEvent = GetEvent(eventID);
+            IUser proposer = DiscordShardedClient.GetUser(cEvent.ProposerID);
 
-            if (Event == null) return;
+            if (cEvent == null) return;
 
-            if (Event.Status == EventStatus.Expired)
+            if (cEvent.Status == EventStatus.Expired)
             {
                 if (CommunityConfiguration.FailOnOverdueApproval)
                 {
@@ -138,34 +139,34 @@ namespace Dexter.Commands
     
                         .SendEmbed(Context.Channel);
 
-                    Event.Status = EventStatus.Approved;
-                    await ReleaseEvent(EventID);
+                    cEvent.Status = EventStatus.Approved;
+                    await ReleaseEvent(eventID);
                     return;
                 }
 
             }
 
-            DateTimeOffset Release = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
+            DateTimeOffset release = DateTimeOffset.FromUnixTimeSeconds(cEvent.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
 
-            if (!TimerService.TimerExists(Event.ReleaseTimer))
-                Event.ReleaseTimer = await CreateEventTimer(ReleaseEventCallback,
-                new Dictionary<string, string> { { "ID", Event.ID.ToString() } },
-                (int)Release.Subtract(DateTimeOffset.Now).TotalSeconds,
+            if (!TimerService.TimerExists(cEvent.ReleaseTimer))
+                cEvent.ReleaseTimer = await CreateEventTimer(ReleaseEventCallback,
+                new Dictionary<string, string> { { "ID", cEvent.ID.ToString() } },
+                (int)release.Subtract(DateTimeOffset.Now).TotalSeconds,
                 TimerType.Expire);
 
-            Event.ResolveReason = Reason;
-            Event.Status = EventStatus.Approved;
-            await UpdateEventProposal(Event.ID);
+            cEvent.ResolveReason = reason;
+            cEvent.Status = EventStatus.Approved;
+            await UpdateEventProposal(cEvent.ID);
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Event approved for release!")
-                .WithDescription($"Event #{Event.ID} will be released at {Release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z} ({Release.Humanize()}).")
-                .SendDMAttachedEmbed(Context.Channel, BotConfiguration, Proposer,
+                .WithDescription($"Event #{cEvent.ID} will be released at {release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z} ({release.Humanize()}).")
+                .SendDMAttachedEmbed(Context.Channel, BotConfiguration, proposer,
                     BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Your Event has been Approved!")
-                    .WithDescription(Event.Description)
-                    .AddField(Reason.Length > 0, "Reason: ", Reason)
-                    .AddField("Release Time:", $"{Release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z}"));
+                    .WithDescription(cEvent.Description)
+                    .AddField(reason.Length > 0, "Reason: ", reason)
+                    .AddField("Release Time:", $"{release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z}"));
 
             CommunityEventsDB.SaveChanges();
         }
@@ -173,33 +174,33 @@ namespace Dexter.Commands
         /// <summary>
         /// A callback method to be called when an event suggestion is declined. It sets the status to denied and handles timer cleanup.
         /// </summary>
-        /// <param name="EventID">The unique numerical ID for the target event.</param>
-        /// <param name="Reason">The optional reason why the event was declined.</param>
+        /// <param name="eventID">The unique numerical ID for the target event.</param>
+        /// <param name="reason">The optional reason why the event was declined.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task DeclineEventCallback(int EventID, string Reason = "")
+        public async Task DeclineEventCallback(int eventID, string reason = "")
         {
-            CommunityEvent Event = GetEvent(EventID);
-            IUser Proposer = DiscordShardedClient.GetUser(Event.ProposerID);
+            CommunityEvent cEvent = GetEvent(eventID);
+            IUser proposer = DiscordShardedClient.GetUser(cEvent.ProposerID);
 
-            if (Event == null) return;
+            if (cEvent == null) return;
 
-            Event.ResolveReason = Reason;
-            await UpdateEventProposal(Event.ID);
+            cEvent.ResolveReason = reason;
+            await UpdateEventProposal(cEvent.ID);
 
-            if (TimerService.TimerExists(Event.ReleaseTimer))
-                TimerService.RemoveTimer(Event.ReleaseTimer);
+            if (TimerService.TimerExists(cEvent.ReleaseTimer))
+                TimerService.RemoveTimer(cEvent.ReleaseTimer);
 
             await BuildEmbed(EmojiEnum.Annoyed)
                 .WithTitle("Event has been declined!")
-                .WithDescription($"Event #{Event.ID} has been declined.")
-                .SendDMAttachedEmbed(Context.Channel, BotConfiguration, Proposer,
+                .WithDescription($"Event #{cEvent.ID} has been declined.")
+                .SendDMAttachedEmbed(Context.Channel, BotConfiguration, proposer,
                     BuildEmbed(EmojiEnum.Love)
                     .WithTitle("Your Event has been Declined!")
-                    .WithDescription(Event.Description)
-                    .AddField(Reason.Length > 0, "Reason: ", Reason));
+                    .WithDescription(cEvent.Description)
+                    .AddField(reason.Length > 0, "Reason: ", reason));
 
-            Event.Status = EventStatus.Denied;
+            cEvent.Status = EventStatus.Denied;
 
             CommunityEventsDB.SaveChanges();
         }
@@ -207,62 +208,62 @@ namespace Dexter.Commands
         /// <summary>
         /// A callback event to be called when an event reaches its release. It sets the status to released if applicable and publishes the event to the appropriate channel.
         /// </summary>
-        /// <param name="Args">A string-string Dictionary containing the field "ID", which must be parsable to a <c>ulong</c>.</param>
+        /// <param name="args">A string-string Dictionary containing the field "ID", which must be parsable to a <c>ulong</c>.</param>
 
-        public async Task ReleaseEventCallback(Dictionary<string, string> Args)
+        public async Task ReleaseEventCallback(Dictionary<string, string> args)
         {
-            int EventID = int.Parse(Args["ID"]);
+            int eventID = int.Parse(args["ID"]);
 
-            await ReleaseEvent(EventID);
+            await ReleaseEvent(eventID);
         }
 
         /// <summary>
         /// A function to be called when an event is released or updated after its release date.
         /// </summary>
-        /// <param name="EventID">The unique numeric ID of the target event.</param>
+        /// <param name="eventID">The unique numeric ID of the target event.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task ReleaseEvent(int EventID)
+        public async Task ReleaseEvent(int eventID)
         {
-            CommunityEvent Event = GetEvent(EventID);
+            CommunityEvent cEvent = GetEvent(eventID);
 
-            if (Event == null) return;
+            if (cEvent == null) return;
 
-            if (Event.Status is EventStatus.Denied or EventStatus.Removed or EventStatus.Released) return;
-            if (Event.Status == EventStatus.Expired && CommunityConfiguration.FailOnOverdueApproval) return;
+            if (cEvent.Status is EventStatus.Denied or EventStatus.Removed or EventStatus.Released) return;
+            if (cEvent.Status == EventStatus.Expired && CommunityConfiguration.FailOnOverdueApproval) return;
 
-            IUser User = DiscordShardedClient.GetUser(Event.ProposerID);
+            IUser user = DiscordShardedClient.GetUser(cEvent.ProposerID);
 
-            if (Event.Status == EventStatus.Pending)
+            if (cEvent.Status == EventStatus.Pending)
             {
-                Event.Status = EventStatus.Expired;
+                cEvent.Status = EventStatus.Expired;
 
                 try
                 {
                     await BuildEmbed(EmojiEnum.Sign)
                         .WithTitle("Event Expired")
-                        .WithDescription($"One of your events expired without the admins giving their feedback in time! \n{Event.Description}")
+                        .WithDescription($"One of your events expired without the admins giving their feedback in time! \n{cEvent.Description}")
     
-                        .SendEmbed(await User.CreateDMChannelAsync());
+                        .SendEmbed(await user.CreateDMChannelAsync());
                 }
                 catch (HttpException) { }
             }
             else
             {
-                Event.Status = EventStatus.Released;
+                cEvent.Status = EventStatus.Released;
 
-                ulong ChannelID = Event.EventType == EventType.Official ? CommunityConfiguration.OfficialEventsChannel : CommunityConfiguration.CommunityEventsChannel;
-                IMessageChannel Channel = DiscordShardedClient.GetChannel(ChannelID) as IMessageChannel;
+                ulong channelID = cEvent.EventType == EventType.Official ? CommunityConfiguration.OfficialEventsChannel : CommunityConfiguration.CommunityEventsChannel;
+                IMessageChannel channel = DiscordShardedClient.GetChannel(channelID) as IMessageChannel;
 
-                string RoleMention = $"<@&{(Event.EventType == EventType.Official ? CommunityConfiguration.OfficialEventsNotifiedRole : CommunityConfiguration.CommunityEventsNotifiedRole)}>";
-                string ProposalText = $"**New {(Event.EventType == EventType.Official ? "Official" : "Community")} Event >>>** {RoleMention} \n" +
-                    $"*Event by <@{Event.ProposerID}>:* \n" +
-                    $"{Event.Description}";
+                string roleMention = $"<@&{(cEvent.EventType == EventType.Official ? CommunityConfiguration.OfficialEventsNotifiedRole : CommunityConfiguration.CommunityEventsNotifiedRole)}>";
+                string proposalText = $"**New {(cEvent.EventType == EventType.Official ? "Official" : "Community")} Event >>>** {roleMention} \n" +
+                    $"*Event by <@{cEvent.ProposerID}>:* \n" +
+                    $"{cEvent.Description}";
 
-                await Channel.SendMessageAsync(text: ProposalText);
+                await channel.SendMessageAsync(text: proposalText);
             }
 
-            await UpdateEventProposal(Event.ID);
+            await UpdateEventProposal(cEvent.ID);
 
             CommunityEventsDB.SaveChanges();
         }
@@ -270,14 +271,14 @@ namespace Dexter.Commands
         /// <summary>
         /// Manually removes an event, automatically denying it and preventing it from running. It also deleted the associated proposal.
         /// </summary>
-        /// <param name="EventID">The unique ID of the target Event.</param>
+        /// <param name="eventID">The unique ID of the target Event.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task RemoveEvent(int EventID)
+        public async Task RemoveEvent(int eventID)
         {
-            CommunityEvent Event = GetEvent(EventID);
+            CommunityEvent cEvent = GetEvent(eventID);
 
-            if (Event.Status == EventStatus.Released)
+            if (cEvent.Status == EventStatus.Released)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Event already released!")
@@ -286,284 +287,279 @@ namespace Dexter.Commands
                     .SendEmbed(Context.Channel);
             }
 
-            if (TimerService.TimerExists(Event.ReleaseTimer))
-                TimerService.RemoveTimer(Event.ReleaseTimer);
+            if (TimerService.TimerExists(cEvent.ReleaseTimer))
+                TimerService.RemoveTimer(cEvent.ReleaseTimer);
 
-            Event.Status = EventStatus.Removed;
-            await UpdateEventProposal(Event.ID);
+            cEvent.Status = EventStatus.Removed;
+            await UpdateEventProposal(cEvent.ID);
 
             CommunityEventsDB.SaveChanges();
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Event was successfully removed!")
-                .WithDescription($"The event \"{Event.Description}\" has been removed from the proposal system.")
+                .WithDescription($"The event \"{cEvent.Description}\" has been removed from the proposal system.")
                 .SendEmbed(Context.Channel);
         }
 
         /// <summary>
         /// Edits the target event to change its description to something new. It also deletes the old proposal and creates a new one with the updated information.
         /// </summary>
-        /// <param name="EventID">The unique ID of the target event.</param>
-        /// <param name="NewDescription">The new Description for the target event.</param>
+        /// <param name="eventID">The unique ID of the target event.</param>
+        /// <param name="newDescription">The new Description for the target event.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task EditEvent(int EventID, string NewDescription)
+        public async Task EditEvent(int eventID, string newDescription)
         {
-            CommunityEvent Event = GetEvent(EventID);
+            CommunityEvent cEvent = GetEvent(eventID);
 
-            if (NewDescription.Length > 1000)
+            if (newDescription.Length > 1000)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Event description too long!")
-                    .WithDescription($"Try to keep the description under 1000 characters, the current description is {NewDescription.Length} characters long.")
+                    .WithDescription($"Try to keep the description under 1000 characters, the current description is {newDescription.Length} characters long.")
                     .SendEmbed(Context.Channel);
                 return;
             }
 
-            if (Event.EventType != EventType.Official)
+            if (cEvent.EventType != EventType.Official)
             {
-                if (Event.Status is EventStatus.Approved or EventStatus.Denied or EventStatus.Removed or EventStatus.Released)
+                if (cEvent.Status is EventStatus.Approved or EventStatus.Denied or EventStatus.Removed or EventStatus.Released)
                 {
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Event is not pending!")
-                        .WithDescription($"This event has already been {Event.Status}; and thus can't be edited. \nYou can remove this event and propose a new one if you wish to change it.")
+                        .WithDescription($"This event has already been {cEvent.Status}; and thus can't be edited. \nYou can remove this event and propose a new one if you wish to change it.")
     
                         .SendEmbed(Context.Channel);
                     return;
                 }
             }
 
-            Event.Description = NewDescription;
-            await UpdateEventProposal(Event.ID);
+            cEvent.Description = newDescription;
+            await UpdateEventProposal(cEvent.ID);
 
             CommunityEventsDB.SaveChanges();
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Event was successfully edited!")
-                .WithDescription($"Event #{Event.ID}'s description has been changed to: \n" +
-                    $"{Event.Description}")
+                .WithDescription($"Event #{cEvent.ID}'s description has been changed to: \n" +
+                    $"{cEvent.Description}")
                 .SendEmbed(Context.Channel);
         }
 
         /// <summary>
-        /// Resolves an event proposal by setting it as approved or declined depending on <paramref name="Action"/>.
+        /// Resolves an event proposal by setting it as approved or declined depending on <paramref name="action"/>.
         /// </summary>
-        /// <param name="EventID">The unique numeric ID of the target event.</param>
-        /// <param name="Reason">The optional reason behind the resolution.</param>
-        /// <param name="Action">Either Action.Approve or Action.Decline, defines how the event proposal is resolved.</param>
+        /// <param name="eventID">The unique numeric ID of the target event.</param>
+        /// <param name="reason">The optional reason behind the resolution.</param>
+        /// <param name="action">Either Action.Approve or Action.Decline, defines how the event proposal is resolved.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task ResolveEventProposal(int EventID, string Reason, Enums.ActionType Action)
+        public async Task ResolveEventProposal(int eventID, string reason, Enums.ActionType action)
         {
-            CommunityEvent Event = GetEvent(EventID);
+            CommunityEvent cEvent = GetEvent(eventID);
 
-            if (Event == null) return;
+            if (cEvent == null) return;
 
-            if (Event.Status is EventStatus.Approved or EventStatus.Denied or EventStatus.Released or EventStatus.Removed)
+            if (cEvent.Status is EventStatus.Approved or EventStatus.Denied or EventStatus.Released or EventStatus.Removed)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Event already resolved!")
-                    .WithDescription($"Event #{EventID} has already been {Event.Status}.")
+                    .WithDescription($"Event #{eventID} has already been {cEvent.Status}.")
                     .SendEmbed(Context.Channel);
                 return;
             }
 
-            Event.Status = Action switch
+            cEvent.Status = action switch
             {
                 Enums.ActionType.Approve => EventStatus.Approved,
                 Enums.ActionType.Decline => EventStatus.Denied,
-                _ => Event.Status
+                _ => cEvent.Status
             };
 
-            if (Action == Enums.ActionType.Approve) await ApproveEventCallback(EventID, Reason);
-            else await DeclineEventCallback(EventID, Reason);
+            if (action == Enums.ActionType.Approve) await ApproveEventCallback(eventID, reason);
+            else await DeclineEventCallback(eventID, reason);
 
-            Event.ResolveReason = Reason;
-            await UpdateEventProposal(Event.ID);
+            cEvent.ResolveReason = reason;
+            await UpdateEventProposal(cEvent.ID);
         }
 
         /// <summary>
         /// Updates a proposal linked to a given ID, by setting its status and relevant information, modifying the linked embed.
         /// </summary>
-        /// <param name="EventID">The ID of the target event to update.</param>
+        /// <param name="eventID">The ID of the target event to update.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-        public async Task UpdateEventProposal(int EventID)
+        public async Task UpdateEventProposal(int eventID)
         {
-            CommunityEvent Event = GetEvent(EventID);
+            CommunityEvent cEvent = GetEvent(eventID);
 
-            if (Event == null) return;
+            if (cEvent == null) return;
 
-            if (Event.EventType == EventType.Official) return;
+            if (cEvent.EventType == EventType.Official) return;
 
-            SocketChannel ProposalChannel = DiscordShardedClient.GetChannel(CommunityConfiguration.EventsNotificationsChannel);
+            SocketChannel proposalChannel = DiscordShardedClient.GetChannel(CommunityConfiguration.EventsNotificationsChannel);
 
-            IUserMessage Proposal = null;
-            if (ProposalChannel is SocketTextChannel TextChannel)
+            IUserMessage proposal = null;
+
+            if (proposalChannel is SocketTextChannel textChannel)
                 try
                 {
-                    Proposal = await TextChannel.GetMessageAsync(Event.EventProposal) as IUserMessage;
+                    proposal = await textChannel.GetMessageAsync(cEvent.EventProposal) as IUserMessage;
                 }
                 catch (HttpException)
                 {
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Failed to update event proposal")
                         .WithDescription("The message doesn't exist anymore! Perhaps it was deleted?")
-                        .AddField("Message ID", Event.EventProposal)
+                        .AddField("Message ID", cEvent.EventProposal)
                         .SendEmbed(Context.Channel);
                 }
 
-            if (Proposal == null) return;
+            if (proposal == null) return;
 
-            string ProposalText = Event.Status switch
+            string proposalText = cEvent.Status switch
             {
                 EventStatus.Pending => $"**New Event Proposal >>>** {CommunityConfiguration.EventsNotificationMention}",
-                EventStatus.Approved => $"**Upcoming Event [{DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone)):MMM M 'at' h:mm tt}] >>>**",
+                EventStatus.Approved => $"**Upcoming Event [{DateTimeOffset.FromUnixTimeSeconds(cEvent.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone)):MMM M 'at' h:mm tt}] >>>**",
                 EventStatus.Released => $"**Released Event**",
-                _ => $"**{Event.Status} Event Proposal >>>**"
+                _ => $"**{cEvent.Status} Event Proposal >>>**"
             };
 
-            if (Event.Status is EventStatus.Pending or EventStatus.Approved or EventStatus.Released)
+            if (cEvent.Status is EventStatus.Pending or EventStatus.Approved or EventStatus.Released)
             {
-                string Link = Event.Description.GetHyperLinks().FirstOrDefault();
-                if (Link != null && Link.Length > 0)
-                {
-                    ProposalText += $"\n{Link}";
-                }
+                string link = cEvent.Description.GetHyperLinks().FirstOrDefault();
+
+                if (link != null && link.Length > 0)
+                    proposalText += $"\n{link}";
             }
 
-            await Proposal.ModifyAsync(Properties =>
+            await proposal.ModifyAsync(Pproperties =>
             {
-                Properties.Content = ProposalText;
-                Properties.Embed = CreateEventProposalEmbed(Event).Build();
+                Pproperties.Content = proposalText;
+                Pproperties.Embed = CreateEventProposalEmbed(cEvent).Build();
             });
         }
 
-        private EmbedBuilder CreateEventProposalEmbed(int ID, EventStatus Status, IUser Author, DateTimeOffset Release, string Description, string ResolveReason = "")
+        private EmbedBuilder CreateEventProposalEmbed(int id, EventStatus status, IUser author, DateTimeOffset release, string description, string resolveReason = "")
         {
-            bool IncludeResolutionInfo = CommunityConfiguration.IncludeEventResolutionInfo && (Status == EventStatus.Pending || (Status == EventStatus.Expired && !CommunityConfiguration.FailOnOverdueApproval));
+            bool includeResolutionInfo = CommunityConfiguration.IncludeEventResolutionInfo && (status == EventStatus.Pending || (status == EventStatus.Expired && !CommunityConfiguration.FailOnOverdueApproval));
 
             return BuildEmbed(EmojiEnum.Sign)
-                .WithColor(new Color(uint.Parse(CommunityConfiguration.EventStatusColor[Status].Replace("0x", ""), System.Globalization.NumberStyles.HexNumber)))
-                .WithTitle(Status.ToString().ToUpper())
-                .WithAuthor(Author)
-                .WithDescription(Description)
-                .AddField("Release Date:", $"{Release.ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone)):ddd', 'MMM d 'at' hh:mm tt 'UTC'z}")
-                .AddField(Status == EventStatus.Pending, "Approval/Decline:", $"`{BotConfiguration.Prefix}event <approve|decline> {ID}`")
-                .AddField(IncludeResolutionInfo, "Resolution:", $"{BotConfiguration.Prefix}event [approve/decline] {ID}")
-                .AddField(ResolveReason.Length > 0, "Reason:", ResolveReason)
-                .WithFooter(ID.ToString());
+                .WithColor(new Color(uint.Parse(CommunityConfiguration.EventStatusColor[status].Replace("0x", ""), System.Globalization.NumberStyles.HexNumber)))
+                .WithTitle(status.ToString().ToUpper())
+                .WithAuthor(author)
+                .WithDescription(description)
+                .AddField("Release Date:", $"{release.ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone)):ddd', 'MMM d 'at' hh:mm tt 'UTC'z}")
+                .AddField(status == EventStatus.Pending, "Approval/Decline:", $"`{BotConfiguration.Prefix}event <approve|decline> {id}`")
+                .AddField(includeResolutionInfo, "Resolution:", $"{BotConfiguration.Prefix}event [approve/decline] {id}")
+                .AddField(resolveReason.Length > 0, "Reason:", resolveReason)
+                .WithFooter(id.ToString());
         }
 
-        private EmbedBuilder CreateEventProposalEmbed(CommunityEvent Event)
+        private EmbedBuilder CreateEventProposalEmbed(CommunityEvent cEvent)
         {
-            IUser Author = DiscordShardedClient.GetUser(Event.ProposerID);
-            DateTimeOffset Release = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
+            IUser author = DiscordShardedClient.GetUser(cEvent.ProposerID);
+            DateTimeOffset release = DateTimeOffset.FromUnixTimeSeconds(cEvent.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
 
-            return CreateEventProposalEmbed(Event.ID, Event.Status, Author, Release, Event.Description, Event.ResolveReason);
-        }
-
-        /// <summary>
-        /// Gets an event from the events database given its <paramref name="EventID"/>.
-        /// </summary>
-        /// <param name="EventID">The ID of the target event.</param>
-        /// <returns>An event whose ID is exactly that given by <paramref name="EventID"/>.</returns>
-
-        public CommunityEvent GetEvent(int EventID)
-        {
-            CommunityEvent Event = CommunityEventsDB.Events.Find(EventID);
-
-            return Event;
+            return CreateEventProposalEmbed(cEvent.ID, cEvent.Status, author, release, cEvent.Description, cEvent.ResolveReason);
         }
 
         /// <summary>
-        /// Gets an event from the events database given its <paramref name="Description"/>.
+        /// Gets an event from the events database given its <paramref name="eventID"/>.
         /// </summary>
-        /// <param name="Description">The text Description of the target event.</param>
-        /// <returns>An event with the exact given <paramref name="Description"/>.</returns>
+        /// <param name="eventID">The ID of the target event.</param>
+        /// <returns>An event whose ID is exactly that given by <paramref name="eventID"/>.</returns>
 
-        public CommunityEvent GetEvent(string Description)
+        public CommunityEvent GetEvent(int eventID)
         {
-            CommunityEvent Event = CommunityEventsDB.Events
+            return CommunityEventsDB.Events.Find(eventID);
+        }
+
+        /// <summary>
+        /// Gets an event from the events database given its <paramref name="description"/>.
+        /// </summary>
+        /// <param name="description">The text Description of the target event.</param>
+        /// <returns>An event with the exact given <paramref name="description"/>.</returns>
+
+        public CommunityEvent GetEvent(string description)
+        {
+            return CommunityEventsDB.Events
                 .AsQueryable()
-                .Where(Event => Event.Description == Description)
+                .Where(Event => Event.Description == description)
                 .FirstOrDefault();
-
-            return Event;
         }
 
         /// <summary>
-        /// Gets all events proposed by a given <paramref name="User"/>.
+        /// Gets all events proposed by a given <paramref name="user"/>.
         /// </summary>
-        /// <param name="User">The user who proposed the target events.</param>
-        /// <returns>An array of all events proposed by the <paramref name="User"/>.</returns>
+        /// <param name="user">The user who proposed the target events.</param>
+        /// <returns>An array of all events proposed by the <paramref name="user"/>.</returns>
 
-        public CommunityEvent[] GetEvents(IUser User)
+        public CommunityEvent[] GetEvents(IUser user)
         {
-            CommunityEvent[] Events = CommunityEventsDB.Events
+            return CommunityEventsDB.Events
                 .AsQueryable()
-                .Where(Event => Event.ProposerID == User.Id)
+                .Where(Event => Event.ProposerID == user.Id)
                 .ToArray();
-
-            return Events;
         }
 
         /// <summary>
         /// Generates an array of EmbedBuilders used for an EmbedMenu given a collection of events.
         /// </summary>
-        /// <param name="Events">The collection of events to include in the final result.</param>
-        /// <returns>An <c>EmbedBuilder[]</c> array containing paged embeds with each individual event in <paramref name="Events"/> as field entries.</returns>
+        /// <param name="events">The collection of events to include in the final result.</param>
+        /// <returns>An <c>EmbedBuilder[]</c> array containing paged embeds with each individual event in <paramref name="events"/> as field entries.</returns>
 
-        public EmbedBuilder[] GenerateUserEventsMenu(IEnumerable<CommunityEvent> Events)
+        public EmbedBuilder[] GenerateUserEventsMenu(IEnumerable<CommunityEvent> events)
         {
-            if (!Events.Any()) return Array.Empty<EmbedBuilder>();
+            if (!events.Any()) return Array.Empty<EmbedBuilder>();
 
-            int ExpectedPages = (Events.Count() + CommunityConfiguration.MaxEventsPerMenu - 1) / CommunityConfiguration.MaxEventsPerMenu;
+            int expectedPages = (events.Count() + CommunityConfiguration.MaxEventsPerMenu - 1) / CommunityConfiguration.MaxEventsPerMenu;
 
-            EmbedBuilder[] Pages = new EmbedBuilder[ExpectedPages];
-            IUser Author = DiscordShardedClient.GetUser(Events.First().ProposerID);
+            EmbedBuilder[] pages = new EmbedBuilder[expectedPages];
+            IUser author = DiscordShardedClient.GetUser(events.First().ProposerID);
 
-            int Page = 1;
-            int Count = CommunityConfiguration.MaxEventsPerMenu;
-            foreach (CommunityEvent e in Events)
+            int page = 1;
+            int count = CommunityConfiguration.MaxEventsPerMenu;
+
+            foreach (CommunityEvent e in events)
             {
-                if (++Count > CommunityConfiguration.MaxEventsPerMenu)
+                if (++count > CommunityConfiguration.MaxEventsPerMenu)
                 {
-                    Pages[Page - 1] = BuildEmbed(EmojiEnum.Sign)
-                        .WithAuthor(Author)
+                    pages[page - 1] = BuildEmbed(EmojiEnum.Sign)
+                        .WithAuthor(author)
                         .WithTitle($"Events");
-                    Count = 1;
+                    count = 1;
                 }
 
-                Pages[Page - 2].AddField(GenerateEventField(e));
+                pages[page - 2].AddField(GenerateEventField(e));
             }
 
-            return Pages.ToArray();
+            return pages.ToArray();
         }
 
         /// <summary>
         /// Creates a standardized field to display an event in an embed.
         /// </summary>
-        /// <param name="Event">The event to take the field parameters from.</param>
+        /// <param name="cEvent">The event to take the field parameters from.</param>
         /// <returns>An EmbedFieldBuilder which can be used as an argument for <c>EmbedBuilder.AddField(FieldEmbedBuilder)</c>.</returns>
 
-        public EmbedFieldBuilder GenerateEventField(CommunityEvent Event)
+        public EmbedFieldBuilder GenerateEventField(CommunityEvent cEvent)
         {
-            DateTimeOffset Release = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
-            DateTimeOffset ProposeTime = DateTimeOffset.FromUnixTimeSeconds(Event.DateTimeProposed).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
+            DateTimeOffset release = DateTimeOffset.FromUnixTimeSeconds(cEvent.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
+            DateTimeOffset proposeTime = DateTimeOffset.FromUnixTimeSeconds(cEvent.DateTimeProposed).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
 
-            string TimeInfo = Event.Status switch
+            string timeInfo = cEvent.Status switch
             {
-                EventStatus.Expired => $"**Proposed:** {ProposeTime:G} \n**Expired:** {Release:G}",
-                EventStatus.Pending => $"**Proposed:** {ProposeTime:G} \n**Programmed for:** {Release:G}",
-                EventStatus.Approved or EventStatus.Released => $"Release: {Release:G}",
-                EventStatus.Removed or EventStatus.Denied or _ => $"**Proposed:** {ProposeTime:G}"
+                EventStatus.Expired => $"**Proposed:** {proposeTime:G} \n**Expired:** {release:G}",
+                EventStatus.Pending => $"**Proposed:** {proposeTime:G} \n**Programmed for:** {release:G}",
+                EventStatus.Approved or EventStatus.Released => $"Release: {release:G}",
+                EventStatus.Removed or EventStatus.Denied or _ => $"**Proposed:** {proposeTime:G}"
             };
 
             return new EmbedFieldBuilder()
-                .WithName($"Event #{Event.ID} [**{Event.Status.ToString().ToUpper()}**]:")
-                .WithValue($"{(Event.Description.Length > 256 ? Event.Description[..256] + "..." : Event.Description)}\n" +
-                    TimeInfo);
+                .WithName($"Event #{cEvent.ID} [**{cEvent.Status.ToString().ToUpper()}**]:")
+                .WithValue($"{(cEvent.Description.Length > 256 ? cEvent.Description[..256] + "..." : cEvent.Description)}\n" +
+                    timeInfo);
         }
 
     }

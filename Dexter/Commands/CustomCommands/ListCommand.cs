@@ -3,12 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Databases.CustomCommands;
 using Dexter.Enums;
-using Dexter.Extensions;
 using Discord.Commands;
-using System.Text;
 using Discord;
 using Humanizer;
-using System;
 
 namespace Dexter.Commands
 {

@@ -7,7 +7,7 @@ namespace Dexter.Databases.UserRestrictions
     /// </summary>
 
     [Flags]
-    public enum Restriction : ulong
+    public enum Restriction
     {
         /// <summary>
         /// Represents the null restriction (default)

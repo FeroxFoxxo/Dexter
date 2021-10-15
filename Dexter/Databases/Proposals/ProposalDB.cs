@@ -34,27 +34,27 @@ namespace Dexter.Databases.Proposals
         /// <summary>
         /// The Get Proposal By Name Or ID method gets a proposal both from either its token, staff message ID or message ID.
         /// </summary>
-        /// <param name="Tracker">The tracked variable of the proposal you would like to find.</param>
+        /// <param name="tracker">The tracked variable of the proposal you would like to find.</param>
         /// <returns>A proposal object pertaining to the proposal that has been returned on the tracked token.</returns>
 
-        public Proposal GetProposalByNameOrID(string Tracker)
+        public Proposal GetProposalByNameOrID(string tracker)
         {
-            Proposal TryTracked = Proposals.Find(Tracker);
+            Proposal tryTracked = Proposals.Find(tracker);
 
-            if (TryTracked != null)
-                return TryTracked;
+            if (tryTracked != null)
+                return tryTracked;
 
-            if (ulong.TryParse(Tracker, out ulong TrackerASULONG))
+            if (ulong.TryParse(tracker, out ulong trackerAsULONG))
             {
-                Proposal TryMessageID = Proposals.AsQueryable().Where(Proposal => Proposal.MessageID == TrackerASULONG).FirstOrDefault();
+                Proposal tryMessageID = Proposals.AsQueryable().Where(Proposal => Proposal.MessageID == trackerAsULONG).FirstOrDefault();
 
-                if (TryMessageID != null)
-                    return TryMessageID;
+                if (tryMessageID != null)
+                    return tryMessageID;
 
-                Suggestion Suggestion = Suggestions.AsQueryable().Where(Suggestion => Suggestion.StaffMessageID == TrackerASULONG).FirstOrDefault();
+                Suggestion suggestion = Suggestions.AsQueryable().Where(Suggestion => Suggestion.StaffMessageID == trackerAsULONG).FirstOrDefault();
 
-                if (Suggestion != null)
-                    return Proposals.Find(Suggestion.Tracker);
+                if (suggestion != null)
+                    return Proposals.Find(suggestion.Tracker);
             }
 
             return null;

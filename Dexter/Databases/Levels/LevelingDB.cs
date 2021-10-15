@@ -47,6 +47,7 @@ namespace Dexter.Databases.Levels
         /// The data structure containing all instances of users on Text XP cooldowns.
         /// </summary>
 
+        [NotMapped]
         public HashSet<ulong> onTextCooldowns = new();
 
         /// <summary>

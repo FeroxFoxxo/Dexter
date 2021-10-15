@@ -108,7 +108,7 @@ namespace Dexter.Services
                     }
             }
 
-            LevelingDB.onTextCooldowns = new();
+            LevelingDB.onTextCooldowns.RemoveWhere(e => true);
             LevelingDB.SaveChanges();
         }
 

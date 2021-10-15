@@ -78,14 +78,14 @@ namespace Dexter.Commands
             LevelPreferences settings;
             try
             {
-                ul = LevelingDB.GetOrCreateLevelData(Context.User.Id, out settings);
+                ul = LevelingDB.GetOrCreateLevelData(user.Id, out settings);
             }
             catch (Exception e)
             {
                 await Task.Delay(500);
                 try
                 {
-                    ul = LevelingDB.GetOrCreateLevelData(Context.User.Id, out settings);
+                    ul = LevelingDB.GetOrCreateLevelData(user.Id, out settings);
                 }
                 catch
                 {

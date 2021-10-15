@@ -101,7 +101,7 @@ namespace Dexter.Services
         /// <param name="result">The result specifies the outcome of the attempted run of the command - whether it was successful or not and the error it may have run in to.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task SendCommandError(Optional<CommandInfo> commandInfo, ICommandContext commandContext, IResult result)
+        public async Task SendCommandError(Optional<CommandInfo> commandInfo, ICommandContext commandContext, Discord.Commands.IResult result)
         {
             if (result.IsSuccess)
                 return;

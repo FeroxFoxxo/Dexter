@@ -12,12 +12,12 @@ namespace Dexter.Abstractions
         /// <summary>
         /// The object held in this instance.
         /// </summary>
-        public T obj;
+        public T Obj;
 
         /// <summary>
         /// The weight attached to this object.
         /// </summary>
-        public double weight;
+        public double Weight;
 
         /// <summary>
         /// Creates a new WeightedObject given a base object and its weight.
@@ -27,8 +27,8 @@ namespace Dexter.Abstractions
 
         public WeightedObject(T obj = default, double weight = 0)
         {
-            this.obj = obj;
-            this.weight = weight;
+            Obj = obj;
+            Weight = weight;
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Dexter.Abstractions
 
         public static void SortByWeightInPlace(List<WeightedObject<T>> objs, bool descending = false)
         {
-            objs.Sort((a, b) => (a.weight < b.weight ^ descending) ? -1 : 1);
+            objs.Sort((a, b) => (a.Weight < b.Weight ^ descending) ? -1 : 1);
         }
     }
 }

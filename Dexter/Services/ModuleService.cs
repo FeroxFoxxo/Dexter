@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Abstractions;
-using Dexter.Attributes.Classes;
 using Dexter.Databases.Configurations;
 using Dexter.Extensions;
 using Discord.Commands;

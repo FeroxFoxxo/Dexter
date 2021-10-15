@@ -20,28 +20,28 @@ namespace Dexter.Extensions
         /// <summary>
         /// The GetPermissionLevel returns the highest permission the user has access to for commands.
         /// </summary>
-        /// <param name="User">The User of which you want to get the permission level of.</param>
-        /// <param name="DiscordShardedClient">The instance of the DiscordSocketUser which is used to get the main guild.</param>
-        /// <param name="BotConfiguration">The instance of the bot configuration which is used to get the role ID for roles.</param>
+        /// <param name="user">The User of which you want to get the permission level of.</param>
+        /// <param name="client">The instance of the DiscordSocketUser which is used to get the main guild.</param>
+        /// <param name="config">The instance of the bot configuration which is used to get the role ID for roles.</param>
         /// <returns>What permission level the user has, in the form from the PermissionLevel enum.</returns>
 
-        public static PermissionLevel GetPermissionLevel(this IUser User, DiscordShardedClient DiscordShardedClient, BotConfiguration BotConfiguration)
+        public static PermissionLevel GetPermissionLevel(this IUser user, DiscordShardedClient client, BotConfiguration config)
         {
-            IGuildUser GuildUser = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(User.Id);
+            IGuildUser gUser = client.GetGuild(config.GuildID).GetUser(user.Id);
 
-            if (GuildUser == null)
+            if (gUser == null)
                 return PermissionLevel.Default;
-            else if (GuildUser.RoleIds.Contains(BotConfiguration.AdministratorRoleID))
+            else if (gUser.RoleIds.Contains(config.AdministratorRoleID))
                 return PermissionLevel.Administrator;
-            else if (GuildUser.RoleIds.Contains(BotConfiguration.DeveloperRoleID))
+            else if (gUser.RoleIds.Contains(config.DeveloperRoleID))
                 return PermissionLevel.Developer;
-            else if (GuildUser.RoleIds.Contains(BotConfiguration.ModeratorRoleID))
+            else if (gUser.RoleIds.Contains(config.ModeratorRoleID))
                 return PermissionLevel.Moderator;
-            else if (GuildUser.RoleIds.Contains(BotConfiguration.GreetFurRoleID))
+            else if (gUser.RoleIds.Contains(config.GreetFurRoleID))
                 return PermissionLevel.GreetFur;
-            else if (GuildUser.RoleIds.Contains(BotConfiguration.UnifursalRoleID))
+            else if (gUser.RoleIds.Contains(config.UnifursalRoleID))
                 return PermissionLevel.Unifursal;
-            else if (GuildUser.RoleIds.Contains(BotConfiguration.DJRoleID))
+            else if (gUser.RoleIds.Contains(config.DJRoleID))
                 return PermissionLevel.DJ;
             else
                 return PermissionLevel.Default;
@@ -71,24 +71,24 @@ namespace Dexter.Extensions
         /// The GetUserInformation method returns a string of the users username, followed by the discriminator, the mention and the ID.
         /// It is used as a standardized way throughout the bot to display information on a user.
         /// </summary>
-        /// <param name="User">The user of which you want to create the standardized string of the user's information of.</param>
+        /// <param name="user">The user of which you want to create the standardized string of the user's information of.</param>
         /// <returns>A string which contains the user's username, discriminator, mention and ID.</returns>
 
-        public static string GetUserInformation(this IUser User)
+        public static string GetUserInformation(this IUser user)
         {
-            return $"{User.Username}#{User.Discriminator} ({User.Mention}) ({User.Id})";
+            return $"{user.Username}#{user.Discriminator} ({user.Mention}) ({user.Id})";
         }
 
         /// <summary>
         /// Returns the URL for a User's avatar, or the URL of the user's Default Discord avatar (Discord logo with a set background color) if they're using a default avatar.
         /// </summary>
-        /// <param name="User">Target user whose avatar is being obtained.</param>
-        /// <param name="DefaultSize">The size of the image to return in. This can be any power of 2 in the range [16, 2048].</param>
+        /// <param name="user">Target user whose avatar is being obtained.</param>
+        /// <param name="size">The size of the image to return in. This can be any power of 2 in the range [16, 2048].</param>
         /// <returns>A string holding the URL of the target user's avatar.</returns>
 
-        public static string GetTrueAvatarUrl(this IUser User, ushort DefaultSize = 128)
+        public static string GetTrueAvatarUrl(this IUser user, ushort size = 128)
         {
-            return string.IsNullOrEmpty(User.GetAvatarUrl(size: DefaultSize)) ? User.GetDefaultAvatarUrl() : User.GetAvatarUrl(size: DefaultSize);
+            return string.IsNullOrEmpty(user.GetAvatarUrl(size: size)) ? user.GetDefaultAvatarUrl() : user.GetAvatarUrl(size: size);
         }
 
         public static async Task<bool> SafeJoinAsync(this LavaNode lavaNode, SocketUser user, ISocketMessageChannel channel)

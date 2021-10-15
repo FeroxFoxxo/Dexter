@@ -1,20 +1,20 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Dexter.Configurations;
 using Discord;
 using Discord.WebSocket;
+using Humanizer;
+using Humanizer.Localisation;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Net.Http;
-using System.Diagnostics;
-using System.Collections.Generic;
-using Humanizer.Localisation;
-using Humanizer;
-using Microsoft.Extensions.Logging;
-using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Dexter.Extensions
 {
@@ -32,31 +32,31 @@ namespace Dexter.Extensions
         /// <summary>
         /// The Prettify method removes all the characters before the name of the class and only selects characters from A-Z.
         /// </summary>
-        /// <param name="Name">The string you wish to run through the REGEX expression.</param>
+        /// <param name="name">The string you wish to run through the REGEX expression.</param>
         /// <returns>A sanitised string with the characters before the name of the class removed.</returns>
 
-        public static string Prettify(this string Name) => Regex.Replace(Name, @"(?<!^)(?=[A-Z])", " ");
+        public static string Prettify(this string name) => Regex.Replace(name, @"(?<!^)(?=[A-Z])", " ");
 
         /// <summary>
         /// The Sanitize method removes the "Commands" string from the name of the class.
         /// </summary>
-        /// <param name="Name">The string you wish to run through the replace method.</param>
+        /// <param name="name">The string you wish to run through the replace method.</param>
         /// <returns>The name of a module with the "Commands" string removed.</returns>
 
-        public static string Sanitize(this string Name) => Name.Replace("Commands", string.Empty);
+        public static string Sanitize(this string name) => name.Replace("Commands", string.Empty);
 
         /// <summary>
         /// The Sanitize Markdown method removes any sensitive characters that may otherwise change the created embed.
         /// It does this by looping through and replacing any sensitive characters that may break the embed.
         /// </summary>
-        /// <param name="Text">The string you wish to be run through the command.</param>
+        /// <param name="text">The string you wish to be run through the command.</param>
         /// <returns>The text which has been sanitized and has had the sensitive characters removed.</returns>
 
-        public static string SanitizeMarkdown(this string Text)
+        public static string SanitizeMarkdown(this string text)
         {
             foreach (string Unsafe in SensitiveCharacters)
-                Text = Text.Replace(Unsafe, $"\\{Unsafe}");
-            return Text;
+                text = text.Replace(Unsafe, $"\\{Unsafe}");
+            return text;
         }
 
         public static string HumanizeTimeSpan(this TimeSpan t)
@@ -81,17 +81,17 @@ namespace Dexter.Extensions
         /// <summary>
         /// Gets the class of the last method that had been called.
         /// </summary>
-        /// <param name="SearchHeight">The height backwards that you would like to see the call come from.</param>
+        /// <param name="searchHeight">The height backwards that you would like to see the call come from.</param>
         /// <returns>The last called class + method</returns>
 
-        public static KeyValuePair<string, string> GetLastMethodCalled(int SearchHeight)
+        public static KeyValuePair<string, string> GetLastMethodCalled(int searchHeight)
         {
-            SearchHeight += 1;
+            searchHeight += 1;
 
-            Type mBase = new StackTrace().GetFrame(SearchHeight).GetMethod().DeclaringType;
+            Type mBase = new StackTrace().GetFrame(searchHeight).GetMethod().DeclaringType;
 
             if (mBase.Assembly != Assembly.GetExecutingAssembly() || mBase.Namespace == typeof(StringExtensions).Namespace)
-                return GetLastMethodCalled(SearchHeight + 1);
+                return GetLastMethodCalled(searchHeight + 1);
 
             string name;
 
@@ -113,47 +113,47 @@ namespace Dexter.Extensions
         /// <summary>
         /// Obtains a Proxied URL from a given Image URL.
         /// </summary>
-        /// <param name="ImageURL">The URL of the target image.</param>
-        /// <param name="ImageName">The Name to give the image once downloaded.</param>
-        /// <param name="DiscordShardedClient">A Discord Socket Client service to parse the storage channel.</param>
-        /// <param name="ProposalConfiguration">Configuration holding the storage channel ID.</param>
+        /// <param name="imageURL">The URL of the target image.</param>
+        /// <param name="imageName">The Name to give the image once downloaded.</param>
+        /// <param name="client">A Discord Socket Client service to parse the storage channel.</param>
+        /// <param name="config">Configuration holding the storage channel ID.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public static async Task<string> GetProxiedImage(this string ImageURL, string ImageName, DiscordShardedClient DiscordShardedClient, ProposalConfiguration ProposalConfiguration)
+        public static async Task<string> GetProxiedImage(this string imageURL, string imageName, DiscordShardedClient client, ProposalConfiguration config)
         {
-            string ImageCacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
+            string imageCacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
 
-            if (!Directory.Exists(ImageCacheDir))
-                Directory.CreateDirectory(ImageCacheDir);
+            if (!Directory.Exists(imageCacheDir))
+                Directory.CreateDirectory(imageCacheDir);
 
-            string FilePath = Path.Combine(ImageCacheDir, $"{ImageName}{Path.GetExtension(ImageURL.Split("?")[0])}");
+            string filePath = Path.Combine(imageCacheDir, $"{imageName}{Path.GetExtension(imageURL.Split("?")[0])}");
 
-            HttpClient client = new();
+            using HttpClient httpClient = new();
 
-            var response = await client.GetAsync(ImageURL);
+            var response = await httpClient.GetAsync(imageURL);
 
-            using (var fs = new FileStream(FilePath, FileMode.CreateNew)) {
+            using (var fs = new FileStream(filePath, FileMode.CreateNew)) {
                 await response.Content.CopyToAsync(fs);
             }
             
-            ITextChannel Channel = DiscordShardedClient.GetChannel(ProposalConfiguration.StorageChannelID) as ITextChannel;
+            ITextChannel channel = client.GetChannel(config.StorageChannelID) as ITextChannel;
 
-            IUserMessage AttachmentMSG = await Channel.SendFileAsync(FilePath);
+            IUserMessage attachmentMSG = await channel.SendFileAsync(filePath);
 
-            File.Delete(FilePath);
+            File.Delete(filePath);
 
-            return AttachmentMSG.Attachments.FirstOrDefault().ProxyUrl;
+            return attachmentMSG.Attachments.FirstOrDefault().ProxyUrl;
         }
 
         /// <summary>
         /// Hashes an object into an <c>int</c> using the MD5 algorithm.
         /// </summary>
-        /// <param name="HashingString">The object to Hash.</param>
+        /// <param name="hashingString">The object to Hash.</param>
         /// <returns>The hashed value as an Int32.</returns>
 
-        public static int GetHash(this object HashingString)
+        public static int GetHash(this object hashingString)
         {
-            return BitConverter.ToInt32(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(HashingString.ToString())));
+            return BitConverter.ToInt32(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(hashingString.ToString())));
         }
 
     }

@@ -1,7 +1,7 @@
-using System;
-using System.Linq;
 using Dexter.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 
 namespace Dexter.Databases.Games
 {
@@ -26,20 +26,20 @@ namespace Dexter.Databases.Games
         public DbSet<Player> Players { get; set; }
 
         /// <summary>
-        /// Gets a player from their unique user <paramref name="ID"/>.
+        /// Gets a player from their unique user <paramref name="id"/>.
         /// </summary>
-        /// <param name="ID">The ID of the player to fetch.</param>
-        /// <returns>A Player whose ID matches <paramref name="ID"/>, or a new one matching it.</returns>
+        /// <param name="id">The ID of the player to fetch.</param>
+        /// <returns>A Player whose ID matches <paramref name="id"/>, or a new one matching it.</returns>
 
-        public Player GetOrCreatePlayer(ulong ID)
+        public Player GetOrCreatePlayer(ulong id)
         {
 
-            Player p = Players.Find(ID);
+            Player p = Players.Find(id);
             if (p is null)
             {
                 p = new()
                 {
-                    UserID = ID,
+                    UserID = id,
                     Playing = -1,
                     Data = "",
                     Lives = 0,
@@ -62,13 +62,13 @@ namespace Dexter.Databases.Games
         /// <summary>
         /// Gets all the players who are currently active in a given instance.
         /// </summary>
-        /// <param name="InstanceID">The unique ID of the game instance to fetch from.</param>
-        /// <returns>An array of Players who are currently playing the instance identified by <paramref name="InstanceID"/>.</returns>
+        /// <param name="instanceID">The unique ID of the game instance to fetch from.</param>
+        /// <returns>An array of Players who are currently playing the instance identified by <paramref name="instanceID"/>.</returns>
 
-        public Player[] GetPlayersFromInstance(int InstanceID)
+        public Player[] GetPlayersFromInstance(int instanceID)
         {
-            if (InstanceID <= 0) return Array.Empty<Player>();
-            return Players.AsQueryable().Where(p => p.Playing == InstanceID).ToArray();
+            if (instanceID <= 0) return Array.Empty<Player>();
+            return Players.AsQueryable().Where(p => p.Playing == instanceID).ToArray();
         }
     }
 }

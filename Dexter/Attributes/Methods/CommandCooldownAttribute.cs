@@ -34,65 +34,65 @@ namespace Dexter.Attributes.Methods
         /// <summary>
         /// The constructor of the attribute sets the cooldown time of the command.
         /// </summary>
-        /// <param name="CooldownTimer">The Cooldown Timer is the set time it will take until this command is able to be rerun.</param>
+        /// <param name="cooldownTimer">The Cooldown Timer is the set time it will take until this command is able to be rerun.</param>
 
-        public CommandCooldownAttribute(int CooldownTimer)
+        public CommandCooldownAttribute(int cooldownTimer)
         {
-            this.CooldownTimer = CooldownTimer;
+            CooldownTimer = cooldownTimer;
         }
 
         /// <summary>
         /// The CheckPermissionsAsync is an overriden method from its superclass, which checks
         /// to see if a command can be run by a user through the cooldown of the command in the database.
         /// </summary>
-        /// <param name="CommandContext">The Context is used to find the channel that has had the command run in.</param>
-        /// <param name="CommandInfo">The CommandInfo is used to find the name of the command that has been run.</param>
-        /// <param name="ServiceProvider">The ServiceProvider is used to get the database of cooldowns.</param>
+        /// <param name="context">The Context is used to find the channel that has had the command run in.</param>
+        /// <param name="commandInfo">The CommandInfo is used to find the name of the command that has been run.</param>
+        /// <param name="services">The ServiceProvider is used to get the database of cooldowns.</param>
         /// <returns>The result of the checked permission, returning successful if it is able to be run or an error if not.
         /// This error is then thrown to the Command Handler Service to log to the user.</returns>
 
-        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext CommandContext, CommandInfo CommandInfo, IServiceProvider ServiceProvider)
+        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo commandInfo, IServiceProvider services)
         {
-            if (ServiceProvider.GetService<BotConfiguration>() == null)
+            if (services.GetService<BotConfiguration>() == null)
                 return PreconditionResult.FromSuccess();
 
-            if (ServiceProvider.GetRequiredService<BotConfiguration>().BotChannels.Contains(CommandContext.Channel.Id))
+            if (services.GetRequiredService<BotConfiguration>().BotChannels.Contains(context.Channel.Id))
                 return PreconditionResult.FromSuccess();
 
-            CooldownDB CooldownDB = ServiceProvider.GetRequiredService<CooldownDB>();
+            CooldownDB cooldownDB = services.GetRequiredService<CooldownDB>();
 
-            Cooldown Cooldown = CooldownDB.Cooldowns.Find($"{CommandInfo.Name}{CommandContext.Channel.Id}");
+            Cooldown cooldown = cooldownDB.Cooldowns.Find($"{commandInfo.Name}{context.Channel.Id}");
 
-            if (Cooldown != null)
+            if (cooldown != null)
             {
-                if (Cooldown.TimeOfCooldown + CooldownTimer < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                if (cooldown.TimeOfCooldown + CooldownTimer < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
                 {
-                    CooldownDB.Remove(Cooldown);
-                    CooldownDB.SaveChanges();
+                    cooldownDB.Remove(cooldown);
+                    cooldownDB.SaveChanges();
                 }
                 else
                 {
-                    DateTime Time = DateTime.UnixEpoch.AddSeconds(Cooldown.TimeOfCooldown + CooldownTimer);
+                    DateTime time = DateTime.UnixEpoch.AddSeconds(cooldown.TimeOfCooldown + CooldownTimer);
 
-                    await new EmbedBuilder().BuildEmbed(EmojiEnum.Wut, ServiceProvider.GetService<BotConfiguration>(), EmbedCallingType.Command)
-                        .WithAuthor($"Hiya, {CommandContext.User.Username}!")
-                        .WithTitle($"Please wait {Time.Humanize()} until you are able to use this command.")
+                    await new EmbedBuilder().BuildEmbed(EmojiEnum.Wut, services.GetService<BotConfiguration>(), EmbedCallingType.Command)
+                        .WithAuthor($"Hiya, {context.User.Username}!")
+                        .WithTitle($"Please wait {time.Humanize()} until you are able to use this command.")
                         .WithDescription("Thanks for your patience, we really do appreciate it. <3")
-                        .SendEmbed(CommandContext.User, CommandContext.Channel as ITextChannel);
+                        .SendEmbed(context.User, context.Channel as ITextChannel);
 
                     return PreconditionResult.FromError("");
                 }
             }
 
-            CooldownDB.Add(
+            cooldownDB.Add(
                 new Cooldown()
                 {
-                    Token = $"{CommandInfo.Name}{CommandContext.Channel.Id}",
+                    Token = $"{commandInfo.Name}{context.Channel.Id}",
                     TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
                 }
             );
 
-            CooldownDB.SaveChanges();
+            cooldownDB.SaveChanges();
 
             return PreconditionResult.FromSuccess();
         }

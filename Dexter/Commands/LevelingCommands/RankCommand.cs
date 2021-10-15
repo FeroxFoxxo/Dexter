@@ -19,7 +19,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Net.Http;
-using System.Threading;
 
 namespace Dexter.Commands
 {

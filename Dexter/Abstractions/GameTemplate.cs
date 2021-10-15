@@ -39,8 +39,8 @@ namespace Dexter.Abstractions
 
         public GameTemplate (GameInstance game, BotConfiguration botConfiguration, string emptyData)
         {
-            this.Game = game;
-            this.BotConfiguration = botConfiguration;
+            Game = game;
+            BotConfiguration = botConfiguration;
             EmptyData = emptyData;
 
             if (string.IsNullOrWhiteSpace(game.Data)) game.Data = emptyData;

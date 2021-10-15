@@ -18,131 +18,131 @@ namespace Dexter.Databases.UserRestrictions
         public DbSet<UserRestriction> UserRestrictions { get; set; }
 
         /// <summary>
-        /// Gets all restrictions related to a user, or NONE if the <paramref name="UserID"/> is not in the database.
+        /// Gets all restrictions related to a user, or NONE if the <paramref name="userID"/> is not in the database.
         /// </summary>
-        /// <param name="UserID">The ID of the target user to fetch from the database.</param>
+        /// <param name="userID">The ID of the target user to fetch from the database.</param>
         /// <returns>A Restriction object representing all flags for which the user is restricted.</returns>
 
-        public Restriction GetUserRestrictions(ulong UserID)
+        public Restriction GetUserRestrictions(ulong userID)
         {
-            UserRestriction UR = UserRestrictions.Find(UserID);
+            UserRestriction userRestriction = UserRestrictions.Find(userID);
 
-            if (UR == null) return Restriction.None;
+            if (userRestriction == null) return Restriction.None;
 
-            return UR.RestrictionFlags;
+            return userRestriction.RestrictionFlags;
         }
 
         /// <summary>
-        /// Gets all restrictions related to a <paramref name="User"/>, or NONE if the user's ID is not in the database.
+        /// Gets all restrictions related to a <paramref name="user"/>, or NONE if the user's ID is not in the database.
         /// </summary>
-        /// <param name="User">The User to fetch from the database.</param>
+        /// <param name="user">The User to fetch from the database.</param>
         /// <returns>A Restriction object representing all flags for which the user is restricted.</returns>
 
-        public Restriction GetUserRestrictions(Discord.IUser User)
+        public Restriction GetUserRestrictions(Discord.IUser user)
         {
-            return GetUserRestrictions(User.Id);
+            return GetUserRestrictions(user.Id);
         }
 
         /// <summary>
-        /// Checks whether a given <paramref name="UserID"/> which represents a user who has a set of restrictions <paramref name="Restriction"/>.
+        /// Checks whether a given <paramref name="userID"/> which represents a user who has a set of restrictions <paramref name="restriction"/>.
         /// </summary>
         /// <remarks>
-        ///     <para>If <paramref name="MatchAny"/> is <see langword="true"/>, it will return <see langword="true"/> if the user has ANY of the restrictions flagged by <paramref name="Restriction"/>.</para>
-        ///     <para>If <paramref name="MatchAny"/> is <see langword="false"/>, it will only return <see langword="true"/> if the user has ALL flagged restrictions.</para>
+        ///     <para>If <paramref name="matchAny"/> is <see langword="true"/>, it will return <see langword="true"/> if the user has ANY of the restrictions flagged by <paramref name="restriction"/>.</para>
+        ///     <para>If <paramref name="matchAny"/> is <see langword="false"/>, it will only return <see langword="true"/> if the user has ALL flagged restrictions.</para>
         /// </remarks>
-        /// <param name="UserID">The Id of the target user to query the database for.</param>
-        /// <param name="Restriction">The individual or multiple restriction(s) to check for.</param>
-        /// <param name="MatchAny">Dictates the matching mode, if set to <see langword="true"/>, the matching becomes non-strict.</param>
-        /// <returns><see langword="true"/> if the user has all restriction flags in <paramref name="Restriction"/>, otherwise <see langword="false"/>.</returns>
+        /// <param name="userID">The Id of the target user to query the database for.</param>
+        /// <param name="restriction">The individual or multiple restriction(s) to check for.</param>
+        /// <param name="matchAny">Dictates the matching mode, if set to <see langword="true"/>, the matching becomes non-strict.</param>
+        /// <returns><see langword="true"/> if the user has all restriction flags in <paramref name="restriction"/>, otherwise <see langword="false"/>.</returns>
 
-        public bool IsUserRestricted(ulong UserID, Restriction Restriction, bool MatchAny = false)
+        public bool IsUserRestricted(ulong userID, Restriction restriction, bool matchAny = false)
         {
-            if (MatchAny) return (GetUserRestrictions(UserID) & Restriction) != Restriction.None;
-            else return (GetUserRestrictions(UserID) & Restriction) == Restriction;
+            if (matchAny) return (GetUserRestrictions(userID) & restriction) != Restriction.None;
+            else return (GetUserRestrictions(userID) & restriction) == restriction;
         }
 
         /// <summary>
-        /// Checks whether a given <paramref name="User"/> has a set of restrictions <paramref name="Restriction"/>.
+        /// Checks whether a given <paramref name="user"/> has a set of restrictions <paramref name="restriction"/>.
         /// </summary>
-        /// <param name="User">The target user to query the database for.</param>
-        /// <param name="Restriction">The individual or multiple restriction(s) to check for.</param>
-        /// <returns><see langword="true"/> if the <paramref name="User"/> has all restriction flags in <paramref name="Restriction"/>, otherwise <see langword="false"/>.</returns>
+        /// <param name="user">The target user to query the database for.</param>
+        /// <param name="restriction">The individual or multiple restriction(s) to check for.</param>
+        /// <returns><see langword="true"/> if the <paramref name="user"/> has all restriction flags in <paramref name="restriction"/>, otherwise <see langword="false"/>.</returns>
 
-        public bool IsUserRestricted(Discord.IUser User, Restriction Restriction)
+        public bool IsUserRestricted(Discord.IUser user, Restriction restriction)
         {
-            return IsUserRestricted(User.Id, Restriction);
+            return IsUserRestricted(user.Id, restriction);
         }
 
         /// <summary>
-        /// Adds a given <paramref name="Restriction"/> to a user's registry, and creates a new one if none exists for the given user by <paramref name="UserID"/>.
+        /// Adds a given <paramref name="restriction"/> to a user's registry, and creates a new one if none exists for the given user by <paramref name="userID"/>.
         /// </summary>
-        /// <param name="UserID">The ID of the target User.</param>
-        /// <param name="Restriction">The Restriction flags to add to the User.</param>
-        /// <returns><see langword="false"/> if the user already had that <paramref name="Restriction"/>, otherwise <see langword="true"/>.</returns>
+        /// <param name="userID">The ID of the target User.</param>
+        /// <param name="restriction">The Restriction flags to add to the User.</param>
+        /// <returns><see langword="false"/> if the user already had that <paramref name="restriction"/>, otherwise <see langword="true"/>.</returns>
 
-        public bool AddRestriction(ulong UserID, Restriction Restriction)
+        public bool AddRestriction(ulong userID, Restriction restriction)
         {
-            UserRestriction UR = UserRestrictions.Find(UserID);
+            UserRestriction userRestriction = UserRestrictions.Find(userID);
 
-            if (UR == null)
+            if (userRestriction == null)
             {
-                UR = new()
+                userRestriction = new()
                 {
-                    UserID = UserID,
-                    RestrictionFlags = Restriction
+                    UserID = userID,
+                    RestrictionFlags = restriction
                 };
-                UserRestrictions.Add(UR);
+                UserRestrictions.Add(userRestriction);
                 return true;
             }
 
-            if ((UR.RestrictionFlags | Restriction) == UR.RestrictionFlags) return false;
+            if ((userRestriction.RestrictionFlags | restriction) == userRestriction.RestrictionFlags) return false;
 
-            UR.RestrictionFlags |= Restriction;
+            userRestriction.RestrictionFlags |= restriction;
             return true;
         }
 
         /// <summary>
-        /// Adds a given <paramref name="Restriction"/> to a user's registry, and creates a new one if none exists for the given <paramref name="User"/>.
+        /// Adds a given <paramref name="restriction"/> to a user's registry, and creates a new one if none exists for the given <paramref name="user"/>.
         /// </summary>
-        /// <param name="User">The target User.</param>
-        /// <param name="Restriction">The Restriction flags to add to <paramref name="User"/>.</param>
-        /// <returns><see langword="false"/> if the user already had that <paramref name="Restriction"/>, otherwise <see langword="true"/>.</returns>
+        /// <param name="user">The target User.</param>
+        /// <param name="restriction">The Restriction flags to add to <paramref name="user"/>.</param>
+        /// <returns><see langword="false"/> if the user already had that <paramref name="restriction"/>, otherwise <see langword="true"/>.</returns>
 
-        public bool AddRestriction(Discord.IUser User, Restriction Restriction)
+        public bool AddRestriction(Discord.IUser user, Restriction restriction)
         {
-            return AddRestriction(User.Id, Restriction);
+            return AddRestriction(user.Id, restriction);
         }
 
         /// <summary>
-        /// Removes a set of restrictions <paramref name="Restriction"/> from a user given by <paramref name="UserID"/>.
+        /// Removes a set of restrictions <paramref name="restriction"/> from a user given by <paramref name="userID"/>.
         /// </summary>
-        /// <param name="UserID">The target user's unique ID.</param>
-        /// <param name="Restriction">The Restriction flags to remove from User.</param>
+        /// <param name="userID">The target user's unique ID.</param>
+        /// <param name="restriction">The Restriction flags to remove from User.</param>
         /// <returns><see langword="true"/> if the restriction was removed, <see langword="false"/> if the user wasn't in the database or didn't have that restriction.</returns>
 
-        public bool RemoveRestriction(ulong UserID, Restriction Restriction)
+        public bool RemoveRestriction(ulong userID, Restriction restriction)
         {
-            UserRestriction UR = UserRestrictions.Find(UserID);
+            UserRestriction userRestriction = UserRestrictions.Find(userID);
 
-            if (UR == null) return false;
+            if (userRestriction == null) return false;
 
-            if ((UR.RestrictionFlags & Restriction) == Restriction.None) return false;
+            if ((userRestriction.RestrictionFlags & restriction) == Restriction.None) return false;
 
-            UR.RestrictionFlags &= ~Restriction;
+            userRestriction.RestrictionFlags &= ~restriction;
 
             return true;
         }
 
         /// <summary>
-        /// Removes a set of restrictions <paramref name="Restriction"/> from a target <paramref name="User"/>.
+        /// Removes a set of restrictions <paramref name="restriction"/> from a target <paramref name="user"/>.
         /// </summary>
-        /// <param name="User">The target user.</param>
-        /// <param name="Restriction">The Restriction flags to remove from <paramref name="User"/>.</param>
+        /// <param name="user">The target user.</param>
+        /// <param name="restriction">The Restriction flags to remove from <paramref name="user"/>.</param>
         /// <returns><see langword="true"/> if the restriction was removed, <see langword="false"/> if the user wasn't in the database or didn't have that restriction.</returns>
 
-        public bool RemoveRestriction(Discord.IUser User, Restriction Restriction)
+        public bool RemoveRestriction(Discord.IUser user, Restriction restriction)
         {
-            return RemoveRestriction(User.Id, Restriction);
+            return RemoveRestriction(user.Id, restriction);
         }
 
     }

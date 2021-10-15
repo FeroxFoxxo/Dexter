@@ -168,7 +168,7 @@ namespace Dexter.Extensions
         {
             return builder.WithTitle("🎵 Now playing").WithDescription(
                                 $"Title: **{track.Title}**\n" +
-                                $"Duration: **{track.Duration.HumanizeTimeSpan()}**");
+                                $"Duration: **[{track.Position.HumanizeTimeSpan()}/{track.Duration.HumanizeTimeSpan()}]**");
         }
 
         public static EmbedBuilder GetQueuedTrack(this EmbedBuilder builder, LavaTrack track, int queueSize)
@@ -185,19 +185,6 @@ namespace Dexter.Extensions
 
             if (player.Track != null)
             {
-                string trackDurCur, trackDurTotal;
-
-                if (player.Track.Duration.TotalMinutes > 60)
-                {
-                    trackDurCur = player.Track.Position.ToString("hh\\:mm\\:ss");
-                    trackDurTotal = player.Track.Duration.ToString("hh\\:mm\\:ss");
-                }
-                else
-                {
-                    trackDurCur = player.Track.Position.ToString("mm\\:ss");
-                    trackDurTotal = player.Track.Duration.ToString("mm\\:ss");
-                }
-
                 var timeRem = player.Track.Duration - player.Track.Position +
                     TimeSpan.FromSeconds(player.Vueue.Select(x => x.Duration.TotalSeconds).Sum());
 
@@ -211,7 +198,7 @@ namespace Dexter.Extensions
                     .First()
                     .WithDescription($"**Now {(loopType == LoopType.Off ? "Playing" : "Looping")}:**\n" +
                         $"{(loopType == LoopType.Single ? "Looped " : "")}Title: **{player.Track.Title}** " +
-                        $"[{trackDurCur} / {trackDurTotal}]\n\n" +
+                        $"[{player.Track.Position.HumanizeTimeSpan()} / {player.Track.Duration.HumanizeTimeSpan()}]\n\n" +
                         $"**Duration Left:** \n" +
                         $"{player.Vueue.Count + 1} Tracks [{timeRem.HumanizeTimeSpan()}]\n\n" +
                         "Up Next ⬇️" + embeds.First().Description);
@@ -222,46 +209,46 @@ namespace Dexter.Extensions
 
         public static EmbedBuilder[] GetQueueFromTrackArray(this LavaTrack[] tracks, string title, BotConfiguration botConfiguration)
         {
-            EmbedBuilder CurrentBuilder = new EmbedBuilder()
+            EmbedBuilder currentBuilder = new EmbedBuilder()
                 .BuildEmbed(EmojiEnum.Unknown, botConfiguration, EmbedCallingType.Command).WithTitle(title);
 
-            List<EmbedBuilder> Embeds = new();
+            List<EmbedBuilder> embeds = new();
 
             if (tracks.Length == 0)
             {
-                CurrentBuilder.WithDescription(CurrentBuilder.Description += "\n\n*No tracks enqueued.*");
+                currentBuilder.WithDescription(currentBuilder.Description += "\n\n*No tracks enqueued.*");
             }
 
-            for (int Index = 0; Index < tracks.Length; Index++)
+            for (int index = 0; index < tracks.Length; index++)
             {
-                EmbedFieldBuilder Field = new EmbedFieldBuilder()
-                    .WithName($"#{Index + 1}. **{tracks[Index].Title}**")
-                    .WithValue($"{tracks[Index].Author} ({tracks[Index].Duration:mm\\:ss})");
+                EmbedFieldBuilder field = new EmbedFieldBuilder()
+                    .WithName($"#{index + 1}. **{tracks[index].Title}**")
+                    .WithValue($"{tracks[index].Author} ({tracks[index].Duration:mm\\:ss})");
 
-                if (Index % 5 == 0 && Index != 0)
+                if (index % 5 == 0 && index != 0)
                 {
-                    Embeds.Add(CurrentBuilder);
-                    CurrentBuilder = new EmbedBuilder()
-                        .BuildEmbed(EmojiEnum.Unknown, botConfiguration, EmbedCallingType.Command).AddField(Field);
+                    embeds.Add(currentBuilder);
+                    currentBuilder = new EmbedBuilder()
+                        .BuildEmbed(EmojiEnum.Unknown, botConfiguration, EmbedCallingType.Command).AddField(field);
                 }
                 else
                 {
                     try
                     {
-                        CurrentBuilder.AddField(Field);
+                        currentBuilder.AddField(field);
                     }
                     catch (Exception)
                     {
-                        Embeds.Add(CurrentBuilder);
-                        CurrentBuilder = new EmbedBuilder()
-                            .BuildEmbed(EmojiEnum.Unknown, botConfiguration, EmbedCallingType.Command).AddField(Field);
+                        embeds.Add(currentBuilder);
+                        currentBuilder = new EmbedBuilder()
+                            .BuildEmbed(EmojiEnum.Unknown, botConfiguration, EmbedCallingType.Command).AddField(field);
                     }
                 }
             }
 
-            Embeds.Add(CurrentBuilder);
+            embeds.Add(currentBuilder);
 
-            return Embeds.ToArray();
+            return embeds.ToArray();
         }
 
         /// <summary>

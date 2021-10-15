@@ -41,7 +41,9 @@ namespace Dexter.Commands
                 return;
             }
 
-            if (!TimeSpan.TryParse(seekPosition, out TimeSpan result))
+            TimeSpan? result = null;
+
+            if (seekPosition.Contains(':'))
             {
 
                 string[] times = Array.Empty<string>();
@@ -77,19 +79,33 @@ namespace Dexter.Commands
                 }
 
                 result = new(h, m, s);
+            }
 
-                if (player.Track.Duration < result)
+            if (!result.HasValue)
+                if (TimeSpan.TryParse(seekPosition, out TimeSpan newTime))
+                    result = newTime;
+                else
                 {
                     await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Could not seek song!")
-                        .WithDescription("Value must not be greater than current track duration")
+                        .WithDescription("The time you chose to seek could not be converted to a TimeSpan.")
                         .SendEmbed(Context.Channel);
 
                     return;
                 }
+
+
+            if (player.Track.Duration < result)
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Could not seek song!")
+                    .WithDescription("Value must not be greater than current track duration")
+                    .SendEmbed(Context.Channel);
+
+                return;
             }
 
-            await player.SeekAsync(result);
+            await player.SeekAsync(result.Value);
 
             await BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"Seeked current song to {result.HumanizeTimeSpan()}.")

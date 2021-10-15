@@ -108,8 +108,8 @@ namespace Dexter.Commands
             await player.SeekAsync(result.Value);
 
             await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle($"Seeked current song to {result.HumanizeTimeSpan()}.")
-                    .WithDescription($"Seeked applied {player.Track} from {player.Track.Position.HumanizeTimeSpan()} to {result.HumanizeTimeSpan()}~!")
+                    .WithTitle($"Seeked current song to {result.Value.HumanizeTimeSpan()}.")
+                    .WithDescription($"Seeked applied {player.Track} from {player.Track.Position.HumanizeTimeSpan()} to {result.Value.HumanizeTimeSpan()}~!")
                     .SendEmbed(Context.Channel);
         }
 

@@ -256,6 +256,10 @@ namespace Dexter.Events
             ProposalDB.Proposals.Add(Proposal);
             ProposalDB.Suggestions.Add(Suggested);
 
+            await ProposalDB.SaveChangesAsync();
+
+            await RestrictionsDB.SaveChangesAsync();
+
             // Delete the message sent by the user.
             await ReceivedMessage.DeleteAsync();
 
@@ -267,10 +271,6 @@ namespace Dexter.Events
                 GuildEmote Emote = await Guild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
                 await Embed.AddReactionAsync(Emote);
             }
-
-            await ProposalDB.SaveChangesAsync();
-
-            await RestrictionsDB.SaveChangesAsync();
         }
 
         /// <summary>

@@ -91,6 +91,8 @@ namespace Dexter.Events
                 Logger.LogInformation($"Running Leveling event with onTextCooldowns = {{{string.Join(", ", OnTextCooldowns)}}}");
             OnTextCooldowns.RemoveWhere(e => true);
 
+            List<string> vcLeveledUsers = new();
+
             using var scope = ServiceProvider.CreateScope();
 
             using var RestrictionsDB = scope.ServiceProvider.GetRequiredService<RestrictionsDB>();
@@ -114,6 +116,7 @@ namespace Dexter.Events
                     if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsSuppressed 
                         || uservc.IsBot || RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)))
                     {
+                        if (Debugging) vcLeveledUsers.Add(uservc.Username);
                         await LevelingDB.IncrementUserXP(
                             Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven + 1),
                             false,
@@ -124,10 +127,9 @@ namespace Dexter.Events
                     }
             }
 
-            if (Debugging) Logger.LogInformation("Saving Changes");
+            if (Debugging) Logger.LogInformation($"Saving Changes; granted VCXP to users {string.Join(", ", vcLeveledUsers)}.");
 
-            await RestrictionsDB.SaveChangesAsync();
-            await LevelingDB.SaveChangesAsync();
+            LevelingDB.SaveChanges();
         }
 
         /// <summary>

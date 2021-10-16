@@ -11,6 +11,7 @@ using Discord;
 using Discord.WebSocket;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Dexter.Events
 {
@@ -33,6 +34,12 @@ namespace Dexter.Events
         /// </summary>
 
         public Random Random { get; set; }
+
+        /// <summary>
+        /// Debugging utility.
+        /// </summary>
+
+        public ILogger<Leveling> Logger { get; set; }
 
         /// <summary>
         /// The data structure containing all instances of users on Text XP cooldowns.
@@ -81,7 +88,7 @@ namespace Dexter.Events
         public async Task AddLevels(Dictionary<string, string> parameters)
         {
             if (Debugging)
-                Console.Out.WriteLine($"Running Leveling event with onTextCooldowns = {{{string.Join(", ", OnTextCooldowns)}}}");
+                Logger.LogInformation($"Running Leveling event with onTextCooldowns = {{{string.Join(", ", OnTextCooldowns)}}}");
             OnTextCooldowns.RemoveWhere(e => true);
 
             using var scope = ServiceProvider.CreateScope();
@@ -117,7 +124,7 @@ namespace Dexter.Events
                     }
             }
 
-            if (Debugging) Console.Out.WriteLine("Saving Changes");
+            if (Debugging) Logger.LogInformation("Saving Changes");
 
             await RestrictionsDB.SaveChangesAsync();
             await LevelingDB.SaveChangesAsync();

@@ -77,9 +77,6 @@ namespace Dexter.Commands
             {
                 IGuild Guild = DiscordShardedClient.GetGuild(FunConfiguration.HeadpatStorageGuild);
 
-                Console.WriteLine(NameOfUser.Length);
-                Console.WriteLine(EmoteImage);
-
                 GuildEmote PrevEmote = Guild.Emotes.Where(Emote => Emote.Name == NameOfUser).FirstOrDefault();
 
                 if (PrevEmote != null)

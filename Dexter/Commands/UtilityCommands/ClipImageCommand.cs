@@ -95,8 +95,6 @@ namespace Dexter.Commands
                     break;
             }
 
-            Console.Out.WriteLine(targetRatio);
-
             bool toCircle = false;
             bool scaled = true;
             float shift = 0;

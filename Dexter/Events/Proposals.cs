@@ -637,10 +637,9 @@ namespace Dexter.Events
             if (SocketChannel is SocketTextChannel TextChannel)
             {
                 IMessage ProposalMessage = await TextChannel.GetMessageAsync(MessageID);
-                Console.Out.WriteLine($"Modifying the status of proposal: {Proposal.Tracker}, linked message is {ProposalMessage}.");
+
                 if (ProposalMessage is IUserMessage ProposalMSG)
                 {
-                    Console.Out.WriteLine($"{ProposalMessage} is of type \"IUserMessage\"");
                     await ProposalMessage.RemoveAllReactionsAsync();
 
                     try

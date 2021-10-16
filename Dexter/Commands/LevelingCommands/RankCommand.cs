@@ -475,7 +475,6 @@ namespace Dexter.Commands
                 {
                     if (bitmap.GetPixel(i, j).A != 0)
                     {
-                        Console.WriteLine($"Found pixel ({i},{j}) with color {bitmap.GetPixel(i, j).ToArgb():X} (dimensions: {bitmap.Width}x{bitmap.Height})");
                         location = new Point(i, j);
                         return false;
                     }

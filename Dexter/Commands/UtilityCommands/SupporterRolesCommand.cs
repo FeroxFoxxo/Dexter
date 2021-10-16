@@ -126,7 +126,6 @@ namespace Dexter.Commands
             try
             {
                 await user.AddRoleAsync(toAdd, new RequestOptions { RetryMode = RetryMode.AlwaysRetry });
-                Console.Out.WriteLine($"Adding {toAdd}");
             }
             catch
             {

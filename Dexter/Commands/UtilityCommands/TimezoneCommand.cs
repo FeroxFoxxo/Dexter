@@ -252,8 +252,6 @@ namespace Dexter.Commands
                     ulong userID = ulong.Parse(idStr);
                     UserProfile profile = ProfilesDB.Profiles.Find(userID);
 
-                    Console.Out.WriteLine($"Before: {profile} | {profile.UserID}");
-
                     if (profile is null)
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)

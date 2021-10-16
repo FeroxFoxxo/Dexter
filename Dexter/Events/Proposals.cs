@@ -569,7 +569,7 @@ namespace Dexter.Events
                     Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
 
                     if (!string.IsNullOrEmpty(Suggestion.TimerToken))
-                        TimerService.RemoveTimer(Suggestion.TimerToken);
+                        await TimerService.RemoveTimer(Suggestion.TimerToken);
 
                     await UpdateSpecificProposal(Proposal, ProposalConfiguration.SuggestionsChannel, Proposal.MessageID);
                     await UpdateSpecificProposal(Proposal, ProposalConfiguration.StaffSuggestionsChannel, Suggestion.StaffMessageID);

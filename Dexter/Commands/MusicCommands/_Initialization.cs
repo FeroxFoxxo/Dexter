@@ -3,7 +3,6 @@ using Dexter.Events;
 using Google.Apis.YouTube.v3;
 using Microsoft.Extensions.Logging;
 using SpotifyAPI.Web;
-using Victoria.Node;
 
 namespace Dexter.Commands
 {

@@ -4,7 +4,6 @@ using Dexter.Extensions;
 using Discord.Commands;
 using System.Linq;
 using System.Threading.Tasks;
-using Victoria.Node;
 
 namespace Dexter.Commands
 {

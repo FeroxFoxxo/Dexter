@@ -40,52 +40,6 @@ namespace Dexter.Databases.GreetFur
         }
 
         /// <summary>
-        /// Gets all recent activity starting from a given <paramref name="day"/>.
-        /// </summary>
-        /// <param name="day">The day to start pulling information from.</param>
-        /// <param name="length">The length of the period to consider starting from <paramref name="day"/></param>
-        /// <returns>A <see cref="Dictionary{TKey, TValue}"/> where the key holds all caught user IDs and the values are all their attached records sorted by date.</returns>
-
-        public Dictionary<ulong, List<GreetFurRecord>> GetAllRecentActivity(int day, int length = 14)
-        {
-            List<GreetFurRecord> allEntries = Records.AsQueryable().Where(r => r.Date >= day && r.Date < day + length).ToList();
-
-            Dictionary<ulong, List<GreetFurRecord>> result = new();
-
-            foreach (GreetFurRecord r in allEntries)
-            {
-                if (result.ContainsKey(r.UserId))
-                {
-                    result[r.UserId].Add(r);
-                } 
-                else
-                {
-                    result.Add(r.UserId, new List<GreetFurRecord>() { r });
-                }
-            }
-
-            foreach (List<GreetFurRecord> ls in result.Values)
-            {
-                ls.Sort((a, b) => a.Date.CompareTo(b.Date));
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Gets all logged activity for a given user.
-        /// </summary>
-        /// <param name="greetFurId">The ID of the user to query for.</param>
-        /// <returns>A list (sorted by date) containing all records linked to the given <paramref name="greetFurId"/>.</returns>
-
-        public List<GreetFurRecord> GetAllActivity(ulong greetFurId)
-        {
-            List<GreetFurRecord> result = Records.AsQueryable().Where(r => r.UserId == greetFurId).ToList();
-            result.Sort((a, b) => a.Date.CompareTo(b.Date));
-            return result;
-        }
-
-        /// <summary>
         /// Gets a number of days of activity for a user from a given <paramref name="day"/> up to a given <paramref name="length"/>.
         /// </summary>
         /// <param name="greetFurId">The ID of the target user to query activity for.</param>

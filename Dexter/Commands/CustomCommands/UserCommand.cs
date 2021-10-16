@@ -72,7 +72,7 @@ namespace Dexter.Commands
                 return;
             }
 
-            CustomCommand incompatibleCC = CustomCommandDB.GetCommandByNameOrAlias(name);
+            CustomCommand incompatibleCC = GetCommandByNameOrAlias(CustomCommandDB, name);
             if (incompatibleCC is not null && incompatibleCC.User != Context.User.Id && incompatibleCC.CommandType != UserCommandSource.Unspecified)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
@@ -85,7 +85,7 @@ namespace Dexter.Commands
             StringBuilder description = new();
             description.Append($"User {Context.User.Mention} wants to set their custom {cct} command to {name}; with the following reply: \"{reply}\".");
 
-            CustomCommand prevUC = CustomCommandDB.GetCommandByUser(Context.User.Id, cct);
+            CustomCommand prevUC = GetCommandByUser(Context.User.Id, cct);
             if (prevUC is not null)
             {
                 description.Append($"\nThis would replace the user command {prevUC.CommandName}; with the following reply: \"{prevUC.Reply.TruncateTo(512)}\"");

@@ -8,7 +8,6 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using System.Reflection;
 using System.Net.Http;

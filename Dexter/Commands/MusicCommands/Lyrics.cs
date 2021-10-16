@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Victoria;
-using Victoria.Node;
 using Victoria.Player;
 using Victoria.Responses.Search;
 

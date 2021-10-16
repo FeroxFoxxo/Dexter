@@ -30,7 +30,9 @@ namespace Dexter.Commands
                 user = Context.User;
             }
 
-            List<GreetFurRecord> records = GreetFurDB.GetAllActivity(user.Id);
+            List<GreetFurRecord> records = GreetFurDB.Records.AsQueryable().Where(r => r.UserId == user.Id).ToList();
+
+            records.Sort((a, b) => a.Date.CompareTo(b.Date));
 
             if (records.Count == 0)
             {

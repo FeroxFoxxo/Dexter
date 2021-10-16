@@ -4,11 +4,10 @@ using Dexter.Extensions;
 using Discord.Commands;
 using System;
 using System.Threading.Tasks;
-using Victoria.Node;
 
 namespace Dexter.Commands
 {
-	public partial class MusicCommands
+    public partial class MusicCommands
 	{
 
 		[Command("skip")]

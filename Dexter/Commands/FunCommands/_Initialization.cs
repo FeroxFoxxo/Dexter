@@ -1,6 +1,5 @@
 using Dexter.Abstractions;
 using Dexter.Configurations;
-using Dexter.Databases.FunTopics;
 using Dexter.Databases.Games;
 using Dexter.Databases.UserRestrictions;
 

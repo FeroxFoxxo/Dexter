@@ -10,7 +10,6 @@ using Dexter.Databases.UserRestrictions;
 using Discord;
 using Discord.WebSocket;
 using System.Text;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dexter.Events

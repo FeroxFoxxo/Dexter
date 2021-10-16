@@ -2,7 +2,6 @@ using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Levels;
 using Dexter.Events;
-using Microsoft.Extensions.Logging;
 
 namespace Dexter.Commands
 {

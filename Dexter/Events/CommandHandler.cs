@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Abstractions;
+using Dexter.Commands;
 using Dexter.Configurations;
 using Dexter.Databases.CustomCommands;
 using Dexter.Enums;
@@ -136,7 +137,7 @@ namespace Dexter.Events
                         {
                             var CustomCommandDB = scope.ServiceProvider.GetRequiredService<CustomCommandDB>();
 
-                            CustomCommand customCommand = CustomCommandDB.GetCommandByNameOrAlias(customCommandArgs[0].ToLower());
+                            CustomCommand customCommand = CustomCommands.GetCommandByNameOrAlias(CustomCommandDB, customCommandArgs[0].ToLower());
 
                             if (customCommand != null)
                             {

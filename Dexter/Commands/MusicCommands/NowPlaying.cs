@@ -3,7 +3,6 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
 using System.Threading.Tasks;
-using Victoria.Node;
 using Victoria.Player;
 
 namespace Dexter.Commands

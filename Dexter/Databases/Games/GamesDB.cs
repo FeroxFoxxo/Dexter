@@ -50,15 +50,6 @@ namespace Dexter.Databases.Games
             return p;
         }
 
-        private int Count = 1;
-
-        internal int GenerateGameToken()
-        {
-            while (Games.Find(Count) is not null) Count++;
-
-            return Count;
-        }
-
         /// <summary>
         /// Gets all the players who are currently active in a given instance.
         /// </summary>

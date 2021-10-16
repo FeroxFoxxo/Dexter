@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Abstractions;
@@ -7,7 +6,6 @@ using Dexter.Configurations;
 using Dexter.Events;
 using Discord;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Dexter.Databases.Levels
 {
@@ -69,6 +67,8 @@ namespace Dexter.Databases.Levels
                 };
 
                 Levels.Add(level);
+
+                SaveChanges();
             }
 
             return level;
@@ -117,6 +117,8 @@ namespace Dexter.Databases.Levels
 
                 Prefs.Add(setting);
             }
+
+            SaveChanges();
 
             return level;
         }
@@ -199,6 +201,8 @@ namespace Dexter.Databases.Levels
                     await user.AddRoleAsync(memrole);
                 }
             }
+
+            SaveChanges();
         }
 
     }

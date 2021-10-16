@@ -5,7 +5,6 @@ using Discord.Commands;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
-using Victoria.Node;
 
 namespace Dexter.Commands
 {

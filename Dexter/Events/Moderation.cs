@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dexter.Abstractions;
-using Dexter.Commands;
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
 using Dexter.Databases.FinalWarns;
@@ -13,7 +12,6 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using Discord.Webhook;
 using Discord.WebSocket;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
@@ -167,7 +165,7 @@ namespace Dexter.Events
                 );
             }
 
-            if (FinalWarnsDB.IsUserFinalWarned(User) && PointsDeducted >= ModerationConfiguration.FinalWarnNotificationThreshold)
+            if (IsUserFinalWarned(User) && PointsDeducted >= ModerationConfiguration.FinalWarnNotificationThreshold)
             {
                 await (DiscordShardedClient.GetChannel(BotConfiguration.ModerationLogChannelID) as ITextChannel)
                     .SendMessageAsync($"**Final Warned User Infraction >>>** <@&{BotConfiguration.AdministratorRoleID}> <@{Context.User.Id}>",
@@ -310,6 +308,23 @@ namespace Dexter.Events
             }
 
             await InfractionsDB.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Checks whether an active final warn is logged for <paramref name="user"/>.
+        /// </summary>
+        /// <param name="user">The user to query in the database.</param>
+        /// <returns><see langword="true"/> if the user has an active final warn; <see langword="false"/> otherwise.</returns>
+
+        public bool IsUserFinalWarned(IGuildUser user)
+        {
+            using var scope = ServiceProvider.CreateScope();
+
+            using var FinalWarnsDB = scope.ServiceProvider.GetRequiredService<FinalWarnsDB>();
+
+            FinalWarn warn = FinalWarnsDB.FinalWarns.Find(user.Id);
+
+            return warn != null && warn.EntryType == EntryType.Issue;
         }
 
         /// <summary>

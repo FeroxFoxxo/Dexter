@@ -15,7 +15,6 @@ using System.Text.RegularExpressions;
 using Dexter.Commands;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource;
 using System.Text;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dexter.Events
@@ -209,7 +208,7 @@ namespace Dexter.Events
                 ValueRange range = new();
                 List<string[]> rows = new();
 
-                newActivity = GreetFurDB.GetAllRecentActivity(firstDay, TRACKING_LENGTH);
+                newActivity = GetAllRecentActivity(GreetFurDB, firstDay, TRACKING_LENGTH);
 
                 bool managerToggle = true;
                 for (int i = 1; i < data.Values.Count; i++)
@@ -313,7 +312,7 @@ namespace Dexter.Events
                     HashSet<ulong> tbpFoundIDs = foundIDs.ToHashSet();
 
                     if (newActivity is null)
-                        newActivity = GreetFurDB.GetAllRecentActivity(firstDay, TRACKING_LENGTH);
+                        newActivity = GetAllRecentActivity(GreetFurDB, firstDay, TRACKING_LENGTH);
 
                     ValueRange range = new();
                     List<string[]> newRows = new();
@@ -347,6 +346,39 @@ namespace Dexter.Events
             }
 
             await GreetFurDB.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Gets all recent activity starting from a given <paramref name="day"/>.
+        /// </summary>
+        /// <param name="day">The day to start pulling information from.</param>
+        /// <param name="length">The length of the period to consider starting from <paramref name="day"/></param>
+        /// <returns>A <see cref="Dictionary{TKey, TValue}"/> where the key holds all caught user IDs and the values are all their attached records sorted by date.</returns>
+
+        public Dictionary<ulong, List<GreetFurRecord>> GetAllRecentActivity(GreetFurDB greetFurDB, int day, int length = 14)
+        {
+            List<GreetFurRecord> allEntries = greetFurDB.Records.AsQueryable().Where(r => r.Date >= day && r.Date < day + length).ToList();
+
+            Dictionary<ulong, List<GreetFurRecord>> result = new();
+
+            foreach (GreetFurRecord r in allEntries)
+            {
+                if (result.ContainsKey(r.UserId))
+                {
+                    result[r.UserId].Add(r);
+                }
+                else
+                {
+                    result.Add(r.UserId, new List<GreetFurRecord>() { r });
+                }
+            }
+
+            foreach (List<GreetFurRecord> ls in result.Values)
+            {
+                ls.Sort((a, b) => a.Date.CompareTo(b.Date));
+            }
+
+            return result;
         }
 
         /// <summary>

@@ -1,11 +1,9 @@
 using Dexter.Abstractions;
 using Dexter.Configurations;
-using Dexter.Databases.Mail;
 using Dexter.Databases.Reminders;
 using Dexter.Databases.UserProfiles;
 using Dexter.Events;
 using Discord.Commands;
-using Genbox.WolframAlpha;
 using System;
 
 namespace Dexter.Commands

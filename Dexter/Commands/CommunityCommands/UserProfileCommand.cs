@@ -1156,11 +1156,11 @@ namespace Dexter.Commands
             return new DateTimeOffset(birthday, profile?.GetRelevantTimeZone(LanguageConfiguration).TimeOffset ?? default);
         }
 
-        private bool TryRemoveBirthdayTimer(UserProfile profile)
+        private async Task<bool> TryRemoveBirthdayTimer(UserProfile profile)
         {
             if (!string.IsNullOrEmpty(profile.BorkdayTimerToken) && TimerService.TimerExists(profile.BorkdayTimerToken))
             {
-                TimerService.RemoveTimer(profile.BorkdayTimerToken);
+                await TimerService.RemoveTimer(profile.BorkdayTimerToken);
                 return true;
             }
             return false;
@@ -1173,7 +1173,7 @@ namespace Dexter.Commands
                 return;
             }
 
-            TryRemoveBirthdayTimer(profile);
+            await TryRemoveBirthdayTimer(profile);
             TimeSpan diff = TimeSpan.Zero;
 
             int nextYear = DateTime.Now.Year - 1;

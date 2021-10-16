@@ -9,7 +9,6 @@ using Dexter.Helpers;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using Victoria.Node;
 
 namespace Dexter.Attributes.Methods
 {

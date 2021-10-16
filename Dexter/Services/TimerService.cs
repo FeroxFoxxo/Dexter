@@ -90,46 +90,50 @@ namespace Dexter.Services
 
         public async Task LoopThroughEvents()
         {
-            long CurrentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-            await EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.ExpirationTime <= CurrentTime)
-                .ForEachAsync(async (EventTimer Timer) =>
+            EventTimer[] expiredTimers = EventTimersDB.EventTimers.AsQueryable().Where(Timer => currentTime > Timer.ExpirationTime).ToArray();
+            foreach (EventTimer timer in expiredTimers)
+            {
+                switch (timer.TimerType)
                 {
+                    case TimerType.Expire:
+                        EventTimersDB.EventTimers.Remove(timer);
+                        break;
+                    case TimerType.Interval:
+                        if (currentTime - timer.ExpirationTime > timer.ExpirationLength)
+                            timer.ExpirationTime = currentTime + timer.ExpirationLength;
+                        else
+                            timer.ExpirationTime += timer.ExpirationLength;
+                        break;
+                }
 
-                    switch (Timer.TimerType)
+                Dictionary<string, string> parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(timer.CallbackParameters);
+                Type refClass = Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.Name.Equals(timer.CallbackClass)).FirstOrDefault();
+
+                if (refClass != null)
+                {
+                    if (refClass.GetMethod(timer.CallbackMethod) == null)
+                        throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
+
+                    try
                     {
-                        case TimerType.Expire:
-                            EventTimersDB.EventTimers.Remove(Timer);
-                            break;
-                        case TimerType.Interval:
-                            Timer.ExpirationTime = Timer.ExpirationLength + DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                            break;
+                        await (Task)refClass.GetMethod(timer.CallbackMethod)
+                            .Invoke(ServiceProvider.GetRequiredService(refClass), new object[1] { parameters });
                     }
-
-                    Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Timer.CallbackParameters);
-                    Type Class = Assembly.GetExecutingAssembly().GetTypes().Where(Type => Type.Name.Equals(Timer.CallbackClass)).FirstOrDefault();
-
-                    if (Class != null)
+                    catch (Exception e)
                     {
-                        if (Class.GetMethod(Timer.CallbackMethod) == null)
-                            throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
-
-                        try
-                        {
-                            await (Task)Class.GetMethod(Timer.CallbackMethod)
-                                .Invoke(ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
-                        }
-                        catch (Exception Exception)
-                        {
-                            Logger.LogError(
-                                Exception.StackTrace,
-                                LogSeverity.Error
-                            );
-                        }
+                        Logger.LogError(
+                            e.StackTrace,
+                            LogSeverity.Error
+                        );
                     }
-                    else if (Timer.TimerType == TimerType.Interval)
-                        EventTimersDB.EventTimers.Remove(Timer);
-                });
+                }
+                else if (timer.TimerType == TimerType.Interval)
+                    EventTimersDB.EventTimers.Remove(timer);
+            }
+
+            if (expiredTimers.Length > 0) { EventTimersDB.SaveChanges(); }
         }
 
         /// <summary>

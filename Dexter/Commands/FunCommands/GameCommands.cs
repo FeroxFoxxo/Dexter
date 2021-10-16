@@ -492,7 +492,7 @@ namespace Dexter.Commands
 
             GameInstance result = new()
             {
-                GameID = GamesDB.Games.Count() + 1,
+                GameID = 0,
                 Master = master.UserID,
                 Title = title,
                 Description = description,

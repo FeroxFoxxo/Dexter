@@ -21,6 +21,7 @@ namespace Dexter.Abstractions
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             string conString = $"server=localhost;database={GetType().Name};user={Startup.DBUser};password={Startup.DBPassword}";
+            options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 
             if (!string.IsNullOrEmpty(Startup.DBUser) && !string.IsNullOrEmpty(Startup.DBPassword))
                 options.UseMySql(conString, ServerVersion.AutoDetect(conString));

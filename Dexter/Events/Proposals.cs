@@ -70,7 +70,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
             Proposal Proposal = ProposalDB.GetProposalByNameOrID(Tracker);
 
@@ -165,8 +165,8 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var RestrictionsDB = scope.ServiceProvider.GetRequiredService<RestrictionsDB>();
-            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var RestrictionsDB = scope.ServiceProvider.GetRequiredService<RestrictionsDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
             if (RestrictionsDB.IsUserRestricted(ReceivedMessage.Author, Restriction.Suggestions))
             {
@@ -280,7 +280,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
             string Token = Parameters["Suggestion"];
 
@@ -312,7 +312,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
             string Token = CreateToken();
 
@@ -363,7 +363,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
             // Get the suggestion from the database which has a message ID which matches the one of which we're looking for.
             Proposal Proposal = ProposalDB.Proposals.AsQueryable().Where(Suggestion => Suggestion.MessageID == UserMessage.Id).FirstOrDefault();
@@ -486,7 +486,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
             string Token = Parameters["Suggestion"];
 
@@ -549,7 +549,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
             Proposal.ProposalStatus = ProposalStatus;
 
@@ -610,7 +610,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
             if (Channel == 0 || MessageID == 0)
                 return;
@@ -660,7 +660,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
             char[] TokenArray = new char[BotConfiguration.TrackerLength];
 

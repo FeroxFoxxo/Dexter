@@ -34,7 +34,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var RelayDB = scope.ServiceProvider.GetRequiredService<RelayDB>();
+            using var RelayDB = scope.ServiceProvider.GetRequiredService<RelayDB>();
 
             Relay Relay = RelayDB.Relays.Find(SocketMessage.Channel.Id);
 

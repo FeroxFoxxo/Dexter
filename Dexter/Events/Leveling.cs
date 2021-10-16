@@ -61,7 +61,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+            using var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
 
             EventTimer Timer = EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault();
 
@@ -84,8 +84,8 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var RestrictionsDB = scope.ServiceProvider.GetRequiredService<RestrictionsDB>();
-            var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
+            using var RestrictionsDB = scope.ServiceProvider.GetRequiredService<RestrictionsDB>();
+            using var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
 
             // Voice leveling up.
             IReadOnlyCollection<SocketVoiceChannel> vcs = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).VoiceChannels;
@@ -122,7 +122,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
+            using var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
 
             if (!LevelingConfiguration.ManageTextXP) return;
             if (message.Author.IsBot) return;
@@ -154,7 +154,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
+            using var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
 
             if (user is null || !LevelingConfiguration.HandleRoles) return false;
 
@@ -314,7 +314,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
+            using var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
 
             if (user is null) return await new RoleModificationResponse(user, false, "Received user is null!").Log();
             if (!LevelingConfiguration.HandleRoles) return new RoleModificationResponse(user, false, "Dexter does not manage roles in this server!");

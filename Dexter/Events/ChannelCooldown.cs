@@ -50,7 +50,7 @@ namespace Dexter.Events
 
             using var scope = ServiceProvider.CreateScope();
 
-            var CooldownDB = scope.ServiceProvider.GetRequiredService<CooldownDB>();
+            using var CooldownDB = scope.ServiceProvider.GetRequiredService<CooldownDB>();
 
             // We then try pull the cooldown from the database to see if the user and channel ID both exist as a token.
             Cooldown Cooldown = CooldownDB.Cooldowns.Find($"{SocketMessage.Author.Id}{SocketMessage.Channel.Id}");

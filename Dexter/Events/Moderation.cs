@@ -69,7 +69,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var InfractionsDB = scope.ServiceProvider.GetRequiredService<InfractionsDB>();
+            using var InfractionsDB = scope.ServiceProvider.GetRequiredService<InfractionsDB>();
 
             await InfractionsDB.DexterProfiles.AsQueryable().ForEachAsync(
                 async DexterProfile =>
@@ -131,9 +131,9 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var InfractionsDB = scope.ServiceProvider.GetRequiredService<InfractionsDB>();
+            using var InfractionsDB = scope.ServiceProvider.GetRequiredService<InfractionsDB>();
 
-            var FinalWarnsDB = scope.ServiceProvider.GetRequiredService<FinalWarnsDB>();
+            using var FinalWarnsDB = scope.ServiceProvider.GetRequiredService<FinalWarnsDB>();
 
             if (Reason.Length > 750)
             {
@@ -295,7 +295,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var InfractionsDB = scope.ServiceProvider.GetRequiredService<InfractionsDB>();
+            using var InfractionsDB = scope.ServiceProvider.GetRequiredService<InfractionsDB>();
 
             ulong UserID = ulong.Parse(Parameters["UserID"]);
 
@@ -329,7 +329,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var InfractionsDB = scope.ServiceProvider.GetRequiredService<InfractionsDB>();
+            using var InfractionsDB = scope.ServiceProvider.GetRequiredService<InfractionsDB>();
 
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
 
@@ -377,7 +377,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var InfractionsDB = scope.ServiceProvider.GetRequiredService<InfractionsDB>();
+            using var InfractionsDB = scope.ServiceProvider.GetRequiredService<InfractionsDB>();
 
             ulong UserID = ulong.Parse(Parameters["UserID"]);
 

@@ -78,7 +78,7 @@ namespace Dexter.Events
 
             using var scope = ServiceProvider.CreateScope();
 
-            var GreetFurDB = scope.ServiceProvider.GetRequiredService<GreetFurDB>();
+            using var GreetFurDB = scope.ServiceProvider.GetRequiredService<GreetFurDB>();
 
             if (Regex.IsMatch(msg.Content, GreetFurConfiguration.GreetFurMutePattern))
             {
@@ -101,7 +101,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var GreetFurDB = scope.ServiceProvider.GetRequiredService<GreetFurDB>();
+            using var GreetFurDB = scope.ServiceProvider.GetRequiredService<GreetFurDB>();
 
             Spreadsheet spreadsheet = await SheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
 
@@ -386,7 +386,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var GreetFurDB = scope.ServiceProvider.GetRequiredService<GreetFurDB>();
+            using var GreetFurDB = scope.ServiceProvider.GetRequiredService<GreetFurDB>();
 
             ulong id = records[0].UserId;
             int day = GreetFurDB.GetDayForUser(id);

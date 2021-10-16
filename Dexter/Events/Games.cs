@@ -39,7 +39,7 @@ namespace Dexter.Events
 
             using var scope = ServiceProvider.CreateScope();
 
-            var GamesDB = scope.ServiceProvider.GetRequiredService<GamesDB>();
+            using var GamesDB = scope.ServiceProvider.GetRequiredService<GamesDB>();
 
             Player Player = GamesDB.Players.Find(Message.Author.Id);
 

@@ -85,7 +85,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+            using var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
 
             long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
@@ -145,7 +145,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+            using var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
 
             string Token = CreateToken();
 
@@ -174,7 +174,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+            using var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
 
             char[] TokenArray = new char[BotConfiguration.TrackerLength];
 
@@ -201,7 +201,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+            using var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
 
             EventTimer Timer = EventTimersDB.EventTimers.Find(TimerTracker);
 
@@ -221,7 +221,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+            using var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
 
             EventTimer Timer = EventTimersDB.EventTimers.Find(TimerTracker);
 

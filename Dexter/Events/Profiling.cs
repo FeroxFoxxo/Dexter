@@ -55,7 +55,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+            using var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
 
             if (EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault() == null)
                 await CreateEventTimer(ProfileCallback, new(), ProfilingConfiguration.SecTillProfiling, TimerType.Interval);

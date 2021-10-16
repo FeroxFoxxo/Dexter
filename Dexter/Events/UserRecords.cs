@@ -34,7 +34,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
+            using var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
 
             if (Before.Username != After.Username && !string.IsNullOrEmpty(After.Username))
             {
@@ -66,7 +66,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
+            using var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
 
             if (Before.Value.Nickname != After.Nickname && !string.IsNullOrEmpty(After.Nickname))
             {
@@ -102,7 +102,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
+            using var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
 
             List<NameRecord> Result = new();
             List<NameRecord> Records = ProfilesDB.Names.AsEnumerable().Where(n => n.Type == NameType && n.UserID == User.Id).ToList();
@@ -167,7 +167,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
+            using var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
 
             return ProfilesDB.Names.AsQueryable().Where(n => n.Type == NameType && n.UserID == User.Id).ToArray();
         }
@@ -182,7 +182,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
+            using var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
 
             UserProfile Profile = ProfilesDB.GetOrCreateProfile(User.Id);
 
@@ -204,7 +204,7 @@ namespace Dexter.Events
         {
             using var scope = ServiceProvider.CreateScope();
 
-            var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
+            using var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
 
             UserProfile Profile = ProfilesDB.GetOrCreateProfile(User.Id);
 

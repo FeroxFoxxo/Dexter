@@ -81,6 +81,8 @@ namespace Dexter.Commands
                     $"Thank you~! - {DiscordShardedClient.GetGuild(BotConfiguration.GuildID).Name} Staff Team <3")
                 .WithFooter(ModMail.Tracker)
                 .SendEmbed(Context.Channel);
+
+            ModMailDB.SaveChanges();
         }
 
         /// <summary>

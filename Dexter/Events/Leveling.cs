@@ -48,6 +48,12 @@ namespace Dexter.Events
         public ILogger<Leveling> Logger { get; set; }
 
         /// <summary>
+        /// The data structure containing all instances of users on Text XP cooldowns.
+        /// </summary>
+        
+        public HashSet<ulong> onTextCooldowns = new();
+
+        /// <summary>
         /// This method is run when the service is first started; which happens after dependency injection.
         /// </summary>
 
@@ -109,7 +115,7 @@ namespace Dexter.Events
                     }
             }
 
-            LevelingDB.onTextCooldowns.RemoveWhere(e => true);
+            onTextCooldowns.RemoveWhere(e => true);
         }
 
         private async Task HandleMessage(SocketMessage message)
@@ -123,7 +129,7 @@ namespace Dexter.Events
 
             if (message.Channel is IDMChannel || LevelingConfiguration.DisabledTCs.Contains(message.Channel.Id)) return;
 
-            if (LevelingDB.onTextCooldowns.Contains(message.Author.Id)) return;
+            if (onTextCooldowns.Contains(message.Author.Id)) return;
 
             await LevelingDB.IncrementUserXP(
                 Random.Next(LevelingConfiguration.TextMinXPGiven, LevelingConfiguration.TextMaxXPGiven + 1),
@@ -133,7 +139,7 @@ namespace Dexter.Events
                 LevelingConfiguration.TextSendLevelUpMessage
                 );
 
-            LevelingDB.onTextCooldowns.Add(message.Author.Id);
+            onTextCooldowns.Add(message.Author.Id);
         }
 
         /// <summary>

@@ -30,7 +30,12 @@ namespace Dexter.Databases.Infractions
         /// Represents the configured settings attached to the Moderation module.
         /// </summary>
 
-        public ModerationConfiguration ModerationConfiguration { get; set; }
+        private ModerationConfiguration ModerationConfiguration;
+
+        public InfractionsDB(ModerationConfiguration moderationConfiguration)
+        {
+            ModerationConfiguration = moderationConfiguration;
+        }
 
         /// <summary>
         /// The Get Infractions method queries the database for all infractions that have not been revoked

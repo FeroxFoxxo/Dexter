@@ -21,12 +21,6 @@ namespace Dexter.Databases.FinalWarns
         public DbSet<FinalWarn> FinalWarns { get; set; }
 
         /// <summary>
-        /// Represents the configured settings attached to the Moderation module.
-        /// </summary>
-
-        public ModerationConfiguration ModerationConfiguration { get; set; }
-
-        /// <summary>
         /// Checks whether an active final warn is logged for <paramref name="user"/>.
         /// </summary>
         /// <param name="user">The user to query in the database.</param>

@@ -19,19 +19,25 @@ namespace Dexter.Databases.GreetFur
         /// Holds relevant information about users' time zones and personal details relevant to recordkeeping.
         /// </summary>
 
-        public ProfilesDB ProfilesDB { get; set; }
+        private ProfilesDB ProfilesDB;
 
         /// <summary>
         /// Holds relevant configuration about time zone formatting.
         /// </summary>
 
-        public LanguageConfiguration LanguageConfiguration { get; set; }
+        private LanguageConfiguration LanguageConfiguration;
 
         /// <summary>
         /// The set of all records for days GreetFurs have been active.
         /// </summary>
 
         public DbSet<GreetFurRecord> Records { get; set; }
+
+        public GreetFurDB(ProfilesDB profilesDB, LanguageConfiguration languageConfiguration)
+        {
+            ProfilesDB = profilesDB;
+            LanguageConfiguration = languageConfiguration;
+        }
 
         /// <summary>
         /// Gets all recent activity starting from a given <paramref name="day"/>.

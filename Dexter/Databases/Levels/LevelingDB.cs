@@ -23,13 +23,19 @@ namespace Dexter.Databases.Levels
         /// The configuration file that contains all relevant data for the leveling module.
         /// </summary>
 
-        public LevelingConfiguration LevelingConfiguration { get; set; }
+        private LevelingConfiguration LevelingConfiguration;
 
         /// <summary>
         /// Generic bot configuration that relates to overarching settings.
         /// </summary>
 
-        public BotConfiguration BotConfiguration { get; set; }
+        private BotConfiguration BotConfiguration;
+
+        /// <summary>
+        /// The service that manages leveling internally.
+        /// </summary>
+        
+        private Leveling LevelingService;
 
         /// <summary>
         /// The data structure containing information for user XP.
@@ -43,12 +49,12 @@ namespace Dexter.Databases.Levels
 
         public DbSet<LevelPreferences> Prefs { get; set; }
 
-        /// <summary>
-        /// The data structure containing all instances of users on Text XP cooldowns.
-        /// </summary>
-
-        [NotMapped]
-        public HashSet<ulong> onTextCooldowns = new();
+        public LevelingDB(LevelingConfiguration levelingConfiguration, BotConfiguration botConfiguration, Leveling levelingService)
+        {
+            LevelingConfiguration = levelingConfiguration;
+            BotConfiguration = botConfiguration;
+            LevelingService = levelingService;
+        }
 
         /// <summary>
         /// Gets a level entry from the database or creates one if none exist for <paramref name="id"/>
@@ -121,13 +127,6 @@ namespace Dexter.Databases.Levels
 
             return level;
         }
-
-        /// <summary>
-        /// The service that manages leveling internally.
-        /// </summary>
-
-        [NotMapped]
-        public Leveling LevelingService { get; set; }
 
         /// <summary>
         /// Grants a given user an amount of XP and announces the level up in <paramref name="fallbackChannel"/> if appropriate.

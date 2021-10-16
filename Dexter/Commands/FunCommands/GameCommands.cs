@@ -77,29 +77,31 @@ namespace Dexter.Commands
                         return;
                     }
                     if (args.Length == 1) args = new string[2] { args[0], "Unnamed Session" };
-                    string gameTYpeStr = args[0].ToLower();
-                    if (!GameTypeConversion.GameNames.ContainsKey(gameTYpeStr))
+                    string gameTypeStr = args[0].ToLower();
+                    if (!GameTypeConversion.GameNames.ContainsKey(gameTypeStr))
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Game not found!")
-                            .WithDescription($"Game \"{gameTYpeStr}\" not found! Currently supported games are: {string.Join(", ", Enum.GetNames<GameType>()[1..])}")
+                            .WithDescription($"Game \"{gameTypeStr}\" not found! Currently supported games are: {string.Join(", ", Enum.GetNames<GameType>()[1..])}")
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    GameType gameType = GameTypeConversion.GameNames[gameTYpeStr];
+                    GameType gameType = GameTypeConversion.GameNames[gameTypeStr];
                     string relevantArgs = arguments[args[0].Length..].Trim();
                     string description = "";
-                    string title = relevantArgs;
+                    string title = relevantArgs.Trim();
 
                     int separatorPos = relevantArgs.IndexOf(';');
                     if (separatorPos + 1 == relevantArgs.Length) separatorPos = -1;
                     if (separatorPos > 0)
                     {
-                        title = relevantArgs[..separatorPos];
-                        description = relevantArgs[(separatorPos + 1)..];
+                        title = relevantArgs[..separatorPos].Trim();
+                        description = relevantArgs[(separatorPos + 1)..].Trim();
                     }
 
-                    game = OpenSession(player, title.Trim(), description.Trim(), gameType);
+                    if (string.IsNullOrEmpty(title)) title = $"{gameType} Game";
+
+                    game = OpenSession(player, title, description, gameType);
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"Created and Joined Game Session #{game.GameID}!")
                         .WithDescription($"Created Game {game.Title}.\nCurrently playing {game.Type}")

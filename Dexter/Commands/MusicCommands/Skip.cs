@@ -18,15 +18,6 @@ namespace Dexter.Commands
 
 		public async Task SkipCommand(int skipCount)
 		{
-			if (skipCount < 2)
-			{
-				await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Unable to skip song!")
-					.WithDescription("If you are specifiying a skip count, you must skip 2+ tracks.").SendEmbed(Context.Channel);
-
-				return;
-			}
-
 			if (!MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)

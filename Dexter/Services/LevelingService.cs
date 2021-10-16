@@ -87,9 +87,12 @@ namespace Dexter.Services
             IReadOnlyCollection<SocketVoiceChannel> vcs = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).VoiceChannels;
 
             List<string> grantedUsers = new();
+            List<string> channelsInfo = new();
 
             foreach (SocketVoiceChannel voiceChannel in vcs)
             {
+                StringBuilder info = new();
+
                 if (voiceChannel.CategoryId == UtilityConfiguration.PrivateCategoryID)
                     continue;
 
@@ -100,10 +103,14 @@ namespace Dexter.Services
                         || RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)
                         || !LevelingConfiguration.VoiceCountMutedMembers && (uservc.IsMuted || uservc.IsSelfMuted || uservc.IsSuppressed))) 
                         nonbotusers++;
-                if (nonbotusers < LevelingConfiguration.VCMinUsers) continue;
+                if (nonbotusers < LevelingConfiguration.VCMinUsers) { channelsInfo.Add($"{voiceChannel.Name}({nonbotusers})"); continue; }
                 if (LevelingConfiguration.DisabledVCs.Contains(voiceChannel.Id)) continue;
+
+                info.Append(voiceChannel.Name);
+
                 foreach (IGuildUser uservc in voiceChannel.Users)
-                    if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsSuppressed 
+                {
+                    if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsSuppressed
                         || uservc.IsBot || RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)))
                     {
                         grantedUsers.Add(uservc.Username);
@@ -115,10 +122,19 @@ namespace Dexter.Services
                             DiscordShardedClient.GetChannel(LevelingConfiguration.VoiceTextChannel) as ITextChannel,
                             LevelingConfiguration.VoiceSendLevelUpMessage
                         );
+
+                        info.Append('+');
                     }
+                    else
+                    {
+                        info.Append('-');
+                    }
+                }
+
+                channelsInfo.Add(info.ToString());
             }
 
-            Logger.LogInformation($"Granting users [{string.Join(", ", grantedUsers)}] VC XP. \n In voice channels {string.Join(", ", vcs)}.");
+            Logger.LogInformation($"Granting users [{string.Join(", ", grantedUsers)}] VC XP. \n In voice channels {string.Join(", ", channelsInfo)}.");
 
             LevelingDB.onTextCooldowns.RemoveWhere(e => true);
             LevelingDB.SaveChanges();

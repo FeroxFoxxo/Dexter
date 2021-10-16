@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
 using Dexter.Databases.Proposals;
-using Dexter.Services;
 using Discord;
 using Discord.Commands;
 using System.Runtime.InteropServices;

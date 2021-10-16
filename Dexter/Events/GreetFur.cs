@@ -16,22 +16,17 @@ using Dexter.Commands;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
 
     /// <summary>
     /// This service manages the Dexter Games subsystem and sends events to the appropriate data structures.
     /// </summary>
 
-    public class GreetFurService : Service
+    public class GreetFur : Event
     {
-
-        /// <summary>
-        /// The database holding all relevant information about GreetFur activity history.
-        /// </summary>
-
-        public GreetFurDB GreetFurDB { get; set; }
 
         /// <summary>
         /// The configuration file holding all relevant GreetFur-specific configuration.
@@ -51,7 +46,7 @@ namespace Dexter.Services
 
         public SheetsService SheetsService { get; set; }
 
-        public ILogger<GreetFurService> Logger { get; set; }
+        public ILogger<GreetFur> Logger { get; set; }
 
         private const int TRACKING_LENGTH = 14;
 
@@ -59,7 +54,7 @@ namespace Dexter.Services
         /// This method is run after dependencies are initialized and injected, it manages hooking up the service to all relevant events.
         /// </summary>
 
-        public override async void Initialize()
+        public override async void InitializeEvents()
         {
             DiscordShardedClient.MessageReceived += HandleMessage;
         }
@@ -81,6 +76,10 @@ namespace Dexter.Services
             if (user.IsBot)
                 return;
 
+            using var scope = ServiceProvider.CreateScope();
+
+            var GreetFurDB = scope.ServiceProvider.GetRequiredService<GreetFurDB>();
+
             if (Regex.IsMatch(msg.Content, GreetFurConfiguration.GreetFurMutePattern))
             {
                 GreetFurDB.AddActivity(user.Id, 0, ActivityFlags.MutedUser);
@@ -100,6 +99,10 @@ namespace Dexter.Services
 
         public async Task UpdateRemoteSpreadsheet(GreetFurOptions options = GreetFurOptions.None, int week = -1)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var GreetFurDB = scope.ServiceProvider.GetRequiredService<GreetFurDB>();
+
             Spreadsheet spreadsheet = await SheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
 
             Sheet currentFortnight = spreadsheet.Sheets
@@ -149,6 +152,7 @@ namespace Dexter.Services
                 {
                     newRow[GreetFurConfiguration.Information["IDs"]] = gfid.ToString();
                     ids.Add(gfid);
+
                     GreetFurRecord[] records = GreetFurDB.GetRecentActivity(gfid, firstDay, TRACKING_LENGTH, true);
                     int localDay = GreetFurDB.GetDayForUser(gfid);
 
@@ -176,23 +180,18 @@ namespace Dexter.Services
                                     {
                                         GreetFurDB.AddActivity(gfid, 0, ActivityFlags.Exempt, records[d].Date);
                                     }
-                                    else
-                                    {
-                                        GreetFurDB.SaveChanges();
-                                    }
                                 }
                             }
                             else if (records[d].IsExempt)
                             {
                                 records[d].IsExempt = false;
-                                GreetFurDB.SaveChanges();
                             }
                         }
 
                         if (options.HasFlag(GreetFurOptions.Safe) && !string.IsNullOrEmpty(ogText))
                             newRow[firstDataIndex + d] = ogText;
                         else 
-                            newRow[firstDataIndex + d] = DayFormat(records[d], localDay);
+                            newRow[firstDataIndex + d] = DayFormat(records[d], GreetFurDB, localDay);
                     }
                     toUpdate.Values[i] = newRow;
                 } 
@@ -385,6 +384,10 @@ namespace Dexter.Services
 
         private async Task<string[]> RowFromRecords(GreetFurRecord[] records, int row, bool managerToggle = false)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var GreetFurDB = scope.ServiceProvider.GetRequiredService<GreetFurDB>();
+
             ulong id = records[0].UserId;
             int day = GreetFurDB.GetDayForUser(id);
             string[] result = new string[GreetFurConfiguration.FortnightTemplates.Keys.Max() + 1];
@@ -392,7 +395,7 @@ namespace Dexter.Services
             int firstCol = GreetFurConfiguration.Information["Notes"] - records.Length;
             for (int i = firstCol; i < firstCol + records.Length; i++)
             {
-                result[i] = DayFormat(records[i - firstCol], day);
+                result[i] = DayFormat(records[i - firstCol], GreetFurDB, day);
             }
 
             foreach(KeyValuePair<int, string> kvp in GreetFurConfiguration.FortnightTemplates)
@@ -433,7 +436,7 @@ namespace Dexter.Services
             return result;
         }
 
-        private string DayFormat(GreetFurRecord r, int day = -1)
+        private string DayFormat(GreetFurRecord r, GreetFurDB GreetFurDB, int day = -1)
         {
             if (r is null)
                 return "";

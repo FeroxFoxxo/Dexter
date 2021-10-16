@@ -16,13 +16,15 @@ using Victoria.Node;
 using Victoria.Node.EventArgs;
 using Victoria.Player;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
-    public class MusicService : Service
+    public class Music : Event
 	{
 		private readonly DiscordShardedClient Client;
-		private readonly LavaNode LavaNode;
-		private readonly ILogger<MusicService> Logger;
+
+		public readonly LavaNode LavaNode;
+
+		private readonly ILogger<Music> Logger;
 		private readonly ConcurrentDictionary<ulong, CancellationTokenSource> DisconnectTokens;
 		private readonly InteractiveService Interactive;
 
@@ -33,12 +35,13 @@ namespace Dexter.Services
 		public object LoopLocker;
 		public object QueueLocker;
 
-		public MusicService (DiscordShardedClient client, LavaNode lavaNode, ILogger<MusicService> logger, InteractiveService interactive)
+		public Music (DiscordShardedClient client, ILogger<Music> logger, InteractiveService interactive, ILogger<LavaNode> nodeLog)
         {
 			Client = client;
-			LavaNode = lavaNode;
 			Logger = logger;
 			Interactive = interactive;
+
+			LavaNode = new LavaNode (client, new NodeConfiguration() { Port = 2333, SelfDeaf = true }, nodeLog);
 
 			LoopLocker = new ();
 			QueueLocker = new ();
@@ -49,7 +52,7 @@ namespace Dexter.Services
 			DisconnectTokens = new ConcurrentDictionary<ulong, CancellationTokenSource>();
 		}
 
-		public override void Initialize()
+		public override void InitializeEvents()
 		{
 			Client.ShardReady += ClientOnShardReady;
 			Client.JoinedGuild += DisposeMusicPlayerAsync;
@@ -206,7 +209,7 @@ namespace Dexter.Services
 			if (queueable is null)
 				return;
 
-			await Interactive.DelayedSendMessageAndDeleteAsync(trackEvent.Player.TextChannel, null, TimeSpan.FromSeconds(10), embed: BuildEmbed(Dexter.Enums.EmojiEnum.Unknown).GetNowPlaying(queueable).Build());
+			await Interactive.DelayedSendMessageAndDeleteAsync(trackEvent.Player.TextChannel, null, TimeSpan.FromSeconds(10), embed: BuildEmbed(EmojiEnum.Unknown).GetNowPlaying(queueable).Build());
 		}
 		
 		private async Task ProtectPlayerIntegrityOnDisconnectAsync(SocketUser user, SocketVoiceState ogState, SocketVoiceState newState)

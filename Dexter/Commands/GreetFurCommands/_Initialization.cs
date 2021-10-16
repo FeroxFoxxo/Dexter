@@ -2,7 +2,7 @@ using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.GreetFur;
 using Dexter.Databases.UserProfiles;
-using Dexter.Services;
+using Dexter.Events;
 using Google.Apis.Sheets.v4;
 
 namespace Dexter.Commands
@@ -31,7 +31,7 @@ namespace Dexter.Commands
         /// A wrapper for useful GreetFur data and a wrapper for spreadsheet manipulation and access.
         /// </summary>
 
-        public GreetFurService GreetFurService { get; set; }
+        public GreetFur GreetFurService { get; set; }
 
         /// <summary>
         /// Manages the Google Sheets section of GreetFur record-keeping.
@@ -51,11 +51,7 @@ namespace Dexter.Commands
 
         public ProfilesDB ProfilesDB { get; set; }
 
-        /// <summary>
-        /// A reference to the command module responsible for muting users.
-        /// </summary>
-
-        public ModeratorCommands ModeratorCommands { get; set; }
+        public Moderation ModerationService { get; set; }
 
     }
 

@@ -170,7 +170,7 @@ namespace Dexter.Commands
                             .SendEmbed(Context.Channel);
                         return;
                     }
-                    GamesDB.SaveChanges();
+
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Success!")
                         .WithDescription(feedback)
@@ -183,7 +183,7 @@ namespace Dexter.Commands
                         return;
                     }
                     RemovePlayer(player);
-                    GamesDB.SaveChanges();
+
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Left the game")
                         .WithDescription($"You left Game {game.Title}. If you were the master, the session was closed.")
@@ -230,14 +230,13 @@ namespace Dexter.Commands
                         return;
                     }
                     game.ToGameProper(BotConfiguration).Reset(FunConfiguration, GamesDB);
-                    GamesDB.SaveChanges();
+
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Game successfully reset!")
                         .WithDescription($"Reset Game {game.Title} (#{game.GameID}) to its default state.")
                         .SendEmbed(Context.Channel);
                     return;
                 case "save":
-                    GamesDB.SaveChanges();
                     await Context.Message.ReplyAsync("Saved games!");
                     return;
                 case "set":
@@ -259,7 +258,6 @@ namespace Dexter.Commands
                         return;
                     }
 
-                    GamesDB.SaveChanges();
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"Changed the value of {field}")
                         .WithDescription(string.IsNullOrEmpty(feedback) ? $"{field}'s value has been modified to \"{arguments[field.Length..].Trim()}\"" : feedback)
@@ -412,7 +410,7 @@ namespace Dexter.Commands
             }
 
             CloseSession(game);
-            GamesDB.SaveChanges();
+
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Game removed!")
                 .WithDescription($"Game #{gameID} was successfully removed and all players in it were kicked.")
@@ -508,7 +506,6 @@ namespace Dexter.Commands
 
             GamesDB.Add(result);
             Join(master, result, out _);
-            GamesDB.SaveChanges();
 
             GameTemplate game = result.ToGameProper(BotConfiguration);
             if (game is not null) game.Reset(FunConfiguration, GamesDB);

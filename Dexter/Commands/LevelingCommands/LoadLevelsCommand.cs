@@ -59,11 +59,10 @@ namespace Dexter.Commands
                 if (++total % 1000 == 0)
                 {
                     await loadMsg.ModifyAsync(m => m.Content = $"Loading level entries... {total}/{records.Length}");
-                    await LevelingDB.SaveChangesAsync();
                 }
                 try
                 {
-                    ul = LevelingDB.GetOrCreateLevelData(r.Id, false);
+                    ul = LevelingDB.GetOrCreateLevelData(r.Id);
                     if (force || ul.TextXP < r.Xp)
                     {
                         ul.TextXP = r.Xp;
@@ -72,9 +71,7 @@ namespace Dexter.Commands
                 }
                 catch (InvalidOperationException e)
                 {
-                    Console.Error.WriteLine($"Warning; error when processing level loading: {e}");
-                    await LevelingDB.SaveChangesAsync();
-                    ul = LevelingDB.GetOrCreateLevelData(r.Id, false);
+                    ul = LevelingDB.GetOrCreateLevelData(r.Id);
                     try
                     {
                         if (force || ul?.TextXP < r.Xp)
@@ -92,9 +89,7 @@ namespace Dexter.Commands
 
             if (count > 0)
             {
-                await LevelingDB.SaveChangesAsync();
-
-                await BuildEmbed(Enums.EmojiEnum.Love)
+                await BuildEmbed(EmojiEnum.Love)
                     .WithTitle($"Loaded {count} levels")
                     .WithDescription($"The level data for {count} users has been added to the local database.")
                     .SendEmbed(Context.Channel);
@@ -187,7 +182,7 @@ namespace Dexter.Commands
                         UserLevel ul = null;
                         try
                         {
-                            ul = LevelingDB.GetOrCreateLevelData(p.id, false);
+                            ul = LevelingDB.GetOrCreateLevelData(p.id);
                             if (force || ul.TextXP < xp)
                             {
                                 ul.TextXP = xp;
@@ -198,9 +193,8 @@ namespace Dexter.Commands
                         }
                         catch (Exception e)
                         {
-                            Console.Error.WriteLine($"Warning; error when processing web level loading: {e}");
-                            await LevelingDB.SaveChangesAsync();
-                            ul = LevelingDB.GetOrCreateLevelData(p.id, false);
+                            ul = LevelingDB.GetOrCreateLevelData(p.id);
+
                             try
                             {
                                 if (force || ul?.TextXP < xp)
@@ -221,13 +215,11 @@ namespace Dexter.Commands
                             await loadMsg.ModifyAsync(m => m.Content = $"Loading level entries... {total}/{(max - min + 1) * 100} - page {page}/{max}. (modified {count} values.)");
                         }
                     }
-
-                    await LevelingDB.SaveChangesAsync();
                 }
             }
             catch (ArgumentOutOfRangeException e)
             {
-                await BuildEmbed(Enums.EmojiEnum.Sign)
+                await BuildEmbed(EmojiEnum.Sign)
                     .WithTitle("Completed Loading with Errors")
                     .WithDescription(e.ParamName)
                     .SendEmbed(Context.Channel);
@@ -243,7 +235,7 @@ namespace Dexter.Commands
                 return;
             }
 
-            await BuildEmbed(Enums.EmojiEnum.Love)
+            await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Completed Loading")
                 .WithDescription($"Loaded pages up to {--page}. Assigned {count} new values from {total} total processed entries.")
                 .SendEmbed(Context.Channel);

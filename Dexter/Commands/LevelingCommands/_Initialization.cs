@@ -1,7 +1,8 @@
 using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Levels;
-using Dexter.Services;
+using Dexter.Events;
+using Microsoft.Extensions.Logging;
 
 namespace Dexter.Commands
 {
@@ -16,7 +17,7 @@ namespace Dexter.Commands
         /// Holds specific methods for managing user levels.
         /// </summary>
 
-        public LevelingService LevelingService { get; set; }
+        public Leveling LevelingService { get; set; }
 
         /// <summary>
         /// Holds all configuration specifically relevant to the Leveling System.

@@ -7,8 +7,9 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
 
     /// <summary>
@@ -16,14 +17,8 @@ namespace Dexter.Services
     /// time than otherwise allowed and, if so, attempts to remove the posting and warns the user of the event.
     /// </summary>
 
-    public class ChannelCooldownService : Service
+    public class ChannelCooldown : Event
     {
-
-        /// <summary>
-        /// The CooldownDB contains all the current cooldowns in the database.
-        /// </summary>
-
-        public CooldownDB CooldownDB { get; set; }
 
         /// <summary>
         /// The ChannelCooldownConfiguration contains information regarding the channel in which the commission is in, aswell as how long cooldowns should last.
@@ -35,7 +30,7 @@ namespace Dexter.Services
         /// The Initialize override hooks into the MessageReceived event to run the related method.
         /// </summary>
 
-        public override void Initialize()
+        public override void InitializeEvents()
         {
             DiscordShardedClient.MessageReceived += MessageReceived;
         }
@@ -52,6 +47,10 @@ namespace Dexter.Services
             // We first check to see if the channel is in the commissions corner and not from a bot to continue.
             if (!ChannelCooldownConfiguration.ChannelCooldowns.ContainsKey(SocketMessage.Channel.Id) || SocketMessage.Author.IsBot)
                 return;
+
+            using var scope = ServiceProvider.CreateScope();
+
+            var CooldownDB = scope.ServiceProvider.GetRequiredService<CooldownDB>();
 
             // We then try pull the cooldown from the database to see if the user and channel ID both exist as a token.
             Cooldown Cooldown = CooldownDB.Cooldowns.Find($"{SocketMessage.Author.Id}{SocketMessage.Channel.Id}");
@@ -86,8 +85,6 @@ namespace Dexter.Services
                 {
                     // If the commission has expired we set the new cooldown.
                     Cooldown.TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-                    CooldownDB.SaveChanges();
                 }
             }
             else
@@ -100,8 +97,6 @@ namespace Dexter.Services
                         TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                     }
                 );
-
-                CooldownDB.SaveChanges();
             }
         }
 

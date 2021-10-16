@@ -109,7 +109,6 @@ namespace Dexter.Commands
                         {
                             IMessage Messaged = await MailMSG.Channel.SendMessageAsync(embed: MailMSG.Embeds.FirstOrDefault().ToEmbedBuilder().Build());
                             ModMail.MessageID = Messaged.Id;
-                            ModMailDB.SaveChanges();
                         }
                     }
                     else

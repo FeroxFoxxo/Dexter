@@ -68,7 +68,6 @@ namespace Dexter.Attributes.Methods
                 if (cooldown.TimeOfCooldown + CooldownTimer < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
                 {
                     cooldownDB.Remove(cooldown);
-                    cooldownDB.SaveChanges();
                 }
                 else
                 {
@@ -91,8 +90,6 @@ namespace Dexter.Attributes.Methods
                     TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
                 }
             );
-
-            cooldownDB.SaveChanges();
 
             return PreconditionResult.FromSuccess();
         }

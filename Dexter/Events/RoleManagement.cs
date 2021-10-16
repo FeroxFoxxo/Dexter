@@ -5,13 +5,13 @@ using Dexter.Configurations;
 using Discord;
 using Discord.WebSocket;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
     /// <summary>
     /// The RoleManagementService adds the given roles to the user if they join the server.
     /// </summary>
 
-    public class RoleManagementService : Service
+    public class RoleManagement : Event
     {
         /// <summary>
         /// Holds all relevant information about color and patreon roles.
@@ -21,7 +21,7 @@ namespace Dexter.Services
         /// <summary>
         /// Runs after dependency injection and wires up all relevant events for this service to run properly.
         /// </summary>
-        public override void Initialize()
+        public override void InitializeEvents()
         {
             DiscordShardedClient.GuildMemberUpdated += CheckUserColorRoles;
         }

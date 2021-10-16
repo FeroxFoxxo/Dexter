@@ -4,7 +4,7 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord.Commands;
 using Discord.Rest;
-using static Dexter.Services.LevelingService;
+using static Dexter.Events.Leveling;
 
 namespace Dexter.Commands
 {

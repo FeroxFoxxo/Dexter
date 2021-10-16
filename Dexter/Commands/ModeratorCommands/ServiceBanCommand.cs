@@ -70,8 +70,6 @@ namespace Dexter.Commands
                         return;
                     }
 
-                    RestrictionsDB.SaveChanges();
-
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Success!")
                         .WithDescription($"User {User.GetUserInformation()} has had the following permissions revoked: \n" +
@@ -97,8 +95,6 @@ namespace Dexter.Commands
                             .SendEmbed(Context.Channel);
                         return;
                     }
-
-                    RestrictionsDB.SaveChanges();
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Success!")

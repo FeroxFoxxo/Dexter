@@ -31,9 +31,7 @@ namespace Dexter.Commands
 
             DexterProfile.CurrentPointTimer = string.Empty;
 
-            await RemoveMutedRole(new() { { "UserID", User.Id.ToString() } });
-
-            InfractionsDB.SaveChanges();
+            await ModerationService.RemoveMutedRole(new() { { "UserID", User.Id.ToString() } });
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"Successfully Unmuted {User.Username}.")
@@ -70,9 +68,7 @@ namespace Dexter.Commands
                 DexterProfile.InfractionAmount = ModerationConfiguration.MaxPoints;
 
             if (Infraction.PointCost > 2)
-                await RemoveMutedRole(new() { { "UserID", Infraction.User.ToString() } });
-
-            InfractionsDB.SaveChanges();
+                await ModerationService.RemoveMutedRole(new() { { "UserID", Infraction.User.ToString() } });
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle($"Infraction Revoked! New Points: {DexterProfile.InfractionAmount}.")

@@ -3,7 +3,7 @@ using Dexter.Attributes.Methods;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
-using static Dexter.Services.LevelingService;
+using static Dexter.Events.Leveling;
 
 namespace Dexter.Commands
 {
@@ -26,6 +26,7 @@ namespace Dexter.Commands
             RestGuildUser restTarget = await DiscordShardedClient.Rest.GetGuildUserAsync(Context.Guild?.Id ?? BotConfiguration.GuildID, target.Id);
 
             RoleModificationResponse response = await LevelingService.UpdateRolesWithInfo(restTarget, true);
+
             await Context.Channel.SendMessageAsync(response.ToString());
         }
 

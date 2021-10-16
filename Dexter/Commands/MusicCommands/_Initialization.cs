@@ -1,5 +1,5 @@
 using Dexter.Abstractions;
-using Dexter.Services;
+using Dexter.Events;
 using Google.Apis.YouTube.v3;
 using Microsoft.Extensions.Logging;
 using SpotifyAPI.Web;
@@ -15,9 +15,7 @@ namespace Dexter.Commands
     public partial class MusicCommands : DiscordModule
     {
 
-        public LavaNode LavaNode { get; set; }
-
-        public MusicService MusicService { get; set; }
+        public Music MusicService { get; set; }
 
         public ILogger<MusicCommands> Logger { get; set; }
 

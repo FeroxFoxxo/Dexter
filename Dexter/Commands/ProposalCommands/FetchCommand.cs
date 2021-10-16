@@ -3,7 +3,6 @@ using Dexter.Attributes.Methods;
 using Dexter.Databases.Proposals;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Dexter.Services;
 using Discord.Commands;
 
 namespace Dexter.Commands

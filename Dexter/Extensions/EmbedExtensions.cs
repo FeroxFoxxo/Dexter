@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
 using Dexter.Configurations;
 using Dexter.Enums;
-using Dexter.Services;
+using Dexter.Events;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -179,7 +179,7 @@ namespace Dexter.Extensions
                                 $"Queue Position: **{queueSize}**.");
         }
 
-        public static EmbedBuilder[] GetQueue(this LavaPlayer player, string title, BotConfiguration botConfiguration, MusicService musicService )
+        public static EmbedBuilder[] GetQueue(this LavaPlayer player, string title, BotConfiguration botConfiguration, Music musicService )
         {
             var embeds = player.Vueue.ToArray().GetQueueFromTrackArray(title, botConfiguration);
 

@@ -356,7 +356,6 @@ namespace Dexter.Commands
                         .SendEmbed(Context.Channel);
                     return;
             }
-            LevelingDB.SaveChanges();
         }
     }
 }

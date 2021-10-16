@@ -215,13 +215,11 @@ namespace Dexter.Commands
                 if (incompat is not null && incompat.CommandType == UserCommandSource.Unspecified)
                 {
                     CustomCommandDB.Remove(incompat);
-                    CustomCommandDB.SaveChanges();
                 }
                 
                 if (uc is not null)
                 {
                     CustomCommandDB.Remove(uc);
-                    CustomCommandDB.SaveChanges();
 
                     CustomCommandDB.CustomCommands.Add(new CustomCommand()
                     {
@@ -231,7 +229,6 @@ namespace Dexter.Commands
                         User = userID,
                         CommandType = ucs
                     });
-                    CustomCommandDB.SaveChanges();
                     return;
                 }
 
@@ -242,7 +239,6 @@ namespace Dexter.Commands
                     uc.Reply = reply;
                     uc.CommandType = ucs;
 
-                    CustomCommandDB.SaveChanges();
                     return;
                 }
             }
@@ -254,8 +250,6 @@ namespace Dexter.Commands
                 User = userID,
                 CommandType = ucs
             });
-
-            CustomCommandDB.SaveChanges();
         }
 
         /// <summary>
@@ -272,8 +266,6 @@ namespace Dexter.Commands
             string Reply = Parameters["Reply"];
 
             CustomCommandDB.GetCommandByNameOrAlias(CommandName).Reply = Reply;
-
-            CustomCommandDB.SaveChanges();
         }
 
         /// <summary>
@@ -289,8 +281,6 @@ namespace Dexter.Commands
             string CommandName = Parameters["CommandName"];
 
             CustomCommandDB.CustomCommands.Remove(CustomCommandDB.GetCommandByNameOrAlias(CommandName));
-
-            CustomCommandDB.SaveChanges();
         }
 
     }

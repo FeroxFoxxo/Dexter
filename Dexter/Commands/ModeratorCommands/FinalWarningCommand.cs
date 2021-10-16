@@ -6,7 +6,6 @@ using Dexter.Databases.FinalWarns;
 using Dexter.Databases.Infractions;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Dexter.Services;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -50,7 +49,7 @@ namespace Dexter.Commands
             DexterProfile.InfractionAmount -= PointsDeducted;
 
             if (!TimerService.TimerExists(DexterProfile.CurrentPointTimer))
-                DexterProfile.CurrentPointTimer = await CreateEventTimer(IncrementPoints, new() { { "UserID", User.Id.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
+                DexterProfile.CurrentPointTimer = await CreateEventTimer(ModerationService.IncrementPoints, new() { { "UserID", User.Id.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
 
 
             ulong WarningLogID = 0;
@@ -66,7 +65,7 @@ namespace Dexter.Commands
 
             FinalWarnsDB.SetOrCreateFinalWarn(PointsDeducted, Context.User as IGuildUser, User, MuteDuration, Reason, WarningLogID);
 
-            await MuteUser(User, MuteDuration);
+            await ModerationService.MuteUser(User, MuteDuration);
 
             try
             {
@@ -94,8 +93,6 @@ namespace Dexter.Commands
                     .WithDescription($"The target user, {User.GetUserInformation()}, might have DMs disabled or might have blocked me... :c\nThe final warning has been recorded to the database regardless.")
                     .SendEmbed(Context.Channel);
             }
-
-            InfractionsDB.SaveChanges();
         }
 
         /// <summary>

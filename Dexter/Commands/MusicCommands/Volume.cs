@@ -19,7 +19,7 @@ namespace Dexter.Commands
 
         public async Task VolumeCommand(int volumeLevel = 100)
         {
-            if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
+            if (!MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to change volume!")

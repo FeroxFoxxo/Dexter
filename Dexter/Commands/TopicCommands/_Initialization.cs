@@ -49,7 +49,7 @@ namespace Dexter.Commands
             {
                 if (Enum.TryParse(command.Split(" ")[0].ToLower().Pascalize(), out Enums.ActionType actionType))
                 {
-                    if (RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.TopicManagement) && actionType != Enums.ActionType.Get)
+                    if (RestrictionsDB.IsUserRestricted(Context.User, Restriction.TopicManagement) && actionType != Enums.ActionType.Get)
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("You aren't permitted to manage topics!")
@@ -216,8 +216,6 @@ namespace Dexter.Commands
                     TopicType = topicType
                 }
             );
-
-            FunTopicsDB.SaveChanges();
         }
 
         /// <summary>
@@ -282,8 +280,6 @@ namespace Dexter.Commands
                     .FirstOrDefault();
 
             funTopic.EntryType = EntryType.Revoke;
-
-            FunTopicsDB.SaveChanges();
         }
 
         /// <summary>
@@ -385,8 +381,6 @@ namespace Dexter.Commands
                     .FirstOrDefault();
 
             funTopic.Topic = editedTopic;
-
-            FunTopicsDB.SaveChanges();
         }
 
         /// <summary>

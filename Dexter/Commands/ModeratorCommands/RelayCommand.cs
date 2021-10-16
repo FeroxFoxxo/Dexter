@@ -86,8 +86,6 @@ namespace Dexter.Commands
                 MessageInterval = MessageInterval,
                 Message = Message
             });
-
-            RelayDB.SaveChanges();
         }
 
     }

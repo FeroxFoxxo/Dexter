@@ -21,12 +21,6 @@ namespace Dexter.Commands
         public FunConfiguration FunConfiguration { get; set; }
 
         /// <summary>
-        /// Loads the database containing topics for the <c>~topic</c> command.
-        /// </summary>
-
-        public FunTopicsDB FunTopicsDB { get; set; }
-
-        /// <summary>
         /// Holds relevant information about permissions and restrictions for specific users and services.
         /// </summary>
 

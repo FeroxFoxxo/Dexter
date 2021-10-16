@@ -91,7 +91,7 @@ namespace Dexter.Extensions
             return string.IsNullOrEmpty(user.GetAvatarUrl(size: size)) ? user.GetDefaultAvatarUrl() : user.GetAvatarUrl(size: size);
         }
 
-        public static async Task<bool> SafeJoinAsync(this LavaNode lavaNode, SocketUser user, ISocketMessageChannel channel)
+        public static async Task<bool> SafeJoinAsync(this LavaNode LavaNode, SocketUser user, ISocketMessageChannel channel)
         {
             if (user is not SocketGuildUser guildUser || channel is not ITextChannel textChannel)
                 return false;
@@ -101,11 +101,11 @@ namespace Dexter.Extensions
             if (voiceChannel == null)
                 return false;
 
-            if (!lavaNode.HasPlayer(guildUser.Guild))
+            if (!LavaNode.HasPlayer(guildUser.Guild))
             {
                 try
                 {
-                    await (await lavaNode.JoinAsync(voiceChannel, textChannel)).SetVolumeAsync(100);
+                    await (await LavaNode.JoinAsync(voiceChannel, textChannel)).SetVolumeAsync(100);
                 }
                 catch (Exception)
                 {

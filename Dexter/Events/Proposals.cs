@@ -18,38 +18,26 @@ using Newtonsoft.Json;
 using System.Data;
 using System.Reflection;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
 
     /// <summary>
     /// The Proposal service, which is used to create and update proposals on the change of a reaction.
     /// </summary>
 
-    public class ProposalService : Service
+    public class Proposals : Event
     {
 
         /// <summary>
         /// The ServiceProvider is used to run the initialized command and method that an admin confirmation will call back to.
         /// </summary>
-        public ServiceProvider ServiceProvider { get; set; }
+        public IServiceProvider ServiceProvider { get; set; }
 
         /// <summary>
         /// The ProposalConfiguration, which contains the location of the emoji storage guild, as well as IDs of channels.
         /// </summary>
 
         public ProposalConfiguration ProposalConfiguration { get; set; }
-
-        /// <summary>
-        /// The ProposalDB is used as a storage for the proposals.
-        /// </summary>
-
-        public ProposalDB ProposalDB { get; set; }
-
-        /// <summary>
-        /// Holds relevant information about users who are restricted from using this service.
-        /// </summary>
-
-        public RestrictionsDB RestrictionsDB { get; set; }
 
         /// <summary>
         /// The Random instance is used to pick a set number of random characters from the configuration to create a token.
@@ -61,7 +49,7 @@ namespace Dexter.Services
         /// The Initialize method hooks the client MessageReceived, ReactionAdded and ReactionRemoved events and sets them to their related delegates.
         /// </summary>
 
-        public override void Initialize()
+        public override void InitializeEvents()
         {
             DiscordShardedClient.MessageReceived += MessageReceived;
             DiscordShardedClient.ReactionAdded += ReactionAdded;
@@ -80,6 +68,10 @@ namespace Dexter.Services
 
         public async Task EditProposal(string Tracker, string Reason, IUser Approver, IMessageChannel MessageChannel, ProposalStatus ProposalStatus)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+
             Proposal Proposal = ProposalDB.GetProposalByNameOrID(Tracker);
 
             if (Proposal == null)
@@ -171,6 +163,11 @@ namespace Dexter.Services
 
         public async Task CreateSuggestion(SocketMessage ReceivedMessage)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var RestrictionsDB = scope.ServiceProvider.GetRequiredService<RestrictionsDB>();
+            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+
             if (RestrictionsDB.IsUserRestricted(ReceivedMessage.Author, Restriction.Suggestions))
             {
                 await ReceivedMessage.DeleteAsync();
@@ -257,8 +254,6 @@ namespace Dexter.Services
             ProposalDB.Proposals.Add(Proposal);
             ProposalDB.Suggestions.Add(Suggested);
 
-            ProposalDB.SaveChanges();
-
             // Delete the message sent by the user.
             await ReceivedMessage.DeleteAsync();
 
@@ -283,6 +278,10 @@ namespace Dexter.Services
 
         public async Task DeclineSuggestion(Dictionary<string, string> Parameters)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+
             string Token = Parameters["Suggestion"];
 
             Proposal Proposal = ProposalDB.Proposals.Find(Token);
@@ -311,6 +310,10 @@ namespace Dexter.Services
 
         public async Task<Proposal> SendAdminConfirmation(string JSON, string Type, string Method, ulong Author, string ProposedMessage, string DenyJSON = null, string DenyType = null, string DenyMethod = null)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+
             string Token = CreateToken();
 
             // Creates a new Proposal object with the related fields.
@@ -345,8 +348,6 @@ namespace Dexter.Services
             ProposalDB.Proposals.Add(Proposal);
             ProposalDB.AdminConfirmations.Add(Confirmation);
 
-            ProposalDB.SaveChanges();
-
             return Proposal;
         }
 
@@ -360,6 +361,10 @@ namespace Dexter.Services
 
         public async Task<bool> CheckAsync(IUserMessage UserMessage, SocketReaction Reaction)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+
             // Get the suggestion from the database which has a message ID which matches the one of which we're looking for.
             Proposal Proposal = ProposalDB.Proposals.AsQueryable().Where(Suggestion => Suggestion.MessageID == UserMessage.Id).FirstOrDefault();
 
@@ -425,8 +430,6 @@ namespace Dexter.Services
                                             // Set the staff message ID in the suggestions database to the new suggestion.
                                             Suggestion.StaffMessageID = StaffSuggestion.Id;
 
-                                            ProposalDB.SaveChanges();
-
                                             // Get the staff suggestions channel and add the related emoji to the message.
                                             SocketGuild EmojiCacheGuild = DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild);
 
@@ -481,6 +484,10 @@ namespace Dexter.Services
 
         public async Task DeclineStaffSuggestion(Dictionary<string, string> Parameters)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+
             string Token = Parameters["Suggestion"];
 
             Proposal Proposal = ProposalDB.Proposals.Find(Token);
@@ -540,8 +547,11 @@ namespace Dexter.Services
 
         public async Task UpdateProposal(Proposal Proposal, ProposalStatus ProposalStatus)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+
             Proposal.ProposalStatus = ProposalStatus;
-            ProposalDB.SaveChanges();
 
             switch (Proposal.ProposalType)
             {
@@ -598,6 +608,10 @@ namespace Dexter.Services
 
         public async Task UpdateSpecificProposal(Proposal Proposal, ulong Channel, ulong MessageID)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+
             if (Channel == 0 || MessageID == 0)
                 return;
 
@@ -627,8 +641,6 @@ namespace Dexter.Services
                         else if (Proposal.ProposalType == ProposalType.Suggestion)
                             if (ProposalDB.Suggestions.Find(Proposal.Tracker).StaffMessageID == MessageID)
                                 Proposal.MessageID = Message.Id;
-
-                        ProposalDB.SaveChanges();
                     }
                 }
                 else
@@ -646,6 +658,10 @@ namespace Dexter.Services
 
         public string CreateToken()
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+
             char[] TokenArray = new char[BotConfiguration.TrackerLength];
 
             for (int i = 0; i < TokenArray.Length; i++)

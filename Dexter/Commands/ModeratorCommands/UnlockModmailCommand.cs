@@ -98,8 +98,6 @@ namespace Dexter.Commands
 
             ModMail.MessageID = Message.Id;
 
-            ModMailDB.SaveChanges();
-
             if (User != null)
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Modmail Unlocked")

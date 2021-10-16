@@ -65,8 +65,6 @@ namespace Dexter.Commands
             Relay RelayToRemove = RelayDB.Relays.Find(ChannelID);
 
             RelayDB.Relays.Remove(RelayToRemove);
-
-            RelayDB.SaveChanges();
         }
 
     }

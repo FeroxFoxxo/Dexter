@@ -39,7 +39,6 @@ namespace Dexter.Commands
                         if (IssueCooldown.TimeOfCooldown + CommissionCooldownConfiguration.ChannelCooldowns[TextChannel.Id]["CooldownTime"] < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
                         {
                             CooldownDB.Cooldowns.Remove(IssueCooldown);
-                            CooldownDB.SaveChanges();
                         }
                         else
                         {
@@ -63,8 +62,6 @@ namespace Dexter.Commands
 
                     CooldownDB.Cooldowns.Add(NewCooldown);
 
-                    CooldownDB.SaveChanges();
-
                     DateTime NewCooldownTime = DateTime.UnixEpoch.AddSeconds(NewCooldown.TimeOfCooldown);
 
                     await BuildEmbed(EmojiEnum.Love)
@@ -86,7 +83,6 @@ namespace Dexter.Commands
                     if (RevokeCooldown != null)
                     {
                         CooldownDB.Cooldowns.Remove(RevokeCooldown);
-                        CooldownDB.SaveChanges();
 
                         DateTime CooldownTime = DateTime.UnixEpoch.AddSeconds(RevokeCooldown.TimeOfCooldown);
 

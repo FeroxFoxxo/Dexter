@@ -11,15 +11,16 @@ using Discord;
 using Discord.WebSocket;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
 
     /// <summary>
     /// Manages the events and timers related to granting users Dexter experience for activity.
     /// </summary>
 
-    public class LevelingService : Service
+    public class Leveling : Event
     {
 
         /// <summary>
@@ -35,18 +36,6 @@ namespace Dexter.Services
         public Random Random { get; set; }
 
         /// <summary>
-        /// The data structure holding all relevant information about user levels.
-        /// </summary>
-
-        public LevelingDB LevelingDB { get; set; }
-
-        /// <summary>
-        /// The data structure holding all relevant information for user restrictions.
-        /// </summary>
-
-        public RestrictionsDB RestrictionsDB { get; set; }
-
-        /// <summary>
         /// Utility Configuration for private VCs.
         /// </summary>
 
@@ -56,18 +45,22 @@ namespace Dexter.Services
         /// Gets the logging utility to debug potential errors with leveling.
         /// </summary>
 
-        public ILogger<LevelingService> Logger { get; set; }
+        public ILogger<Leveling> Logger { get; set; }
 
         /// <summary>
         /// This method is run when the service is first started; which happens after dependency injection.
         /// </summary>
 
-        public override async void Initialize()
+        public override async void InitializeEvents()
         {
-            EventTimer Timer = TimerService.EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault();
+            using var scope = ServiceProvider.CreateScope();
+
+            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+
+            EventTimer Timer = EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault();
 
             if (Timer != null)
-                TimerService.EventTimersDB.EventTimers.Remove(Timer);
+                EventTimersDB.EventTimers.Remove(Timer);
 
             DiscordShardedClient.MessageReceived += HandleMessage;
             DiscordShardedClient.UserJoined += HandleJoin;
@@ -83,6 +76,11 @@ namespace Dexter.Services
 
         public async Task AddLevels(Dictionary<string, string> parameters)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var RestrictionsDB = scope.ServiceProvider.GetRequiredService<RestrictionsDB>();
+            var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
+
             // Voice leveling up.
             IReadOnlyCollection<SocketVoiceChannel> vcs = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).VoiceChannels;
 
@@ -112,11 +110,14 @@ namespace Dexter.Services
             }
 
             LevelingDB.onTextCooldowns.RemoveWhere(e => true);
-            LevelingDB.SaveChanges();
         }
 
         private async Task HandleMessage(SocketMessage message)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
+
             if (!LevelingConfiguration.ManageTextXP) return;
             if (message.Author.IsBot) return;
 
@@ -133,8 +134,6 @@ namespace Dexter.Services
                 );
 
             LevelingDB.onTextCooldowns.Add(message.Author.Id);
-            LevelingDB.SaveChanges();
-
         }
 
         /// <summary>
@@ -147,6 +146,10 @@ namespace Dexter.Services
 
         public async Task<bool> UpdateRoles(IGuildUser user, bool removeExtra = false, int level = -1)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
+
             if (user is null || !LevelingConfiguration.HandleRoles) return false;
 
             if (level < 0)
@@ -303,6 +306,10 @@ namespace Dexter.Services
 
         public async Task<RoleModificationResponse> UpdateRolesWithInfo(IGuildUser user, bool removeExtra = false, int level = -1)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
+
             if (user is null) return await new RoleModificationResponse(user, false, "Received user is null!").Log();
             if (!LevelingConfiguration.HandleRoles) return new RoleModificationResponse(user, false, "Dexter does not manage roles in this server!");
 

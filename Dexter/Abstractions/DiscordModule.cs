@@ -4,10 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
-using Dexter.Databases.Proposals;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Dexter.Services;
+using Dexter.Events;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
@@ -31,7 +30,7 @@ namespace Dexter.Abstractions
         /// <summary>
         /// The ProposalService class is used to send a command to be accepted by an admin through the SendForAdminApproval method.
         /// </summary>
-        public ProposalService ProposalService { get; set; }
+        public Proposals ProposalService { get; set; }
 
         /// <summary>
         /// The Interactivity class is used to create a reaction menu for the await CreateReactionMenu method.
@@ -41,12 +40,12 @@ namespace Dexter.Abstractions
         /// <summary>
         /// The TimerService class is used to create a timer for wait until an expiration time has been reached.
         /// </summary>
-        public TimerService TimerService { get; set; }
+        public Timers TimerService { get; set; }
 
         /// <summary>
         /// The ProfileService is used to find a random profile picture for a webhook on create or get.
         /// </summary>
-        public ProfilingService ProfileService { get; set; }
+        public Profiling ProfileService { get; set; }
 
         /// <summary>
         /// The BotConfiguration is used to find the thumbnails for the BuildEmbed method.
@@ -81,7 +80,7 @@ namespace Dexter.Abstractions
         /// <param name="denyCallbackParameters">Optional parameters for the <paramref name="denyCallbackMethod"/>, must be set if <paramref name="denyCallbackMethod"/> is set.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully. The Task holds the <c>string</c> token of the created <c>Proposal</c>.</returns>
 
-        public async Task<Proposal> SendForAdminApproval(Action<Dictionary<string, string>> callbackMethod,
+        public async Task<Databases.Proposals.Proposal> SendForAdminApproval(Action<Dictionary<string, string>> callbackMethod,
                 Dictionary<string, string> callbackParameters, ulong author, string proposal,
                 Action<Dictionary<string, string>> denyCallbackMethod = null, Dictionary<string, string> denyCallbackParameters = null)
         {
@@ -156,7 +155,7 @@ namespace Dexter.Abstractions
         /// <returns>The token associated with the timed event for future reference.</returns>
 
         public static async Task<string> CreateEventTimer(Func<Dictionary<string, string>, Task> callbackMethod,
-                Dictionary<string, string> callbackParameters, int secondsTillExpiration, TimerType timerType, TimerService timerService)
+                Dictionary<string, string> callbackParameters, int secondsTillExpiration, TimerType timerType, Timers timerService)
         {
             string json = JsonConvert.SerializeObject(callbackParameters);
 

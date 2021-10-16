@@ -62,8 +62,6 @@ namespace Dexter.Commands
             datato.TextXP += textxp;
             datato.VoiceXP += voicexp;
 
-            await LevelingDB.SaveChangesAsync();
-
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Transferrence successful!")
                 .WithDescription($"Successfully transferred {textxp} text XP and {voicexp} voice XP from user {idfrom} to user {idto}.\n" +

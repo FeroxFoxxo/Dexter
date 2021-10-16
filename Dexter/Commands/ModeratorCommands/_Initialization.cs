@@ -8,6 +8,7 @@ using Dexter.Databases.Mail;
 using Dexter.Databases.Relays;
 using Dexter.Databases.UserProfiles;
 using Dexter.Databases.UserRestrictions;
+using Dexter.Events;
 using Discord.WebSocket;
 
 namespace Dexter.Commands
@@ -86,6 +87,7 @@ namespace Dexter.Commands
 
         public Random Random { get; set; }
 
+        public Moderation ModerationService { get; set; }
     }
 
 }

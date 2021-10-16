@@ -82,8 +82,6 @@ namespace Dexter.Commands
                     ReleaseTimer = releaseTimer
                 });
 
-            CommunityEventsDB.SaveChanges();
-
             await UpdateEventProposal(id);
 
             if (eventType == EventType.Official)
@@ -167,8 +165,6 @@ namespace Dexter.Commands
                     .WithDescription(cEvent.Description)
                     .AddField(reason.Length > 0, "Reason: ", reason)
                     .AddField("Release Time:", $"{release:ddd', 'MMM d 'at' hh:mm tt 'UTC'z}"));
-
-            CommunityEventsDB.SaveChanges();
         }
 
         /// <summary>
@@ -201,8 +197,6 @@ namespace Dexter.Commands
                     .AddField(reason.Length > 0, "Reason: ", reason));
 
             cEvent.Status = EventStatus.Denied;
-
-            CommunityEventsDB.SaveChanges();
         }
 
         /// <summary>
@@ -264,8 +258,6 @@ namespace Dexter.Commands
             }
 
             await UpdateEventProposal(cEvent.ID);
-
-            CommunityEventsDB.SaveChanges();
         }
 
         /// <summary>
@@ -292,8 +284,6 @@ namespace Dexter.Commands
 
             cEvent.Status = EventStatus.Removed;
             await UpdateEventProposal(cEvent.ID);
-
-            CommunityEventsDB.SaveChanges();
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Event was successfully removed!")
@@ -336,8 +326,6 @@ namespace Dexter.Commands
 
             cEvent.Description = newDescription;
             await UpdateEventProposal(cEvent.ID);
-
-            CommunityEventsDB.SaveChanges();
 
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Event was successfully edited!")

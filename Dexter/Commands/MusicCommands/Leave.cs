@@ -19,7 +19,7 @@ namespace Dexter.Commands
 
         public async Task LeaveCommand()
         {
-            if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
+            if (!MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to leave VC!")
@@ -34,7 +34,7 @@ namespace Dexter.Commands
 
             try
             {
-                await LavaNode.LeaveAsync(player.VoiceChannel);
+                await MusicService.LavaNode.LeaveAsync(player.VoiceChannel);
 
                 lock (MusicService.LoopLocker)
                     if (MusicService.LoopedGuilds.ContainsKey(player.VoiceChannel.Guild.Id))

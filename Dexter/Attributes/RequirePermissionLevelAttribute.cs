@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Enums;
+using Dexter.Events;
 using Dexter.Extensions;
 using Dexter.Helpers;
 using Discord.Commands;
@@ -71,7 +72,7 @@ namespace Dexter.Attributes.Methods
                     return PreconditionResult.FromSuccess();
                 else
                 {
-                    if (services.GetService<LavaNode>().TryGetPlayer(context.Guild, out var player))
+                    if (services.GetService<Music>().LavaNode.TryGetPlayer(context.Guild, out var player))
                     {
                         int uCount = 0;
                         

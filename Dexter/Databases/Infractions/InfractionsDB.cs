@@ -58,7 +58,6 @@ namespace Dexter.Databases.Infractions
             {
                 dexterProfile = new DexterProfile() { UserID = user, InfractionAmount = ModerationConfiguration.MaxPoints, CurrentMute = "", CurrentPointTimer = "" };
                 DexterProfiles.Add(dexterProfile);
-                SaveChanges();
             }
 
             return dexterProfile;

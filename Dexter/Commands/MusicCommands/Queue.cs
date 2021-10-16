@@ -17,7 +17,7 @@ namespace Dexter.Commands
 
         public async Task QueueCommand()
         {
-            if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
+            if (!MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                         .WithTitle("Could not display queue.")

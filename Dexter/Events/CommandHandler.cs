@@ -12,9 +12,10 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
 
     /// <summary>
@@ -24,7 +25,7 @@ namespace Dexter.Services
     /// an appropriate error to the channel, pinging the developers if the error is unknown.
     /// </summary>
 
-    public class CommandHandlerService : Service
+    public class CommandHandler : Event
     {
 
         /// <summary>
@@ -40,12 +41,6 @@ namespace Dexter.Services
         public CommandService CommandService { get; set; }
 
         /// <summary>
-        /// The CustomCommandDB is used to get our custom commands, which - if we fail as the command is unknown - we parse to find a match.
-        /// </summary>
-
-        public CustomCommandDB CustomCommandDB { get; set; }
-
-        /// <summary>
         /// The ProposalConfiguration is used to operate the suggestion service and confugure voting thresholds.
         /// </summary>
 
@@ -57,13 +52,13 @@ namespace Dexter.Services
 
         public CustomCommandsConfiguration CustomCommandsConfiguration { get; set; }
 
-        public ILogger<CommandHandlerService> Logger { get; set; }
+        public ILogger<CommandHandler> Logger { get; set; }
 
         /// <summary>
         /// The Initialize override hooks into both the Client's MessageReceived event and the CommandService's CommandExecuted event.
         /// </summary>
 
-        public override void Initialize()
+        public override void InitializeEvents()
         {
             DiscordShardedClient.MessageReceived += HandleCommandAsync;
             CommandService.CommandExecuted += SendCommandError;
@@ -101,7 +96,7 @@ namespace Dexter.Services
         /// <param name="result">The result specifies the outcome of the attempted run of the command - whether it was successful or not and the error it may have run in to.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        public async Task SendCommandError(Optional<CommandInfo> commandInfo, ICommandContext commandContext, Discord.Commands.IResult result)
+        public async Task SendCommandError(Optional<CommandInfo> commandInfo, ICommandContext commandContext, IResult result)
         {
             if (result.IsSuccess)
                 return;
@@ -137,53 +132,57 @@ namespace Dexter.Services
                     case CommandError.UnknownCommand:
                         string[] customCommandArgs = commandContext.Message.Content[BotConfiguration.Prefix.Length..].Split(' ');
 
-                        CustomCommand customCommand = CustomCommandDB.GetCommandByNameOrAlias(customCommandArgs[0].ToLower());
-
-                        if (customCommand != null)
+                        using (var scope = ServiceProvider.CreateScope())
                         {
-                            if (customCommand.Reply.Length > 0 && Commands.CustomCommands.IsCustomCommandActive(customCommand, DiscordShardedClient, BotConfiguration, CustomCommandsConfiguration))
+                            var CustomCommandDB = scope.ServiceProvider.GetRequiredService<CustomCommandDB>();
+
+                            CustomCommand customCommand = CustomCommandDB.GetCommandByNameOrAlias(customCommandArgs[0].ToLower());
+
+                            if (customCommand != null)
                             {
-                                string reply = customCommand.Reply;
-
-                                ulong firstMentionedID = commandContext.Message.MentionedUserIds?.FirstOrDefault() ?? default;
-
-                                reply = reply.Replace("AUTHOR", (firstMentionedID != default && firstMentionedID != commandContext?.User.Id) || !reply.Contains("USER")
-                                    ? commandContext.User.Mention : commandContext?.Client?.CurrentUser?.Mention ?? "Dexter");
-
-                                List<string> userMentions = new();
-                                foreach(ulong id in commandContext.Message.MentionedUserIds ?? Array.Empty<ulong>())
+                                if (customCommand.Reply.Length > 0 && Commands.CustomCommands.IsCustomCommandActive(customCommand, DiscordShardedClient, BotConfiguration, CustomCommandsConfiguration))
                                 {
-                                    IUser user = DiscordShardedClient.GetUser(id);
-                                    if (user is not null)
-                                        userMentions.Add(user.Mention);
+                                    string reply = customCommand.Reply;
+
+                                    ulong firstMentionedID = commandContext.Message.MentionedUserIds?.FirstOrDefault() ?? default;
+
+                                    reply = reply.Replace("AUTHOR", (firstMentionedID != default && firstMentionedID != commandContext?.User.Id) || !reply.Contains("USER")
+                                        ? commandContext.User.Mention : commandContext?.Client?.CurrentUser?.Mention ?? "Dexter");
+
+                                    List<string> userMentions = new();
+                                    foreach (ulong id in commandContext.Message.MentionedUserIds ?? Array.Empty<ulong>())
+                                    {
+                                        IUser user = DiscordShardedClient.GetUser(id);
+                                        if (user is not null)
+                                            userMentions.Add(user.Mention);
+                                    }
+
+                                    reply = userMentions.Any()
+                                        ? reply.Replace("USER", LanguageHelper.Enumerate(userMentions))
+                                        : reply.Replace("USER", commandContext?.User?.Mention ?? "{Unknown}");
+
+                                    await commandContext.Channel.SendMessageAsync(reply);
                                 }
-
-                                reply = userMentions.Any()
-                                    ? reply.Replace("USER", LanguageHelper.Enumerate(userMentions))
-                                    : reply.Replace("USER", commandContext?.User?.Mention ?? "{Unknown}");
-
-                                await commandContext.Channel.SendMessageAsync(reply);
+                                else
+                                    message = BuildEmbed(EmojiEnum.Annoyed)
+                                        .WithTitle("Misconfigured command!")
+                                        .WithDescription($"`{customCommand.CommandName}` has not been configured! Please contact a moderator about this. <3");
                             }
-                            else
-                                message = BuildEmbed(EmojiEnum.Annoyed)
-                                    .WithTitle("Misconfigured command!")
-                                    .WithDescription($"`{customCommand.CommandName}` has not been configured! Please contact a moderator about this. <3");
-                        }
-                        else
-                        {
-                            if (commandContext.Message.Content.Length <= 1)
-                                return;
-                            else if (commandContext.Message.Content.Count(Character => Character == '~') > 1 ||
-                                    ProposalConfiguration.CommandRemovals.Contains(commandContext.Message.Content.Split(' ')[0]))
-                                return;
                             else
                             {
-                                message = BuildEmbed(EmojiEnum.Annoyed)
-                                        .WithTitle("Unknown Command.")
-                                        .WithDescription($"Oopsies! It seems as if the command **{customCommandArgs[0].SanitizeMarkdown()}** doesn't exist!");
+                                if (commandContext.Message.Content.Length <= 1)
+                                    return;
+                                else if (commandContext.Message.Content.Count(Character => Character == '~') > 1 ||
+                                        ProposalConfiguration.CommandRemovals.Contains(commandContext.Message.Content.Split(' ')[0]))
+                                    return;
+                                else
+                                {
+                                    message = BuildEmbed(EmojiEnum.Annoyed)
+                                            .WithTitle("Unknown Command.")
+                                            .WithDescription($"Oopsies! It seems as if the command **{customCommandArgs[0].SanitizeMarkdown()}** doesn't exist!");
+                                }
                             }
                         }
-
                         break;
 
                     // Parse Failed specifies that the TypeReader has been unable to parse a specific parameter of the command.

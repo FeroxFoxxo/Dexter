@@ -71,7 +71,7 @@ namespace Dexter.Databases.Reminders
             };
 
             Reminders.Add(r);
-            SaveChanges();
+
             return r;
         }
 

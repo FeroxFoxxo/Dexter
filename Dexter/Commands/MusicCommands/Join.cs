@@ -18,7 +18,7 @@ namespace Dexter.Commands
 
         public async Task JoinCommand()
         {
-            if (LavaNode.HasPlayer(Context.Guild))
+            if (MusicService.LavaNode.HasPlayer(Context.Guild))
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle($"Unable to join channel!")
                     .WithDescription("I'm already connected to a voice channel somewhere in this server.")
@@ -39,7 +39,7 @@ namespace Dexter.Commands
 
                 try
                 {
-                    await LavaNode.JoinAsync(voiceState.VoiceChannel, Context.Channel as ITextChannel);
+                    await MusicService.LavaNode.JoinAsync(voiceState.VoiceChannel, Context.Channel as ITextChannel);
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"Joined {voiceState.VoiceChannel.Name}!")

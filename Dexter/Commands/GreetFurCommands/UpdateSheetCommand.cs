@@ -6,7 +6,7 @@ using Dexter.Attributes.Methods;
 using Dexter.Enums;
 using Discord;
 using Discord.Commands;
-using static Dexter.Services.GreetFurService;
+using static Dexter.Events.GreetFur;
 
 namespace Dexter.Commands
 {

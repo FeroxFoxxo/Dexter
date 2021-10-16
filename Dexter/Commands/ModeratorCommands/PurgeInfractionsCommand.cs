@@ -63,8 +63,6 @@ namespace Dexter.Commands
 
             await InfractionsDB.Infractions.AsQueryable().Where(Warning => Warning.User == UserID).ForEachAsync(Warning => Warning.EntryType = EntryType.Revoke);
 
-            InfractionsDB.SaveChanges();
-
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Infractions Purged")
                 .WithDescription($"Heya! I've purged {Count} warnings from your account. You now have a clean slate! <3")

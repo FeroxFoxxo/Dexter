@@ -3,9 +3,10 @@ using Dexter.Configurations;
 using Dexter.Databases.Mail;
 using Dexter.Databases.Reminders;
 using Dexter.Databases.UserProfiles;
-using Dexter.Services;
+using Dexter.Events;
 using Discord.Commands;
 using Genbox.WolframAlpha;
+using System;
 
 namespace Dexter.Commands
 {
@@ -30,12 +31,6 @@ namespace Dexter.Commands
         public ProfilesDB ProfilesDB { get; set; }
 
         /// <summary>
-        /// The ModmailDB stores information about the mailing service and mailed messages.
-        /// </summary>
-
-        public ModMailDB ModMailDB { get; set; }
-
-        /// <summary>
         /// Stores information relevant to the Reminder system.
         /// </summary>
 
@@ -45,13 +40,7 @@ namespace Dexter.Commands
         /// Stores relevant information about certain users' historical records.
         /// </summary>
 
-        public UserRecordsService UserRecordsService { get; set; }
-
-        /// <summary>
-        /// Coordinates the initialization of all necessary infrastructure upon startup.
-        /// </summary>
-
-        public StartupService StartupService { get; set; }
+        public UserRecords UserRecordsService { get; set; }
 
         /// <summary>
         /// Contains information relative to organic language management and time zones.
@@ -59,16 +48,12 @@ namespace Dexter.Commands
 
         public LanguageConfiguration LanguageConfiguration { get; set; }
 
-        /// <summary>
-        /// Allows interface with the WolframAlpha servers for the math command.
-        /// </summary>
-
-        public WolframAlphaClient WolframAlphaClient;
+        public IServiceProvider ServiceProvider { get; set; }
 
         /// <summary>
         /// Levelling role for getting the Awoo role.
         /// </summary>
-        
+
         public LevelingConfiguration LevelingConfiguration { get; set; }
 
 

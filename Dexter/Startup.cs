@@ -1,10 +1,12 @@
 using Dexter.Abstractions;
+using Dexter.Workers;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
 using Fergun.Interactive;
 using Figgle;
+using Genbox.WolframAlpha;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
@@ -19,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -53,9 +56,10 @@ namespace Dexter
 		/// <param name="spotifySecret">[OPTIONAL] Spotify CLIENT_SECRET from developer.spotify.com/dashboard.</param>
 		/// <param name="dbUser">[OPTIONAL] DBUSER for the MySQL database username.</param>
 		/// <param name="dbPassword">[OPTIONAL] DBPASSWORD for the MySQL database password.</param>
+		/// <param name="wolframAPI">[OPTIONAL] WOLFRAM ALPHA API KEY.</param>
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public static async Task Main(string token, string version, string directory, string spotifyID, string spotifySecret, string dbUser, string dbPassword)
+		public static async Task Main(string token, string version, string directory, string spotifyID, string spotifySecret, string dbUser, string dbPassword, string wolframAPI)
 		{
 			p_Version = version;
 			p_Token = token;
@@ -107,7 +111,7 @@ namespace Dexter
 				c.SwaggerDoc(version, new() { Title = name, Version = version });
 			});
 
-			// Init spotify API.
+			// Init Spotify API.
 
 			if (!string.IsNullOrEmpty(spotifyID) && !string.IsNullOrEmpty(spotifySecret))
 			{
@@ -116,7 +120,12 @@ namespace Dexter
 			else
 				builder.Services.AddSingleton(new ClientCredentialsRequest("UNKNOWN", "UNKNOWN"));
 
-			// Init google API.
+			// Init WolfRam Alpha.
+
+			if (!string.IsNullOrEmpty(wolframAPI))
+				builder.Services.AddSingleton(new WolframAlphaClient(wolframAPI));
+
+			// Init Google API.
 
 			if (!File.Exists("Credentials.json"))
 			{
@@ -196,8 +205,6 @@ namespace Dexter
 				return new InteractiveService(client, TimeSpan.FromMinutes(5));
 			});
 
-			builder.Services.AddLavaNode(x => { x.SelfDeaf = true; x.Port = 2333; });
-
 			bool hasErrored = false;
 
 			// Finds all JSON configurations and initializes them from their respective files.
@@ -253,34 +260,32 @@ namespace Dexter
 			if (hasErrored)
 				return;
 
-			GetDatabases().ForEach(t => builder.Services.AddSingleton(t));
+			GetDatabases().ForEach(t => builder.Services.AddScoped(t));
 
-			GetCommands().ForEach(t => builder.Services.AddSingleton(t));
-
-			GetServices().ForEach(t => builder.Services.AddSingleton(t));
+			GetEvents().ForEach(t => builder.Services.AddSingleton(t));
 
 			// Add hosted events to the application, which will run until it is closed.
 
-			builder.Services.AddHostedService<ShardHost>();
+			builder.Services.AddHostedService<DiscordWorker>();
 
 			// Build the website and start up swagger to allow for quick development of the API.
 
 			var app = builder.Build();
 
-			// Makes sure all entity databases exist and are created if they do not.
-			GetDatabases().ForEach(
-				DBType =>
-				{
-					Database entityDatabase = (Database) app.Services.GetRequiredService(DBType);
+			using (var scope = app.Services.CreateScope())
 
-					entityDatabase.Database.EnsureCreated();
-				}
-			);
+				// Makes sure all entity databases exist and are created if they do not.
+				GetDatabases().ForEach(
+					DBType =>
+					{
+						Database entityDatabase = (Database)scope.ServiceProvider.GetRequiredService(DBType);
 
-			// Adds all the commands', databases' and services' dependencies to their properties.
-			Assembly.GetExecutingAssembly().GetTypes()
-					.Where(type => (type.IsSubclassOf(typeof(DiscordModule)) || type.IsSubclassOf(typeof(Service)) || type.IsSubclassOf(typeof(Database))) && !type.IsAbstract)
-					.ToList().ForEach(
+						entityDatabase.Database.EnsureCreated();
+					}
+				);
+
+			// Adds all the services' dependencies to their properties.
+			GetEvents().ForEach(
 				type => type.GetProperties().ToList().ForEach(property =>
 				{
 					if (property.PropertyType == typeof(ServiceProvider))
@@ -297,10 +302,9 @@ namespace Dexter
 				})
 			);
 
-
 			// Connects all the event hooks in initializable modules to their designated delegates.
-			GetServices().ForEach(
-				type => (app.Services.GetService(type) as Service).Initialize()
+			GetEvents().ForEach(
+				type => (app.Services.GetService(type) as Event).InitializeEvents()
 			);
 
 			app.UseSwagger();
@@ -316,13 +320,11 @@ namespace Dexter
 			app.Run();
 		}
 
-		private static List<Type> GetCommands() { return GetClassesOfType(typeof(DiscordModule)); }
-
 		private static List<Type> GetDatabases() { return GetClassesOfType(typeof(Database)); }
 
 		private static List<Type> GetJSONConfigs() { return GetClassesOfType(typeof(JSONConfig)); }
 
-		private static List<Type> GetServices() { return GetClassesOfType(typeof(Service)); }
+		private static List<Type> GetEvents() { return GetClassesOfType(typeof(Event)); }
 
 		private static List<Type> GetClassesOfType(Type type)
 		{

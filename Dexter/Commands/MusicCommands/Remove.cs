@@ -18,7 +18,7 @@ namespace Dexter.Commands
 
         public async Task RemoveCommand(int index)
         {
-            if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
+            if (!MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
                     .WithTitle("Unable to remove song!")

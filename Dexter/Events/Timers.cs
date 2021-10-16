@@ -6,7 +6,6 @@ using Dexter.Abstractions;
 using Dexter.Databases.EventTimers;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System.Data;
@@ -14,7 +13,7 @@ using System.Reflection;
 using Timer = System.Timers.Timer;
 using Microsoft.Extensions.Logging;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
 
     /// <summary>
@@ -22,20 +21,14 @@ namespace Dexter.Services
     /// Timers that expire will be removed but interval timers will loop at set intervals of time.
     /// </summary>
 
-    public class TimerService : Service
+    public class Timers : Event
     {
-
-        /// <summary>
-        /// The database holding all dynamic data to reference and operate with Event Timers.
-        /// </summary>
-
-        public EventTimersDB EventTimersDB { get; set; }
 
         /// <summary>
         /// The ServiceProvider is where our dependencies are stored - used to execute an object when a timer is run.
         /// </summary>
 
-        public ServiceProvider ServiceProvider { get; set; }
+        public IServiceProvider ServiceProvider { get; set; }
 
         /// <summary>
         /// The Random instance is used to pick a set number of random characters from the configuration to create a token.
@@ -49,13 +42,13 @@ namespace Dexter.Services
 
         public bool HasStarted = false;
 
-        public ILogger<TimerService> Logger { get; set; }
+        public ILogger<Timers> Logger { get; set; }
 
         /// <summary>
         /// The Initialize method hooks the client Ready events and begins to loop through all timers.
         /// </summary>
 
-        public override void Initialize()
+        public override void InitializeEvents()
         {
             DiscordShardedClient.ShardReady += (DiscordSocketClient _) => HasTimerStarted();
         }
@@ -70,7 +63,7 @@ namespace Dexter.Services
             // Runs the bot timer to loop through all events that may occur on a timer.
             if (!HasStarted)
             {
-                Timer EventTimer = new(TimeSpan.FromSeconds(5).TotalMilliseconds)
+                System.Timers.Timer EventTimer = new(TimeSpan.FromSeconds(5).TotalMilliseconds)
                 {
                     AutoReset = true,
                     Enabled = true
@@ -90,6 +83,10 @@ namespace Dexter.Services
 
         public async Task LoopThroughEvents()
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+
             long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             EventTimer[] expiredTimers = EventTimersDB.EventTimers.AsQueryable().Where(Timer => currentTime > Timer.ExpirationTime).ToArray();
@@ -132,8 +129,6 @@ namespace Dexter.Services
                 else if (timer.TimerType == TimerType.Interval)
                     EventTimersDB.EventTimers.Remove(timer);
             }
-
-            if (expiredTimers.Length > 0) { EventTimersDB.SaveChanges(); }
         }
 
         /// <summary>
@@ -148,6 +143,10 @@ namespace Dexter.Services
 
         public async Task<string> AddTimer(string JSON, string ClassName, string MethodName, int SecondsTillExpiration, TimerType TimerType)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+
             string Token = CreateToken();
 
             EventTimer Timer = new()
@@ -163,8 +162,6 @@ namespace Dexter.Services
 
             EventTimersDB.EventTimers.Add(Timer);
 
-            await EventTimersDB.SaveChangesAsync();
-
             return Timer.Token;
         }
 
@@ -175,6 +172,10 @@ namespace Dexter.Services
 
         public string CreateToken()
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+
             char[] TokenArray = new char[BotConfiguration.TrackerLength];
 
             for (int i = 0; i < TokenArray.Length; i++)
@@ -198,6 +199,10 @@ namespace Dexter.Services
 
         public bool TimerExists(string TimerTracker)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+
             EventTimer Timer = EventTimersDB.EventTimers.Find(TimerTracker);
 
             if (Timer == null)
@@ -214,12 +219,14 @@ namespace Dexter.Services
 
         public void RemoveTimer(string TimerTracker)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+
             EventTimer Timer = EventTimersDB.EventTimers.Find(TimerTracker);
 
             if (Timer != null)
                 EventTimersDB.EventTimers.Remove(Timer);
-
-            EventTimersDB.SaveChanges();
         }
 
     }

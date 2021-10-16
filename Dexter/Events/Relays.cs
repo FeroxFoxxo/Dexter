@@ -2,28 +2,23 @@ using System.Threading.Tasks;
 using Dexter.Abstractions;
 using Dexter.Databases.Relays;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
 
     /// <summary>
     /// The RelayService sends messages to a channel with a specified message delay as a notification.
     /// </summary>
     
-    public class RelayService : Service
+    public class Relays : Event
     {
-
-        /// <summary>
-        /// The Relay DB specifies the notifications and in which channels they are in.
-        /// </summary>
-        
-        public RelayDB RelayDB { get; set; }
 
         /// <summary>
         /// The Initialize method hooks up the message recieved event to the relay method.
         /// </summary>
         
-        public override void Initialize()
+        public override void InitializeEvents()
         {
             DiscordShardedClient.MessageReceived += CheckRelay;
         }
@@ -37,6 +32,10 @@ namespace Dexter.Services
 
         public async Task CheckRelay(SocketMessage SocketMessage)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var RelayDB = scope.ServiceProvider.GetRequiredService<RelayDB>();
+
             Relay Relay = RelayDB.Relays.Find(SocketMessage.Channel.Id);
 
             if (Relay == null)
@@ -50,8 +49,6 @@ namespace Dexter.Services
             }
 
             Relay.CurrentMessageCount += 1;
-
-            RelayDB.SaveChanges();
         }
 
     }

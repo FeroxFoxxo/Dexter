@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Abstractions;
 using Dexter.Configurations;
-using Dexter.Services;
+using Dexter.Events;
 using Discord;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -54,10 +54,9 @@ namespace Dexter.Databases.Levels
         /// Gets a level entry from the database or creates one if none exist for <paramref name="id"/>
         /// </summary>
         /// <param name="id">The ID of the user to fetch.</param>
-        /// <param name="save">Whether to save the dabase if the user needs to be created.</param>
         /// <returns>A <see cref="UserLevel"/> object that corresponds to the given <paramref name="id"/> and is being tracked by the database context.</returns>
 
-        public UserLevel GetOrCreateLevelData(ulong id, bool save = true)
+        public UserLevel GetOrCreateLevelData(ulong id)
         {
             UserLevel level = Levels.Find(id);
 
@@ -71,8 +70,6 @@ namespace Dexter.Databases.Levels
                 };
 
                 Levels.Add(level);
-                if (save)
-                    SaveChanges();
             }
 
             return level;
@@ -82,18 +79,17 @@ namespace Dexter.Databases.Levels
         /// Gets a level record for a given user, or creates one if it doesn't exist.
         /// </summary>
         /// <param name="id">The ID of the user to look up.</param>
-        /// <param name="settings">The corresponding User Preferences object for this user.</param>
-        /// <param name="save">Whether to save the data to the database if a user or preferences object needs to be created.</param>
+        /// <param name="setting">The corresponding User Preferences object for this user.</param>
         /// <exception cref="InvalidOperationException"></exception>
         /// <returns>A <see cref="UserLevel"/> object containing the obtained XP levels for the given <paramref name="id"/>.</returns>
 
-        public UserLevel GetOrCreateLevelData(ulong id, out LevelPreferences settings, bool save = true)
+        public UserLevel GetOrCreateLevelData(ulong id, out LevelPreferences setting)
         {
             UserLevel level;
             try
             {
                 level = Levels.Find(id);
-                settings = Prefs.Find(id);
+                setting = Prefs.Find(id);
             }
             catch (IndexOutOfRangeException e)
             {
@@ -101,7 +97,6 @@ namespace Dexter.Databases.Levels
                     $"\n{e}");
             }
 
-            bool toSave = false;
             if (level is null)
             {
                 level = new UserLevel
@@ -112,21 +107,17 @@ namespace Dexter.Databases.Levels
                 };
 
                 Levels.Add(level);
-                toSave = true;
             }
 
-            if (settings is null)
+            if (setting is null)
             {
-                settings = new()
+                setting = new()
                 {
                     UserId = id
                 };
 
-                Prefs.Add(settings);
-                toSave = true;
+                Prefs.Add(setting);
             }
-
-            if (toSave && save) SaveChanges();
 
             return level;
         }
@@ -136,7 +127,7 @@ namespace Dexter.Databases.Levels
         /// </summary>
 
         [NotMapped]
-        public LevelingService LevelingService { get; set; }
+        public Leveling LevelingService { get; set; }
 
         /// <summary>
         /// Grants a given user an amount of XP and announces the level up in <paramref name="fallbackChannel"/> if appropriate.
@@ -156,7 +147,6 @@ namespace Dexter.Databases.Levels
             {
                 userlevel = new UserLevel() { UserID = user.Id, TextXP = 0, VoiceXP = 0 };
                 Levels.Add(userlevel);
-                await SaveChangesAsync();
             }
 
             int currentLevel;
@@ -217,8 +207,6 @@ namespace Dexter.Databases.Levels
                     await user.AddRoleAsync(memrole);
                 }
             }
-
-            await SaveChangesAsync();
         }
 
     }

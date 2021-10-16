@@ -13,7 +13,7 @@ using Newtonsoft.Json.Linq;
 using System.Reflection;
 using System.Net.Http;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
 
     /// <summary>
@@ -22,14 +22,14 @@ namespace Dexter.Services
     /// like its bot and Discord.NET versionings.
     /// </summary>
 
-    public class StartupService : Service
+    public class StartupNotification : Event
     {
 
         /// <summary>
         /// The ServiceProvider is where our dependencies are stored - given to get an initialized class.
         /// </summary>
 
-        public ServiceProvider ServiceProvider { get; set; }
+        public IServiceProvider ServiceProvider { get; set; }
         
         /// <summary>
         /// <see langword="true"/> if the bot has finished its startup process; <see langword="false"/> otherwise.
@@ -41,7 +41,7 @@ namespace Dexter.Services
         /// The Initialize method hooks the client ready event to the Display Startup Version Async method.
         /// </summary>
 
-        public override void Initialize()
+        public override void InitializeEvents()
         {
             DiscordShardedClient.ShardReady += (DiscordSocketClient _) => DisplayStartupVersionAsync();
         }

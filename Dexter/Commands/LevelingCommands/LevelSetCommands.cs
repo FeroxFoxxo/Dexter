@@ -119,7 +119,6 @@ namespace Dexter.Commands
             }
 
             await LevelingService.UpdateRoles(DiscordShardedClient.GetGuild(BotConfiguration.GuildID)?.GetUser(user.Id), true);
-            LevelingDB.SaveChanges();
         }
 
         /// <summary>
@@ -184,7 +183,6 @@ namespace Dexter.Commands
                 .SendEmbed(Context.Channel);
 
             await LevelingService.UpdateRoles(DiscordShardedClient.GetGuild(BotConfiguration.GuildID)?.GetUser(user.Id), true);
-            LevelingDB.SaveChanges();
         }
     }
 }

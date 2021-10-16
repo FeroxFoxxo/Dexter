@@ -8,7 +8,7 @@ using Discord;
 using Discord.Webhook;
 using Discord.WebSocket;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
 
     /// <summary>
@@ -16,7 +16,7 @@ namespace Dexter.Services
     /// It does this through creating a webhook and sending to that very webhook each time an event runs.
     /// </summary>
 
-    public class MeetNGreetService : Service
+    public class MeetNGreet : Event
     {
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Dexter.Services
         /// It also hooks the ready event to the CreateWebhook delegate.
         /// </summary>
 
-        public override void Initialize()
+        public override void InitializeEvents()
         {
             DiscordShardedClient.MessageDeleted += MNGMessageDeleted;
             DiscordShardedClient.MessageUpdated += MNGMessageUpdated;

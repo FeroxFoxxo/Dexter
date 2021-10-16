@@ -487,7 +487,6 @@ namespace Dexter.Games
                         .WithDescription($"The victory goes for {(isWhite ? "Black" : "White")}! The board has been reset, you can play again by typing `board`. The game master can swap colors by typing `swap`.")
                         .SendEmbed(message.Channel);
                     Reset(funConfiguration, gamesDB);
-                    gamesDB.SaveChanges();
                 }
             }
 
@@ -521,7 +520,6 @@ namespace Dexter.Games
                             .WithDescription($"No winners this game, but also no losers! The board has been reset, you can play again by typing `board`. The game master can swap colors by typing `swap`.")
                             .SendEmbed(message.Channel);
                         Reset(funConfiguration, gamesDB);
-                        gamesDB.SaveChanges();
                     }
                     else
                     {

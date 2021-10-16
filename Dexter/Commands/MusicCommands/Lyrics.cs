@@ -32,7 +32,7 @@ namespace Dexter.Commands
 
 		public async Task LyricsCommand()
 		{
-			if (!await LavaNode.SafeJoinAsync(Context.User, Context.Channel))
+			if (!await MusicService.LavaNode.SafeJoinAsync(Context.User, Context.Channel))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to find lyrics!")
@@ -42,7 +42,7 @@ namespace Dexter.Commands
 				return;
 			}
 
-			if (LavaNode.TryGetPlayer(Context.Guild, out var player))
+			if (MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
 			{
 				if (player.PlayerState != PlayerState.Playing)
 				{
@@ -65,7 +65,7 @@ namespace Dexter.Commands
 
 			try
 			{
-				searchResult = await LavaNode.SearchAsync(SearchType.YouTube, song);
+				searchResult = await MusicService.LavaNode.SearchAsync(SearchType.YouTube, song);
 			}
 			catch (Exception)
 			{

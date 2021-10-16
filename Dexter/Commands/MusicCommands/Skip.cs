@@ -27,7 +27,7 @@ namespace Dexter.Commands
 				return;
 			}
 
-			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
+			if (!MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to skip song!")

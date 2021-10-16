@@ -63,8 +63,6 @@ namespace Dexter.Commands
                     Borkday.BorkdayTime = DateTimeOffset.Now.ToUnixTimeSeconds();
             }
 
-            BorkdayDB.SaveChanges();
-
             IRole Role = Context.Guild.GetRole(
                 User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator ?
                     ModerationConfiguration.StaffBorkdayRoleID : ModerationConfiguration.BorkdayRoleID

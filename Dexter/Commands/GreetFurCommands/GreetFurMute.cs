@@ -49,7 +49,7 @@ namespace Dexter.Commands
                     .AddField("Reason", Reason, true)
                     .SendEmbed(await CreateOrGetWebhook(GreetFurConfiguration.GreetFurMuteChannel, GreetFurConfiguration.GreetFurMuteWebhookName));
 
-                await ModeratorCommands.IssueInfraction(0, User, TimeSpan.FromDays(1), Reason, Context);
+                await ModerationService.IssueInfraction(0, User, TimeSpan.FromDays(1), Reason, Context);
             }
         }
 

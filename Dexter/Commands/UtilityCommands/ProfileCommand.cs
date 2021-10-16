@@ -227,11 +227,11 @@ namespace Dexter.Commands
             {
                 case "nick":
                 case "nickname":
-                    enumNameType = Databases.UserProfiles.NameType.Nickname;
+                    enumNameType = NameType.Nickname;
                     break;
                 case "user":
                 case "username":
-                    enumNameType = Databases.UserProfiles.NameType.Username;
+                    enumNameType = NameType.Username;
                     break;
                 default:
                     await BuildEmbed(EmojiEnum.Annoyed)

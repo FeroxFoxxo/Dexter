@@ -9,9 +9,10 @@ using Dexter.Databases.EventTimers;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
 
     /// <summary>
@@ -20,7 +21,7 @@ namespace Dexter.Services
     /// It also deals with other profiling aspects like database saving.
     /// </summary>
 
-    public class ProfilingService : Service
+    public class Profiling : Event
     {
 
         /// <summary>
@@ -44,15 +45,19 @@ namespace Dexter.Services
         /// <summary>
         /// The Logger instance for the current class that has been injected through DI.
         /// </summary>
-        public ILogger<ProfilingService> Logger { get; set; }
+        public ILogger<Profiling> Logger { get; set; }
 
         /// <summary>
         /// The Initialize void hooks the Client.Ready event to the ChangePFP method.
         /// </summary>
 
-        public override async void Initialize()
+        public override async void InitializeEvents()
         {
-            if (TimerService.EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault() == null)
+            using var scope = ServiceProvider.CreateScope();
+
+            var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
+
+            if (EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault() == null)
                 await CreateEventTimer(ProfileCallback, new(), ProfilingConfiguration.SecTillProfiling, TimerType.Interval);
         }
 

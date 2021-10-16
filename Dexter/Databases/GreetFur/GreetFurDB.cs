@@ -126,7 +126,7 @@ namespace Dexter.Databases.GreetFur
         /// <param name="save">Whether to save the database after the opertaion is completed.</param>
         /// <returns>The <see cref="GreetFurRecord"/> that was modified.</returns>
 
-        public GreetFurRecord AddActivity(ulong greetFurId, int increment = 1, ActivityFlags activity = ActivityFlags.None, DateTimeOffset date = default, bool save = true)
+        public GreetFurRecord AddActivity(ulong greetFurId, int increment = 1, ActivityFlags activity = ActivityFlags.None, DateTimeOffset date = default)
         {
             if (date == default)
             {
@@ -134,7 +134,7 @@ namespace Dexter.Databases.GreetFur
             }
             int day = GetDayFromDate(date);
 
-            return AddActivity(greetFurId, increment, activity, day, save);
+            return AddActivity(greetFurId, increment, activity, day);
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace Dexter.Databases.GreetFur
         /// <param name="save">Whether to save the database after the opertaion is completed.</param>
         /// <returns>The <see cref="GreetFurRecord"/> that was modified.</returns>
         
-        public GreetFurRecord AddActivity(ulong greetFurId, int increment, ActivityFlags activity, int day, bool save = true)
+        public GreetFurRecord AddActivity(ulong greetFurId, int increment, ActivityFlags activity, int day)
         {
             GreetFurRecord r = GetActivity(greetFurId, day);
             if (r is null)
@@ -166,8 +166,6 @@ namespace Dexter.Databases.GreetFur
             r.MessageCount += increment;
             r.Activity |= activity;
 
-            if (save)
-                SaveChanges();
             return r;
         }
 

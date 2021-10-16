@@ -176,7 +176,6 @@ namespace Dexter.Commands
                             {
                                 profile.TimeZoneDST = "";
                                 await GenericResetInfo("DST Time Zone");
-                                ProfilesDB.SaveChanges();
                                 return;
                             }
 
@@ -208,7 +207,6 @@ namespace Dexter.Commands
                                     .WithTitle("Cleared data about DST application rules")
                                     .WithDescription($"All previous information about DST patterns has been removed. From now on, only your default time zone will be considered for any calculations.")
                                     .SendEmbed(Context.Channel);
-                                ProfilesDB.SaveChanges();
                                 return;
                             }
 
@@ -237,7 +235,6 @@ namespace Dexter.Commands
                             {
                                 profile.Borkday = default;
                                 TryRemoveBirthdayTimer(profile);
-                                ProfilesDB.SaveChanges();
                                 await BuildEmbed(EmojiEnum.Sign)
                                     .WithTitle("Removed local birthday records.")
                                     .WithDescription("Your birth day is no longer being tracked by the profile system.")
@@ -273,7 +270,6 @@ namespace Dexter.Commands
                                     .WithTitle("Removed local birth year records")
                                     .WithDescription("Your birth year is no longer being tracked by the profile system.")
                                     .SendEmbed(Context.Channel);
-                                ProfilesDB.SaveChanges();
                                 return;
                             }
 
@@ -383,7 +379,6 @@ namespace Dexter.Commands
                                 .SendEmbed(Context.Channel);
                             break;
                     }
-                    ProfilesDB.SaveChanges();
                     return;
                 case "settings":
                 case "config":
@@ -393,7 +388,6 @@ namespace Dexter.Commands
                         if (profile.Settings is null)
                         {
                             profile.Settings = new();
-                            ProfilesDB.SaveChanges();
                         }
 
                         await BuildEmbed(EmojiEnum.Sign)
@@ -525,7 +519,6 @@ namespace Dexter.Commands
                             return;
                     }
                     profile.Settings = prefs;
-                    ProfilesDB.SaveChanges();
                     break;
                 default:
                     await BuildEmbed(EmojiEnum.Annoyed)
@@ -943,7 +936,6 @@ namespace Dexter.Commands
 
                     return;
             }
-            ProfilesDB.SaveChanges();
 
         }
 
@@ -1038,7 +1030,6 @@ namespace Dexter.Commands
                     return;
             }
             link.Settings = prefs;
-            ProfilesDB.SaveChanges();
         }
 
         /// <summary>
@@ -1207,7 +1198,6 @@ namespace Dexter.Commands
             }
 
             profile.BorkdayTimerToken = await CreateEventTimer(BorkdayCallback, new Dictionary<string, string>() { { "ID", profile.UserID.ToString() } }, (int)diff.TotalSeconds, Databases.EventTimers.TimerType.Expire, TimerService);
-            ProfilesDB.SaveChanges();
         }
 
         /// <summary>

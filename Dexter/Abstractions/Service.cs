@@ -5,7 +5,7 @@ using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
 using Dexter.Enums;
 using Dexter.Extensions;
-using Dexter.Services;
+using Dexter.Events;
 using Discord;
 using Discord.Rest;
 using Discord.Webhook;
@@ -26,28 +26,24 @@ namespace Dexter.Abstractions
         /// <summary>
         /// The ProfileService is used to find a random profile picture for a webhook on create or get.
         /// </summary>
-        public ProfilingService ProfileService { get; set; }
+        public Profiling ProfileService { get; set; }
 
         /// <summary>
-        /// The BotConfiguration is used to find the thumbnails for the BuildEmbed method.
+        /// The BotConfiguration instance.
         /// </summary>
         public BotConfiguration BotConfiguration { get; set; }
 
         /// <summary>
-        /// The DiscordShardedClient is used to create the webhook for the webhook on create or get.
+        /// The DiscordShardedClient instance.
         /// </summary>
         public DiscordShardedClient DiscordShardedClient { get; set; }
+
+        public IServiceProvider ServiceProvider { get; set; }
 
         /// <summary>
         /// The TimerService class is used to create a timer for wait until an expiration time has been reached.
         /// </summary>
-        public TimerService TimerService { get; set; }
-
-        /// <summary>
-        /// The Initialize abstract method is what is called when all dependencies are initialized.
-        /// It can be used to hook into delegates to run when an event occurs.
-        /// </summary>
-        public abstract void Initialize();
+        public Timers TimerService { get; set; }
 
         /// <summary>
         /// The Create Or Get Webhook finds the given channel and, when provided a name, attempts to find a webhook
@@ -107,7 +103,7 @@ namespace Dexter.Abstractions
         /// <returns>The token associated with the timed event for future reference.</returns>
 
         public static async Task<string> CreateEventTimer(Func<Dictionary<string, string>, Task> callbackMethod,
-                Dictionary<string, string> callbackParameters, int secondsTillExpiration, TimerType timerType, TimerService timerService)
+                Dictionary<string, string> callbackParameters, int secondsTillExpiration, TimerType timerType, Timers timerService)
         {
             string json = JsonConvert.SerializeObject(callbackParameters);
 

@@ -73,8 +73,6 @@ namespace Dexter.Commands
 
             ModMailDB.ModMail.Add(ModMail);
 
-            ModMailDB.SaveChanges();
-
             await BuildEmbed(EmojiEnum.Love)
                 .WithTitle("Successfully Sent Modmail")
                 .WithDescription($"Haiya! Your message has been sent to the staff team.\n\n" +

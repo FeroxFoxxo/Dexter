@@ -56,7 +56,6 @@ namespace Dexter.Databases.UserProfiles
                 };
 
                 Profiles.Add(profile);
-                SaveChanges();
             }
 
             return profile;
@@ -91,7 +90,6 @@ namespace Dexter.Databases.UserProfiles
                 Settings = new()
             };
             Links.Add(link);
-            SaveChanges();
 
             return link;
         }
@@ -222,7 +220,7 @@ namespace Dexter.Databases.UserProfiles
             if (link is null) return false;
 
             Links.Remove(link);
-            SaveChanges();
+
             return true;
         }
 

@@ -196,10 +196,9 @@ namespace Dexter.Commands
         {
             for (int d = time.start; d <= time.end; d++)
             {
-                GreetFurRecord record = GreetFurDB.AddActivity(userId, 0, ActivityFlags.None, d, false);
+                GreetFurRecord record = GreetFurDB.AddActivity(userId, 0, ActivityFlags.None, d);
                 template.Apply(record);
             }
-            GreetFurDB.SaveChanges();
         }
 
         internal class GreetFurTimePeriod

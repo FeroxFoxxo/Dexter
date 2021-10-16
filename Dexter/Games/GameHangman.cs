@@ -463,7 +463,6 @@ namespace Dexter.Games
                                 .SendEmbed(message.Channel);
                         }
                     }
-                    gamesDB.SaveChanges();
                     return;
                 }
                 if (newGuess.Length > 1)

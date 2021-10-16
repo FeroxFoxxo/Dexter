@@ -94,7 +94,6 @@ namespace Dexter.Commands
                     }
 
                     Reminder = ReminderDB.AddReminder(Context.User, Date, Message);
-                    ReminderDB.SaveChanges();
 
                     await CreateEventTimer(ReminderCallback, new Dictionary<string, string> { { "ID", Reminder.ID.ToString() } }, (int)Date.Subtract(DateTimeOffset.Now).TotalSeconds, Databases.EventTimers.TimerType.Expire);
 
@@ -119,7 +118,6 @@ namespace Dexter.Commands
                     }
 
                     Reminder.Status = ReminderStatus.Removed;
-                    ReminderDB.SaveChanges();
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"Reminder #{Reminder.ID} successfully removed!")
@@ -145,7 +143,6 @@ namespace Dexter.Commands
                     }
 
                     Reminder.Message = NewMessage;
-                    ReminderDB.SaveChanges();
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"Reminder #{Reminder.ID} successfully edited!")
@@ -233,7 +230,6 @@ namespace Dexter.Commands
             if (Issuer == null) return;
 
             Reminder.Status = ReminderStatus.Released;
-            ReminderDB.SaveChanges();
 
             try
             {

@@ -7,28 +7,23 @@ using Dexter.Databases.UserProfiles;
 using Discord;
 using Discord.WebSocket;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
 
     /// <summary>
     /// Stores, manages, and records modifications to users' nicknames among other data.
     /// </summary>
 
-    public class UserRecordsService : Service
+    public class UserRecords : Event
     {
-
-        /// <summary>
-        /// Holds all information used in the module for management.
-        /// </summary>
-
-        public ProfilesDB ProfilesDB { get; set; }
 
         /// <summary>
         /// This method is called after all dependencies are initialized and serves to hook the appropriate events to this service's methods.
         /// </summary>
 
-        public override void Initialize()
+        public override void InitializeEvents()
         {
             DiscordShardedClient.GuildMemberUpdated += RecordNicknameChange;
             DiscordShardedClient.UserUpdated += RecordUserNameChange;
@@ -37,6 +32,10 @@ namespace Dexter.Services
 
         private async Task RecordUserNameChange(SocketUser Before, SocketUser After)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
+
             if (Before.Username != After.Username && !string.IsNullOrEmpty(After.Username))
             {
                 NameRecord Record = ProfilesDB.Names.AsQueryable().Where(n => n.Name == After.Username && n.UserID == After.Id && n.Type == NameType.Username).FirstOrDefault();
@@ -53,7 +52,6 @@ namespace Dexter.Services
                         Type = NameType.Username
                     });
                 }
-                await ProfilesDB.SaveChangesAsync();
             }
         }
 
@@ -66,6 +64,10 @@ namespace Dexter.Services
 
         public async Task RecordNicknameChange(Cacheable<SocketGuildUser, ulong> Before, SocketGuildUser After)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
+
             if (Before.Value.Nickname != After.Nickname && !string.IsNullOrEmpty(After.Nickname))
             {
                 NameRecord Record = ProfilesDB.Names.AsQueryable().Where(n => n.Name == After.Username && n.UserID == After.Id && n.Type == NameType.Nickname).FirstOrDefault();
@@ -82,7 +84,6 @@ namespace Dexter.Services
                         Type = NameType.Nickname
                     });
                 }
-                await ProfilesDB.SaveChangesAsync();
             }
 
             return;
@@ -99,6 +100,10 @@ namespace Dexter.Services
 
         public List<NameRecord> RemoveNames(IUser User, NameType NameType, string Pattern, bool IsRegex = false)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
+
             List<NameRecord> Result = new();
             List<NameRecord> Records = ProfilesDB.Names.AsEnumerable().Where(n => n.Type == NameType && n.UserID == User.Id).ToList();
             Pattern = Pattern.Trim();
@@ -127,7 +132,6 @@ namespace Dexter.Services
                 }
             }
 
-            ProfilesDB.SaveChanges();
             return Result;
         }
 
@@ -161,6 +165,10 @@ namespace Dexter.Services
 
         public NameRecord[] GetNameRecords(IUser User, NameType NameType)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
+
             return ProfilesDB.Names.AsQueryable().Where(n => n.Type == NameType && n.UserID == User.Id).ToArray();
         }
 
@@ -172,12 +180,15 @@ namespace Dexter.Services
 
         public Task RecordUserJoin(SocketGuildUser User)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
+
             UserProfile Profile = ProfilesDB.GetOrCreateProfile(User.Id);
 
             if (Profile.DateJoined != default) return Task.CompletedTask;
 
             Profile.DateJoined = DateTimeOffset.Now.ToUnixTimeSeconds();
-            ProfilesDB.SaveChanges();
 
             return Task.CompletedTask;
         }
@@ -191,12 +202,15 @@ namespace Dexter.Services
 
         public DateTimeOffset GetUserJoin(IGuildUser User)
         {
+            using var scope = ServiceProvider.CreateScope();
+
+            var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
+
             UserProfile Profile = ProfilesDB.GetOrCreateProfile(User.Id);
 
             if (Profile.DateJoined != default) return DateTimeOffset.FromUnixTimeSeconds(Profile.DateJoined);
 
             Profile.DateJoined = User.JoinedAt?.ToUnixTimeSeconds() ?? default;
-            ProfilesDB.SaveChanges();
 
             return Profile.DateJoined == default ? default : DateTimeOffset.FromUnixTimeSeconds(Profile.DateJoined);
         }

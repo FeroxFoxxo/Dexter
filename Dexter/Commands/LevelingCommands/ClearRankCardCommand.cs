@@ -25,7 +25,6 @@ namespace Dexter.Commands
             _ = LevelingDB.GetOrCreateLevelData(target.Id, out LevelPreferences settings);
 
             LevelingDB.Prefs.Remove(settings);
-            LevelingDB.SaveChanges();
 
             await BuildEmbed(Enums.EmojiEnum.Love)
                 .WithTitle("Success!")
@@ -48,7 +47,6 @@ namespace Dexter.Commands
             _ = LevelingDB.GetOrCreateLevelData(targetID, out LevelPreferences settings);
 
             LevelingDB.Prefs.Remove(settings);
-            LevelingDB.SaveChanges();
 
             await BuildEmbed(Enums.EmojiEnum.Love)
                 .WithTitle("Success!")

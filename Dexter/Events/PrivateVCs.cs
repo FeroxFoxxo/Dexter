@@ -7,14 +7,14 @@ using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 
-namespace Dexter.Services
+namespace Dexter.Events
 {
 
     /// <summary>
     /// The PrivateVCService deals with removing private VCs if nobody is in them.
     /// </summary>
 
-    public class PrivateVCService : Service
+    public class PrivateVCs : Event
     {
 
         /// <summary>
@@ -23,13 +23,13 @@ namespace Dexter.Services
 
         public UtilityConfiguration UtilityConfiguration { get; set; }
 
-        public ILogger<PrivateVCService> Logger { get; set; }
+        public ILogger<PrivateVCs> Logger { get; set; }
 
         /// <summary>
         /// The Initialize void hooks the Client.Ready event to the CheckRemoveVCs method.
         /// </summary>
 
-        public override void Initialize()
+        public override void InitializeEvents()
         {
             DiscordShardedClient.ShardReady += (DiscordSocketClient _) => CheckRemoveVCs();
             DiscordShardedClient.UserVoiceStateUpdated += async (_, oldVoiceChannel, newVoiceChannel) => {

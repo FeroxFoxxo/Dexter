@@ -76,8 +76,6 @@ namespace Dexter.Databases.FinalWarns
                 FinalWarns.Add(newWarning);
             }
 
-            SaveChanges();
-
             return newWarning;
         }
 
@@ -96,7 +94,6 @@ namespace Dexter.Databases.FinalWarns
 
             warning.EntryType = EntryType.Revoke;
 
-            SaveChanges();
             return true;
         }
 

@@ -37,18 +37,6 @@ namespace Dexter.Events
         public ModerationConfiguration ModerationConfiguration { get; set; }
 
         /// <summary>
-        /// The ModeratorCommands references Dexter's moderation module and grants access to its commands.
-        /// </summary>
-
-        public ModeratorCommands ModeratorCommands { get; set; }
-
-        /// <summary>
-        /// The DiscordWebhookClient is used for sending messages to the logging channel.
-        /// </summary>
-
-        public DiscordWebhookClient DiscordWebhookClient;
-
-        /// <summary>
         /// The Initialize method adds the ReactionRemoved hook to the ReactionRemovedLog method.
         /// It also hooks the ready event to the CreateWebhook delegate.
         /// </summary>
@@ -340,7 +328,7 @@ namespace Dexter.Events
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User.Id);
 
             if (TimerService.TimerExists(DexterProfile.CurrentMute))
-                TimerService.RemoveTimer(DexterProfile.CurrentMute);
+                await TimerService.RemoveTimer(DexterProfile.CurrentMute);
 
             try
             {

@@ -1,4 +1,5 @@
 using Dexter.Abstractions;
+using Dexter.Extensions;
 using Dexter.Workers;
 using Discord;
 using Discord.Commands;
@@ -286,20 +287,7 @@ namespace Dexter
 
 			// Adds all the services' dependencies to their properties.
 			GetEvents().ForEach(
-				type => type.GetProperties().ToList().ForEach(property =>
-				{
-					if (property.PropertyType == typeof(ServiceProvider))
-						property.SetValue(app.Services.GetRequiredService(type), app.Services);
-					else
-					{
-						object service = app.Services.GetService(property.PropertyType);
-
-						if (service != null)
-						{
-							property.SetValue(app.Services.GetRequiredService(type), service);
-						}
-					}
-				})
+				type => app.Services.GetRequiredService(type).SetClassParameters(app.Services)
 			);
 
 			// Connects all the event hooks in initializable modules to their designated delegates.

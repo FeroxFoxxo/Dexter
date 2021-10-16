@@ -110,6 +110,26 @@ namespace Dexter.Extensions
             return new KeyValuePair<string, string>(name, methodName);
         }
 
+        public static object SetClassParameters(this object newClass, IServiceProvider sp)
+        {
+            newClass.GetType().GetProperties().ToList().ForEach(property =>
+            {
+                if (property.PropertyType == typeof(IServiceProvider))
+                    property.SetValue(newClass, sp);
+                else
+                {
+                    object service = sp.GetService(property.PropertyType);
+
+                    if (service != null)
+                    {
+                        property.SetValue(newClass, service);
+                    }
+                }
+            });
+
+            return newClass;
+        }
+
         /// <summary>
         /// Obtains a Proxied URL from a given Image URL.
         /// </summary>

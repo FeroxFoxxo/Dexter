@@ -29,11 +29,6 @@ namespace Dexter.Events
     {
 
         /// <summary>
-        /// The ServiceProvider is used to run the initialized command and method that an admin confirmation will call back to.
-        /// </summary>
-        public IServiceProvider ServiceProvider { get; set; }
-
-        /// <summary>
         /// The ProposalConfiguration, which contains the location of the emoji storage guild, as well as IDs of channels.
         /// </summary>
 
@@ -612,7 +607,7 @@ namespace Dexter.Events
             if (Class.GetMethod(Method) == null)
                 throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
 
-            Class.GetMethod(Method).Invoke(ServiceProvider.GetRequiredService(Class), new object[1] { Parameters });
+            Class.GetMethod(Method).Invoke(ActivatorUtilities.CreateInstance(ServiceProvider, Class).SetClassParameters(ServiceProvider), new object[1] { Parameters });
         }
 
         /// <summary>

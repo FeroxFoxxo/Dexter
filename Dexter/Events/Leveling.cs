@@ -36,18 +36,6 @@ namespace Dexter.Events
         public Random Random { get; set; }
 
         /// <summary>
-        /// Utility Configuration for private VCs.
-        /// </summary>
-
-        public UtilityConfiguration UtilityConfiguration {  get; set; }
-
-        /// <summary>
-        /// Gets the logging utility to debug potential errors with leveling.
-        /// </summary>
-
-        public ILogger<Leveling> Logger { get; set; }
-
-        /// <summary>
         /// The data structure containing all instances of users on Text XP cooldowns.
         /// </summary>
         

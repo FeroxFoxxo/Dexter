@@ -46,8 +46,6 @@ namespace Dexter.Events
 
         public SheetsService SheetsService { get; set; }
 
-        public ILogger<GreetFur> Logger { get; set; }
-
         private const int TRACKING_LENGTH = 14;
 
         /// <summary>

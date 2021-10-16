@@ -26,12 +26,6 @@ namespace Dexter.Events
     {
 
         /// <summary>
-        /// The ServiceProvider is where our dependencies are stored - given to get an initialized class.
-        /// </summary>
-
-        public IServiceProvider ServiceProvider { get; set; }
-        
-        /// <summary>
         /// <see langword="true"/> if the bot has finished its startup process; <see langword="false"/> otherwise.
         /// </summary>
 

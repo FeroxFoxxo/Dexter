@@ -12,6 +12,7 @@ using System.Data;
 using System.Reflection;
 using Timer = System.Timers.Timer;
 using Microsoft.Extensions.Logging;
+using Dexter.Extensions;
 
 namespace Dexter.Events
 {
@@ -23,13 +24,6 @@ namespace Dexter.Events
 
     public class Timers : Event
     {
-
-        /// <summary>
-        /// The ServiceProvider is where our dependencies are stored - used to execute an object when a timer is run.
-        /// </summary>
-
-        public IServiceProvider ServiceProvider { get; set; }
-
         /// <summary>
         /// The Random instance is used to pick a set number of random characters from the configuration to create a token.
         /// </summary>
@@ -116,7 +110,7 @@ namespace Dexter.Events
                     try
                     {
                         await (Task)refClass.GetMethod(timer.CallbackMethod)
-                            .Invoke(ServiceProvider.GetRequiredService(refClass), new object[1] { parameters });
+                            .Invoke(ActivatorUtilities.CreateInstance(ServiceProvider, refClass).SetClassParameters(ServiceProvider), new object[1] { parameters });
                     }
                     catch (Exception e)
                     {

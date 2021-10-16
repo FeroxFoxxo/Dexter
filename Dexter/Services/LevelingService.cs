@@ -118,7 +118,7 @@ namespace Dexter.Services
                     }
             }
 
-            Logger.LogInformation($"Granting users [{string.Join(", ", grantedUsers)}] VC XP.");
+            Logger.LogInformation($"Granting users [{string.Join(", ", grantedUsers)}] VC XP. \n In voice channels {string.Join(", ", vcs)}.");
 
             LevelingDB.onTextCooldowns.RemoveWhere(e => true);
             LevelingDB.SaveChanges();

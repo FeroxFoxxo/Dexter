@@ -7,6 +7,7 @@ using Dexter.Extensions;
 using Discord.Commands;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
+using Dexter.Attributes.Methods;
 
 namespace Dexter.Services
 {

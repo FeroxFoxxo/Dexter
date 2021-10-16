@@ -30,7 +30,7 @@ namespace Dexter.Databases.Infractions
         /// Represents the configured settings attached to the Moderation module.
         /// </summary>
 
-        private ModerationConfiguration ModerationConfiguration;
+        private readonly ModerationConfiguration ModerationConfiguration;
 
         public InfractionsDB(ModerationConfiguration moderationConfiguration)
         {

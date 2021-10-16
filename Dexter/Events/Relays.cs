@@ -49,6 +49,8 @@ namespace Dexter.Events
             }
 
             Relay.CurrentMessageCount += 1;
+
+            await RelayDB.SaveChangesAsync();
         }
 
     }

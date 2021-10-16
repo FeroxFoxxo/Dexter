@@ -55,6 +55,8 @@ namespace Dexter.Events
             if (Game is null) return;
 
             await Game.HandleMessage(Message, GamesDB, DiscordShardedClient, FunConfiguration);
+
+            await GamesDB.SaveChangesAsync();
         }
     }
 }

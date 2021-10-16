@@ -84,6 +84,8 @@ namespace Dexter.Events
                             );
                 }
             );
+
+            await InfractionsDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -280,6 +282,8 @@ namespace Dexter.Events
                         .AddField("Reason", Reason)
 
                 );
+
+            await InfractionsDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -316,6 +320,8 @@ namespace Dexter.Events
 
                 DexterProfile.CurrentPointTimer = string.Empty;
             }
+
+            await InfractionsDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -362,6 +368,8 @@ namespace Dexter.Events
                 return;
 
             DexterProfile.CurrentMute = await CreateEventTimer(RemoveMutedRole, new() { { "UserID", User.Id.ToString() } }, Convert.ToInt32(Time.TotalSeconds), TimerType.Expire);
+
+            await InfractionsDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -396,6 +404,8 @@ namespace Dexter.Events
             DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(UserID);
 
             DexterProfile.CurrentMute = string.Empty;
+
+            await InfractionsDB.SaveChangesAsync();
         }
 
     }

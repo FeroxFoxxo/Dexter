@@ -63,7 +63,7 @@ namespace Dexter.Events
             // Runs the bot timer to loop through all events that may occur on a timer.
             if (!HasStarted)
             {
-                System.Timers.Timer EventTimer = new(TimeSpan.FromSeconds(5).TotalMilliseconds)
+                Timer EventTimer = new(TimeSpan.FromSeconds(5).TotalMilliseconds)
                 {
                     AutoReset = true,
                     Enabled = true
@@ -129,6 +129,8 @@ namespace Dexter.Events
                 else if (timer.TimerType == TimerType.Interval)
                     EventTimersDB.EventTimers.Remove(timer);
             }
+
+            await EventTimersDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -161,6 +163,8 @@ namespace Dexter.Events
             };
 
             EventTimersDB.EventTimers.Add(Timer);
+
+            await EventTimersDB.SaveChangesAsync();
 
             return Timer.Token;
         }
@@ -217,7 +221,7 @@ namespace Dexter.Events
         /// <remarks>This function removes the timer given by its <paramref name="TimerTracker"/> from the database completely.</remarks>
         /// <param name="TimerTracker">The unique identifier of the target EventTimer.</param>
 
-        public void RemoveTimer(string TimerTracker)
+        public async Task RemoveTimer(string TimerTracker)
         {
             using var scope = ServiceProvider.CreateScope();
 
@@ -227,6 +231,8 @@ namespace Dexter.Events
 
             if (Timer != null)
                 EventTimersDB.EventTimers.Remove(Timer);
+
+            await EventTimersDB.SaveChangesAsync();
         }
 
     }

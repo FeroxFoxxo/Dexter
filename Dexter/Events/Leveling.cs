@@ -72,6 +72,8 @@ namespace Dexter.Events
             DiscordShardedClient.UserJoined += HandleJoin;
 
             await CreateEventTimer(AddLevels, new(), LevelingConfiguration.XPIncrementTime, TimerType.Interval);
+
+            await EventTimersDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -116,6 +118,9 @@ namespace Dexter.Events
             }
 
             onTextCooldowns.RemoveWhere(e => true);
+
+            await RestrictionsDB.SaveChangesAsync();
+            await LevelingDB.SaveChangesAsync();
         }
 
         private async Task HandleMessage(SocketMessage message)
@@ -140,6 +145,8 @@ namespace Dexter.Events
                 );
 
             onTextCooldowns.Add(message.Author.Id);
+
+            await LevelingDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -210,6 +217,8 @@ namespace Dexter.Events
             {
                 throw new NullReferenceException("At least one of the specified roles in configuration that should be applied does not exist!");
             }
+
+            await LevelingDB.SaveChangesAsync();
 
             return toAdd.Count > 0 || toRemove.Count > 0;
         }
@@ -387,6 +396,9 @@ namespace Dexter.Events
             string rolesFoundExpression = rolesFoundNames.Count == 0 ? "" : $"Found roles: [{string.Join(", ", rolesFoundNames)}]";
             string message = (success ? "" : "No role modifications are necessary; updated no roles. ") + rolesFoundExpression;
             Dictionary<bool, IEnumerable<IRole>> mods = new() { { false, toRemove }, { true, toAdd } };
+
+            await LevelingDB.SaveChangesAsync();
+
             return new RoleModificationResponse(user, success, message, mods, level);
         }
 

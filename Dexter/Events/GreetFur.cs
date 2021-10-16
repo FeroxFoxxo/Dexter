@@ -347,6 +347,8 @@ namespace Dexter.Events
                     await appendRequest.ExecuteAsync();
                 }
             }
+
+            await GreetFurDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -402,6 +404,7 @@ namespace Dexter.Events
             {
                 result[kvp.Key] = await ResolveFormat(kvp.Value, id, row, managerToggle);
             }
+            await GreetFurDB.SaveChangesAsync();
 
             return result;
         }

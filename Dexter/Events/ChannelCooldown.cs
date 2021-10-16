@@ -97,6 +97,8 @@ namespace Dexter.Events
                         TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                     }
                 );
+
+                await CooldownDB.SaveChangesAsync();
             }
         }
 

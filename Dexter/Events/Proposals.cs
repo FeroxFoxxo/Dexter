@@ -92,6 +92,8 @@ namespace Dexter.Events
                     .AddField(!string.IsNullOrEmpty(Reason), "Reason", Reason)
                     .SendDMAttachedEmbed(MessageChannel, BotConfiguration, DiscordShardedClient.GetUser(Proposal.Proposer), BuildProposal(Proposal));
             }
+
+            await ProposalDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -265,6 +267,10 @@ namespace Dexter.Events
                 GuildEmote Emote = await Guild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
                 await Embed.AddReactionAsync(Emote);
             }
+
+            await ProposalDB.SaveChangesAsync();
+
+            await RestrictionsDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -293,6 +299,8 @@ namespace Dexter.Events
             Suggestion.TimerToken = string.Empty;
 
             await UpdateProposal(Proposal, ProposalStatus.Declined);
+
+            await ProposalDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -347,6 +355,8 @@ namespace Dexter.Events
             // Add the confirmation and proposal objects to the database.
             ProposalDB.Proposals.Add(Proposal);
             ProposalDB.AdminConfirmations.Add(Confirmation);
+
+            await ProposalDB.SaveChangesAsync();
 
             return Proposal;
         }
@@ -450,6 +460,7 @@ namespace Dexter.Events
                                             break;
                                     }
 
+                                    await ProposalDB.SaveChangesAsync();
                                     return false;
                                 }
                             case "Bin":
@@ -458,6 +469,8 @@ namespace Dexter.Events
                                 {
                                     await UpdateProposal(Proposal, ProposalStatus.Deleted);
                                     await UserMessage.DeleteAsync();
+
+                                    await ProposalDB.SaveChangesAsync();
                                     return false;
                                 }
                                 break;
@@ -517,6 +530,8 @@ namespace Dexter.Events
             Suggestion.TimerToken = string.Empty;
 
             await UpdateProposal(Proposal, ProposalStatus.Declined);
+
+            await ProposalDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -585,6 +600,8 @@ namespace Dexter.Events
 
                     break;
             }
+
+            await ProposalDB.SaveChangesAsync();
         }
 
         private void InvokeStringifiedMethod(string Type, string Method, string Params)
@@ -648,6 +665,8 @@ namespace Dexter.Events
             }
             else
                 throw new Exception($"Eek! The given channel of {SocketChannel} turned out *not* to be an instance of SocketTextChannel, rather {SocketChannel.GetType().Name}!");
+
+            await ProposalDB.SaveChangesAsync();
         }
 
         /// <summary>

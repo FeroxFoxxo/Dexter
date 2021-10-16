@@ -23,19 +23,13 @@ namespace Dexter.Databases.Levels
         /// The configuration file that contains all relevant data for the leveling module.
         /// </summary>
 
-        private LevelingConfiguration LevelingConfiguration;
-
-        /// <summary>
-        /// Generic bot configuration that relates to overarching settings.
-        /// </summary>
-
-        private BotConfiguration BotConfiguration;
+        private readonly LevelingConfiguration LevelingConfiguration;
 
         /// <summary>
         /// The service that manages leveling internally.
         /// </summary>
         
-        private Leveling LevelingService;
+        private readonly Leveling LevelingService;
 
         /// <summary>
         /// The data structure containing information for user XP.
@@ -49,10 +43,9 @@ namespace Dexter.Databases.Levels
 
         public DbSet<LevelPreferences> Prefs { get; set; }
 
-        public LevelingDB(LevelingConfiguration levelingConfiguration, BotConfiguration botConfiguration, Leveling levelingService)
+        public LevelingDB(LevelingConfiguration levelingConfiguration, Leveling levelingService)
         {
             LevelingConfiguration = levelingConfiguration;
-            BotConfiguration = botConfiguration;
             LevelingService = levelingService;
         }
 

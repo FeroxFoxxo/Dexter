@@ -48,7 +48,7 @@ namespace Dexter.Commands
                     .SendEmbed(Context.Channel);
                 return;
             }
-            DateTimeOffset joined = UserRecordsService.GetUserJoin(guildUser);
+            DateTimeOffset joined = await UserRecordsService.GetUserJoin(guildUser);
 
             UserProfile profile = ProfilesDB.Profiles.Find(user.Id);
 
@@ -268,7 +268,7 @@ namespace Dexter.Commands
                 return;
             }
 
-            List<NameRecord> removed = UserRecordsService.RemoveNames(user, enumNameType, name, isRegex);
+            List<NameRecord> removed = await UserRecordsService.RemoveNames(user, enumNameType, name, isRegex);
 
             if (removed.Count == 0)
             {

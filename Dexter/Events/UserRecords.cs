@@ -53,6 +53,8 @@ namespace Dexter.Events
                     });
                 }
             }
+
+            await ProfilesDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -86,6 +88,8 @@ namespace Dexter.Events
                 }
             }
 
+            await ProfilesDB.SaveChangesAsync();
+
             return;
         }
 
@@ -98,7 +102,7 @@ namespace Dexter.Events
         /// <param name="IsRegex">Whether <paramref name="Pattern"/> should be interpreted as a regular expression.</param>
         /// <returns>A List of strings containing all nicknames that fit <paramref name="Pattern"/>.</returns>
 
-        public List<NameRecord> RemoveNames(IUser User, NameType NameType, string Pattern, bool IsRegex = false)
+        public async Task<List<NameRecord>> RemoveNames(IUser User, NameType NameType, string Pattern, bool IsRegex = false)
         {
             using var scope = ServiceProvider.CreateScope();
 
@@ -131,6 +135,8 @@ namespace Dexter.Events
                     }
                 }
             }
+
+            await ProfilesDB.SaveChangesAsync();
 
             return Result;
         }
@@ -178,7 +184,7 @@ namespace Dexter.Events
         /// <param name="User">The user whose join event is being recorded.</param>
         /// <returns>A completed <c>Task</c> object.</returns>
 
-        public Task RecordUserJoin(SocketGuildUser User)
+        public async Task RecordUserJoin(SocketGuildUser User)
         {
             using var scope = ServiceProvider.CreateScope();
 
@@ -186,11 +192,11 @@ namespace Dexter.Events
 
             UserProfile Profile = ProfilesDB.GetOrCreateProfile(User.Id);
 
-            if (Profile.DateJoined != default) return Task.CompletedTask;
+            if (Profile.DateJoined != default) return;
 
             Profile.DateJoined = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-            return Task.CompletedTask;
+            await ProfilesDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -200,7 +206,7 @@ namespace Dexter.Events
         /// <param name="User">The user whose join date is being queried.</param>
         /// <returns>A <c>DateTimeOffset</c> object detailing the join date of the user, or <see langword="default"/> if no data can be obtained.</returns>
 
-        public DateTimeOffset GetUserJoin(IGuildUser User)
+        public async Task<DateTimeOffset> GetUserJoin(IGuildUser User)
         {
             using var scope = ServiceProvider.CreateScope();
 
@@ -213,6 +219,8 @@ namespace Dexter.Events
             Profile.DateJoined = User.JoinedAt?.ToUnixTimeSeconds() ?? default;
 
             return Profile.DateJoined == default ? default : DateTimeOffset.FromUnixTimeSeconds(Profile.DateJoined);
+
+            await ProfilesDB.SaveChangesAsync();
         }
     }
 }

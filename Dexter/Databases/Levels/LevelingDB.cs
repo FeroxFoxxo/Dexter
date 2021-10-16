@@ -106,6 +106,10 @@ namespace Dexter.Databases.Levels
                 };
 
                 Levels.Add(level);
+            } 
+            else
+            {
+                Entry(level).Reload();
             }
 
             if (setting is null)
@@ -116,6 +120,10 @@ namespace Dexter.Databases.Levels
                 };
 
                 Prefs.Add(setting);
+            }
+            else
+            {
+                Entry(setting).Reload();
             }
 
             SaveChanges();

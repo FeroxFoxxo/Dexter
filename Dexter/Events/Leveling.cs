@@ -89,7 +89,6 @@ namespace Dexter.Events
         {
             if (Debugging)
                 Logger.LogInformation($"Running Leveling event with onTextCooldowns = {{{string.Join(", ", OnTextCooldowns)}}}");
-            OnTextCooldowns.RemoveWhere(e => true);
 
             List<string> vcLeveledUsers = new();
 
@@ -97,6 +96,8 @@ namespace Dexter.Events
 
             using var RestrictionsDB = scope.ServiceProvider.GetRequiredService<RestrictionsDB>();
             using var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
+
+            OnTextCooldowns.RemoveWhere(e => true);
 
             // Voice leveling up.
             IReadOnlyCollection<SocketVoiceChannel> vcs = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).VoiceChannels;

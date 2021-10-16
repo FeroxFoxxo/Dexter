@@ -1,7 +1,7 @@
 {
-  "XPIncrementTime": 60,
+  "XPIncrementTime": 8,
   "HandleRoles": true,
-  "VCMinUsers": 3,
+  "VCMinUsers": 1,
   "DisabledVCs": [
     0
   ],

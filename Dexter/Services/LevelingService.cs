@@ -10,6 +10,7 @@ using Dexter.Databases.UserRestrictions;
 using Discord;
 using Discord.WebSocket;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace Dexter.Services
 {
@@ -52,6 +53,12 @@ namespace Dexter.Services
         public UtilityConfiguration UtilityConfiguration {  get; set; }
 
         /// <summary>
+        /// Gets the logging utility to debug potential errors with leveling.
+        /// </summary>
+
+        public ILogger<LevelingService> Logger { get; set; }
+
+        /// <summary>
         /// This method is run when the service is first started; which happens after dependency injection.
         /// </summary>
 
@@ -77,8 +84,9 @@ namespace Dexter.Services
         public async Task AddLevels(Dictionary<string, string> parameters)
         {
             // Voice leveling up.
-
             IReadOnlyCollection<SocketVoiceChannel> vcs = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).VoiceChannels;
+
+            List<string> grantedUsers = new();
 
             foreach (SocketVoiceChannel voiceChannel in vcs)
             {
@@ -98,6 +106,8 @@ namespace Dexter.Services
                     if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsSuppressed 
                         || uservc.IsBot || RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)))
                     {
+                        grantedUsers.Add(uservc.Username);
+
                         await LevelingDB.IncrementUserXP(
                             Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven + 1),
                             false,
@@ -107,6 +117,8 @@ namespace Dexter.Services
                         );
                     }
             }
+
+            Logger.LogInformation($"Granting users [{string.Join(", ", grantedUsers)}] VC XP.");
 
             LevelingDB.onTextCooldowns.RemoveWhere(e => true);
             LevelingDB.SaveChanges();

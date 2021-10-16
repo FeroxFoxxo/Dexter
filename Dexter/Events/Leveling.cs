@@ -11,6 +11,7 @@ using Discord;
 using Discord.WebSocket;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Dexter.Events
 {
@@ -35,10 +36,22 @@ namespace Dexter.Events
         public Random Random { get; set; }
 
         /// <summary>
+        /// Debugging utility.
+        /// </summary>
+
+        public ILogger<Leveling> Logger { get; set; }
+
+        /// <summary>
         /// The data structure containing all instances of users on Text XP cooldowns.
         /// </summary>
         
-        public HashSet<ulong> onTextCooldowns = new();
+        public static HashSet<ulong> OnTextCooldowns { get; set; }
+
+        /// <summary>
+        /// Whether XP debugging is currently active.
+        /// </summary>
+
+        private static bool Debugging { get; set; }
 
         /// <summary>
         /// This method is run when the service is first started; which happens after dependency injection.
@@ -46,6 +59,9 @@ namespace Dexter.Events
 
         public override async void InitializeEvents()
         {
+            Debugging = false;
+            OnTextCooldowns = new();
+
             using var scope = ServiceProvider.CreateScope();
 
             using var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
@@ -71,10 +87,17 @@ namespace Dexter.Events
 
         public async Task AddLevels(Dictionary<string, string> parameters)
         {
+            if (Debugging)
+                Logger.LogInformation($"Running Leveling event with onTextCooldowns = {{{string.Join(", ", OnTextCooldowns)}}}");
+
+            List<string> vcLeveledUsers = new();
+
             using var scope = ServiceProvider.CreateScope();
 
             using var RestrictionsDB = scope.ServiceProvider.GetRequiredService<RestrictionsDB>();
             using var LevelingDB = scope.ServiceProvider.GetRequiredService<LevelingDB>();
+
+            OnTextCooldowns.RemoveWhere(e => true);
 
             // Voice leveling up.
             IReadOnlyCollection<SocketVoiceChannel> vcs = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).VoiceChannels;
@@ -94,6 +117,7 @@ namespace Dexter.Events
                     if (!(uservc.IsMuted || uservc.IsDeafened || uservc.IsSelfMuted || uservc.IsSelfDeafened || uservc.IsSuppressed 
                         || uservc.IsBot || RestrictionsDB.IsUserRestricted(uservc.Id, Restriction.VoiceXP)))
                     {
+                        if (Debugging) vcLeveledUsers.Add(uservc.Username);
                         await LevelingDB.IncrementUserXP(
                             Random.Next(LevelingConfiguration.VCMinXPGiven, LevelingConfiguration.VCMaxXPGiven + 1),
                             false,
@@ -104,10 +128,20 @@ namespace Dexter.Events
                     }
             }
 
-            onTextCooldowns.RemoveWhere(e => true);
+            if (Debugging) Logger.LogInformation($"Saving Changes; granted VCXP to users {string.Join(", ", vcLeveledUsers)}.");
 
-            await RestrictionsDB.SaveChangesAsync();
-            await LevelingDB.SaveChangesAsync();
+            LevelingDB.SaveChanges();
+        }
+
+        /// <summary>
+        /// Toggles service debugging on and off.
+        /// </summary>
+        /// <returns>A text description of the operation result.</returns>
+
+        public string ToggleDebugging()
+        {
+            Debugging = !Debugging;
+            return Debugging ? "Debugging has been turned on!" : "Debugging stopped.";
         }
 
         private async Task HandleMessage(SocketMessage message)
@@ -121,7 +155,7 @@ namespace Dexter.Events
 
             if (message.Channel is IDMChannel || LevelingConfiguration.DisabledTCs.Contains(message.Channel.Id)) return;
 
-            if (onTextCooldowns.Contains(message.Author.Id)) return;
+            if (OnTextCooldowns.Contains(message.Author.Id)) return;
 
             await LevelingDB.IncrementUserXP(
                 Random.Next(LevelingConfiguration.TextMinXPGiven, LevelingConfiguration.TextMaxXPGiven + 1),
@@ -131,7 +165,7 @@ namespace Dexter.Events
                 LevelingConfiguration.TextSendLevelUpMessage
                 );
 
-            onTextCooldowns.Add(message.Author.Id);
+            OnTextCooldowns.Add(message.Author.Id);
 
             await LevelingDB.SaveChangesAsync();
         }

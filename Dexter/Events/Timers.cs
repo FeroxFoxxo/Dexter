@@ -105,7 +105,7 @@ namespace Dexter.Events
                 if (refClass != null)
                 {
                     if (refClass.GetMethod(timer.CallbackMethod) == null)
-                        throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
+                        Logger.LogError($"The callback method specified ({timer.CallbackMethod}) for the admin confirmation is null! This could very well be due to the method being private.");
 
                     try
                     {

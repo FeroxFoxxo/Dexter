@@ -184,5 +184,32 @@ namespace Dexter.Commands
 
             await LevelingService.UpdateRoles(DiscordShardedClient.GetGuild(BotConfiguration.GuildID)?.GetUser(user.Id), true);
         }
+
+        /// <summary>
+        /// Gives a given user the Awoo and Member roles.
+        /// </summary>
+        /// <param name="user">The target user</param>
+        /// <returns>A <see cref="Task"/> object, which can be awaited until the method completes successfully.</returns>
+
+        [Command("giveawoo")]
+        [Alias("grantawoo")]
+        [Summary("Grants a given user the Awoo and Member roles. Should be used exclusively when regular levels aren't working properly.")]
+        [RequireGreetFur]
+
+        public async Task GiveAwooCommand(IGuildUser user)
+        {
+            if (user is null)
+            {
+                await Context.Channel.SendMessageAsync($"I can't find the provided user! This may be due to caching. Try again in a few minutes or call a staff member to aid you.");
+                return;
+            }
+
+            IRole awooRole = Context.Guild.GetRole(LevelingConfiguration.Levels[1]);
+            IRole memberRole = Context.Guild.GetRole(LevelingConfiguration.MemberRoleID);
+            await user.AddRoleAsync(awooRole);
+            await user.AddRoleAsync(memberRole);
+
+            await Context.Channel.SendMessageAsync($"Successfully updated {user.Mention}'s roles!");
+        }
     }
 }

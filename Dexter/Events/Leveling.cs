@@ -38,7 +38,13 @@ namespace Dexter.Events
         /// The data structure containing all instances of users on Text XP cooldowns.
         /// </summary>
         
-        public HashSet<ulong> onTextCooldowns = new();
+        public static HashSet<ulong> OnTextCooldowns { get; set; }
+
+        /// <summary>
+        /// Whether XP debugging is currently active.
+        /// </summary>
+
+        private static bool Debugging { get; set; }
 
         /// <summary>
         /// This method is run when the service is first started; which happens after dependency injection.
@@ -46,6 +52,9 @@ namespace Dexter.Events
 
         public override async void InitializeEvents()
         {
+            Debugging = false;
+            OnTextCooldowns = new();
+
             using var scope = ServiceProvider.CreateScope();
 
             using var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
@@ -71,6 +80,10 @@ namespace Dexter.Events
 
         public async Task AddLevels(Dictionary<string, string> parameters)
         {
+            if (Debugging)
+                Console.Out.WriteLine($"Running Leveling event with onTextCooldowns = {{{string.Join(", ", OnTextCooldowns)}}}");
+            OnTextCooldowns.RemoveWhere(e => true);
+
             using var scope = ServiceProvider.CreateScope();
 
             using var RestrictionsDB = scope.ServiceProvider.GetRequiredService<RestrictionsDB>();
@@ -104,10 +117,21 @@ namespace Dexter.Events
                     }
             }
 
-            onTextCooldowns.RemoveWhere(e => true);
+            if (Debugging) Console.Out.WriteLine("Saving Changes");
 
             await RestrictionsDB.SaveChangesAsync();
             await LevelingDB.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Toggles service debugging on and off.
+        /// </summary>
+        /// <returns>A text description of the operation result.</returns>
+
+        public string ToggleDebugging()
+        {
+            Debugging = !Debugging;
+            return Debugging ? "Debugging has been turned on!" : "Debugging stopped.";
         }
 
         private async Task HandleMessage(SocketMessage message)
@@ -121,7 +145,7 @@ namespace Dexter.Events
 
             if (message.Channel is IDMChannel || LevelingConfiguration.DisabledTCs.Contains(message.Channel.Id)) return;
 
-            if (onTextCooldowns.Contains(message.Author.Id)) return;
+            if (OnTextCooldowns.Contains(message.Author.Id)) return;
 
             await LevelingDB.IncrementUserXP(
                 Random.Next(LevelingConfiguration.TextMinXPGiven, LevelingConfiguration.TextMaxXPGiven + 1),
@@ -131,7 +155,7 @@ namespace Dexter.Events
                 LevelingConfiguration.TextSendLevelUpMessage
                 );
 
-            onTextCooldowns.Add(message.Author.Id);
+            OnTextCooldowns.Add(message.Author.Id);
 
             await LevelingDB.SaveChangesAsync();
         }

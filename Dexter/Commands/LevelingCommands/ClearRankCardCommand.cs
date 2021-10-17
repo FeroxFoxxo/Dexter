@@ -26,6 +26,8 @@ namespace Dexter.Commands
 
             LevelingDB.Prefs.Remove(settings);
 
+            await LevelingDB.SaveChangesAsync();
+
             await BuildEmbed(Enums.EmojiEnum.Love)
                 .WithTitle("Success!")
                 .WithDescription($"Removed user preferences for user {target.Mention}, if none existed, nothing was performed.")
@@ -47,6 +49,8 @@ namespace Dexter.Commands
             _ = LevelingDB.GetOrCreateLevelData(targetID, out LevelPreferences settings);
 
             LevelingDB.Prefs.Remove(settings);
+
+            await LevelingDB.SaveChangesAsync();
 
             await BuildEmbed(Enums.EmojiEnum.Love)
                 .WithTitle("Success!")

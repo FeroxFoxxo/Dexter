@@ -102,7 +102,7 @@ namespace Dexter.Commands
                         .WithDescription($"The reminder will be released on {Date.HumanizeExtended()}")
     
                         .SendEmbed(Context.Channel);
-                    return;
+                    break;
                 case "remove":
                     Reminder = await TryParseAndGetReminder(Arguments, Context.User);
                     if (Reminder == null) return;
@@ -124,7 +124,7 @@ namespace Dexter.Commands
                         .WithDescription($"You will no longer receive this reminder, but you can still check its information using the `{BotConfiguration.Prefix}reminder get {Reminder.ID}` command.")
     
                         .SendEmbed(Context.Channel);
-                    return;
+                    break;
                 case "edit":
                     string IDArg = Arguments.Split(" ").FirstOrDefault();
                     string NewMessage = Arguments[IDArg.Length..].Trim();
@@ -149,7 +149,7 @@ namespace Dexter.Commands
                         .WithDescription($"The reminder will now appear with the content defined above.")
     
                         .SendEmbed(Context.Channel);
-                    return;
+                    break;
                 case "get":
                     Reminder = await TryParseAndGetReminder(Arguments, Context.User);
                     if (Reminder == null) return;
@@ -192,6 +192,7 @@ namespace Dexter.Commands
                         .SendEmbed(Context.Channel);
                     return;
             }
+            await ReminderDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -240,6 +241,7 @@ namespace Dexter.Commands
                     .SendEmbed(await Issuer.CreateDMChannelAsync());
             }
             catch { }
+            ReminderDB.SaveChanges();
         }
 
         private EmbedBuilder[] BuildReminderEmbeds(IEnumerable<Reminder> Reminders)

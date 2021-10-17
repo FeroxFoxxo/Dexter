@@ -108,6 +108,8 @@ namespace Dexter.Commands
                     $"- {DiscordShardedClient.GetGuild(BotConfiguration.GuildID).Name} Staff Team")
                     .AddField("Reason: ", Reason)
                 .SendEmbed(await User.CreateDMChannelAsync());
+
+            await ModMailDB.SaveChangesAsync();
         }
 
     }

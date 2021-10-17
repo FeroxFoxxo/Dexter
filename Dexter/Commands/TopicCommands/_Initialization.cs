@@ -96,6 +96,7 @@ namespace Dexter.Commands
                                 .SendEmbed(Context.Channel);
                             break;
                     }
+                    await FunTopicsDB.SaveChangesAsync();
                 }
                 else
                     await SendTopic(topicType, name);
@@ -135,7 +136,8 @@ namespace Dexter.Commands
                 .WithTitle($"{Context.Client.CurrentUser.Username} Asks")
                 .WithDescription(topic)
                 .WithFooter($"{name} written by {(user == null ? "Unknown" : user.Username)} • " +
-                    $"Add a {name.ToLower()} using {BotConfiguration.Prefix}{topicType.ToString().ToLower()} add {name.ToUpper()}")
+                    $"Add a {name.ToLower()} using
+                    await FunTopicsDB.SaveChangesAsync(); {BotConfiguration.Prefix}{topicType.ToString().ToLower()} add {name.ToUpper()}")
                 .SendEmbed(Context.Channel);
         }
 
@@ -216,6 +218,7 @@ namespace Dexter.Commands
                     TopicType = topicType
                 }
             );
+            FunTopicsDB.SaveChanges();
         }
 
         /// <summary>
@@ -280,6 +283,7 @@ namespace Dexter.Commands
                     .FirstOrDefault();
 
             funTopic.EntryType = EntryType.Revoke;
+            FunTopicsDB.SaveChanges();
         }
 
         /// <summary>
@@ -381,6 +385,7 @@ namespace Dexter.Commands
                     .FirstOrDefault();
 
             funTopic.Topic = editedTopic;
+            FunTopicsDB.SaveChanges();
         }
 
         /// <summary>

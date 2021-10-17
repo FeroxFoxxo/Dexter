@@ -189,6 +189,8 @@ namespace Dexter.Commands
                         .SendEmbed(Context.Channel);
                     return;
             }
+
+            await CustomCommandDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -250,6 +252,8 @@ namespace Dexter.Commands
                 User = userID,
                 CommandType = ucs
             });
+
+            CustomCommandDB.SaveChanges();
         }
 
         /// <summary>
@@ -266,6 +270,8 @@ namespace Dexter.Commands
             string Reply = Parameters["Reply"];
 
             GetCommandByNameOrAlias(CustomCommandDB, CommandName).Reply = Reply;
+
+            CustomCommandDB.SaveChanges();
         }
 
         /// <summary>
@@ -281,6 +287,8 @@ namespace Dexter.Commands
             string CommandName = Parameters["CommandName"];
 
             CustomCommandDB.CustomCommands.Remove(GetCommandByNameOrAlias(CustomCommandDB, CommandName));
+
+            CustomCommandDB.SaveChanges();
         }
 
     }

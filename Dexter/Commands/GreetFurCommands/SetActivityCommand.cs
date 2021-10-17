@@ -198,6 +198,7 @@ namespace Dexter.Commands
             {
                 GreetFurRecord record = GreetFurDB.AddActivity(userId, 0, ActivityFlags.None, d);
                 template.Apply(record);
+                GreetFurDB.SaveChanges();
             }
         }
 

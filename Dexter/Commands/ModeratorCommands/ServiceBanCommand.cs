@@ -76,7 +76,7 @@ namespace Dexter.Commands
                             $"{Apply}.")
                         .AddField(Errored.Count > 0, "Unrecognizable:", string.Join(", ", Errored))
                         .SendEmbed(Context.Channel);
-                    return;
+                    break;
                 case "remove":
                     Apply = ParseRestriction(RestrictionsArray, out Success);
 
@@ -102,7 +102,7 @@ namespace Dexter.Commands
                             $"{Apply}.")
                         .AddField(Errored.Count > 0, "Unrecognizable:", string.Join(", ", Errored))
                         .SendEmbed(Context.Channel);
-                    return;
+                    break;
                 case "get":
                 case "fetch":
                     await BuildEmbed(EmojiEnum.Love)
@@ -117,6 +117,8 @@ namespace Dexter.Commands
                         .SendEmbed(Context.Channel);
                     return;
             }
+
+            await RestrictionsDB.SaveChangesAsync();
         }
 
         private static Restriction ParseRestriction(string[] Input, out bool[] Success)

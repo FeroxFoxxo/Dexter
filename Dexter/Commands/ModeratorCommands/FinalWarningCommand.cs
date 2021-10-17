@@ -93,6 +93,7 @@ namespace Dexter.Commands
                     .WithDescription($"The target user, {User.GetUserInformation()}, might have DMs disabled or might have blocked me... :c\nThe final warning has been recorded to the database regardless.")
                     .SendEmbed(Context.Channel);
             }
+            await InfractionsDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -110,7 +111,6 @@ namespace Dexter.Commands
 
         public async Task RevokeFinalWarn(IGuildUser User, [Remainder] string Reason = "")
         {
-
             if (!TryRevokeFinalWarn(User, out FinalWarn Warn))
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
@@ -142,6 +142,7 @@ namespace Dexter.Commands
             {
                 await Context.Channel.SendMessageAsync("This user either has closed DMs or has me blocked! I wasn't able to inform them of this.");
             }
+            await InfractionsDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -179,6 +180,7 @@ namespace Dexter.Commands
                 .AddField("Points Deducted:", Warn.PointsDeducted, true)
                 .AddField("Issued on:", DateTimeOffset.FromUnixTimeSeconds(Warn.IssueTime).Humanize(), true)
                 .SendEmbed(Context.Channel);
+            await InfractionsDB.SaveChangesAsync();
         }
         /// <summary>
         /// Looks for a final warn entry for the target <paramref name="user"/>. If none are found, it creates one. If one is found, it is overwritten by the new parameters.
@@ -217,6 +219,8 @@ namespace Dexter.Commands
                 FinalWarnsDB.FinalWarns.Add(newWarning);
             }
 
+            InfractionsDB.SaveChanges();
+
             return newWarning;
         }
 
@@ -234,6 +238,8 @@ namespace Dexter.Commands
             if (warning == null || warning.EntryType == EntryType.Revoke) return false;
 
             warning.EntryType = EntryType.Revoke;
+
+            InfractionsDB.SaveChanges();
 
             return true;
         }

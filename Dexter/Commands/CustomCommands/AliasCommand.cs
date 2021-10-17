@@ -146,6 +146,7 @@ namespace Dexter.Commands
                         .SendEmbed(Context.Channel);
                     break;
             }
+            await CustomCommandDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -171,6 +172,8 @@ namespace Dexter.Commands
             AddedAlias.Add(Alias);
 
             Command.Alias = JsonConvert.SerializeObject(AddedAlias);
+
+            CustomCommandDB.SaveChanges();
         }
 
         /// <summary>
@@ -193,6 +196,8 @@ namespace Dexter.Commands
             RemovedAlias.Remove(Alias);
 
             Command.Alias = JsonConvert.SerializeObject(RemovedAlias);
+
+            CustomCommandDB.SaveChanges();
         }
 
     }

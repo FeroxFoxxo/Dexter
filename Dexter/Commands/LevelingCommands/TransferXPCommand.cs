@@ -73,6 +73,8 @@ namespace Dexter.Commands
 
             if (userfrom is not null) await LevelingService.UpdateRoles(userfrom, true);
             if (userto is not null) await LevelingService.UpdateRoles(userto, true);
+
+            await LevelingDB.SaveChangesAsync();
         }
 
         /// <summary>

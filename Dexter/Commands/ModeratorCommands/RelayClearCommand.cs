@@ -48,6 +48,8 @@ namespace Dexter.Commands
                 .WithTitle($"The relay to `#{Channel}` with the message `{(FindRelay.Message.Length > 100 ? $"{FindRelay.Message.Substring(0, 100)}..." : FindRelay.Message)}` for every {FindRelay.MessageInterval} messages has been suggested for removal!")
                 .WithDescription($"Once it has passed admin approval, it will be removed from the database.")
                 .SendEmbed(Context.Channel);
+
+            await RelayDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -65,6 +67,8 @@ namespace Dexter.Commands
             Relay RelayToRemove = RelayDB.Relays.Find(ChannelID);
 
             RelayDB.Relays.Remove(RelayToRemove);
+
+            RelayDB.SaveChanges();
         }
 
     }

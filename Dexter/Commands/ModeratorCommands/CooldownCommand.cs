@@ -117,6 +117,7 @@ namespace Dexter.Commands
                     break;
             }
 
+            await CooldownDB.SaveChangesAsync();
         }
 
     }

@@ -234,7 +234,7 @@ namespace Dexter.Commands
                             if (value.ToLower() == "none")
                             {
                                 profile.Borkday = default;
-                                TryRemoveBirthdayTimer(profile);
+                                await TryRemoveBirthdayTimer(profile);
                                 await BuildEmbed(EmojiEnum.Sign)
                                     .WithTitle("Removed local birthday records.")
                                     .WithDescription("Your birth day is no longer being tracked by the profile system.")
@@ -528,6 +528,7 @@ namespace Dexter.Commands
                     return;
             }
 
+            await ProfilesDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -936,7 +937,7 @@ namespace Dexter.Commands
 
                     return;
             }
-
+            await ProfilesDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -1030,6 +1031,7 @@ namespace Dexter.Commands
                     return;
             }
             link.Settings = prefs;
+            await ProfilesDB.SaveChangesAsync();
         }
 
         /// <summary>

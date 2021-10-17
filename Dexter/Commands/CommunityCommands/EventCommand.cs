@@ -230,6 +230,7 @@ namespace Dexter.Commands
                         return;
                     }
             }
+            CommunityEventsDB.SaveChanges();
         }
 
         /// <summary>

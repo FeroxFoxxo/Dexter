@@ -134,6 +134,7 @@ namespace Dexter.Commands
                         $"To modify the reply at any time, use `{BotConfiguration.Prefix}ccedit`.")
                     .SendEmbed(Context.Channel);
             }
+            await CustomCommandDB.SaveChangesAsync();
         }
 
         /// <summary>

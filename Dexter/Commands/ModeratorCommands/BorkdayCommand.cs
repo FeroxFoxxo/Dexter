@@ -91,6 +91,7 @@ namespace Dexter.Commands
                         $"Have a splendid birthday filled with lots of love and cheer!\n - {Context.Guild.Name} Staff <3")
 
                 );
+            await BorkdayDB.SaveChangesAsync();
         }
 
         /// <summary>

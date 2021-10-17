@@ -37,6 +37,8 @@ namespace Dexter.Commands
                 .WithTitle($"Successfully Unmuted {User.Username}.")
                 .WithDescription($"Heya! I have successfully unmuted {User.GetUserInformation()}. Give them a headpat. <3")
                 .SendEmbed(Context.Channel);
+
+            await InfractionsDB.SaveChangesAsync();
         }
 
         /// <summary>
@@ -77,6 +79,8 @@ namespace Dexter.Commands
                 .AddField("Revoked by", Context.User.GetUserInformation())
                 .AddField("Reason", Infraction.Reason)
                 .SendEmbed(Context.Channel);
+
+            await InfractionsDB.SaveChangesAsync();
         }
 
     }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dexter.Abstractions;
+using Dexter.Commands;
 using Dexter.Configurations;
 using Discord;
 using Discord.WebSocket;
@@ -30,12 +31,12 @@ namespace Dexter.Events
         {
             if (before.Value.Roles == after.Roles) return;
 
-            int tierAfter = Commands.UtilityCommands.GetRoleChangePerms(after, UtilityConfiguration);
+            int tierAfter = UtilityCommands.GetRoleChangePerms(after, UtilityConfiguration);
 
             List<SocketRole> toRemove = new();
             foreach (SocketRole role in after.Roles)
             {
-                int roleTier = Commands.UtilityCommands.GetColorRoleTier(role.Id, UtilityConfiguration);
+                int roleTier = UtilityCommands.GetColorRoleTier(role.Id, UtilityConfiguration);
                 if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix)
                     && roleTier < tierAfter)
                 {

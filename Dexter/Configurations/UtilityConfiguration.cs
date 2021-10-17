@@ -24,12 +24,6 @@ namespace Dexter.Configurations
         public int ReminderMaxCharactersPerItem { get; set; }
 
         /// <summary>
-        /// The wolfram API key for the ~ask command.
-        /// </summary>
-
-        public string WolframAppAPI { get; set; }
-
-        /// <summary>
         /// The prefix for all role colors.
         /// </summary>
 

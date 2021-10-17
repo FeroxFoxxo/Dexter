@@ -153,7 +153,7 @@ namespace Dexter.Commands
 
         public static int GetColorRoleTier(ulong roleId, UtilityConfiguration config)
         {
-            return config.LockedColors.ContainsKey(roleId) ? 2 : 1;
+            return config.LockedColors.ContainsKey(roleId) ? 1 : 2;
         }
 
         private async Task<bool> TryRemoveRoles(IGuildUser user, Dictionary<ulong, IRole> colorRoleIDs)

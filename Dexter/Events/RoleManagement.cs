@@ -44,8 +44,8 @@ namespace Dexter.Events
                 }
             }
 
-            if (toRemove.Count > 0)
-                await after.RemoveRolesAsync(toRemove);
+            //if (toRemove.Count > 0)
+            //    await after.RemoveRolesAsync(toRemove);
         }
 
     }

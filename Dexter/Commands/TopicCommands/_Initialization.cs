@@ -136,9 +136,9 @@ namespace Dexter.Commands
                 .WithTitle($"{Context.Client.CurrentUser.Username} Asks")
                 .WithDescription(topic)
                 .WithFooter($"{name} written by {(user == null ? "Unknown" : user.Username)} • " +
-                    $"Add a {name.ToLower()} using
-                    await FunTopicsDB.SaveChangesAsync(); {BotConfiguration.Prefix}{topicType.ToString().ToLower()} add {name.ToUpper()}")
+                    $"Add a {name.ToLower()} using {BotConfiguration.Prefix}{topicType.ToString().ToLower()} add {name.ToUpper()}")
                 .SendEmbed(Context.Channel);
+            await FunTopicsDB.SaveChangesAsync();
         }
 
         /// <summary>

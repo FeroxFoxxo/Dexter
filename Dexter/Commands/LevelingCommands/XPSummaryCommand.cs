@@ -122,6 +122,7 @@ namespace Dexter.Commands
                     .SendEmbed(Context.Channel);
                 return;
             }
+            await LevelingDB.Entry(ul).ReloadAsync();
 
             int textLevel = LevelingConfiguration.GetLevelFromXP(ul.TextXP, out long resTextXP, out long levelTextXP);
             int voiceLevel = LevelingConfiguration.GetLevelFromXP(ul.VoiceXP, out long resVoiceXP, out long levelVoiceXP);

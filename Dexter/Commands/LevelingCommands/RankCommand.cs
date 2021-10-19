@@ -528,6 +528,12 @@ namespace Dexter.Commands
                 if (ld.rects.nextLevel != default)
                     g.DrawString((ld.level + 1).ToString(), fontTitle, xpColor, ld.rects.nextLevel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
 
+                if (!ld.isHybrid && prefs.InsetMainXP)
+                {
+                    ld.isHybrid = true;
+                    ld.rects.expText = barRect;
+                }
+
                 if (ld.isHybrid)
                 {
                     SolidBrush overXPColor = new(xpColor.Color.GetBrightness() < 0.5 ? System.Drawing.Color.White : System.Drawing.Color.Black);

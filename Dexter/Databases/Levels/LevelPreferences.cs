@@ -59,6 +59,12 @@ namespace Dexter.Databases.Levels
         /// </summary>
 
         public float LevelOpacity { get; set; } = 1;
+
+        /// <summary>
+        /// Whether to display the XP pertaining to the main level inside the XP bar (such as in hybrid mode).
+        /// </summary>
+
+        public bool InsetMainXP { get; set; } = true;
     }
 
 }

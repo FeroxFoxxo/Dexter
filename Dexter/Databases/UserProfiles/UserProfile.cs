@@ -60,9 +60,10 @@ namespace Dexter.Databases.UserProfiles
         {
             get
             {
+                if (BorkdayValue is null) return null;
                 try
                 {
-                    return JsonConvert.DeserializeObject<DayInYear>(BorkdayStr);
+                    return DayInYear.FromRawValue(BorkdayValue ?? 0);
                 }
                 catch
                 {
@@ -71,15 +72,15 @@ namespace Dexter.Databases.UserProfiles
             }
             set
             {
-                BorkdayStr = JsonConvert.SerializeObject(value);
+                BorkdayValue = value.RawValue;
             }
         }
 
         /// <summary>
-        /// The JSON expression for Borkday.
+        /// The Unique Integer representation of the Borkday object.
         /// </summary>
 
-        public string? BorkdayStr { get; set; }
+        public short? BorkdayValue { get; set; }
 
         /// <summary>
         /// The user's birth year.
@@ -110,13 +111,14 @@ namespace Dexter.Databases.UserProfiles
         /// </summary>
 
         [NotMapped]
-        public DaylightShiftRules DSTRules
+        public DaylightShiftRules DstRules
         {
             get
             {
+                if (DstRulesValue is null) return null;
                 try
                 {
-                    return JsonConvert.DeserializeObject<DaylightShiftRules>(DSTRulesStr);
+                    return new DaylightShiftRules(DstRulesValue ?? 0);
                 }
                 catch
                 {
@@ -125,15 +127,15 @@ namespace Dexter.Databases.UserProfiles
             }
             set
             {
-                DSTRulesStr = JsonConvert.SerializeObject(value);
+                DstRulesValue = value.RawValue;
             }
         }
 
         /// <summary>
-        /// String JSON representation of DSTRules. 
+        /// The Unique Integer representation of the DSTRules object. 
         /// </summary>
 
-        public string? DSTRulesStr { get; set; }
+        public int? DstRulesValue { get; set; }
 
         /// <summary>
         /// The user's sona information provided by the user.
@@ -212,7 +214,7 @@ namespace Dexter.Databases.UserProfiles
             if (!TimeZoneData.TryParse(TimeZone, languageConfiguration, out TimeZoneData tz))
                 return null;
 
-            if (DSTRules is null || !DSTRules.IsDST(day))
+            if (DstRules is null || !DstRules.IsDST(day))
             {
                 return tz;
             }
@@ -246,6 +248,35 @@ namespace Dexter.Databases.UserProfiles
     [Serializable]
     public class DayInYear
     {
+        /// <summary>
+        /// Gets an integer that uniquely identifies the DayInYear or sets the values of the instance based on it.
+        /// </summary>
+
+        public short RawValue
+        {
+            get
+            {
+                return (short)(Day + ((int)Month << 7));
+            }
+            set
+            {
+                Day = (sbyte)(value & 0x7f);
+                Month = (LanguageHelper.Month)(byte)(value >> 7);
+            }
+        }
+
+        /// <summary>
+        /// Creates an instance of <see cref="DayInYear"/> from a unique raw value.
+        /// </summary>
+        /// <param name="rawValue">The raw value of the day in year; where the 7 least significant bits represent the day, and the rest represent the month.</param>
+        /// <returns>A <see cref="DayInYear"/> object with the appropriate values.</returns>
+
+        public static DayInYear FromRawValue(short rawValue)
+        {
+            DayInYear d = new();
+            d.RawValue = rawValue;
+            return d;
+        }
 
         /// <summary>
         /// The day of the month that this date refers to.
@@ -263,13 +294,13 @@ namespace Dexter.Databases.UserProfiles
         /// Returns the weekday this object refers to if it is interpreted as relative.
         /// </summary>
 
-        public LanguageHelper.Weekday RelativeWeekday { get { return (LanguageHelper.Weekday)(Day % 7 < 0 ? (Day % 7) + 7 : Day % 7); } }
+        public LanguageHelper.Weekday RelativeWeekday => (LanguageHelper.Weekday)(Day % 7 < 0 ? (Day % 7) + 7 : Day % 7);
 
         /// <summary>
         /// Returns which weekday of the same type in the month this object refers to if it's relative.
         /// </summary>
 
-        public int WeekdayCount { get { return Day < 0 ? -1 : Day / 7; } }
+        public int WeekdayCount => Day < 0 ? -1 : Day / 7;
 
         /// <summary>
         /// Obtains a text expression of the absolute day this object represents.
@@ -446,6 +477,43 @@ namespace Dexter.Databases.UserProfiles
     [Serializable]
     public class DaylightShiftRules
     {
+        /// <summary>
+        /// Gets an integer that uniquely identifies the DayLightShiftRule or sets the values of the instance based on it.
+        /// </summary>
+
+        public int RawValue
+        {
+            get
+            {
+                return (IsAbsolute ? 1 << 24 : 0)
+                    + Starts.RawValue << 12
+                    + Ends.RawValue;
+            }
+            set
+            {
+                IsAbsolute = value >> 24 > 0;
+                Starts.RawValue = (short)((value & 0x0000fff000) >> 12);
+                Ends.RawValue = (short)(value & 0x0fff);
+            }
+        }
+
+        /// <summary>
+        /// Creates an instance of DaylightShift rules from a unique raw integer value.
+        /// </summary>
+        /// <param name="rawValue">The rawvalue of an instance of <see cref="DaylightShiftRules"/>. Given by 12 bits for Ends, 12 bits for Starts, and 1 bit for IsAbsolute from least to most significant.</param>
+
+        public DaylightShiftRules(int rawValue)
+        {
+            Starts = new DayInYear();
+            Ends = new DayInYear();
+            RawValue = rawValue;
+        }
+
+        /// <summary>
+        /// Default constructor for Daylight Shift rules. Doesn't initialize values for Starts or Ends.
+        /// </summary>
+
+        public DaylightShiftRules() { }
 
         /// <summary>
         /// Refers to a shift that happens in specific days if <see langword="true"/>. Otherwise uses the rules for nth instance of a weekday in a month.

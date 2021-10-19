@@ -528,23 +528,24 @@ namespace Dexter.Commands
                 if (ld.rects.nextLevel != default)
                     g.DrawString((ld.level + 1).ToString(), fontTitle, xpColor, ld.rects.nextLevel, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
 
+                Rectangle textXPTarget = ld.rects.expText;
                 if (!ld.isHybrid && prefs.InsetMainXP)
                 {
                     ld.isHybrid = true;
-                    ld.rects.expText = barRect;
+                    textXPTarget = barRect;
                 }
 
                 if (ld.isHybrid)
                 {
                     SolidBrush overXPColor = new(xpColor.Color.GetBrightness() < 0.5 ? System.Drawing.Color.White : System.Drawing.Color.Black);
-                    g.DrawString(ld.XpExpr, fontDefault, xpColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Far });
+                    g.DrawString(ld.XpExpr, fontDefault, xpColor, textXPTarget, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Far });
                     g.Clip = new Region(barXPGPath);
-                    g.DrawString(ld.XpExpr, fontDefault, overXPColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Far });
+                    g.DrawString(ld.XpExpr, fontDefault, overXPColor, textXPTarget, new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Far });
                     g.Clip = new Region();
                 }
                 else
                 {
-                    g.DrawString(ld.XpExpr, fontDefault, xpColor, ld.rects.expText, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
+                    g.DrawString(ld.XpExpr, fontDefault, xpColor, textXPTarget, new StringFormat() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far });
                 }
             }
         }

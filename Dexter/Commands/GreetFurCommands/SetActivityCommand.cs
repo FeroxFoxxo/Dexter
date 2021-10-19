@@ -133,6 +133,8 @@ namespace Dexter.Commands
             activity = new();
             for (int i = 0; i < input.Length; i++)
             {
+                if (activity.messageCount > 0) break;
+
                 switch(input[i])
                 {
 

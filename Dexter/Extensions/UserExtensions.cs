@@ -27,7 +27,12 @@ namespace Dexter.Extensions
 
         public static PermissionLevel GetPermissionLevel(this IUser user, DiscordShardedClient client, BotConfiguration config)
         {
-            IGuildUser gUser = client.GetGuild(config.GuildID).GetUser(user.Id);
+            IGuildUser gUser;
+
+            if (user is IGuildUser ngUser)
+                gUser = ngUser;
+            else
+                gUser = client.GetGuild(config.GuildID).GetUser(user.Id);
 
             if (gUser == null)
                 return PermissionLevel.Default;

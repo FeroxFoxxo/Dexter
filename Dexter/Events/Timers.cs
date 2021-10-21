@@ -110,7 +110,7 @@ namespace Dexter.Events
                     try
                     {
                         await (Task)refClass.GetMethod(timer.CallbackMethod)
-                            .Invoke(scope.ServiceProvider.GetRequiredService(refClass).SetClassParameters(ServiceProvider), new object[1] { parameters });
+                            .Invoke(ActivatorUtilities.CreateInstance(ServiceProvider, refClass).SetClassParameters(scope, ServiceProvider), new object[1] { parameters });
                     }
                     catch (Exception e)
                     {

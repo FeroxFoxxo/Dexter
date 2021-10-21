@@ -148,7 +148,7 @@ namespace Dexter
 
 				UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
 					GoogleClientSecrets.FromStream(stream).Secrets,
-					new [] { SheetsService.Scope.Spreadsheets, YouTubeService.Scope.YoutubeReadonly },
+					new[] { SheetsService.Scope.Spreadsheets, YouTubeService.Scope.YoutubeReadonly },
 					"admin",
 					CancellationToken.None,
 					new FileDataStore("Token", true),
@@ -175,11 +175,11 @@ namespace Dexter
 			builder.Services.AddSingleton(
 				new CommandService(
 					new CommandServiceConfig()
-                    {
+					{
 						CaseSensitiveCommands = false,
 						LogLevel = LogSeverity.Debug,
 						DefaultRunMode = RunMode.Async
-                    }
+					}
 				)
 			);
 
@@ -259,8 +259,6 @@ namespace Dexter
 			if (hasErrored)
 				return;
 
-			GetCommands().ForEach(t => builder.Services.AddScoped(t));
-
 			GetDatabases().ForEach(t => builder.Services.AddScoped(t));
 
 			GetEvents().ForEach(t => builder.Services.AddSingleton(t));
@@ -273,7 +271,7 @@ namespace Dexter
 
 			var app = builder.Build();
 
-			using (var scope = app.Services.CreateScope())
+			using (var scope = app.Services.CreateScope()) {
 
 				// Makes sure all entity databases exist and are created if they do not.
 				GetDatabases().ForEach(
@@ -284,11 +282,10 @@ namespace Dexter
 						entityDatabase.Database.EnsureCreated();
 					}
 				);
-
-			// Adds all the services' dependencies to their properties.
-			GetEvents().ForEach(
-				type => app.Services.GetRequiredService(type).SetClassParameters(app.Services)
-			);
+				GetEvents().ForEach(
+					type => app.Services.GetRequiredService(type).SetClassParameters(scope, app.Services)
+				);
+			}
 
 			// Connects all the event hooks in initializable modules to their designated delegates.
 			GetEvents().ForEach(
@@ -311,8 +308,6 @@ namespace Dexter
 		private static List<Type> GetDatabases() { return GetClassesOfType(typeof(Database)); }
 
 		private static List<Type> GetJSONConfigs() { return GetClassesOfType(typeof(JSONConfig)); }
-
-		private static List<Type> GetCommands() { return GetClassesOfType(typeof(DiscordModule)); }
 
 		private static List<Type> GetEvents() { return GetClassesOfType(typeof(Event)); }
 

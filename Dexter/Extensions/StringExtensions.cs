@@ -3,6 +3,7 @@ using Discord;
 using Discord.WebSocket;
 using Humanizer;
 using Humanizer.Localisation;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -112,7 +113,7 @@ namespace Dexter.Extensions
             return new KeyValuePair<string, string>(name, methodName);
         }
 
-        public static object SetClassParameters(this object newClass, IServiceProvider sp)
+        public static object SetClassParameters(this object newClass, IServiceScope scope, IServiceProvider sp)
         {
             newClass.GetType().GetProperties().ToList().ForEach(property =>
             {
@@ -120,7 +121,7 @@ namespace Dexter.Extensions
                     property.SetValue(newClass, sp);
                 else
                 {
-                    object service = sp.GetService(property.PropertyType);
+                    object service = scope.ServiceProvider.GetService(property.PropertyType);
 
                     if (service != null)
                     {

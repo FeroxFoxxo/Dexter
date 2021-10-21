@@ -11,6 +11,9 @@ using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;
 using Newtonsoft.Json;
+using Fergun.Interactive.Pagination;
+using Fergun.Interactive;
+using System.Linq;
 
 namespace Dexter.Abstractions
 {
@@ -39,6 +42,11 @@ namespace Dexter.Abstractions
         public DiscordShardedClient DiscordShardedClient { get; set; }
 
         public IServiceProvider ServiceProvider { get; set; }
+
+        /// <summary>
+        /// The Interactivity class is used to create a reaction menu for the await CreateReactionMenu method.
+        /// </summary>
+        public InteractiveService Interactive { get; set; }
 
         /// <summary>
         /// The TimerService class is used to create a timer for wait until an expiration time has been reached.
@@ -119,6 +127,36 @@ namespace Dexter.Abstractions
         public EmbedBuilder BuildEmbed(EmojiEnum thumbnail)
         {
             return new EmbedBuilder().BuildEmbed(thumbnail, BotConfiguration, EmbedCallingType.Service);
+        }
+
+        /// <summary>
+        /// The Create Reaction Menu method creates a reaction menu with pages that you can use to navigate the embeds.
+        /// </summary>
+        /// <param name="embeds">The embeds that you wish to create the reaction menu from.</param>
+        /// <param name="channel">The channel that the reaction menu should be sent to.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+
+        public async Task CreateReactionMenu(EmbedBuilder[] embeds, IMessageChannel channel)
+        {
+            if (embeds.Length > 1)
+            {
+                PageBuilder[] pageBuilderMenu = new PageBuilder[embeds.Length];
+
+                for (int i = 0; i < embeds.Length; i++)
+                    pageBuilderMenu[i] = PageBuilder.FromEmbedBuilder(embeds[i]);
+
+                Paginator paginator = new StaticPaginatorBuilder()
+                    .WithPages(pageBuilderMenu)
+                    .WithDefaultEmotes()
+                    .WithFooter(PaginatorFooter.PageNumber)
+                    .WithActionOnCancellation(ActionOnStop.DeleteInput)
+                    .WithActionOnTimeout(ActionOnStop.DeleteInput)
+                                        .Build();
+
+                await Interactive.SendPaginatorAsync(paginator, channel, TimeSpan.FromMinutes(10));
+            }
+            else
+                await embeds.FirstOrDefault().SendEmbed(channel);
         }
 
     }

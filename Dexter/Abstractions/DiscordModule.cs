@@ -189,7 +189,7 @@ namespace Dexter.Abstractions
                 await Interactive.SendPaginatorAsync(paginator, channel, TimeSpan.FromMinutes(10));
             }
             else
-                await embeds.FirstOrDefault().SendEmbed(Context.Channel);
+                await embeds.FirstOrDefault().SendEmbed(channel);
         }
 
     }

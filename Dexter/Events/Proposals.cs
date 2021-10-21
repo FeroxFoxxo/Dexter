@@ -604,12 +604,12 @@ namespace Dexter.Events
             using var scope = ServiceProvider.CreateScope();
 
             Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Params);
-            Type Class = Assembly.GetExecutingAssembly().GetTypes().Where(T => T.Name.Equals(Type)).FirstOrDefault();
+            Type refClass = Assembly.GetExecutingAssembly().GetTypes().Where(T => T.Name.Equals(Type)).FirstOrDefault();
 
-            if (Class.GetMethod(Method) == null)
+            if (refClass.GetMethod(Method) == null)
                 throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
 
-            Class.GetMethod(Method).Invoke(scope.ServiceProvider.GetRequiredService(Class).SetClassParameters(ServiceProvider), new object[1] { Parameters });
+            refClass.GetMethod(Method).Invoke(ActivatorUtilities.CreateInstance(ServiceProvider, refClass).SetClassParameters(scope, ServiceProvider), new object[1] { Parameters });
         }
 
         /// <summary>

@@ -135,13 +135,13 @@ namespace Dexter.Events
 
                         using (var scope = ServiceProvider.CreateScope())
                         {
-                            var CustomCommandDB = scope.ServiceProvider.GetRequiredService<CustomCommandDB>();
+                            using var CustomCommandDB = scope.ServiceProvider.GetService<CustomCommandDB>();
 
-                            CustomCommand customCommand = CustomCommands.GetCommandByNameOrAlias(CustomCommandDB, customCommandArgs[0].ToLower());
+                            CustomCommand customCommand = CustomCommandDB.GetCommandByNameOrAlias(customCommandArgs[0].ToLower());
 
                             if (customCommand != null)
                             {
-                                if (customCommand.Reply.Length > 0 && Commands.CustomCommands.IsCustomCommandActive(customCommand, DiscordShardedClient, BotConfiguration, CustomCommandsConfiguration))
+                                if (customCommand.Reply.Length > 0 && CustomCommands.IsCustomCommandActive(customCommand, DiscordShardedClient, BotConfiguration, CustomCommandsConfiguration))
                                 {
                                     string reply = customCommand.Reply;
 

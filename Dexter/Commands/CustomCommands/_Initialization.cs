@@ -27,29 +27,6 @@ namespace Dexter.Commands
         public CustomCommandsConfiguration CustomCommandsConfiguration { get; set; }
 
         /// <summary>
-        /// The Get Command By Name Or Alias method gets the CustomCommand object from the CustomCommands table
-        /// that matches an alias or the command name itself through a query of the database.
-        /// </summary>
-        /// <param name="name">The name of the command or alias you wish to query for.</param>
-        /// <returns>A CustomCommand object of the command you queried.</returns>
-
-        public static CustomCommand GetCommandByNameOrAlias(CustomCommandDB customCommandDB, string name)
-        {
-            CustomCommand cmdByName = customCommandDB.CustomCommands.Find(name);
-
-            if (cmdByName is not null)
-                return cmdByName;
-
-            CustomCommand[] cmdByAlias = customCommandDB.CustomCommands.AsQueryable().Where(customcmd => (customcmd.Alias ?? "").Contains(name)).ToArray();
-
-            foreach (CustomCommand command in cmdByAlias)
-                if (JsonConvert.DeserializeObject<List<string>>(command.Alias ?? "[]").Contains(name))
-                    return command;
-
-            return null;
-        }
-
-        /// <summary>
         /// Obtains a user command by the user attached to it.
         /// </summary>
         /// <param name="id">The id of the target user.</param>

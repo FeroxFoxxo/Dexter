@@ -575,7 +575,13 @@ namespace Dexter.Commands
                         allowed = false;
                         break;
                     case ProfilePreferences.PrivacyMode.Friends:
-                        allowed = await ProfilesDB.AreLinked(Context.User.Id, user.Id);
+                        await ProfilesDB.Links.AsAsyncEnumerable().ForEachAsync(l =>
+                        {
+                            if (allowed) return;
+                            if (l.LinkType != LinkType.Friend) return;
+                            if (l.Sender == Context.User.Id && l.Sendee == user.Id) allowed = true;
+                            else if (l.Sender == user.Id && l.Sendee == Context.User.Id) allowed = true;
+                        });
                         break;
                     case ProfilePreferences.PrivacyMode.Public:
                         allowed = true;
@@ -604,7 +610,6 @@ namespace Dexter.Commands
 
         public async Task FriendCommand(string action, ulong userID)
         {
-
             IUser target = DiscordShardedClient.GetUser(userID);
 
             if (target is null)
@@ -614,7 +619,6 @@ namespace Dexter.Commands
             }
 
             await FriendCommand(action, target);
-
         }
 
         /// <summary>
@@ -629,7 +633,6 @@ namespace Dexter.Commands
 
         public async Task FriendCommand(string action, IUser user = null)
         {
-
             if (user is not null && RestrictionsDB.IsUserRestricted(user.Id, Databases.UserRestrictions.Restriction.Social))
             {
                 await BuildEmbed(EmojiEnum.Annoyed)

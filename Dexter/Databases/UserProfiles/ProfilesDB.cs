@@ -162,30 +162,6 @@ namespace Dexter.Databases.UserProfiles
         }
 
         /// <summary>
-        /// Checks whether two users are linked by a given <paramref name="linkType"/>.
-        /// </summary>
-        /// <param name="sender">The Sender user to look for in the link.</param>
-        /// <param name="sendee">The Sendee user to look for in the link.</param>
-        /// <param name="anyOrder">Whether the order of the sender and sendee can be altered.</param>
-        /// <param name="linkType">What type of link to look for.</param>
-        /// <returns><see langword="true"/> if a link is found with the given parameters, otherwise <see langword="false"/>.</returns>
-
-        public async Task<bool> AreLinked(ulong sender, ulong sendee, bool anyOrder = true, LinkType linkType = LinkType.Friend)
-        {
-            bool found = false;
-
-            await Links.AsAsyncEnumerable().ForEachAsync(l =>
-            {
-                if (found) return;
-                if (l.LinkType != linkType) return;
-                if (l.Sender == sender && l.Sendee == sendee) found = true;
-                else if (anyOrder && l.Sender == sendee && l.Sendee == sender) found = true;
-            });
-
-            return found;
-        }
-
-        /// <summary>
         /// Obtains a list of users set to receive birthday notifications for a given <paramref name="user"/>.
         /// </summary>
         /// <param name="user">The user whose birthday it is.</param>

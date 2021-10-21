@@ -72,7 +72,7 @@ namespace Dexter.Commands
                 return;
             }
 
-            CustomCommand incompatibleCC = GetCommandByNameOrAlias(CustomCommandDB, name);
+            CustomCommand incompatibleCC = CustomCommandDB.GetCommandByNameOrAlias(name);
             if (incompatibleCC is not null && incompatibleCC.User != Context.User.Id && incompatibleCC.CommandType != UserCommandSource.Unspecified)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)

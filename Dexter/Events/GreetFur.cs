@@ -208,7 +208,7 @@ namespace Dexter.Events
                 ValueRange range = new();
                 List<string[]> rows = new();
 
-                newActivity = GetAllRecentActivity(GreetFurDB, firstDay, TRACKING_LENGTH);
+                newActivity = GetAllRecentActivity(firstDay, TRACKING_LENGTH);
 
                 bool managerToggle = true;
                 for (int i = 1; i < data.Values.Count; i++)
@@ -312,7 +312,7 @@ namespace Dexter.Events
                     HashSet<ulong> tbpFoundIDs = foundIDs.ToHashSet();
 
                     if (newActivity is null)
-                        newActivity = GetAllRecentActivity(GreetFurDB, firstDay, TRACKING_LENGTH);
+                        newActivity = GetAllRecentActivity(firstDay, TRACKING_LENGTH);
 
                     ValueRange range = new();
                     List<string[]> newRows = new();
@@ -355,9 +355,13 @@ namespace Dexter.Events
         /// <param name="length">The length of the period to consider starting from <paramref name="day"/></param>
         /// <returns>A <see cref="Dictionary{TKey, TValue}"/> where the key holds all caught user IDs and the values are all their attached records sorted by date.</returns>
 
-        public Dictionary<ulong, List<GreetFurRecord>> GetAllRecentActivity(GreetFurDB greetFurDB, int day, int length = 14)
+        public Dictionary<ulong, List<GreetFurRecord>> GetAllRecentActivity(int day, int length = 14)
         {
-            List<GreetFurRecord> allEntries = greetFurDB.Records.AsQueryable().Where(r => r.Date >= day && r.Date < day + length).ToList();
+            using var scope = ServiceProvider.CreateScope();
+
+            using var GreetFurDB = scope.ServiceProvider.GetRequiredService<GreetFurDB>();
+
+            List<GreetFurRecord> allEntries = GreetFurDB.Records.AsQueryable().Where(r => r.Date >= day && r.Date < day + length).ToList();
 
             Dictionary<ulong, List<GreetFurRecord>> result = new();
 
@@ -377,6 +381,8 @@ namespace Dexter.Events
             {
                 ls.Sort((a, b) => a.Date.CompareTo(b.Date));
             }
+
+            GreetFurDB.SaveChanges();
 
             return result;
         }

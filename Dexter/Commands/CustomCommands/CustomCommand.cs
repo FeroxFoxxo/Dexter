@@ -49,7 +49,7 @@ namespace Dexter.Commands
                         return;
                     }
 
-                    if (GetCommandByNameOrAlias(CustomCommandDB, CommandName) != null)
+                    if ( CustomCommandDB.GetCommandByNameOrAlias(CommandName) != null)
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Unable To Add Reply.")
@@ -99,7 +99,7 @@ namespace Dexter.Commands
                         return;
                     }
 
-                    CustomCommand Command = GetCommandByNameOrAlias(CustomCommandDB, CommandName);
+                    CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
                     if (Command == null)
                     {
@@ -165,7 +165,7 @@ namespace Dexter.Commands
                         .SendEmbed(Context.Channel);
                     break;
                 case ActionType.Get:
-                    CustomCommand GetCommand = GetCommandByNameOrAlias(CustomCommandDB, CommandName);
+                    CustomCommand GetCommand = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
                     if (GetCommand == null)
                     {
@@ -213,7 +213,7 @@ namespace Dexter.Commands
             if (userID != 0 && ucs != UserCommandSource.Unspecified)
             {
                 CustomCommand uc = GetCommandByUser(userID, ucs);
-                CustomCommand incompat = GetCommandByNameOrAlias(CustomCommandDB, cmdName);
+                CustomCommand incompat = CustomCommandDB.GetCommandByNameOrAlias(cmdName);
                 if (incompat is not null && incompat.CommandType == UserCommandSource.Unspecified)
                 {
                     CustomCommandDB.Remove(incompat);
@@ -234,7 +234,7 @@ namespace Dexter.Commands
                     return;
                 }
 
-                uc = GetCommandByNameOrAlias(CustomCommandDB, cmdName);
+                uc = CustomCommandDB.GetCommandByNameOrAlias(cmdName);
                 if (uc is not null && uc.CommandType == UserCommandSource.Unspecified)
                 {
                     uc.User = userID;
@@ -269,7 +269,7 @@ namespace Dexter.Commands
             string CommandName = Parameters["CommandName"];
             string Reply = Parameters["Reply"];
 
-            GetCommandByNameOrAlias(CustomCommandDB, CommandName).Reply = Reply;
+             CustomCommandDB.GetCommandByNameOrAlias(CommandName).Reply = Reply;
 
             CustomCommandDB.SaveChanges();
         }
@@ -286,7 +286,7 @@ namespace Dexter.Commands
         {
             string CommandName = Parameters["CommandName"];
 
-            CustomCommandDB.CustomCommands.Remove(GetCommandByNameOrAlias(CustomCommandDB, CommandName));
+            CustomCommandDB.CustomCommands.Remove( CustomCommandDB.GetCommandByNameOrAlias(CommandName));
 
             CustomCommandDB.SaveChanges();
         }

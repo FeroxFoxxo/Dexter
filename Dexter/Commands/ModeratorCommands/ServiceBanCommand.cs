@@ -39,6 +39,7 @@ namespace Dexter.Commands
             Restriction Apply;
             bool[] Success;
             List<string> Errored = new();
+            UserRestriction userRestriction;
 
             if (string.IsNullOrEmpty(Restrictions))
             {
@@ -59,7 +60,18 @@ namespace Dexter.Commands
                         if (!Success[i]) Errored.Add(RestrictionsArray[i]);
                     }
 
-                    if (!RestrictionsDB.AddRestriction(User, Apply))
+                    userRestriction = RestrictionsDB.UserRestrictions.Find(User.Id);
+
+                    if (userRestriction == null)
+                    {
+                        userRestriction = new()
+                        {
+                            UserID = User.Id,
+                            RestrictionFlags = Apply
+                        };
+                        RestrictionsDB.UserRestrictions.Add(userRestriction);
+                    }
+                    else if ((userRestriction.RestrictionFlags | Apply) == userRestriction.RestrictionFlags)
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Failure!")
@@ -67,8 +79,11 @@ namespace Dexter.Commands
                             $"{Apply}")
                             .AddField(Errored.Count > 0, "Unrecognizable:", string.Join(", ", Errored))
                             .SendEmbed(Context.Channel);
+
                         return;
                     }
+
+                    userRestriction.RestrictionFlags |= Apply;
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Success!")
@@ -81,11 +96,11 @@ namespace Dexter.Commands
                     Apply = ParseRestriction(RestrictionsArray, out Success);
 
                     for (int i = 0; i < Success.Length; i++)
-                    {
                         if (!Success[i]) Errored.Add(RestrictionsArray[i]);
-                    }
 
-                    if (!RestrictionsDB.RemoveRestriction(User, Apply))
+                    userRestriction = RestrictionsDB.UserRestrictions.Find(User.Id);
+
+                    if (userRestriction == null || (userRestriction.RestrictionFlags & Apply) == Restriction.None)
                     {
                         await BuildEmbed(EmojiEnum.Annoyed)
                             .WithTitle("Failure!")
@@ -95,6 +110,8 @@ namespace Dexter.Commands
                             .SendEmbed(Context.Channel);
                         return;
                     }
+
+                    userRestriction.RestrictionFlags &= ~Apply;
 
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Success!")
@@ -107,7 +124,7 @@ namespace Dexter.Commands
                 case "fetch":
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle($"{User.Username.Possessive()} Restrictions:")
-                        .WithDescription(RestrictionsDB.GetUserRestrictions(User).ToString())
+                        .WithDescription(RestrictionsDB.GetUserRestrictions(User.Id).ToString())
                         .SendEmbed(Context.Channel);
                     return;
                 default:

@@ -259,6 +259,8 @@ namespace Dexter
 			if (hasErrored)
 				return;
 
+			GetCommands().ForEach(t => builder.Services.AddScoped(t));
+
 			GetDatabases().ForEach(t => builder.Services.AddScoped(t));
 
 			GetEvents().ForEach(t => builder.Services.AddSingleton(t));
@@ -309,6 +311,8 @@ namespace Dexter
 		private static List<Type> GetDatabases() { return GetClassesOfType(typeof(Database)); }
 
 		private static List<Type> GetJSONConfigs() { return GetClassesOfType(typeof(JSONConfig)); }
+
+		private static List<Type> GetCommands() { return GetClassesOfType(typeof(DiscordModule)); }
 
 		private static List<Type> GetEvents() { return GetClassesOfType(typeof(Event)); }
 

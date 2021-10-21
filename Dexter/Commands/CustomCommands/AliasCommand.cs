@@ -35,7 +35,7 @@ namespace Dexter.Commands
 
         public async Task Alias(AliasActionType AliasActionType, string CommandName, [Optional] string Alias)
         {
-            CustomCommand Command = GetCommandByNameOrAlias(CustomCommandDB, CommandName);
+            CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
             if (Context.User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) < PermissionLevel.Moderator && Command.User != Context.User.Id)
             {
@@ -58,7 +58,7 @@ namespace Dexter.Commands
                         return;
                     }
 
-                    CustomCommand Add = GetCommandByNameOrAlias(CustomCommandDB, Alias);
+                    CustomCommand Add = CustomCommandDB.GetCommandByNameOrAlias(Alias);
 
                     if (Add != null)
                     {
@@ -93,7 +93,7 @@ namespace Dexter.Commands
                         return;
                     }
 
-                    CustomCommand Remove = GetCommandByNameOrAlias(CustomCommandDB, Alias);
+                    CustomCommand Remove = CustomCommandDB.GetCommandByNameOrAlias(Alias);
 
                     if (Remove == null)
                     {
@@ -118,7 +118,7 @@ namespace Dexter.Commands
                         .SendEmbed(Context.Channel);
                     break;
                 case AliasActionType.List:
-                    CustomCommand List = GetCommandByNameOrAlias(CustomCommandDB, CommandName);
+                    CustomCommand List = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
                     if (List == null)
                     {
@@ -162,7 +162,7 @@ namespace Dexter.Commands
             string CommandName = Parameters["CommandName"];
             string Alias = Parameters["Alias"];
 
-            CustomCommand Command = GetCommandByNameOrAlias(CustomCommandDB, CommandName);
+            CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
             List<string> AddedAlias = new();
 
@@ -189,7 +189,7 @@ namespace Dexter.Commands
             string CommandName = Parameters["CommandName"];
             string Alias = Parameters["Alias"];
 
-            CustomCommand Command = GetCommandByNameOrAlias(CustomCommandDB, CommandName);
+            CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
             List<string> RemovedAlias = JsonConvert.DeserializeObject<List<string>>(Command.Alias);
 

@@ -25,13 +25,11 @@ namespace Dexter.Commands
         [Alias("configlevel")]
         [Summary("Usage: `rankcard [Attribute] (Value)` - Used to modify the appearance of your rank card.")]
         [ExtendedSummary("Usage: `rankcard [Attribute] (Value)`\n" +
-            "-  `background ([DefaultImage] OR #[ColorCode])` {+Attachment} - Sets your rank card background to the `.png` or `.jpg` image you uploaded along with the command. Use the value `list` to see a list of default images.\n" +
-            "-  `color ([ColorName] OR #[ColorCode])` - Sets your rank card theme color to the chosen color. You can view some examples by leaving the value field blank.\n" +
-            "-  `pfpborder <true|false>` - Sets whether to render a grey circle behind your pfp in your rank card.\n" +
-            "-  `croppfp <true|false>` - Sets whether to crop your pfp into a circle or render it in full in your rank card.\n" +
-            "-  `titlebg <true|false>` - Sets whether to display a black background behind the name and total level.\n" +
-            "-  `showhybrid <true|false>` - Sets whether to display separate XP types in Merge Level Mode.\n" +
-            "-  `levelopacity ([decimal 0-1] OR [whole 2-255] OR [0-100]%)` - Sets the opacity of the level background.\n")]
+            "You may see all attributes and their encoded names by using the `rankcard` command without any parameters. In order to inquire more about a specific attribute, use the `rankcard [Attribute]` command without specifying a value.\n" +
+            "Examples:\n" +
+            "`rankcard` - get general attribute infomation and your personal settings\n" +
+            "`rankcard color #ff0000` - set your xpcolor to red\n" +
+            "`rankcard pfpborder` - inquire about the possible effects and values of the pfpborder attribute.")]
         [BotChannel]
 
         public async Task CustomizeLevelsCommand(string attribute = "", [Remainder] string value = "")
@@ -152,13 +150,11 @@ namespace Dexter.Commands
                         case "true":
                         case "yes":
                         case "enabled":
-                        case "circle":
                             prefs.TitleBackground = true;
                             break;
                         case "false":
                         case "no":
                         case "disabled":
-                        case "square":
                             prefs.TitleBackground = false;
                             break;
                         default:
@@ -183,13 +179,11 @@ namespace Dexter.Commands
                         case "true":
                         case "yes":
                         case "enabled":
-                        case "circle":
                             prefs.ShowHybrid = true;
                             break;
                         case "false":
                         case "no":
                         case "disabled":
-                        case "square":
                             prefs.ShowHybrid = false;
                             break;
                         default:
@@ -203,6 +197,36 @@ namespace Dexter.Commands
                     await BuildEmbed(EmojiEnum.Love)
                         .WithTitle("Operation Successful!")
                         .WithDescription($"The value of \"ShowHybridLevels\" has been set to `{prefs.ShowHybrid}`.")
+                        .SendEmbed(Context.Channel);
+                    break;
+                case "insetmain":
+                case "insetmainxp":
+                case "insetmainexp":
+                    switch(value.ToLower())
+                    {
+                        case "true":
+                        case "yes":
+                        case "enabled":
+                        case "inside":
+                            prefs.InsetMainXP = true;
+                            break;
+                        case "false":
+                        case "no":
+                        case "disabled":
+                        case "outside":
+                            prefs.InsetMainXP = false;
+                            break;
+                        default:
+                            await BuildEmbed(EmojiEnum.Sign)
+                                .WithTitle("Information about \"InsetMainXP\"")
+                                .WithDescription("Displays the user's XP in text form inside the main XP bar, similarly to hybrid levels.")
+                                .AddField("Possible Values", "**true** or **inside**: XP text will be displayed inside the XP bar.\n**false** or **outside**: XP text will be displayed on the top right corner of the main XP rectangle.")
+                                .SendEmbed(Context.Channel);
+                            return;
+                    }
+                    await BuildEmbed(EmojiEnum.Love)
+                        .WithTitle("Operation Successful!")
+                        .WithDescription($"The value of \"InsetMainXP\" has been set to `{prefs.InsetMainXP}`.")
                         .SendEmbed(Context.Channel);
                     break;
                 case "levelalpha":
@@ -346,13 +370,14 @@ namespace Dexter.Commands
                     await BuildEmbed(EmojiEnum.Sign)
                         .WithTitle("Rankcard Display Settings")
                         .WithDescription($"Here are the list of preferences you've set for your rank card display:\n" +
-                        $"XPColor: #{prefs.XpColor & 0x00ffffff:X}\n" +
-                        $"Background Image: {(prefs.Background.StartsWith("http") ? $"[View]({prefs.Background})" : prefs.Background)}\n" +
-                        $"Pfp border: **{prefs.PfpBorder}**\n" +
-                        $"Crop Pfp: **{prefs.CropPfp}**\n" +
-                        $"Title Background: **{prefs.TitleBackground}**\n" +
-                        $"Show Hybrid Levels: **{prefs.ShowHybrid}** {(LevelingConfiguration.LevelMergeMode is Configurations.LevelMergeMode.AddXPMerged or Configurations.LevelMergeMode.AddXPSimple ? "" : " *(disabled due to Dexter XP Merge Mode.)*")}\n" +
-                        $"Level Opacity: **{prefs.LevelOpacity * 100:G3}%**")
+                        $"XPColor <__*color*__>: #{prefs.XpColor & 0x00ffffff:X}\n" +
+                        $"Background Image <__*bg*__>: {(prefs.Background.StartsWith("http") ? $"[View]({prefs.Background})" : prefs.Background)}\n" +
+                        $"Pfp border <__*pfpborder*__>: **{prefs.PfpBorder}**\n" +
+                        $"Crop Pfp <__*croppfp*__>: **{prefs.CropPfp}**\n" +
+                        $"Title Background <__*titlebg*__>: **{prefs.TitleBackground}**\n" +
+                        $"Show Hybrid Levels <__*showhybrid*__>: **{prefs.ShowHybrid}** {(LevelingConfiguration.LevelMergeMode is Configurations.LevelMergeMode.AddXPMerged or Configurations.LevelMergeMode.AddXPSimple ? "" : " *(disabled due to Dexter XP Merge Mode.)*")}\n" +
+                        $"Level Opacity <__*levelopacity*__>: **{prefs.LevelOpacity * 100:G3}%**\n" +
+                        $"Inset Main XP <__*insetmain*__>: **{prefs.InsetMainXP}**")
                         .SendEmbed(Context.Channel);
                     return;
             }

@@ -209,20 +209,20 @@ namespace Dexter.Databases.UserProfiles
 
         public TimeZoneData GetRelevantTimeZone(DateTimeOffset day, LanguageConfiguration languageConfiguration)
         {
-            if (!TimeZoneData.TryParse(TimeZone, languageConfiguration, out TimeZoneData TZ))
+            if (!TimeZoneData.TryParse(TimeZone, languageConfiguration, out TimeZoneData tz))
                 return null;
 
             if (DSTRules is null || !DSTRules.IsDST(day))
             {
-                return TZ;
+                return tz;
             }
             else
             {
-                if (!TimeZoneData.TryParse(TimeZoneDST, languageConfiguration, out TimeZoneData TZDST))
+                if (!TimeZoneData.TryParse(TimeZoneDST, languageConfiguration, out TimeZoneData tzDst))
                 {
-                    return TZ;
+                    return tz;
                 }
-                return TZDST;
+                return tzDst;
             }
         }
 
@@ -435,7 +435,7 @@ namespace Dexter.Databases.UserProfiles
 
         public static DayInYear FromDateTime(DateTimeOffset day)
         {
-            return new DayInYear() { Day = (sbyte)day.Day, Month = (LanguageHelper.Month)(day.Month) };
+            return new DayInYear() { Day = (sbyte)day.Day, Month = (LanguageHelper.Month)day.Month };
         }
     }
 

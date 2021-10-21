@@ -44,19 +44,26 @@ namespace Dexter.Extensions
                 _ => Color.Magenta
             };
 
-            string name = StringExtensions.GetLastMethodCalled(2).Key;
+            string name;
+            try {
+                name = StringExtensions.GetLastMethodCalled(2).Key;
 
-            string delete = calledType switch
+                string delete = calledType switch
+                {
+                    EmbedCallingType.Command => "Commands",
+                    EmbedCallingType.Service => "Service",
+                    EmbedCallingType.Game => "Game",
+                    _ => ""
+                };
+
+                name = name.Replace(delete, "");
+
+                name = string.Concat(name.Select(x => char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
+            } 
+            catch
             {
-                EmbedCallingType.Command => "Commands",
-                EmbedCallingType.Service => "Service",
-                EmbedCallingType.Game => "Game",
-                _ => ""
-            };
-
-            name = name.Replace(delete, "");
-
-            name = string.Concat(name.Select(x => char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
+                name = "Unknown";
+            }
 
             return embedBuilder
                 .WithThumbnailUrl(botConfiguration.ThumbnailURLs[(int)thumbnails])

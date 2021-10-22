@@ -120,6 +120,8 @@ namespace Dexter.Configurations
 
         public short FinalWarningPointsDeducted { get; set; }
 
+        public string BanAppealForm { get; set; }
+
     }
 
 }

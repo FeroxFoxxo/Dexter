@@ -125,6 +125,11 @@ namespace Dexter.Configurations
 
         public ulong AwooRole { get; set; }
 
+        /// <summary>
+        /// The OWO role ID is used for finding if a moderator is trying to ban a user already with the OwO role.
+        /// </summary>
+
+        public ulong OwORole { get; set; }
     }
 
 }

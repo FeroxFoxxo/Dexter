@@ -1,6 +1,4 @@
 using Dexter.Abstractions;
-using Dexter.Enums;
-using Discord;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dexter.Databases.FinalWarns

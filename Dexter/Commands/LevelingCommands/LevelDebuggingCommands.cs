@@ -1,10 +1,5 @@
-using System;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
-using Dexter.Databases.Levels;
-using Dexter.Enums;
-using Dexter.Extensions;
-using Discord;
 using Discord.Commands;
 
 namespace Dexter.Commands

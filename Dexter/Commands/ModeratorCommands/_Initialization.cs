@@ -88,6 +88,9 @@ namespace Dexter.Commands
         public Random Random { get; set; }
 
         public Moderation ModerationService { get; set; }
+
+        public GreetFurConfiguration GreetFurConfiguration { get; set; }
+
     }
 
 }

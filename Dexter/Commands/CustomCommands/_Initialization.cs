@@ -1,8 +1,6 @@
 using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.CustomCommands;
-using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Dexter.Commands

@@ -49,6 +49,7 @@
     "5": "=SUM(G{N}:{N})"
   },
   "AwooRole": 815091090117885974,
+  "OwORole": 815091151278702633,
   "GreetFurMinimumDailyMessages": 10,
   "GreetFurActiveWithMute": true,
   "GreetFurMutePattern": "^!mute\\s(<@!?)?[0-9]{18}>?(\\s|$)",

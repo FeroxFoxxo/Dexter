@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
 using Dexter.Databases.Infractions;
@@ -50,11 +51,22 @@ namespace Dexter.Commands
 
         [Command("delrecord")]
         [Summary("Removes an infraction from a specified user based on the infraction's ID.")]
-        [Alias("unmute", "unwarn", "delwarn", "delmute")]
+        [Alias("unmute", "unwarn", "unban", "delwarn", "delmute", "delban")]
         [RequireModerator]
 
-        public async Task DeleteInfraction(int InfractionID)
+        public async Task DeleteInfraction([Optional] int InfractionID)
         {
+            if (InfractionID <= 0)
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle($"Unable to revoke infraction!")
+                    .WithDescription("To revoke infractions, please enter in its Infraction ID. " +
+                    "This is found through using the ~records command on the user.")
+                    .SendEmbed(Context.Channel);
+
+                return;
+            }
+
             Infraction Infraction = InfractionsDB.Infractions.Find(InfractionID);
 
             Infraction.EntryType = EntryType.Revoke;

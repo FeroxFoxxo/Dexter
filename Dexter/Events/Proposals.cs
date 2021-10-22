@@ -17,6 +17,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System.Data;
 using System.Reflection;
+using Fergun.Interactive.Selection;
+using Fergun.Interactive;
 
 namespace Dexter.Events
 {
@@ -311,49 +313,73 @@ namespace Dexter.Events
         /// <param name="DenyType">The type/class of <paramref name="DenyMethod"/>.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully. The task holds the string token attached to the proposal.</returns>
 
-        public async Task<Proposal> SendAdminConfirmation(string JSON, string Type, string Method, ulong Author, string ProposedMessage, string DenyJSON = null, string DenyType = null, string DenyMethod = null)
+        public async Task SendAdminConfirmation(string JSON, string Type, string Method, ulong Author, string ProposedMessage, string DenyJSON = null, string DenyType = null, string DenyMethod = null)
         {
-            using var scope = ServiceProvider.CreateScope();
+            var stc = DiscordShardedClient.GetChannel(BotConfiguration.ModerationLogChannelID) as SocketTextChannel;
 
-            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            Proposal proposal;
 
-            string Token = CreateToken();
-
-            // Creates a new Proposal object with the related fields.
-            Proposal Proposal = new()
+            using (var scope = ServiceProvider.CreateScope())
             {
-                Tracker = Token,
-                Content = ProposedMessage,
-                ProposalStatus = ProposalStatus.Suggested,
-                ProposalType = ProposalType.AdminConfirmation,
-                Proposer = Author,
-                AvatarURL = await DiscordShardedClient.GetUser(Author).GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordShardedClient, ProposalConfiguration)
-            };
+                using var proposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
-            // Creates a new AdminConfirmation object with the related fields.
-            AdminConfirmation Confirmation = new()
-            {
-                Tracker = Proposal.Tracker,
-                CallbackClass = Type,
-                CallbackMethod = Method,
-                CallbackParameters = JSON,
-                DenyCallbackClass = DenyType,
-                DenyCallbackMethod = DenyMethod,
-                DenyCallbackParameters = DenyJSON
-            };
+                string token = CreateToken();
 
-            RestUserMessage Embed = await (DiscordShardedClient.GetChannel(BotConfiguration.ModerationLogChannelID) as SocketTextChannel).SendMessageAsync(embed: BuildProposal(Proposal).Build());
+                // Creates a new Proposal object with the related fields.
+                proposal = new()
+                {
+                    Tracker = token,
+                    Content = ProposedMessage,
+                    ProposalStatus = ProposalStatus.Suggested,
+                    ProposalType = ProposalType.AdminConfirmation,
+                    Proposer = Author,
+                    AvatarURL = await DiscordShardedClient.GetUser(Author).GetTrueAvatarUrl().GetProxiedImage($"AVATAR{token}", DiscordShardedClient, ProposalConfiguration)
+                };
 
-            // Set the message ID in the suggestion object to the ID of the embed.
-            Proposal.MessageID = Embed.Id;
+                // Creates a new AdminConfirmation object with the related fields.
+                AdminConfirmation Confirmation = new()
+                {
+                    Tracker = proposal.Tracker,
+                    CallbackClass = Type,
+                    CallbackMethod = Method,
+                    CallbackParameters = JSON,
+                    DenyCallbackClass = DenyType,
+                    DenyCallbackMethod = DenyMethod,
+                    DenyCallbackParameters = DenyJSON
+                };
 
-            // Add the confirmation and proposal objects to the database.
-            ProposalDB.Proposals.Add(Proposal);
-            ProposalDB.AdminConfirmations.Add(Confirmation);
+                // Add the confirmation and proposal objects to the database.
+                proposalDB.Proposals.Add(proposal);
+                proposalDB.AdminConfirmations.Add(Confirmation);
 
-            await ProposalDB.SaveChangesAsync();
+                RestUserMessage msg = await stc.SendMessageAsync("Generating embed...");
 
-            return Proposal;
+                // Set the message ID in the suggestion object to the ID of the embed.
+                proposal.MessageID = msg.Id;
+
+                await proposalDB.SaveChangesAsync();
+            }
+
+            var options = new[] { "Approve", "Deny" };
+
+            var embed = PageBuilder.FromEmbedBuilder(BuildProposal(proposal));
+
+            var selection = new SelectionBuilder<string>()
+                .WithOptions(options)
+                .WithInputType(InputType.Buttons)
+                .WithSelectionPage(embed)
+                .WithActionOnCancellation(ActionOnStop.DeleteInput)
+                .WithActionOnTimeout(ActionOnStop.DeleteInput)
+                .Build();
+
+            var result = await Interactive.SendSelectionAsync(selection, stc, TimeSpan.FromHours(4));
+
+            string selected = result.Value;
+
+            if (selected == options[0])
+                await UpdateProposal(proposal, ProposalStatus.Approved);
+            else if (selected == options[1])
+                await UpdateProposal(proposal, ProposalStatus.Declined);
         }
 
         /// <summary>

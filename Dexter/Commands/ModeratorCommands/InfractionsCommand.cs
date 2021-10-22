@@ -142,7 +142,16 @@ namespace Dexter.Commands
                 DateTimeOffset Time = DateTimeOffset.FromUnixTimeSeconds(TimeOfIssue > 253402300799 ? TimeOfIssue / 1000 : TimeOfIssue);
 
                 EmbedFieldBuilder Field = new EmbedFieldBuilder()
-                    .WithName($"{(Infraction.InfractionTime == 0 ? "Warning" : $"{TimeSpan.FromSeconds(Infraction.InfractionTime).Humanize().Titleize()} Mute")} {Index + 1} (ID {Infraction.InfractionID}), {(Infraction.PointCost > 0 ? "-" : "")}{Infraction.PointCost} {(Infraction.PointCost == 1 ? "Point" : "Points")}.")
+                    .WithName(
+                        (
+                        Infraction.PointCost == 5 ?
+                            "Ban" :
+                            Infraction.InfractionTime == 0 ? "Warning" :
+                            $"{TimeSpan.FromSeconds(Infraction.InfractionTime).Humanize().Titleize()} Mute"
+                        )
+                        + $" {Index + 1} (ID {Infraction.InfractionID})" +
+                        $"{(Infraction.PointCost > 0 && Infraction.PointCost < 5 ? $", - {Infraction.PointCost} {(Infraction.PointCost == 1 ? "Point" : "Points")}" : "")}."
+                    )
                     .WithValue($"{(ShowIssuer ? $":cop: {(Issuer != null ? Issuer.GetUserInformation() : $"Unknown ({Infraction.Issuer})")}\n" : "")}" +
                         $":calendar: {Time:M/d/yyyy h:mm:ss}\n" +
                         $":notepad_spiral: {Infraction.Reason}"

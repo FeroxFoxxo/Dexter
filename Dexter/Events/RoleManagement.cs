@@ -6,7 +6,6 @@ using Dexter.Abstractions;
 using Dexter.Commands;
 using Dexter.Configurations;
 using Dexter.Enums;
-using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;

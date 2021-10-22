@@ -80,7 +80,7 @@ namespace Dexter.Abstractions
         /// <param name="denyCallbackParameters">Optional parameters for the <paramref name="denyCallbackMethod"/>, must be set if <paramref name="denyCallbackMethod"/> is set.</param>
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully. The Task holds the <c>string</c> token of the created <c>Proposal</c>.</returns>
 
-        public async Task<Databases.Proposals.Proposal> SendForAdminApproval(Action<Dictionary<string, string>> callbackMethod,
+        public async Task SendForAdminApproval(Action<Dictionary<string, string>> callbackMethod,
                 Dictionary<string, string> callbackParameters, ulong author, string proposal,
                 Action<Dictionary<string, string>> denyCallbackMethod = null, Dictionary<string, string> denyCallbackParameters = null)
         {
@@ -92,7 +92,7 @@ namespace Dexter.Abstractions
             if (denyCallbackParameters != null)
                 denyJSON = JsonConvert.SerializeObject(denyCallbackParameters);
 
-            return await ProposalService.SendAdminConfirmation(json, callbackMethod.Target.GetType().Name,
+            await ProposalService.SendAdminConfirmation(json, callbackMethod.Target.GetType().Name,
                 callbackMethod.Method.Name, author, proposal, denyJSON, denyCallbackMethod?.Target.GetType().Name,
                 denyCallbackMethod?.Method.Name);
         }

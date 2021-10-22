@@ -103,37 +103,21 @@ namespace Dexter.Commands
                             { "User", Context.User.Id.ToString() }
             };
 
-            if (cct == UserCommandSource.Staff && CustomCommandsConfiguration.StaffCommandsSkipConfirmation
-                && (incompatibleCC is null || incompatibleCC.CommandType != UserCommandSource.Unspecified))
-            {
-                CreateCommandCallback(setupArgs);
+            await SendForAdminApproval(CreateCommandCallback,
+                    setupArgs,
+                    Context.User.Id,
+                    description.ToString());
 
-                await BuildEmbed(EmojiEnum.Love)
-                    .WithTitle($"The staff command `{BotConfiguration.Prefix}{name}` was added!")
-                    .WithDescription($"{description}\n" +
-                        $"use `{BotConfiguration.Prefix}ccalias add {name} [alias]` to add an alias to the command! \n" +
-                        "Please note, to make the command ping a user if mentioned, add `USER` to the reply~! \n" +
-                        "To make the command ping the user who executes the command, add `AUTHOR` to the reply. \n" +
-                        $"To modify the reply at any time, use `{BotConfiguration.Prefix}ccedit`.")
-                    .SendEmbed(Context.Channel);
-            }
-            else
-            {
-                await SendForAdminApproval(CreateCommandCallback,
-                        setupArgs,
-                        Context.User.Id,
-                        description.ToString());
-                
-                await BuildEmbed(EmojiEnum.Sign)
-                    .WithTitle($"The command `{BotConfiguration.Prefix}{name}` was suggested!")
-                    .WithDescription($"{description}\n" + 
-                        $"Once it has passed admin approval, " +
-                        $"use `{BotConfiguration.Prefix}ccalias add {name} [alias]` to add an alias to the command! \n" +
-                        "Please note, to make the command ping a user if mentioned, add `USER` to the reply~! \n" +
-                        "To make the command ping the user who executes the command, add `AUTHOR` to the reply. \n" +
-                        $"To modify the reply at any time, use `{BotConfiguration.Prefix}ccedit`.")
-                    .SendEmbed(Context.Channel);
-            }
+            await BuildEmbed(EmojiEnum.Sign)
+                .WithTitle($"The command `{BotConfiguration.Prefix}{name}` was suggested!")
+                .WithDescription($"{description}\n" +
+                    $"Once it has passed admin approval, " +
+                    $"use `{BotConfiguration.Prefix}ccalias add {name} [alias]` to add an alias to the command! \n" +
+                    "Please note, to make the command ping a user if mentioned, add `USER` to the reply~! \n" +
+                    "To make the command ping the user who executes the command, add `AUTHOR` to the reply. \n" +
+                    $"To modify the reply at any time, use `{BotConfiguration.Prefix}ccedit`.")
+                .SendEmbed(Context.Channel);
+
             await CustomCommandDB.SaveChangesAsync();
         }
 

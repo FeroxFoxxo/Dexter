@@ -26,7 +26,7 @@ namespace Dexter.Commands
         /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
         [Command("cc")]
-        [Summary("Modifies a given customizeable command.\n" +
+        [Summary("Modifies a given server customizeable command.\n" +
             "`ADD [COMMAND NAME] [REPLY]` - adds a custom command to the database with a given reply.\n" +
             "`EDIT [COMMAND NAME] [EDITED REPLY]` - edits a custom command's reply with a new one given.\n" +
             "`REMOVE [COMMAND NAME]` - removes a custom command from the database.\n" +

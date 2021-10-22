@@ -78,6 +78,8 @@ namespace Dexter.Configurations
 
         public int StaffVotingThreshold { get; set; }
 
+        public ulong AdminApprovalChannel { get; set; }
+
     }
 
 }

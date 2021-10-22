@@ -25,5 +25,6 @@
   ],
   "ReactionPass": 1,
   "IdleDeclineTime": 604800,
-  "StaffVotingThreshold": 4
+  "StaffVotingThreshold": 4,
+  "AdminApprovalChannel": 792657959192231976
 }

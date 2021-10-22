@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -315,9 +315,10 @@ namespace Dexter.Events
 
         public async Task SendAdminConfirmation(string JSON, string Type, string Method, ulong Author, string ProposedMessage, string DenyJSON = null, string DenyType = null, string DenyMethod = null)
         {
-            var stc = DiscordShardedClient.GetChannel(BotConfiguration.ModerationLogChannelID) as SocketTextChannel;
+            var stc = DiscordShardedClient.GetChannel(ProposalConfiguration.AdminApprovalChannel) as SocketTextChannel;
 
             Proposal proposal;
+            RestUserMessage msg;
 
             using (var scope = ServiceProvider.CreateScope())
             {
@@ -352,7 +353,7 @@ namespace Dexter.Events
                 proposalDB.Proposals.Add(proposal);
                 proposalDB.AdminConfirmations.Add(Confirmation);
 
-                RestUserMessage msg = await stc.SendMessageAsync("Generating embed...");
+                msg = await stc.SendMessageAsync(embed: BuildProposal(proposal).Build());
 
                 // Set the message ID in the suggestion object to the ID of the embed.
                 proposal.MessageID = msg.Id;
@@ -360,7 +361,7 @@ namespace Dexter.Events
                 await proposalDB.SaveChangesAsync();
             }
 
-            var options = new[] { "Approve", "Deny" };
+            var options = new[] { "✔️ Approve", "❌ Deny" };
 
             var embed = PageBuilder.FromEmbedBuilder(BuildProposal(proposal));
 
@@ -372,14 +373,17 @@ namespace Dexter.Events
                 .WithActionOnTimeout(ActionOnStop.DeleteInput)
                 .Build();
 
-            var result = await Interactive.SendSelectionAsync(selection, stc, TimeSpan.FromHours(4));
+            _ = Task.Run(async () =>
+            {
+                var result = await Interactive.SendSelectionAsync(selection, stc, TimeSpan.FromHours(6), msg);
 
-            string selected = result.Value;
+                string selected = result.Value;
 
-            if (selected == options[0])
-                await UpdateProposal(proposal, ProposalStatus.Approved);
-            else if (selected == options[1])
-                await UpdateProposal(proposal, ProposalStatus.Declined);
+                if (selected == options[0])
+                    await UpdateProposal(proposal, ProposalStatus.Approved);
+                else if (selected == options[1])
+                    await UpdateProposal(proposal, ProposalStatus.Declined);
+            });
         }
 
         /// <summary>
@@ -601,7 +605,7 @@ namespace Dexter.Events
                     await UpdateSpecificProposal(Proposal, ProposalConfiguration.StaffSuggestionsChannel, Suggestion.StaffMessageID);
                     break;
                 case ProposalType.AdminConfirmation:
-                    await UpdateSpecificProposal(Proposal, BotConfiguration.ModerationLogChannelID, Proposal.MessageID);
+                    await UpdateSpecificProposal(Proposal, ProposalConfiguration.AdminApprovalChannel, Proposal.MessageID);
 
                     if (ProposalStatus == ProposalStatus.Approved)
                     {

@@ -23,7 +23,6 @@ namespace Dexter.Games
 		const int MinWidth = 3;
 		const int MinHeight = 3;
 		const float MaxMineRatio = 0.4f;
-		const char ZWSP = 'â€‹';
 
 		private int MaxMines
 		{

@@ -1462,7 +1462,7 @@ namespace Dexter.Helpers
 		/// A zero-width space character.
 		/// </summary>
 
-		public const char ZWSP = 'â€‹';
+		public const char ZWSP = '​';
 	}
 
 	/// <summary>

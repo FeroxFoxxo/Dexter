@@ -142,14 +142,12 @@ namespace Dexter.Games
 			return string.Join("", chars);
 		}
 
-		const char LifeFullChar = 'â™¥';
-		const char LifeEmptyChar = 'â˜ ';
 		private string LivesExpression()
 		{
 			char[] expression = new char[MaxLives];
 			for (int i = 0; i < MaxLives; i++)
 			{
-				expression[i] = i < Lives ? LifeFullChar : LifeEmptyChar;
+				expression[i] = i < Lives ? '♥' : '☠';
 			}
 			return string.Join("", expression);
 		}

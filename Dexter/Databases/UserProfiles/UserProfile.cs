@@ -235,13 +235,6 @@ namespace Dexter.Databases.UserProfiles
         {
             return DateTimeOffset.Now.ToOffset(GetRelevantTimeZone(languageConfiguration).TimeOffset);
         }
-
-        public string BorkdayStr { get; set; }
-        public DayInYear ParsedBorkday => string.IsNullOrEmpty(BorkdayStr) ? null : JsonConvert.DeserializeObject<DayInYear>(BorkdayStr);
-        public string SettingsStr { get; set; }
-        public ProfilePreferences ParsedSettings => string.IsNullOrEmpty(SettingsStr) ? null : JsonConvert.DeserializeObject<ProfilePreferences>(SettingsStr);
-        public string DSTRulesStr { get; set; }
-        public DaylightShiftRules ParsedDSTRules => string.IsNullOrEmpty(DSTRulesStr) ? null : JsonConvert.DeserializeObject<DaylightShiftRules>(DSTRulesStr);
     }
 
     /// <summary>

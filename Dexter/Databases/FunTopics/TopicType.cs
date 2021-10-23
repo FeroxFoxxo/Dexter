@@ -1,43 +1,43 @@
-namespace Dexter.Databases.FunTopics
+﻿namespace Dexter.Databases.FunTopics
 {
 
-    /// <summary>
-    /// [risk of deprecation] The subtype a topic falls into. Can be of type TOPIC or WOULDYOURATHER.
-    /// </summary>
+	/// <summary>
+	/// [risk of deprecation] The subtype a topic falls into. Can be of type TOPIC or WOULDYOURATHER.
+	/// </summary>
 
-    public enum TopicType
-    {
+	public enum TopicType
+	{
 
-        /// <summary>
-        /// A topic that initiates a random, unprompted conversation, generally by asking an open question.
-        /// </summary>
+		/// <summary>
+		/// A topic that initiates a random, unprompted conversation, generally by asking an open question.
+		/// </summary>
 
-        Topic,
+		Topic,
 
-        /// <summary>
-        /// A topic that initiates a conversation by proposing two options and opening up a binary choice.
-        /// </summary>
+		/// <summary>
+		/// A topic that initiates a conversation by proposing two options and opening up a binary choice.
+		/// </summary>
 
-        WouldYouRather,
+		WouldYouRather,
 
-        /// <summary>
-        /// A topic that states some fun, random, or unexpected fact about science, sociology, demography, or any other field of knowledge.
-        /// </summary>
+		/// <summary>
+		/// A topic that states some fun, random, or unexpected fact about science, sociology, demography, or any other field of knowledge.
+		/// </summary>
 
-        FunFact,
+		FunFact,
 
-        /// <summary>
-        /// A topic that contains an introductory statement and a punchline inteded for comedy.
-        /// </summary>
+		/// <summary>
+		/// A topic that contains an introductory statement and a punchline inteded for comedy.
+		/// </summary>
 
-        Joke,
+		Joke,
 
-        /// <summary>
-        /// A topic that contains a famous quote.
-        /// </summary>
+		/// <summary>
+		/// A topic that contains a famous quote.
+		/// </summary>
 
-        Quote
+		Quote
 
-    }
+	}
 
 }

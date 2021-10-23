@@ -13,7 +13,7 @@ using Victoria.Responses.Search;
 
 namespace Dexter.Commands
 {
-    public partial class MusicCommands
+	public partial class MusicCommands
 	{
 		
 		[Command("lyrics")]

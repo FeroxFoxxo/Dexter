@@ -8,7 +8,7 @@ using Victoria.Player;
 
 namespace Dexter.Commands
 {
-    public partial class MusicCommands
+	public partial class MusicCommands
 	{
 		[Command("loop")]
 		[Alias("repeat")]

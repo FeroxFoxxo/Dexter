@@ -1,4 +1,4 @@
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.GreetFur;
 using Dexter.Databases.UserProfiles;
@@ -8,51 +8,51 @@ using Google.Apis.Sheets.v4;
 namespace Dexter.Commands
 {
 
-    /// <summary>
-    /// The class containing all commands within the GreetFur module.
-    /// </summary>
+	/// <summary>
+	/// The class containing all commands within the GreetFur module.
+	/// </summary>
 
-    public partial class GreetFurCommands : DiscordModule
-    {
+	public partial class GreetFurCommands : DiscordModule
+	{
 
-        /// <summary>
-        /// Works as an interface between the configuration files attached to the GreetFur module and the commands.
-        /// </summary>
+		/// <summary>
+		/// Works as an interface between the configuration files attached to the GreetFur module and the commands.
+		/// </summary>
 
-        public GreetFurConfiguration GreetFurConfiguration { get; set; }
+		public GreetFurConfiguration GreetFurConfiguration { get; set; }
 
-        /// <summary>
-        /// A Configuration file containing linguistic information used to parse time zones.
-        /// </summary>
+		/// <summary>
+		/// A Configuration file containing linguistic information used to parse time zones.
+		/// </summary>
 
-        public LanguageConfiguration LanguageConfiguration { get; set; }
+		public LanguageConfiguration LanguageConfiguration { get; set; }
 
-        /// <summary>
-        /// A wrapper for useful GreetFur data and a wrapper for spreadsheet manipulation and access.
-        /// </summary>
+		/// <summary>
+		/// A wrapper for useful GreetFur data and a wrapper for spreadsheet manipulation and access.
+		/// </summary>
 
-        public GreetFur GreetFurService { get; set; }
+		public GreetFur GreetFurService { get; set; }
 
-        /// <summary>
-        /// Manages the Google Sheets section of GreetFur record-keeping.
-        /// </summary>
+		/// <summary>
+		/// Manages the Google Sheets section of GreetFur record-keeping.
+		/// </summary>
 
-        public SheetsService SheetsService { get; set; }
+		public SheetsService SheetsService { get; set; }
 
-        /// <summary>
-        /// A database with information about GreetFur activity records.
-        /// </summary>
+		/// <summary>
+		/// A database with information about GreetFur activity records.
+		/// </summary>
 
-        public GreetFurDB GreetFurDB { get; set; }
+		public GreetFurDB GreetFurDB { get; set; }
 
-        /// <summary>
-        /// A database with information about GreetFur profile preferences.
-        /// </summary>
+		/// <summary>
+		/// A database with information about GreetFur profile preferences.
+		/// </summary>
 
-        public ProfilesDB ProfilesDB { get; set; }
+		public ProfilesDB ProfilesDB { get; set; }
 
-        public Moderation ModerationService { get; set; }
+		public Moderation ModerationService { get; set; }
 
-    }
+	}
 
 }

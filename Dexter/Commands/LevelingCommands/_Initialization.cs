@@ -1,4 +1,4 @@
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Levels;
 using Dexter.Events;
@@ -6,29 +6,29 @@ using Dexter.Events;
 namespace Dexter.Commands
 {
 
-    /// <summary>
-    /// Contains all commands and utilities related to the levels system.
-    /// </summary>
-    public partial class LevelingCommands : DiscordModule
-    {
+	/// <summary>
+	/// Contains all commands and utilities related to the levels system.
+	/// </summary>
+	public partial class LevelingCommands : DiscordModule
+	{
 
-        /// <summary>
-        /// Holds specific methods for managing user levels.
-        /// </summary>
+		/// <summary>
+		/// Holds specific methods for managing user levels.
+		/// </summary>
 
-        public Leveling LevelingService { get; set; }
+		public Leveling LevelingService { get; set; }
 
-        /// <summary>
-        /// Holds all configuration specifically relevant to the Leveling System.
-        /// </summary>
+		/// <summary>
+		/// Holds all configuration specifically relevant to the Leveling System.
+		/// </summary>
 
-        public LevelingConfiguration LevelingConfiguration { get; set; }
+		public LevelingConfiguration LevelingConfiguration { get; set; }
 
-        /// <summary>
-        /// Holds all user data relevant to user levels.
-        /// </summary>
+		/// <summary>
+		/// Holds all user data relevant to user levels.
+		/// </summary>
 
-        public LevelingDB LevelingDB { get; set; }
+		public LevelingDB LevelingDB { get; set; }
 
-    }
+	}
 }

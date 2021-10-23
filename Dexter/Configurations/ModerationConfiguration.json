@@ -2,28 +2,28 @@
   "WebhookChannel": 792658154668294193,
   "WebhookName": "Dexter Moderation",
   "DisabledReactionChannels": [
-    792657918309695498
+	792657918309695498
   ],
   "BorkdayRoleID": 793682158727856151,
   "StaffBorkdayRoleID": 793682190835515463,
   "SecondsOfBorkday": 86400,
   "RulesAndInfoChannel": 795538176709230613,
   "MutedRoles": [
-    821232960468025344,
-    825105041463443497
+	821232960468025344,
+	825105041463443497
   ],
   "SecondsTillPointIncrement": 30,
   "MaxPoints": 5,
   "StaffBotsChannel": 792657895014793246,
   "InfractionNotifications": [
-    {
-      "Points": 10,
-      "Days": 7
-    },
-    {
-      "Points": 20,
-      "Days": 30
-    }
+	{
+	  "Points": 10,
+	  "Days": 7
+	},
+	{
+	  "Points": 20,
+	  "Days": 30
+	}
   ],
   "InfractionNotification": -4,
   "ModMailChannelID": 808106616557797394,

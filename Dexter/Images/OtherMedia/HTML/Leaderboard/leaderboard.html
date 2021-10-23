@@ -1,209 +1,209 @@
 ﻿<html>
 <head>
-    <title>Leaderboard</title>
-    <style>
-        body {
-            color: azure;
-            font-family: "Quicksand", "Nunito", "Trebuchet MS", Arial, sans-serif;
-            font-size: 30px;
-            background-color: #1a1a1a;
-            margin: 0;
-        }
-        .hide {
-            display: none;
-        }
-        .top {
-            background-color: #232323;
-            padding-left: 1em;
-            margin: 0;
-        }
-        .top > h1 {
-            margin: 0;
-            padding: 0.2em 0 0.5em 0;
-        }
+	<title>Leaderboard</title>
+	<style>
+		body {
+			color: azure;
+			font-family: "Quicksand", "Nunito", "Trebuchet MS", Arial, sans-serif;
+			font-size: 30px;
+			background-color: #1a1a1a;
+			margin: 0;
+		}
+		.hide {
+			display: none;
+		}
+		.top {
+			background-color: #232323;
+			padding-left: 1em;
+			margin: 0;
+		}
+		.top > h1 {
+			margin: 0;
+			padding: 0.2em 0 0.5em 0;
+		}
 
-        .list {
-            flex: 0 1 auto;
-            flex-direction: column; 
-        }
-        .level-item {
-            margin: 0;
-            height: 2em;
-            padding-left: 1em;
-            background-color: #5a5a5a;
-            border-style: solid;
-            border-width: 1px 0px;
-            border-color: black;
-            flex: 0 1 auto;
-            flex-direction: row;
-        }
-        .text {
-            border-left: solid 3px green;
-        }
-        .voice {
-            border-left: solid 3px darkorange;
-        }
-        .user-level {
-            position: absolute;
-            flex: 1 0 auto;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            right: 0.5em;
-            height: 2em;
-            width: 50%;
-            text-align: right;
-            color: mediumturquoise;
-        }
-        .rank-text {
-            position:absolute;
-            left: 0.25em;
-            padding-top: 0.25em;
-            font-size: 1.25em;
-            width: 2.5em;
-            text-align: center;
-        }
-        .user-pfp {
-            position:absolute;
-            left: 3.5em;
-            clip-path: circle();
-        }
-        .user-name {
-            position: absolute;
-            height: 2em;
-            padding-top: 0.45em;
-            padding-left: 4.75em;
-        }
-        .user-pfp > img {
-            width: 2em;
-            height: 2em;
-        }
+		.list {
+			flex: 0 1 auto;
+			flex-direction: column; 
+		}
+		.level-item {
+			margin: 0;
+			height: 2em;
+			padding-left: 1em;
+			background-color: #5a5a5a;
+			border-style: solid;
+			border-width: 1px 0px;
+			border-color: black;
+			flex: 0 1 auto;
+			flex-direction: row;
+		}
+		.text {
+			border-left: solid 3px green;
+		}
+		.voice {
+			border-left: solid 3px darkorange;
+		}
+		.user-level {
+			position: absolute;
+			flex: 1 0 auto;
+			flex-direction: row;
+			flex-wrap: nowrap;
+			right: 0.5em;
+			height: 2em;
+			width: 50%;
+			text-align: right;
+			color: mediumturquoise;
+		}
+		.rank-text {
+			position:absolute;
+			left: 0.25em;
+			padding-top: 0.25em;
+			font-size: 1.25em;
+			width: 2.5em;
+			text-align: center;
+		}
+		.user-pfp {
+			position:absolute;
+			left: 3.5em;
+			clip-path: circle();
+		}
+		.user-name {
+			position: absolute;
+			height: 2em;
+			padding-top: 0.45em;
+			padding-left: 4.75em;
+		}
+		.user-pfp > img {
+			width: 2em;
+			height: 2em;
+		}
 
-        .user-level > .xp-text {
-            display: inline-block;
-            padding-bottom: 0.4em;
-            position: absolute;
-            right: 2.5em;
-            bottom: 0;
-            margin: 0px;
-        }
-        .user-level > p::after { content: " - Lvl " }
-        .xpbar-container {
-            position: relative;
-            display: inline-block;
-            width: 2em;
-            height: 2em;
-        }
-        .xpbar-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-            font-size: 0.75em;
-            color: aqua;
-        }
-        .xpbar-circle { }
-        .xpbar-inner {
-            position: absolute;
-            z-index: 6;
-            top: 50%;
-            left: 50%;
-            height: 1.6em;
-            width: 1.6em;
-            margin: -0.8em 0 0 -0.8em;
-            background-color: #5a5a5a;
-            border-radius: 100%;
-        }
-        .xpbar {
-            position: absolute;
-            height: 2em;
-            width: 2em;
-            background-color: #5a5a5a;
-            border-radius: 100%;
-        }
-        .xpbar-left {
-            clip: rect(0, 1em, 2em, 0);
-        }
-        .xpbar-right {
-            clip: rect(0, 2em, 2em, 1em);
-        }
-        .progress {
-            position: absolute;
-            height: 100%;
-            width: 100%;
-            border-radius: 100%;
-            clip: rect(0, 1em, 2em, 0);
-            background-color: mediumturquoise;
-        }
+		.user-level > .xp-text {
+			display: inline-block;
+			padding-bottom: 0.4em;
+			position: absolute;
+			right: 2.5em;
+			bottom: 0;
+			margin: 0px;
+		}
+		.user-level > p::after { content: " - Lvl " }
+		.xpbar-container {
+			position: relative;
+			display: inline-block;
+			width: 2em;
+			height: 2em;
+		}
+		.xpbar-text {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			z-index: 10;
+			font-size: 0.75em;
+			color: aqua;
+		}
+		.xpbar-circle { }
+		.xpbar-inner {
+			position: absolute;
+			z-index: 6;
+			top: 50%;
+			left: 50%;
+			height: 1.6em;
+			width: 1.6em;
+			margin: -0.8em 0 0 -0.8em;
+			background-color: #5a5a5a;
+			border-radius: 100%;
+		}
+		.xpbar {
+			position: absolute;
+			height: 2em;
+			width: 2em;
+			background-color: #5a5a5a;
+			border-radius: 100%;
+		}
+		.xpbar-left {
+			clip: rect(0, 1em, 2em, 0);
+		}
+		.xpbar-right {
+			clip: rect(0, 2em, 2em, 1em);
+		}
+		.progress {
+			position: absolute;
+			height: 100%;
+			width: 100%;
+			border-radius: 100%;
+			clip: rect(0, 1em, 2em, 0);
+			background-color: mediumturquoise;
+		}
 
-        .toggle-button-container {
-            position: absolute;
-            right: 2em;
-            top: 10px;
-            cursor: pointer;
-            font-size: 1.6em;
-        }
-        .toggle-button-container > label > input {
-            opacity: 0;
-            cursor: pointer;
-            opacity: 0;
-            height: 0;
-            width: 0;
-        }
-        .toggle-button-container input ~ .checkmark {
-            border: 1px solid black;
-            border-radius: 0.5em;
-            background-color: green;
-            padding: 0 0.2em;
-            cursor: pointer;
-        }
-        .toggle-button-container input ~ .checkmark::before {
-            content: "Text";
-        }
-        .toggle-button-container:hover input ~ .checkmark {
-            background-color: darkgreen;
-        }
-        .toggle-button-container:hover input:checked ~ .checkmark {
-            background-color: orangered;
-        }
-        .toggle-button-container input:checked ~ .checkmark {
-            background-color: darkorange;
-        }
-        .toggle-button-container input:checked ~ .checkmark::before {
-            content: "Voice";
-        }
-    </style>
+		.toggle-button-container {
+			position: absolute;
+			right: 2em;
+			top: 10px;
+			cursor: pointer;
+			font-size: 1.6em;
+		}
+		.toggle-button-container > label > input {
+			opacity: 0;
+			cursor: pointer;
+			opacity: 0;
+			height: 0;
+			width: 0;
+		}
+		.toggle-button-container input ~ .checkmark {
+			border: 1px solid black;
+			border-radius: 0.5em;
+			background-color: green;
+			padding: 0 0.2em;
+			cursor: pointer;
+		}
+		.toggle-button-container input ~ .checkmark::before {
+			content: "Text";
+		}
+		.toggle-button-container:hover input ~ .checkmark {
+			background-color: darkgreen;
+		}
+		.toggle-button-container:hover input:checked ~ .checkmark {
+			background-color: orangered;
+		}
+		.toggle-button-container input:checked ~ .checkmark {
+			background-color: darkorange;
+		}
+		.toggle-button-container input:checked ~ .checkmark::before {
+			content: "Voice";
+		}
+	</style>
 
-    <script>
-        function switchtype() {
-            let displaytext = document.querySelector("#type-checkbox:checked") === null;
-            let targetclassview = displaytext ? "text" : "voice";
-            let targetclasshide = displaytext ? "voice" : "text";
+	<script>
+		function switchtype() {
+			let displaytext = document.querySelector("#type-checkbox:checked") === null;
+			let targetclassview = displaytext ? "text" : "voice";
+			let targetclasshide = displaytext ? "voice" : "text";
 
-            let targetsview = document.getElementsByClassName(targetclassview);
-            let targetshide = document.getElementsByClassName(targetclasshide);
+			let targetsview = document.getElementsByClassName(targetclassview);
+			let targetshide = document.getElementsByClassName(targetclasshide);
 
-            for (var i in targetsview) {
-                targetsview[i].classList = "level-item " + targetclassview;
-            }
-            for (var i in targetshide) {
-                targetshide[i].classList = "level-item hide " + targetclasshide;
-            }
-        }
-    </script>
+			for (var i in targetsview) {
+				targetsview[i].classList = "level-item " + targetclassview;
+			}
+			for (var i in targetshide) {
+				targetshide[i].classList = "level-item hide " + targetclasshide;
+			}
+		}
+	</script>
 </head>
 <body>
-    <div class="top">
-        <h1>Dexter Leaderboard</h1>
-    </div>
-    <div class="toggle-button-container" id="type-toggle-button" onclick="switchtype()">
-        <label>
-            <input type="checkbox" id="type-checkbox">
-            <span class="checkmark"></span>
-        </label>
-    </div>
-    <div class="list">
-        $LIST
-    </div>
+	<div class="top">
+		<h1>Dexter Leaderboard</h1>
+	</div>
+	<div class="toggle-button-container" id="type-toggle-button" onclick="switchtype()">
+		<label>
+			<input type="checkbox" id="type-checkbox">
+			<span class="checkmark"></span>
+		</label>
+	</div>
+	<div class="list">
+		$LIST
+	</div>
 </body>
 </html>

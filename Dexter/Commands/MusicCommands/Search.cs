@@ -19,7 +19,7 @@ using SearchResponse = Victoria.Responses.Search.SearchResponse;
 
 namespace Dexter.Commands
 {
-    public partial class MusicCommands
+	public partial class MusicCommands
 	{
 
 		[Command("play")]
@@ -140,7 +140,7 @@ namespace Dexter.Commands
 								{
 									songs.Add($"{track.Artists.First().Name} {track.Name}");
 								}
-                            }
+							}
 
 							if (songs.Any())
 							{
@@ -187,7 +187,7 @@ namespace Dexter.Commands
 				var track = searchResult.Tracks.FirstOrDefault();
 
 				if (track is not null)
-                {
+				{
 					tracks.Add(track);
 					if (player.Vueue.Count == 0 && player.PlayerState != PlayerState.Playing)
 					{

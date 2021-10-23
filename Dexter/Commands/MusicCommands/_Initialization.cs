@@ -1,4 +1,4 @@
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Events;
 using Google.Apis.YouTube.v3;
 using Microsoft.Extensions.Logging;
@@ -7,21 +7,21 @@ using SpotifyAPI.Web;
 namespace Dexter.Commands
 {
 
-    /// <summary>
-    /// The class containing all commands withing the Music module.
-    /// </summary>
+	/// <summary>
+	/// The class containing all commands withing the Music module.
+	/// </summary>
 
-    public partial class MusicCommands : DiscordModule
-    {
+	public partial class MusicCommands : DiscordModule
+	{
 
-        public Music MusicService { get; set; }
+		public Music MusicService { get; set; }
 
-        public ILogger<MusicCommands> Logger { get; set; }
+		public ILogger<MusicCommands> Logger { get; set; }
 
-        public YouTubeService YouTubeService { get; set; }
+		public YouTubeService YouTubeService { get; set; }
 
-        public ClientCredentialsRequest ClientCredentialsRequest { get; set; }
+		public ClientCredentialsRequest ClientCredentialsRequest { get; set; }
 
-    }
+	}
 
 }

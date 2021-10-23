@@ -1,4 +1,4 @@
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Extensions;
 using Dexter.Workers;
 using Discord;
@@ -30,14 +30,14 @@ using System.Threading.Tasks;
 namespace Dexter
 {
 
-    /// <summary>
-    /// The Startup class is the entrance of the program. It is where dependencies are injected into all of their respected classes and where the bot starts up.
-    /// </summary>
+	/// <summary>
+	/// The Startup class is the entrance of the program. It is where dependencies are injected into all of their respected classes and where the bot starts up.
+	/// </summary>
 
-    public static class Startup
+	public static class Startup
 	{
 
-        private static string p_Token, p_DBUser, p_DBPassword, p_Version;
+		private static string p_Token, p_DBUser, p_DBPassword, p_Version;
 
 		public static string Version { get => p_Version; }
 		public static string Token { get => p_Token; }
@@ -319,7 +319,7 @@ namespace Dexter
 		}
 
 		private static async Task<KeyValuePair<string, int>> GetNameAndShardsOfBot(string token)
-        {
+		{
 			var restClient = new DiscordRestClient();
 			await restClient.LoginAsync(TokenType.Bot, token);
 			var shards = await restClient.GetRecommendedShardCountAsync();

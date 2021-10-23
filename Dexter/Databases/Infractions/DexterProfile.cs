@@ -1,39 +1,39 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.Infractions
 {
 
-    /// <summary>
-    /// Contains all user-specific information used for recordkeeping and automoderation.
-    /// </summary>
+	/// <summary>
+	/// Contains all user-specific information used for recordkeeping and automoderation.
+	/// </summary>
 
-    public class DexterProfile
-    {
+	public class DexterProfile
+	{
 
-        /// <summary>
-        /// The unique numerical identifier for the profile's linked User.
-        /// </summary>
+		/// <summary>
+		/// The unique numerical identifier for the profile's linked User.
+		/// </summary>
 
-        [Key]
-        public ulong UserID { get; set; }
+		[Key]
+		public ulong UserID { get; set; }
 
-        /// <summary>
-        /// Total number of recorded infractions
-        /// </summary>
+		/// <summary>
+		/// Total number of recorded infractions
+		/// </summary>
 
-        public short InfractionAmount { get; set; }
+		public short InfractionAmount { get; set; }
 
-        /// <summary>
-        /// The token associated with the current mute in the corresponding database.
-        /// </summary>
+		/// <summary>
+		/// The token associated with the current mute in the corresponding database.
+		/// </summary>
 
-        public string CurrentMute { get; set; }
+		public string CurrentMute { get; set; }
 
-        /// <summary>
-        /// The token associated with the current event timer in the corresponding database.
-        /// </summary>
+		/// <summary>
+		/// The token associated with the current event timer in the corresponding database.
+		/// </summary>
 
-        public string CurrentPointTimer { get; set; }
-    }
+		public string CurrentPointTimer { get; set; }
+	}
 
 }

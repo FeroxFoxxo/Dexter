@@ -60,9 +60,10 @@ namespace Dexter.Databases.UserProfiles
         {
             get
             {
+                if (BorkdayValue is null) return null;
                 try
                 {
-                    return JsonConvert.DeserializeObject<DayInYear>(BorkdayStr);
+                    return DayInYear.FromRawValue(BorkdayValue ?? 0);
                 }
                 catch
                 {
@@ -71,15 +72,15 @@ namespace Dexter.Databases.UserProfiles
             }
             set
             {
-                BorkdayStr = JsonConvert.SerializeObject(value);
+                BorkdayValue = value?.RawValue ?? null;
             }
         }
 
         /// <summary>
-        /// The JSON expression for Borkday.
+        /// The Unique Integer representation of the Borkday object.
         /// </summary>
 
-        public string? BorkdayStr { get; set; }
+        public short? BorkdayValue { get; set; }
 
         /// <summary>
         /// The user's birth year.
@@ -110,13 +111,14 @@ namespace Dexter.Databases.UserProfiles
         /// </summary>
 
         [NotMapped]
-        public DaylightShiftRules DSTRules
+        public DaylightShiftRules DstRules
         {
             get
             {
+                if (DstRulesValue is null) return null;
                 try
                 {
-                    return JsonConvert.DeserializeObject<DaylightShiftRules>(DSTRulesStr);
+                    return new DaylightShiftRules(DstRulesValue ?? 0);
                 }
                 catch
                 {
@@ -125,15 +127,15 @@ namespace Dexter.Databases.UserProfiles
             }
             set
             {
-                DSTRulesStr = JsonConvert.SerializeObject(value);
+                DstRulesValue = value?.RawValue ?? null;
             }
         }
 
         /// <summary>
-        /// String JSON representation of DSTRules. 
+        /// The Unique Integer representation of the DSTRules object. 
         /// </summary>
 
-        public string? DSTRulesStr { get; set; }
+        public int? DstRulesValue { get; set; }
 
         /// <summary>
         /// The user's sona information provided by the user.
@@ -170,24 +172,21 @@ namespace Dexter.Databases.UserProfiles
             {
                 try
                 {
-                    return JsonConvert.DeserializeObject<ProfilePreferences>(SettingsStr);
+                    return ProfilePreferences.FromFlags((ProfilePrefFlags?)SettingsValue ?? (ProfilePrefFlags.FriendsVisible | ProfilePrefFlags.GiveBorkdayRole));
                 }
                 catch
                 {
                     return null;
                 }
             }
-            set
-            {
-                SettingsStr = JsonConvert.SerializeObject(value);
-            }
+            set { SettingsValue = ((long?)value?.Flags) ?? null; }
         }
 
         /// <summary>
-        /// JSON representation of the profile preferences object.
+        /// Represents the compressed binary representation of the per-user specific profile preferences. 
         /// </summary>
 
-        public string SettingsStr { get; set; }
+        public long? SettingsValue { get; set; }
 
         /// <summary>
         /// Obtains the current time zone for a user with correctly set up time zone data.
@@ -212,7 +211,7 @@ namespace Dexter.Databases.UserProfiles
             if (!TimeZoneData.TryParse(TimeZone, languageConfiguration, out TimeZoneData tz))
                 return null;
 
-            if (DSTRules is null || !DSTRules.IsDST(day))
+            if (DstRules is null || !DstRules.IsDST(day))
             {
                 return tz;
             }
@@ -237,6 +236,12 @@ namespace Dexter.Databases.UserProfiles
             return DateTimeOffset.Now.ToOffset(GetRelevantTimeZone(languageConfiguration).TimeOffset);
         }
 
+        public string BorkdayStr { get; set; }
+        public DayInYear ParsedBorkday => string.IsNullOrEmpty(BorkdayStr) ? null : JsonConvert.DeserializeObject<DayInYear>(BorkdayStr);
+        public string SettingsStr { get; set; }
+        public ProfilePreferences ParsedSettings => string.IsNullOrEmpty(SettingsStr) ? null : JsonConvert.DeserializeObject<ProfilePreferences>(SettingsStr);
+        public string DSTRulesStr { get; set; }
+        public DaylightShiftRules ParsedDSTRules => string.IsNullOrEmpty(DSTRulesStr) ? null : JsonConvert.DeserializeObject<DaylightShiftRules>(DSTRulesStr);
     }
 
     /// <summary>
@@ -246,12 +251,41 @@ namespace Dexter.Databases.UserProfiles
     [Serializable]
     public class DayInYear
     {
+        /// <summary>
+        /// Gets an integer that uniquely identifies the DayInYear or sets the values of the instance based on it.
+        /// </summary>
+
+        public short RawValue
+        {
+            get
+            {
+                return (short)(Day + ((int)Month << 7));
+            }
+            set
+            {
+                Day = (byte)(value & 0x7f);
+                Month = (LanguageHelper.Month)(byte)(value >> 7);
+            }
+        }
+
+        /// <summary>
+        /// Creates an instance of <see cref="DayInYear"/> from a unique raw value.
+        /// </summary>
+        /// <param name="rawValue">The raw value of the day in year; where the 7 least significant bits represent the day, and the rest represent the month.</param>
+        /// <returns>A <see cref="DayInYear"/> object with the appropriate values.</returns>
+
+        public static DayInYear FromRawValue(short rawValue)
+        {
+            DayInYear d = new();
+            d.RawValue = rawValue;
+            return d;
+        }
 
         /// <summary>
         /// The day of the month that this date refers to.
         /// </summary>
 
-        public sbyte Day { get; set; }
+        public byte Day { get; set; }
 
         /// <summary>
         /// The month of the year that this date refers to.
@@ -263,13 +297,13 @@ namespace Dexter.Databases.UserProfiles
         /// Returns the weekday this object refers to if it is interpreted as relative.
         /// </summary>
 
-        public LanguageHelper.Weekday RelativeWeekday { get { return (LanguageHelper.Weekday)(Day % 7 < 0 ? (Day % 7) + 7 : Day % 7); } }
+        public LanguageHelper.Weekday RelativeWeekday => (LanguageHelper.Weekday)(Day % 7);
 
         /// <summary>
         /// Returns which weekday of the same type in the month this object refers to if it's relative.
         /// </summary>
 
-        public int WeekdayCount { get { return Day < 0 ? -1 : Day / 7; } }
+        public int WeekdayCount => Day / 7;
 
         /// <summary>
         /// Obtains a text expression of the absolute day this object represents.
@@ -290,7 +324,7 @@ namespace Dexter.Databases.UserProfiles
         public string ToString(bool isAbsolute = true)
         {
             if (isAbsolute) return $"{((int)Day).Ordinal()} of {Month}";
-            else return $"{(WeekdayCount < 0 ? "last" : (WeekdayCount + 1).Ordinal())} {RelativeWeekday} of {Month}";
+            else return $"{(WeekdayCount == 0 ? "last" : WeekdayCount.Ordinal())} {RelativeWeekday} of {Month}";
         }
 
         static readonly string[] ordinals = { "last", "first", "second", "third", "fourth", "fifth", "sixth" };
@@ -317,7 +351,7 @@ namespace Dexter.Databases.UserProfiles
             {
                 if (LanguageHelper.TryParseTime(input, cultureInfo, languageConfig, out DateTimeOffset parsedTimeStart, out feedback))
                 {
-                    dayInYear.Day = (sbyte)parsedTimeStart.Day;
+                    dayInYear.Day = (byte)parsedTimeStart.Day;
                     dayInYear.Month = (LanguageHelper.Month)(parsedTimeStart.Month);
                     year = parsedTimeStart.Year;
                     feedback = $"Successfully parsed: {dayInYear.ToString(true)}";
@@ -343,7 +377,7 @@ namespace Dexter.Databases.UserProfiles
 
                 if (segments[0][0] >= '0' && segments[0][0] <= '9')
                 {
-                    dayInYear.Day = (sbyte)(7 * (segments[0][0] - '1'));
+                    dayInYear.Day = (byte)(7 * (segments[0][0] - '0'));
                 }
                 else
                 {
@@ -352,7 +386,7 @@ namespace Dexter.Databases.UserProfiles
                     {
                         if (segments[0].ToLower() == ordinals[i])
                         {
-                            dayInYear.Day = (sbyte)(7 * i);
+                            dayInYear.Day = (byte)(7 * i);
                             success = true;
                             break;
                         }
@@ -370,7 +404,7 @@ namespace Dexter.Databases.UserProfiles
                     feedback = "Unable to parse day of the week; " + feedback;
                     return false;
                 }
-                dayInYear.Day += (sbyte)weekday;
+                dayInYear.Day += (byte)weekday;
 
                 dayInYear.Month = LanguageHelper.ParseMonthEnum(segments[^1]);
                 if (dayInYear.Month == LanguageHelper.Month.None)
@@ -435,7 +469,7 @@ namespace Dexter.Databases.UserProfiles
 
         public static DayInYear FromDateTime(DateTimeOffset day)
         {
-            return new DayInYear() { Day = (sbyte)day.Day, Month = (LanguageHelper.Month)day.Month };
+            return new DayInYear() { Day = (byte)day.Day, Month = (LanguageHelper.Month)day.Month };
         }
     }
 
@@ -446,6 +480,43 @@ namespace Dexter.Databases.UserProfiles
     [Serializable]
     public class DaylightShiftRules
     {
+        /// <summary>
+        /// Gets an integer that uniquely identifies the DayLightShiftRule or sets the values of the instance based on it.
+        /// </summary>
+
+        public int RawValue
+        {
+            get
+            {
+                return (IsAbsolute ? (1 << 24) : 0)
+                    + (Starts.RawValue << 12)
+                    + Ends.RawValue;
+            }
+            set
+            {
+                IsAbsolute = (value >> 24) > 0;
+                Starts.RawValue = (short)((value & 0x0000fff000) >> 12);
+                Ends.RawValue = (short)(value & 0x0fff);
+            }
+        }
+
+        /// <summary>
+        /// Creates an instance of DaylightShift rules from a unique raw integer value.
+        /// </summary>
+        /// <param name="rawValue">The rawvalue of an instance of <see cref="DaylightShiftRules"/>. Given by 12 bits for Ends, 12 bits for Starts, and 1 bit for IsAbsolute from least to most significant.</param>
+
+        public DaylightShiftRules(int rawValue)
+        {
+            Starts = new DayInYear();
+            Ends = new DayInYear();
+            RawValue = rawValue;
+        }
+
+        /// <summary>
+        /// Default constructor for Daylight Shift rules. Doesn't initialize values for Starts or Ends.
+        /// </summary>
+
+        public DaylightShiftRules() { }
 
         /// <summary>
         /// Refers to a shift that happens in specific days if <see langword="true"/>. Otherwise uses the rules for nth instance of a weekday in a month.
@@ -607,10 +678,39 @@ namespace Dexter.Databases.UserProfiles
 
         private static readonly Dictionary<string, DaylightShiftRules> PresetRules = new()
         {
-            { "American", new() { IsAbsolute = false, Starts = new() { Day = (byte)LanguageHelper.Weekday.Sunday + 1 * 7, Month = LanguageHelper.Month.March }, Ends = new() { Day = (sbyte)LanguageHelper.Weekday.Sunday, Month = LanguageHelper.Month.November } } },
-            { "European", new() { IsAbsolute = false, Starts = new() { Day = (byte)LanguageHelper.Weekday.Sunday - 7, Month = LanguageHelper.Month.March }, Ends = new() { Day = (sbyte)LanguageHelper.Weekday.Sunday - 7, Month = LanguageHelper.Month.October } } },
-            { "Australian", new() { IsAbsolute = false, Starts = new() { Day = (sbyte)LanguageHelper.Weekday.Sunday, Month = LanguageHelper.Month.October }, Ends = new() { Day = (sbyte)LanguageHelper.Weekday.Sunday, Month = LanguageHelper.Month.April } } },
+            { "American", new() { IsAbsolute = false, Starts = new() { Day = (byte)LanguageHelper.Weekday.Sunday + 2 * 7, Month = LanguageHelper.Month.March }, Ends = new() { Day = (byte)LanguageHelper.Weekday.Sunday + 1 * 7, Month = LanguageHelper.Month.November } } },
+            { "European", new() { IsAbsolute = false, Starts = new() { Day = (byte)LanguageHelper.Weekday.Sunday, Month = LanguageHelper.Month.March }, Ends = new() { Day = (byte)LanguageHelper.Weekday.Sunday, Month = LanguageHelper.Month.October } } },
+            { "Australian", new() { IsAbsolute = false, Starts = new() { Day = (byte)LanguageHelper.Weekday.Sunday + 1 * 7, Month = LanguageHelper.Month.October }, Ends = new() { Day = (byte)LanguageHelper.Weekday.Sunday + 1 * 7, Month = LanguageHelper.Month.April } } },
         };
+    }
+
+    /// <summary>
+    /// Binary flags to describe a user's social preferences.
+    /// </summary>
+
+    [Flags]
+    public enum ProfilePrefFlags : long
+    {
+        /// <summary>
+        /// A default setting with no flags set
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Whether anyone can see the user's profile
+        /// </summary>
+        PublicVisible = 1,
+        /// <summary>
+        /// Whether the user's friends can see the user's profile
+        /// </summary>
+        FriendsVisible = 2,
+        /// <summary>
+        /// Whether the user should automatically get the Borkday role on their birthday
+        /// </summary>
+        GiveBorkdayRole = 4,
+        /// <summary>
+        /// Whether to automatically ignore all friend requests
+        /// </summary>
+        BlockRequests = 8
     }
 
     /// <summary>
@@ -620,6 +720,48 @@ namespace Dexter.Databases.UserProfiles
     [Serializable]
     public class ProfilePreferences
     {
+        /// <summary>
+        /// Creates a new <see cref="ProfilePreferences"/> object from a <see cref="ProfilePrefFlags"/> object.
+        /// </summary>
+        /// <param name="flags">Denotes which flags the profile preferences object should have.</param>
+        /// <returns>A <see cref="ProfilePreferences"/> object with its flags set to <paramref name="flags"/>.</returns>
+
+        public static ProfilePreferences FromFlags(ProfilePrefFlags flags)
+        {
+            ProfilePreferences result = new();
+            result.Flags = flags;
+            return result;
+        }
+
+        /// <summary>
+        /// The binary flags that describe the user's preferences.
+        /// </summary>
+
+        public ProfilePrefFlags Flags { 
+            get {
+                ProfilePrefFlags flags = ProfilePrefFlags.None;
+                switch(Privacy)
+                {
+                    case PrivacyMode.Public:
+                        flags |= ProfilePrefFlags.PublicVisible | ProfilePrefFlags.FriendsVisible;
+                        break;
+                    case PrivacyMode.Friends:
+                        flags |= ProfilePrefFlags.FriendsVisible;
+                        break;
+                }
+                if (GiveBorkdayRole) flags |= ProfilePrefFlags.GiveBorkdayRole;
+                if (BlockRequests) flags |= ProfilePrefFlags.BlockRequests;
+                return flags;
+            } 
+            set {
+                if (value.HasFlag(ProfilePrefFlags.PublicVisible)) Privacy = PrivacyMode.Public;
+                else if (value.HasFlag(ProfilePrefFlags.FriendsVisible)) Privacy = PrivacyMode.Friends;
+                else Privacy = PrivacyMode.Private;
+
+                GiveBorkdayRole = value.HasFlag(ProfilePrefFlags.GiveBorkdayRole);
+                BlockRequests = value.HasFlag(ProfilePrefFlags.BlockRequests);
+            } 
+        }
 
         /// <summary>
         /// Codifies the access level for general users to this user's profile.
@@ -658,6 +800,5 @@ namespace Dexter.Databases.UserProfiles
         /// </summary>
 
         public bool BlockRequests { get; set; } = false;
-
     }
 }

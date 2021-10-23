@@ -145,7 +145,7 @@ namespace Dexter.Commands
                                     rulesParsed = DaylightShiftRules.TryParse(string.Join(separator, segments[2..]), LanguageConfiguration, out rulesError, out tzrules);
                                     if (rulesParsed)
                                     {
-                                        profile.DSTRules = tzrules;
+                                        profile.DstRules = tzrules;
                                     }
                                 }
 
@@ -202,7 +202,7 @@ namespace Dexter.Commands
                         case "tzrules":
                             if (value == "none")
                             {
-                                profile.DSTRules = null;
+                                profile.DstRules = null;
                                 await BuildEmbed(EmojiEnum.Sign)
                                     .WithTitle("Cleared data about DST application rules")
                                     .WithDescription($"All previous information about DST patterns has been removed. From now on, only your default time zone will be considered for any calculations.")
@@ -221,7 +221,7 @@ namespace Dexter.Commands
                                 return;
                             }
 
-                            profile.DSTRules = rules;
+                            profile.DstRules = rules;
                             await BuildEmbed(EmojiEnum.Love)
                                 .WithTitle("Successfully set Local DST Rules")
                                 .WithDescription(feedback)
@@ -237,9 +237,9 @@ namespace Dexter.Commands
                                 await TryRemoveBirthdayTimer(profile);
                                 await BuildEmbed(EmojiEnum.Sign)
                                     .WithTitle("Removed local birthday records.")
-                                    .WithDescription("Your birth day is no longer being tracked by the profile system.")
+                                    .WithDescription("Your birthday is no longer being tracked by the profile system.")
                                     .SendEmbed(Context.Channel);
-                                return;
+                                break;
                             }
 
                             if (!DayInYear.TryParse(value, true, LanguageConfiguration, out DayInYear day, out feedback, out int year))
@@ -528,7 +528,7 @@ namespace Dexter.Commands
                     return;
             }
 
-            await ProfilesDB.SaveChangesAsync();
+            ProfilesDB.SaveChanges();
         }
 
         /// <summary>
@@ -1094,7 +1094,7 @@ namespace Dexter.Commands
                 .AddField(!string.IsNullOrEmpty(profile.Gender), "Gender", profile.Gender, true)
                 .AddField(!string.IsNullOrEmpty(profile.Orientation), "Sexuality", profile.Orientation, true)
                 .AddField(profile.Borkday != default, "Borkday", $"{profile.Borkday}" + (profile.BirthYear > 0 ? $", {profile.BirthYear} (**Age**: {GetAge(profile, out _)})" : ""))
-                .AddField(TZSuccess, "Time Zone", TZ.ToString() + ((profile.TimeZone != profile.TimeZoneDST && TZDSTSuccess) ? $" ({TZDST} during Daylight Savings. [{profile.DSTRules?.ToString() ?? "Never"}])" : ""))
+                .AddField(TZSuccess, "Time Zone", TZ.ToString() + ((profile.TimeZone != profile.TimeZoneDST && TZDSTSuccess) ? $" ({TZDST} during Daylight Savings. [{profile.DstRules?.ToString() ?? "Never"}])" : ""))
                 .AddField(!string.IsNullOrEmpty(profile.Nationality), "Nationality", profile.Nationality, true)
                 .AddField(!string.IsNullOrEmpty(profile.Languages), "Languages", profile.Languages, true)
                 .AddField(!string.IsNullOrEmpty(profile.SonaInfo), "Sona", profile.SonaInfo)
@@ -1369,6 +1369,28 @@ namespace Dexter.Commands
             UserLink link = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.Invalid);
             bool sent = link.Sender == Context.User.Id;
             return $"{(sent ? "➡️" : "⬅️")}{user.Mention} {(sent ? "(Outgoing)" : $"(Incoming: `~friend <add|decline> {user.Id}`)")}";
+        }
+
+        [Command("optimizeprofiles")]
+        [RequireDeveloper]
+
+        public async Task OptimizeProfiles()
+        {
+            IUserMessage progress = await Context.Channel.SendMessageAsync("Updating database...");
+            int count = 0;
+            foreach (UserProfile profile in ProfilesDB.Profiles)
+            {
+                Console.Out.WriteLine($"Processing item {count}");
+                profile.Borkday = profile.ParsedBorkday;
+                profile.DstRules = profile.ParsedDSTRules;
+                profile.Settings = profile.ParsedSettings;
+                if (++count % 1000 == 0)
+                {
+                    await progress.ModifyAsync(m => m.Content = $"Updated {count} entries.");
+                }
+            }
+            await ProfilesDB.SaveChangesAsync();
+            await progress.ModifyAsync(m => m.Content = $"Updated and saved {count} entries.");
         }
     }
 }

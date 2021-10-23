@@ -37,7 +37,10 @@ namespace Dexter.Workers
 
 		public async Task StartAsync(CancellationToken _)
 		{
-			await cmdService.AddModulesAsync(Assembly.GetExecutingAssembly(), services.CreateScope().ServiceProvider);
+			using (var moduleScope = services.CreateScope())
+			{
+				await cmdService.AddModulesAsync(Assembly.GetExecutingAssembly(), moduleScope.ServiceProvider);
+			}
 
 			await client.LoginAsync(TokenType.Bot, Startup.Token);
 

@@ -1367,5 +1367,27 @@ namespace Dexter.Commands
             bool sent = link.Sender == Context.User.Id;
             return $"{(sent ? "➡️" : "⬅️")}{user.Mention} {(sent ? "(Outgoing)" : $"(Incoming: `~friend <add|decline> {user.Id}`)")}";
         }
+
+        [Command("optimizeprofiles")]
+        [RequireDeveloper]
+
+        public async Task OptimizeProfiles()
+        {
+            IUserMessage progress = await Context.Channel.SendMessageAsync("Updating database...");
+            int count = 0;
+            foreach (UserProfile profile in ProfilesDB.Profiles)
+            {
+                Console.Out.WriteLine($"Processing item {count}");
+                profile.Borkday = profile.ParsedBorkday;
+                profile.DstRules = profile.ParsedDSTRules;
+                profile.Settings = profile.ParsedSettings;
+                if (++count % 1000 == 0)
+                {
+                    await progress.ModifyAsync(m => m.Content = $"Updated {count} entries.");
+                }
+            }
+            await ProfilesDB.SaveChangesAsync();
+            await progress.ModifyAsync(m => m.Content = $"Updated and saved {count} entries.");
+        }
     }
 }

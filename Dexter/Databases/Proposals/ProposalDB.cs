@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Dexter.Abstractions;
 using Dexter.Databases.AdminConfirmations;
 using Microsoft.EntityFrameworkCore;

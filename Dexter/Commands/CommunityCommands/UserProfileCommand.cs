@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -1250,7 +1250,7 @@ namespace Dexter.Commands
 					await BuildEmbed(EmojiEnum.Unknown)
 						.WithColor(Color.Gold)
 						.WithThumbnailUrl(user.GetTrueAvatarUrl())
-						.WithTitle("🎂 Happy Borkday 🎂")
+						.WithTitle("ðŸŽ‚ Happy Borkday ðŸŽ‚")
 						.WithDescription("Happy borkday from the USF Team! We hope your day goes wonderfully!\n" +
 						"If this wasn't sent at midnight, make sure you set your timezones up correctly on your profile :3")
 						.SendEmbed(await user.CreateDMChannelAsync());
@@ -1267,7 +1267,7 @@ namespace Dexter.Commands
 					await BuildEmbed(EmojiEnum.Unknown)
 						.WithColor(Color.Gold)
 						.WithThumbnailUrl(user.GetTrueAvatarUrl())
-						.WithTitle("🎂 Borkday Time 🎂")
+						.WithTitle("ðŸŽ‚ Borkday Time ðŸŽ‚")
 						.WithDescription($"Hey there! It's {user.Mention}'{(user.Username.EndsWith('s') ? "" : "s")} birthday! Thought you'd like to know and celebrate! :3")
 						.SendEmbed(await friend.CreateDMChannelAsync());
 				}
@@ -1346,7 +1346,7 @@ namespace Dexter.Commands
 
 		private static string DefaultDisplay(IUser user)
 		{
-			return $"👥{user.Mention}";
+			return $"ðŸ‘¥{user.Mention}";
 		}
 
 		private string BlockedDisplay(IUser user)
@@ -1354,21 +1354,21 @@ namespace Dexter.Commands
 			UserLink link = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.Invalid);
 			bool receiving = link.IsUserBlocked(Context.User.Id);
 			bool blocking = link.IsUserBlocked(user.Id);
-			return $"🚫{user.Mention} ({(receiving ? "⬅️" : "")}{(blocking ? "➡️" : "")})";
+			return $"ðŸš«{user.Mention} ({(receiving ? "â¬…ï¸" : "")}{(blocking ? "âž¡ï¸" : "")})";
 		}
 
 		private string FriendDisplay(IUser user)
 		{
 			UserLink link = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.Invalid);
 			bool borkdayNotifs = link.IsUserBorkdayNotified(Context.User.Id);
-			return $"👥{user.Mention}{(borkdayNotifs ? " (🎂)" : "")}";
+			return $"ðŸ‘¥{user.Mention}{(borkdayNotifs ? " (ðŸŽ‚)" : "")}";
 		}
 
 		private string FriendRequestDisplay(IUser user)
 		{
 			UserLink link = ProfilesDB.GetOrCreateLink(Context.User.Id, user.Id, LinkType.Invalid);
 			bool sent = link.Sender == Context.User.Id;
-			return $"{(sent ? "➡️" : "⬅️")}{user.Mention} {(sent ? "(Outgoing)" : $"(Incoming: `~friend <add|decline> {user.Id}`)")}";
+			return $"{(sent ? "âž¡ï¸" : "â¬…ï¸")}{user.Mention} {(sent ? "(Outgoing)" : $"(Incoming: `~friend <add|decline> {user.Id}`)")}";
 		}
 	}
 }

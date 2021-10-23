@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,7 +23,7 @@ namespace Dexter.Games
 		const int MinWidth = 3;
 		const int MinHeight = 3;
 		const float MaxMineRatio = 0.4f;
-		const char ZWSP = '​';
+		const char ZWSP = 'â€‹';
 
 		private int MaxMines
 		{
@@ -504,8 +504,8 @@ namespace Dexter.Games
 				.WithColor(Discord.Color.Blue)
 				.WithTitle($"{Game.Title} (Game {Game.GameID})")
 				.WithDescription($"{Game.Description}")
-				.AddField("Dimensions", $"{Width}×{Height}", true)
-				.AddField("Mines", $"{Mines}💣", true)
+				.AddField("Dimensions", $"{Width}Ã—{Height}", true)
+				.AddField("Mines", $"{Mines}ðŸ’£", true)
 				.AddField("Master", client.GetUser(Game.Master)?.GetUserInformation() ?? "<N/A>")
 				.AddField(Game.Banned.Length > 0, "Banned Players", Game.BannedMentions.TruncateTo(500));
 		}
@@ -628,9 +628,9 @@ namespace Dexter.Games
 				.WithTitle("How to Play: Minesweeper")
 				.WithDescription("**Step 1**: Set your desired parameters for the board using the `~game set [field] [value]` command. These fields are `width`, `height` and `mines`.\n" +
 					"Here are some defaults, if you'd like to try them:\n" +
-					"Beginner: [10x10] (10💣)\n" +
-					"Intermediate: [16x16] (40💣)\n" +
-					"Advanced: [26x18] (99💣)\n" +
+					"Beginner: [10x10] (10ðŸ’£)\n" +
+					"Intermediate: [16x16] (40ðŸ’£)\n" +
+					"Advanced: [26x18] (99ðŸ’£)\n" +
 					"**Step 2**: Create the board view by typing `board` into the game chat.\n" +
 					"**Step 3**: Begin probing cells! Type the name of one or more cells (e.g. `C3` or `G12 D4 H3`) to probe them. Or type `flag [Cell] (Cells...)` to toggle a flag in one or more cells.)\n" +
 					"Since this game is singleplayer, only the game master can interact with it. The number on each cell tells you how many mines are on its immediate surroundings, anywhere from 0 to 8. If you probe a mine, it's game over!\n" +

@@ -1,4 +1,4 @@
-namespace Dexter.Databases.EventTimers
+﻿namespace Dexter.Databases.EventTimers
 {
 
 	/// <summary>

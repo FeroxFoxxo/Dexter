@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Configurations;
@@ -142,9 +142,9 @@ namespace Dexter.Games
 				.AddField(Game.Banned.Length > 0, "Banned Players", Game.BannedMentions.TruncateTo(500));
 		}
 
-		const string EChar = "⚫️";
-		const string YellowChar = "🟡";
-		const string RedChar = "🔴";
+		const string EChar = "âš«ï¸";
+		const string YellowChar = "ðŸŸ¡";
+		const string RedChar = "ðŸ”´";
 		private readonly Dictionary<char, string> ToEmoji = new() {
 			{'-', EChar},
 			{'Y', YellowChar},
@@ -226,7 +226,7 @@ namespace Dexter.Games
 					"Positions are the following:\n" +
 					"```\n" +
 					"1 2 3 4 5 6 7\n" +
-					"↓ ↓ ↓ ↓ ↓ ↓ ↓\n" +
+					"â†“ â†“ â†“ â†“ â†“ â†“ â†“\n" +
 					"```\n" +
 					"Keep playing until you fill the board or get a line of four.\n" +
 					"You can pass the token by typing `pass <Y|R> [Player]` to give control of a token to another player (only the master or the player with that token can do this).\n" +

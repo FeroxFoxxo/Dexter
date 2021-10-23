@@ -1,4 +1,4 @@
-using Dexter.Enums;
+﻿using Dexter.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace Dexter.Databases.FinalWarns

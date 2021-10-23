@@ -1,4 +1,4 @@
-namespace Dexter.Databases.UserProfiles
+﻿namespace Dexter.Databases.UserProfiles
 {
 
 	/// <summary>

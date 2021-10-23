@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
 using Dexter.Databases.EventTimers;
@@ -70,7 +70,7 @@ namespace Dexter.Commands
 			try
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle($"🚨 You were issued a **FINAL WARNING** from {Context.Guild.Name}! 🚨")
+					.WithTitle($"ðŸš¨ You were issued a **FINAL WARNING** from {Context.Guild.Name}! ðŸš¨")
 					.WithDescription(Reason)
 					.AddField("Points Deducted:", PointsDeducted, true)
 					.AddField("Mute Duration:", MuteDuration.Humanize(), true)

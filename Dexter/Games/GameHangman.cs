@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dexter.Configurations;
@@ -142,8 +142,8 @@ namespace Dexter.Games
 			return string.Join("", chars);
 		}
 
-		const char LifeFullChar = '♥';
-		const char LifeEmptyChar = '☠';
+		const char LifeFullChar = 'â™¥';
+		const char LifeEmptyChar = 'â˜ ';
 		private string LivesExpression()
 		{
 			char[] expression = new char[MaxLives];

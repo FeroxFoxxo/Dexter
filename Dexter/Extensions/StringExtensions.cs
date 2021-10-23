@@ -1,4 +1,4 @@
-using Dexter.Configurations;
+﻿using Dexter.Configurations;
 using Discord;
 using Discord.WebSocket;
 using Humanizer;

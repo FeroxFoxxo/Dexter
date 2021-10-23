@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
 using Discord;
 using Discord.Commands;
@@ -31,7 +31,7 @@ namespace Dexter.Commands
 			Response = Response.Replace("and his team", "and their team");
 
 			if (Response == "DexterBot did not understand your input" || Response == "No spoken result available")
-				await Context.Message.AddReactionAsync(new Emoji("❓"));
+				await Context.Message.AddReactionAsync(new Emoji("â“"));
 			else
 				await Context.Channel.SendMessageAsync(Response);
 		}

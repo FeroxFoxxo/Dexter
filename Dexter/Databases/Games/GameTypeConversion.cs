@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 namespace Dexter.Databases.Games
 {
 
@@ -31,14 +31,14 @@ namespace Dexter.Databases.Games
 		/// </summary>
 
 		public static readonly Dictionary<GameType, string> GameEmoji = new() {
-			{GameType.Unselected, "❓"},
-			{GameType.Hangman, "💀"},
-			{GameType.TicTacToe, "⭕"},
-			{GameType.Connect4, "4️⃣" },
-			{GameType.Minesweeper, "💣" },
-			{GameType.Chess, "♟️"}
-			//{GameType.Shiritori, "⛓"},
-			//{GameType.Charades, "🎭"},
+			{GameType.Unselected, "â“"},
+			{GameType.Hangman, "ðŸ’€"},
+			{GameType.TicTacToe, "â­•"},
+			{GameType.Connect4, "4ï¸âƒ£" },
+			{GameType.Minesweeper, "ðŸ’£" },
+			{GameType.Chess, "â™Ÿï¸"}
+			//{GameType.Shiritori, "â›“"},
+			//{GameType.Charades, "ðŸŽ­"},
 		};
 
 	}

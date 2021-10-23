@@ -1,4 +1,4 @@
-namespace Dexter.Databases.Games
+﻿namespace Dexter.Databases.Games
 {
 
 	/// <summary>

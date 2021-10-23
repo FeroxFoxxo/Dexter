@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -614,7 +614,7 @@ namespace Dexter.Commands
 			{
 				IUser user = DiscordShardedClient.GetUser(p.UserID);
 				if (user is null) continue;
-				board.Append($"{(board.Length > 0 ? "\n" : "")}{user.Username.TruncateTo(16),-16}| {p.Score:G4}, ♥×{p.Lives}");
+				board.Append($"{(board.Length > 0 ? "\n" : "")}{user.Username.TruncateTo(16),-16}| {p.Score:G4}, â™¥Ã—{p.Lives}");
 			}
 
 			return BuildEmbed(EmojiEnum.Unknown)

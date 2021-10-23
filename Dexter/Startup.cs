@@ -1,4 +1,4 @@
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Extensions;
 using Dexter.Workers;
 using Discord;

@@ -1,4 +1,4 @@
-using Dexter.Configurations;
+﻿using Dexter.Configurations;
 using Dexter.Helpers;
 using System.ComponentModel.DataAnnotations;
 

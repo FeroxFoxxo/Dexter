@@ -1,4 +1,4 @@
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Databases.FunTopics;
 using Dexter.Databases.UserRestrictions;
 using Dexter.Enums;
@@ -135,7 +135,7 @@ namespace Dexter.Commands
 				.WithAuthor(Context.User)
 				.WithTitle($"{Context.Client.CurrentUser.Username} Asks")
 				.WithDescription(topic)
-				.WithFooter($"{name} written by {(user == null ? "Unknown" : user.Username)} � " +
+				.WithFooter($"{name} written by {(user == null ? "Unknown" : user.Username)} • " +
 					$"Add a {name.ToLower()} using {BotConfiguration.Prefix}{topicType.ToString().ToLower()} add {name.ToUpper()}")
 				.SendEmbed(Context.Channel);
 			await FunTopicsDB.SaveChangesAsync();

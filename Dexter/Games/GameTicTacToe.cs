@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -140,9 +140,9 @@ namespace Dexter.Games
 				.AddField(Game.Banned.Length > 0, "Banned Players", Game.BannedMentions.TruncateTo(500));
 		}
 
-		const string EChar = "⬜";
-		const string OChar = "⭕";
-		const string XChar = "❌";
+		const string EChar = "â¬œ";
+		const string OChar = "â­•";
+		const string XChar = "âŒ";
 		private readonly Dictionary<char, string> ToEmoji = new() {
 			{'-', EChar},
 			{'O', OChar},

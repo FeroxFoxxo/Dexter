@@ -1,4 +1,4 @@
-namespace Dexter.Databases.FunTopics
+﻿namespace Dexter.Databases.FunTopics
 {
 
 	/// <summary>

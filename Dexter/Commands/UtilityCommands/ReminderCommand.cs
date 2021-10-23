@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -98,7 +98,7 @@ namespace Dexter.Commands
 					await CreateEventTimer(ReminderCallback, new Dictionary<string, string> { { "ID", Reminder.ID.ToString() } }, (int)Date.Subtract(DateTimeOffset.Now).TotalSeconds, Databases.EventTimers.TimerType.Expire);
 
 					await BuildEmbed(EmojiEnum.Love)
-						.WithTitle($"🎗Created Reminder #{Reminder.ID}🎗")
+						.WithTitle($"ðŸŽ—Created Reminder #{Reminder.ID}ðŸŽ—")
 						.WithDescription($"The reminder will be released on {Date.HumanizeExtended()}")
 	
 						.SendEmbed(Context.Channel);
@@ -235,7 +235,7 @@ namespace Dexter.Commands
 			try
 			{
 				await BuildEmbed(EmojiEnum.Sign)
-					.WithTitle("🎗Dexter Reminder!🎗")
+					.WithTitle("ðŸŽ—Dexter Reminder!ðŸŽ—")
 					.WithDescription(Reminder.Message)
 
 					.SendEmbed(await Issuer.CreateDMChannelAsync());
@@ -278,7 +278,7 @@ namespace Dexter.Commands
 
 			foreach (Reminder r in Reminders)
 			{
-				Builder.AddField($"🎗Reminder {counter++} (ID {r.ID})🎗", $"{r.Message.TruncateTo(UtilityConfiguration.ReminderMaxCharactersPerItem)}\n " +
+				Builder.AddField($"ðŸŽ—Reminder {counter++} (ID {r.ID})ðŸŽ—", $"{r.Message.TruncateTo(UtilityConfiguration.ReminderMaxCharactersPerItem)}\n " +
 					$"- **Release:** {DateTimeOffset.FromUnixTimeSeconds(r.DateTimeRelease).HumanizeExtended(BotConfiguration, true)}");
 			}
 

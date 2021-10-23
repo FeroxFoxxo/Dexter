@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
 using Dexter.Databases.Infractions;

@@ -1,4 +1,4 @@
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Dexter.Enums;
 using Dexter.Extensions;

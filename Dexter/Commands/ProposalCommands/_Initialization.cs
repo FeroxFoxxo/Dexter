@@ -1,4 +1,4 @@
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Databases.Proposals;
 
 namespace Dexter.Commands

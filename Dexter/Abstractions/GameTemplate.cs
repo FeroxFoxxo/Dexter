@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Dexter.Configurations;
 using Dexter.Databases.Games;
 using Dexter.Enums;

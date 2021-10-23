@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Dexter.Enums;
 
 namespace Dexter.Attributes.Methods

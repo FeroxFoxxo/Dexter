@@ -1,4 +1,4 @@
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.CommunityEvents;
 using Dexter.Databases.EventTimers;

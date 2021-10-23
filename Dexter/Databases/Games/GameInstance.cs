@@ -1,4 +1,4 @@
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Games;
 using System.ComponentModel.DataAnnotations;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -198,7 +198,7 @@ namespace Dexter.Commands
 			return Embeds;
 		}
 
-		const string Header = "`ID`|🎮|`	 Title	 `|`  Game Master  `|`PC`|🔒";
+		const string Header = "`ID`|ðŸŽ®|`	 Title	 `|`  Game Master  `|`PC`|ðŸ”’";
 		private string StringifyGames(GameInstance[] Games)
 		{
 
@@ -221,7 +221,7 @@ namespace Dexter.Commands
 
 			Player[] Players = GamesDB.GetPlayersFromInstance(Game.GameID);
 
-			return $"`{Game.GameID:D2}`|{GameTypeConversion.GameEmoji[Game.Type]}|`{ToLength(15, Game.Title)}`|`{ToLength(15, MasterName)}`|`{Players.Length:D2}`|{(Game.Password.Length > 0 ? "🔑" : "")}";
+			return $"`{Game.GameID:D2}`|{GameTypeConversion.GameEmoji[Game.Type]}|`{ToLength(15, Game.Title)}`|`{ToLength(15, MasterName)}`|`{Players.Length:D2}`|{(Game.Password.Length > 0 ? "ðŸ”‘" : "")}";
 		}
 
 		private static string ToLength(int Length, string S)

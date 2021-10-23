@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
-    public partial class MusicCommands
+	public partial class MusicCommands
 	{
 
 		[Command("skip")]

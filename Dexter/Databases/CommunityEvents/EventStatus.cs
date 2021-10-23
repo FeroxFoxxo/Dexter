@@ -1,48 +1,48 @@
 namespace Dexter.Databases.CommunityEvents
 {
 
-    /// <summary>
-    /// Keeps track of what stage of approval an event submission is in. It can be PENDING, APPROVED, DENIED, or RELEASED.
-    /// </summary>
+	/// <summary>
+	/// Keeps track of what stage of approval an event submission is in. It can be PENDING, APPROVED, DENIED, or RELEASED.
+	/// </summary>
 
-    public enum EventStatus
-    {
+	public enum EventStatus
+	{
 
-        /// <summary>
-        /// An item that still has not gone through the admin approval process.
-        /// </summary>
+		/// <summary>
+		/// An item that still has not gone through the admin approval process.
+		/// </summary>
 
-        Pending,
+		Pending,
 
-        /// <summary>
-        /// An item that has successfully gone through the admin approval process and is pending release.
-        /// </summary>
+		/// <summary>
+		/// An item that has successfully gone through the admin approval process and is pending release.
+		/// </summary>
 
-        Approved,
+		Approved,
 
-        /// <summary>
-        /// An item that has failed to go through the admin approval process or has been removed.
-        /// </summary>
+		/// <summary>
+		/// An item that has failed to go through the admin approval process or has been removed.
+		/// </summary>
 
-        Denied,
+		Denied,
 
-        /// <summary>
-        /// An item that has not been denied nor approved, and whose release time is overdue.
-        /// </summary>
+		/// <summary>
+		/// An item that has not been denied nor approved, and whose release time is overdue.
+		/// </summary>
 
-        Expired,
+		Expired,
 
-        /// <summary>
-        /// An item that has been removed from the proposals system.
-        /// </summary>
+		/// <summary>
+		/// An item that has been removed from the proposals system.
+		/// </summary>
 
-        Removed,
+		Removed,
 
-        /// <summary>
-        /// An item that was approved by admins and has been released to the public.
-        /// </summary>
+		/// <summary>
+		/// An item that was approved by admins and has been released to the public.
+		/// </summary>
 
-        Released
+		Released
 
-    }
+	}
 }

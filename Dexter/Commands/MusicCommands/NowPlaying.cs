@@ -7,39 +7,39 @@ using Victoria.Player;
 
 namespace Dexter.Commands
 {
-    public partial class MusicCommands
-    {
+	public partial class MusicCommands
+	{
 
-        [Command("nowplaying")]
-        [Alias("np")]
-        [Summary("Display the currently playing song.")]
-        [MusicBotChannel]
+		[Command("nowplaying")]
+		[Alias("np")]
+		[Summary("Display the currently playing song.")]
+		[MusicBotChannel]
 
-        public async Task NowPlayingCommand()
-        {
-            if (!MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
-            {
-                await BuildEmbed(EmojiEnum.Annoyed)
-                    .WithTitle("Unable to find current song!")
-                    .WithDescription("I couldn't find the music player for this server.\n" +
-                    "Please ensure I am connected to a voice channel before using this command.")
-                    .SendEmbed(Context.Channel);
+		public async Task NowPlayingCommand()
+		{
+			if (!MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
+			{
+				await BuildEmbed(EmojiEnum.Annoyed)
+					.WithTitle("Unable to find current song!")
+					.WithDescription("I couldn't find the music player for this server.\n" +
+					"Please ensure I am connected to a voice channel before using this command.")
+					.SendEmbed(Context.Channel);
 
-                return;
-            }
+				return;
+			}
 
-            if (player.PlayerState != PlayerState.Playing)
-            {
-                await BuildEmbed(EmojiEnum.Annoyed)
-                .WithTitle("Unable to find current song!")
-                .WithDescription("The player must be actively playing a track in order to see its information.").SendEmbed(Context.Channel);
+			if (player.PlayerState != PlayerState.Playing)
+			{
+				await BuildEmbed(EmojiEnum.Annoyed)
+				.WithTitle("Unable to find current song!")
+				.WithDescription("The player must be actively playing a track in order to see its information.").SendEmbed(Context.Channel);
 
-                return;
-            }
+				return;
+			}
 
-            await BuildEmbed(EmojiEnum.Unknown)
-                .GetNowPlaying(player.Track)
-                .SendEmbed(Context.Channel);
-        }
-    }
+			await BuildEmbed(EmojiEnum.Unknown)
+				.GetNowPlaying(player.Track)
+				.SendEmbed(Context.Channel);
+		}
+	}
 }

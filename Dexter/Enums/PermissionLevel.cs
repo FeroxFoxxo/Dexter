@@ -1,55 +1,55 @@
 namespace Dexter.Enums
 {
 
-    /// <summary>
-    /// An enum of the types of the different permission levels a user can have.
-    /// </summary>
+	/// <summary>
+	/// An enum of the types of the different permission levels a user can have.
+	/// </summary>
 
-    public enum PermissionLevel
-    {
+	public enum PermissionLevel
+	{
 
-        /// <summary>
-        /// The DEFAULT value is given to an ordinary user with no special roles.
-        /// </summary>
+		/// <summary>
+		/// The DEFAULT value is given to an ordinary user with no special roles.
+		/// </summary>
 
-        Default,
+		Default,
 
-        /// <summary>
-        /// The DJ value is given to a user who hold the dj role specified in the bot configuration.
-        /// </summary>
+		/// <summary>
+		/// The DJ value is given to a user who hold the dj role specified in the bot configuration.
+		/// </summary>
 
-        DJ,
+		DJ,
 
-        /// <summary>
-        /// The UNIFURSAL value is given to a user who hold the unifursal role specified in the bot configuration.
-        /// </summary>
+		/// <summary>
+		/// The UNIFURSAL value is given to a user who hold the unifursal role specified in the bot configuration.
+		/// </summary>
 
-        Unifursal,
+		Unifursal,
 
-        /// <summary>
-        /// The GREETFUR value is given to a user who hold the greetfur role specified in the bot configuration.
-        /// </summary>
+		/// <summary>
+		/// The GREETFUR value is given to a user who hold the greetfur role specified in the bot configuration.
+		/// </summary>
 
-        GreetFur,
+		GreetFur,
 
-        /// <summary>
-        /// The MODERATOR value is given to a user who holds the moderator role specified in the bot configuration.
-        /// </summary>
+		/// <summary>
+		/// The MODERATOR value is given to a user who holds the moderator role specified in the bot configuration.
+		/// </summary>
 
-        Moderator,
+		Moderator,
 
-        /// <summary>
-        /// The DEVELOPER value is given to a user who hold the development team role specified in the bot configuration.
-        /// </summary>
+		/// <summary>
+		/// The DEVELOPER value is given to a user who hold the development team role specified in the bot configuration.
+		/// </summary>
 
-        Developer,
+		Developer,
 
-        /// <summary>
-        /// The ADMINISTRATOR value is given to a user who holds the administrator role specified in the bot configuration.
-        /// </summary>
+		/// <summary>
+		/// The ADMINISTRATOR value is given to a user who holds the administrator role specified in the bot configuration.
+		/// </summary>
 
-        Administrator
+		Administrator
 
-    }
+	}
 
 }

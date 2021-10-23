@@ -1,61 +1,61 @@
 namespace Dexter.Databases.Games
 {
 
-    /// <summary>
-    /// Indicates a game type that a game instance can take on.
-    /// </summary>
+	/// <summary>
+	/// Indicates a game type that a game instance can take on.
+	/// </summary>
 
-    public enum GameType
-    {
+	public enum GameType
+	{
 
-        /// <summary>
-        /// The default GameType, it should largely be unused.
-        /// </summary>
+		/// <summary>
+		/// The default GameType, it should largely be unused.
+		/// </summary>
 
-        Unselected,
+		Unselected,
 
-        /// <summary>
-        /// An instance game of Hangman, a game about guessing an obscured word by guessing individual letters.
-        /// </summary>
+		/// <summary>
+		/// An instance game of Hangman, a game about guessing an obscured word by guessing individual letters.
+		/// </summary>
 
-        Hangman,
+		Hangman,
 
-        /// <summary>
-        /// An instance of a game of TicTacToe, a game about placing a token in a 3x3 board to make a line.
-        /// </summary>
+		/// <summary>
+		/// An instance of a game of TicTacToe, a game about placing a token in a 3x3 board to make a line.
+		/// </summary>
 
-        TicTacToe,
+		TicTacToe,
 
-        /// <summary>
-        /// An instance of a game of Connect 4, a game about placing tokens on a 9x6 vertical, gravity-affected grid to make a line of 4.
-        /// </summary>
+		/// <summary>
+		/// An instance of a game of Connect 4, a game about placing tokens on a 9x6 vertical, gravity-affected grid to make a line of 4.
+		/// </summary>
 
-        Connect4,
+		Connect4,
 
-        /// <summary>
-        /// An instance of a game of Minesweeper, a game about probing different cells in a board filled with mines without triggering them.
-        /// </summary>
+		/// <summary>
+		/// An instance of a game of Minesweeper, a game about probing different cells in a board filled with mines without triggering them.
+		/// </summary>
 
-        Minesweeper,
+		Minesweeper,
 
-        /// <summary>
-        /// An instance of a game of Chess, a game about putting the enemy in checkmate while avoiding the same.
-        /// </summary>
+		/// <summary>
+		/// An instance of a game of Chess, a game about putting the enemy in checkmate while avoiding the same.
+		/// </summary>
 
-        Chess,
+		Chess,
 
-        /// <summary>
-        /// An instance game of Shiritori, a game about coming up with words that start by whatever the previous person's word ends.
-        /// </summary>
+		/// <summary>
+		/// An instance game of Shiritori, a game about coming up with words that start by whatever the previous person's word ends.
+		/// </summary>
 
-        //[NotImplemented]
-        Shiritori,
+		//[NotImplemented]
+		Shiritori,
 
-        /// <summary>
-        /// An instance game of Charades, a game about guessing what a person is trying to nonverbally communicate.
-        /// </summary>
+		/// <summary>
+		/// An instance game of Charades, a game about guessing what a person is trying to nonverbally communicate.
+		/// </summary>
 
-        //[NotImplemented]
-        Charades
-    }
+		//[NotImplemented]
+		Charades
+	}
 }

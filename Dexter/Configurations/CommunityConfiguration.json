@@ -6,12 +6,12 @@
   "EventsNotificationMention": "<@&815926474443456542> <@&796371963811332107>",
   "EventsNotificationsChannel": 792657959192231976,
   "EventStatusColor": {
-    "0": "0xff9900",
-    "1": "0x00ff00",
-    "2": "0xff0000",
-    "3": "0xa06020",
-    "4": "0x880000",
-    "5": "0xc000ff"
+	"0": "0xff9900",
+	"1": "0x00ff00",
+	"2": "0xff0000",
+	"3": "0xa06020",
+	"4": "0x880000",
+	"5": "0xc000ff"
   },
   "FailOnOverdueApproval": true,
   "IncludeEventResolutionInfo": false,

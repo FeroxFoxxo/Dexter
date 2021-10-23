@@ -10,48 +10,48 @@ using Humanizer;
 namespace Dexter.Commands
 {
 
-    public partial class CustomCommands
-    {
+	public partial class CustomCommands
+	{
 
-        /// <summary>
-        /// The ListCommands method runs on CCLIST and will list all the custom commands in the database.
-        /// </summary>
-        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+		/// <summary>
+		/// The ListCommands method runs on CCLIST and will list all the custom commands in the database.
+		/// </summary>
+		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-        [Command("cclist")]
-        [Summary("Displays all avaliable custom commands in the database.")]
-        [Alias("customcommands", "ccl")]
+		[Command("cclist")]
+		[Summary("Displays all avaliable custom commands in the database.")]
+		[Alias("customcommands", "ccl")]
 
-        public async Task ListCommands()
-        {
-            List<EmbedBuilder> embeds = new ();
+		public async Task ListCommands()
+		{
+			List<EmbedBuilder> embeds = new ();
 
-            var CurrentType = UserCommandSource.Unspecified;
-            var CurrentBuilder = BuildEmbed(EmojiEnum.Annoyed).WithTitle("Unable to find custom commands!").WithDescription("No custom commands set.");
+			var CurrentType = UserCommandSource.Unspecified;
+			var CurrentBuilder = BuildEmbed(EmojiEnum.Annoyed).WithTitle("Unable to find custom commands!").WithDescription("No custom commands set.");
 
-            foreach (var cc in CustomCommandDB.CustomCommands.ToList().OrderByDescending(x => (int) x.CommandType))
-            {
-                if (CurrentType != cc.CommandType || CurrentBuilder.Fields.Count >= 10)
-                {
-                    embeds.Add(CurrentBuilder);
-                    CurrentBuilder = BuildEmbed(EmojiEnum.Unknown).WithTitle($"{cc.CommandType.Humanize()} Commands");
-                    CurrentType = cc.CommandType;
-                }
+			foreach (var cc in CustomCommandDB.CustomCommands.ToList().OrderByDescending(x => (int) x.CommandType))
+			{
+				if (CurrentType != cc.CommandType || CurrentBuilder.Fields.Count >= 10)
+				{
+					embeds.Add(CurrentBuilder);
+					CurrentBuilder = BuildEmbed(EmojiEnum.Unknown).WithTitle($"{cc.CommandType.Humanize()} Commands");
+					CurrentType = cc.CommandType;
+				}
 
-                CurrentBuilder.AddField($"{BotConfiguration.Prefix}{cc.CommandName} {(string.IsNullOrEmpty(cc.Alias) ? "" : $"{cc.Alias.Replace("\"", "")}")}", $"{cc.Reply}{(cc.User > 0 ? $" - by <@{cc.User}>" : "")}");
-            }
+				CurrentBuilder.AddField($"{BotConfiguration.Prefix}{cc.CommandName} {(string.IsNullOrEmpty(cc.Alias) ? "" : $"{cc.Alias.Replace("\"", "")}")}", $"{cc.Reply}{(cc.User > 0 ? $" - by <@{cc.User}>" : "")}");
+			}
 
-            embeds.Add(CurrentBuilder);
+			embeds.Add(CurrentBuilder);
 
-            List<CustomCommand> customCommandsList = CustomCommandDB.CustomCommands.ToList();
-            customCommandsList.Sort((a, b) => a.CommandName.CompareTo(b.CommandName));
+			List<CustomCommand> customCommandsList = CustomCommandDB.CustomCommands.ToList();
+			customCommandsList.Sort((a, b) => a.CommandName.CompareTo(b.CommandName));
 
-            if (embeds.Count > 1)
-                embeds.RemoveAt(0);
+			if (embeds.Count > 1)
+				embeds.RemoveAt(0);
 
-            await CreateReactionMenu(embeds.ToArray(), Context.Channel);
-        }
+			await CreateReactionMenu(embeds.ToArray(), Context.Channel);
+		}
 
-    }
+	}
 
 }

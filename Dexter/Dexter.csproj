@@ -45,7 +45,7 @@
 		<None Update="Configurations\CustomCommandsConfiguration.json">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-    
+	
 		<None Update="Configurations\ChannelCooldownConfiguration.json">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

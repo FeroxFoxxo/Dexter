@@ -7,8 +7,8 @@ using System;
 
 namespace Dexter.Events
 {
-    public class Logging : Event
-    {
+	public class Logging : Event
+	{
 
 		private readonly DiscordShardedClient client;
 
@@ -17,7 +17,7 @@ namespace Dexter.Events
 		private readonly ILogger<Logging> logger;
 
 		public Logging(DiscordShardedClient client, ILogger<Logging> logger, CommandService commandService)
-        {
+		{
 			this.client = client;
 			this.logger = logger;
 			this.commandService = commandService;
@@ -108,5 +108,5 @@ namespace Dexter.Events
 			client.UserVoiceStateUpdated += async (user, _, _) =>
 				logger.LogTrace($"User Voice State Updated: [User: {user}]");
 		}
-    }
+	}
 }

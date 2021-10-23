@@ -7,26 +7,26 @@
   "UnifursalRoleID": 886354632367034419,
   "DJRoleID": 893721086817075240,
   "PatreonRoleIDs": [
-    853691823197257778
+	853691823197257778
   ],
   "GuildID": 613441321751019550,
   "ModerationLogChannelID": 792657959192231976,
   "Prefix": "~",
   "BotName": "Dexter DEV",
   "ThumbnailURLs": [
-    "",
-    "https://cdn.discordapp.com/attachments/781077443338960926/808664878977646602/DexAnnoyed.png",
-    "https://cdn.discordapp.com/attachments/781077443338960926/807479083297931264/DexLove.png",
-    "https://cdn.discordapp.com/attachments/781077443338960926/808664061440294933/DexterWut.png",
-    "https://cdn.discordapp.com/attachments/781077443338960926/808664325014290462/DexterSignAwesome.png"
+	"",
+	"https://cdn.discordapp.com/attachments/781077443338960926/808664878977646602/DexAnnoyed.png",
+	"https://cdn.discordapp.com/attachments/781077443338960926/807479083297931264/DexLove.png",
+	"https://cdn.discordapp.com/attachments/781077443338960926/808664061440294933/DexterWut.png",
+	"https://cdn.discordapp.com/attachments/781077443338960926/808664325014290462/DexterSignAwesome.png"
   ],
   "EnableStartupAlert": false,
   "BotChannels": [
-    792657895014793246,
-    829137462404055082
+	792657895014793246,
+	829137462404055082
   ],
   "DisallowedChannels": [
-    792657918309695498
+	792657918309695498
   ],
   "Help": "Dexter is the official USFurries Discord bot, used to moderate the server and provide useful tools. Made with love. 💙\n\nIf you wish to help in the bot's development, you can find his repository here: https://github.com/FeroxFoxxo/Dexter.",
   "TrackerLength": 6,

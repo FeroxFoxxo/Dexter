@@ -18,7 +18,7 @@ using Victoria.Player;
 
 namespace Dexter.Events
 {
-    public class Music : Event
+	public class Music : Event
 	{
 		private readonly DiscordShardedClient Client;
 
@@ -36,7 +36,7 @@ namespace Dexter.Events
 		public object QueueLocker;
 
 		public Music (DiscordShardedClient client, ILogger<Music> logger, InteractiveService interactive, ILogger<LavaNode> nodeLog)
-        {
+		{
 			Client = client;
 			Logger = logger;
 			Interactive = interactive;
@@ -244,12 +244,12 @@ namespace Dexter.Events
 			catch (Exception) { }
 		}
 
-        private bool AllShardsReady(DiscordShardedClient client)
-        {
+		private bool AllShardsReady(DiscordShardedClient client)
+		{
 			return client.Shards.Count == ShardsReady.Count;
 		}
 
-        private async Task DisposeMusicPlayerAsync(SocketGuild guild)
+		private async Task DisposeMusicPlayerAsync(SocketGuild guild)
 		{
 			if (LavaNode.TryGetPlayer(guild, out var player))
 			{
@@ -262,5 +262,5 @@ namespace Dexter.Events
 				catch (Exception) { }
 			}
 		}
-    }
+	}
 }

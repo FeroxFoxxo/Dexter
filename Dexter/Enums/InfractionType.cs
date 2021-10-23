@@ -1,32 +1,32 @@
 namespace Dexter.Enums
 {
 
-    /// <summary>
-    /// The type an infraction falls into.
-    /// An infraction may be of type WARNING, MUTE, or INDEFINITEMUTE.
-    /// </summary>
+	/// <summary>
+	/// The type an infraction falls into.
+	/// An infraction may be of type WARNING, MUTE, or INDEFINITEMUTE.
+	/// </summary>
 
-    public enum InfractionType
-    {
+	public enum InfractionType
+	{
 
-        /// <summary>
-        /// Infraction which lacks a mute, and is supposed to serve as a heads-up to a user.
-        /// </summary>
+		/// <summary>
+		/// Infraction which lacks a mute, and is supposed to serve as a heads-up to a user.
+		/// </summary>
 
-        Warning,
+		Warning,
 
-        /// <summary>
-        /// Punitive infraction which renders the user unable to send messages for a set duration.
-        /// </summary>
+		/// <summary>
+		/// Punitive infraction which renders the user unable to send messages for a set duration.
+		/// </summary>
 
-        Mute,
+		Mute,
 
-        /// <summary>
-        /// Punitive infraction which renders the user unable to send messages indefinitely.
-        /// </summary>
+		/// <summary>
+		/// Punitive infraction which renders the user unable to send messages indefinitely.
+		/// </summary>
 
-        IndefiniteMute
+		IndefiniteMute
 
-    }
+	}
 
 }

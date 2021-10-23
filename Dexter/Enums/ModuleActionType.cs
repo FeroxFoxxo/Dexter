@@ -1,31 +1,31 @@
 namespace Dexter.Enums
 {
 
-    /// <summary>
-    /// An enum of the types of actions you can run through the ~module command.
-    /// </summary>
+	/// <summary>
+	/// An enum of the types of actions you can run through the ~module command.
+	/// </summary>
 
-    public enum ModuleActionType
-    {
+	public enum ModuleActionType
+	{
 
-        /// <summary>
-        /// The ENABLE value will set the specified module to be enabled.
-        /// </summary>
+		/// <summary>
+		/// The ENABLE value will set the specified module to be enabled.
+		/// </summary>
 
-        Enable,
+		Enable,
 
-        /// <summary>
-        /// The DISABLE value will set the specified module to be disabled.
-        /// </summary>
+		/// <summary>
+		/// The DISABLE value will set the specified module to be disabled.
+		/// </summary>
 
-        Disable,
+		Disable,
 
-        /// <summary>
-        /// The STATUS value will query the database for the related status of the specified command
-        /// </summary>
+		/// <summary>
+		/// The STATUS value will query the database for the related status of the specified command
+		/// </summary>
 
-        Status
+		Status
 
-    }
+	}
 
 }

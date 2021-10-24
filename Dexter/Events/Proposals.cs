@@ -19,6 +19,7 @@ using System.Data;
 using System.Reflection;
 using Fergun.Interactive.Selection;
 using Fergun.Interactive;
+using Humanizer;
 
 namespace Dexter.Events
 {
@@ -353,7 +354,7 @@ namespace Dexter.Events
 				proposalDB.Proposals.Add(proposal);
 				proposalDB.AdminConfirmations.Add(Confirmation);
 
-				msg = await stc.SendMessageAsync(embed: BuildProposal(proposal).Build());
+				msg = await stc.SendMessageAsync($"{Type.Humanize()} Admin Confirmation, <t:{DateTimeOffset.Now.ToUnixTimeSeconds()}:R>");
 
 				// Set the message ID in the suggestion object to the ID of the embed.
 				proposal.MessageID = msg.Id;
@@ -375,7 +376,7 @@ namespace Dexter.Events
 
 			_ = Task.Run(async () =>
 			{
-				var result = await Interactive.SendSelectionAsync(selection, stc, TimeSpan.FromHours(6), msg);
+				var result = await Interactive.SendSelectionAsync(selection, stc, TimeSpan.FromHours(12), msg);
 
 				string selected = result.Value;
 

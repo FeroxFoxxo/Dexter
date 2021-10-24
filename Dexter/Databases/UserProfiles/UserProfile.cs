@@ -435,13 +435,12 @@ namespace Dexter.Databases.UserProfiles
 
         public int GetThresholdDay(int year)
         {
-            int monthStartWeekday = (int)(CultureInfo.InvariantCulture.Calendar.GetDayOfWeek(new DateTime(year, (int)Month, 1)) - 1) % 7;
-            int weekdayDiff = (monthStartWeekday - (int)RelativeWeekday) % 7;
-            if (weekdayDiff < 0) weekdayDiff += 7;
+            int monthStartWeekday = (int)(CultureInfo.InvariantCulture.Calendar.GetDayOfWeek(new DateTime(year, (int)Month, 1)) + 6) % 7;
+            int weekdayDiff = (monthStartWeekday - (int)RelativeWeekday + 7) % 7;
 
             int thresholdDay;
 
-            if (Day < 0)
+            if (Day < 7)
             {
                 //Last weekday of the month
                 int maxDay = CultureInfo.InvariantCulture.Calendar.GetDaysInMonth(year, (int)Month);

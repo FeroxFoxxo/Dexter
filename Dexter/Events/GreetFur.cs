@@ -16,6 +16,8 @@ using Dexter.Commands;
 using static Google.Apis.Sheets.v4.SpreadsheetsResource.ValuesResource;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Services;
 
 namespace Dexter.Events
 {
@@ -43,7 +45,7 @@ namespace Dexter.Events
 		/// Manages the Google Sheets section of GreetFur record-keeping.
 		/// </summary>
 
-		public SheetsService SheetsService { get; set; }
+		public UserCredential UserCredential { get; set; }
 
 		private const int TRACKING_LENGTH = 14;
 
@@ -100,7 +102,13 @@ namespace Dexter.Events
 
 			using var GreetFurDB = scope.ServiceProvider.GetRequiredService<GreetFurDB>();
 
-			Spreadsheet spreadsheet = await SheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
+			using SheetsService sheet = new(new BaseClientService.Initializer()
+			{
+				HttpClientInitializer = UserCredential,
+				ApplicationName = DiscordShardedClient.CurrentUser.Username,
+			});
+
+			Spreadsheet spreadsheet = await sheet.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
 
 			Sheet currentFortnight = spreadsheet.Sheets
 				.Where(sheet => sheet.Properties.Title == GreetFurConfiguration.FortnightSpreadsheet)
@@ -113,9 +121,9 @@ namespace Dexter.Events
 
 			string dataRequestRange = $"{currentFortnight.Properties.Title}";
 			string updateRangeName = $"{currentFortnight.Properties.Title}!A2:{GreetFurCommands.IntToLetters(GreetFurConfiguration.Information["Notes"])}{currentFortnight.Properties.GridProperties.RowCount}";
-			ValueRange data = await SheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID, dataRequestRange)
+			ValueRange data = await sheet.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID, dataRequestRange)
 				.ExecuteAsync();
-			ValueRange toUpdate = await SheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID, updateRangeName)
+			ValueRange toUpdate = await sheet.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID, updateRangeName)
 				.ExecuteAsync();
 
 			List<ulong> ids = new(toUpdate.Values.Count);
@@ -138,7 +146,7 @@ namespace Dexter.Events
 			string firstDayName = firstDTO.ToString("MMM dd yyyy");
 			string dateRangeName = $"{GreetFurConfiguration.FortnightSpreadsheet}!{GreetFurConfiguration.Cells["FirstDay"]}";
 			ValueRange firstDayCell = new() {Range = dateRangeName, Values = new string[][] { new string[] { firstDayName } } };
-			UpdateRequest req = SheetsService.Spreadsheets.Values.Update(firstDayCell, GreetFurConfiguration.SpreadSheetID, dateRangeName);
+			UpdateRequest req = sheet.Spreadsheets.Values.Update(firstDayCell, GreetFurConfiguration.SpreadSheetID, dateRangeName);
 			req.ValueInputOption = UpdateRequest.ValueInputOptionEnum.USERENTERED;
 			await req.ExecuteAsync();
 			
@@ -198,7 +206,7 @@ namespace Dexter.Events
 				}
 			}
 
-			req = SheetsService.Spreadsheets.Values.Update(toUpdate, GreetFurConfiguration.SpreadSheetID, updateRangeName);
+			req = sheet.Spreadsheets.Values.Update(toUpdate, GreetFurConfiguration.SpreadSheetID, updateRangeName);
 			req.ValueInputOption = UpdateRequest.ValueInputOptionEnum.USERENTERED;
 			await req.ExecuteAsync();
 
@@ -244,7 +252,7 @@ namespace Dexter.Events
 				}
 
 				range.Values = rows.ToArray();
-				AppendRequest appendReq = SheetsService.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.FortnightSpreadsheet);
+				AppendRequest appendReq = sheet.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.FortnightSpreadsheet);
 				appendReq.ValueInputOption = AppendRequest.ValueInputOptionEnum.USERENTERED;
 				await appendReq.ExecuteAsync();
 			}
@@ -266,7 +274,7 @@ namespace Dexter.Events
 				string tbpIDsA1 = $"{GreetFurConfiguration.TheBigPictureSpreadsheet}!{GreetFurConfiguration.TheBigPictureIDs}1:{GreetFurConfiguration.TheBigPictureIDs}{tbpRows}";
 				string tbpWeeksA1 = $"{GreetFurConfiguration.TheBigPictureSpreadsheet}!{GreetFurCommands.IntToLetters(week + GreetFurConfiguration.Information["TBPWeekStart"] - 1)}1:{GreetFurCommands.IntToLetters(week + GreetFurConfiguration.Information["TBPWeekStart"])}{tbpRows}";
 
-				BatchGetRequest batchreq = SheetsService.Spreadsheets.Values.BatchGet(GreetFurConfiguration.SpreadSheetID);
+				BatchGetRequest batchreq = sheet.Spreadsheets.Values.BatchGet(GreetFurConfiguration.SpreadSheetID);
 				batchreq.Ranges = new Google.Apis.Util.Repeatable<string>(new string[] { tbpNamesA1, tbpIDsA1, tbpWeeksA1 });
 				BatchGetValuesResponse batchresp = await batchreq.ExecuteAsync();
 				ValueRange[] ranges = batchresp.ValueRanges.ToArray();
@@ -303,7 +311,7 @@ namespace Dexter.Events
 					ranges[2].Values[i] = transformed;
 				}
 
-				UpdateRequest weekValuesUpdate = SheetsService.Spreadsheets.Values.Update(ranges[2], GreetFurConfiguration.SpreadSheetID, tbpWeeksA1);
+				UpdateRequest weekValuesUpdate = sheet.Spreadsheets.Values.Update(ranges[2], GreetFurConfiguration.SpreadSheetID, tbpWeeksA1);
 				weekValuesUpdate.ValueInputOption = UpdateRequest.ValueInputOptionEnum.RAW;
 				await weekValuesUpdate.ExecuteAsync();
 
@@ -339,7 +347,7 @@ namespace Dexter.Events
 					}
 
 					range.Values = newRows.ToArray();
-					AppendRequest appendRequest = SheetsService.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.TheBigPictureSpreadsheet);
+					AppendRequest appendRequest = sheet.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.TheBigPictureSpreadsheet);
 					appendRequest.ValueInputOption = AppendRequest.ValueInputOptionEnum.USERENTERED;
 					await appendRequest.ExecuteAsync();
 				}

@@ -3,6 +3,7 @@ using Dexter.Configurations;
 using Dexter.Databases.GreetFur;
 using Dexter.Databases.UserProfiles;
 using Dexter.Events;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Sheets.v4;
 
 namespace Dexter.Commands
@@ -37,7 +38,7 @@ namespace Dexter.Commands
 		/// Manages the Google Sheets section of GreetFur record-keeping.
 		/// </summary>
 
-		public SheetsService SheetsService { get; set; }
+		public UserCredential UserCredential { get; set; }
 
 		/// <summary>
 		/// A database with information about GreetFur activity records.

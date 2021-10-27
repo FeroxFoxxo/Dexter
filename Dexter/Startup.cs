@@ -133,10 +133,7 @@ namespace Dexter
 				);
 
 				// Create Google Sheets API service.
-				builder.Services.AddSingleton<SheetsService>();
-
-				// Create Youtube API service.
-				builder.Services.AddSingleton<YouTubeService>();
+				builder.Services.AddSingleton<UserCredential>();
 			}
 			else
 			{
@@ -146,28 +143,16 @@ namespace Dexter
 				// The file token.json stores the user's access and refresh tokens, and is created
 				// automatically when the authorization flow completes for the first time.
 
-				UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-					GoogleClientSecrets.FromStream(stream).Secrets,
-					new[] { SheetsService.Scope.Spreadsheets, YouTubeService.Scope.YoutubeReadonly },
-					"admin",
-					CancellationToken.None,
-					new FileDataStore("Token", true),
-					new PromptCodeReceiver()
+				builder.Services.AddSingleton(
+					await GoogleWebAuthorizationBroker.AuthorizeAsync(
+						GoogleClientSecrets.FromStream(stream).Secrets,
+						new[] { SheetsService.Scope.Spreadsheets, YouTubeService.Scope.YoutubeReadonly },
+						"admin",
+						CancellationToken.None,
+						new FileDataStore("Token", true),
+						new PromptCodeReceiver()
+					)
 				);
-
-				// Create Google Sheets API service.
-				builder.Services.AddSingleton(new SheetsService(new BaseClientService.Initializer()
-				{
-					HttpClientInitializer = credential,
-					ApplicationName = name,
-				}));
-
-				// Create Youtube API service.
-				builder.Services.AddSingleton(new YouTubeService(new BaseClientService.Initializer()
-				{
-					HttpClientInitializer = credential,
-					ApplicationName = name,
-				}));
 			}
 
 			// Initialize our dependencies for the bot.

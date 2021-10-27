@@ -5,6 +5,8 @@ using Discord;
 using Discord.Commands;
 using Fergun.Interactive;
 using Fergun.Interactive.Selection;
+using Google.Apis.Services;
+using Google.Apis.YouTube.v3;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using SpotifyAPI.Web;
@@ -71,11 +73,17 @@ namespace Dexter.Commands
 					}
 					else if (baseUrl.Contains("youtube") || baseUrl.Contains("youtu.be"))
 					{
+						using YouTubeService youtube = new(new BaseClientService.Initializer()
+						{
+							HttpClientInitializer = UserCredential,
+							ApplicationName = Context.Client.CurrentUser.Username,
+						});
+
 						if (abUrl.Contains("list"))
 						{
 							var query = HttpUtility.ParseQueryString(uriResult.Query);
 
-							var searchRequest = YouTubeService.PlaylistItems.List("snippet");
+							var searchRequest = youtube.PlaylistItems.List("snippet");
 
 							searchRequest.PlaylistId = query["list"];
 							searchRequest.MaxResults = 25;
@@ -87,7 +95,7 @@ namespace Dexter.Commands
 							if (query["v"] is not null)
 							{
 
-								var searchRequestV = YouTubeService.Videos.List("snippet");
+								var searchRequestV = youtube.Videos.List("snippet");
 								searchRequestV.Id = query["v"];
 								var searchResponseV = await searchRequestV.ExecuteAsync();
 
@@ -105,7 +113,7 @@ namespace Dexter.Commands
 						{
 							var query = HttpUtility.ParseQueryString(uriResult.Query);
 
-							var searchRequest = YouTubeService.Videos.List("snippet");
+							var searchRequest = youtube.Videos.List("snippet");
 							searchRequest.Id = query["v"];
 							var searchResponse = await searchRequest.ExecuteAsync();
 

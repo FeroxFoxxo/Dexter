@@ -13,6 +13,8 @@ using System.Reflection;
 using Timer = System.Timers.Timer;
 using Microsoft.Extensions.Logging;
 using Dexter.Extensions;
+using Google.Apis.Auth.OAuth2;
+using System.Threading;
 
 namespace Dexter.Events
 {
@@ -38,6 +40,8 @@ namespace Dexter.Events
 
 		public ILogger<Timers> Logger { get; set; }
 
+		public UserCredential UserCredential { get; set; }
+
 		/// <summary>
 		/// The Initialize method hooks the client Ready events and begins to loop through all timers.
 		/// </summary>
@@ -57,7 +61,7 @@ namespace Dexter.Events
 			// Runs the bot timer to loop through all events that may occur on a timer.
 			if (!HasStarted)
 			{
-				Timer EventTimer = new(TimeSpan.FromSeconds(5).TotalMilliseconds)
+				Timer EventTimer = new(TimeSpan.FromSeconds(60).TotalMilliseconds)
 				{
 					AutoReset = true,
 					Enabled = true
@@ -82,6 +86,11 @@ namespace Dexter.Events
 			using var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
 
 			long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+			if (UserCredential.Token.IsExpired(Google.Apis.Util.SystemClock.Default))
+			{
+				await UserCredential.RefreshTokenAsync(CancellationToken.None);
+			}
 
 			EventTimer[] expiredTimers = EventTimersDB.EventTimers.AsQueryable().Where(Timer => currentTime > Timer.ExpirationTime).ToArray();
 			foreach (EventTimer timer in expiredTimers)

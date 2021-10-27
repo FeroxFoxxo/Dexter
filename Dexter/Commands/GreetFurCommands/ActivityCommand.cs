@@ -7,6 +7,8 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
+using Google.Apis.Services;
+using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 
 namespace Dexter.Commands
@@ -27,13 +29,19 @@ namespace Dexter.Commands
 
 		public async Task GreetFurActivity()
 		{
-			Spreadsheet spreadsheets = await SheetsService.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
+			using SheetsService sheet = new(new BaseClientService.Initializer()
+			{
+				HttpClientInitializer = UserCredential,
+				ApplicationName = Context.Client.CurrentUser.Username,
+			});
+
+			Spreadsheet spreadsheets = await sheet.Spreadsheets.Get(GreetFurConfiguration.SpreadSheetID).ExecuteAsync();
 
 			Sheet currentFortnight = spreadsheets.Sheets
 				.Where(sheet => sheet.Properties.Title == GreetFurConfiguration.FortnightSpreadsheet)
 				.FirstOrDefault();
 
-			ValueRange columns = await SheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
+			ValueRange columns = await sheet.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
 				$"{currentFortnight.Properties.Title}!{GreetFurConfiguration.IDColumnIndex}1:{currentFortnight.Properties.GridProperties.RowCount}")
 				.ExecuteAsync();
 
@@ -54,7 +62,7 @@ namespace Dexter.Commands
 				return;
 			}
 
-			ValueRange rows = await SheetsService.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
+			ValueRange rows = await sheet.Spreadsheets.Values.Get(GreetFurConfiguration.SpreadSheetID,
 				$"{currentFortnight.Properties.Title}!A{indexOfUser}:{IntToLetters(currentFortnight.Properties.GridProperties.ColumnCount)}")
 				.ExecuteAsync();
 

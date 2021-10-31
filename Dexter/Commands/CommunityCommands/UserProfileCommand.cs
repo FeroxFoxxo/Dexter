@@ -176,7 +176,7 @@ namespace Dexter.Commands
                             {
                                 profile.TimeZoneDST = "";
                                 await GenericResetInfo("DST Time Zone");
-                                return;
+                                break;
                             }
 
                             if (!TimeZoneData.TryParse(value, LanguageConfiguration, out TimeZoneData timeZoneDST))
@@ -207,7 +207,7 @@ namespace Dexter.Commands
                                     .WithTitle("Cleared data about DST application rules")
                                     .WithDescription($"All previous information about DST patterns has been removed. From now on, only your default time zone will be considered for any calculations.")
                                     .SendEmbed(Context.Channel);
-                                return;
+                                break;
                             }
 
                             if (!DaylightShiftRules.TryParse(value, LanguageConfiguration, out feedback, out DaylightShiftRules rules))
@@ -270,7 +270,7 @@ namespace Dexter.Commands
                                     .WithTitle("Removed local birth year records")
                                     .WithDescription("Your birth year is no longer being tracked by the profile system.")
                                     .SendEmbed(Context.Channel);
-                                return;
+                                break;
                             }
 
                             if (!int.TryParse(value, out int result))
@@ -397,7 +397,7 @@ namespace Dexter.Commands
                             $"**Get Borkday Role on Borkday** [*borkdayrole*]: {(profile.Settings.GiveBorkdayRole ? "Yes" : "No")}\n" +
                             $"**Receive Friend Requests** [*friendrequests*]: {(profile.Settings.BlockRequests ? "Silent" : "Regular")}")
                             .SendEmbed(Context.Channel);
-                        return;
+                        break;
                     }
 
                     separatorIndex = parameters.IndexOf(' ');

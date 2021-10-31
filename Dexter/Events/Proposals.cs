@@ -319,7 +319,7 @@ namespace Dexter.Events
 			var stc = DiscordShardedClient.GetChannel(ProposalConfiguration.AdminApprovalChannel) as SocketTextChannel;
 
 			Proposal proposal;
-			RestUserMessage msg;
+			IUserMessage embed;
 
 			using (var scope = ServiceProvider.CreateScope())
 			{
@@ -339,7 +339,7 @@ namespace Dexter.Events
 				};
 
 				// Creates a new AdminConfirmation object with the related fields.
-				AdminConfirmation Confirmation = new()
+				AdminConfirmation confirmation = new()
 				{
 					Tracker = proposal.Tracker,
 					CallbackClass = Type,
@@ -352,31 +352,30 @@ namespace Dexter.Events
 
 				// Add the confirmation and proposal objects to the database.
 				proposalDB.Proposals.Add(proposal);
-				proposalDB.AdminConfirmations.Add(Confirmation);
+				proposalDB.AdminConfirmations.Add(confirmation);
 
-				msg = await stc.SendMessageAsync($"{Type.Humanize()} Admin Confirmation, <t:{DateTimeOffset.Now.ToUnixTimeSeconds()}:R>");
+				embed = await stc.SendMessageAsync(embed: BuildProposal(proposal).Build());
 
-				// Set the message ID in the suggestion object to the ID of the embed.
-				proposal.MessageID = msg.Id;
+				proposal.MessageID = embed.Id;
 
 				await proposalDB.SaveChangesAsync();
 			}
 
 			var options = new[] { "✔️ Approve", "❌ Deny" };
 
-			var embed = PageBuilder.FromEmbedBuilder(BuildProposal(proposal));
+			var embedNew = PageBuilder.FromEmbedBuilder(BuildProposal(proposal));
 
 			var selection = new SelectionBuilder<string>()
 				.WithOptions(options)
 				.WithInputType(InputType.Buttons)
-				.WithSelectionPage(embed)
+				.WithSelectionPage(embedNew)
 				.WithActionOnCancellation(ActionOnStop.DeleteInput)
 				.WithActionOnTimeout(ActionOnStop.DeleteInput)
 				.Build();
 
 			_ = Task.Run(async () =>
 			{
-				var result = await Interactive.SendSelectionAsync(selection, stc, TimeSpan.FromHours(12), msg);
+				var result = await Interactive.SendSelectionAsync(selection, stc, TimeSpan.FromHours(12), embed);
 
 				string selected = result.Value;
 

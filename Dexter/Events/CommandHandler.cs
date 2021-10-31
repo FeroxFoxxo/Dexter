@@ -86,7 +86,7 @@ namespace Dexter.Events
 				return;
 
 			// Finally, if all prerequesites have returned correctly, we run and parse the command with an instance of our socket command context and our services.
-			await CommandService.ExecuteAsync(new ShardedCommandContext(DiscordShardedClient, message), argumentPosition, ServiceProvider);
+			await CommandService.ExecuteAsync(new ShardedCommandContext(DiscordShardedClient, message), argumentPosition, ServiceProvider.CreateScope().ServiceProvider);
 		}
 
 		/// <summary>

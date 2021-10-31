@@ -54,13 +54,14 @@ namespace Dexter.Commands
             }
 
             UserProfile profile = ProfilesDB.GetOrCreateProfile(Context.User.Id);
+            await ProfilesDB.Entry(profile).ReloadAsync();
 
             switch (action.ToLower())
             {
                 case "get":
                 case "profile":
                     await DisplayProfileInformation(profile);
-                    break;
+                    return;
                 case "set":
                 case "edit":
                     int separatorIndex = parameters.IndexOf(' ');

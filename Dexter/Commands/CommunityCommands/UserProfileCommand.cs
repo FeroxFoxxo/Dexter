@@ -398,7 +398,7 @@ namespace Dexter.Commands
                             $"**Get Borkday Role on Borkday** [*borkdayrole*]: {(profile.Settings.GiveBorkdayRole ? "Yes" : "No")}\n" +
                             $"**Receive Friend Requests** [*friendrequests*]: {(profile.Settings.BlockRequests ? "Silent" : "Regular")}")
                             .SendEmbed(Context.Channel);
-                        return;
+                        break;
                     }
 
                     separatorIndex = parameters.IndexOf(' ');

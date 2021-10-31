@@ -371,6 +371,7 @@ namespace Dexter.Events
 				.WithSelectionPage(embedNew)
 				.WithActionOnCancellation(ActionOnStop.DeleteInput)
 				.WithActionOnTimeout(ActionOnStop.DeleteInput)
+				.WithActionOnSuccess(ActionOnStop.DeleteInput)
 				.Build();
 
 			_ = Task.Run(async () =>

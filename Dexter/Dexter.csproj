@@ -22,6 +22,7 @@
 	<ItemGroup>
 		<PackageReference Include="AnimatedGif" Version="1.0.5" />
 		<PackageReference Include="Discord.Net.Labs" Version="3.1.7" />
+		<PackageReference Include="Fergun.Interactive.Labs" Version="1.2.4" />
 		<PackageReference Include="Figgle" Version="0.4.0" />
 		<PackageReference Include="Genbox.WolframAlpha" Version="3.0.0-alpha3" />
 		<PackageReference Include="Google.Apis.Sheets.v4" Version="1.55.0.2371" />
@@ -34,7 +35,7 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0-rc.2.21480.5" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0-rc.2.21480.5" />
-		<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.0-rc.1.ci.20211007223757" />
+		<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.0-rc.1.ci.20211029075225" />
 		<PackageReference Include="Serilog" Version="2.11.0-dev-01371" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1-dev-00879" />
 		<PackageReference Include="SpotifyAPI.Web" Version="6.2.2" />

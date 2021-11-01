@@ -24,7 +24,7 @@ namespace Dexter.Commands
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
 		[Command("ban")]
-		[Summary("Gives a user the borkday role for 24 hours! Happy birthday. <3")]
+		[Summary("Bans a user, assuming their account isn't Awoo or 1 week+ old. Bans if on Final Warning.")]
 		[RequireModerator]
 
 		public async Task BanUser (IUser user, string reason)

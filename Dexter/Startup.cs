@@ -149,7 +149,7 @@ namespace Dexter
 						new[] { SheetsService.Scope.Spreadsheets, YouTubeService.Scope.YoutubeReadonly },
 						"admin",
 						CancellationToken.None,
-						new FileDataStore("Token.json", true),
+						new FileDataStore("token", true),
 						new PromptCodeReceiver()
 					)
 				);

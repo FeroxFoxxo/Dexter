@@ -7,9 +7,11 @@ using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Dexter.Commands
 {
@@ -31,7 +33,7 @@ namespace Dexter.Commands
 		{
 			using SheetsService sheet = new(new BaseClientService.Initializer()
 			{
-				HttpClientInitializer = UserCredential,
+				HttpClientInitializer = GreetFurService.ServiceProvider.GetService<UserCredential>(),
 				ApplicationName = Context.Client.CurrentUser.Username,
 			});
 

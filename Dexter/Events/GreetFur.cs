@@ -41,12 +41,6 @@ namespace Dexter.Events
 
 		public MNGConfiguration MNGConfiguration { get; set; }
 
-		/// <summary>
-		/// Manages the Google Sheets section of GreetFur record-keeping.
-		/// </summary>
-
-		public UserCredential UserCredential { get; set; }
-
 		private const int TRACKING_LENGTH = 14;
 
 		/// <summary>
@@ -104,7 +98,7 @@ namespace Dexter.Events
 
 			using SheetsService sheet = new(new BaseClientService.Initializer()
 			{
-				HttpClientInitializer = UserCredential,
+				HttpClientInitializer = ServiceProvider.GetService<UserCredential>(),
 				ApplicationName = DiscordShardedClient.CurrentUser.Username,
 			});
 

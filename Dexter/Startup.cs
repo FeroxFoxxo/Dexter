@@ -131,9 +131,6 @@ namespace Dexter
 				logger.Error(
 					$"Credential file 'Credentials.json' does not exist!"
 				);
-
-				// Create Google Sheets API service.
-				builder.Services.AddSingleton<UserCredential>();
 			}
 			else
 			{

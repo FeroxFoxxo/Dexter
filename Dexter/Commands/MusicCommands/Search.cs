@@ -5,9 +5,11 @@ using Discord;
 using Discord.Commands;
 using Fergun.Interactive;
 using Fergun.Interactive.Selection;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Humanizer;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SpotifyAPI.Web;
 using System;
@@ -75,7 +77,7 @@ namespace Dexter.Commands
 					{
 						using YouTubeService youtube = new(new BaseClientService.Initializer()
 						{
-							HttpClientInitializer = UserCredential,
+							HttpClientInitializer = MusicService.ServiceProvider.GetService<UserCredential>(),
 							ApplicationName = Context.Client.CurrentUser.Username,
 						});
 

@@ -19,8 +19,6 @@ namespace Dexter.Commands
 
 		public ILogger<MusicCommands> Logger { get; set; }
 
-		public UserCredential UserCredential { get; set; }
-
 		public ClientCredentialsRequest ClientCredentialsRequest { get; set; }
 
 	}

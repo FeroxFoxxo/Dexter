@@ -35,12 +35,6 @@ namespace Dexter.Commands
 		public GreetFur GreetFurService { get; set; }
 
 		/// <summary>
-		/// Manages the Google Sheets section of GreetFur record-keeping.
-		/// </summary>
-
-		public UserCredential UserCredential { get; set; }
-
-		/// <summary>
 		/// A database with information about GreetFur activity records.
 		/// </summary>
 

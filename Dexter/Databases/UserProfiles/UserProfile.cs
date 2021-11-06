@@ -60,7 +60,7 @@ namespace Dexter.Databases.UserProfiles
         {
             get
             {
-                if (BorkdayValue is null) return null;
+                if (BorkdayValue is null || BorkdayValue == 0) return null;
                 try
                 {
                     return DayInYear.FromRawValue(BorkdayValue ?? 0);
@@ -702,7 +702,11 @@ namespace Dexter.Databases.UserProfiles
         /// <summary>
         /// Whether to automatically ignore all friend requests
         /// </summary>
-        BlockRequests = 8
+        BlockRequests = 8,
+        /// <summary>
+        /// Indicates that the user's birth date has been verified by staff
+        /// </summary>
+        AgeVerified = 16
     }
 
     /// <summary>
@@ -743,6 +747,7 @@ namespace Dexter.Databases.UserProfiles
                 }
                 if (GiveBorkdayRole) flags |= ProfilePrefFlags.GiveBorkdayRole;
                 if (BlockRequests) flags |= ProfilePrefFlags.BlockRequests;
+                if (AgeVerified) flags |= ProfilePrefFlags.AgeVerified;
                 return flags;
             } 
             set {
@@ -752,6 +757,7 @@ namespace Dexter.Databases.UserProfiles
 
                 GiveBorkdayRole = value.HasFlag(ProfilePrefFlags.GiveBorkdayRole);
                 BlockRequests = value.HasFlag(ProfilePrefFlags.BlockRequests);
+                AgeVerified = value.HasFlag(ProfilePrefFlags.AgeVerified);
             } 
         }
 
@@ -792,5 +798,11 @@ namespace Dexter.Databases.UserProfiles
         /// </summary>
 
         public bool BlockRequests { get; set; } = false;
+
+        /// <summary>
+        /// Indicates that the user's birth date has been verified by staff
+        /// </summary>
+
+        public bool AgeVerified { get; set; } = false;
     }
 }

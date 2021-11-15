@@ -10,7 +10,7 @@ namespace Dexter.Commands
 	{
 
 		[Command("queue")]
-		[Alias("list")]
+		[Alias("list", "q")]
 		[Summary("Displays the current queue of songs.")]
 		[MusicBotChannel]
 

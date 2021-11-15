@@ -73,7 +73,7 @@ namespace Dexter.Commands
 							.WithDescription("This music type is not implemented. Please contact a developer!")
 							.SendEmbed(Context.Channel);
 					}
-					else if (baseUrl.Contains("youtube") || baseUrl.Contains("youtu.be"))
+					else if (baseUrl.Contains("youtube"))
 					{
 						using YouTubeService youtube = new(new BaseClientService.Initializer()
 						{
@@ -108,7 +108,7 @@ namespace Dexter.Commands
 
 							foreach (var item in searchResponse.Items)
 								songs.Add(item.Snippet.Title);
-							
+
 							await SearchPlaylist(songs.ToArray(), player);
 						}
 						else
@@ -123,6 +123,22 @@ namespace Dexter.Commands
 
 							await SearchSingleTrack($"{youTubeVideo.Snippet.ChannelTitle} {youTubeVideo.Snippet.Title}", player, false);
 						}
+					}
+					else if (baseUrl.Contains("youtu.be"))
+					{
+						using YouTubeService youtube = new(new BaseClientService.Initializer()
+						{
+							HttpClientInitializer = MusicService.ServiceProvider.GetService<UserCredential>(),
+							ApplicationName = Context.Client.CurrentUser.Username,
+						});
+
+						var searchRequest = youtube.Videos.List("snippet");
+						searchRequest.Id = uriResult.Segments.Last();
+						var searchResponse = await searchRequest.ExecuteAsync();
+
+						var youTubeVideo = searchResponse.Items.FirstOrDefault();
+
+						await SearchSingleTrack($"{youTubeVideo.Snippet.ChannelTitle} {youTubeVideo.Snippet.Title}", player, false);
 					}
 					else if (baseUrl.Contains("soundcloud"))
 					{
@@ -181,10 +197,23 @@ namespace Dexter.Commands
 				{
 					await SearchSingleTrack(search, player, true);
 				}
+
+				if (player.PlayerState == PlayerState.Paused)
+					await player.ResumeAsync();
+				else if (player.PlayerState == PlayerState.Stopped) {
+					var track = player.Vueue.FirstOrDefault();
+
+					if (track is not null)
+					{
+						await player.PlayAsync(track);
+
+						await player.SkipAsync();
+					}
+				}
 			}
 		}
 
-		public async Task SearchPlaylist(string[] playlist, LavaPlayer player)
+		public async Task SearchPlaylist(string[] playlist, LavaPlayer<LavaTrack> player)
 		{
 			bool wasEmpty = player.Vueue.Count == 0 && player.PlayerState != PlayerState.Playing;
 
@@ -223,7 +252,7 @@ namespace Dexter.Commands
 			await CreateReactionMenu(embeds, Context.Channel);
 		}
 
-		public async Task SearchSingleTrack(string search, LavaPlayer player, bool searchList)
+		public async Task SearchSingleTrack(string search, LavaPlayer<LavaTrack> player, bool searchList)
 		{
 			SearchResponse searchResult;
 

@@ -168,7 +168,7 @@ namespace Dexter.Commands
 			if (flags.HasFlag(RecordsFlags.ShowAll))
 			{
 				long tnow = DateTimeOffset.Now.ToUnixTimeSeconds();
-				infractions = infractions.Where(i => tnow - i.TimeOfIssue > ModerationConfiguration.RecentInfractionThreshold).ToArray();
+				infractions = infractions.Where(i => tnow - i.TimeOfIssue <= ModerationConfiguration.RecentInfractionThreshold).ToArray();
 				hiddenInfractions = totalInfractions - infractions.Length;
             }
 

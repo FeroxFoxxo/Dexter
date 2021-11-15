@@ -97,7 +97,7 @@ namespace Dexter.Events
 			}
 		}
 
-		private async Task OnTrackStarted(TrackStartEventArg<LavaPlayer> trackEvent)
+		private async Task OnTrackStarted(TrackStartEventArg<LavaPlayer<LavaTrack>, LavaTrack> trackEvent)
 		{
 			Logger.LogInformation($"Track started for guild {trackEvent.Player.VoiceChannel.Guild.Id}:\n\t" +
 								   $"[Name: {trackEvent.Track.Title} | Duration: {trackEvent.Track.Duration.HumanizeTimeSpan()}]");
@@ -115,7 +115,7 @@ namespace Dexter.Events
 			value.Cancel(true);
 		}
 
-		private async Task OnTrackEnded(TrackEndEventArg<LavaPlayer> trackEvent)
+		private async Task OnTrackEnded(TrackEndEventArg<LavaPlayer<LavaTrack>, LavaTrack> trackEvent)
 		{
 			Logger.LogInformation($"Track ended for guild {trackEvent.Player.VoiceChannel.Guild.Id} " +
 								   $"-> {trackEvent.Player.Vueue.Count:N0} tracks remaining.");

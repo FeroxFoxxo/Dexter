@@ -186,7 +186,7 @@ namespace Dexter.Extensions
 								$"Queue Position: **{queueSize}**.");
 		}
 
-		public static EmbedBuilder[] GetQueue(this LavaPlayer player, string title, BotConfiguration botConfiguration, Music musicService )
+		public static EmbedBuilder[] GetQueue(this LavaPlayer<LavaTrack> player, string title, BotConfiguration botConfiguration, Music musicService )
 		{
 			var embeds = player.Vueue.ToArray().GetQueueFromTrackArray(title, botConfiguration);
 

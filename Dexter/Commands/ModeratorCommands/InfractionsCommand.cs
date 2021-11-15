@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
 using Dexter.Databases.Infractions;
@@ -17,60 +18,98 @@ namespace Dexter.Commands
 
 	public partial class ModeratorCommands
 	{
+		const string HELP_SUMMARY = "Returns a record of infractions for a given user.\n" +
+			"You can use options after the user identification to modify the behaviour of the command\n" +
+			"`all` - Displays all infractions (as opposed to only recent ones)\n" +
+			"`reverse` - Displays infractions in chronological order, as opposed to being most-recent-first.";
 
 		/// <summary>
 		/// Sends an embed with the records of infractions of a specified user.
 		/// </summary>
 		/// <remarks>If the user is different from <c>Context.User</c>, it is Staff-only.</remarks>
-		/// <param name="UserID">The target user to query.</param>
+		/// <param name="userId">The target user to query.</param>
+		/// <param name="options">The additional flag options used for specialized rendering of the records command.</param>
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
 		[Command("records")]
 		[Summary("Returns a record of infractions for a set user based on their ID.")]
+		[ExtendedSummary(HELP_SUMMARY)]
 		[Alias("warnings", "record", "warns", "mutes")]
 		[RequireModerator]
 		[BotChannel]
 
-		public async Task InfractionsCommand(ulong UserID)
+		public async Task InfractionsCommand(ulong userId, [Remainder] string options = "")
 		{
-			IUser User = DiscordShardedClient.GetUser(UserID);
+			IUser user = await DiscordShardedClient.Rest.GetUserAsync(userId);
 
-			if (User == null)
+			if (user == null)
 			{
-				EmbedBuilder[] Warnings = GetWarnings(UserID, Context.User.Id, $"<@{UserID}>", $"Unknown ({UserID})", true);
+				await BuildEmbed(EmojiEnum.Annoyed)
+					.WithTitle("Unable to parse user information!")
+					.WithDescription($"The given user ID ({userId}) doesn't match any known user according to Discord's API.")
+					.SendEmbed(Context.Channel);
 
-				await CreateReactionMenu(Warnings, Context.Channel);
+				/* This should only occur if the user ID is invalid
+				EmbedBuilder[] warnings = GetWarnings(userId, Context.User.Id, $"<@{userId}>", $"Unknown ({userId})", true);
+
+				await CreateReactionMenu(warnings, Context.Channel);
+				*/
 			}
 			else
-				await InfractionsCommand(User);
+				await InfractionsCommand(user, options);
 		}
 
-		/// <summary>
-		/// The InfractionsCommand runs on RECORDS and will send a DM to the author of the message if the command is run in a bot
-		/// channel and no user is specified of their own infractions. If a user is specified and the author is a moderator it will
-		/// proceed to print out all the infractions of that specified member into the channel the command had been sent into.
-		/// </summary>
-		/// <param name="User">The User field specifies the user that you wish to get the infractions of.</param>
-		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+        /// <summary>
+        /// The InfractionsCommand runs on RECORDS and will send a DM to the author of the message if the command is run in a bot
+        /// channel and no user is specified of their own infractions. If a user is specified and the author is a moderator it will
+        /// proceed to print out all the infractions of that specified member into the channel the command had been sent into.
+        /// </summary>
+        /// <param name="user">The User field specifies the user that you wish to get the infractions of.</param>
+        /// <param name="options">The additional flag options used for specialized rendering of the records command.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		[Command("records")]
+        [Command("records")]
 		[Summary("Returns a record of infractions for a set user or your own.")]
+		[ExtendedSummary(HELP_SUMMARY)]
 		[Alias("warnings", "record", "warns", "mutes")]
 		[BotChannel]
 
-		public async Task InfractionsCommand([Optional] IUser User)
+		public async Task InfractionsCommand([Optional] IUser user, [Remainder] string options = "")
 		{
-			bool IsUserSpecified = User != null;
+			bool isUserSpecified = user != null;
+			RecordsFlags flags = RecordsFlags.None;
+			List<string> unknownOptions = new();
 
-			if (IsUserSpecified)
+			foreach(string s in options.ToLower().Split(' '))
+            {
+				switch(s)
+                {
+					case "all":
+					case "showall":
+						flags |= RecordsFlags.ShowAll;
+						break;
+					case "reverse":
+					case "revert":
+					case "invert":
+					case "chronological":
+					case "oldestfirst":
+						flags |= RecordsFlags.Reverse;
+						break;
+					default:
+						unknownOptions.Add(s);
+						break;
+                }
+            }
+
+			if (isUserSpecified)
 			{
 				if ((Context.User as IGuildUser).GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator)
-					await CreateReactionMenu(GetWarnings(User.Id, Context.User.Id, User.Mention, User.Username, true), Context.Channel);
+					await CreateReactionMenu(GetWarnings(user.Id, Context.User.Id, user.Mention, user.Username, flags | RecordsFlags.ShowIssuer), Context.Channel);
 				else
 				{
 					await BuildEmbed(EmojiEnum.Annoyed)
 						.WithTitle("Halt! Don't go there-")
-						.WithDescription("Heya! To run this command with a user specified, you will need to be a moderator. <3")
+						.WithDescription("Heya! To run this command with a specified, you will need to be a moderator. <3")
 						.SendEmbed(Context.Channel);
 				}
 			}
@@ -78,7 +117,7 @@ namespace Dexter.Commands
 			{
 				try
 				{
-					if (Context.Channel.GetType() != typeof(SocketDMChannel))
+					if (Context.Channel is not SocketDMChannel)
 					{
 						await BuildEmbed(EmojiEnum.Love)
 							.WithTitle("Sent infractions log.")
@@ -86,7 +125,7 @@ namespace Dexter.Commands
 							.SendEmbed(Context.Channel);
 					}
 
-					await CreateReactionMenu(GetWarnings(Context.User.Id, Context.User.Id, Context.User.Mention, Context.User.Username, false), await Context.User.CreateDMChannelAsync());
+					await CreateReactionMenu(GetWarnings(Context.User.Id, Context.User.Id, Context.User.Mention, Context.User.Username, flags & ~RecordsFlags.ShowIssuer), await Context.User.CreateDMChannelAsync());
 				}
 				catch (HttpException)
 				{
@@ -104,83 +143,124 @@ namespace Dexter.Commands
 		/// <summary>
 		/// The GetWarnings method returns an array of embeds detailing the user's warnings, time of warning, and moderator (if enabled).
 		/// </summary>
-		/// <param name="User">The user whose warnings you wish to receive.</param>
-		/// <param name="RunBy">The user who has run the given warnings command.</param>
-		/// <param name="Mention">The stringified mention for the target user.</param>
-		/// <param name="Username">The target user's username in the given context.</param>
-		/// <param name="ShowIssuer">Whether or not the moderators should be shown in the log. Enabled for moderators, disabled for DMed records.</param>
+		/// <param name="user">The user whose warnings you wish to receive.</param>
+		/// <param name="runBy">The user who has run the given warnings command.</param>
+		/// <param name="mention">The stringified mention for the target user.</param>
+		/// <param name="username">The target user's username in the given context.</param>
+		/// <param name="flags">Configures extra parameters for the request.</param>
 		/// <returns>An array of embeds containing the given user's warnings.</returns>
 
-		public EmbedBuilder[] GetWarnings(ulong User, ulong RunBy, string Mention, string Username, bool ShowIssuer)
+		public EmbedBuilder[] GetWarnings(ulong user, ulong runBy, string mention, string username, RecordsFlags flags)
 		{
-			Infraction[] Infractions = InfractionsDB.GetInfractions(User);
+			Infraction[] infractions = InfractionsDB.GetInfractions(user);
 
-			if (Infractions.Length <= 0)
+			if (infractions.Length <= 0)
 				return new EmbedBuilder[1] {
 					BuildEmbed(EmojiEnum.Love)
 						.WithTitle("No issued infractions!")
-						.WithDescription($"{Mention} has a clean slate!\n" +
-						$"Go give {(User == RunBy ? "yourself" : "them")} a pat on the back. <3")
+						.WithDescription($"{mention} has a clean slate!\n" +
+						$"Go give {(user == runBy ? "yourself" : "them")} a pat on the back. <3")
 				};
 
-			List<EmbedBuilder> Embeds = new();
+			int totalInfractions = infractions.Length;
+			int hiddenInfractions = 0;
 
-			DexterProfile DexterProfile = InfractionsDB.GetOrCreateProfile(User);
-
-			EmbedBuilder CurrentBuilder = BuildEmbed(EmojiEnum.Love)
-				.WithTitle($"{Username}'s Infractions - {Infractions.Length} {(Infractions.Length == 1 ? "Entry" : "Entries")} and {DexterProfile.InfractionAmount} {(DexterProfile.InfractionAmount == 1 ? "Point" : "Points")}.")
-				.WithDescription($"All times are displayed in {TimeZoneInfo.Local.DisplayName}");
-
-			for (int Index = 0; Index < Infractions.Length; Index++)
+			if (flags.HasFlag(RecordsFlags.ShowAll))
 			{
-				Infraction Infraction = Infractions[Index];
+				long tnow = DateTimeOffset.Now.ToUnixTimeSeconds();
+				infractions = infractions.Where(i => tnow - i.TimeOfIssue > ModerationConfiguration.RecentInfractionThreshold).ToArray();
+				hiddenInfractions = totalInfractions - infractions.Length;
+            }
 
-				IUser Issuer = Client.GetUser(Infraction.Issuer);
+			if (!flags.HasFlag(RecordsFlags.Reverse))
+			{
+				infractions = infractions.Reverse().ToArray();
+			}
 
-				long TimeOfIssue = Infraction.TimeOfIssue;
+			List<EmbedBuilder> embeds = new();
 
-				DateTimeOffset Time = DateTimeOffset.FromUnixTimeSeconds(TimeOfIssue > 253402300799 ? TimeOfIssue / 1000 : TimeOfIssue);
+			DexterProfile dexterProfile = InfractionsDB.GetOrCreateProfile(user);
 
-				EmbedFieldBuilder Field = new EmbedFieldBuilder()
+			EmbedBuilder currentBuilder = BuildEmbed(EmojiEnum.Love)
+				.WithTitle($"{username}'s Infractions - {infractions.Length} {(infractions.Length == 1 ? "Entry" : "Entries")} and {dexterProfile.InfractionAmount} {(dexterProfile.InfractionAmount == 1 ? "Point" : "Points")}.")
+				.WithDescription($"All times are displayed in {TimeZoneInfo.Local.DisplayName}"
+					+ (hiddenInfractions == 0 ? "" : $"\n(Hiding {hiddenInfractions} old infractions)"));
+
+            for (int i = 0; i < infractions.Length; i++)
+			{
+				Infraction infraction = infractions[i];
+
+				IUser issuer = Client.GetUser(infraction.Issuer);
+
+				long timeOfIssue = infraction.TimeOfIssue;
+
+				DateTimeOffset time = DateTimeOffset.FromUnixTimeSeconds(timeOfIssue);
+
+				EmbedFieldBuilder field = new EmbedFieldBuilder()
 					.WithName(
 						(
-						Infraction.PointCost == 5 ?
+						infraction.PointCost == 5 ?
 							"Ban" :
-							Infraction.InfractionTime == 0 ? "Warning" :
-							$"{TimeSpan.FromSeconds(Infraction.InfractionTime).Humanize().Titleize()} Mute"
+							infraction.InfractionTime == 0 ? "Warning" :
+							$"{TimeSpan.FromSeconds(infraction.InfractionTime).Humanize().Titleize()} Mute"
 						)
-						+ $" {Index + 1} (ID {Infraction.InfractionID})" +
-						$"{(Infraction.PointCost > 0 && Infraction.PointCost < 5 ? $", - {Infraction.PointCost} {(Infraction.PointCost == 1 ? "Point" : "Points")}" : "")}."
+						+ $" {i + 1} (ID {infraction.InfractionID})" +
+						$"{(infraction.PointCost > 0 && infraction.PointCost < 5 ? $", - {infraction.PointCost} {(infraction.PointCost == 1 ? "Point" : "Points")}" : "")}."
 					)
-					.WithValue($"{(ShowIssuer ? $":cop: {(Issuer != null ? Issuer.GetUserInformation() : $"Unknown ({Infraction.Issuer})")}\n" : "")}" +
-						$":calendar: {Time:M/d/yyyy h:mm:ss}\n" +
-						$":notepad_spiral: {Infraction.Reason}"
+					.WithValue($"{(flags.HasFlag(RecordsFlags.ShowIssuer) ? $":cop: {(issuer != null ? issuer.GetUserInformation() : $"Unknown ({infraction.Issuer})")}\n" : "")}" +
+						$":calendar: {time:M/d/yyyy h:mm:ss}\n" +
+						$":notepad_spiral: {infraction.Reason}"
 					);
 
-				if (Index % 5 == 0 && Index != 0)
+				if (i % 5 == 0 && i != 0)
 				{
-					Embeds.Add(CurrentBuilder);
-					CurrentBuilder = BuildEmbed(EmojiEnum.Love).AddField(Field);
+					embeds.Add(currentBuilder);
+					currentBuilder = BuildEmbed(EmojiEnum.Love).AddField(field);
 				}
 				else
 				{
 					try
 					{
-						CurrentBuilder.AddField(Field);
+						currentBuilder.AddField(field);
 					}
 					catch (Exception)
 					{
-						Embeds.Add(CurrentBuilder);
-						CurrentBuilder = BuildEmbed(EmojiEnum.Love).AddField(Field);
+						embeds.Add(currentBuilder);
+						currentBuilder = BuildEmbed(EmojiEnum.Love).AddField(field);
 					}
 				}
 			}
 
-			Embeds.Add(CurrentBuilder);
+			embeds.Add(currentBuilder);
 
-			return Embeds.ToArray();
+			return embeds.ToArray();
 		}
 
 	}
+
+	/// <summary>
+	/// Determines the display mode of elements in the records command.
+	/// </summary>
+
+	[Flags]
+	public enum RecordsFlags
+    {
+		/// <summary>
+		/// Default setting
+		/// </summary>
+		None = 0,
+		/// <summary>
+		/// Displays the issuer of the infraction in the final embed. Should be reserved to moderator use.
+		/// </summary>
+		ShowIssuer = 1,
+		/// <summary>
+		/// Revert the order of the infractions so they show up in chronological order instead of most recent fist.
+		/// </summary>
+		Reverse = 2,
+		/// <summary>
+		/// Whether to display all infractions, if disabled, only infractions up to a certain time ago would be displayed.
+		/// </summary>
+		ShowAll = 4
+    }
 
 }

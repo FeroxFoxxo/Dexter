@@ -31,5 +31,6 @@
   "FinalWarningsChannelID": 808850069788426311,
   "FinalWarningsManageRecords": true,
   "FinalWarningPointsDeducted": 4,
-  "BanAppealForm": "https://forms.gle/oqYNwZK7Y9TxefvE8"
+  "BanAppealForm": "https://forms.gle/oqYNwZK7Y9TxefvE8",
+  "RecentInfractionThreshold": 12900000
 }

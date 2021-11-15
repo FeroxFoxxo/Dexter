@@ -120,8 +120,17 @@ namespace Dexter.Configurations
 
 		public short FinalWarningPointsDeducted { get; set; }
 
-		public string BanAppealForm { get; set; }
+		/// <summary>
+		/// A URL to the ban appeal form.
+		/// </summary>
 
-	}
+		public string BanAppealForm { get; set; }
+        
+		/// <summary>
+		/// Maximum age in seconds for an infraction to be considered recent.
+		/// </summary>
+
+		public long RecentInfractionThreshold { get; set; }
+    }
 
 }

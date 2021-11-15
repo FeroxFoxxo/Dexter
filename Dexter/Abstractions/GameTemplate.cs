@@ -31,7 +31,7 @@ namespace Dexter.Abstractions
 		private readonly BotConfiguration BotConfiguration;
 
 		/// <summary>
-		/// Initializes an instatnce of Game.
+		/// Initializes an instance of Game.
 		/// </summary>
 		/// <param name="game">The current instance of the game with its data.</param>
 		/// <param name="botConfiguration">The current instance of the bot configuration.</param>

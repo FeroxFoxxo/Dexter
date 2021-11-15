@@ -20,8 +20,8 @@ namespace Dexter.Games
 	{
 		const int MaxWidth = 26;
 		const int MaxHeight = 18;
-		const int MinWidth = 3;
-		const int MinHeight = 3;
+		const int MinWidth = 4;
+		const int MinHeight = 4;
 		const float MaxMineRatio = 0.4f;
 
 		private int MaxMines
@@ -172,21 +172,45 @@ namespace Dexter.Games
 			}
 		}
 
-		private static char[,] GenerateBoard(int height, int width, int mineCount, Random rnd)
-		{
+		internal class Cell
+        {
+			public int row;
+			public int col;
 
+			public Cell(int row, int col)
+            {
+				this.row = row;
+				this.col = col;
+            }
+
+			public override string ToString()
+            {
+				return $"{(char)('A' + col)}{1 + row}";
+            }
+        }
+
+		private static char[,] GenerateBoard(int height, int width, int mineCount, Random rnd, Cell removeMine = null)
+		{
 			char[,] board = new char[height, width];
 
 			int[,] dangers = new int[height, width];
 			int[] mines = new int[height * width];
 			for (int i = 0; i < height * width; i++)
 				mines[i] = i;
-			mines = mines.OrderBy(x => rnd.Next()).ToArray()[..mineCount];
+			mines = mines.OrderBy(x => rnd.Next()).ToArray();
 
+			int totalMines = 0;
 			foreach (int i in mines)
 			{
 				int x = i % width;
 				int y = i / width;
+				if (removeMine is not null)
+                {
+					if (removeMine.row >= y - 1 && removeMine.row <= y + 1
+						&& removeMine.col >= x - 1 && removeMine.col <= x + 1)
+						continue;
+                } 
+
 				for (int dx = -1; dx <= 1; dx++)
 				{
 					if (x + dx < 0 || x + dx >= width) continue;
@@ -197,6 +221,8 @@ namespace Dexter.Games
 					}
 				}
 				board[y, x] = 'X';
+
+				if (++totalMines >= mineCount) break;
 			}
 
 			for (int x = 0; x < width; x++)
@@ -357,18 +383,18 @@ namespace Dexter.Games
 			return result;
 		}
 
-		private bool ProbeCell(IEnumerable<Tuple<int, int>> cells, out bool isLoss)
+		private bool ProbeCells(IEnumerable<Cell> cells, out bool isLoss)
 		{
 			char[,] state = State;
 			bool result = false;
 			isLoss = false;
 
-			foreach (Tuple<int, int> cell in cells)
+			foreach (Cell cell in cells)
 			{
-				if (ProbeCell(cell.Item1, cell.Item2, ref state, Board))
+				if (ProbeCell(cell.col, cell.row, ref state, Board))
 				{
 					result = true;
-					if (state[cell.Item2, cell.Item1] == 'X') isLoss = true;
+					if (state[cell.col, cell.row] == 'X') isLoss = true;
 				}
 			}
 
@@ -644,13 +670,13 @@ namespace Dexter.Games
 			{"advanced", "26 18 99"}
 		};
 
-		public GameMinesweeper(GameInstance game, BotConfiguration botConfiguration) : base(game, botConfiguration, "???/???/???, XXX/X8X/XXX, 0, 3, 3, 8")
+		public GameMinesweeper(GameInstance game, BotConfiguration botConfiguration) : base(game, botConfiguration, "????/????/????/????, XXXX/X55X/X55X/XXXX, 0, 4, 4, 12")
 		{
 		}
 
-		private bool TryParsePos(string input, out Tuple<int, int> result)
+		private bool TryParsePos(string input, out Cell result)
 		{
-			result = new Tuple<int, int>(0, 0);
+			result = new Cell(0, 0);
 			if (input.Length < 2) return false;
 			input = input.ToUpper();
 
@@ -659,17 +685,17 @@ namespace Dexter.Games
 
 			if (!int.TryParse(input[1..], out int y)) return false;
 
-			result = new Tuple<int, int>(x, --y);
+			result = new Cell(--y, x);
 			return true;
 		}
 
-		private Tuple<int, int> ToRealPos(Tuple<int, int> input)
+		private Cell ToRealPos(Cell input)
 		{
-			int y = input.Item2;
-			if (input.Item2 >= Height) y = Height - 1;
-			if (input.Item2 < 0) y = 0;
+			int y = input.row;
+			if (y >= Height) y = Height - 1;
+			if (y < 0) y = 0;
 
-			return new Tuple<int, int>(input.Item1, y);
+			return new Cell(y, input.col);
 		}
 
 		public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordShardedClient client, FunConfiguration funConfiguration)
@@ -730,10 +756,10 @@ namespace Dexter.Games
 					await message.Channel.SendMessageAsync("You must provide a position to flag or unflag!");
 					return;
 				}
-				List<Tuple<int, int>> toFlag = new();
+				List<Cell> toFlag = new();
 				for (int i = 1; i < args.Length; i++)
 				{
-					if (!TryParsePos(args[i], out Tuple<int, int> flagpos))
+					if (!TryParsePos(args[i], out Cell flagpos))
 					{
 						await message.Channel.SendMessageAsync($"Unable to resolve position {args[1]}, please type a letter followed by a number, no spaces!");
 						return;
@@ -742,16 +768,16 @@ namespace Dexter.Games
 				}
 
 				char[,] state = State;
-				foreach (Tuple<int, int> cell in toFlag)
+				foreach (Cell cell in toFlag)
 				{
-					if (state[cell.Item2, cell.Item1] is not '?' and not 'F')
+					if (state[cell.row, cell.col] is not '?' and not 'F')
 					{
-						await message.Channel.SendMessageAsync($"Unable to toggle flag at ({(char)(cell.Item1 + 'A')}{cell.Item2 + 1}), it has already been probed!");
+						await message.Channel.SendMessageAsync($"Unable to toggle flag at ({cell}), it has already been probed!");
 						return;
 					}
 					else
 					{
-						state[cell.Item2, cell.Item1] = state[cell.Item2, cell.Item1] == 'F' ? '?' : 'F';
+						state[cell.row, cell.col] = state[cell.row, cell.col] == 'F' ? '?' : 'F';
 					}
 				}
 				State = state;
@@ -762,10 +788,10 @@ namespace Dexter.Games
 			string[] positions = msg.Split(" ");
 			if (TryParsePos(positions[0], out _))
 			{
-				List<Tuple<int, int>> cells = new();
+				List<Cell> cells = new();
 				foreach (string s in positions)
 				{
-					if (TryParsePos(s, out Tuple<int, int> newItem))
+					if (TryParsePos(s, out Cell newItem))
 					{
 						cells.Add(ToRealPos(newItem));
 					}
@@ -773,23 +799,19 @@ namespace Dexter.Games
 
 				if (cells.Count > 0)
 				{
-					if (Board[cells[0].Item2, cells[0].Item1] == 'X')
+					if (Board[cells[0].row, cells[0].col] == 'X')
 					{
 						if (CheckNew(State))
 						{
 							Random rnd = new();
-							char[,] newBoard = GenerateBoard(Height, Width, Math.Min(Mines, MaxMines), rnd);
-							while (newBoard[cells[0].Item2, cells[0].Item1] is 'X')
-							{
-								newBoard = GenerateBoard(Height, Width, Math.Min(Mines, MaxMines), rnd);
-							}
+							char[,] newBoard = GenerateBoard(Height, Width, Math.Min(Mines, MaxMines), rnd, cells[0]);
 							Board = newBoard;
 						}
 						else
 							isLoss = true;
 					}
 
-					if (!ProbeCell(cells, out bool probeLoss))
+					if (!ProbeCells(cells, out bool probeLoss))
 					{
 						await message.Channel.SendMessageAsync($"All provided cells have already been probed or are flagged!");
 						return;

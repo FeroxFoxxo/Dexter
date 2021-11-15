@@ -84,6 +84,7 @@ namespace Dexter.Commands
                         return;
                     }
 
+                    bool wasVerified = profile.Settings.AgeVerified;
                     string feedback = "";
                     switch (attribute.ToLower())
                     {
@@ -234,12 +235,26 @@ namespace Dexter.Commands
                             if (value.ToLower() == "none")
                             {
                                 profile.Borkday = default;
+                                
+                                ProfilePreferences tempPrefs = profile.Settings;
+                                tempPrefs.AgeVerified = false;
+                                profile.Settings = tempPrefs;
+                                
                                 await TryRemoveBirthdayTimer(profile);
                                 await BuildEmbed(EmojiEnum.Sign)
                                     .WithTitle("Removed local birthday records.")
-                                    .WithDescription("Your birthday is no longer being tracked by the profile system.")
+                                    .WithDescription("Your birthday is no longer being tracked by the profile system." + (wasVerified ? " Your age verification has been removed." : ""))
                                     .SendEmbed(Context.Channel);
                                 break;
+                            }
+
+                            if (wasVerified)
+                            {
+                                await BuildEmbed(EmojiEnum.Annoyed)
+                                    .WithTitle("Unable to modify verified birth date.")
+                                    .WithDescription("Your birth day has been verified to be its current value. If you wish to change this anyway, set your birthday to \"none\" first; this will remove your verified status and remove all birthday-related data. You can set it to a different value afterwards.")
+                                    .SendEmbed(Context.Channel);
+                                return;
                             }
 
                             if (!DayInYear.TryParse(value, true, LanguageConfiguration, out DayInYear day, out feedback, out int year))
@@ -266,11 +281,25 @@ namespace Dexter.Commands
                             if (value.ToLower() == "none")
                             {
                                 profile.BirthYear = default;
+
+                                ProfilePreferences tempPrefs = profile.Settings;
+                                tempPrefs.AgeVerified = false;
+                                profile.Settings = tempPrefs;
+
                                 await BuildEmbed(EmojiEnum.Sign)
                                     .WithTitle("Removed local birth year records")
-                                    .WithDescription("Your birth year is no longer being tracked by the profile system.")
+                                    .WithDescription("Your birth year is no longer being tracked by the profile system." + (wasVerified ? " Your age verification has been removed." : ""))
                                     .SendEmbed(Context.Channel);
                                 break;
+                            }
+
+                            if (wasVerified)
+                            {
+                                await BuildEmbed(EmojiEnum.Annoyed)
+                                    .WithTitle("Unable to modify verified birth year.")
+                                    .WithDescription("Your birth year has been verified to be its current value. If you wish to change this anyway, set your birth year to \"none\" first; this will remove your verified status and remove all birthday-related data. You can set it to a different value afterwards.")
+                                    .SendEmbed(Context.Channel);
+                                return;
                             }
 
                             if (!int.TryParse(value, out int result))
@@ -1093,7 +1122,7 @@ namespace Dexter.Commands
                 .WithDescription($"Custom user profile for user: {user.GetUserInformation()}")
                 .AddField(!string.IsNullOrEmpty(profile.Gender), "Gender", profile.Gender, true)
                 .AddField(!string.IsNullOrEmpty(profile.Orientation), "Sexuality", profile.Orientation, true)
-                .AddField(profile.Borkday != default, "Borkday", $"{profile.Borkday}" + (profile.BirthYear > 0 ? $", {profile.BirthYear} (**Age**: {GetAge(profile, out _)})" : ""))
+                .AddField(profile.Borkday != default, "Borkday" + (profile.Settings.AgeVerified ? " :white_check_mark: (Verified)" : ""), $"{profile.Borkday}" + (profile.BirthYear > 0 ? $", {profile.BirthYear} (**Age**: {GetAge(profile, out _)})" : ""))
                 .AddField(TZSuccess, "Time Zone", TZ.ToString() + ((profile.TimeZone != profile.TimeZoneDST && TZDSTSuccess) ? $" ({TZDST} during Daylight Savings. [{profile.DstRules?.ToString() ?? "Never"}])" : ""))
                 .AddField(!string.IsNullOrEmpty(profile.Nationality), "Nationality", profile.Nationality, true)
                 .AddField(!string.IsNullOrEmpty(profile.Languages), "Languages", profile.Languages, true)

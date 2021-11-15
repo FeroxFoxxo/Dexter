@@ -67,7 +67,7 @@ namespace Dexter.Commands
 		/// The BorkdayDB stores information regarding a user's birthday.
 		/// </summary>
 
-		public ProfilesDB BorkdayDB { get; set; }
+		public ProfilesDB ProfilesDB { get; set; }
 
 		/// <summary>
 		/// Stores information regarding final warns issued in the server.
@@ -87,7 +87,15 @@ namespace Dexter.Commands
 
 		public Random Random { get; set; }
 
+		/// <summary>
+		/// Holds relevant methods to access certain moderation events and dynamic data.
+		/// </summary>
+
 		public Moderation ModerationService { get; set; }
+
+		/// <summary>
+		/// Holds relevant information about GreetFur management procedures.
+		/// </summary>
 
 		public GreetFurConfiguration GreetFurConfiguration { get; set; }
 

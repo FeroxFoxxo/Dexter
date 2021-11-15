@@ -22,7 +22,7 @@ namespace Dexter.Commands
 		/// Gives a user the "Happy Borkday" role for 24 hours.
 		/// </summary>
 		/// <remarks>This command is staff-only.</remarks>
-		/// <param name="User">The target user to give the role to.</param>
+		/// <param name="user">The target user to give the role to.</param>
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
 		[Command("borkday")]
@@ -30,19 +30,19 @@ namespace Dexter.Commands
 		[Alias("birthday")]
 		[RequireModerator]
 
-		public async Task GiveBorkday([Optional] IGuildUser User)
+		public async Task GiveBorkday([Optional] IGuildUser user)
 		{
-			if (User == null)
-				User = Context.Guild.GetUser(Context.User.Id);
+			if (user == null)
+				user = Context.Guild.GetUser(Context.User.Id);
 
-			UserProfile Borkday = BorkdayDB.Profiles.Find(User.Id);
+			UserProfile Borkday = ProfilesDB.Profiles.Find(user.Id);
 
 			if (Borkday == null)
-				BorkdayDB.Profiles.Add(
+				ProfilesDB.Profiles.Add(
 					new UserProfile()
 					{
 						BorkdayTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
-						UserID = User.Id
+						UserID = user.Id
 					}
 				);
 			else
@@ -64,17 +64,17 @@ namespace Dexter.Commands
 			}
 
 			IRole Role = Context.Guild.GetRole(
-				User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator ?
+				user.GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator ?
 					ModerationConfiguration.StaffBorkdayRoleID : ModerationConfiguration.BorkdayRoleID
 			);
 
-			await User.AddRoleAsync(Role);
+			await user.AddRoleAsync(Role);
 
 			await CreateEventTimer(
 				RemoveBorkday,
 				new()
 				{
-					{ "User", User.Id.ToString() },
+					{ "User", user.Id.ToString() },
 					{ "Role", Role.Id.ToString() }
 				},
 				ModerationConfiguration.SecondsOfBorkday,
@@ -83,15 +83,15 @@ namespace Dexter.Commands
 
 			await BuildEmbed(EmojiEnum.Love)
 				.WithTitle("Borkday role given!")
-				.WithDescription($"Haiya! I have given {User.GetUserInformation()} the `{Role.Name}` role!\nWish them a good one <3")
-				.SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,
+				.WithDescription($"Haiya! I have given {user.GetUserInformation()} the `{Role.Name}` role!\nWish them a good one <3")
+				.SendDMAttachedEmbed(Context.Channel, BotConfiguration, user,
 					BuildEmbed(EmojiEnum.Love)
 					.WithTitle($"Happy Borkday!")
 					.WithDescription($"Haiya! You have been given the {Role.Name} role on {Context.Guild.Name}. " +
 						$"Have a splendid birthday filled with lots of love and cheer!\n - {Context.Guild.Name} Staff <3")
 
 				);
-			await BorkdayDB.SaveChangesAsync();
+			await ProfilesDB.SaveChangesAsync();
 		}
 
 		/// <summary>

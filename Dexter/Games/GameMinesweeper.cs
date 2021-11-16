@@ -799,7 +799,7 @@ namespace Dexter.Games
 
 				if (cells.Count > 0)
 				{
-					if (Board[cells[0].col, cells[0].row] == 'X')
+					if (Board[cells[0].row, cells[0].col] == 'X')
 					{
 						if (CheckNew(State))
 						{

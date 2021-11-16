@@ -394,7 +394,7 @@ namespace Dexter.Games
 				if (ProbeCell(cell.col, cell.row, ref state, Board))
 				{
 					result = true;
-					if (state[cell.col, cell.row] == 'X') isLoss = true;
+					if (state[cell.row, cell.col] == 'X') isLoss = true;
 				}
 			}
 

@@ -799,7 +799,8 @@ namespace Dexter.Games
 
 				if (cells.Count > 0)
 				{
-					if (Board[cells[0].row, cells[0].col] == 'X')
+					char firstC = Board[cells[0].row, cells[0].col];
+					if (firstC != '0')
 					{
 						if (CheckNew(State))
 						{
@@ -807,7 +808,7 @@ namespace Dexter.Games
 							char[,] newBoard = GenerateBoard(Height, Width, Math.Min(Mines, MaxMines), rnd, cells[0]);
 							Board = newBoard;
 						}
-						else
+						else if (firstC == 'X')
 							isLoss = true;
 					}
 

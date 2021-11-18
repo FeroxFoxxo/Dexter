@@ -15,6 +15,7 @@ using Discord.Net;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using IResult = Discord.Commands.IResult;
 
 namespace Dexter.Events
 {

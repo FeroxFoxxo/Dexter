@@ -1,6 +1,7 @@
 ﻿<html>
 <head>
 	<title>Leaderboard</title>
+	<meta charset="utf-8" />
 	<style>
 		body {
 			color: azure;
@@ -42,6 +43,9 @@
 		}
 		.voice {
 			border-left: solid 3px darkorange;
+		}
+		.total {
+			border-left: solid 3px cornflowerblue;
 		}
 		.user-level {
 			position: absolute;
@@ -102,7 +106,6 @@
 			font-size: 0.75em;
 			color: aqua;
 		}
-		.xpbar-circle { }
 		.xpbar-inner {
 			position: absolute;
 			z-index: 6;
@@ -139,68 +142,148 @@
 		.toggle-button-container {
 			position: absolute;
 			right: 2em;
-			top: 10px;
-			cursor: pointer;
+			top: 0.36em;
 			font-size: 1.6em;
+			width: 30%;
+			min-width: 8em;
+			justify-content: space-around;
+			display: flex;
 		}
-		.toggle-button-container > label > input {
-			opacity: 0;
+
+        .hide-checkbox {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkbox-type {
+            position: absolute;
+            top: 0.2em;
+            left: 0.2em;
+            height: 0.7em;
+            width: 0.7em;
+            border-radius: 0.35em;
+        }
+
+		.checkbox-text {
+			background-color: grey;
+		}
+
+		.checkbox-voice {
+			background-color: grey;
+		}
+
+        .checkbox-label {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+			padding-left: 1em;
+        }
+
+		.label-container {
+			position: relative;
 			cursor: pointer;
-			opacity: 0;
-			height: 0;
-			width: 0;
 		}
-		.toggle-button-container input ~ .checkmark {
-			border: 1px solid black;
-			border-radius: 0.5em;
-			background-color: green;
-			padding: 0 0.2em;
-			cursor: pointer;
-		}
-		.toggle-button-container input ~ .checkmark::before {
-			content: "Text";
-		}
-		.toggle-button-container:hover input ~ .checkmark {
-			background-color: darkgreen;
-		}
-		.toggle-button-container:hover input:checked ~ .checkmark {
-			background-color: orangered;
-		}
-		.toggle-button-container input:checked ~ .checkmark {
+
+        /* When the checkbox is checked, add a background */
+        .label-container input:checked ~ .checkbox-text {
+            background-color: darkgreen;
+        }
+		.label-container input:checked ~ .checkbox-voice {
 			background-color: darkorange;
 		}
-		.toggle-button-container input:checked ~ .checkmark::before {
-			content: "Voice";
+
+        /* On mouse-over, add a background color */
+        .label-container:hover input ~ .checkbox-text {
+            background-color: lightgrey;
+        }
+        .label-container:hover input ~ .checkbox-voice {
+            background-color: lightgrey;
+        }
+
+        .label-container:hover input:checked ~ .checkbox-text {
+            background-color: greenyellow;
+        }
+        .label-container:hover input:checked ~ .checkbox-voice {
+            background-color: orange;
+        }
+
+        .label-container input:checked ~ .checkbox-type {
+			border: solid white 2px;
+			box-sizing: border-box;
+        }
+
+		/* Modify checked Text and Voice text based on inputs*/
+		.checkbox-label {
+			color: grey;
+		}
+        .label-container input:checked ~ .label-text {
+            color: greenyellow;
+        }
+		.label-container input:checked ~ .label-voice {
+			color: orange;
 		}
 	</style>
 
 	<script>
-		function switchtype() {
-			let displaytext = document.querySelector("#type-checkbox:checked") === null;
-			let targetclassview = displaytext ? "text" : "voice";
-			let targetclasshide = displaytext ? "voice" : "text";
-
-			let targetsview = document.getElementsByClassName(targetclassview);
-			let targetshide = document.getElementsByClassName(targetclasshide);
-
-			for (var i in targetsview) {
-				targetsview[i].classList = "level-item " + targetclassview;
-			}
-			for (var i in targetshide) {
-				targetshide[i].classList = "level-item hide " + targetclasshide;
-			}
+		function togglevoice() {
+            updateclass();
 		}
+
+		function toggletext() {
+			updateclass();
+		}
+
+        function getclassview() {
+            let textVisible = document.querySelector("#text-checkbox:checked") !== null;
+            let voiceVisible = document.querySelector("#voice-checkbox:checked") !== null;
+
+            if (textVisible == voiceVisible)
+                return "total";
+            else if (textVisible)
+                return "text";
+            else
+                return "voice";
+        }
+
+		function updateclass() {
+			let targetclassview = getclassview();
+			let alltargets = document.getElementsByClassName("level-item");
+
+			for (let i = 0; i < alltargets.length; i++) {
+				if (alltargets.item(i).classList.contains(targetclassview)) {
+                    alltargets.item(i).classList.remove("hide");
+				}
+				else {
+                    alltargets.item(i).classList.add("hide");
+                }
+            }
+        }
+
 	</script>
 </head>
 <body>
 	<div class="top">
 		<h1>Dexter Leaderboard</h1>
 	</div>
-	<div class="toggle-button-container" id="type-toggle-button" onclick="switchtype()">
-		<label>
-			<input type="checkbox" id="type-checkbox">
-			<span class="checkmark"></span>
-		</label>
+	<div class="toggle-button-container" id="type-toggle-button">
+		<div>
+			<label onclick="toggletext()" class="label-container">
+				<input type="checkbox" id="text-checkbox" class="hide-checkbox" checked="checked"/>
+				<span class="checkbox-label label-text">Text</span>
+				<span class="checkbox-type checkbox-text"></span>
+			</label>
+		</div>
+		<div>
+			<label onclick="togglevoice()" class="label-container">
+				<input type="checkbox" id="voice-checkbox" class="hide-checkbox" checked="checked"/>
+				<span class="checkbox-label label-voice">Voice</span>
+				<span class="checkbox-type checkbox-voice"></span>
+			</label>
+		</div>
 	</div>
 	<div class="list">
 		$LIST

@@ -19,7 +19,7 @@ namespace Dexter.Workers
 	/// an appropriate error to the channel, pinging the developers if the error is unknown.
 	/// </summary>
 
-	public class DiscordWorker : IHostedService
+	public class DiscordWorker
 	{
 
 		private readonly DiscordShardedClient client;
@@ -35,7 +35,7 @@ namespace Dexter.Workers
 			this.logger = logger;
 		}
 
-		public async Task StartAsync(CancellationToken _)
+		public async Task StartAsync()
 		{
 			using (var moduleScope = services.CreateScope())
 			{
@@ -47,7 +47,7 @@ namespace Dexter.Workers
 			await client.StartAsync();
 		}
 
-		public async Task StopAsync(CancellationToken _)
+		public async Task StopAsync()
 		{
 			await client.StopAsync();
 

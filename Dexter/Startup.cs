@@ -15,6 +15,7 @@ using Google.Apis.Util.Store;
 using Google.Apis.YouTube.v3;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using SpotifyAPI.Web;
 using System;
@@ -66,9 +67,7 @@ namespace Dexter
 			p_DBUser = dbUser;
 			p_DBPassword = dbPassword;
 
-			// Create new WebApplication which will generate our REST-FUL API.
-
-			var builder = WebApplication.CreateBuilder();
+			var services = new ServiceCollection();
 
 			// Sets the current, active directory to the working directory specified in the azure cloud.
 
@@ -101,28 +100,19 @@ namespace Dexter
 				.WriteTo.Console()
 				.CreateLogger();
 
-			// Start the swager instance for debugging.
-
-			builder.Services.AddControllers();
-
-			builder.Services.AddSwaggerGen(c =>
-			{
-				c.SwaggerDoc(version, new() { Title = name, Version = version });
-			});
-
 			// Init Spotify API.
 
 			if (!string.IsNullOrEmpty(spotifyID) && !string.IsNullOrEmpty(spotifySecret))
 			{
-				builder.Services.AddSingleton(new ClientCredentialsRequest(spotifyID, spotifySecret));
+				services.AddSingleton(new ClientCredentialsRequest(spotifyID, spotifySecret));
 			}
 			else
-				builder.Services.AddSingleton(new ClientCredentialsRequest("UNKNOWN", "UNKNOWN"));
+				services.AddSingleton(new ClientCredentialsRequest("UNKNOWN", "UNKNOWN"));
 
 			// Init WolfRam Alpha.
 
 			if (!string.IsNullOrEmpty(wolframAPI))
-				builder.Services.AddSingleton(new WolframAlphaClient(wolframAPI));
+				services.AddSingleton(new WolframAlphaClient(wolframAPI));
 
 			// Init Google API.
 
@@ -140,7 +130,7 @@ namespace Dexter
 				// The file token.json stores the user's access and refresh tokens, and is created
 				// automatically when the authorization flow completes for the first time.
 
-				builder.Services.AddSingleton(
+				services.AddSingleton(
 					await GoogleWebAuthorizationBroker.AuthorizeAsync(
 						GoogleClientSecrets.FromStream(stream).Secrets,
 						new[] { SheetsService.Scope.Spreadsheets, YouTubeService.Scope.YoutubeReadonly },
@@ -154,7 +144,7 @@ namespace Dexter
 
 			// Initialize our dependencies for the bot.
 
-			builder.Services.AddSingleton(
+			services.AddSingleton(
 				new CommandService(
 					new CommandServiceConfig()
 					{
@@ -165,7 +155,7 @@ namespace Dexter
 				)
 			);
 
-			builder.Services.AddSingleton(
+			services.AddSingleton(
 				new DiscordShardedClient(
 					new DiscordSocketConfig
 					{
@@ -178,13 +168,17 @@ namespace Dexter
 				)
 			);
 
-			builder.Services.AddSingleton<Random>();
+			services.AddSingleton<Random>();
 
-			builder.Services.AddSingleton(provider =>
+			services.AddSingleton(provider =>
 			{
 				var client = provider.GetRequiredService<DiscordShardedClient>();
 				return new InteractiveService(client, TimeSpan.FromMinutes(5));
 			});
+
+			// Add hosted events to the application, which will run until it is closed.
+
+			services.AddSingleton<DiscordWorker>();
 
 			bool hasErrored = false;
 
@@ -203,7 +197,7 @@ namespace Dexter
 								)
 							);
 
-							builder.Services.AddSingleton(Type);
+							services.AddSingleton(Type);
 
 							logger.Error(
 								$" This application does not have a configuration file for {Type.Name}! " +
@@ -221,7 +215,7 @@ namespace Dexter
 									new JsonSerializerOptions() { WriteIndented = true }
 								);
 
-								builder.Services.AddSingleton(
+								services.AddSingleton(
 									Type,
 									JSON
 								);
@@ -241,19 +235,16 @@ namespace Dexter
 			if (hasErrored)
 				return;
 
-			GetDatabases().ForEach(t => builder.Services.AddScoped(t));
+			GetDatabases().ForEach(t => services.AddScoped(t));
 
-			GetEvents().ForEach(t => builder.Services.AddSingleton(t));
+			GetEvents().ForEach(t => services.AddSingleton(t));
 
-			// Add hosted events to the application, which will run until it is closed.
+			services.AddOptions();
+			services.AddLogging(configure => configure.AddConsole());
 
-			builder.Services.AddHostedService<DiscordWorker>();
+			var serviceProvider = services.BuildServiceProvider();
 
-			// Build the website and start up swagger to allow for quick development of the API.
-
-			var app = builder.Build();
-
-			using (var scope = app.Services.CreateScope()) {
+			using (var scope = serviceProvider.CreateScope()) {
 
 				// Makes sure all entity databases exist and are created if they do not.
 				GetDatabases().ForEach(
@@ -265,26 +256,20 @@ namespace Dexter
 					}
 				);
 				GetEvents().ForEach(
-					type => app.Services.GetRequiredService(type).SetClassParameters(scope, app.Services)
+					type => serviceProvider.GetRequiredService(type).SetClassParameters(scope, serviceProvider)
 				);
 			}
 
 			// Connects all the event hooks in initializable modules to their designated delegates.
 			GetEvents().ForEach(
-				type => (app.Services.GetService(type) as Event).InitializeEvents()
+				type => (serviceProvider.GetService(type) as Event).InitializeEvents()
 			);
 
-			app.UseSwagger();
+			await serviceProvider.GetRequiredService<DiscordWorker>().StartAsync();
 
-			app.UseSwaggerUI(c => c.SwaggerEndpoint($"/swagger/{version}/swagger.json", $"{name} {version}"));
+			Console.Read();
 
-			app.UseHttpsRedirection();
-
-			app.UseAuthorization();
-
-			app.MapControllers();
-
-			app.Run();
+			await serviceProvider.GetRequiredService<DiscordWorker>().StopAsync();
 		}
 
 		private static List<Type> GetDatabases() { return GetClassesOfType(typeof(Database)); }

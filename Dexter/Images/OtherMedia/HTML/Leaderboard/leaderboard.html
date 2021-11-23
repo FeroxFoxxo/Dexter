@@ -33,6 +33,7 @@
 			margin-top: 10rem;
 			flex: 0 1 auto;
 			flex-direction: column; 
+			clip: rect(10rem, 0, 0, 0); 
 		}
 		.level-item {
 			margin: 0;
@@ -157,14 +158,6 @@
 			grid-template-rows: 1fr;
 		}
 
-        .hide-checkbox {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-            height: 0;
-            width: 0;
-        }
-
         .checkbox-type {
             position: absolute;
             top: 0.2em;
@@ -174,26 +167,16 @@
             border-radius: 0.35em;
         }
 
-		.checkbox-text {
-			background-color: grey;
-		}
-		.checkbox-voice {
-			background-color: grey;
-		}
-        .checkbox-total {
-            background-color: grey;
-        }
-
         .checkbox-label {
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+			cursor: pointer;
         }
 
 		.label-container {
 			position: relative;
-			cursor: pointer;
 		}
 
 		/* Modify checked Text and Voice text based on inputs*/
@@ -205,14 +188,15 @@
         }
 
 		/* Background behaviour */
-		.option-background {
-			grid-row: 1 / 2;
-			width: stretch;
-			height: 3.5rem;
-			box-sizing: border-box;
-			text-align: center;
-			transition: height 0.5s ease-in-out;
-		}
+        .option-background {
+            grid-row: 1 / 2;
+            width: stretch;
+            height: 3.5rem;
+            box-sizing: border-box;
+            text-align: center;
+            transition: height 0.5s ease-in-out;
+            cursor: pointer;
+        }
 
         .option-text {
             grid-column: 1 / 2;
@@ -290,23 +274,20 @@
 		<h1>Dexter Leaderboard</h1>
 	</div>
 	<div class="toggle-button-container" id="type-toggle-button">
-		<div class="option-text option-background" id="area-text">
-			<label onclick="settext()" class="label-container">
-				<input type="radio" name="xptype" id="text-option" value="text" class="hide-checkbox" />
+		<div class="option-text option-background" id="area-text" onclick="settext()">
+			<label class="label-container">
 				<span class="checkbox-label label-text">Text</span>
 				<!--<span class="checkbox-type checkbox-text"></span>-->
 			</label>
 		</div>
-		<div class="option-total option-background selected" id="area-total">
-			<label onclick="settotal()" class="label-container">
-				<input type="radio" name="xptype" id="total-option" value="total" class="hide-checkbox" checked="checked" />
+		<div class="option-total option-background selected" id="area-total" onclick="settotal()">
+			<label class="label-container">
 				<span class="checkbox-label label-total">Total</span>
 				<!--<span class="checkbox-type checkbox-total"></span>-->
 			</label>
 		</div>
-		<div class="option-voice option-background" id="area-voice">
-			<label onclick="setvoice()" class="label-container">
-				<input type="radio" name="xptype" id="voice-option" value="voice" class="hide-checkbox" />
+		<div class="option-voice option-background" id="area-voice" onclick="setvoice()">
+			<label class="label-container">
 				<span class="checkbox-label label-voice">Voice</span>
 				<!--<span class="checkbox-type checkbox-voice"></span>-->
 			</label>

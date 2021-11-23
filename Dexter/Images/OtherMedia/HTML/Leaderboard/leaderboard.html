@@ -14,16 +14,23 @@
 			display: none;
 		}
 		.top {
+			position: fixed;
+			top: 0;
+			width: 100%;
 			background-color: #232323;
 			padding-left: 1em;
 			margin: 0;
+			font-size: 2em;
+			height: 6rem;
 		}
 		.top > h1 {
+			font-size: 1em;
 			margin: 0;
 			padding: 0.2em 0 0.5em 0;
 		}
 
 		.list {
+			margin-top: 10rem;
 			flex: 0 1 auto;
 			flex-direction: column; 
 		}
@@ -140,13 +147,12 @@
 		}
 
 		.toggle-button-container {
-			position: absolute;
-			right: 2em;
-			top: 0.36em;
+			position: fixed;
+			top: 6rem;
 			font-size: 1.6em;
-			width: 30%;
-			min-width: 8em;
-			justify-content: space-around;
+			width: 100%;
+			height: 4rem;
+			justify-content: stretch;
 			display: flex;
 		}
 
@@ -287,6 +293,9 @@
 	</div>
 	<div class="list">
 		$LIST
+		<p>PADDING</p>
+		<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+		<p>END PADDING</p>
 	</div>
 </body>
 </html>

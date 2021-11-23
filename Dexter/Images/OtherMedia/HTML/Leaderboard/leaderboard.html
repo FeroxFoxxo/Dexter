@@ -52,7 +52,7 @@
 			border-left: solid 3px darkorange;
 		}
 		.total {
-			border-left: solid 3px cornflowerblue;
+			border-left: solid 3px royalblue;
 		}
 		.user-level {
 			position: absolute;
@@ -152,8 +152,9 @@
 			font-size: 1.6em;
 			width: 100%;
 			height: 4rem;
-			justify-content: stretch;
-			display: flex;
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			grid-template-rows: 1fr;
 		}
 
         .hide-checkbox {
@@ -176,17 +177,18 @@
 		.checkbox-text {
 			background-color: grey;
 		}
-
 		.checkbox-voice {
 			background-color: grey;
 		}
+        .checkbox-total {
+            background-color: grey;
+        }
 
         .checkbox-label {
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
-			padding-left: 1em;
         }
 
 		.label-container {
@@ -194,73 +196,86 @@
 			cursor: pointer;
 		}
 
-        /* When the checkbox is checked, add a background */
-        .label-container input:checked ~ .checkbox-text {
-            background-color: darkgreen;
-        }
-		.label-container input:checked ~ .checkbox-voice {
-			background-color: darkorange;
-		}
-
-        /* On mouse-over, add a background color */
-        .label-container:hover input ~ .checkbox-text {
-            background-color: lightgrey;
-        }
-        .label-container:hover input ~ .checkbox-voice {
-            background-color: lightgrey;
-        }
-
-        .label-container:hover input:checked ~ .checkbox-text {
-            background-color: greenyellow;
-        }
-        .label-container:hover input:checked ~ .checkbox-voice {
-            background-color: orange;
-        }
-
-        .label-container input:checked ~ .checkbox-type {
-			border: solid white 2px;
-			box-sizing: border-box;
-        }
-
 		/* Modify checked Text and Voice text based on inputs*/
 		.checkbox-label {
-			color: grey;
+			color: black;
 		}
-        .label-container input:checked ~ .label-text {
-            color: greenyellow;
+        .selected * .checkbox-label {
+			color: white;
         }
-		.label-container input:checked ~ .label-voice {
-			color: orange;
+
+		/* Background behaviour */
+		.option-background {
+			grid-row: 1 / 2;
+			width: stretch;
+			height: 3.5rem;
+			box-sizing: border-box;
+			text-align: center;
+			transition: height 0.5s ease-in-out;
 		}
+
+        .option-text {
+            grid-column: 1 / 2;
+            background: linear-gradient(0deg, darkgreen, seagreen);
+        }
+        .option-total {
+            grid-column: 2 / 3;
+            background: linear-gradient(0deg, darkblue, blue);
+        }
+        .option-voice {
+            grid-column: 3 / 4;
+            background: linear-gradient(0deg, chocolate, orangered);
+        }
+
+        .option-background.selected {
+            height: 4rem;
+        }
+        .option-text.selected {
+            background: linear-gradient(0deg, greenyellow, lightgreen);
+        }
+        .option-total.selected {
+            background: linear-gradient(0deg, royalblue, deepskyblue);
+        }
+        .option-voice.selected {
+            background: linear-gradient(0deg, orangered, coral);
+        }
+
 	</style>
 
 	<script>
-		function togglevoice() {
-            updateclass();
+		function settext() {
+			removeSelections();
+			let textopt = document.getElementById("area-text");
+            textopt.classList.add("selected");
+            updateclass("text");
 		}
 
-		function toggletext() {
-			updateclass();
+        function settotal() {
+            removeSelections();
+            let textopt = document.getElementById("area-total");
+            textopt.classList.add("selected");
+            updateclass("total");
 		}
 
-        function getclassview() {
-            let textVisible = document.querySelector("#text-checkbox:checked") !== null;
-            let voiceVisible = document.querySelector("#voice-checkbox:checked") !== null;
+        function setvoice() {
+            removeSelections();
+            let textopt = document.getElementById("area-voice");
+			textopt.classList.add("selected");
+			updateclass("voice");
+		}
 
-            if (textVisible == voiceVisible)
-                return "total";
-            else if (textVisible)
-                return "text";
-            else
-                return "voice";
+        function removeSelections() {
+            let alloptions = document.getElementsByClassName("option-background");
+            for (let i = 0; i < alloptions.length; i++) {
+                alloptions.item(i).classList.remove("selected");
+            }
         }
 
-		function updateclass() {
-			let targetclassview = getclassview();
+		function updateclass(target) {
 			let alltargets = document.getElementsByClassName("level-item");
 
 			for (let i = 0; i < alltargets.length; i++) {
-				if (alltargets.item(i).classList.contains(targetclassview)) {
+				if (alltargets.item(i).classList.contains(target)) {
                     alltargets.item(i).classList.remove("hide");
 				}
 				else {
@@ -268,7 +283,6 @@
                 }
             }
         }
-
 	</script>
 </head>
 <body>
@@ -276,26 +290,30 @@
 		<h1>Dexter Leaderboard</h1>
 	</div>
 	<div class="toggle-button-container" id="type-toggle-button">
-		<div>
-			<label onclick="toggletext()" class="label-container">
-				<input type="checkbox" id="text-checkbox" class="hide-checkbox" checked="checked"/>
+		<div class="option-text option-background" id="area-text">
+			<label onclick="settext()" class="label-container">
+				<input type="radio" name="xptype" id="text-option" value="text" class="hide-checkbox" />
 				<span class="checkbox-label label-text">Text</span>
-				<span class="checkbox-type checkbox-text"></span>
+				<!--<span class="checkbox-type checkbox-text"></span>-->
 			</label>
 		</div>
-		<div>
-			<label onclick="togglevoice()" class="label-container">
-				<input type="checkbox" id="voice-checkbox" class="hide-checkbox" checked="checked"/>
+		<div class="option-total option-background selected" id="area-total">
+			<label onclick="settotal()" class="label-container">
+				<input type="radio" name="xptype" id="total-option" value="total" class="hide-checkbox" checked="checked" />
+				<span class="checkbox-label label-total">Total</span>
+				<!--<span class="checkbox-type checkbox-total"></span>-->
+			</label>
+		</div>
+		<div class="option-voice option-background" id="area-voice">
+			<label onclick="setvoice()" class="label-container">
+				<input type="radio" name="xptype" id="voice-option" value="voice" class="hide-checkbox" />
 				<span class="checkbox-label label-voice">Voice</span>
-				<span class="checkbox-type checkbox-voice"></span>
+				<!--<span class="checkbox-type checkbox-voice"></span>-->
 			</label>
 		</div>
 	</div>
 	<div class="list">
 		$LIST
-		<p>PADDING</p>
-		<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
-		<p>END PADDING</p>
 	</div>
 </body>
 </html>

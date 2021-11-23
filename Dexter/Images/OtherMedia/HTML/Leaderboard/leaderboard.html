@@ -13,27 +13,35 @@
 		.hide {
 			display: none;
 		}
-		.top {
-			position: fixed;
-			top: 0;
-			width: 100%;
-			background-color: #232323;
-			padding-left: 1em;
-			margin: 0;
-			font-size: 2em;
-			height: 6rem;
-		}
+        .top {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #232323;
+            padding-left: 1em;
+            margin: 0;
+            font-size: 2em;
+            height: 6rem;
+            z-index: 50;
+        }
 		.top > h1 {
 			font-size: 1em;
 			margin: 0;
 			padding: 0.2em 0 0.5em 0;
+			z-index: inherit;
 		}
 
+		.list-window {
+			position: fixed;
+			top: 10rem;
+			left: 0;
+			bottom: 0;
+			right: 0;
+			overflow-y: scroll;
+		}
 		.list {
-			margin-top: 10rem;
 			flex: 0 1 auto;
 			flex-direction: column; 
-			clip: rect(10rem, 0, 0, 0); 
 		}
 		.level-item {
 			margin: 0;
@@ -190,9 +198,9 @@
 		/* Background behaviour */
         .option-background {
             grid-row: 1 / 2;
-            width: stretch;
             height: 3.5rem;
             box-sizing: border-box;
+			z-index: 50;
             text-align: center;
             transition: height 0.5s ease-in-out;
             cursor: pointer;
@@ -293,8 +301,10 @@
 			</label>
 		</div>
 	</div>
-	<div class="list">
-		$LIST
+	<div class="list-window">
+		<div class="list">
+			$LIST
+		</div>
 	</div>
 </body>
 </html>

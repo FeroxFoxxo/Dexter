@@ -129,7 +129,7 @@ namespace Dexter.Commands
 					.WithDescription("Haiya! Your private voice channel has sucessfully been created. " +
 						"You should have full permission to edit it, move members and much more! " +
 						"Have fun~!\n" +
-						"**Note: You may modify permissions to prevent staff from viewing or accessing the channel**, as this interferes with our moderation and monitoring abilities for things like VCXP-grinding.")
+						"**Note: You may not modify permissions to prevent staff from viewing or accessing the channel**, as this interferes with our moderation and monitoring abilities for things like VCXP-grinding.")
 
 					.SendEmbed(Context.Channel);
 			}

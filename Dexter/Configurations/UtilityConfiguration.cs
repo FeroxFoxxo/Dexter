@@ -84,5 +84,17 @@ namespace Dexter.Configurations
 
 		public string WaitingVCName { get; set; }
 
+		/// <summary>
+		/// The unique Role ID of the Artist role.
+		/// </summary>
+
+		public ulong ArtistRole { get; set; }
+
+		/// <summary>
+		/// The unique Role ID of the External Emoji Enabled role.
+		/// </summary>
+
+		public ulong ExternalEmotesRole { get; set; }
+
 	}
 }

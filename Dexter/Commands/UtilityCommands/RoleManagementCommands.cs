@@ -20,7 +20,10 @@ namespace Dexter.Commands
         /// <returns>A <see cref="Task"/> object, which can be awaited until the command completes successfully.</returns>
 
         [Command("artist")]
-        [Summary("Grants the Artist role to a target user. Use the \"silent\" option after the user to avoid mentioning them.")]
+        [Summary("Grants the Artist role to a target user. Available options are: \"silent\", \"remove\".")]
+        [ExtendedSummary("Grants the Artist role to a target user.\n" +
+            "Use the \"silent\" option after the user to avoid mentioning them.\n" +
+            "Use the \"remove\" option to remove the role instead of adding it.")]
         [RequireModerator]
 
         public async Task GrantArtistRoleCommand(IGuildUser target, [Remainder] string options = "")
@@ -37,7 +40,10 @@ namespace Dexter.Commands
         /// <returns>A <see cref="Task"/> object, which can be awaited until the command completes successfully.</returns>
 
         [Command("externalemotes")]
-        [Summary("Grants the External Emoji Enabled role to a target user. Use the \"silent\" option after the user to avoid mentioning them.")]
+        [Summary("Grants the External Emoji Enabled role to a target user.  Available options are: \"silent\", \"remove\".")]
+        [ExtendedSummary("Grants the External Emoji Enabled role to a target user.\n" +
+            "Use the \"silent\" option after the user to avoid mentioning them.\n" +
+            "Use the \"remove\" option to remove the role instead of adding it.")]
         [Alias("externalemoji")]
         [RequireModerator]
 
@@ -49,7 +55,9 @@ namespace Dexter.Commands
 
         private async Task GrantRoleCommand(IRole role, IGuildUser target, string options = "")
         {
+            options = options.ToLower();
             bool silent = options.Contains("silent");
+            bool remove = options.Contains("remove");
 
             if (target is null)
             {
@@ -57,26 +65,34 @@ namespace Dexter.Commands
                 return;
             }
 
-            if (target.RoleIds.Contains(role.Id))
+            string targetname = silent ? target.Nickname ?? target.Username : target.Mention;
+
+            if (target.RoleIds.Contains(role.Id) != remove)
             {
-                await Context.Channel.SendMessageAsync($"The target user ({(silent ? target.Nickname ?? target.Username : target.Mention)}) already has the {role.Name} role!");
+                if (remove)
+                    await Context.Channel.SendMessageAsync($"The target user ({targetname}) doesn't have the {role.Name} role!");
+                else
+                    await Context.Channel.SendMessageAsync($"The target user ({targetname}) already has the {role.Name} role!");
                 return;
             }
 
             try
             {
-                await target.AddRoleAsync(role);
+                if (remove)
+                    await target.RemoveRoleAsync(role);
+                else
+                    await target.AddRoleAsync(role);
             }
             catch
             {
                 await BuildEmbed(Enums.EmojiEnum.Annoyed)
-                    .WithTitle("Unable to add role!")
-                    .WithDescription($"It seems I am missing permissions to add this role ({role.Name}) to the target user!")
+                    .WithTitle("Unable to manage roles!")
+                    .WithDescription($"It seems I am missing permissions to add/remove this role ({role.Name}) to the target user!")
                     .SendEmbed(Context.Channel);
                 return;
             }
 
-            await Context.Channel.SendMessageAsync($"Successfully added the {role.Name} role to {(silent ? target.Nickname ?? target.Username : target.Mention)}!");
+            await Context.Channel.SendMessageAsync($"Successfully added the {role.Name} role to {targetname}!");
         }
     }
 }

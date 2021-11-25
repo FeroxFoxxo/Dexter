@@ -92,7 +92,7 @@ namespace Dexter.Commands
                 return;
             }
 
-            await Context.Channel.SendMessageAsync($"Successfully added the {role.Name} role to {targetname}!");
+            await Context.Channel.SendMessageAsync($"Successfully {(remove ? "removed" : "added")} the {role.Name} role {(remove ? "from" : "to")} {targetname}!");
         }
     }
 }

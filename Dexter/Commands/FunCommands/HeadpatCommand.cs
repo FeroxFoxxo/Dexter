@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Image = System.Drawing.Image;
 using System.Net.Http;
+using Dexter.Attributes.Methods;
 
 namespace Dexter.Commands
 {
@@ -28,6 +29,7 @@ namespace Dexter.Commands
 		[Command("headpat", ignoreExtraArgs: true)]
 		[Summary("Ooh, you've been a good boy? *gives rapid headpats in an emoji*")]
 		[Alias("headpats", "petpat", "petpats", "pet", "pat")]
+		[CommandCooldown(15)]
 
 		public async Task HeadpatCommand([Optional] IGuildUser User)
 		{

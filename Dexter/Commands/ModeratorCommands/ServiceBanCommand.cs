@@ -170,6 +170,10 @@ namespace Dexter.Commands
 							Result |= Restriction.Games;
 							Success[i] = true;
 							break;
+						case "privatevc":
+							Result |= Restriction.PrivateVCCreation;
+							Success[i] = true;
+							break;
 						case "all":
 							foreach (ulong r in Enum.GetValues<Restriction>())
 							{

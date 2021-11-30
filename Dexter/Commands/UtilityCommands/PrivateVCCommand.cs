@@ -32,7 +32,15 @@ namespace Dexter.Commands
 		{
 			IGuildUser user = Context.Guild.GetUser(Context.User.Id);
 
-			if (vcName.Length > 100 || vcName.Length == 0)
+			if (RestrictionsDB.GetUserRestrictions(Context.User.Id).HasFlag(Databases.UserRestrictions.Restriction.PrivateVCCreation))
+            {
+				await BuildEmbed(EmojiEnum.Annoyed)
+					.WithTitle("Restricted User!")
+					.WithDescription("You have had your ability to create private VCs revoked." +
+						"Feel free to contact a staff member if you think this is a mistake.")
+					.SendEmbed(Context.Channel);
+            }
+			else if (vcName.Length > 100 || vcName.Length == 0)
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Invalid Channel Name")
@@ -40,7 +48,6 @@ namespace Dexter.Commands
 						"Looks like we ran into an error! " +
 						"Your private channel name must be between 1-100 characters long. " +
 						$"Your current channel name is {vcName.Length} characters long.")
-
 					.SendEmbed(Context.Channel);
 			}
 			else if (Context.Guild.Channels.Where(channel => channel.Name == vcName).FirstOrDefault() != null)
@@ -121,7 +128,8 @@ namespace Dexter.Commands
 					.WithTitle($"Created \"{vcName}\"")
 					.WithDescription("Haiya! Your private voice channel has sucessfully been created. " +
 						"You should have full permission to edit it, move members and much more! " +
-						"Have fun~!")
+						"Have fun~!\n" +
+						"**Note: You may not modify permissions to prevent staff from viewing or accessing the channel**, as this interferes with our moderation and monitoring abilities for things like VCXP-grinding.")
 
 					.SendEmbed(Context.Channel);
 			}

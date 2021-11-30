@@ -3,8 +3,8 @@
   "ReminderMaxCharactersPerItem": 400,
   "ColorRolePrefix": "Color: ",
   "LockedColors": {
-	"853612069701156876": 815091090117885974,
-	"853612267244093461": 815091151278702633
+    "853612069701156876": 815091090117885974,
+    "853612267244093461": 815091151278702633
   },
   "ColorListColWidth": 600,
   "ColorListColCount": 3,
@@ -12,9 +12,11 @@
   "ColorListDisplayByRows": false,
   "ColorListFontSize": 60,
   "ColorChangeRoles": {
-	"888985313572184084": 1,
-	"853691823197257778": 2
+    "888985313572184084": 1,
+    "853691823197257778": 2
   },
   "PrivateCategoryID": 871997282533380126,
-  "WaitingVCName": "✨ Waiting Room ✨"
+  "WaitingVCName": "✨ Waiting Room ✨",
+  "ArtistRole": 913549105454792705,
+  "ExternalEmotesRole": 913549108965425182
 }

@@ -40,6 +40,10 @@ namespace Dexter.Databases.UserRestrictions
 		/// <summary>
 		/// Prevents users from obtaining Voice XP altogether.
 		/// </summary>
-		VoiceXP = 64
+		VoiceXP = 64,
+		/// <summary>
+		/// Prevents users from creating private VCs.
+		/// </summary>
+		PrivateVCCreation = 128
 	}
 }

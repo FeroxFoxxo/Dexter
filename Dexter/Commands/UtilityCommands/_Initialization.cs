@@ -2,6 +2,7 @@
 using Dexter.Configurations;
 using Dexter.Databases.Reminders;
 using Dexter.Databases.UserProfiles;
+using Dexter.Databases.UserRestrictions;
 using Dexter.Events;
 using Discord.Commands;
 using System;
@@ -33,6 +34,12 @@ namespace Dexter.Commands
 		/// </summary>
 
 		public ReminderDB ReminderDB { get; set; }
+
+		/// <summary>
+		/// Stores information relevant to per-user permissions and servicebans.
+		/// </summary>
+
+		public RestrictionsDB RestrictionsDB { get; set; }
 
 		/// <summary>
 		/// Stores relevant information about certain users' historical records.

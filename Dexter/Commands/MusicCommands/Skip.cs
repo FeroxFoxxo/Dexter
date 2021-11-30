@@ -17,7 +17,7 @@ namespace Dexter.Commands
 
 		public async Task SkipCommand(int skipCount)
 		{
-			if (!MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
+			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to skip song!")

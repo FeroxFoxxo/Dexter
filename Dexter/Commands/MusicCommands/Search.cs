@@ -33,7 +33,7 @@ namespace Dexter.Commands
 
 		public async Task SearchCommand([Remainder] string search)
 		{
-			if (!await MusicService.LavaNode.SafeJoinAsync(Context.User, Context.Channel))
+			if (!await LavaNode.SafeJoinAsync(Context.User, Context.Channel))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 						.WithTitle($"Unable to search!")
@@ -45,7 +45,7 @@ namespace Dexter.Commands
 
 			try
 			{
-				await MusicService.LavaNode.SearchAsync(SearchType.YouTube, search);
+				await LavaNode.SearchAsync(SearchType.YouTube, search);
 			}
 			catch (Exception)
 			{
@@ -59,7 +59,7 @@ namespace Dexter.Commands
 				return;
 			}
 
-			if (MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
+			if (LavaNode.TryGetPlayer(Context.Guild, out var player))
 			{
 				if (Uri.TryCreate(search, UriKind.Absolute, out Uri uriResult))
 				{
@@ -221,7 +221,7 @@ namespace Dexter.Commands
 
 			foreach (string search in playlist)
 			{
-				SearchResponse searchResult = await MusicService.LavaNode.SearchAsync(SearchType.YouTube, search);
+				SearchResponse searchResult = await LavaNode.SearchAsync(SearchType.YouTube, search);
 
 				var track = searchResult.Tracks.FirstOrDefault();
 
@@ -256,7 +256,7 @@ namespace Dexter.Commands
 		{
 			SearchResponse searchResult;
 
-			searchResult = await MusicService.LavaNode.SearchAsync(SearchType.YouTube, search);
+			searchResult = await LavaNode.SearchAsync(SearchType.YouTube, search);
 
 			var track = searchResult.Tracks.FirstOrDefault();
 
@@ -342,7 +342,7 @@ namespace Dexter.Commands
 
 		public async Task PauseCommand()
 		{
-			if (!await MusicService.LavaNode.SafeJoinAsync(Context.User, Context.Channel))
+			if (!await LavaNode.SafeJoinAsync(Context.User, Context.Channel))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to pause the player!")
@@ -351,7 +351,7 @@ namespace Dexter.Commands
 				return;
 			}
 
-			if (MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
+			if (LavaNode.TryGetPlayer(Context.Guild, out var player))
 			{
 				if (player.PlayerState == PlayerState.Paused)
 				{

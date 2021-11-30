@@ -18,7 +18,7 @@ namespace Dexter.Commands
 
 		public async Task SeekCommand([Remainder] string seekPosition)
 		{
-			if (!MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
+			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 						.WithTitle("Could not seek current song.")

@@ -35,13 +35,13 @@ namespace Dexter.Events
 		public object LoopLocker;
 		public object QueueLocker;
 
-		public Music (DiscordShardedClient client, ILogger<Music> logger, InteractiveService interactive, ILogger<LavaNode> nodeLog)
+
+		public Music (DiscordShardedClient client, ILogger<Music> logger, InteractiveService interactive, LavaNode lavaNode)
 		{
+			LavaNode = lavaNode;
 			Client = client;
 			Logger = logger;
 			Interactive = interactive;
-
-			LavaNode = new LavaNode (client, new NodeConfiguration() { Port = 2333, SelfDeaf = true }, nodeLog);
 
 			LoopLocker = new ();
 			QueueLocker = new ();

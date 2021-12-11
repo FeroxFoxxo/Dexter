@@ -96,5 +96,11 @@ namespace Dexter.Configurations
 
 		public ulong ExternalEmotesRole { get; set; }
 
+		/// <summary>
+		/// Overrides general rules for color tiers if the color role key is present.
+		/// </summary>
+
+		public Dictionary<ulong, int> ColorTiers { get; set; }
+
 	}
 }

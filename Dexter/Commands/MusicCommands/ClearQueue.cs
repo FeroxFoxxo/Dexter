@@ -19,7 +19,7 @@ namespace Dexter.Commands
 
 		public async Task ClearQueueCommand()
 		{
-			if (!MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
+			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to clear queue!")

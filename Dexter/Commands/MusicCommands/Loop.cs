@@ -17,7 +17,7 @@ namespace Dexter.Commands
 
 		public async Task LoopCommand(LoopType loopType)
 		{
-			if (!await MusicService.LavaNode.SafeJoinAsync(Context.User, Context.Channel))
+			if (!await LavaNode.SafeJoinAsync(Context.User, Context.Channel))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to loop songs!")
@@ -26,7 +26,7 @@ namespace Dexter.Commands
 				return;
 			}
 
-			if (MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
+			if (LavaNode.TryGetPlayer(Context.Guild, out var player))
 			{
 				if (player.PlayerState != PlayerState.Playing)
 				{

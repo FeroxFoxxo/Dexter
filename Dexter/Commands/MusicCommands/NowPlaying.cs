@@ -17,7 +17,7 @@ namespace Dexter.Commands
 
 		public async Task NowPlayingCommand()
 		{
-			if (!MusicService.LavaNode.TryGetPlayer(Context.Guild, out var player))
+			if (!LavaNode.TryGetPlayer(Context.Guild, out var player))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Unable to find current song!")

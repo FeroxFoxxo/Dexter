@@ -4,6 +4,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.YouTube.v3;
 using Microsoft.Extensions.Logging;
 using SpotifyAPI.Web;
+using Victoria.Node;
 
 namespace Dexter.Commands
 {
@@ -14,6 +15,8 @@ namespace Dexter.Commands
 
 	public partial class MusicCommands : DiscordModule
 	{
+
+		public LavaNode LavaNode { get; set; }
 
 		public Music MusicService { get; set; }
 

@@ -27,6 +27,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Victoria;
 
 namespace Dexter
 {
@@ -167,6 +168,12 @@ namespace Dexter
 					}
 				)
 			);
+
+			services.AddLavaNode(x =>
+				 {
+					 x.Port = 2333;
+					 x.SelfDeaf = true;
+				 });
 
 			services.AddSingleton<Random>();
 

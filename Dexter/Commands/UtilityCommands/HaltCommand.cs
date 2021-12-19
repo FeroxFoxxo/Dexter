@@ -19,7 +19,7 @@ namespace Dexter.Commands
 		[Command("halt")]
 		[Summary("Shuts the bot down and, if in use with continuous intergration, restarts the process.")]
 		[Alias("shutdown")]
-		[RequireAdministrator]
+		[RequireDeveloper]
 
 		public async Task HaltCommand()
 		{

@@ -187,12 +187,18 @@ namespace Dexter.Configurations
 		public ulong NicknameDisabledReplacement { get; set; }
 
 		/// <summary>
-		/// Returns the amount of XP required for a given level
+		/// Contains a mapping of levels to level-up messages for special levels.
 		/// </summary>
-		/// <param name="level">The target level</param>
-		/// <returns>The XP required to reach a given <paramref name="level"/>.</returns>
 
-		public long GetXPForLevel(double level)
+        public Dictionary<int, string> LevelUpMessageOverrides { get; set; }
+
+        /// <summary>
+        /// Returns the amount of XP required for a given level
+        /// </summary>
+        /// <param name="level">The target level</param>
+        /// <returns>The XP required to reach a given <paramref name="level"/>.</returns>
+
+        public long GetXPForLevel(double level)
 		{
 			return (long)GetXPForLevelFull(level);
 		}

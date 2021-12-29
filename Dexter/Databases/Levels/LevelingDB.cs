@@ -193,10 +193,19 @@ namespace Dexter.Databases.Levels
 					newLevel = userlevel.TotalLevel(LevelingConfiguration, isTextXp ? currentLevel : otherLevel, isTextXp ? otherLevel : currentLevel);
 				}
 				if (sendLevelUp)
-					await fallbackChannel.SendMessageAsync(LevelingConfiguration.LevelUpMessage
-						.Replace("{TYPE}", mergeLevelUp ? "total" : isTextXp ? "text" : "voice")
+				{
+					string message = LevelingConfiguration.LevelUpMessage;
+					if (LevelingConfiguration.LevelUpMessageOverrides.ContainsKey(newLevel))
+					{
+						message = LevelingConfiguration.LevelUpMessageOverrides[newLevel];
+					}
+
+					message = message.Replace("{TYPE}", mergeLevelUp ? "total" : isTextXp ? "text" : "voice")
 						.Replace("{MENTION}", user.Mention)
-						.Replace("{LVL}", (mergeLevelUp ? newLevel : currentLevel).ToString()));
+						.Replace("{LVL}", (mergeLevelUp ? newLevel : currentLevel).ToString());
+
+					await fallbackChannel.SendMessageAsync(message);
+				}
 
 				await LevelingService.UpdateRoles(user, false, mergeLevelUp ? newLevel : currentLevel);
 

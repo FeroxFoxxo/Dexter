@@ -36,5 +36,8 @@
   "Mee6SyncGuildId": 336243033416794118,
   "NicknameDisabledRole": 870011785950924810,
   "NicknameDisabledReplacement": 815091090117885974,
-  "LevelUpMessage": "OwO What's this? {MENTION} just advanced to **{TYPE} level {LVL}**!!! YAY!!!"
+  "LevelUpMessage": "OwO What's this? {MENTION} just advanced to **{TYPE} level {LVL}**!!! YAY!!!",
+  "LevelUpMessageOverrides": {
+    "1": "Welcome into the server, {MENTION}! You just reached **level {LVL}**! Feel free to check out <#806665599681822760> for role assignments or <#441228012420333568> to continue chatting."
+  }
 }

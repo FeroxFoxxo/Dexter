@@ -64,7 +64,7 @@ namespace Dexter.Commands
 					}
 					System.Drawing.Color color;
 					color = System.Drawing.Color.FromName(value);
-					if (value.ToLower() != "black" && color.R == 0 && color.G == 0 && color.B == 0)
+					if (color.A == 0)
 					{
 						if (!Regex.IsMatch(value, @"^(0x|#)?[0-9A-F]{6}$", RegexOptions.IgnoreCase))
 						{

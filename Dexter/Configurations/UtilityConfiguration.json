@@ -21,5 +21,7 @@
   "PrivateCategoryID": 871997282533380126,
   "WaitingVCName": "✨ Waiting Room ✨",
   "ArtistRole": 913549105454792705,
-  "ExternalEmotesRole": 913549108965425182
+  "ExternalEmotesRole": 913549108965425182,
+  "ColorDisplayWidth": 400,
+  "ColorDisplayHeight": 256
 }

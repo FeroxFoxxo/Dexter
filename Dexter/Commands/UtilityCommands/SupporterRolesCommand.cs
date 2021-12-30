@@ -14,6 +14,9 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using Dexter.Configurations;
+using System.Text;
+using System.Text.RegularExpressions;
+using Dexter.Helpers;
 
 namespace Dexter.Commands
 {
@@ -30,17 +33,40 @@ namespace Dexter.Commands
 		[Summary("Changes your color role or lists all available color roles.")]
 		[ExtendedSummary("Changes your color role or lists all available color roles.\n" +
 			"`color LIST` - displays a list of available color roles\n" +
+			"`color DISPLAY [color] (, color)...` - displays a solid rectangle of the chosen color(s) (by name or hex-code).\n" +
 			"`color NONE` - removes all color roles from you\n" +
 			"`color [colorname]` - changes your current color role to the one specified.")]
 
 		public async Task SupporterRolesCommand([Remainder] string colorname)
 		{
-
+			colorname = colorname.ToLower();
 			if (colorname == "list")
 			{
 				await PrintColorOptions();
 				return;
 			}
+			else if (colorname.StartsWith("display"))
+            {
+				if (colorname == "display")
+                {
+					await PrintColorOptions();
+					return;
+				}
+
+				string[] preprocessedColors = colorname["display".Length..].Split(',', StringSplitOptions.TrimEntries);
+				List<System.Drawing.Color> colors = ProcessColorNames(preprocessedColors, out List<string> errors);
+
+				if (errors.Any())
+                {
+					await Context.Channel.SendMessageAsync(string.Join("\n", errors));
+                }
+
+				if (colors.Any())
+                {
+					await DisplayColors(colors);
+                }
+				return;
+            }
 
 			Discord.Rest.RestGuildUser user = await DiscordShardedClient.Rest.GetGuildUserAsync(BotConfiguration.GuildID, Context.User.Id);
 			if (user is null)
@@ -71,7 +97,7 @@ namespace Dexter.Commands
 			}
 
 			int colorChangePerms = GetRoleChangePerms(user);
-			if (colorChangePerms < 1 || colorname.ToLower() == "none")
+			if (colorChangePerms < 1 || colorname == "none")
 			{
 				IEnumerable<IRole> removed = await TryRemoveRolesAndGet(user, colorRoleIDs);
 				if (removed is null) return;
@@ -351,6 +377,73 @@ namespace Dexter.Commands
 			}
 			return value;
 		}
+
+		private List<System.Drawing.Color> ProcessColorNames(IEnumerable<string> names, out List<string> errors)
+        {
+			Dictionary<string, IRole> nameToRole = new();
+			foreach (IRole role in DiscordShardedClient.GetGuild(BotConfiguration.GuildID).Roles)
+            {
+				if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix))
+                {
+					nameToRole.Add(role.Name[UtilityConfiguration.ColorRolePrefix.Length..].ToLower().Trim(), role);
+                }
+            }
+
+			errors = new();
+			List<System.Drawing.Color> result = new();
+
+			foreach (string n in names)
+            {
+				if (nameToRole.ContainsKey(n.ToLower()))
+                {
+					result.Add(nameToRole[n.ToLower()].ToGraphicsColor());
+					continue;
+                }
+				System.Drawing.Color color = System.Drawing.Color.FromName(n.Replace(" ", ""));
+				if (color.A != 0)
+                {
+					result.Add(color);
+					continue;
+                }
+				color = LanguageHelper.ColorFromHex(n);
+				if (!color.IsEmpty)
+                {
+					result.Add(color);
+					continue;
+                }
+				errors.Add($"Unable to parse color {n}");
+            }
+
+			return result;
+        }
+
+		private async Task DisplayColors(IEnumerable<System.Drawing.Color> colors)
+		{
+			int width = UtilityConfiguration.ColorDisplayWidth;
+			int height = UtilityConfiguration.ColorDisplayHeight;
+			using System.Drawing.Image img = new Bitmap(width, height);
+			using (Graphics g = Graphics.FromImage(img))
+			{
+
+				int max = colors.Count();
+				float uwidth = (float)width / max;
+				int i = 0;
+				foreach (System.Drawing.Color c in colors)
+				{
+					Rectangle rect = new Rectangle((int)Math.Round(uwidth * i), 0, (int)Math.Round(uwidth * (i + 1)), height);
+					Brush brush = new SolidBrush(c);
+
+					g.FillRectangle(brush, rect);
+					i++;
+				}
+			}
+
+			string path = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache", "ColorDisplay.png");
+			img.Save(path);
+
+			await Context.Channel.SendFileAsync(path);
+			File.Delete(path);
+        }
 	}
 
 }

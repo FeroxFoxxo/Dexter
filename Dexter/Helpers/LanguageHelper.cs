@@ -1463,6 +1463,22 @@ namespace Dexter.Helpers
 		/// </summary>
 
 		public const char ZWSP = '​';
+
+		/// <summary>
+		/// Translates a hex-code expression (or a superexpression thereof) into a Graphics color object.
+		/// </summary>
+		/// <param name="expr">An expression containing a 6-digit-long hexadecimal subexpression that represents a number in an RGB Hex format.</param>
+		/// <returns>The <see cref="System.Drawing.Color"/> resulting from the evaluation of <paramref name="expr"/>; or <see cref="System.Drawing.Color.Empty"></see> if no color matches the given expression.</returns>
+
+		public static System.Drawing.Color ColorFromHex(string expr)
+		{
+			expr = expr.ToLower();
+			string m = Regex.Match(expr, @"[0-9a-f]{6}").Value;
+			if (string.IsNullOrEmpty(m)) return System.Drawing.Color.Empty;
+
+			uint hex = uint.Parse(m, NumberStyles.HexNumber);
+			return System.Drawing.Color.FromArgb(unchecked((int)(hex + 0xff000000)));
+		}
 	}
 
 	/// <summary>
@@ -1581,37 +1597,5 @@ namespace Dexter.Helpers
 
 			return success;
 		}
-
-		/// <summary>
-		/// Holds regional indicator characters, where 0 is ðŸ‡¦ and 25 is ðŸ‡¿.
-		/// </summary>
-		public static readonly Dictionary<int, string> Indicators = new() {
-			{0, "ðŸ‡¦"},
-			{1, "ðŸ‡§"},
-			{2, "ðŸ‡¨"},
-			{3, "ðŸ‡©"},
-			{4, "ðŸ‡ª"},
-			{5, "ðŸ‡«"},
-			{6, "ðŸ‡¬"},
-			{7, "ðŸ‡­"},
-			{8, "ðŸ‡®"},
-			{9, "ðŸ‡¯"},
-			{10, "ðŸ‡°"},
-			{11, "ðŸ‡±"},
-			{12, "ðŸ‡²"},
-			{13, "ðŸ‡³"},
-			{14, "ðŸ‡´"},
-			{15, "ðŸ‡µ"},
-			{16, "ðŸ‡¶"},
-			{17, "ðŸ‡·"},
-			{18, "ðŸ‡¸"},
-			{19, "ðŸ‡¹"},
-			{20, "ðŸ‡º"},
-			{21, "ðŸ‡»"},
-			{22, "ðŸ‡¼"},
-			{23, "ðŸ‡½"},
-			{24, "ðŸ‡¾"},
-			{25, "ðŸ‡¿"}
-		};
 	}
 }

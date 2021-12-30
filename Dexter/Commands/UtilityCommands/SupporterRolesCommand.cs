@@ -30,6 +30,7 @@ namespace Dexter.Commands
 		/// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
 		[Command("color")]
+		[Alias("colour")]
 		[Summary("Changes your color role or lists all available color roles.")]
 		[ExtendedSummary("Changes your color role or lists all available color roles.\n" +
 			"`color LIST` - displays a list of available color roles\n" +

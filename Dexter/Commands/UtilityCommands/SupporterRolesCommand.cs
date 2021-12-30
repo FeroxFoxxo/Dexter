@@ -36,6 +36,7 @@ namespace Dexter.Commands
 			"`color DISPLAY [color] (, color)...` - displays a solid rectangle of the chosen color(s) (by name or hex-code).\n" +
 			"`color NONE` - removes all color roles from you\n" +
 			"`color [colorname]` - changes your current color role to the one specified.")]
+		[BotChannel]
 
 		public async Task SupporterRolesCommand([Remainder] string colorname)
 		{

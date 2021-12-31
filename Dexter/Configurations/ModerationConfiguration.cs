@@ -131,6 +131,24 @@ namespace Dexter.Configurations
 		/// </summary>
 
 		public long RecentInfractionThreshold { get; set; }
+
+		/// <summary>
+		/// The maximum number of days a user must be in the server for and still be banned without prior warning.
+		/// </summary>
+
+        public double InstabanMaximumDays { get; set; }
+
+		/// <summary>
+		/// The ID of the role required to have resistence to instabans; usually the ID of the OwO role.
+		/// </summary>
+
+        public ulong InstabanResistanceRole { get; set; }
+
+		/// <summary>
+		/// If <see langword="true"/>, the user must have both the <see cref="InstabanResistanceRole"/> AND have been in the server for <see cref="InstabanMaximumDays"/> to avoid an instaban; otherwise, either condition prevents this.
+		/// </summary>
+
+		public bool InstabanOnOneConditionMet { get; set; }
     }
 
 }

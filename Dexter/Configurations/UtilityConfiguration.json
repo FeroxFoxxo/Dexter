@@ -1,6 +1,8 @@
 ﻿{
   "ReminderMaxItemsPerPage": 3,
   "ReminderMaxCharactersPerItem": 400,
+  "InRoleMaxItemsPerPage": 20,
+  "InRoleMaxPages": 25,
   "ColorRolePrefix": "Color: ",
   "LockedColors": {
     "853612069701156876": 815091090117885974,

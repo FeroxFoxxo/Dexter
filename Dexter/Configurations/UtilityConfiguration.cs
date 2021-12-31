@@ -24,6 +24,18 @@ namespace Dexter.Configurations
 		public int ReminderMaxCharactersPerItem { get; set; }
 
 		/// <summary>
+		/// The maximum number of members that may be displayed in a page for the inrole command.
+		/// </summary>
+
+		public int InRoleMaxItemsPerPage { get; set; }
+
+		/// <summary>
+		/// The maximum number of pages that may be prepared for the inrole command.
+		/// </summary>
+
+		public int InRoleMaxPages { get; set; }
+
+		/// <summary>
 		/// The prefix for all role colors.
 		/// </summary>
 

@@ -123,10 +123,13 @@ namespace Dexter.Commands
 					if (page > maxpages) break;
                 }
 
-				b.Append($"\n{user.Mention}");
+				b.Append($"\n{user.Mention} - {user.Username}");
 				itemsRemaining--;
             }
-			sublists.Add(b.ToString());
+			if (b.Length > 0)
+			{
+				sublists.Add(b.ToString());
+			}
 
 			page = 1;
 			foreach(string sublist in sublists)

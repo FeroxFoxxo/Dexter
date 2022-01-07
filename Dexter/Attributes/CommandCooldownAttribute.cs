@@ -41,6 +41,8 @@ namespace Dexter.Attributes.Methods
 			CooldownTimer = cooldownTimer;
 		}
 
+		const int RETRIES = 5;
+
 		/// <summary>
 		/// The CheckPermissionsAsync is an overriden method from its superclass, which checks
 		/// to see if a command can be run by a user through the cooldown of the command in the database.
@@ -90,7 +92,20 @@ namespace Dexter.Attributes.Methods
 					TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
 				}
 			);
-			await cooldownDB.SaveChangesAsync();
+
+			for (int i = 0; i < RETRIES; i++)
+            {
+				try
+                {
+					cooldownDB.SaveChanges();
+					break;
+                }
+				catch
+                {
+					Console.WriteLine($"Failed to save CooldownDB, attempt {i + 1}/{RETRIES}");
+					await Task.Yield();
+                }
+            }
 
 			return PreconditionResult.FromSuccess();
 		}

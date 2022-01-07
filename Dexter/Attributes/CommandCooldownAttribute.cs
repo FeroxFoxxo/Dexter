@@ -90,6 +90,7 @@ namespace Dexter.Attributes.Methods
 					TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
 				}
 			);
+			await cooldownDB.SaveChangesAsync();
 
 			return PreconditionResult.FromSuccess();
 		}

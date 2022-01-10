@@ -1,4 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Dexter.Abstractions
 {
@@ -26,6 +29,32 @@ namespace Dexter.Abstractions
 				options.UseMySql(conString, ServerVersion.AutoDetect(conString));
 			else
 				options.UseSqlite($"Data Source=Databases/{GetType().Name}.db");
+		}
+
+		private const int RETRIES = 5;
+
+		/// <summary>
+		/// Using a retry system to ensure that the 
+		/// </summary>
+		/// <returns></returns>
+
+		public async Task EnsureSaved()
+        {
+			for (int i = 0; i < RETRIES; i++)
+			{
+				try
+				{
+					SaveChanges();
+					return;
+				}
+				catch
+				{
+					Console.WriteLine($"Failed to save {GetType().Name}, attempt {i + 1}/{RETRIES}");
+					await Task.Yield();
+				}
+			}
+
+			throw new DbUpdateException($"Unable to save {GetType().Name} after {RETRIES} attempts.");
 		}
 
 	}

@@ -39,7 +39,7 @@ namespace Dexter.Commands
 				.WithDescription($"Heya! I have successfully unmuted {User.GetUserInformation()}. Give them a headpat. <3")
 				.SendEmbed(Context.Channel);
 
-			await InfractionsDB.SaveChangesAsync();
+			await InfractionsDB.EnsureSaved();
 		}
 
 		/// <summary>
@@ -92,7 +92,7 @@ namespace Dexter.Commands
 				.AddField("Reason", Infraction.Reason)
 				.SendEmbed(Context.Channel);
 
-			await InfractionsDB.SaveChangesAsync();
+			await InfractionsDB.EnsureSaved();
 		}
 
 	}

@@ -54,7 +54,7 @@ namespace Dexter.Events
 				}
 			}
 
-			await ProfilesDB.SaveChangesAsync();
+			await ProfilesDB.EnsureSaved();
 		}
 
 		/// <summary>
@@ -88,7 +88,7 @@ namespace Dexter.Events
 				}
 			}
 
-			await ProfilesDB.SaveChangesAsync();
+			await ProfilesDB.EnsureSaved();
 
 			return;
 		}
@@ -136,7 +136,7 @@ namespace Dexter.Events
 				}
 			}
 
-			await ProfilesDB.SaveChangesAsync();
+			await ProfilesDB.EnsureSaved();
 
 			return Result;
 		}
@@ -196,7 +196,7 @@ namespace Dexter.Events
 
 			Profile.DateJoined = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-			await ProfilesDB.SaveChangesAsync();
+			await ProfilesDB.EnsureSaved();
 		}
 
 		/// <summary>
@@ -218,9 +218,9 @@ namespace Dexter.Events
 
 			Profile.DateJoined = User.JoinedAt?.ToUnixTimeSeconds() ?? default;
 
+			await ProfilesDB.EnsureSaved();
 			return Profile.DateJoined == default ? default : DateTimeOffset.FromUnixTimeSeconds(Profile.DateJoined);
 
-			await ProfilesDB.SaveChangesAsync();
 		}
 	}
 }

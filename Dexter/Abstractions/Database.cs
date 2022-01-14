@@ -50,7 +50,7 @@ namespace Dexter.Abstractions
 				catch
 				{
 					Console.WriteLine($"Failed to save {GetType().Name}, attempt {i + 1}/{RETRIES}");
-					await Task.Yield();
+					await Task.Delay(50);
 				}
 			}
 

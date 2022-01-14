@@ -36,7 +36,8 @@ namespace Dexter.Abstractions
 		/// <summary>
 		/// Using a retry system to ensure that the 
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>A <see cref="Task"/> object, which can be awaited until the method completes successfully or throws an exception.</returns>
+		/// <exception cref="DbUpdateException"></exception>
 
 		public async Task EnsureSaved()
         {

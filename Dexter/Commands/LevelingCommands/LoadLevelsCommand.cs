@@ -69,7 +69,7 @@ namespace Dexter.Commands
 						count++;
 					}
 				}
-				catch (InvalidOperationException e)
+				catch (InvalidOperationException)
 				{
 					ul = LevelingDB.GetOrCreateLevelData(r.Id);
 					try
@@ -191,7 +191,7 @@ namespace Dexter.Commands
 									await LevelingService.UpdateRoles(Context.Guild.GetUser(ul.UserID), force);
 							}
 						}
-						catch (Exception e)
+						catch (Exception)
 						{
 							ul = LevelingDB.GetOrCreateLevelData(p.id);
 

@@ -117,8 +117,6 @@ namespace Dexter.Commands
 				await FinalWarnsDB.SaveChangesAsync();
 			}
 
-			await Context.Guild.AddBanAsync(user, reason: reason.TruncateTo(100));
-
 			int infractionID = InfractionsDB.Infractions.Any() ? InfractionsDB.Infractions.Max(warning => warning.InfractionID) + 1 : 1;
 
 			InfractionsDB.Infractions.Add(new Infraction()
@@ -146,6 +144,8 @@ namespace Dexter.Commands
 						.WithDescription($"If you think this was made in error, you may submit an appeal to the ban appeal form in 30 days: {ModerationConfiguration.BanAppealForm}.")
 						.AddField("Reason", reason)
 				);
+
+			await Context.Guild.AddBanAsync(user, reason: reason.TruncateTo(100));
 		}
 
 	}

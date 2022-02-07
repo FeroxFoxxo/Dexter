@@ -26,11 +26,11 @@ namespace Dexter.Commands
 		{
 			if (Random.Next(4) == 1)
 			{
-				IGuildUser MuzzledUser = Context.Guild.GetUser(Context.User.Id);
+				IGuildUser targetUser = Context.Guild.GetUser(Context.User.Id);
 
-				await Muzzle(MuzzledUser);
+				await TimeoutUser(targetUser, TimeSpan.FromSeconds(MuzzleConfiguration.MuzzleDuration));
 
-				await Context.Channel.SendMessageAsync($"Muzzled **{MuzzledUser.Username}#{MuzzledUser.Discriminator}~!**");
+				await Context.Channel.SendMessageAsync($"Muzzled **{targetUser.Username}#{targetUser.Discriminator}~!**");
 			}
 			else
 				await Context.Channel.SendMessageAsync("You missed it - lucky you! <3");

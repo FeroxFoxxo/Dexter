@@ -13,22 +13,29 @@ namespace Dexter.Commands
 		/// <summary>
 		/// Performs the muzzling of a target user, a timed event is set up to undo this at the adequate time.
 		/// </summary>
-		/// <param name="GuildUser">The target user</param>
+		/// <param name="user">The target user</param>
+		/// <param name="duration">The duration of the muzzle to be applied</param>
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public async Task Muzzle(IGuildUser GuildUser)
+		public static async Task TimeoutUser(IGuildUser user, TimeSpan duration)
 		{
-			await GuildUser.AddRolesAsync(new IRole[2] {
-				GuildUser.Guild.GetRole(MuzzleConfiguration.MuzzleRoleID),
-				GuildUser.Guild.GetRole(MuzzleConfiguration.ReactionMutedRoleID)
+			await user.ModifyAsync(prop =>
+            {
+				prop.TimedOutUntil = DateTimeOffset.Now + duration;
+            });
+			/*
+			await user.AddRolesAsync(new IRole[2] {
+				user.Guild.GetRole(MuzzleConfiguration.MuzzleRoleID),
+				user.Guild.GetRole(MuzzleConfiguration.ReactionMutedRoleID)
 			});
 
 			await CreateEventTimer(
 				UnmuzzleCallback,
-				new() { { "User", GuildUser.Id.ToString() } },
-				MuzzleConfiguration.MuzzleDuration,
+				new() { { "User", user.Id.ToString() } },
+				(int) duration.TotalSeconds,
 				TimerType.Expire
 			);
+			*/
 		}
 
 		/// <summary>

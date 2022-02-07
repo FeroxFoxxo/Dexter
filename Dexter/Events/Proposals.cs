@@ -364,7 +364,6 @@ namespace Dexter.Events
 			var options = new[] { "✔️ Approve", "❌ Deny" };
 
 			var embedNew = PageBuilder.FromEmbedBuilder(BuildProposal(proposal));
-
 			var selection = new SelectionBuilder<string>()
 				.WithOptions(options)
 				.WithInputType(InputType.Buttons)
@@ -376,7 +375,7 @@ namespace Dexter.Events
 
 			_ = Task.Run(async () =>
 			{
-				var result = await Interactive.SendSelectionAsync(selection, stc, TimeSpan.FromHours(12), embed);
+				var result = await Interactive.SendSelectionAsync(selection, embed, TimeSpan.FromHours(12));
 
 				string selected = result.Value;
 

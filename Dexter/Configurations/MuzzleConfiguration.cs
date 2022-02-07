@@ -17,6 +17,12 @@ namespace Dexter.Configurations
 		public int MuzzleDuration { get; set; }
 
 		/// <summary>
+		/// The duration of the self-imposed mute upon using the ~sleep command.
+		/// </summary>
+
+		public int SleepDuration { get; set; }
+
+		/// <summary>
 		/// The role ID for the "Muzzled" role.
 		/// </summary>
 

@@ -216,12 +216,12 @@ namespace Dexter.Commands
 				CustomCommand incompat = CustomCommandDB.GetCommandByNameOrAlias(cmdName);
 				if (incompat is not null && incompat.CommandType == UserCommandSource.Unspecified)
 				{
-					CustomCommandDB.Remove(incompat);
+					CustomCommandDB.CustomCommands.Remove(incompat);
 				}
 				
 				if (uc is not null)
 				{
-					CustomCommandDB.Remove(uc);
+					CustomCommandDB.CustomCommands.Remove(uc);
 
 					CustomCommandDB.CustomCommands.Add(new CustomCommand()
 					{

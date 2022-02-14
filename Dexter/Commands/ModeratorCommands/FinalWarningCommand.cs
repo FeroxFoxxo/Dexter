@@ -34,6 +34,15 @@ namespace Dexter.Commands
 		{
 			short pointsDeducted = ModerationConfiguration.FinalWarningPointsDeducted;
 
+			if (reason.Length > 1000)
+            {
+				await BuildEmbed(EmojiEnum.Annoyed)
+					.WithTitle("Reason Too Long")
+					.WithDescription("Keep the 'reason' field under a maximum length of 1000 characters.")
+					.SendEmbed(Context.Channel);
+				return;
+            }
+
 			if (ModerationService.IsUserFinalWarned(user))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
@@ -51,7 +60,6 @@ namespace Dexter.Commands
 			if (!TimerService.TimerExists(dexProfile.CurrentPointTimer))
 				dexProfile.CurrentPointTimer = await CreateEventTimer(ModerationService.IncrementPoints, new() { { "UserID", user.Id.ToString() } }, ModerationConfiguration.SecondsTillPointIncrement, TimerType.Expire);
 
-
 			ulong warningLogID = 0;
 
 			if (ModerationConfiguration.FinalWarningsManageRecords)
@@ -63,7 +71,17 @@ namespace Dexter.Commands
 					$"**Reason**: {reason}")).Id;
 			}
 
-			SetOrCreateFinalWarn(pointsDeducted, Context.User as IGuildUser, user, muteDuration, reason, warningLogID);
+			try
+			{
+				await SetOrCreateFinalWarn(pointsDeducted, Context.User as IGuildUser, user, muteDuration, reason, warningLogID);
+				await InfractionsDB.EnsureSaved();
+			} 
+			catch (Exception)
+            {
+				await Context.Channel.SendMessageAsync($"The database is busy! We weren't able to save the data to the system; please issue the command again.");
+				await (DiscordShardedClient.GetChannel(ModerationConfiguration.FinalWarningsChannelID) as ITextChannel).DeleteMessageAsync(warningLogID);
+				return;
+            }
 
 			await ModerationService.MuteUser(user, muteDuration);
 
@@ -93,7 +111,6 @@ namespace Dexter.Commands
 					.WithDescription($"The target user, {user.GetUserInformation()}, might have DMs disabled or might have blocked me... :c\nThe final warning has been recorded to the database regardless.")
 					.SendEmbed(Context.Channel);
 			}
-			await InfractionsDB.SaveChangesAsync();
 		}
 
 		/// <summary>
@@ -146,7 +163,7 @@ namespace Dexter.Commands
 			{
 				await Context.Channel.SendMessageAsync("This user either has closed DMs or has me blocked! I wasn't able to inform them of this.");
 			}
-			await InfractionsDB.SaveChangesAsync();
+			await FinalWarnsDB.EnsureSaved();
 		}
 
 		/// <summary>
@@ -184,7 +201,6 @@ namespace Dexter.Commands
 				.AddField("Points Deducted:", warn.PointsDeducted, true)
 				.AddField("Issued on:", DateTimeOffset.FromUnixTimeSeconds(warn.IssueTime).Humanize(), true)
 				.SendEmbed(Context.Channel);
-			await InfractionsDB.SaveChangesAsync();
 		}
 		/// <summary>
 		/// Looks for a final warn entry for the target <paramref name="user"/>. If none are found, it creates one. If one is found, it is overwritten by the new parameters.
@@ -197,7 +213,7 @@ namespace Dexter.Commands
 		/// <param name="msgID">The ID of the message within #final-warnings which records this final warn instance.</param>
 		/// <returns>The <c>FinalWarn</c> object added to the database.</returns>
 
-		public FinalWarn SetOrCreateFinalWarn(short deducted, IGuildUser issuer, IGuildUser user, TimeSpan duration, string reason, ulong msgID)
+		public async Task<FinalWarn> SetOrCreateFinalWarn(short deducted, IGuildUser issuer, IGuildUser user, TimeSpan duration, string reason, ulong msgID)
 		{
 			FinalWarn warning = FinalWarnsDB.FinalWarns.Find(user.Id);
 
@@ -223,7 +239,7 @@ namespace Dexter.Commands
 				FinalWarnsDB.FinalWarns.Add(newWarning);
 			}
 
-			InfractionsDB.SaveChanges();
+			await FinalWarnsDB.EnsureSaved();
 
 			return newWarning;
 		}
@@ -244,6 +260,7 @@ namespace Dexter.Commands
 			warning.EntryType = EntryType.Revoke;
 
 			InfractionsDB.SaveChanges();
+			FinalWarnsDB.SaveChanges();
 
 			return true;
 		}

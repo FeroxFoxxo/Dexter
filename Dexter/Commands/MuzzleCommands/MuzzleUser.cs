@@ -60,17 +60,14 @@ namespace Dexter.Commands
 		}
 
 		/// <summary>
-		/// Removes the "Muzzled" and "Reaction Muted" role from a given user.
+		/// Removes timeouts from a given user.
 		/// </summary>
 		/// <param name="GuildUser">The target user</param>
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
 		public async Task Unmuzzle(IGuildUser GuildUser)
 		{
-			await GuildUser.RemoveRolesAsync(new IRole[2] {
-				GuildUser.Guild.GetRole(MuzzleConfiguration.MuzzleRoleID),
-				GuildUser.Guild.GetRole(MuzzleConfiguration.ReactionMutedRoleID)
-			});
+			await GuildUser.ModifyAsync(p => p.TimedOutUntil = DateTimeOffset.Now);
 		}
 
 	}

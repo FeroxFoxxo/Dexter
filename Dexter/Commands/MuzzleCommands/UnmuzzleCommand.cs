@@ -19,7 +19,7 @@ namespace Dexter.Commands
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
 		[Command("unmuzzle", ignoreExtraArgs: true)]
-		[Summary("Unmuzzles the specified user.")]
+		[Summary("Unmuzzles the specified user. **Note:** removes any timeout, not just one incurred from a muzzle command.")]
 		[RequireModerator]
 
 		public async Task UnmuzzleCommand(IGuildUser User)

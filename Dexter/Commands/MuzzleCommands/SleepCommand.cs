@@ -51,6 +51,12 @@ namespace Dexter.Commands
 			IGuildUser toMuzzle = Context.Guild.GetUser(idToMuzzle);
 
 			TimeSpan duration = TimeSpan.FromSeconds(MuzzleConfiguration.SleepDuration);
+			if (toMuzzle.TimedOutUntil.HasValue && toMuzzle.TimedOutUntil.Value.Subtract(DateTime.Now) > duration)
+			{
+				await Context.Channel.SendMessageAsync($"This is timed out for longer than the target duration!");
+				return;
+			}
+
 			try
 			{
 				await TimeoutUser(toMuzzle, duration);

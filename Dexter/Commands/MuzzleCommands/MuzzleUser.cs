@@ -15,14 +15,22 @@ namespace Dexter.Commands
 		/// </summary>
 		/// <param name="user">The target user</param>
 		/// <param name="duration">The duration of the muzzle to be applied</param>
+		/// <param name="overrideLonger">Whether to override a timeout which is longer than the one being applied.</param>
 		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public static async Task TimeoutUser(IGuildUser user, TimeSpan duration)
+		public static async Task TimeoutUser(IGuildUser user, TimeSpan duration, bool overrideLonger = false)
 		{
-			await user.ModifyAsync(prop =>
-            {
-				prop.TimedOutUntil = DateTimeOffset.Now + duration;
-            });
+			if (overrideLonger || !user.TimedOutUntil.HasValue)
+				await user.ModifyAsync(prop =>
+				{
+					prop.TimedOutUntil = DateTimeOffset.Now + duration;
+				});
+			else 
+				await user.ModifyAsync(prop =>
+                {
+					DateTimeOffset final = DateTimeOffset.Now + duration;
+					prop.TimedOutUntil = final > prop.TimedOutUntil.Value ? final : prop.TimedOutUntil;
+                })
 			/*
 			await user.AddRolesAsync(new IRole[2] {
 				user.Guild.GetRole(MuzzleConfiguration.MuzzleRoleID),

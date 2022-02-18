@@ -48,6 +48,7 @@ namespace Dexter.Events
 		public async Task DisplayStartupVersionAsync()
 		{
 			await DiscordShardedClient.SetActivityAsync(new Game(BotConfiguration.BotStatus));
+			await DiscordShardedClient.SetStatusAsync(UserStatus.Invisible);
 
 			if (HasStarted)
 				return;

@@ -25,12 +25,12 @@ namespace Dexter.Commands
 				{
 					prop.TimedOutUntil = DateTimeOffset.Now + duration;
 				});
-			else 
+			else
 				await user.ModifyAsync(prop =>
-                {
+				{
 					DateTimeOffset final = DateTimeOffset.Now + duration;
 					prop.TimedOutUntil = final > prop.TimedOutUntil.Value ? final : prop.TimedOutUntil;
-                })
+				});
 			/*
 			await user.AddRolesAsync(new IRole[2] {
 				user.Guild.GetRole(MuzzleConfiguration.MuzzleRoleID),

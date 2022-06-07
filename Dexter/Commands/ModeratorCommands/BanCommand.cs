@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
 using Dexter.Configurations;
@@ -48,6 +49,67 @@ namespace Dexter.Commands
 		public async Task ForceBanCommand(IUser user, [Remainder] string reason)
         {
 			await BanUser(user, reason, true);
+		}
+
+		/// <summary>
+		/// Bans the user from the current guild if they meet a set of requirements.
+		/// </summary>
+		/// <remarks>This command is staff-only.</remarks>
+		/// <param name="id">The id of the target user to ban from the guild.</param>
+		/// <param name="reason">The reason for the ban.</param>
+		/// <returns>A <see cref="Task"/> object, which can be awaited until this method completes successfully.</returns>
+
+		[Command("ban")]
+		[Summary("Bans a user, assuming their account meets the instaban requirements or is on Final Warning.")]
+		[RequireModerator]
+
+		public async Task BanUser (string id, [Remainder] string reason)
+        {
+			await BanUserFromStr(id, reason);
+        }
+
+		/// <summary>
+		/// Bans the user from the current guild.
+		/// </summary>
+		/// <remarks>This command is staff-only.</remarks>
+		/// <param name="id">The id of the target user to ban from the guild.</param>
+		/// <param name="reason">The reason for the ban.</param>
+		/// <returns>A <see cref="Task"/> object, which can be awaited until this method completes successfully.</returns>
+
+		[Command("forceban")]
+		[Summary("Bans a user, regardless of their account conditions. Should be used exclusively for extremely severe infractions.")]
+		[RequireModerator]
+
+		public async Task ForceBanUser (string id, [Remainder] string reason)
+        {
+			await BanUserFromStr(id, reason, true);
+        }
+
+		private async Task BanUserFromStr (string id, string reason, bool force = false)
+        {
+			Match m = Regex.Match(id, @"[0-9]{17,18}");
+			if (!m.Success)
+			{
+				await BuildEmbed(EmojiEnum.Annoyed)
+					.WithTitle("Unable to parse User ID")
+					.WithDescription($"The given user identifier text ({id}) has no suitable numeric ID")
+					.SendEmbed(Context.Channel);
+				return;
+			}
+
+			ulong idnum = ulong.Parse(m.Value);
+			IUser u = await Context.Client.Rest.GetUserAsync(idnum);
+
+			if (u is null)
+            {
+				await BuildEmbed(EmojiEnum.Annoyed)
+					.WithTitle("Unable to find user!")
+					.WithDescription($"The given id ({id}) matches no user. Are you sure you didn't copy a message ID?")
+					.SendEmbed(Context.Channel);
+				return;
+            }
+
+			await BanUser(u, reason, force);
 		}
 
 		private async Task BanUser(IUser user, string reason, bool force = false)

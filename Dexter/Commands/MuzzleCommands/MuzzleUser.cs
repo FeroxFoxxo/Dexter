@@ -29,7 +29,8 @@ namespace Dexter.Commands
 				await user.ModifyAsync(prop =>
 				{
 					DateTimeOffset final = DateTimeOffset.Now + duration;
-					prop.TimedOutUntil = final > prop.TimedOutUntil.Value ? final : prop.TimedOutUntil;
+					DateTimeOffset? current = prop.TimedOutUntil.GetValueOrDefault();
+					prop.TimedOutUntil = (current is null || final > current) ? final : current;
 				});
 			/*
 			await user.AddRolesAsync(new IRole[2] {

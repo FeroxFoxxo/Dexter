@@ -28,7 +28,7 @@ namespace Dexter.Commands
 
 			await BuildEmbed(EmojiEnum.Love)
 				.WithTitle($"Unmuzzled {User.Username}.")
-				.WithDescription($"{User.Username} has successfully had their muzzle removed from them. Make sure to fed them with lots of pats! <3")
+				.WithDescription($"{User.Username} has successfully had their muzzle removed from them. Make sure to feed them with lots of pats! <3")
 				.SendDMAttachedEmbed(Context.Channel, BotConfiguration, User,
 					BuildEmbed(EmojiEnum.Love)
 						.WithTitle("You've Been Un-Muzzled!")

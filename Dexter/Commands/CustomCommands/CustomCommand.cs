@@ -171,7 +171,7 @@ namespace Dexter.Commands
 					{
 						await BuildEmbed(EmojiEnum.Annoyed)
 							.WithTitle("Unable To Get Reply.")
-							.WithDescription("A command with the name `{BotConfiguration.Prefix}{CommandName}` doesn't exist!")
+							.WithDescription($"A command with the name `{BotConfiguration.Prefix}{CommandName}` doesn't exist!")
 							.SendEmbed(Context.Channel);
 						return;
 					}

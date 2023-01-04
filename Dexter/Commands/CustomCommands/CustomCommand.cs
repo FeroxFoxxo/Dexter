@@ -221,16 +221,11 @@ namespace Dexter.Commands
 				
 				if (uc is not null)
 				{
-					CustomCommandDB.CustomCommands.Remove(uc);
+					uc.Reply = reply;
+					uc.CommandName = cmdName;
+					uc.CommandType = ucs;
 
-					CustomCommandDB.CustomCommands.Add(new CustomCommand()
-					{
-						CommandName = cmdName,
-						Reply = reply,
-						Alias = "",
-						User = userID,
-						CommandType = ucs
-					});
+					CustomCommandDB.SaveChanges();
 					return;
 				}
 
@@ -241,9 +236,11 @@ namespace Dexter.Commands
 					uc.Reply = reply;
 					uc.CommandType = ucs;
 
+					CustomCommandDB.SaveChanges();
 					return;
 				}
 			}
+
 			CustomCommandDB.CustomCommands.Add(new CustomCommand()
 			{
 				CommandName = cmdName,
@@ -269,7 +266,7 @@ namespace Dexter.Commands
 			string CommandName = Parameters["CommandName"];
 			string Reply = Parameters["Reply"];
 
-			 CustomCommandDB.GetCommandByNameOrAlias(CommandName).Reply = Reply;
+			CustomCommandDB.GetCommandByNameOrAlias(CommandName).Reply = Reply;
 
 			CustomCommandDB.SaveChanges();
 		}

@@ -32,7 +32,7 @@ namespace Dexter.Commands
 			"- rr[n], rr>[n], rr<[n] - Reroll any dice whose roll value satisfies the condition. {4, 1, 3} => (**rr1**) => {4, 2, 3}.\n" +
 			"- [n]=>[m] - Replaces a number with another for all rolled n's.\n" +
 			"- !(n), !>[n], !<[n] - Explode once if a condition is satisfied. {4, 1, 3} => (**!>2**) {4, 1, 3, 2, 1}.\n" +
-			"- !!(n)(,max), !!>(n)(,max), !!<n(,max) - Explode up to max times if a condition is satisfied. {4, 1, 3} => (!!>2,3) => {4, 1, 3, 2, 3, 4}")]
+			"- !!(n)(,max), !!>(n)(,max), !!<n(,max) - Explode up to max times if a condition is satisfied. {4, 1, 3} => (**!!>2,3**) => {4, 1, 3, 2, 3, 4}")]
 		[CommandCooldown(10)]
 
 		public async Task RollCommand([Remainder] string roll)
@@ -361,7 +361,7 @@ namespace Dexter.Commands
 				(List<int> r, string mod, RollContext context) =>
 				{
 					int toReroll = int.Parse(mod[3..]);
-					if (context.d < toReroll) return r;
+					if (toReroll > context.d) return r;
 					for (int i = 0; i < r.Count; i++)
 					{
 						if (r[i] < toReroll)
@@ -378,13 +378,12 @@ namespace Dexter.Commands
 				(List<int> r, string mod, RollContext context) =>
 				{
 					int toReroll = int.Parse(mod[3..]);
-					if (toReroll < 1) return r;
+					if (toReroll <= 1) return r;
 					for (int i = 0; i < r.Count; i++)
 					{
 						if (r[i] > toReroll)
 						{
-							r[i] = context.rand.Next(1, toReroll + 1);
-							if (r[i] >= toReroll) r[i]++;
+							r[i] = context.rand.Next(1, toReroll);
 						}
 					}
 					return r;

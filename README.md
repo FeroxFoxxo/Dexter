@@ -19,7 +19,7 @@
          </a>
       </p>
       <h3 align="center">Note: this branch should not be used!</h3>
-      <h4 align="center">This branch contains a TON of removed features from the base version of Dexter and acts as what is currently on the live server You will not find the additions here more useful than what is included in the other branch!</h4>
+      <h4 align="center">This branch contains a TON of removed features from the base version of Dexter and acts as what is currently on the live server. You will not find the additions here more useful than what is included in the other branch!</h4>
       <p align="center">
          <a href="#built-with">Libraries</a> •
          <a href="#commemorations">Commemorations</a> •

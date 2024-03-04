@@ -3,17 +3,15 @@ using Dexter.Configurations;
 using Dexter.Databases.GreetFur;
 using Dexter.Databases.UserProfiles;
 using Dexter.Events;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Sheets.v4;
 
 namespace Dexter.Commands
 {
 
-	/// <summary>
-	/// The class containing all commands within the GreetFur module.
-	/// </summary>
+    /// <summary>
+    /// The class containing all commands within the GreetFur module.
+    /// </summary>
 
-	public partial class GreetFurCommands : DiscordModule
+    public partial class GreetFurCommands : DiscordModule
 	{
 
 		/// <summary>
@@ -45,9 +43,6 @@ namespace Dexter.Commands
 		/// </summary>
 
 		public ProfilesDB ProfilesDB { get; set; }
-
-		public Moderation ModerationService { get; set; }
-
 	}
 
 }

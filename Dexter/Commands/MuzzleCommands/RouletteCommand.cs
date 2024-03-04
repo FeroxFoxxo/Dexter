@@ -30,7 +30,7 @@ namespace Dexter.Commands
 
 				await TimeoutUser(targetUser, TimeSpan.FromSeconds(MuzzleConfiguration.MuzzleDuration));
 
-				await Context.Channel.SendMessageAsync($"Muzzled **{targetUser.Username}#{targetUser.Discriminator}~!**");
+				await Context.Channel.SendMessageAsync($"Muzzled **{targetUser.Username}~!**");
 			}
 			else
 				await Context.Channel.SendMessageAsync("You missed it - lucky you! <3");

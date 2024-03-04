@@ -60,7 +60,7 @@ namespace Dexter.Commands
 			string role = roleInst != null ? roleInst.Name : "";
 
 			await BuildEmbed(EmojiEnum.Unknown)
-				.WithTitle($"User Profile For {guildUser.Username}#{guildUser.Discriminator}")
+				.WithTitle($"User Profile For {guildUser.Username}")
 				.WithThumbnailUrl(guildUser.GetTrueAvatarUrl())
 				.AddField("Username", guildUser.GetUserInformation(), true)
 				.AddField(!string.IsNullOrEmpty(guildUser.Nickname), "Nickname", guildUser.Nickname, true)
@@ -164,7 +164,7 @@ namespace Dexter.Commands
 			List<NameRecord> names = UserRecordsService.GetNameRecords(user, nameType).ToList();
 			names.Sort((a, b) => b.SetTime.CompareTo(a.SetTime));
 
-			EmbedBuilder[] menu = BuildNicknameEmbeds(names.ToArray(), $"{nameType} Record for User {user.Username}#{user.Discriminator}");
+			EmbedBuilder[] menu = BuildNicknameEmbeds(names.ToArray(), $"{nameType} Record for User {user.Username}");
 
 			if (menu.Length == 1)
 			{

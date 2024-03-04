@@ -101,8 +101,8 @@ namespace Dexter.Commands
 				return;
             }
 
-			List<EmbedBuilder> embeds = new();
-			List<string> sublists = new();
+			List<EmbedBuilder> embeds = [];
+			List<string> sublists = [];
 
 			int page = 0;
 			int maxpages = Math.Min(UtilityConfiguration.InRoleMaxPages, 1 + (count - 1) / UtilityConfiguration.InRoleMaxItemsPerPage);

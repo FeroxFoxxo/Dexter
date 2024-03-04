@@ -144,7 +144,7 @@ namespace Dexter.Databases.UserProfiles
 
         public async Task<List<ulong>> GetLinksAsync(ulong user, Func<UserLink, bool> filter, bool mustBeSender = false, LinkType linkType = LinkType.Friend)
         {
-            List<ulong> links = new();
+            List<ulong> links = [];
             await Links.AsAsyncEnumerable().ForEachAsync(l =>
             {
                 if (l.LinkType != linkType) return;

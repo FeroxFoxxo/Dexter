@@ -147,7 +147,7 @@ namespace Dexter.Commands
 					.SendEmbed(Context.Channel);
 				return null;
 			}
-			List<WeightedObject<FunTopic>> topics = new();
+			List<WeightedObject<FunTopic>> topics = [];
 			foreach (FunTopic t in FunTopicsDB.Topics)
 			{
 				if (type == t.TopicType)

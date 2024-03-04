@@ -278,7 +278,7 @@ namespace Dexter.Games
 		{
 			char[,] newState = State;
 			isLoss = false;
-			HashSet<Tuple<int, int>> toProbe = new();
+			HashSet<Tuple<int, int>> toProbe = [];
 			for (int x = 0; x < newState.GetLength(1); x++)
 				for (int y = 0; y < newState.GetLength(0); y++)
 					if (newState[y, x] > '0' && newState[y, x] < '8')
@@ -325,7 +325,7 @@ namespace Dexter.Games
 				}
 			}
 
-			HashSet<Tuple<int, int>> toProbe = new();
+			HashSet<Tuple<int, int>> toProbe = [];
 			if (flags == goal)
 			{
 				for (int dx = -1; dx <= 1; dx++)
@@ -427,7 +427,7 @@ namespace Dexter.Games
 		{
 			Bitmap result = new(cellSize * (matrix.GetLength(1) + 2), cellSize * (matrix.GetLength(0) + 2));
 
-			Dictionary<char, System.Drawing.Image> cellImages = new();
+			Dictionary<char, System.Drawing.Image> cellImages = [];
 			foreach (KeyValuePair<char, string> kvp in CellImageNames)
 			{
 				cellImages.Add(kvp.Key, System.Drawing.Image.FromFile(Path.Join(MinesweeperPath, $"{kvp.Value}.png")));
@@ -600,7 +600,7 @@ namespace Dexter.Games
 					return true;
 				case "size":
 					string[] toParse = value.Split(" ");
-					List<int> numbers = new();
+					List<int> numbers = [];
 					foreach (string s in toParse)
 					{
 						if (int.TryParse(s, out int n)) numbers.Add(n);
@@ -756,7 +756,7 @@ namespace Dexter.Games
 					await message.Channel.SendMessageAsync("You must provide a position to flag or unflag!");
 					return;
 				}
-				List<Cell> toFlag = new();
+				List<Cell> toFlag = [];
 				for (int i = 1; i < args.Length; i++)
 				{
 					if (!TryParsePos(args[i], out Cell flagpos))
@@ -788,7 +788,7 @@ namespace Dexter.Games
 			string[] positions = msg.Split(" ");
 			if (TryParsePos(positions[0], out _))
 			{
-				List<Cell> cells = new();
+				List<Cell> cells = [];
 				foreach (string s in positions)
 				{
 					if (TryParsePos(s, out Cell newItem))

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dexter.Databases.EventTimers;
 using Discord;
 
 namespace Dexter.Commands
 {
 
-	public partial class MuzzleCommands
+    public partial class MuzzleCommands
 	{
 
 		/// <summary>

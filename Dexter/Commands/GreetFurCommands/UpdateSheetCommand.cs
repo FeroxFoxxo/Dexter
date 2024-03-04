@@ -38,7 +38,7 @@ namespace Dexter.Commands
 
 			int week = -1;
 
-			List<string> errors = new();
+			List<string> errors = [];
 			string[] splitArgs = args.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 			int i = 0;
 			while (i < splitArgs.Length)

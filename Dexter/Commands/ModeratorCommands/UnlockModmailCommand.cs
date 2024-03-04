@@ -88,7 +88,7 @@ namespace Dexter.Commands
 			EmbedBuilder Embed = ModmailMessage.Embeds.First().ToEmbedBuilder();
 
 			if (User != null)
-				Embed.WithTitle($"{User.Username}#{User.Discriminator}'s Modmail");
+				Embed.WithTitle($"{User.Username}'s Modmail");
 			else
 				Embed.WithTitle($"{ModMail.UserID}'s Modmail");
 

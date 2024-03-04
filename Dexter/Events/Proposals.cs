@@ -19,16 +19,15 @@ using System.Data;
 using System.Reflection;
 using Fergun.Interactive.Selection;
 using Fergun.Interactive;
-using Humanizer;
 
 namespace Dexter.Events
 {
 
-	/// <summary>
-	/// The Proposal service, which is used to create and update proposals on the change of a reaction.
-	/// </summary>
+    /// <summary>
+    /// The Proposal service, which is used to create and update proposals on the change of a reaction.
+    /// </summary>
 
-	public class Proposals : Event
+    public class Proposals : Event
 	{
 
 		/// <summary>
@@ -170,7 +169,10 @@ namespace Dexter.Events
 
 			if (RestrictionsDB.IsUserRestricted(ReceivedMessage.Author, Restriction.Suggestions))
 			{
-				await ReceivedMessage.DeleteAsync();
+				try
+				{
+					await ReceivedMessage.DeleteAsync();
+				} catch (Exception) { }
 
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("You aren't permitted to make suggestions!")
@@ -182,9 +184,13 @@ namespace Dexter.Events
 			// Check to see if the embed message length is more than 1750, else will fail the embed from sending due to character limits.
 			if (ReceivedMessage.Content.Length > 1750)
 			{
-				await ReceivedMessage.DeleteAsync();
+                try
+                {
+                    await ReceivedMessage.DeleteAsync();
+                }
+                catch (Exception) { }
 
-				await BuildEmbed(EmojiEnum.Annoyed)
+                await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Your suggestion is too big!")
 					.WithDescription("Please try to summarise your suggestion a little! " +
 					"Keep in mind that emoji add a lot of characters to your suggestion - even if it doesn't seem like it - " +
@@ -224,7 +230,13 @@ namespace Dexter.Events
 						.WithTitle("Your attachment is too big!")
 						.WithDescription("Please keep attachments under 8MB due to Discord's size limitations and our caching of data! <3")
 						.SendEmbed(ReceivedMessage.Author, ReceivedMessage.Channel as ITextChannel);
-					await ReceivedMessage.DeleteAsync();
+
+                    try
+                    {
+                        await ReceivedMessage.DeleteAsync();
+                    }
+                    catch (Exception) { }
+                    
 					return;
 				}
 
@@ -258,17 +270,22 @@ namespace Dexter.Events
 
 			await RestrictionsDB.SaveChangesAsync();
 
-			// Delete the message sent by the user.
-			await ReceivedMessage.DeleteAsync();
+            // Add the related emoji specified in the ProposalConfiguration to the suggestion.
+            SocketGuild Guild = DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild);
 
-			// Add the related emoji specified in the ProposalConfiguration to the suggestion.
-			SocketGuild Guild = DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild);
+            foreach (string Emoji in ProposalConfiguration.SuggestionEmoji)
+            {
+                GuildEmote Emote = await Guild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
+                await Embed.AddReactionAsync(Emote);
+            }
 
-			foreach (string Emoji in ProposalConfiguration.SuggestionEmoji)
-			{
-				GuildEmote Emote = await Guild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
-				await Embed.AddReactionAsync(Emote);
-			}
+            // Delete the message sent by the user.
+
+            try
+            {
+                await ReceivedMessage.DeleteAsync();
+            }
+            catch (Exception) { }
 		}
 
 		/// <summary>

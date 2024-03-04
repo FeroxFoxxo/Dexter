@@ -15,6 +15,7 @@ using Discord.Net;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SpotifyAPI.Web;
 using IResult = Discord.Commands.IResult;
 
 namespace Dexter.Events
@@ -151,15 +152,38 @@ namespace Dexter.Events
 									reply = reply.Replace("AUTHOR", (firstMentionedID != default && firstMentionedID != commandContext?.User.Id) || !reply.Contains("USER")
 										? commandContext.User.Mention : commandContext?.Client?.CurrentUser?.Mention ?? "Dexter");
 
-									List<string> userMentions = new();
+									List<string> userMentions = [];
+
 									foreach (ulong id in commandContext.Message.MentionedUserIds ?? Array.Empty<ulong>())
 									{
 										IUser user = DiscordShardedClient.GetUser(id);
+
 										if (user is not null)
 											userMentions.Add(user.Mention);
-									}
 
-									reply = userMentions.Any()
+                                        if (user is IGuildUser gUser)
+                                        {
+                                            var funCommand = ServiceProvider.GetRequiredService<FunConfiguration>();
+
+                                            if (gUser.RoleIds.Contains(funCommand.RpDeniedRole))
+                                            {
+                                                await commandContext.Channel.SendMessageAsync(
+                                                    embed: new EmbedBuilder()
+                                                        .WithColor(Color.Red)
+                                                        .WithTitle("Halt! Who goes there-")
+                                                        .WithDescription("One of the users you mentioned doesn't want to have commands run on them!")
+                                                        .WithFooter($"To apply this yourself, please add the '{gUser.Guild.GetRole(funCommand.RpDeniedRole).Name}' role!")
+                                                        .WithCurrentTimestamp()
+                                                        .Build()
+                                                );
+
+                                                return;
+                                            }
+                                        }
+
+                                    }
+
+                                    reply = userMentions.Any()
 										? reply.Replace("USER", LanguageHelper.Enumerate(userMentions))
 										: reply.Replace("USER", commandContext?.User?.Mention ?? "{Unknown}");
 

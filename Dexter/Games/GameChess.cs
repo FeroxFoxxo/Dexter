@@ -708,7 +708,7 @@ namespace Dexter.Games
 		{
 			Bitmap img = new(2 * Offset + 8 * CellSize, 2 * Offset + 8 * CellSize);
 
-			Dictionary<char, System.Drawing.Image> pieceImages = new();
+			Dictionary<char, System.Drawing.Image> pieceImages = [];
 			foreach (Piece p in Piece.pieces)
 			{
 				for (int c = 0; c < 2; c++)
@@ -1280,7 +1280,7 @@ namespace Dexter.Games
 					return true;
 				}
 
-				List<int> potentialOrigins = new();
+				List<int> potentialOrigins = [];
 				int rankFilter = -1;
 				int fileFilter = -1;
 				Piece toMove;
@@ -1355,7 +1355,7 @@ namespace Dexter.Games
 							}
 						}
 
-						List<int> validOrigins = new();
+						List<int> validOrigins = [];
 						foreach (int origin in potentialOrigins)
 						{
 							if (toMove.isValid(origin, move.target, board, false))
@@ -1419,10 +1419,7 @@ namespace Dexter.Games
 
 			public List<int> ToHighlight()
 			{
-				List<int> result = new();
-
-				result.Add(origin);
-				result.Add(target);
+				List<int> result = [origin, target];
 
 				if (isCastle)
 				{
@@ -1442,16 +1439,14 @@ namespace Dexter.Games
 
 			public List<int> ToEnPassant()
 			{
-				List<int> result = new();
-
-				result.Add((origin / 8) * 8 + target % 8);
+				List<int> result = [(origin / 8) * 8 + target % 8];
 
 				return result;
 			}
 
 			public List<int> ToDanger(Board board)
 			{
-				List<int> result = new();
+				List<int> result = [];
 				if (isCheck || isCheckMate)
 				{
 					result.Add(board.isWhitesTurn ? board.whiteKing : board.blackKing);
@@ -1674,7 +1669,7 @@ namespace Dexter.Games
 
 			public bool InsufficientMaterial()
 			{
-				Dictionary<char, int> pieceCounts = new();
+				Dictionary<char, int> pieceCounts = [];
 				foreach (char p in Piece.PieceCharacters)
 				{
 					pieceCounts.Add(p, 0);
@@ -1702,7 +1697,7 @@ namespace Dexter.Games
 
 			public bool HasLegalMoves(bool inCheck, bool doubleAttack, int attackerPos)
 			{
-				HashSet<int> pinned = new();
+				HashSet<int> pinned = [];
 				int kingPos = isWhitesTurn ? whiteKing : blackKing;
 
 				if (!inCheck)
@@ -1743,7 +1738,7 @@ namespace Dexter.Games
 				else
 				{
 					Piece attacker = Piece.FromRepresentation(GetSquare(attackerPos));
-					HashSet<int> blockSquares = new();
+					HashSet<int> blockSquares = [];
 
 					if (attacker.canPin && !doubleAttack)
 					{

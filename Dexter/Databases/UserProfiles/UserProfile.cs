@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Dexter.Configurations;
 using Dexter.Helpers;
-using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;

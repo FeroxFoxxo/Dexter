@@ -3,7 +3,6 @@ using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Cooldowns;
 using Dexter.Databases.FinalWarns;
-using Dexter.Databases.Infractions;
 using Dexter.Databases.Mail;
 using Dexter.Databases.Relays;
 using Dexter.Databases.UserProfiles;
@@ -26,12 +25,6 @@ namespace Dexter.Commands
 		/// </summary>
 
 		public CooldownDB CooldownDB { get; set; }
-
-		/// <summary>
-		/// The InfractionsDB stores the warnings that these commands interface.
-		/// </summary>
-
-		public InfractionsDB InfractionsDB { get; set; }
 
 		/// <summary>
 		/// The RelayDB stores the relays that are used to send messages to a channel in set intervals.
@@ -86,12 +79,6 @@ namespace Dexter.Commands
 		/// </summary>
 
 		public Random Random { get; set; }
-
-		/// <summary>
-		/// Holds relevant methods to access certain moderation events and dynamic data.
-		/// </summary>
-
-		public Moderation ModerationService { get; set; }
 
 		/// <summary>
 		/// Holds relevant information about GreetFur management procedures.

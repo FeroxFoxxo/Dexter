@@ -14,13 +14,11 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using Dexter.Configurations;
-using System.Text;
-using System.Text.RegularExpressions;
 using Dexter.Helpers;
 
 namespace Dexter.Commands
 {
-	public partial class UtilityCommands
+    public partial class UtilityCommands
 	{
 
 		/// <summary>
@@ -81,8 +79,8 @@ namespace Dexter.Commands
 			}
 
 			IEnumerable<IRole> roles = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).Roles.ToArray();
-			Dictionary<ulong, IRole> colorRoleIDs = new();
-			Dictionary<ulong, int> colorRoleTiers = new();
+			Dictionary<ulong, IRole> colorRoleIDs = [];
+			Dictionary<ulong, int> colorRoleTiers = [];
 
 			IRole toAdd = null;
 			foreach (IRole role in roles)
@@ -110,7 +108,7 @@ namespace Dexter.Commands
 				{
 					if (removed.Any())
 					{
-						List<string> roleNames = new();
+						List<string> roleNames = [];
 						foreach (IRole role in removed)
 							roleNames.Add(role.Name);
 						await Context.Channel.SendMessageAsync($"Removed color roles! [{string.Join(", ", roleNames)}]");
@@ -192,7 +190,7 @@ namespace Dexter.Commands
 
 		private async Task<IEnumerable<IRole>> TryRemoveRolesAndGet(IGuildUser user, Dictionary<ulong, IRole> colorRoleIDs)
 		{
-			List<IRole> toRemove = new();
+			List<IRole> toRemove = [];
 			ulong[] userRoles = user.RoleIds.ToArray();
 			foreach (ulong roleID in userRoles)
 			{
@@ -249,7 +247,7 @@ namespace Dexter.Commands
 		{
 			List<SocketRole> roles = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).Roles.ToList();
 			roles.Sort((ra, rb) => rb.Position.CompareTo(ra.Position));
-			List<IRole> colorRoles = new();
+			List<IRole> colorRoles = [];
 
 			foreach (IRole role in roles)
 			{
@@ -382,7 +380,7 @@ namespace Dexter.Commands
 
 		private List<System.Drawing.Color> ProcessColorNames(IEnumerable<string> names, out List<string> errors)
         {
-			Dictionary<string, IRole> nameToRole = new();
+			Dictionary<string, IRole> nameToRole = [];
 			foreach (IRole role in DiscordShardedClient.GetGuild(BotConfiguration.GuildID).Roles)
             {
 				if (role.Name.StartsWith(UtilityConfiguration.ColorRolePrefix))
@@ -391,8 +389,8 @@ namespace Dexter.Commands
                 }
             }
 
-			errors = new();
-			List<System.Drawing.Color> result = new();
+			errors = [];
+			List<System.Drawing.Color> result = [];
 
 			foreach (string n in names)
             {

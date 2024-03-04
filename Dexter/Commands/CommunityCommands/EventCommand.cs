@@ -174,7 +174,7 @@ namespace Dexter.Commands
 				case Enums.ActionType.Get:
 					string SearchParam = Params.Split(" ")[0].ToUpper();
 					string SearchString = Params[SearchParam.Length..].Trim();
-					List<CommunityEvent> Events = new();
+					List<CommunityEvent> Events = [];
 					switch (SearchParam)
 					{
 						case "ID":

@@ -24,7 +24,7 @@ namespace Dexter.Commands
 
 		public async Task ListCommands()
 		{
-			List<EmbedBuilder> embeds = new ();
+			List<EmbedBuilder> embeds = [];
 
 			var CurrentType = UserCommandSource.Unspecified;
 			var CurrentBuilder = BuildEmbed(EmojiEnum.Annoyed).WithTitle("Unable to find custom commands!").WithDescription("No custom commands set.");

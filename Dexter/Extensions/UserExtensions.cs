@@ -81,7 +81,7 @@ namespace Dexter.Extensions
 
 		public static string GetUserInformation(this IUser user)
 		{
-			return $"{user.Username}#{user.Discriminator} ({user.Mention}) ({user.Id})";
+			return $"{user.Username} ({user.Mention}) ({user.Id})";
 		}
 
 		/// <summary>

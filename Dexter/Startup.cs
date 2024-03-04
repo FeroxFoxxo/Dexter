@@ -9,11 +9,9 @@ using Fergun.Interactive;
 using Figgle;
 using Genbox.WolframAlpha;
 using Google.Apis.Auth.OAuth2;
-using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
 using Google.Apis.YouTube.v3;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -32,11 +30,11 @@ using Victoria;
 namespace Dexter
 {
 
-	/// <summary>
-	/// The Startup class is the entrance of the program. It is where dependencies are injected into all of their respected classes and where the bot starts up.
-	/// </summary>
+    /// <summary>
+    /// The Startup class is the entrance of the program. It is where dependencies are injected into all of their respected classes and where the bot starts up.
+    /// </summary>
 
-	public static class Startup
+    public static class Startup
 	{
 
 		private static string p_Token, p_DBUser, p_DBPassword, p_Version;

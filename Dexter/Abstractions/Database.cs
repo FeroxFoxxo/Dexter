@@ -1,17 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
-using System.Reflection;
 
 namespace Dexter.Abstractions
 {
 
-	/// <summary>
-	/// Database is an abstract class that all databases that run through the bot use.
-	/// It creates an SQLite database per instance of this abstracted class.
-	/// </summary>
+    /// <summary>
+    /// Database is an abstract class that all databases that run through the bot use.
+    /// It creates an SQLite database per instance of this abstracted class.
+    /// </summary>
 
-	public class Database : DbContext
+    public class Database : DbContext
 	{
 
 		/// <summary>

@@ -49,7 +49,7 @@ namespace Dexter.Helpers
 
 		public static string RandomizePredicate(string predicate, Dictionary<string, string[]> termBanks, Random random, LanguageConfiguration config)
 		{
-			HashSet<TermClass> terms = new();
+			HashSet<TermClass> terms = [];
 
 			foreach (KeyValuePair<string, string[]> k in termBanks)
 			{
@@ -175,7 +175,7 @@ namespace Dexter.Helpers
 			{
 				Identifier = identifier;
 				Bank = bank;
-				Cache = new List<string>();
+				Cache = [];
 			}
 
 			/// <summary>
@@ -367,7 +367,7 @@ namespace Dexter.Helpers
 		/// A set of characters that discord uses for formatting.
 		/// </summary>
 
-		public static readonly HashSet<char> DiscordRichTextChars = new() { '*', '_', '`', '|' };
+		public static readonly HashSet<char> DiscordRichTextChars = ['*', '_', '`', '|'];
 
 		/// <summary>
 		/// Truncates a string to a given length similar to the <see cref="TruncateTo"/> method, but ignores characters marked in <paramref name="ignoreChars"/>.
@@ -548,7 +548,7 @@ namespace Dexter.Helpers
 
 		public static string HumanizeOffbaseUnits(int baseN, float value, string[] largeUnit, string[] smallUnit, out float remainder)
 		{
-			List<string> result = new();
+			List<string> result = [];
 
 			int largeValue = (int)value;
 			int smallValue = (int)Math.Round(value % 1 * baseN);
@@ -599,12 +599,12 @@ namespace Dexter.Helpers
 
 		public static string[] GetHyperLinks(this string input)
 		{
-			List<string> matches = new();
+			List<string> matches = [];
 
 			input = ' ' + input + ' ';
 
-			List<int> openers = new();
-			List<int> closers = new();
+			List<int> openers = [];
+			List<int> closers = [];
 
 			for (int i = 0; i < input.Length; i++)
 			{
@@ -632,7 +632,7 @@ namespace Dexter.Helpers
 
 		private static string[] CheckForLinks(this string input, IEnumerable<int> openers, IEnumerable<int> closers)
 		{
-			List<string> Result = new();
+			List<string> Result = [];
 
 			foreach (int o in openers)
 			{
@@ -1234,7 +1234,7 @@ namespace Dexter.Helpers
 
 		public static string[] SearchTimeZone(this string input, LanguageConfiguration config)
 		{
-			Dictionary<string, int> searchWeight = new();
+			Dictionary<string, int> searchWeight = [];
 
 			foreach (KeyValuePair<string, TimeZoneData> k in config.TimeZones)
 			{
@@ -1287,7 +1287,7 @@ namespace Dexter.Helpers
 
 		public static string[] SearchTimeZone(this TimeSpan offset, LanguageConfiguration config, out int exactMatches)
 		{
-			Dictionary<string, int> searchWeight = new();
+			Dictionary<string, int> searchWeight = [];
 			exactMatches = 0;
 
 			foreach (KeyValuePair<string, TimeZoneData> k in config.TimeZones)
@@ -1375,7 +1375,7 @@ namespace Dexter.Helpers
 				pMaxSubstr = 0.9 + 0.1 * (LCSS / n);
 			}
 
-			Dictionary<char, PairwiseCounter> counts = new();
+			Dictionary<char, PairwiseCounter> counts = [];
 			for (int i = 0; i < a.Length; i++)
 			{
 				if (!counts.ContainsKey(a[i]))

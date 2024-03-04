@@ -13,6 +13,10 @@ using System.Text.RegularExpressions;
 using Image = System.Drawing.Image;
 using System.Net.Http;
 using Dexter.Attributes.Methods;
+using Discord.WebSocket;
+using Dexter.Configurations;
+using Microsoft.Extensions.DependencyInjection;
+using Color = Discord.Color;
 
 namespace Dexter.Commands
 {
@@ -31,12 +35,36 @@ namespace Dexter.Commands
 		[Alias("headpats", "petpat", "petpats", "pet", "pat")]
 		[CommandCooldown(15)]
 
-		public async Task HeadpatCommand([Optional] IGuildUser User)
+		public async Task HeadpatCommand([Optional] IUser User)
 		{
 			if (User == null)
-				User = Context.Guild.GetUser(Context.User.Id);
+			{
+				if (Context.Message.MentionedUsers.Count > 0)
+					User = Context.Message.MentionedUsers.First();
 
-			string NameOfUser = Regex.Replace(User.Username, "[^a-zA-Z]", "", RegexOptions.Compiled);
+				User = Context.Guild.GetUser(Context.User.Id);
+			}
+			else if (User is IGuildUser gUser)
+			{
+				var funCommand = ServiceProvider.GetRequiredService<FunConfiguration>();
+
+				if (gUser.RoleIds.Contains(funCommand.RpDeniedRole))
+				{
+					await Context.Channel.SendMessageAsync(
+						embed: new EmbedBuilder()
+							.WithColor(Color.Red)
+							.WithTitle("Halt! Who goes there-")
+							.WithDescription("One of the users you mentioned doesn't want to have commands run on them!")
+							.WithFooter($"To apply this yourself, please add the '{gUser.Guild.GetRole(funCommand.RpDeniedRole).Name}' role!")
+							.WithCurrentTimestamp()
+							.Build()
+					);
+
+					return;
+				}
+			}
+
+            string NameOfUser = Regex.Replace(User.Username, "[^a-zA-Z]", "", RegexOptions.Compiled);
 
 			if (NameOfUser.Length < 2)
 				NameOfUser = "Unknown";
@@ -85,9 +113,9 @@ namespace Dexter.Commands
 
 				GuildEmote Emote = await Guild.CreateEmoteAsync(NameOfUser, EmoteImage);
 
-				DiscordWebhookClient Webhook = await CreateOrGetWebhook(Context.Channel.Id, FunConfiguration.HeadpatWebhookName);
+				DiscordWebhookClient Webhook = await CreateOrGetWebhook(Context.Channel, FunConfiguration.HeadpatWebhookName);
 
-				await Webhook.SendMessageAsync(
+                await Webhook.SendMessageAsync(
 					Emote.ToString(),
 					username: string.IsNullOrEmpty(Context.Guild.GetUser(Context.User.Id).Nickname) ? Context.User.Username : Context.Guild.GetUser(Context.User.Id).Nickname,
 					avatarUrl: Context.User.GetTrueAvatarUrl()

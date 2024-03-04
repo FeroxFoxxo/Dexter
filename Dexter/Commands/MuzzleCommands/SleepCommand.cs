@@ -61,7 +61,7 @@ namespace Dexter.Commands
 			{
 				await TimeoutUser(toMuzzle, duration);
 
-				await Context.Channel.SendMessageAsync($"Goodnight, **{toMuzzle.Username}#{toMuzzle.Discriminator}~!**. Sleep well <3");
+				await Context.Channel.SendMessageAsync($"Goodnight, **{toMuzzle.Username}~!**. Sleep well <3");
 			} 
 			catch (HttpException)
             {

@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
-using Dexter.Configurations;
-using Dexter.Databases.EventTimers;
 using Dexter.Databases.UserProfiles;
 using Dexter.Enums;
 using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
-using System.Runtime.InteropServices;
 
 namespace Dexter.Commands
 {

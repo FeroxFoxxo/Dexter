@@ -5,12 +5,18 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Commands;
 using System.Runtime.InteropServices;
+using Dexter.Abstractions;
+using Dexter.Configurations;
+using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
 namespace Dexter.Commands
 {
 
 	public partial class FunCommands
 	{
+
+		public IServiceProvider ServiceProvider { get; set; }
 
 		/// <summary>
 		/// Returns a random percentage measurement that changes every so often depending on the user's ID along with time parameters.
@@ -28,6 +34,25 @@ namespace Dexter.Commands
 		{
 			if (User == null)
 				User = Context.User;
+			else if (User is IGuildUser gUser)
+			{
+				var funCommand = ServiceProvider.GetRequiredService<FunConfiguration>();
+
+				if (gUser.RoleIds.Contains(funCommand.RpDeniedRole))
+				{
+					await Context.Channel.SendMessageAsync(
+						embed: new EmbedBuilder()
+							.WithColor(Color.Red)
+							.WithTitle("Halt! Who goes there-")
+							.WithDescription("One of the users you mentioned doesn't want to have commands run on them!")
+							.WithFooter($"To apply this yourself, please add the '{gUser.Guild.GetRole(funCommand.RpDeniedRole).Name}' role!")
+							.WithCurrentTimestamp()
+							.Build()
+					);
+
+					return;
+				}
+            }
 
 			int Percentage = new Random((User.Id / Math.Round(DateTime.UnixEpoch.Subtract(DateTime.UtcNow).TotalDays)).ToString().GetHash()).Next(102);
 

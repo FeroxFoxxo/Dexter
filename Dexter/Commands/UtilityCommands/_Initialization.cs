@@ -56,13 +56,6 @@ namespace Dexter.Commands
 		public IServiceProvider ServiceProvider { get; set; }
 
 		/// <summary>
-		/// Levelling role for getting the Awoo role.
-		/// </summary>
-
-		public LevelingConfiguration LevelingConfiguration { get; set; }
-
-
-		/// <summary>
 		/// Service responsible for parsing and overall managing interaction with commands issued by users.
 		/// </summary>
 

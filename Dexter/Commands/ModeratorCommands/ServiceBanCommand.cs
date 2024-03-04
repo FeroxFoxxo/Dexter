@@ -38,7 +38,7 @@ namespace Dexter.Commands
 
 			Restriction Apply;
 			bool[] Success;
-			List<string> Errored = new();
+			List<string> Errored = [];
 			UserRestriction userRestriction;
 
 			if (string.IsNullOrEmpty(Restrictions))

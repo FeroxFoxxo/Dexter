@@ -58,7 +58,7 @@ namespace Dexter.Events
 			if (LoggingChannel == null || LoggingChannel is not ITextChannel)
 				return;
 
-			Dictionary<string, List<string>> NulledConfigurations = new();
+			Dictionary<string, List<string>> NulledConfigurations = [];
 
 			Assembly.GetExecutingAssembly().GetTypes()
 					.Where(Type => Type.IsSubclassOf(typeof(JSONConfig)) && !Type.IsAbstract)
@@ -77,7 +77,7 @@ namespace Dexter.Events
 									return;
 
 							if (!NulledConfigurations.ContainsKey(Configuration.Name))
-								NulledConfigurations.Add(Configuration.Name, new());
+								NulledConfigurations.Add(Configuration.Name, []);
 
 							NulledConfigurations[Configuration.Name].Add(Property.Name);
 						}

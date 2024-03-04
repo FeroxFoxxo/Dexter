@@ -74,11 +74,11 @@ namespace Dexter.Commands
 			RollContext rollContext = new(n, d, new Random(), FunConfiguration);
 			string[] rollArgs = roll.SanitizeMentions().Split(' ')[1..];
 
-			List<string> report = new();
+			List<string> report = [];
 			List<int> rolls = rollContext.Roll();
 			report.Add(rollContext.StringifyRolls("Base Rolls", rolls));
 
-			List<string> errors = new();
+			List<string> errors = [];
 			foreach (string rawmod in rollArgs)
 			{
 				bool success = false;
@@ -281,7 +281,7 @@ namespace Dexter.Commands
 					int toKeep = int.Parse(mod[2..]);
 					if (toKeep >= r.Count) return r;
 					r.Sort();
-					List<int> result = new();
+					List<int> result = [];
 					for (int i = 0; i < toKeep; i++)
 					{
 						result.Add(r[^(i + 1)]);
@@ -297,7 +297,7 @@ namespace Dexter.Commands
 					int toKeep = int.Parse(mod[2..]);
 					if (toKeep >= r.Count) return r;
 					r.Sort();
-					List<int> result = new();
+					List<int> result = [];
 					for (int i = 0; i < toKeep; i++)
 					{
 						result.Add(r[i]);
@@ -311,9 +311,9 @@ namespace Dexter.Commands
 				(List<int> r, string mod, RollContext context) =>
 				{
 					int toDrop = int.Parse(mod[2..]);
-					if (toDrop >= r.Count) return new List<int>();
+					if (toDrop >= r.Count) return [];
 					r.Sort();
-					List<int> result = new();
+					List<int> result = [];
 					for (int i = 0; i < r.Count - toDrop; i++)
 					{
 						result.Add(r[i]);
@@ -327,9 +327,9 @@ namespace Dexter.Commands
 				(List<int> r, string mod, RollContext context) =>
 				{
 					int toDrop = int.Parse(mod[2..]);
-					if (toDrop >= r.Count) return new List<int>();
+					if (toDrop >= r.Count) return [];
 					r.Sort();
-					List<int> result = new();
+					List<int> result = [];
 					for (int i = 0; i < r.Count - toDrop; i++)
 					{
 						result.Add(r[^(i + 1)]);

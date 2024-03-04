@@ -84,13 +84,6 @@ namespace Dexter.Configurations
 		public Dictionary<ulong, int> ColorChangeRoles { get; set; }
 
 		/// <summary>
-		/// The snowflake ID for the private voice chat category.
-		/// </summary>
-		
-		public ulong PrivateCategoryID { get; set; }
-
-
-		/// <summary>
 		/// The name of the waiting VC that people will be in when waiting to be dragged in and out of private VCs.
 		/// </summary>
 

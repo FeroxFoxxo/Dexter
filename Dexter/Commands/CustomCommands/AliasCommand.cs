@@ -164,7 +164,7 @@ namespace Dexter.Commands
 
 			CustomCommand Command = CustomCommandDB.GetCommandByNameOrAlias(CommandName);
 
-			List<string> AddedAlias = new();
+			List<string> AddedAlias = [];
 
 			if (!string.IsNullOrEmpty(Command.Alias))
 				JsonConvert.DeserializeObject<List<string>>(Command.Alias);

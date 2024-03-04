@@ -40,7 +40,7 @@ namespace Dexter.Events
 
 			int tierAfter = UtilityCommands.GetRoleChangePerms(after, UtilityConfiguration);
 
-			List<SocketRole> toRemove = new();
+			List<SocketRole> toRemove = [];
 
 			foreach (SocketRole role in after.Roles)
 			{
@@ -65,8 +65,8 @@ namespace Dexter.Events
 
 			serviceCollection.AddSingleton(helpAbstraction);
 
-			List<string> removed = new ();
-			List<string> added = new ();
+			List<string> removed = [];
+			List<string> added = [];
 
 			var beforeRole = await before.GetOrDownloadAsync();
 
@@ -95,7 +95,7 @@ namespace Dexter.Events
 				}
 			}
 
-			List<EmbedBuilder> menu = new ();
+			List<EmbedBuilder> menu = [];
 
 			EmbedBuilder currentBuilder = null;
 

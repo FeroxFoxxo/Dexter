@@ -157,7 +157,7 @@ namespace Dexter.Events
 
 					IUser u = DiscordShardedClient.GetUser(gfid);
 					if (u is not null)
-						newRow[GreetFurConfiguration.Information["Users"]] = $"{u.Username}#{u.Discriminator}";
+						newRow[GreetFurConfiguration.Information["Users"]] = $"{u.Username}";
 
 					for (int d = 0; d < TRACKING_LENGTH; d++)
 					{
@@ -208,7 +208,7 @@ namespace Dexter.Events
 			if (options.HasFlag(GreetFurOptions.AddNewRows))
 			{
 				ValueRange range = new();
-				List<string[]> rows = new();
+				List<string[]> rows = [];
 
 				newActivity = GetAllRecentActivity(firstDay, TRACKING_LENGTH);
 
@@ -273,7 +273,7 @@ namespace Dexter.Events
 				BatchGetValuesResponse batchresp = await batchreq.ExecuteAsync();
 				ValueRange[] ranges = batchresp.ValueRanges.ToArray();
 
-				List<ulong> foundIDs = new();
+				List<ulong> foundIDs = [];
 				for (int i = 0; i < ranges[1].Values.Count; i++)
 				{
 					if (!ulong.TryParse(ranges[1].Values[i][0]?.ToString().Split('/').Last() ?? "", out ulong id) || id == 0)
@@ -317,14 +317,14 @@ namespace Dexter.Events
 						newActivity = GetAllRecentActivity(firstDay, TRACKING_LENGTH);
 
 					ValueRange range = new();
-					List<string[]> newRows = new();
+					List<string[]> newRows = [];
 					int row = ranges[1].Values.Count; 
 
 					foreach (ulong id in newActivity.Keys)
 					{
 						if (tbpFoundIDs.Contains(id)) continue;
 
-						Dictionary<int, int> activity = new();
+						Dictionary<int, int> activity = [];
 						foreach(GreetFurRecord record in newActivity[id])
 						{
 							if (record.IsYes(GreetFurConfiguration))
@@ -365,7 +365,7 @@ namespace Dexter.Events
 
 			List<GreetFurRecord> allEntries = GreetFurDB.Records.AsQueryable().Where(r => r.Date >= day && r.Date < day + length).ToList();
 
-			Dictionary<ulong, List<GreetFurRecord>> result = new();
+			Dictionary<ulong, List<GreetFurRecord>> result = [];
 
 			foreach (GreetFurRecord r in allEntries)
 			{
@@ -375,7 +375,7 @@ namespace Dexter.Events
 				}
 				else
 				{
-					result.Add(r.UserId, new List<GreetFurRecord>() { r });
+					result.Add(r.UserId, [r]);
 				}
 			}
 

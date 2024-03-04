@@ -161,11 +161,7 @@ namespace Dexter.Games
 
 		private string MissingLettersExpression()
 		{
-			HashSet<char> missing = new();
-			foreach (char c in ScorePerLetter.Keys)
-			{
-				missing.Add(c);
-			}
+			HashSet<char> missing = [.. ScorePerLetter.Keys];
 
 			foreach (char c in LettersMissed.ToCharArray())
 			{
@@ -277,7 +273,7 @@ namespace Dexter.Games
 						return true;
 					}
 
-					HashSet<char> missed = new();
+					HashSet<char> missed = [];
 					foreach (char c in value.ToCharArray())
 					{
 						if (!char.IsLetter(c)) missed.Add(char.ToUpper('c'));

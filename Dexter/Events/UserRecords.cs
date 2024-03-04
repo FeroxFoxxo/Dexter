@@ -108,7 +108,7 @@ namespace Dexter.Events
 
 			using var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
 
-			List<NameRecord> Result = new();
+			List<NameRecord> Result = [];
 			List<NameRecord> Records = ProfilesDB.Names.AsEnumerable().Where(n => n.Type == NameType && n.UserID == User.Id).ToList();
 			Pattern = Pattern.Trim();
 
@@ -130,7 +130,7 @@ namespace Dexter.Events
 					if (Record.Name == Pattern)
 					{
 						ProfilesDB.Names.Remove(Record);
-						Result = new List<NameRecord>() { Record.Clone() };
+						Result = [Record.Clone()];
 						break;
 					}
 				}

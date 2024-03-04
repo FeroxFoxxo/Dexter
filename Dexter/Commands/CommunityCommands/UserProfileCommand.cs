@@ -1337,9 +1337,9 @@ namespace Dexter.Commands
 
         public EmbedBuilder[] BuildUserListEmbeds(IEnumerable<ulong> users, string title, string description, Func<IUser, string> displayPattern)
         {
-            List<EmbedBuilder> embeds = new();
+            List<EmbedBuilder> embeds = [];
             int inPage = CommunityConfiguration.MaxUsersPerEmbed;
-            List<StringBuilder> userlists = new();
+            List<StringBuilder> userlists = [];
 
             foreach (ulong userID in users)
             {

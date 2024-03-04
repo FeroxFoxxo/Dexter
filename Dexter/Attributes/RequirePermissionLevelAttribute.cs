@@ -65,25 +65,6 @@ namespace Dexter.Attributes.Methods
 			if (botConfiguration == null)
 				return PreconditionResult.FromSuccess();
 
-			if (PermissionLevel == PermissionLevel.DJ)
-			{
-				if (services.GetService<HelpAbstraction>() != null)
-					return PreconditionResult.FromSuccess();
-				else
-				{
-					if (services.GetService<Music>().LavaNode.TryGetPlayer(context.Guild, out var player))
-					{
-						int uCount = 0;
-						
-						await foreach (var _ in player.VoiceChannel.GetUsersAsync())
-							uCount++;
-
-						if (uCount <= 2)
-							return PreconditionResult.FromSuccess();
-					}
-				}
-			}
-
 			return context.User.GetPermissionLevel(discordShardedClient, botConfiguration) >= PermissionLevel
 				? PreconditionResult.FromSuccess()
 				: PreconditionResult.FromError($"Haiya! To run the `{commandInfo.Name}` command you need to have the " +

@@ -92,7 +92,7 @@ namespace Dexter.Commands
 
 			bool success = false;
 
-			List<string> feedback = new();
+			List<string> feedback = [];
 			for (int i = 1; i < args.Length; i += 2)
 			{
 				bool tsuccess = GreetFurTimePeriod.TryParse(args[i - 1], out GreetFurTimePeriod t, out string tfb, GreetFurConfiguration);
@@ -163,7 +163,7 @@ namespace Dexter.Commands
 				}
 			}
 
-			List<string> flagsExpr = new();
+			List<string> flagsExpr = [];
 			if (activity.flags.HasFlag(ActivityFlags.Exempt)) flagsExpr.Add("Exempt");
 			if (activity.flags.HasFlag(ActivityFlags.MutedUser)) flagsExpr.Add("Mute");
 			if (activity.force) flagsExpr.Add("Force");

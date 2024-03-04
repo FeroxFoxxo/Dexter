@@ -36,13 +36,13 @@ namespace Dexter.Commands
 		{
 			if (string.IsNullOrEmpty(Command))
 			{
-				List<EmbedBuilder> Embeds = new();
-
-				Embeds.Add(
-					BuildEmbed(EmojiEnum.Love)
-						.WithTitle($"{DiscordShardedClient.CurrentUser.Username} Help")
-						.WithDescription($"{BotConfiguration.Help}")
-				);
+				List<EmbedBuilder> Embeds =
+                [
+                    BuildEmbed(EmojiEnum.Love)
+                        .WithTitle($"{DiscordShardedClient.CurrentUser.Username} Help")
+                        .WithDescription($"{BotConfiguration.Help}")
+,
+                ];
 
 				ServiceCollection ServiceCollection = new();
 
@@ -87,7 +87,7 @@ namespace Dexter.Commands
 						Embeds.Add(CurrentBuilder);
 				}
 
-				List<string> Pages = new();
+				List<string> Pages = [];
 				string PreviousPage = $"{DiscordShardedClient.CurrentUser.Username} Help";
 				int PageNumber = 0;
 

@@ -93,7 +93,7 @@ namespace Dexter.Commands
 
 
 			await BuildEmbed(EmojiEnum.Love)
-				.WithTitle($"Record for {user.Username}#{user.Discriminator}")
+				.WithTitle($"Record for {user.Username}")
 				.WithDescription($"Overall performance: {total} / {daysGuess - exemptions} ({100 * (float)total / (daysGuess - exemptions):G3}%)")
 				.AddField("Yes", total, true)
 				.AddField("No", daysGuess - exemptions - total, true)

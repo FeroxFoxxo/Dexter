@@ -144,6 +144,12 @@ namespace Dexter.Configurations
 		/// </summary>
 
 		public int MaxDieRollExpressionCount { get; set; }
-	}
+
+		/// <summary>
+		/// A role that denied roleplaying commands being run on a person.
+		/// </summary>
+
+		public ulong RpDeniedRole = 1214049348975992852;
+    }
 
 }

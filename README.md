@@ -1,7 +1,7 @@
 <html>
    <body>
       <h1 align="center" style="position: relative;">
-         <img src="https://cdn.discordapp.com/attachments/781077443338960926/807479083297931264/DexLove.png" width="200" style="border-radius: 50%;" align="center">
+         <img src="LogoBanner.png?raw=true" width="200" style="border-radius: 50%;" align="center">
          <br>
          Dexter .NET
       </h1>
@@ -18,6 +18,8 @@
          <img alt="GitHub" src="https://img.shields.io/github/license/feroxfoxxo/dexter?label=License">
          </a>
       </p>
+      <h3 align="center">Note: this branch should not be used!</h3>
+      <h4 align="center">This branch contains a TON of removed features from the base version of Dexter and acts as what is currently on the live server. You will not find the additions here more useful than what is included in the other branch!</h4>
       <p align="center">
          <a href="#built-with">Libraries</a> •
          <a href="#commemorations">Commemorations</a> •

@@ -115,11 +115,17 @@ namespace Dexter.Commands
 
 				DiscordWebhookClient Webhook = await CreateOrGetWebhook(Context.Channel, FunConfiguration.HeadpatWebhookName);
 
+				ulong? threadId = null;
+
+				if (Context.Channel is IThreadChannel threadChannel)
+					threadId = Context.Channel.Id;
+
                 await Webhook.SendMessageAsync(
 					Emote.ToString(),
 					username: string.IsNullOrEmpty(Context.Guild.GetUser(Context.User.Id).Nickname) ? Context.User.Username : Context.Guild.GetUser(Context.User.Id).Nickname,
-					avatarUrl: Context.User.GetTrueAvatarUrl()
-				);
+					avatarUrl: Context.User.GetTrueAvatarUrl(),
+					threadId: threadId
+                );
 
 				await Guild.DeleteEmoteAsync(Emote);
 			}

@@ -40,12 +40,13 @@ namespace Dexter.Commands
 			if (User == null)
 			{
 				if (Context.Message.MentionedUsers.Count > 0)
-					User = Context.Message.MentionedUsers.First();
+					User = Context.Message.MentionedUsers.FirstOrDefault();
 
-				User = Context.Guild.GetUser(Context.User.Id);
-			}
-			else if (User is IGuildUser gUser)
-			{
+				if (User == null)
+                    User = Context.Guild.GetUser(Context.User.Id);
+            }
+            else if (User is IGuildUser gUser)
+            {
 				var funCommand = ServiceProvider.GetRequiredService<FunConfiguration>();
 
 				if (gUser.RoleIds.Contains(funCommand.RpDeniedRole))

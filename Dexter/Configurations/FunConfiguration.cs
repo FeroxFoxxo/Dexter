@@ -149,7 +149,7 @@ namespace Dexter.Configurations
 		/// A role that denied roleplaying commands being run on a person.
 		/// </summary>
 
-		public ulong RpDeniedRole = 1214049348975992852;
+		public ulong RpDeniedRole { get; set; }
     }
 
 }

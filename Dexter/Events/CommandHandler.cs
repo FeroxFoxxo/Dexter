@@ -156,31 +156,30 @@ namespace Dexter.Events
 
 									foreach (ulong id in commandContext.Message.MentionedUserIds ?? Array.Empty<ulong>())
 									{
-										IUser user = DiscordShardedClient.GetUser(id);
-
-										if (user is not null)
-											userMentions.Add(user.Mention);
-
-                                        if (user is IGuildUser gUser)
+										if (commandContext.Guild != null)
                                         {
+                                            var user = await commandContext.Guild.GetUserAsync(id);
+
+                                            if (user is not null)
+                                                userMentions.Add(user.Mention);
+
                                             var funCommand = ServiceProvider.GetRequiredService<FunConfiguration>();
 
-                                            if (gUser.RoleIds.Contains(funCommand.RpDeniedRole))
-                                            {
-                                                await commandContext.Channel.SendMessageAsync(
-                                                    embed: new EmbedBuilder()
-                                                        .WithColor(Color.Red)
-                                                        .WithTitle("Halt! Who goes there-")
-                                                        .WithDescription("One of the users you mentioned doesn't want to have commands run on them!")
-                                                        .WithFooter($"To apply this yourself, please add the '{gUser.Guild.GetRole(funCommand.RpDeniedRole).Name}' role!")
-                                                        .WithCurrentTimestamp()
-                                                        .Build()
-                                                );
+											if (user.RoleIds.Contains(funCommand.RpDeniedRole))
+											{
+												await commandContext.Channel.SendMessageAsync(
+													embed: new EmbedBuilder()
+														.WithColor(Color.Red)
+														.WithTitle("Halt! Who goes there-")
+														.WithDescription("One of the users you mentioned doesn't want to have commands run on them!")
+														.WithFooter($"To apply this yourself, please add the '{user.Guild.GetRole(funCommand.RpDeniedRole).Name}' role!")
+														.WithCurrentTimestamp()
+														.Build()
+												);
 
-                                                return;
-                                            }
+												return;
+											}
                                         }
-
                                     }
 
                                     reply = userMentions.Any()

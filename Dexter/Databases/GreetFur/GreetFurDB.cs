@@ -12,19 +12,19 @@ namespace Dexter.Databases.GreetFur
 	/// An abstraction of the data structure holding all relevant information about user levels.
 	/// </summary>
 
-	public class GreetFurDB : Database
+	public class GreetFurDB(ProfilesDB profilesDB, LanguageConfiguration languageConfiguration) : Database
 	{
 		/// <summary>
 		/// Holds relevant information about users' time zones and personal details relevant to recordkeeping.
 		/// </summary>
 
-		private readonly ProfilesDB ProfilesDB;
+		private readonly ProfilesDB ProfilesDB = profilesDB;
 
 		/// <summary>
 		/// Holds relevant configuration about time zone formatting.
 		/// </summary>
 
-		private readonly LanguageConfiguration LanguageConfiguration;
+		private readonly LanguageConfiguration LanguageConfiguration = languageConfiguration;
 
 		/// <summary>
 		/// The set of all records for days GreetFurs have been active.
@@ -32,22 +32,16 @@ namespace Dexter.Databases.GreetFur
 
 		public DbSet<GreetFurRecord> Records { get; set; }
 
-		public GreetFurDB(ProfilesDB profilesDB, LanguageConfiguration languageConfiguration)
-		{
-			ProfilesDB = profilesDB;
-			LanguageConfiguration = languageConfiguration;
-		}
+        /// <summary>
+        /// Gets a number of days of activity for a user from a given <paramref name="day"/> up to a given <paramref name="length"/>.
+        /// </summary>
+        /// <param name="greetFurId">The ID of the target user to query activity for.</param>
+        /// <param name="day">The day to start pulling records from.</param>
+        /// <param name="length">The length of the period to query for, in days.</param>
+        /// <param name="fakeNullEntries">If <see langword="false"/>, entries not found in the database will be null as opposed to records with no messages.</param>
+        /// <returns>An array of <see cref="GreetFurRecord"/> whose length equals <paramref name="length"/>. If no activity is logged for a user, it returns a record with no messages.</returns>
 
-		/// <summary>
-		/// Gets a number of days of activity for a user from a given <paramref name="day"/> up to a given <paramref name="length"/>.
-		/// </summary>
-		/// <param name="greetFurId">The ID of the target user to query activity for.</param>
-		/// <param name="day">The day to start pulling records from.</param>
-		/// <param name="length">The length of the period to query for, in days.</param>
-		/// <param name="fakeNullEntries">If <see langword="false"/>, entries not found in the database will be null as opposed to records with no messages.</param>
-		/// <returns>An array of <see cref="GreetFurRecord"/> whose length equals <paramref name="length"/>. If no activity is logged for a user, it returns a record with no messages.</returns>
-
-		public GreetFurRecord[] GetRecentActivity(ulong greetFurId, int day, int length = 14, bool fakeNullEntries = true)
+        public GreetFurRecord[] GetRecentActivity(ulong greetFurId, int day, int length = 14, bool fakeNullEntries = true)
 		{
 			GreetFurRecord[] result = new GreetFurRecord[length];
 			for(int i = 0; i < length; i++)
@@ -125,8 +119,12 @@ namespace Dexter.Databases.GreetFur
 			r.MessageCount += increment;
 			r.Activity |= activity;
 
-			if (save) SaveChanges();
-			return r;
+			if (save)
+            {
+                SaveChanges();
+            }
+
+            return r;
 		}
 
 		/// <summary>

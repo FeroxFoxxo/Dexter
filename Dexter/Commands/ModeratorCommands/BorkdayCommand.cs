@@ -32,20 +32,21 @@ namespace Dexter.Commands
 
 		public async Task GiveBorkday([Optional] IGuildUser user)
 		{
-			if (user == null)
-				user = Context.Guild.GetUser(Context.User.Id);
+			user ??= Context.Guild.GetUser(Context.User.Id);
 
-			UserProfile Borkday = ProfilesDB.Profiles.Find(user.Id);
+            UserProfile Borkday = ProfilesDB.Profiles.Find(user.Id);
 
 			if (Borkday == null)
-				ProfilesDB.Profiles.Add(
+            {
+                ProfilesDB.Profiles.Add(
 					new UserProfile()
 					{
 						BorkdayTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
 						UserID = user.Id
 					}
 				);
-			else
+            }
+            else
 			{
 				if (Borkday.BorkdayTime + TimeSpan.FromDays(364).Seconds > DateTimeOffset.Now.ToUnixTimeSeconds())
 				{
@@ -60,8 +61,10 @@ namespace Dexter.Commands
 					return;
 				}
 				else
-					Borkday.BorkdayTime = DateTimeOffset.Now.ToUnixTimeSeconds();
-			}
+                {
+                    Borkday.BorkdayTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+                }
+            }
 
 			IRole Role = Context.Guild.GetRole(
 				user.GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator ?

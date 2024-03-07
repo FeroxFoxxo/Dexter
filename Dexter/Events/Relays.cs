@@ -39,9 +39,11 @@ namespace Dexter.Events
 			Relay Relay = RelayDB.Relays.Find(SocketMessage.Channel.Id);
 
 			if (Relay == null)
-				return;
+            {
+                return;
+            }
 
-			if (Relay.CurrentMessageCount > Relay.MessageInterval)
+            if (Relay.CurrentMessageCount > Relay.MessageInterval)
 			{
 				Relay.CurrentMessageCount = 0;
 

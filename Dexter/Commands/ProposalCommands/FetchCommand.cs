@@ -27,15 +27,19 @@ namespace Dexter.Commands
 			Proposal Proposal = ProposalDB.GetProposalByNameOrID(Tracker);
 
 			if (Proposal == null)
-				await BuildEmbed(EmojiEnum.Annoyed)
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Proposal does not exist!")
 					.WithDescription($"Cound not fetch the proposal from tracker / message ID / staff message ID `{Tracker}`.\n" +
 						$"Are you sure it exists?")
 					.SendEmbed(Context.Channel);
-			else
-				await ProposalService.BuildProposal(Proposal)
+            }
+            else
+            {
+                await ProposalService.BuildProposal(Proposal)
 					.SendEmbed(Context.Channel);
-		}
+            }
+        }
 
 	}
 

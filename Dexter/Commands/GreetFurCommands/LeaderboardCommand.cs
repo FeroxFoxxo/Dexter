@@ -54,36 +54,47 @@ namespace Dexter.Commands
 			{
 				int Total = int.Parse(Columns.Values[Index][^1].ToString());
 
-				if (!GreetFurLeaderboard.ContainsKey(Total))
-					GreetFurLeaderboard.Add(Total, []);
+				if (!GreetFurLeaderboard.TryGetValue(Total, out List<string> value))
+                {
+                    value = ([]);
+                    GreetFurLeaderboard.Add(Total, value);
+                }
 
-				GreetFurLeaderboard[Total].Add(Columns.Values[Index][0].ToString());
+                value.Add(Columns.Values[Index][0].ToString());
 			}
 
 			List<string> GreetFurs = [];
 
 			foreach (KeyValuePair<int, List<string>> GreetFur in GreetFurLeaderboard.OrderByDescending(Key => Key.Key))
-				foreach (string GreetFurName in GreetFur.Value)
-					if (!string.IsNullOrEmpty(GreetFurName))
-						GreetFurs.Add($"{GreetFurs.Count + 1}. {GreetFurName} - `{GreetFur.Key}`\n");
+            {
+                foreach (string GreetFurName in GreetFur.Value)
+                {
+                    if (!string.IsNullOrEmpty(GreetFurName))
+                    {
+                        GreetFurs.Add($"{GreetFurs.Count + 1}. {GreetFurName} - `{GreetFur.Key}`\n");
+                    }
+                }
+            }
 
-			List<EmbedBuilder> EmbedList = [];
+            List<EmbedBuilder> EmbedList = [];
 
 			for (int Embeds = 0; Embeds < Math.Ceiling(Convert.ToDecimal(GreetFurs.Count) / 20); Embeds++)
 			{
 				string Description = string.Empty;
 
 				for (int i = 0; i < 20 && i < GreetFurs.Count - Embeds * 20; i++)
-					Description += GreetFurs[i + Embeds * 20];
+                {
+                    Description += GreetFurs[i + Embeds * 20];
+                }
 
-				EmbedList.Add(
+                EmbedList.Add(
 					BuildEmbed(EmojiEnum.Love)
 					.WithTitle("GreetFur Leaderboard.")
 					.WithDescription(Description)
 				);
 			}
 
-			await CreateReactionMenu(EmbedList.ToArray(), Context.Channel);
+			await CreateReactionMenu([.. EmbedList], Context.Channel);
 		}
 
 	}

@@ -45,10 +45,12 @@ namespace Dexter.Events
 		public async Task MessageReceived(SocketMessage SocketMessage)
 		{
 			// We first check to see if the channel is in the commissions corner and not from a bot to continue.
-			if (!ChannelCooldownConfiguration.ChannelCooldowns.ContainsKey(SocketMessage.Channel.Id) || SocketMessage.Author.IsBot)
-				return;
+			if (!ChannelCooldownConfiguration.ChannelCooldowns.TryGetValue(SocketMessage.Channel.Id, out System.Collections.Generic.Dictionary<string, long> value) || SocketMessage.Author.IsBot)
+            {
+                return;
+            }
 
-			using var scope = ServiceProvider.CreateScope();
+            using var scope = ServiceProvider.CreateScope();
 
 			using var CooldownDB = scope.ServiceProvider.GetRequiredService<CooldownDB>();
 
@@ -59,11 +61,11 @@ namespace Dexter.Events
 			{
 
 				// We then check to see if the cooldown is expired. If so, we set the new time.
-				if (Cooldown.TimeOfCooldown + ChannelCooldownConfiguration.ChannelCooldowns[SocketMessage.Channel.Id]["CooldownTime"] > DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+				if (Cooldown.TimeOfCooldown + value["CooldownTime"] > DateTimeOffset.UtcNow.ToUnixTimeSeconds())
 				{
 
 					// We then check to see if the cooldown is in the grace-period. This is a period of time where the user can send multiple messages. Once this cooldown has ended we warn the user.
-					if (Cooldown.TimeOfCooldown + ChannelCooldownConfiguration.ChannelCooldowns[SocketMessage.Channel.Id]["GracePeriod"] < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+					if (Cooldown.TimeOfCooldown + value["GracePeriod"] < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
 					{
 						DateTime CooldownTime = DateTime.UnixEpoch.AddSeconds(Cooldown.TimeOfCooldown);
 
@@ -74,7 +76,7 @@ namespace Dexter.Events
 						await BuildEmbed(EmojiEnum.Love)
 							.WithTitle($"Haiya, {SocketMessage.Author.Username}.")
 							.WithDescription($"Just a friendly reminder you are only allowed to post in this channel every" +
-								$" {TimeSpan.FromSeconds(ChannelCooldownConfiguration.ChannelCooldowns[SocketMessage.Channel.Id]["CooldownTime"]).TotalDays} days. " +
+								$" {TimeSpan.FromSeconds(value["CooldownTime"]).TotalDays} days. " +
 								$"Please take a lookie over the channel pins regarding the regulations of this channel if you haven't already <3")
 							.AddField("Last Message Sent:", $"{CooldownTime.ToLongTimeString()}, {CooldownTime.ToLongDateString()}")
 							.WithFooter($"Times are in {(TimeZoneInfo.Local.IsDaylightSavingTime(CooldownTime) ? TimeZoneInfo.Local.DaylightName : TimeZoneInfo.Local.StandardName)}.")

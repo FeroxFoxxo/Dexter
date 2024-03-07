@@ -71,18 +71,24 @@ namespace Dexter
 			// Sets the current, active directory to the working directory specified in the azure cloud.
 
 			if (!string.IsNullOrEmpty(directory))
-				Directory.SetCurrentDirectory(directory);
-			else
-				Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            {
+                Directory.SetCurrentDirectory(directory);
+            }
+            else
+            {
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            }
 
-			string databaseDirectory = Path.Join(Directory.GetCurrentDirectory(), "Databases");
+            string databaseDirectory = Path.Join(Directory.GetCurrentDirectory(), "Databases");
 
 			if (!Directory.Exists(databaseDirectory))
-				Directory.CreateDirectory(databaseDirectory);
+            {
+                Directory.CreateDirectory(databaseDirectory);
+            }
 
-			// Get information on the bot through REST.
+            // Get information on the bot through REST.
 
-			Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = ConsoleColor.Cyan;
 
 			var botInfo = await GetNameAndShardsOfBot(token);
 
@@ -106,16 +112,20 @@ namespace Dexter
 				services.AddSingleton(new ClientCredentialsRequest(spotifyID, spotifySecret));
 			}
 			else
-				services.AddSingleton(new ClientCredentialsRequest("UNKNOWN", "UNKNOWN"));
+            {
+                services.AddSingleton(new ClientCredentialsRequest("UNKNOWN", "UNKNOWN"));
+            }
 
-			// Init WolfRam Alpha.
+            // Init WolfRam Alpha.
 
-			if (!string.IsNullOrEmpty(wolframAPI))
-				services.AddSingleton(new WolframAlphaClient(wolframAPI));
+            if (!string.IsNullOrEmpty(wolframAPI))
+            {
+                services.AddSingleton(new WolframAlphaClient(wolframAPI));
+            }
 
-			// Init Google API.
+            // Init Google API.
 
-			if (!File.Exists("Credentials.json"))
+            if (!File.Exists("Credentials.json"))
 			{
 				logger.Error(
 					$"Credential file 'Credentials.json' does not exist!"
@@ -238,9 +248,11 @@ namespace Dexter
 					});
 
 			if (hasErrored)
-				return;
+            {
+                return;
+            }
 
-			GetDatabases().ForEach(t => services.AddScoped(t));
+            GetDatabases().ForEach(t => services.AddScoped(t));
 
 			GetEvents().ForEach(t => services.AddSingleton(t));
 

@@ -68,18 +68,27 @@ namespace Dexter.Commands
             if (target.RoleIds.Contains(role.Id) != remove)
             {
                 if (remove)
+                {
                     await Context.Channel.SendMessageAsync($"The target user ({targetname}) doesn't have the {role.Name} role!");
+                }
                 else
+                {
                     await Context.Channel.SendMessageAsync($"The target user ({targetname}) already has the {role.Name} role!");
+                }
+
                 return;
             }
 
             try
             {
                 if (remove)
+                {
                     await target.RemoveRoleAsync(role);
+                }
                 else
+                {
                     await target.AddRoleAsync(role);
+                }
             }
             catch
             {

@@ -51,14 +51,18 @@ namespace Dexter.Events
 			await DiscordShardedClient.SetStatusAsync(UserStatus.Invisible);
 
 			if (HasStarted)
-				return;
+            {
+                return;
+            }
 
-			SocketChannel LoggingChannel = DiscordShardedClient.GetChannel(BotConfiguration.ModerationLogChannelID);
+            SocketChannel LoggingChannel = DiscordShardedClient.GetChannel(BotConfiguration.ModerationLogChannelID);
 
 			if (LoggingChannel == null || LoggingChannel is not ITextChannel)
-				return;
+            {
+                return;
+            }
 
-			Dictionary<string, List<string>> NulledConfigurations = [];
+            Dictionary<string, List<string>> NulledConfigurations = [];
 
 			Assembly.GetExecutingAssembly().GetTypes()
 					.Where(Type => Type.IsSubclassOf(typeof(JSONConfig)) && !Type.IsAbstract)
@@ -73,13 +77,20 @@ namespace Dexter.Events
 							object Value = Property.GetValue(Service);
 
 							if (Value != null)
-								if (!string.IsNullOrEmpty(Value.ToString()) && !Value.ToString().Equals("0"))
-									return;
+                            {
+                                if (!string.IsNullOrEmpty(Value.ToString()) && !Value.ToString().Equals("0"))
+                                {
+                                    return;
+                                }
+                            }
 
-							if (!NulledConfigurations.ContainsKey(Configuration.Name))
-								NulledConfigurations.Add(Configuration.Name, []);
+                            if (!NulledConfigurations.TryGetValue(Configuration.Name, out List<string> value))
+                            {
+                                value = ([]);
+                                NulledConfigurations.Add(Configuration.Name, value);
+                            }
 
-							NulledConfigurations[Configuration.Name].Add(Property.Name);
+                            value.Add(Property.Name);
 						}
 					);
 				}
@@ -99,17 +110,21 @@ namespace Dexter.Events
 			string UnsetConfigurations = string.Empty;
 
 			foreach (KeyValuePair<string, List<string>> Configuration in NulledConfigurations)
-				UnsetConfigurations += $"**{Configuration.Key} -** {string.Join(", ", Configuration.Value.Take(Configuration.Value.Count - 1)) + (Configuration.Value.Count > 1 ? " and " : "") + Configuration.Value.LastOrDefault()}\n";
+            {
+                UnsetConfigurations += $"**{Configuration.Key} -** {string.Join(", ", Configuration.Value.Take(Configuration.Value.Count - 1)) + (Configuration.Value.Count > 1 ? " and " : "") + Configuration.Value.LastOrDefault()}\n";
+            }
 
-			if (BotConfiguration.EnableStartupAlert || NulledConfigurations.Count > 0)
-				await BuildEmbed(EmojiEnum.Love)
+            if (BotConfiguration.EnableStartupAlert || NulledConfigurations.Count > 0)
+            {
+                await BuildEmbed(EmojiEnum.Love)
 					.WithTitle("Startup complete!")
 					.WithDescription($"This is **{DiscordShardedClient.CurrentUser.Username} v{Startup.Version}** running **Discord.Net v{DiscordConfig.Version}**!")
-					.AddField("Latest Commit:", LastCommit.Length > 1000 ? $"{LastCommit.Substring(0, 1000)}..." : LastCommit)
-					.AddField(NulledConfigurations.Count > 0, "Unapplied Configurations:", UnsetConfigurations.Length > 600 ? $"{UnsetConfigurations.Substring(0, 600)}..." : UnsetConfigurations)
+					.AddField("Latest Commit:", LastCommit.Length > 1000 ? $"{LastCommit[..1000]}..." : LastCommit)
+					.AddField(NulledConfigurations.Count > 0, "Unapplied Configurations:", UnsetConfigurations.Length > 600 ? $"{UnsetConfigurations[..600]}..." : UnsetConfigurations)
 					.SendEmbed(LoggingChannel as ITextChannel);
+            }
 
-			HasStarted = true;
+            HasStarted = true;
 		}
 
 	}

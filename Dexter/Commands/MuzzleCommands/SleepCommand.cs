@@ -46,9 +46,11 @@ namespace Dexter.Commands
 				idToMuzzle = ulong.Parse(argID);
 			}
 			else
-				idToMuzzle = Context.User.Id;
+            {
+                idToMuzzle = Context.User.Id;
+            }
 
-			IGuildUser toMuzzle = Context.Guild.GetUser(idToMuzzle);
+            IGuildUser toMuzzle = Context.Guild.GetUser(idToMuzzle);
 
 			TimeSpan duration = TimeSpan.FromSeconds(MuzzleConfiguration.SleepDuration);
 			if (toMuzzle.TimedOutUntil.HasValue && toMuzzle.TimedOutUntil.Value.Subtract(DateTime.Now) > duration)

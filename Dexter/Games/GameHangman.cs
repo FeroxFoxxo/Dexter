@@ -14,11 +14,16 @@ using Dexter.Helpers;
 namespace Dexter.Games
 {
 
-	/// <summary>
-	/// Represents an instance of a hangman game.
-	/// </summary>
+    /// <summary>
+    /// Represents an instance of a hangman game.
+    /// </summary>
+    /// <remarks>
+    /// The initializer for the game class, setting both the instance information and the bot configuration.
+    /// </remarks>
+    /// <param name="game">The current instance of the game.</param>
+    /// <param name="botConfiguration">An instance of the bot's configuraiton.</param>
 
-	public class GameHangman : GameTemplate
+    public class GameHangman(GameInstance game, BotConfiguration botConfiguration) : GameTemplate(game, botConfiguration, "Default, _______, 6, 6, ")
 	{
 		private string Term
 		{
@@ -58,9 +63,17 @@ namespace Dexter.Games
 			}
 			set
 			{
-				if (value < 0) return;
-				if (value > MaxLives) MaxLives = value;
-				string processedValue = value.ToString();
+				if (value < 0)
+                {
+                    return;
+                }
+
+                if (value > MaxLives)
+                {
+                    MaxLives = value;
+                }
+
+                string processedValue = value.ToString();
 				string[] newValue = Game.Data.Split(", ");
 				newValue[2] = processedValue;
 				Game.Data = string.Join(", ", newValue);
@@ -75,13 +88,20 @@ namespace Dexter.Games
 			}
 			set
 			{
-				if (value < 1) return;
-				string processedValue = value.ToString();
+				if (value < 1)
+                {
+                    return;
+                }
+
+                string processedValue = value.ToString();
 				string[] newValue = Game.Data.Split(", ");
 				newValue[3] = processedValue;
 				Game.Data = string.Join(", ", newValue);
-				if (Lives > value) Lives = value;
-			}
+				if (Lives > value)
+                {
+                    Lives = value;
+                }
+            }
 		}
 
 		private string LettersMissed
@@ -89,8 +109,12 @@ namespace Dexter.Games
 			get
 			{
 				string s = Game.Data.Split(", ")[4];
-				if (s == "-") return "";
-				return s;
+				if (s == "-")
+                {
+                    return "";
+                }
+
+                return s;
 			}
 			set
 			{
@@ -137,8 +161,11 @@ namespace Dexter.Games
 			char[] chars = term.ToCharArray();
 			for (int i = 0; i < chars.Length; i++)
 			{
-				if (char.IsLetter(chars[i])) chars[i] = '_';
-			}
+				if (char.IsLetter(chars[i]))
+                {
+                    chars[i] = '_';
+                }
+            }
 			return string.Join("", chars);
 		}
 
@@ -155,8 +182,12 @@ namespace Dexter.Games
 		private string MistakesExpression()
 		{
 			string missed = string.Join(", ", LettersMissed);
-			if (missed.Length == 0) return "-";
-			return missed.ToString();
+			if (missed.Length == 0)
+            {
+                return "-";
+            }
+
+            return missed.ToString();
 		}
 
 		private string MissingLettersExpression()
@@ -165,12 +196,18 @@ namespace Dexter.Games
 
 			foreach (char c in LettersMissed.ToCharArray())
 			{
-				if (missing.Contains(c)) missing.Remove(c);
-			}
+				if (missing.Contains(c))
+                {
+                    missing.Remove(c);
+                }
+            }
 			foreach (char c in Guess.ToUpper().ToCharArray())
 			{
-				if (missing.Contains(c)) missing.Remove(c);
-			}
+				if (missing.Contains(c))
+                {
+                    missing.Remove(c);
+                }
+            }
 
 			return string.Join("", missing);
 		}
@@ -186,8 +223,12 @@ namespace Dexter.Games
 			Game.Data = EmptyData;
 			Game.LastUserInteracted = Game.Master;
 			Lives = MaxLives = FunConfiguration.HangmanDefaultLives;
-			if (GamesDB is null) return;
-			Player[] Players = GamesDB.GetPlayersFromInstance(Game.GameID);
+			if (GamesDB is null)
+            {
+                return;
+            }
+
+            Player[] Players = GamesDB.GetPlayersFromInstance(Game.GameID);
 			foreach (Player p in Players)
 			{
 				p.Score = 0;
@@ -266,7 +307,7 @@ namespace Dexter.Games
 					return true;
 				case "missed":
 				case "mistakes":
-					if (value.ToLower() == "none")
+					if (value.Equals("none", StringComparison.CurrentCultureIgnoreCase))
 					{
 						LettersMissed = "";
 						feedback = "Reset mistakes.";
@@ -276,8 +317,11 @@ namespace Dexter.Games
 					HashSet<char> missed = [];
 					foreach (char c in value.ToCharArray())
 					{
-						if (!char.IsLetter(c)) missed.Add(char.ToUpper('c'));
-					}
+						if (!char.IsLetter(c))
+                        {
+                            missed.Add(char.ToUpper('c'));
+                        }
+                    }
 					LettersMissed = string.Join("", missed);
 					feedback = $"Missed letters set to {{{string.Join(", ", missed)}}}.";
 					return true;
@@ -345,11 +389,15 @@ namespace Dexter.Games
 
 		public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordShardedClient client, FunConfiguration funConfiguration)
 		{
-			if (message.Channel is IDMChannel) return;
-			Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
+			if (message.Channel is IDMChannel)
+            {
+                return;
+            }
+
+            Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
 
 			string msg = message.Content.Replace("@", "@-");
-			if (msg.ToLower() == "pass")
+			if (msg.Equals("pass", StringComparison.CurrentCultureIgnoreCase))
 			{
 				if (Game.LastUserInteracted == message.Author.Id)
 				{
@@ -363,12 +411,12 @@ namespace Dexter.Games
 				return;
 			}
 
-			if (msg.ToLower() == "mistakes")
+			if (msg.Equals("mistakes", StringComparison.CurrentCultureIgnoreCase))
 			{
 				await message.Channel.SendMessageAsync($"Mistakes: {MistakesExpression()}");
 				return;
 			}
-			if (msg.ToLower() == "lives")
+			if (msg.Equals("lives", StringComparison.CurrentCultureIgnoreCase))
 			{
 				await message.Channel.SendMessageAsync($"Lives: {LivesExpression()}");
 				return;
@@ -505,12 +553,18 @@ namespace Dexter.Games
 			StringBuilder bStr = new();
 			foreach (char c in a.ToCharArray())
 			{
-				if (char.IsLetter(c)) aStr.Append(c);
-			}
+				if (char.IsLetter(c))
+                {
+                    aStr.Append(c);
+                }
+            }
 			foreach (char c in b.ToCharArray())
 			{
-				if (char.IsLetter(c)) bStr.Append(c);
-			}
+				if (char.IsLetter(c))
+                {
+                    bStr.Append(c);
+                }
+            }
 			return aStr.ToString() == bStr.ToString();
 		}
 
@@ -542,16 +596,5 @@ namespace Dexter.Games
 			{'Y', 4},
 			{'Z', 10}
 		};
-
-		/// <summary>
-		/// The initializer for the game class, setting both the instance information and the bot configuration.
-		/// </summary>
-		/// <param name="game">The current instance of the game.</param>
-		/// <param name="botConfiguration">An instance of the bot's configuraiton.</param>
-
-		//Data structure: "term, guess, lives, maxlives, lettersmissed";
-		public GameHangman(GameInstance game, BotConfiguration botConfiguration) : base(game, botConfiguration, "Default, _______, 6, 6, ")
-		{
-		}
-	}
+    }
 }

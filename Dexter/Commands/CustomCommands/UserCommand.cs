@@ -142,11 +142,18 @@ namespace Dexter.Commands
 		/// <returns><see langword="true"/> if the command has a valid active user.</returns>
 		public static bool IsCustomCommandActive(CustomCommand cc, DiscordShardedClient client, BotConfiguration botConfig, CustomCommandsConfiguration ccConfig)
 		{
-			if (cc.User == 0) return true;
-			IGuildUser user = client.GetGuild(botConfig.GuildID).GetUser(cc.User);
-			if (user is null) return false;
+			if (cc.User == 0)
+            {
+                return true;
+            }
 
-			return cc.CommandType switch
+            IGuildUser user = client.GetGuild(botConfig.GuildID).GetUser(cc.User);
+			if (user is null)
+            {
+                return false;
+            }
+
+            return cc.CommandType switch
 			{
 				UserCommandSource.Patreon => user.GetPatreonTier(client, botConfig) >= ccConfig.MinimumPatreonTierForCustomCommands,
 				UserCommandSource.Staff => user.GetPermissionLevel(client, botConfig) >= PermissionLevel.Moderator,

@@ -14,11 +14,16 @@ using Dexter.Enums;
 namespace Dexter.Games
 {
 
-	/// <summary>
-	/// Represents an instance of a tic tac toe game.
-	/// </summary>
+    /// <summary>
+    /// Represents an instance of a tic tac toe game.
+    /// </summary>
+    /// <remarks>
+    /// The initializer for the game class, setting both the instance information and the bot configuration.
+    /// </remarks>
+    /// <param name="game">The current instance of the game.</param>
+    /// <param name="botConfiguration">An instance of the bot's configuraiton.</param>
 
-	public class GameConnect4 : GameTemplate
+    public class GameConnect4(GameInstance game, BotConfiguration botConfiguration) : GameTemplate(game, botConfiguration, "-------/-------/-------/-------/-------/-------, 0, 0, 0, Y")
 	{
 
 		const string EmptyBoard = "-------/-------/-------/-------/-------/-------";
@@ -46,8 +51,10 @@ namespace Dexter.Games
 				for (int i = 0; i < 6; i++)
 				{
 					for (int j = 0; j < 7; j++)
-						result[i, j] = raw[i][j];
-				}
+                    {
+                        result[i, j] = raw[i][j];
+                    }
+                }
 				return result;
 			}
 			set
@@ -56,9 +63,15 @@ namespace Dexter.Games
 				for (int i = 0; i < 6; i++)
 				{
 					for (int j = 0; j < 7; j++)
-						builder.Append(value[i, j]);
-					if (i != 5) builder.Append('/');
-				}
+                    {
+                        builder.Append(value[i, j]);
+                    }
+
+                    if (i != 5)
+                    {
+                        builder.Append('/');
+                    }
+                }
 				StrState = builder.ToString();
 			}
 		}
@@ -151,16 +164,7 @@ namespace Dexter.Games
 			{'R', RedChar}
 		};
 
-		/// <summary>
-		/// The initializer for the game class, setting both the instance information and the bot configuration.
-		/// </summary>
-		/// <param name="game">The current instance of the game.</param>
-		/// <param name="botConfiguration">An instance of the bot's configuraiton.</param>
-		public GameConnect4(GameInstance game, BotConfiguration botConfiguration) : base(game, botConfiguration, "-------/-------/-------/-------/-------/-------, 0, 0, 0, Y")
-		{
-		}
-
-		private string DisplayState()
+        private string DisplayState()
 		{
 			char[,] icons = State;
 			StringBuilder builder = new();
@@ -168,8 +172,11 @@ namespace Dexter.Games
 			{
 				builder.Append('|');
 				for (int j = 0; j < 7; j++)
-					builder.Append(ToEmoji[icons[i, j]]);
-				builder.Append($"|{(i == 5 ? ToEmoji[Turn] : "\n")}");
+                {
+                    builder.Append(ToEmoji[icons[i, j]]);
+                }
+
+                builder.Append($"|{(i == 5 ? ToEmoji[Turn] : "\n")}");
 			}
 			return builder.ToString();
 		}
@@ -184,8 +191,12 @@ namespace Dexter.Games
 		{
 			Game.Data = EmptyData;
 			Game.LastUserInteracted = Game.Master;
-			if (gamesDB is null) return;
-			Player[] players = gamesDB.GetPlayersFromInstance(Game.GameID);
+			if (gamesDB is null)
+            {
+                return;
+            }
+
+            Player[] players = gamesDB.GetPlayersFromInstance(Game.GameID);
 			foreach (Player p in players)
 			{
 				p.Score = 0;
@@ -239,9 +250,16 @@ namespace Dexter.Games
 			x--;
 			for (y = 5; y >= -1; y--)
 			{
-				if (y == -1) return false;
-				if (state[y, x] == '-') break;
-			}
+				if (y == -1)
+                {
+                    return false;
+                }
+
+                if (state[y, x] == '-')
+                {
+                    break;
+                }
+            }
 			state[y, x] = token;
 			State = state;
 			return true;
@@ -256,28 +274,40 @@ namespace Dexter.Games
 			{
 				for (int x = 0; x < 7; x++)
 				{
-					if (state[y, x] == pattern) count++;
-					else
+					if (state[y, x] == pattern)
+                    {
+                        count++;
+                    }
+                    else
 					{
 						count = 1;
 						pattern = state[y, x];
 					}
-					if (count == 4 && pattern != '-') return true;
-				}
+					if (count == 4 && pattern != '-')
+                    {
+                        return true;
+                    }
+                }
 				count = 0;
 			}
 			for (int x = 0; x < 7; x++)
 			{
 				for (int y = 0; y < 6; y++)
 				{
-					if (state[y, x] == pattern) count++;
-					else
+					if (state[y, x] == pattern)
+                    {
+                        count++;
+                    }
+                    else
 					{
 						count = 1;
 						pattern = state[y, x];
 					}
-					if (count == 4 && pattern != '-') return true;
-				}
+					if (count == 4 && pattern != '-')
+                    {
+                        return true;
+                    }
+                }
 				count = 0;
 			}
 			for (int xbase = -2; xbase < 4; xbase++)
@@ -286,14 +316,21 @@ namespace Dexter.Games
 				for (int y = 0; y < 6; y++)
 				{
 					if (x < 0 || x >= 7) { x++; continue; }
-					if (state[y, x] == pattern) count++;
-					else
+					if (state[y, x] == pattern)
+                    {
+                        count++;
+                    }
+                    else
 					{
 						count = 1;
 						pattern = state[y, x];
 					}
-					if (count == 4 && pattern != '-') return true;
-					x++;
+					if (count == 4 && pattern != '-')
+                    {
+                        return true;
+                    }
+
+                    x++;
 				}
 				count = 0;
 			}
@@ -303,14 +340,21 @@ namespace Dexter.Games
 				for (int y = 5; y >= 0; y--)
 				{
 					if (x < 0 || x >= 7) { x++; continue; }
-					if (state[y, x] == pattern) count++;
-					else
+					if (state[y, x] == pattern)
+                    {
+                        count++;
+                    }
+                    else
 					{
 						count = 1;
 						pattern = state[y, x];
 					}
-					if (count == 4 && pattern != '-') return true;
-					x++;
+					if (count == 4 && pattern != '-')
+                    {
+                        return true;
+                    }
+
+                    x++;
 				}
 				count = 0;
 			}
@@ -321,11 +365,17 @@ namespace Dexter.Games
 		{
 			char[,] state = State;
 			for (int i = 0; i < 6; i++)
-				for (int j = 0; j < 7; j++)
+            {
+                for (int j = 0; j < 7; j++)
 				{
-					if (state[i, j] == '-') return false;
-				}
-			return true;
+					if (state[i, j] == '-')
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
 		}
 
 		/// <summary>
@@ -339,17 +389,28 @@ namespace Dexter.Games
 
 		public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordShardedClient client, FunConfiguration funConfiguration)
 		{
-			if (message.Channel is IDMChannel) return;
-			Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
+			if (message.Channel is IDMChannel)
+            {
+                return;
+            }
+
+            Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
 
 			string msg = message.Content.ToUpper().Replace("@", "@-");
 			IUserMessage board = null;
-			if (BoardID != 0) board = await message.Channel.GetMessageAsync(BoardID) as IUserMessage;
+			if (BoardID != 0)
+            {
+                board = await message.Channel.GetMessageAsync(BoardID) as IUserMessage;
+            }
 
-			if (msg == "BOARD")
+            if (msg == "BOARD")
 			{
-				if (board is not null) await board.DeleteAsync();
-				IUserMessage newBoard = await message.Channel.SendMessageAsync(DisplayState());
+				if (board is not null)
+                {
+                    await board.DeleteAsync();
+                }
+
+                IUserMessage newBoard = await message.Channel.SendMessageAsync(DisplayState());
 				BoardID = newBoard.Id;
 				return;
 			}
@@ -365,14 +426,28 @@ namespace Dexter.Games
 					{
 						case "YELLOW":
 						case "Y":
-							if (PlayerYellow == 0) skip = true;
-							else prevPlayer = gamesDB.Players.Find(PlayerYellow);
-							break;
+							if (PlayerYellow == 0)
+                            {
+                                skip = true;
+                            }
+                            else
+                            {
+                                prevPlayer = gamesDB.Players.Find(PlayerYellow);
+                            }
+
+                            break;
 						case "RED":
 						case "R":
-							if (PlayerRed == 0) skip = true;
-							else prevPlayer = gamesDB.Players.Find(PlayerRed);
-							break;
+							if (PlayerRed == 0)
+                            {
+                                skip = true;
+                            }
+                            else
+                            {
+                                prevPlayer = gamesDB.Players.Find(PlayerRed);
+                            }
+
+                            break;
 						default:
 							await message.Channel.SendMessageAsync($"\"{args[1]}\" is not a valid token! Use 'Y' or 'R'.");
 							return;
@@ -384,10 +459,16 @@ namespace Dexter.Games
 						return;
 					}
 
-					if (args[1].StartsWith("R")) PlayerRed = message.Author.Id;
-					else PlayerYellow = message.Author.Id;
+					if (args[1].StartsWith("R"))
+                    {
+                        PlayerRed = message.Author.Id;
+                    }
+                    else
+                    {
+                        PlayerYellow = message.Author.Id;
+                    }
 
-					await message.Channel.SendMessageAsync($"<@{message.Author.Id}> will play with {(args[1].StartsWith("Y") ? "yellow" : "red")}!");
+                    await message.Channel.SendMessageAsync($"<@{message.Author.Id}> will play with {(args[1].StartsWith("Y") ? "yellow" : "red")}!");
 					return;
 				}
 				await message.Channel.SendMessageAsync("You need to specify what token you'd like to claim!");

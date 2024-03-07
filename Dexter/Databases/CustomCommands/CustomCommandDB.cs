@@ -32,15 +32,21 @@ namespace Dexter.Databases.CustomCommands
 			CustomCommand cmdByName = CustomCommands.Find(name);
 
 			if (cmdByName is not null)
-				return cmdByName;
+            {
+                return cmdByName;
+            }
 
-			CustomCommand[] cmdByAlias = CustomCommands.AsQueryable().Where(customcmd => (customcmd.Alias ?? "").Contains(name)).ToArray();
+            CustomCommand[] cmdByAlias = [.. CustomCommands.AsQueryable().Where(customcmd => (customcmd.Alias ?? "").Contains(name))];
 
 			foreach (CustomCommand command in cmdByAlias)
-				if (JsonConvert.DeserializeObject<List<string>>(command.Alias ?? "[]").Contains(name))
-					return command;
+            {
+                if (JsonConvert.DeserializeObject<List<string>>(command.Alias ?? "[]").Contains(name))
+                {
+                    return command;
+                }
+            }
 
-			return null;
+            return null;
 		}
 	}
 

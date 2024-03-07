@@ -44,7 +44,7 @@ namespace Dexter.Commands
 
 		public async Task GameCommand(string action, [Remainder] string arguments = "")
 		{
-			if (RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.Games) && action.ToLower() != "leave")
+			if (RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.Games) && !action.Equals("leave", StringComparison.CurrentCultureIgnoreCase))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("You aren't permitted to manage or join games!")
@@ -60,8 +60,11 @@ namespace Dexter.Commands
 			if (player.Playing > 0)
 			{
 				game = GamesDB.Games.Find(player.Playing);
-				if (game is not null && game.Type == GameType.Unselected) game = null;
-			}
+				if (game is not null && game.Type == GameType.Unselected)
+                {
+                    game = null;
+                }
+            }
 
 			switch (action.ToLower())
 			{
@@ -76,9 +79,13 @@ namespace Dexter.Commands
 							.SendEmbed(Context.Channel);
 						return;
 					}
-					if (args.Length == 1) args = new string[2] { args[0], "Unnamed Session" };
-					string gameTypeStr = args[0].ToLower();
-					if (!GameTypeConversion.GameNames.ContainsKey(gameTypeStr))
+					if (args.Length == 1)
+                    {
+                        args = [args[0], "Unnamed Session"];
+                    }
+
+                    string gameTypeStr = args[0].ToLower();
+					if (!GameTypeConversion.GameNames.TryGetValue(gameTypeStr, out GameType value))
 					{
 						await BuildEmbed(EmojiEnum.Annoyed)
 							.WithTitle("Game not found!")
@@ -86,22 +93,29 @@ namespace Dexter.Commands
 							.SendEmbed(Context.Channel);
 						return;
 					}
-					GameType gameType = GameTypeConversion.GameNames[gameTypeStr];
+					GameType gameType = value;
 					string relevantArgs = arguments[args[0].Length..].Trim();
 					string description = "";
 					string title = relevantArgs.Trim();
 
 					int separatorPos = relevantArgs.IndexOf(';');
-					if (separatorPos + 1 == relevantArgs.Length) separatorPos = -1;
-					if (separatorPos > 0)
+					if (separatorPos + 1 == relevantArgs.Length)
+                    {
+                        separatorPos = -1;
+                    }
+
+                    if (separatorPos > 0)
 					{
 						title = relevantArgs[..separatorPos].Trim();
 						description = relevantArgs[(separatorPos + 1)..].Trim();
 					}
 
-					if (string.IsNullOrEmpty(title)) title = $"{gameType} Game";
+					if (string.IsNullOrEmpty(title))
+                    {
+                        title = $"{gameType} Game";
+                    }
 
-					game = OpenSession(player, title, description, gameType);
+                    game = OpenSession(player, title, description, gameType);
 					await BuildEmbed(EmojiEnum.Love)
 						.WithTitle($"Created and Joined Game Session #{game.GameID}!")
 						.WithDescription($"Created Game {game.Title}.\nCurrently playing {game.Type}")
@@ -424,8 +438,12 @@ namespace Dexter.Commands
 		{
 			Player player = GamesDB.Players.Find(playerID);
 
-			if (player is null) return;
-			RemovePlayer(player);
+			if (player is null)
+            {
+                return;
+            }
+
+            RemovePlayer(player);
 		}
 
 		private async void RemovePlayer(Player player, bool save = true)
@@ -437,15 +455,21 @@ namespace Dexter.Commands
 			player.Data = "";
 			player.Playing = -1;
 
-			if (!CheckCloseSession(wasPlaying) && save) 
-				GamesDB.SaveChanges();
-		}
+			if (!CheckCloseSession(wasPlaying) && save)
+            {
+                GamesDB.SaveChanges();
+            }
+        }
 
 		private bool CheckCloseSession(int instanceID)
 		{
 			GameInstance instance = GamesDB.Games.Find(instanceID);
-			if (instance is null) return false;
-			Player master = GamesDB.GetOrCreatePlayer(instance.Master);
+			if (instance is null)
+            {
+                return false;
+            }
+
+            Player master = GamesDB.GetOrCreatePlayer(instance.Master);
 			if (master.Playing != instanceID)
 			{
 				CloseSession(instance);
@@ -461,19 +485,30 @@ namespace Dexter.Commands
 				RemovePlayer(player);
 			}
 
-			if (instance.Banned.Split(", ").Contains(player.UserID.ToString())) return false;
-			instance.Banned += (instance.Banned.TrimEnd().Length > 0 ? ", " : "")
+			if (instance.Banned.Split(", ").Contains(player.UserID.ToString()))
+            {
+                return false;
+            }
+
+            instance.Banned += (instance.Banned.TrimEnd().Length > 0 ? ", " : "")
 				+ player.UserID.ToString();
 			return true;
 		}
 
 		private static bool UnbanPlayer(ulong playerID, GameInstance instance)
 		{
-			if (instance is null) return false;
+			if (instance is null)
+            {
+                return false;
+            }
 
-			List<string> b = instance.Banned.Split(", ").ToList();
-			if (!b.Contains(playerID.ToString())) return false;
-			b.Remove(playerID.ToString());
+            List<string> b = [.. instance.Banned.Split(", ")];
+			if (!b.Contains(playerID.ToString()))
+            {
+                return false;
+            }
+
+            b.Remove(playerID.ToString());
 			instance.Banned = string.Join(", ", b);
 			return true;
 		}
@@ -513,9 +548,12 @@ namespace Dexter.Commands
 			Join(master, result, out _, result.Password, false);
 
 			GameTemplate game = result.ToGameProper(BotConfiguration);
-			if (game is not null) game.Reset(FunConfiguration, GamesDB);
+			if (game is not null)
+            {
+                game.Reset(FunConfiguration, GamesDB);
+            }
 
-			GamesDB.SaveChanges();
+            GamesDB.SaveChanges();
 			return result;
 		}
 
@@ -595,10 +633,14 @@ namespace Dexter.Commands
 					}
 
 					if (game.Set(field, value, FunConfiguration, out feedback))
-						break;
-					else
-						return false;
-			}
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+            }
 
 			GamesDB.SaveChanges();
 			return true;
@@ -607,14 +649,18 @@ namespace Dexter.Commands
 		private EmbedBuilder Leaderboard(GameInstance instance)
 		{
 			StringBuilder board = new();
-			List<Player> players = GamesDB.GetPlayersFromInstance(instance.GameID).ToList();
+			List<Player> players = [.. GamesDB.GetPlayersFromInstance(instance.GameID)];
 			players.Sort((a, b) => b.Score.CompareTo(a.Score));
 
 			foreach (Player p in players)
 			{
 				IUser user = DiscordShardedClient.GetUser(p.UserID);
-				if (user is null) continue;
-				board.Append($"{(board.Length > 0 ? "\n" : "")}{user.Username.TruncateTo(16),-16}| {p.Score:G4}, â™¥Ã—{p.Lives}");
+				if (user is null)
+                {
+                    continue;
+                }
+
+                board.Append($"{(board.Length > 0 ? "\n" : "")}{user.Username.TruncateTo(16),-16}| {p.Score:G4}, â™¥Ã—{p.Lives}");
 			}
 
 			return BuildEmbed(EmojiEnum.Unknown)
@@ -654,9 +700,12 @@ namespace Dexter.Commands
 			RemovePlayer(player);
 			player.Playing = instance.GameID;
 
-			if (save) GamesDB.SaveChanges();
+			if (save)
+            {
+                GamesDB.SaveChanges();
+            }
 
-			feedback = $"Joined {instance.Title} (Game #{instance.GameID})";
+            feedback = $"Joined {instance.Title} (Game #{instance.GameID})";
 			return true;
 		}
 

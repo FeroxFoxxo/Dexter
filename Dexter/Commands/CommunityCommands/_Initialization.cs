@@ -175,9 +175,12 @@ namespace Dexter.Commands
 			CommunityEvent cEvent = GetEvent(eventID);
 			IUser proposer = DiscordShardedClient.GetUser(cEvent.ProposerID);
 
-			if (cEvent == null) return;
+			if (cEvent == null)
+            {
+                return;
+            }
 
-			if (cEvent.Status == EventStatus.Expired)
+            if (cEvent.Status == EventStatus.Expired)
 			{
 				if (CommunityConfiguration.FailOnOverdueApproval)
 				{
@@ -206,12 +209,14 @@ namespace Dexter.Commands
 			DateTimeOffset release = DateTimeOffset.FromUnixTimeSeconds(cEvent.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone));
 
 			if (!TimerService.TimerExists(cEvent.ReleaseTimer))
-				cEvent.ReleaseTimer = await CreateEventTimer(ReleaseEventCallback,
+            {
+                cEvent.ReleaseTimer = await CreateEventTimer(ReleaseEventCallback,
 				new Dictionary<string, string> { { "ID", cEvent.ID.ToString() } },
 				(int)release.Subtract(DateTimeOffset.Now).TotalSeconds,
 				TimerType.Expire);
+            }
 
-			cEvent.ResolveReason = reason;
+            cEvent.ResolveReason = reason;
 			cEvent.Status = EventStatus.Approved;
 			await UpdateEventProposal(cEvent.ID);
 
@@ -238,15 +243,20 @@ namespace Dexter.Commands
 			CommunityEvent cEvent = GetEvent(eventID);
 			IUser proposer = DiscordShardedClient.GetUser(cEvent.ProposerID);
 
-			if (cEvent == null) return;
+			if (cEvent == null)
+            {
+                return;
+            }
 
-			cEvent.ResolveReason = reason;
+            cEvent.ResolveReason = reason;
 			await UpdateEventProposal(cEvent.ID);
 
 			if (TimerService.TimerExists(cEvent.ReleaseTimer))
-				await TimerService.RemoveTimer(cEvent.ReleaseTimer);
+            {
+                await TimerService.RemoveTimer(cEvent.ReleaseTimer);
+            }
 
-			await BuildEmbed(EmojiEnum.Annoyed)
+            await BuildEmbed(EmojiEnum.Annoyed)
 				.WithTitle("Event has been declined!")
 				.WithDescription($"Event #{cEvent.ID} has been declined.")
 				.SendDMAttachedEmbed(Context.Channel, BotConfiguration, proposer,
@@ -280,12 +290,22 @@ namespace Dexter.Commands
 		{
 			CommunityEvent cEvent = GetEvent(eventID);
 
-			if (cEvent == null) return;
+			if (cEvent == null)
+            {
+                return;
+            }
 
-			if (cEvent.Status is EventStatus.Denied or EventStatus.Removed or EventStatus.Released) return;
-			if (cEvent.Status == EventStatus.Expired && CommunityConfiguration.FailOnOverdueApproval) return;
+            if (cEvent.Status is EventStatus.Denied or EventStatus.Removed or EventStatus.Released)
+            {
+                return;
+            }
 
-			IUser user = DiscordShardedClient.GetUser(cEvent.ProposerID);
+            if (cEvent.Status == EventStatus.Expired && CommunityConfiguration.FailOnOverdueApproval)
+            {
+                return;
+            }
+
+            IUser user = DiscordShardedClient.GetUser(cEvent.ProposerID);
 
 			if (cEvent.Status == EventStatus.Pending)
 			{
@@ -339,9 +359,11 @@ namespace Dexter.Commands
 			}
 
 			if (TimerService.TimerExists(cEvent.ReleaseTimer))
-				await TimerService.RemoveTimer(cEvent.ReleaseTimer);
+            {
+                await TimerService.RemoveTimer(cEvent.ReleaseTimer);
+            }
 
-			cEvent.Status = EventStatus.Removed;
+            cEvent.Status = EventStatus.Removed;
 			await UpdateEventProposal(cEvent.ID);
 
 			await BuildEmbed(EmojiEnum.Love)
@@ -405,9 +427,12 @@ namespace Dexter.Commands
 		{
 			CommunityEvent cEvent = GetEvent(eventID);
 
-			if (cEvent == null) return;
+			if (cEvent == null)
+            {
+                return;
+            }
 
-			if (cEvent.Status is EventStatus.Approved or EventStatus.Denied or EventStatus.Released or EventStatus.Removed)
+            if (cEvent.Status is EventStatus.Approved or EventStatus.Denied or EventStatus.Released or EventStatus.Removed)
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Event already resolved!")
@@ -423,10 +448,16 @@ namespace Dexter.Commands
 				_ => cEvent.Status
 			};
 
-			if (action == Enums.ActionType.Approve) await ApproveEventCallback(eventID, reason);
-			else await DeclineEventCallback(eventID, reason);
+			if (action == Enums.ActionType.Approve)
+            {
+                await ApproveEventCallback(eventID, reason);
+            }
+            else
+            {
+                await DeclineEventCallback(eventID, reason);
+            }
 
-			cEvent.ResolveReason = reason;
+            cEvent.ResolveReason = reason;
 			await UpdateEventProposal(cEvent.ID);
 		}
 
@@ -440,16 +471,23 @@ namespace Dexter.Commands
 		{
 			CommunityEvent cEvent = GetEvent(eventID);
 
-			if (cEvent == null) return;
+			if (cEvent == null)
+            {
+                return;
+            }
 
-			if (cEvent.EventType == EventType.Official) return;
+            if (cEvent.EventType == EventType.Official)
+            {
+                return;
+            }
 
-			SocketChannel proposalChannel = DiscordShardedClient.GetChannel(CommunityConfiguration.EventsNotificationsChannel);
+            SocketChannel proposalChannel = DiscordShardedClient.GetChannel(CommunityConfiguration.EventsNotificationsChannel);
 
 			IUserMessage proposal = null;
 
 			if (proposalChannel is SocketTextChannel textChannel)
-				try
+            {
+                try
 				{
 					proposal = await textChannel.GetMessageAsync(cEvent.EventProposal) as IUserMessage;
 				}
@@ -461,10 +499,14 @@ namespace Dexter.Commands
 						.AddField("Message ID", cEvent.EventProposal)
 						.SendEmbed(Context.Channel);
 				}
+            }
 
-			if (proposal == null) return;
+            if (proposal == null)
+            {
+                return;
+            }
 
-			string proposalText = cEvent.Status switch
+            string proposalText = cEvent.Status switch
 			{
 				EventStatus.Pending => $"**New Event Proposal >>>** {CommunityConfiguration.EventsNotificationMention}",
 				EventStatus.Approved => $"**Upcoming Event [{DateTimeOffset.FromUnixTimeSeconds(cEvent.DateTimeRelease).ToOffset(TimeSpan.FromHours(BotConfiguration.StandardTimeZone)):MMM M 'at' h:mm tt}] >>>**",
@@ -477,8 +519,10 @@ namespace Dexter.Commands
 				string link = cEvent.Description.GetHyperLinks().FirstOrDefault();
 
 				if (link != null && link.Length > 0)
-					proposalText += $"\n{link}";
-			}
+                {
+                    proposalText += $"\n{link}";
+                }
+            }
 
 			await proposal.ModifyAsync(Pproperties =>
 			{
@@ -544,10 +588,9 @@ namespace Dexter.Commands
 
 		public CommunityEvent[] GetEvents(IUser user)
 		{
-			return CommunityEventsDB.Events
+			return [.. CommunityEventsDB.Events
 				.AsQueryable()
-				.Where(Event => Event.ProposerID == user.Id)
-				.ToArray();
+				.Where(Event => Event.ProposerID == user.Id)];
 		}
 
 		/// <summary>
@@ -558,9 +601,12 @@ namespace Dexter.Commands
 
 		public EmbedBuilder[] GenerateUserEventsMenu(IEnumerable<CommunityEvent> events)
 		{
-			if (!events.Any()) return Array.Empty<EmbedBuilder>();
+			if (!events.Any())
+            {
+                return [];
+            }
 
-			int expectedPages = (events.Count() + CommunityConfiguration.MaxEventsPerMenu - 1) / CommunityConfiguration.MaxEventsPerMenu;
+            int expectedPages = (events.Count() + CommunityConfiguration.MaxEventsPerMenu - 1) / CommunityConfiguration.MaxEventsPerMenu;
 
 			EmbedBuilder[] pages = new EmbedBuilder[expectedPages];
 			IUser author = DiscordShardedClient.GetUser(events.First().ProposerID);
@@ -581,7 +627,7 @@ namespace Dexter.Commands
 				pages[page - 2].AddField(GenerateEventField(e));
 			}
 
-			return pages.ToArray();
+			return [.. pages];
 		}
 
 		/// <summary>

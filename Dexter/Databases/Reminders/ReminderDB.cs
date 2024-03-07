@@ -49,7 +49,7 @@ namespace Dexter.Databases.Reminders
 
 		public Reminder[] GetRemindersByUser(ulong userID)
 		{
-			return Reminders.AsQueryable().Where(r => r.IssuerID == userID).ToArray();
+			return [.. Reminders.AsQueryable().Where(r => r.IssuerID == userID)];
 		}
 
 		/// <summary>
@@ -84,8 +84,12 @@ namespace Dexter.Databases.Reminders
 
 		public int GenerateToken()
 		{
-			while (Reminders.Find(Count) != null) Count++;
-			return Count;
+			while (Reminders.Find(Count) != null)
+            {
+                Count++;
+            }
+
+            return Count;
 		}
 	}
 }

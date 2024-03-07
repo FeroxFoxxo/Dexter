@@ -22,8 +22,11 @@ namespace Dexter.Commands
 		{
 			if (!string.IsNullOrEmpty(Args) && int.TryParse(Args.Split(" ")[0], out int Flips))
 			{
-				if (Flips < 0) Flips = Math.Abs(Flips);
-			}
+				if (Flips < 0)
+                {
+                    Flips = Math.Abs(Flips);
+                }
+            }
 			else
 			{
 				Flips = 1;
@@ -59,9 +62,15 @@ namespace Dexter.Commands
 				bool newResult = RNG.Next(0, 2) == 0;
 
 				Results[i] = newResult;
-				if (newResult) Heads++;
-				else Tails++;
-			}
+				if (newResult)
+                {
+                    Heads++;
+                }
+                else
+                {
+                    Tails++;
+                }
+            }
 
 			if (Flips == 1)
 			{

@@ -70,22 +70,32 @@ namespace Dexter.Commands
 							break;
 						case Enums.ActionType.Remove:
 							if (int.TryParse(topic, out int topicID))
-								await RemoveTopic(topicID, topicType, name);
-							else
-								await BuildEmbed(EmojiEnum.Annoyed)
+                            {
+                                await RemoveTopic(topicID, topicType, name);
+                            }
+                            else
+                            {
+                                await BuildEmbed(EmojiEnum.Annoyed)
 									.WithTitle($"Error Removing {name}.")
 									.WithDescription($"No {name.ToLower()} ID provided! To use this command please use the syntax of `remove ID`.")
 									.SendEmbed(Context.Channel);
-							break;
+                            }
+
+                            break;
 						case Enums.ActionType.Edit:
 							if (int.TryParse(topic.Split(' ')[0], out int editTopicID))
-								await EditTopic(editTopicID, string.Join(' ', topic.Split(' ').Skip(1).ToArray()), topicType, name);
-							else
-								await BuildEmbed(EmojiEnum.Annoyed)
+                            {
+                                await EditTopic(editTopicID, string.Join(' ', topic.Split(' ').Skip(1).ToArray()), topicType, name);
+                            }
+                            else
+                            {
+                                await BuildEmbed(EmojiEnum.Annoyed)
 									.WithTitle($"Error Editing {name}.")
 									.WithDescription($"No {name.ToLower()} ID provided! To use this command please use the syntax of `edit ID {name.ToUpper()}`.")
 									.SendEmbed(Context.Channel);
-							break;
+                            }
+
+                            break;
 						case Enums.ActionType.Unknown:
 							await SendTopic(topicType, name);
 							break;
@@ -99,11 +109,15 @@ namespace Dexter.Commands
 					await FunTopicsDB.SaveChangesAsync();
 				}
 				else
-					await SendTopic(topicType, name);
-			}
+                {
+                    await SendTopic(topicType, name);
+                }
+            }
 			else
-				await SendTopic(topicType, name);
-		}
+            {
+                await SendTopic(topicType, name);
+            }
+        }
 
 		/// <summary>
 		/// Sends a randomly selected topic or wyr to chat.
@@ -189,7 +203,7 @@ namespace Dexter.Commands
 				$"{Context.User.GetUserInformation()} has suggested that the {name.ToLower()} `{topicEntry}` should be added to Dexter.");
 
 			await BuildEmbed(EmojiEnum.Love)
-				.WithTitle($"The {name.ToLower()} `{(topicEntry.Length > 200 ? $"{topicEntry.Substring(0, 200)}..." : topicEntry)}` was suggested!")
+				.WithTitle($"The {name.ToLower()} `{(topicEntry.Length > 200 ? $"{topicEntry[..200]}..." : topicEntry)}` was suggested!")
 				.WithDescription($"Once it has passed admin approval, it will be added to the database.")
 				.SendEmbed(Context.Channel);
 		}
@@ -258,7 +272,7 @@ namespace Dexter.Commands
 
 			await BuildEmbed(EmojiEnum.Love)
 				.WithTitle($"The {name.ToLower()} `" +
-					$"{(funTopic.Topic.Length > 200 ? $"{funTopic.Topic.Substring(0, 200)}..." : funTopic.Topic)}" +
+					$"{(funTopic.Topic.Length > 200 ? $"{funTopic.Topic[..200]}..." : funTopic.Topic)}" +
 					$"` was suggested to be removed!")
 				.WithDescription($"Once it has passed admin approval, it will be removed from the database.")
 				.SendEmbed(Context.Channel);
@@ -357,9 +371,9 @@ namespace Dexter.Commands
 
 			await BuildEmbed(EmojiEnum.Love)
 				.WithTitle($"The {name.ToLower()} `" +
-				$"{(FunTopic.Topic.Length > 100 ? $"{FunTopic.Topic.Substring(0, 100)}..." : FunTopic.Topic)}" +
+				$"{(FunTopic.Topic.Length > 100 ? $"{FunTopic.Topic[..100]}..." : FunTopic.Topic)}" +
 				$"` was suggested to be edited to `" +
-				$"{(editedTopic.Length > 100 ? $"{editedTopic.Substring(0, 100)}..." : editedTopic)}" +
+				$"{(editedTopic.Length > 100 ? $"{editedTopic[..100]}..." : editedTopic)}" +
 				$"`!")
 				.WithDescription($"Once it has passed admin approval, it will be edited in the database accordingly.")
 				.SendEmbed(Context.Channel);
@@ -396,12 +410,14 @@ namespace Dexter.Commands
 
 		public FunTopic GetRandomTopic(TopicType topicType)
 		{
-			FunTopic[] eligible = FunTopicsDB.Topics.AsQueryable().Where(t => t.TopicType == topicType && t.EntryType == EntryType.Issue).ToArray();
+			FunTopic[] eligible = [.. FunTopicsDB.Topics.AsQueryable().Where(t => t.TopicType == topicType && t.EntryType == EntryType.Issue)];
 
 			if (!eligible.Any())
-				return null;
+            {
+                return null;
+            }
 
-			int randomID = new Random().Next(0, eligible.Length);
+            int randomID = new Random().Next(0, eligible.Length);
 
 			return eligible[randomID];
 		}

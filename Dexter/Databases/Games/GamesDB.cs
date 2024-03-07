@@ -58,8 +58,12 @@ namespace Dexter.Databases.Games
 
 		public Player[] GetPlayersFromInstance(int instanceID)
 		{
-			if (instanceID <= 0) return Array.Empty<Player>();
-			return Players.AsQueryable().Where(p => p.Playing == instanceID).ToArray();
+			if (instanceID <= 0)
+            {
+                return [];
+            }
+
+            return [.. Players.AsQueryable().Where(p => p.Playing == instanceID)];
 		}
 	}
 }

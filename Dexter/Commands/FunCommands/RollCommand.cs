@@ -48,8 +48,12 @@ namespace Dexter.Commands
 				return;
 			}
 			int dIndex = baseRoll.IndexOf("d");
-			if (dIndex < 0) dIndex = baseRoll.IndexOf("D");
-			bool verbose = baseRoll[dIndex] == 'D';
+			if (dIndex < 0)
+            {
+                dIndex = baseRoll.IndexOf("D");
+            }
+
+            bool verbose = baseRoll[dIndex] == 'D';
 
 			if (!int.TryParse(baseRoll[..dIndex], out int n))
 			{
@@ -85,9 +89,12 @@ namespace Dexter.Commands
 				foreach (KeyValuePair<string, Func<List<int>, string, RollContext, List<int>>> pair in Modifiers)
 				{
 					string mod = Regex.Match(rawmod, @$"^{pair.Key}$").Value;
-					if (string.IsNullOrEmpty(mod)) continue;
+					if (string.IsNullOrEmpty(mod))
+                    {
+                        continue;
+                    }
 
-					rolls = pair.Value(rolls, mod, rollContext);
+                    rolls = pair.Value(rolls, mod, rollContext);
 					if (rolls.Count > FunConfiguration.MaxDieRolls)
 					{
 						await BuildEmbed(EmojiEnum.Annoyed)
@@ -165,8 +172,12 @@ namespace Dexter.Commands
 				StringBuilder sb = new();
 				foreach (int r in rolls)
 				{
-					if (sb.Length > 0) sb.Append(", ");
-					sb.Append(StringifyRoll(r));
+					if (sb.Length > 0)
+                    {
+                        sb.Append(", ");
+                    }
+
+                    sb.Append(StringifyRoll(r));
 					if (sb.LengthSpecial(LanguageHelper.DiscordRichTextChars) > funConfiguration.MaxDieRollExpressionLength)
 					{
 						sb.Append("...");
@@ -202,14 +213,38 @@ namespace Dexter.Commands
 			private string StringifyRoll(int roll)
 			{
 				StringBuilder b = new();
-				if (roll >= underlineMin && roll <= underlineMax) b.Append("__");
-				if (roll >= italicizeMin && roll <= italicizeMax) b.Append('*');
-				if (roll >= highlightMin && roll <= highlightMax) b.Append("**");
-				b.Append(roll);
-				if (roll >= highlightMin && roll <= highlightMax) b.Append("**");
-				if (roll >= italicizeMin && roll <= italicizeMax) b.Append('*');
-				if (roll >= underlineMin && roll <= underlineMax) b.Append("__");
-				return b.ToString();
+				if (roll >= underlineMin && roll <= underlineMax)
+                {
+                    b.Append("__");
+                }
+
+                if (roll >= italicizeMin && roll <= italicizeMax)
+                {
+                    b.Append('*');
+                }
+
+                if (roll >= highlightMin && roll <= highlightMax)
+                {
+                    b.Append("**");
+                }
+
+                b.Append(roll);
+				if (roll >= highlightMin && roll <= highlightMax)
+                {
+                    b.Append("**");
+                }
+
+                if (roll >= italicizeMin && roll <= italicizeMax)
+                {
+                    b.Append('*');
+                }
+
+                if (roll >= underlineMin && roll <= underlineMax)
+                {
+                    b.Append("__");
+                }
+
+                return b.ToString();
 			}
 		}
 
@@ -241,13 +276,9 @@ namespace Dexter.Commands
 				(List<int> r, string mod, RollContext context) =>
 				{
 					int di = mod.IndexOf('d');
-					if (di < 0) di = mod.IndexOf('D');
-					int n = int.Parse(mod[1..di]);
+					if (di < 0) { di = mod.IndexOf('D'); } int n = int.Parse(mod[1..di]);
 					int d = int.Parse(mod[(di + 1)..]);
-					if (n > context.funConfiguration.MaxDieRolls - r.Count)
-						n = context.funConfiguration.MaxDieRolls - r.Count;
-
-					for (int i = 0; i < n; i++)
+					if (n > context.funConfiguration.MaxDieRolls - r.Count) { n = context.funConfiguration.MaxDieRolls - r.Count; } for (int i = 0; i < n; i++)
 					{
 						r.Add(context.rand.Next(1, d + 1));
 					}
@@ -260,13 +291,9 @@ namespace Dexter.Commands
 				(List<int> r, string mod, RollContext context) =>
 				{
 					int di = mod.IndexOf('d');
-					if (di < 0) di = mod.IndexOf('D');
-					int n = int.Parse(mod[1..di]);
+					if (di < 0) { di = mod.IndexOf('D'); } int n = int.Parse(mod[1..di]);
 					int d = int.Parse(mod[(di + 1)..]);
-					if (n > context.funConfiguration.MaxDieRolls - r.Count)
-						n = context.funConfiguration.MaxDieRolls - r.Count;
-
-					for (int i = 0; i < n; i++)
+					if (n > context.funConfiguration.MaxDieRolls - r.Count) { n = context.funConfiguration.MaxDieRolls - r.Count; } for (int i = 0; i < n; i++)
 					{
 						r.Add(-context.rand.Next(1, d + 1));
 					}
@@ -279,8 +306,7 @@ namespace Dexter.Commands
 				(List<int> r, string mod, RollContext context) =>
 				{
 					int toKeep = int.Parse(mod[2..]);
-					if (toKeep >= r.Count) return r;
-					r.Sort();
+					if (toKeep >= r.Count) { return r; } r.Sort();
 					List<int> result = [];
 					for (int i = 0; i < toKeep; i++)
 					{
@@ -295,8 +321,7 @@ namespace Dexter.Commands
 				(List<int> r, string mod, RollContext context) =>
 				{
 					int toKeep = int.Parse(mod[2..]);
-					if (toKeep >= r.Count) return r;
-					r.Sort();
+					if (toKeep >= r.Count) { return r; } r.Sort();
 					List<int> result = [];
 					for (int i = 0; i < toKeep; i++)
 					{
@@ -311,8 +336,7 @@ namespace Dexter.Commands
 				(List<int> r, string mod, RollContext context) =>
 				{
 					int toDrop = int.Parse(mod[2..]);
-					if (toDrop >= r.Count) return [];
-					r.Sort();
+					if (toDrop >= r.Count) { return []; } r.Sort();
 					List<int> result = [];
 					for (int i = 0; i < r.Count - toDrop; i++)
 					{
@@ -327,8 +351,7 @@ namespace Dexter.Commands
 				(List<int> r, string mod, RollContext context) =>
 				{
 					int toDrop = int.Parse(mod[2..]);
-					if (toDrop >= r.Count) return [];
-					r.Sort();
+					if (toDrop >= r.Count) { return []; } r.Sort();
 					List<int> result = [];
 					for (int i = 0; i < r.Count - toDrop; i++)
 					{
@@ -342,15 +365,13 @@ namespace Dexter.Commands
 				@"rr[0-9]{1,10}",
 				(List<int> r, string mod, RollContext context) =>
 				{
-					if (context.d == 1) return r;
-					int toReroll = int.Parse(mod[2..]);
+					if (context.d == 1) { return r; } int toReroll = int.Parse(mod[2..]);
 					for (int i = 0; i < r.Count; i++)
 					{
 						if (r[i] == toReroll)
 						{
 							r[i] = context.rand.Next(1, context.d);
-							if (r[i] >= toReroll) r[i]++;
-						}
+							if (r[i] >= toReroll) { r[i]++; } }
 					}
 					return r;
 				}
@@ -361,8 +382,7 @@ namespace Dexter.Commands
 				(List<int> r, string mod, RollContext context) =>
 				{
 					int toReroll = int.Parse(mod[3..]);
-					if (toReroll > context.d) return r;
-					for (int i = 0; i < r.Count; i++)
+					if (toReroll > context.d) { return r; } for (int i = 0; i < r.Count; i++)
 					{
 						if (r[i] < toReroll)
 						{
@@ -378,8 +398,7 @@ namespace Dexter.Commands
 				(List<int> r, string mod, RollContext context) =>
 				{
 					int toReroll = int.Parse(mod[3..]);
-					if (toReroll <= 1) return r;
-					for (int i = 0; i < r.Count; i++)
+					if (toReroll <= 1) { return r; } for (int i = 0; i < r.Count; i++)
 					{
 						if (r[i] > toReroll)
 						{
@@ -398,8 +417,7 @@ namespace Dexter.Commands
 					int swapTo = int.Parse(mod[(mod.IndexOf('>') + 1)..]);
 					for (int i = 0; i < r.Count; i++)
 					{
-						if (r[i] == toSwap) r[i] = swapTo;
-					}
+						if (r[i] == toSwap) { r[i] = swapTo; } }
 					return r;
 				}
 			},
@@ -408,8 +426,7 @@ namespace Dexter.Commands
 				@"!!([0-9]{1,10}|$)(,[0-9]{1,10})?",
 				(List<int> r, string mod, RollContext context) =>
 				{
-					if (context.d == 1) return r;
-					int maxSeparator = mod.IndexOf(',');
+					if (context.d == 1) { return r; } int maxSeparator = mod.IndexOf(',');
 					int toExplode;
 					int max = int.MaxValue;
 					if (maxSeparator < 0)
@@ -419,9 +436,7 @@ namespace Dexter.Commands
 					else
 					{
 						string toExplodeStr = mod[2..maxSeparator];
-						if (toExplodeStr.Length == 0) toExplode = context.d;
-						else toExplode = int.Parse(toExplodeStr);
-						max = int.Parse(mod[(maxSeparator + 1)..]);
+						if (toExplodeStr.Length == 0) { toExplode = context.d; } else { toExplode = int.Parse(toExplodeStr); } max = int.Parse(mod[(maxSeparator + 1)..]);
 					}
 
 					context.highlightMin = context.highlightMax = toExplode;
@@ -444,8 +459,7 @@ namespace Dexter.Commands
 				@"!!(<|>)[0-9]{1,10}(,[0-9]{1,10})?",
 				(List<int> r, string mod, RollContext context) =>
 				{
-					if (context.d == 1) return r;
-					bool explodeLower = mod[1] == '<';
+					if (context.d == 1) { return r; } bool explodeLower = mod[1] == '<';
 					int maxSeparator = mod.IndexOf(',');
 					int toExplode;
 					int max = int.MaxValue;
@@ -470,9 +484,7 @@ namespace Dexter.Commands
 						context.highlightMin = toExplode + 1;
 					}
 
-					if (max > context.funConfiguration.MaxDieRollExplosions) max = context.funConfiguration.MaxDieRollExplosions;
-
-					int i = 0;
+					if (max > context.funConfiguration.MaxDieRollExplosions) { max = context.funConfiguration.MaxDieRollExplosions; } int i = 0;
 					int rerolls = 0;
 					while (i < r.Count && rerolls < max)
 					{
@@ -491,8 +503,7 @@ namespace Dexter.Commands
 				@"!([1-9]|$)[0-9]{0,9}",
 				(List<int> r, string mod, RollContext context) =>
 				{
-					if (context.d == 1) return r;
-					int toExplode;
+					if (context.d == 1) { return r; } int toExplode;
 					int max = context.funConfiguration.MaxDieRollExplosions;
 					toExplode = mod.Length == 1 ? context.d : int.Parse(mod[1..]);
 

@@ -35,10 +35,14 @@ namespace Dexter.Commands
 			Response = Response.Replace("and his team", "and their team");
 
 			if (Response == "DexterBot did not understand your input" || Response == "No spoken result available")
-				await Context.Message.AddReactionAsync(new Emoji("❓"));
-			else
-				await Context.Channel.SendMessageAsync(Response.SanitizeMentions());
-		}
+            {
+                await Context.Message.AddReactionAsync(new Emoji("❓"));
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync(Response.SanitizeMentions());
+            }
+        }
 
 	}
 

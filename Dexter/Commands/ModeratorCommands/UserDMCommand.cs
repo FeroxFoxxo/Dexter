@@ -140,9 +140,11 @@ namespace Dexter.Commands
 			IUser user = null;
 
 			if (modMail != null)
-				user = DiscordShardedClient.GetUser(modMail.UserID);
+            {
+                user = DiscordShardedClient.GetUser(modMail.UserID);
+            }
 
-			if (modMail == null || user == null)
+            if (modMail == null || user == null)
 			{
 				if (Regex.IsMatch(token, @"<@!?[0-9]{18}>"))
 				{
@@ -174,7 +176,7 @@ namespace Dexter.Commands
 						{
 							await mailMsg.ModifyAsync(msg => msg.Embed = mailMessage.Embeds.FirstOrDefault().ToEmbedBuilder()
 								.WithColor(Color.Green)
-								.AddField($"Replied By: {Context.User.Username}", message.Length > 300 ? $"{message.Substring(0, 300)} ..." : message)
+								.AddField($"Replied By: {Context.User.Username}", message.Length > 300 ? $"{message[..300]} ..." : message)
 													.Build()
 							);
 						}
@@ -185,12 +187,16 @@ namespace Dexter.Commands
 						}
 					}
 					else
-						throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? ModMail Type: {mailMessage.GetType()}");
-				}
+                    {
+                        throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? ModMail Type: {mailMessage.GetType()}");
+                    }
+                }
 				else
-					throw new Exception($"Eek! The given channel of {channel} turned out *not* to be an instance of SocketTextChannel, rather {channel.GetType().Name}!");
+                {
+                    throw new Exception($"Eek! The given channel of {channel} turned out *not* to be an instance of SocketTextChannel, rather {channel.GetType().Name}!");
+                }
 
-				await BuildEmbed(EmojiEnum.Love)
+                await BuildEmbed(EmojiEnum.Love)
 					.WithTitle("Modmail User DM")
 					.WithDescription(message)
 					.AddField("Sent By", Context.User.GetUserInformation())

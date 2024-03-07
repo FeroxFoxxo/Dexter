@@ -34,27 +34,47 @@ namespace Dexter.Events
 
 		private async Task HandleMessage(SocketMessage Message)
 		{
-			if (!FunConfiguration.GamesChannels.Contains(Message.Channel.Id) && Message.Channel is not IDMChannel) return;
-			if (Message.Content.StartsWith(BotConfiguration.Prefix)) return;
+			if (!FunConfiguration.GamesChannels.Contains(Message.Channel.Id) && Message.Channel is not IDMChannel)
+            {
+                return;
+            }
 
-			using var scope = ServiceProvider.CreateScope();
+            if (Message.Content.StartsWith(BotConfiguration.Prefix))
+            {
+                return;
+            }
+
+            using var scope = ServiceProvider.CreateScope();
 
 			using var GamesDB = scope.ServiceProvider.GetRequiredService<GamesDB>();
 
 			Player Player = GamesDB.Players.Find(Message.Author.Id);
 
-			if (Player is null) return;
-			if (Player.Playing < 1) return;
+			if (Player is null)
+            {
+                return;
+            }
 
-			GameInstance Instance = GamesDB.Games.Find(Player.Playing);
+            if (Player.Playing < 1)
+            {
+                return;
+            }
 
-			if (Instance is null) return;
+            GameInstance Instance = GamesDB.Games.Find(Player.Playing);
 
-			GameTemplate Game = Instance.ToGameProper(BotConfiguration);
+			if (Instance is null)
+            {
+                return;
+            }
 
-			if (Game is null) return;
+            GameTemplate Game = Instance.ToGameProper(BotConfiguration);
 
-			await Game.HandleMessage(Message, GamesDB, DiscordShardedClient, FunConfiguration);
+			if (Game is null)
+            {
+                return;
+            }
+
+            await Game.HandleMessage(Message, GamesDB, DiscordShardedClient, FunConfiguration);
 
 			await GamesDB.SaveChangesAsync();
 		}

@@ -43,13 +43,15 @@ namespace Dexter.Commands
 
 			embeds.Add(CurrentBuilder);
 
-			List<CustomCommand> customCommandsList = CustomCommandDB.CustomCommands.ToList();
+			List<CustomCommand> customCommandsList = [.. CustomCommandDB.CustomCommands];
 			customCommandsList.Sort((a, b) => a.CommandName.CompareTo(b.CommandName));
 
 			if (embeds.Count > 1)
-				embeds.RemoveAt(0);
+            {
+                embeds.RemoveAt(0);
+            }
 
-			await CreateReactionMenu(embeds.ToArray(), Context.Channel);
+            await CreateReactionMenu([.. embeds], Context.Channel);
 		}
 
 	}

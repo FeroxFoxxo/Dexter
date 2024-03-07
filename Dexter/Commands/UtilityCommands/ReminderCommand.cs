@@ -105,9 +105,12 @@ namespace Dexter.Commands
 					break;
 				case "remove":
 					Reminder = await TryParseAndGetReminder(Arguments, Context.User);
-					if (Reminder == null) return;
+					if (Reminder == null)
+                    {
+                        return;
+                    }
 
-					if (Reminder.Status != ReminderStatus.Pending)
+                    if (Reminder.Status != ReminderStatus.Pending)
 					{
 						await BuildEmbed(EmojiEnum.Annoyed)
 							.WithTitle("Reminder is not Pending!")
@@ -130,9 +133,12 @@ namespace Dexter.Commands
 					string NewMessage = Arguments[IDArg.Length..].Trim();
 
 					Reminder = await TryParseAndGetReminder(IDArg, Context.User);
-					if (Reminder == null) return;
+					if (Reminder == null)
+                    {
+                        return;
+                    }
 
-					if (Reminder.Status != ReminderStatus.Pending)
+                    if (Reminder.Status != ReminderStatus.Pending)
 					{
 						await BuildEmbed(EmojiEnum.Annoyed)
 							.WithTitle("Reminder is not Pending!")
@@ -152,9 +158,12 @@ namespace Dexter.Commands
 					break;
 				case "get":
 					Reminder = await TryParseAndGetReminder(Arguments, Context.User);
-					if (Reminder == null) return;
+					if (Reminder == null)
+                    {
+                        return;
+                    }
 
-					await BuildReminderInfo(Reminder).SendEmbed(Context.Channel);
+                    await BuildReminderInfo(Reminder).SendEmbed(Context.Channel);
 					return;
 				case "upcoming":
 					List<Reminder> Reminders = ReminderDB.GetRemindersByUser(Context.User)
@@ -225,12 +234,18 @@ namespace Dexter.Commands
 		public async Task ReminderCallback(Dictionary<string, string> Args)
 		{
 			Reminder Reminder = ReminderDB.GetReminder(int.Parse(Args["ID"]));
-			if (Reminder == null || Reminder.Status != ReminderStatus.Pending) return;
+			if (Reminder == null || Reminder.Status != ReminderStatus.Pending)
+            {
+                return;
+            }
 
-			IUser Issuer = DiscordShardedClient.GetUser(Reminder.IssuerID);
-			if (Issuer == null) return;
+            SocketUser Issuer = DiscordShardedClient.GetUser(Reminder.IssuerID);
+			if (Issuer == null)
+            {
+                return;
+            }
 
-			Reminder.Status = ReminderStatus.Released;
+            Reminder.Status = ReminderStatus.Released;
 
 			try
 			{
@@ -257,9 +272,12 @@ namespace Dexter.Commands
 			{
 				int First = (p - 1) * UtilityConfiguration.ReminderMaxItemsPerPage;
 				int LastExcluded = p * UtilityConfiguration.ReminderMaxItemsPerPage;
-				if (LastExcluded > ReminderArray.Length) LastExcluded = ReminderArray.Length;
+				if (LastExcluded > ReminderArray.Length)
+                {
+                    LastExcluded = ReminderArray.Length;
+                }
 
-				Embeds[p - 1] = BuildReminderPage(ReminderArray[First..LastExcluded], ref counter);
+                Embeds[p - 1] = BuildReminderPage(ReminderArray[First..LastExcluded], ref counter);
 			}
 
 			return Embeds;

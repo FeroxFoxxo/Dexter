@@ -7,42 +7,43 @@ using System;
 
 namespace Dexter.Events
 {
-	public class Logging : Event
+	public class Logging(DiscordShardedClient client, ILogger<Logging> logger, CommandService commandService) : Event
 	{
 
-		private readonly DiscordShardedClient client;
+		private readonly DiscordShardedClient client = client;
 
-		private readonly CommandService commandService;
+		private readonly CommandService commandService = commandService;
 
-		private readonly ILogger<Logging> logger;
+		private readonly ILogger<Logging> logger = logger;
 
-		public Logging(DiscordShardedClient client, ILogger<Logging> logger, CommandService commandService)
-		{
-			this.client = client;
-			this.logger = logger;
-			this.commandService = commandService;
-		}
-
-		public override void InitializeEvents()
+        public override void InitializeEvents()
 		{
 			commandService.Log += async (logMessage) =>
 			{
 				if (logMessage.Message is not null)
-					logger.Log(logMessage.Severity.ToLogLevel(), logMessage.Exception, logMessage.Message);
-				else
-					logger.Log(logMessage.Severity.ToLogLevel(), logMessage.Exception, "Internal Exception");
-			};
+                {
+                    logger.Log(logMessage.Severity.ToLogLevel(), logMessage.Exception, logMessage.Message);
+                }
+                else
+                {
+                    logger.Log(logMessage.Severity.ToLogLevel(), logMessage.Exception, "Internal Exception");
+                }
+            };
 
 			client.Log += async (logMessage) =>
 			{
 				if (logMessage.Message is not null)
 				{
 					if (!logMessage.Message.Contains("unknown dispatch", StringComparison.OrdinalIgnoreCase))
-						logger.Log(logMessage.Severity.ToLogLevel(), logMessage.Exception, logMessage.Message);
-				}
+                    {
+                        logger.Log(logMessage.Severity.ToLogLevel(), logMessage.Exception, logMessage.Message);
+                    }
+                }
 				else
-					logger.Log(logMessage.Severity.ToLogLevel(), logMessage.Exception, "Internal Exception");
-			};
+                {
+                    logger.Log(logMessage.Severity.ToLogLevel(), logMessage.Exception, "Internal Exception");
+                }
+            };
 
 			client.ShardConnected += async (client) =>
 				logger.LogDebug($"Shard {client.ShardId} connected");
@@ -74,15 +75,21 @@ namespace Dexter.Events
 			client.MessageDeleted += async (cache, _) =>
 			{
 				if (cache.Value is not null)
-					logger.LogTrace($"Message Deleted [Author: {cache.Value.Author} | ID: {cache.Id}]");
-			};
+                {
+                    logger.LogTrace($"Message Deleted [Author: {cache.Value.Author} | ID: {cache.Id}]");
+                }
+            };
 
 			client.MessageUpdated += async (cache, msg, _) =>
 			{
 				if (cache.Value is not null)
-					if (cache.Value.Embeds == null && cache.Value.Content != msg.Content)
-						logger.LogTrace($"Message Updated [Author: {cache.Value.Author} | ID: {cache.Id}]");
-			};
+                {
+                    if (cache.Value.Embeds == null && cache.Value.Content != msg.Content)
+                    {
+                        logger.LogTrace($"Message Updated [Author: {cache.Value.Author} | ID: {cache.Id}]");
+                    }
+                }
+            };
 
 			client.MessageReceived += async (msg) =>
 				logger.LogTrace($"Message Received [Author: {msg.Author} | ID: {msg.Id} | Bot: {msg.Author.IsBot}]");

@@ -32,8 +32,12 @@ namespace Dexter.Commands
 		/// <returns><see langword="null"/> if no command exists attached to that user; otherwise returns the respective <see cref="CustomCommand"/>.</returns>
 		public CustomCommand GetCommandByUser(ulong id, UserCommandSource type = UserCommandSource.Unspecified)
 		{
-			if (id == 0) return null;
-			return CustomCommandDB.CustomCommands.AsQueryable().Where(uc => uc.User == id && (type == UserCommandSource.Unspecified || uc.CommandType == type)).FirstOrDefault();
+			if (id == 0)
+            {
+                return null;
+            }
+
+            return CustomCommandDB.CustomCommands.AsQueryable().Where(uc => uc.User == id && (type == UserCommandSource.Unspecified || uc.CommandType == type)).FirstOrDefault();
 		}
 
 	}

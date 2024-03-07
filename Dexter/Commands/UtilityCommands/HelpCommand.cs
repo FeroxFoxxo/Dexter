@@ -68,7 +68,7 @@ namespace Dexter.Commands
 
 						if (Result.IsSuccess && !string.IsNullOrWhiteSpace(CommandInfo.Summary))
 						{
-							string Field = $"**{BotConfiguration.Prefix}{string.Join("/", CommandInfo.Aliases.ToArray())}:** {CommandInfo.Summary}\n\n";
+							string Field = $"**{BotConfiguration.Prefix}{string.Join("/", [.. CommandInfo.Aliases])}:** {CommandInfo.Summary}\n\n";
 
 							try
 							{
@@ -84,8 +84,10 @@ namespace Dexter.Commands
 					}
 
 					if (!string.IsNullOrEmpty(CurrentBuilder.Description))
-						Embeds.Add(CurrentBuilder);
-				}
+                    {
+                        Embeds.Add(CurrentBuilder);
+                    }
+                }
 
 				List<string> Pages = [];
 				string PreviousPage = $"{DiscordShardedClient.CurrentUser.Username} Help";
@@ -102,29 +104,33 @@ namespace Dexter.Commands
 				}
 
 				Embeds[0].AddField("Help Pages",
-					string.Join('\n', Pages.ToArray())
+					string.Join('\n', [.. Pages])
 				);
 
-				await CreateReactionMenu(Embeds.ToArray(), Context.Channel);
+				await CreateReactionMenu([.. Embeds], Context.Channel);
 			}
 			else
 			{
 				SearchResult Result = CommandService.Search(Context, Command);
 
 				if (!Result.IsSuccess)
-					await BuildEmbed(EmojiEnum.Annoyed)
+                {
+                    await BuildEmbed(EmojiEnum.Annoyed)
 						.WithTitle("Unknown Command")
 						.WithDescription($"Sorry, I couldn't find a command like **{Command}**.")
 						.SendEmbed(Context.Channel);
-				else
+                }
+                else
 				{
 					EmbedBuilder EmbedBuilder = BuildEmbed(EmojiEnum.Love)
 						.WithTitle($"{BotConfiguration.Prefix}{Command} Command Help");
 
 					foreach (CommandMatch CommandMatch in Result.Commands)
-						EmbedBuilder.GetParametersForCommand(CommandMatch.Command, BotConfiguration);
+                    {
+                        EmbedBuilder.GetParametersForCommand(CommandMatch.Command, BotConfiguration);
+                    }
 
-					await EmbedBuilder.SendEmbed(Context.Channel);
+                    await EmbedBuilder.SendEmbed(Context.Channel);
 				}
 			}
 		}

@@ -28,7 +28,7 @@ namespace Dexter.Extensions
 	public static class StringExtensions
 	{
 
-		private static readonly string[] SensitiveCharacters = { "\\", "*", "_", "~", "`", "|", ">", "[", "(" };
+		private static readonly string[] SensitiveCharacters = ["\\", "*", "_", "~", "`", "|", ">", "[", "("];
 
 		/// <summary>
 		/// The Prettify method removes all the characters before the name of the class and only selects characters from A-Z.
@@ -56,8 +56,11 @@ namespace Dexter.Extensions
 		public static string SanitizeMarkdown(this string text)
 		{
 			foreach (string Unsafe in SensitiveCharacters)
-				text = text.Replace(Unsafe, $"\\{Unsafe}");
-			return text;
+            {
+                text = text.Replace(Unsafe, $"\\{Unsafe}");
+            }
+
+            return text;
 		}
 
 		public static string HumanizeTimeSpan(this TimeSpan t)
@@ -94,23 +97,31 @@ namespace Dexter.Extensions
 			//Console.Out.WriteLine(mBase.FullName);
 
 			if (mBase.Assembly != Assembly.GetExecutingAssembly() || mBase.Namespace == typeof(StringExtensions).Namespace)
-				return GetLastMethodCalled(searchHeight + 1);
+            {
+                return GetLastMethodCalled(searchHeight + 1);
+            }
 
-			string name;
+            string name;
 
 			if (mBase.DeclaringType != null)
-				name = mBase.DeclaringType.Name;
-			else
-				name = mBase.Name;
+            {
+                name = mBase.DeclaringType.Name;
+            }
+            else
+            {
+                name = mBase.Name;
+            }
 
-			string methodName = mBase.Name;
+            string methodName = mBase.Name;
 
 			int Index = methodName.IndexOf(">d__");
 
 			if (Index != -1)
-				methodName = methodName.Substring(0, Index).Replace("<", "");
+            {
+                methodName = methodName[..Index].Replace("<", "");
+            }
 
-			return new KeyValuePair<string, string>(name, methodName);
+            return new KeyValuePair<string, string>(name, methodName);
 		}
 
 		public static object SetClassParameters(this object newClass, IServiceScope scope, IServiceProvider sp)
@@ -118,8 +129,10 @@ namespace Dexter.Extensions
 			newClass.GetType().GetProperties().ToList().ForEach(property =>
 			{
 				if (property.PropertyType == typeof(IServiceProvider))
-					property.SetValue(newClass, sp);
-				else
+                {
+                    property.SetValue(newClass, sp);
+                }
+                else
 				{
 					object service = scope.ServiceProvider.GetService(property.PropertyType);
 
@@ -147,9 +160,11 @@ namespace Dexter.Extensions
 			string imageCacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
 
 			if (!Directory.Exists(imageCacheDir))
-				Directory.CreateDirectory(imageCacheDir);
+            {
+                Directory.CreateDirectory(imageCacheDir);
+            }
 
-			string filePath = Path.Combine(imageCacheDir, $"{imageName}{Path.GetExtension(imageURL.Split("?")[0])}");
+            string filePath = Path.Combine(imageCacheDir, $"{imageName}{Path.GetExtension(imageURL.Split("?")[0])}");
 
 			using HttpClient httpClient = new();
 

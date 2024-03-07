@@ -120,7 +120,10 @@ namespace Dexter.Commands
 						b.Clear();
                     }
 
-					if (page > maxpages) break;
+					if (page > maxpages)
+                    {
+                        break;
+                    }
                 }
 
 				b.Append($"\n{user.Mention} - {user.Username}");
@@ -140,7 +143,7 @@ namespace Dexter.Commands
 					.WithDescription($"{count} users with the role {r.Mention}" + sublist));
 			}
 
-			await CreateReactionMenu(embeds.ToArray(), Context.Channel);
+			await CreateReactionMenu([.. embeds], Context.Channel);
 		}
 
 	}

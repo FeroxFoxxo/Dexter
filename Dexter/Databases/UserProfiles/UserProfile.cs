@@ -59,7 +59,11 @@ namespace Dexter.Databases.UserProfiles
         {
             get
             {
-                if (BorkdayValue is null || BorkdayValue == 0) return null;
+                if (BorkdayValue is null || BorkdayValue == 0)
+                {
+                    return null;
+                }
+
                 try
                 {
                     return DayInYear.FromRawValue(BorkdayValue ?? 0);
@@ -114,7 +118,11 @@ namespace Dexter.Databases.UserProfiles
         {
             get
             {
-                if (DstRulesValue is null) return null;
+                if (DstRulesValue is null)
+                {
+                    return null;
+                }
+
                 try
                 {
                     return new DaylightShiftRules(DstRulesValue ?? 0);
@@ -208,7 +216,9 @@ namespace Dexter.Databases.UserProfiles
         public TimeZoneData GetRelevantTimeZone(DateTimeOffset day, LanguageConfiguration languageConfiguration)
         {
             if (!TimeZoneData.TryParse(TimeZone, languageConfiguration, out TimeZoneData tz))
+            {
                 return null;
+            }
 
             if (DstRules is null || !DstRules.IsDST(day))
             {
@@ -315,11 +325,17 @@ namespace Dexter.Databases.UserProfiles
 
         public string ToString(bool isAbsolute = true)
         {
-            if (isAbsolute) return $"{((int)Day).Ordinal()} of {Month}";
-            else return $"{(WeekdayCount == 0 ? "last" : WeekdayCount.Ordinal())} {RelativeWeekday} of {Month}";
+            if (isAbsolute)
+            {
+                return $"{((int)Day).Ordinal()} of {Month}";
+            }
+            else
+            {
+                return $"{(WeekdayCount == 0 ? "last" : WeekdayCount.Ordinal())} {RelativeWeekday} of {Month}";
+            }
         }
 
-        static readonly string[] ordinals = { "last", "first", "second", "third", "fourth", "fifth", "sixth" };
+        static readonly string[] ordinals = ["last", "first", "second", "third", "fourth", "fifth", "sixth"];
 
         /// <summary>
         /// Attempts to parse an absolute or relative day of the year from <paramref name="input"/> based on a set of parameters.
@@ -335,7 +351,8 @@ namespace Dexter.Databases.UserProfiles
 
         public static bool TryParse(string input, bool isAbsolute, LanguageConfiguration languageConfig, out DayInYear dayInYear, out string feedback, out int year, CultureInfo cultureInfo = null)
         {
-            if (cultureInfo is null) cultureInfo = CultureInfo.InvariantCulture;
+            cultureInfo ??= CultureInfo.InvariantCulture;
+
             year = -1;
             dayInYear = new();
 
@@ -376,7 +393,7 @@ namespace Dexter.Databases.UserProfiles
                     bool success = false;
                     for (int i = 0; i < ordinals.Length; i++)
                     {
-                        if (segments[0].ToLower() == ordinals[i])
+                        if (segments[0].Equals(ordinals[i], StringComparison.CurrentCultureIgnoreCase))
                         {
                             dayInYear.Day = (byte)(7 * i);
                             success = true;
@@ -544,7 +561,7 @@ namespace Dexter.Databases.UserProfiles
 
             foreach (KeyValuePair<string, DaylightShiftRules> kvp in PresetRules)
             {
-                if (kvp.Key.ToLower() == input)
+                if (kvp.Key.Equals(input, StringComparison.CurrentCultureIgnoreCase))
                 {
                     feedback = $"Found preset \"{kvp.Key}\": {kvp.Value}";
                     rules = kvp.Value;
@@ -609,7 +626,11 @@ namespace Dexter.Databases.UserProfiles
 
         public override string ToString()
         {
-            if (Starts is null || Ends is null) return $"Undefined";
+            if (Starts is null || Ends is null)
+            {
+                return $"Undefined";
+            }
+
             return $"From the {Starts.ToString(IsAbsolute)} to the {Ends.ToString(IsAbsolute)}.";
         }
 
@@ -651,14 +672,18 @@ namespace Dexter.Databases.UserProfiles
             else if (month == monthmin)
             {
                 if (IsAbsolute)
+                {
                     return day.Day > Starts.Day;
+                }
 
                 return day.Day > Starts.GetThresholdDay(year);
             }
             else if (month == monthmax)
             {
                 if (IsAbsolute)
+                {
                     return day.Day <= Ends.Day;
+                }
 
                 return day.Day <= Ends.GetThresholdDay(year);
             }
@@ -744,15 +769,36 @@ namespace Dexter.Databases.UserProfiles
                         flags |= ProfilePrefFlags.FriendsVisible;
                         break;
                 }
-                if (GiveBorkdayRole) flags |= ProfilePrefFlags.GiveBorkdayRole;
-                if (BlockRequests) flags |= ProfilePrefFlags.BlockRequests;
-                if (AgeVerified) flags |= ProfilePrefFlags.AgeVerified;
+                if (GiveBorkdayRole)
+                {
+                    flags |= ProfilePrefFlags.GiveBorkdayRole;
+                }
+
+                if (BlockRequests)
+                {
+                    flags |= ProfilePrefFlags.BlockRequests;
+                }
+
+                if (AgeVerified)
+                {
+                    flags |= ProfilePrefFlags.AgeVerified;
+                }
+
                 return flags;
             } 
             set {
-                if (value.HasFlag(ProfilePrefFlags.PublicVisible)) Privacy = PrivacyMode.Public;
-                else if (value.HasFlag(ProfilePrefFlags.FriendsVisible)) Privacy = PrivacyMode.Friends;
-                else Privacy = PrivacyMode.Private;
+                if (value.HasFlag(ProfilePrefFlags.PublicVisible))
+                {
+                    Privacy = PrivacyMode.Public;
+                }
+                else if (value.HasFlag(ProfilePrefFlags.FriendsVisible))
+                {
+                    Privacy = PrivacyMode.Friends;
+                }
+                else
+                {
+                    Privacy = PrivacyMode.Private;
+                }
 
                 GiveBorkdayRole = value.HasFlag(ProfilePrefFlags.GiveBorkdayRole);
                 BlockRequests = value.HasFlag(ProfilePrefFlags.BlockRequests);

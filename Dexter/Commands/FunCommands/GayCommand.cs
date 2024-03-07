@@ -33,8 +33,10 @@ namespace Dexter.Commands
 		public async Task GayCommand([Optional] IUser User)
 		{
 			if (User == null)
-				User = Context.User;
-			else if (User is IGuildUser gUser)
+            {
+                User = Context.User;
+            }
+            else if (User is IGuildUser gUser)
 			{
 				var funCommand = ServiceProvider.GetRequiredService<FunConfiguration>();
 

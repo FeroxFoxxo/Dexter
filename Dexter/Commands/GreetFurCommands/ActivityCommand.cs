@@ -52,8 +52,10 @@ namespace Dexter.Commands
 			for (int i = 0; i < columns.Values.Count; i++)
 			{
 				if (columns.Values[i][0].Equals(Context.User.Id.ToString()))
-					indexOfUser = i + 1;
-			}
+                {
+                    indexOfUser = i + 1;
+                }
+            }
 
 			if (indexOfUser == -1)
 			{
@@ -78,11 +80,15 @@ namespace Dexter.Commands
 			decimal activity;
 
 			if (ratio > 0)
-				activity = Math.Round(yes / ratio * 100);
-			else
-				activity = 100;
+            {
+                activity = Math.Round(yes / ratio * 100);
+            }
+            else
+            {
+                activity = 100;
+            }
 
-			string Notes = information[GreetFurConfiguration.Information["Notes"]].ToString();
+            string Notes = information[GreetFurConfiguration.Information["Notes"]].ToString();
 
 			await BuildEmbed(activity >= 66 ? EmojiEnum.Love : activity > 33 ? EmojiEnum.Wut : EmojiEnum.Annoyed)
 				.WithAuthor(Context.User)

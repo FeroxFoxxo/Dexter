@@ -25,10 +25,14 @@ namespace Dexter.Abstractions
 			string conString = $"server=localhost;database={GetType().Name};user={Startup.DBUser};password={Startup.DBPassword}";
 
 			if (!string.IsNullOrEmpty(Startup.DBUser) && !string.IsNullOrEmpty(Startup.DBPassword))
-				options.UseMySql(conString, ServerVersion.AutoDetect(conString));
-			else
-				options.UseSqlite($"Data Source=Databases/{GetType().Name}.db");
-		}
+            {
+                options.UseMySql(conString, ServerVersion.AutoDetect(conString));
+            }
+            else
+            {
+                options.UseSqlite($"Data Source=Databases/{GetType().Name}.db");
+            }
+        }
 
 		private const int RETRIES = 5;
 

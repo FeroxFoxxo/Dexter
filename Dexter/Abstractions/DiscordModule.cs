@@ -90,9 +90,11 @@ namespace Dexter.Abstractions
 			string denyJSON = "";
 
 			if (denyCallbackParameters != null)
-				denyJSON = JsonConvert.SerializeObject(denyCallbackParameters);
+            {
+                denyJSON = JsonConvert.SerializeObject(denyCallbackParameters);
+            }
 
-			await ProposalService.SendAdminConfirmation(json, callbackMethod.Target.GetType().Name,
+            await ProposalService.SendAdminConfirmation(json, callbackMethod.Target.GetType().Name,
 				callbackMethod.Method.Name, author, proposal, denyJSON, denyCallbackMethod?.Target.GetType().Name,
 				denyCallbackMethod?.Method.Name);
 		}
@@ -110,15 +112,23 @@ namespace Dexter.Abstractions
             if (channel is SocketThreadChannel threadChannel)
             {
                 if (threadChannel.ParentChannel is ISocketMessageChannel sChannel)
+                {
                     return await CreateOrGetWebhook(sChannel, webhookName);
+                }
                 else
+                {
                     throw new Exception($"The webhook {webhookName} could not be initialized in the given parent channel {threadChannel.ParentChannel} due to it being of type {threadChannel.ParentChannel.GetType().Name}.");
+                }
             }
             else if (channel is IIntegrationChannel integrationChannel)
 			{
                 foreach (IWebhook restWebhook in await integrationChannel.GetWebhooksAsync())
+                {
                     if (restWebhook.Name.Equals(webhookName))
+                    {
                         return new DiscordWebhookClient(restWebhook.Id, restWebhook.Token);
+                    }
+                }
 
                 IWebhook webhook = await integrationChannel.CreateWebhookAsync(webhookName, ProfileService.GetRandomPFP());
 
@@ -127,15 +137,21 @@ namespace Dexter.Abstractions
 			else if (channel is SocketTextChannel textChannel)
 			{
 				foreach (RestWebhook restWebhook in await textChannel.GetWebhooksAsync())
-					if (restWebhook.Name.Equals(webhookName))
-						return new DiscordWebhookClient(restWebhook.Id, restWebhook.Token);
+                {
+                    if (restWebhook.Name.Equals(webhookName))
+                    {
+                        return new DiscordWebhookClient(restWebhook.Id, restWebhook.Token);
+                    }
+                }
 
-				RestWebhook webhook = await textChannel.CreateWebhookAsync(webhookName, ProfileService.GetRandomPFP());
+                RestWebhook webhook = await textChannel.CreateWebhookAsync(webhookName, ProfileService.GetRandomPFP());
 
 				return new DiscordWebhookClient(webhook.Id, webhook.Token);
 			}
             else
+            {
                 throw new Exception($"The webhook {webhookName} could not be initialized in the given channel {channel} due to it being of type {channel.GetType().Name}.");
+            }
         }
 
         /// <summary>
@@ -188,9 +204,11 @@ namespace Dexter.Abstractions
 				PageBuilder[] pageBuilderMenu = new PageBuilder[embeds.Length];
 
 				for (int i = 0; i < embeds.Length; i++)
-					pageBuilderMenu[i] = PageBuilder.FromEmbedBuilder(embeds[i]);
+                {
+                    pageBuilderMenu[i] = PageBuilder.FromEmbedBuilder(embeds[i]);
+                }
 
-				Paginator paginator = new StaticPaginatorBuilder()
+                Paginator paginator = new StaticPaginatorBuilder()
 					.WithPages(pageBuilderMenu)
 					.WithDefaultEmotes()
 					.WithFooter(PaginatorFooter.PageNumber)
@@ -201,8 +219,10 @@ namespace Dexter.Abstractions
 				await Interactive.SendPaginatorAsync(paginator, channel, TimeSpan.FromMinutes(10));
 			}
 			else
-				await embeds.FirstOrDefault().SendEmbed(channel);
-		}
+            {
+                await embeds.FirstOrDefault().SendEmbed(channel);
+            }
+        }
 
 	}
 

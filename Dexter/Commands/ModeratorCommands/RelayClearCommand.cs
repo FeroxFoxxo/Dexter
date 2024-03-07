@@ -45,7 +45,7 @@ namespace Dexter.Commands
 				$"{Context.User.GetUserInformation()} has suggested that `{FindRelay.Message}` should be removed from the channel {Channel} which has an interval of {FindRelay.MessageInterval} messages.");
 
 			await BuildEmbed(EmojiEnum.Love)
-				.WithTitle($"The relay to `#{Channel}` with the message `{(FindRelay.Message.Length > 100 ? $"{FindRelay.Message.Substring(0, 100)}..." : FindRelay.Message)}` for every {FindRelay.MessageInterval} messages has been suggested for removal!")
+				.WithTitle($"The relay to `#{Channel}` with the message `{(FindRelay.Message.Length > 100 ? $"{FindRelay.Message[..100]}..." : FindRelay.Message)}` for every {FindRelay.MessageInterval} messages has been suggested for removal!")
 				.WithDescription($"Once it has passed admin approval, it will be removed from the database.")
 				.SendEmbed(Context.Channel);
 

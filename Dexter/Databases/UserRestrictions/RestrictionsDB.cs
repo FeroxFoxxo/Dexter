@@ -27,9 +27,12 @@ namespace Dexter.Databases.UserRestrictions
 		{
 			UserRestriction userRestriction = UserRestrictions.Find(userID);
 
-			if (userRestriction == null) return Restriction.None;
+			if (userRestriction == null)
+            {
+                return Restriction.None;
+            }
 
-			return userRestriction.RestrictionFlags;
+            return userRestriction.RestrictionFlags;
 		}
 
 		/// <summary>
@@ -46,9 +49,15 @@ namespace Dexter.Databases.UserRestrictions
 
 		public bool IsUserRestricted(ulong userID, Restriction restriction, bool matchAny = false)
 		{
-			if (matchAny) return (GetUserRestrictions(userID) & restriction) != Restriction.None;
-			else return (GetUserRestrictions(userID) & restriction) == restriction;
-		}
+			if (matchAny)
+            {
+                return (GetUserRestrictions(userID) & restriction) != Restriction.None;
+            }
+            else
+            {
+                return (GetUserRestrictions(userID) & restriction) == restriction;
+            }
+        }
 
 		/// <summary>
 		/// Checks whether a given <paramref name="user"/> has a set of restrictions <paramref name="restriction"/>.

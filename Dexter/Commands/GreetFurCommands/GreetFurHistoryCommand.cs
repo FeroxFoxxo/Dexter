@@ -25,12 +25,9 @@ namespace Dexter.Commands
 
 		public async Task GreetFurHistoryCommand(IUser user = null)
 		{
-			if (user is null)
-			{
-				user = Context.User;
-			}
+			user ??= Context.User;
 
-			List<GreetFurRecord> records = GreetFurDB.Records.AsQueryable().Where(r => r.UserId == user.Id).ToList();
+			List<GreetFurRecord> records = [.. GreetFurDB.Records.AsQueryable().Where(r => r.UserId == user.Id)];
 
 			records.Sort((a, b) => a.Date.CompareTo(b.Date));
 

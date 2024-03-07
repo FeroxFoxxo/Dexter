@@ -15,11 +15,16 @@ using Dexter.Helpers;
 namespace Dexter.Games
 {
 
-	/// <summary>
-	/// Represents an instance of a tic tac toe game.
-	/// </summary>
+    /// <summary>
+    /// Represents an instance of a tic tac toe game.
+    /// </summary>
+    /// <remarks>
+    /// The initializer for the game class, setting both the instance information and the bot configuration.
+    /// </remarks>
+    /// <param name="game">The current instance of the game.</param>
+    /// <param name="botConfiguration">An instance of the bot's configuraiton.</param>
 
-	public class GameTicTacToe : GameTemplate
+    public class GameTicTacToe(GameInstance game, BotConfiguration botConfiguration) : GameTemplate(game, botConfiguration, "---------, 0, 0, 0, O")
 	{
 
 		private string StrState
@@ -45,8 +50,10 @@ namespace Dexter.Games
 				for (int i = 0; i < 3; i++)
 				{
 					for (int j = 0; j < 3; j++)
-						Result[i, j] = Raw[i * 3 + j];
-				}
+                    {
+                        Result[i, j] = Raw[i * 3 + j];
+                    }
+                }
 				return Result;
 			}
 			set
@@ -55,8 +62,10 @@ namespace Dexter.Games
 				for (int i = 0; i < 3; i++)
 				{
 					for (int j = 0; j < 3; j++)
-						Builder.Append(value[i, j]);
-				}
+                    {
+                        Builder.Append(value[i, j]);
+                    }
+                }
 				StrState = Builder.ToString();
 			}
 		}
@@ -156,8 +165,11 @@ namespace Dexter.Games
 			for (int i = 0; i < 3; i++)
 			{
 				for (int j = 0; j < 3; j++)
-					builder.Append(ToEmoji[icons[i, j]]);
-				builder.Append('\n');
+                {
+                    builder.Append(ToEmoji[icons[i, j]]);
+                }
+
+                builder.Append('\n');
 			}
 			return builder.ToString();
 		}
@@ -172,8 +184,12 @@ namespace Dexter.Games
 		{
 			Game.Data = EmptyData;
 			Game.LastUserInteracted = Game.Master;
-			if (gamesDB is null) return;
-			Player[] Players = gamesDB.GetPlayersFromInstance(Game.GameID);
+			if (gamesDB is null)
+            {
+                return;
+            }
+
+            Player[] Players = gamesDB.GetPlayersFromInstance(Game.GameID);
 			foreach (Player p in Players)
 			{
 				p.Score = 0;
@@ -224,8 +240,12 @@ namespace Dexter.Games
 
 		private bool PlaceToken(int x, int y, char token)
 		{
-			if (State[x, y] != '-') return false;
-			char[] newState = StrState.ToCharArray();
+			if (State[x, y] != '-')
+            {
+                return false;
+            }
+
+            char[] newState = StrState.ToCharArray();
 			newState[x * 3 + y] = token;
 			StrState = string.Join("", newState);
 			return true;
@@ -236,23 +256,44 @@ namespace Dexter.Games
 			char[,] state = State;
 			for (int i = 0; i < 3; i++)
 			{
-				if (state[i, 0] != '-' && state[i, 0] == state[i, 1] && state[i, 1] == state[i, 2]) return true;
-				if (state[0, i] != '-' && state[0, i] == state[1, i] && state[1, i] == state[2, i]) return true;
-			}
-			if (state[0, 0] != '-' && state[0, 0] == state[1, 1] && state[1, 1] == state[2, 2]) return true;
-			if (state[0, 2] != '-' && state[0, 2] == state[1, 1] && state[1, 1] == state[2, 0]) return true;
-			return false;
+				if (state[i, 0] != '-' && state[i, 0] == state[i, 1] && state[i, 1] == state[i, 2])
+                {
+                    return true;
+                }
+
+                if (state[0, i] != '-' && state[0, i] == state[1, i] && state[1, i] == state[2, i])
+                {
+                    return true;
+                }
+            }
+			if (state[0, 0] != '-' && state[0, 0] == state[1, 1] && state[1, 1] == state[2, 2])
+            {
+                return true;
+            }
+
+            if (state[0, 2] != '-' && state[0, 2] == state[1, 1] && state[1, 1] == state[2, 0])
+            {
+                return true;
+            }
+
+            return false;
 		}
 
 		private bool CheckDraw()
 		{
 			char[,] state = State;
 			for (int i = 0; i < 3; i++)
-				for (int j = 0; j < 3; j++)
+            {
+                for (int j = 0; j < 3; j++)
 				{
-					if (state[i, j] == '-') return false;
-				}
-			return true;
+					if (state[i, j] == '-')
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
 		}
 
 		/// <summary>
@@ -266,17 +307,28 @@ namespace Dexter.Games
 
 		public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordShardedClient client, FunConfiguration funConfiguration)
 		{
-			if (message.Channel is IDMChannel) return;
-			Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
+			if (message.Channel is IDMChannel)
+            {
+                return;
+            }
+
+            Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
 
 			string msg = message.Content.ToUpper().Replace("@", "@-");
 			IUserMessage board = null;
-			if (BoardID != 0) board = await message.Channel.GetMessageAsync(BoardID) as IUserMessage;
+			if (BoardID != 0)
+            {
+                board = await message.Channel.GetMessageAsync(BoardID) as IUserMessage;
+            }
 
-			if (msg == "BOARD")
+            if (msg == "BOARD")
 			{
-				if (board is not null) await board.DeleteAsync();
-				IUserMessage newBoard = await message.Channel.SendMessageAsync(DisplayState());
+				if (board is not null)
+                {
+                    await board.DeleteAsync();
+                }
+
+                IUserMessage newBoard = await message.Channel.SendMessageAsync(DisplayState());
 				BoardID = newBoard.Id;
 				return;
 			}
@@ -291,13 +343,27 @@ namespace Dexter.Games
 					switch (args[1])
 					{
 						case "O":
-							if (PlayerO == 0) skip = true;
-							else prevPlayer = gamesDB.Players.Find(PlayerO);
-							break;
+							if (PlayerO == 0)
+                            {
+                                skip = true;
+                            }
+                            else
+                            {
+                                prevPlayer = gamesDB.Players.Find(PlayerO);
+                            }
+
+                            break;
 						case "X":
-							if (PlayerX == 0) skip = true;
-							else prevPlayer = gamesDB.Players.Find(PlayerX);
-							break;
+							if (PlayerX == 0)
+                            {
+                                skip = true;
+                            }
+                            else
+                            {
+                                prevPlayer = gamesDB.Players.Find(PlayerX);
+                            }
+
+                            break;
 						default:
 							await message.Channel.SendMessageAsync($"\"{args[1]}\" is not a valid token! Use 'O' or 'X'.");
 							return;
@@ -309,10 +375,16 @@ namespace Dexter.Games
 						return;
 					}
 
-					if (args[1] == "O") PlayerO = message.Author.Id;
-					else PlayerX = message.Author.Id;
+					if (args[1] == "O")
+                    {
+                        PlayerO = message.Author.Id;
+                    }
+                    else
+                    {
+                        PlayerX = message.Author.Id;
+                    }
 
-					await message.Channel.SendMessageAsync($"<@{message.Author.Id}> will play with {(args[1] == "O" ? "circles" : "crosses")}!");
+                    await message.Channel.SendMessageAsync($"<@{message.Author.Id}> will play with {(args[1] == "O" ? "circles" : "crosses")}!");
 					return;
 				}
 				await message.Channel.SendMessageAsync("You need to specify what token you'd like to claim!");
@@ -321,10 +393,10 @@ namespace Dexter.Games
 
 			if (args.Length > 0 && Positions.ContainsKey(args[0]))
 			{
-				args = new string[] {
+				args = [
 					Turn.ToString(),
 					args[0]
-				};
+				];
 			}
 
 			if (args.Length > 1 && args[0] is "O" or "X")
@@ -347,12 +419,12 @@ namespace Dexter.Games
 					return;
 				}
 
-				if (!Positions.ContainsKey(args[1]))
+				if (!Positions.TryGetValue(args[1], out Tuple<int, int> value))
 				{
 					await message.Channel.SendMessageAsync($"Unable to parse position \"{args[1]}\"! Make sure you use a valid expression (see game info).");
 					return;
 				}
-				Tuple<int, int> pos = Positions[args[1]];
+				Tuple<int, int> pos = value;
 
 				if (!PlaceToken(pos.Item1, pos.Item2, args[0].First()))
 				{
@@ -471,17 +543,5 @@ namespace Dexter.Games
 			{ "C2", new Tuple<int, int>(1, 2) },
 			{ "C3", new Tuple<int, int>(0, 2) }
 		};
-
-		/// <summary>
-		/// The initializer for the game class, setting both the instance information and the bot configuration.
-		/// </summary>
-		/// <param name="game">The current instance of the game.</param>
-		/// <param name="botConfiguration">An instance of the bot's configuraiton.</param>
-
-		//Data structure: "term, guess, lives, maxlives, lettersmissed";
-
-		public GameTicTacToe(GameInstance game, BotConfiguration botConfiguration) : base(game, botConfiguration, "---------, 0, 0, 0, O")
-		{
-		}
-	}
+    }
 }

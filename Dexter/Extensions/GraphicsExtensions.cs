@@ -51,7 +51,7 @@ namespace Dexter.Extensions
 			File.Delete(tempCachePath);
 		}
 
-		private readonly static float[] lineartransform = new float[] { 0, 0, 0, 0, 1 };
+		private readonly static float[] lineartransform = [0, 0, 0, 0, 1];
 
 		/// <summary>
 		/// Creates a color matrix from a given color.
@@ -61,13 +61,13 @@ namespace Dexter.Extensions
 
 		public static System.Drawing.Imaging.ColorMatrix ToColorMatrix(this Color color)
 		{
-			return new System.Drawing.Imaging.ColorMatrix(new float[][] {
-				new float[] {color.R / 255f, 0, 0, 0, 0},
-				new float[] {0, color.G / 255f, 0, 0, 0},
-				new float[] {0, 0, color.B / 255f, 0, 0},
-				new float[] {0, 0, 0, color.A / 255f, 0},
+			return new System.Drawing.Imaging.ColorMatrix([
+				[color.R / 255f, 0, 0, 0, 0],
+				[0, color.G / 255f, 0, 0, 0],
+				[0, 0, color.B / 255f, 0, 0],
+				[0, 0, 0, color.A / 255f, 0],
 				lineartransform
-				});
+				]);
 		}
 
 		/// <summary>

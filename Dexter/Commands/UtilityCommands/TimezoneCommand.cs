@@ -37,7 +37,7 @@ namespace Dexter.Commands
 		public async Task TimezoneCommand(string Action = "", [Remainder] string argument = "")
 		{
 
-			if (string.IsNullOrEmpty(Action) || Action.ToLower() == "info")
+			if (string.IsNullOrEmpty(Action) || Action.Equals("info", StringComparison.CurrentCultureIgnoreCase))
 			{
 				await BuildEmbed(EmojiEnum.Sign)
 					.WithTitle("Time Zone Info")
@@ -68,9 +68,11 @@ namespace Dexter.Commands
 						string[] resultsHumanized = new string[Math.Min(10, results.Length)];
 
 						for (int i = 0; i < resultsHumanized.Length; i++)
-							resultsHumanized[i] = $"{results[i]}: {LanguageConfiguration.TimeZones[results[i]]}";
+                        {
+                            resultsHumanized[i] = $"{results[i]}: {LanguageConfiguration.TimeZones[results[i]]}";
+                        }
 
-						await BuildEmbed(EmojiEnum.Love)
+                        await BuildEmbed(EmojiEnum.Love)
 							.WithTitle("Top 10 Results")
 							.WithDescription(string.Join("\n", resultsHumanized))
 							.SendEmbed(Context.Channel);
@@ -100,9 +102,11 @@ namespace Dexter.Commands
 						string[] resultsHumanized = new string[Math.Min(Math.Max(Exact, 10), results.Length)];
 
 						for (int i = 0; i < resultsHumanized.Length; i++)
-							resultsHumanized[i] = $"{results[i]}: {LanguageConfiguration.TimeZones[results[i]]}";
+                        {
+                            resultsHumanized[i] = $"{results[i]}: {LanguageConfiguration.TimeZones[results[i]]}";
+                        }
 
-						await BuildEmbed(EmojiEnum.Love)
+                        await BuildEmbed(EmojiEnum.Love)
 							.WithTitle($"Top {resultsHumanized.Length} Results similar to {TimeZoneData.ToTimeZoneExpression(TimeZone.Offset)}")
 							.WithDescription(string.Join("\n", resultsHumanized))
 							.SendEmbed(Context.Channel);
@@ -141,15 +145,17 @@ namespace Dexter.Commands
 						return;
 					}
 
-					if (!LanguageConfiguration.TimeZones.ContainsKey(argument))
+					if (!LanguageConfiguration.TimeZones.TryGetValue(argument, out TimeZoneData value))
 					{
 						string[] results = LanguageHelper.SearchTimeZone(argument, LanguageConfiguration);
 						string[] resultsHumanized = new string[Math.Min(3, results.Length)];
 
 						for (int i = 0; i < resultsHumanized.Length; i++)
-							resultsHumanized[i] = $"{results[i]}: {LanguageConfiguration.TimeZones[results[i]]}";
+                        {
+                            resultsHumanized[i] = $"{results[i]}: {LanguageConfiguration.TimeZones[results[i]]}";
+                        }
 
-						await BuildEmbed(EmojiEnum.Annoyed)
+                        await BuildEmbed(EmojiEnum.Annoyed)
 							.WithTitle("Unable to find time zone!")
 							.WithDescription($"Did you mean...\n{string.Join("\n", resultsHumanized)}")
 							.SendEmbed(Context.Channel);
@@ -158,7 +164,7 @@ namespace Dexter.Commands
 
 					await BuildEmbed(EmojiEnum.Love)
 						.WithTitle("Found time zone!")
-						.WithDescription($"{argument}: {LanguageConfiguration.TimeZones[argument]}")
+						.WithDescription($"{argument}: {value}")
 						.SendEmbed(Context.Channel);
 					return;
 				case "when":
@@ -229,12 +235,18 @@ namespace Dexter.Commands
 						float diff = timeZones[0].Offset - timeZones[1].Offset;
 
 						string message;
-						if (diff != 0) message = $"{args[0]} ({timeZones[0].Name}) is " +
-								 $"**{LanguageHelper.HumanizeSexagesimalUnits(Math.Abs(diff), new string[] { "hour", "hours" }, new string[] { "minute", "minutes" }, out _)} " +
+						if (diff != 0)
+                        {
+                            message = $"{args[0]} ({timeZones[0].Name}) is " +
+								 $"**{LanguageHelper.HumanizeSexagesimalUnits(Math.Abs(diff), ["hour", "hours"], ["minute", "minutes"], out _)} " +
 								 $"{(diff < 0 ? "behind" : "ahead of")}** {args[1]} ({timeZones[1].Name}).";
-						else message = $"{args[0]} ({timeZones[0].Name}) is **in sync with** {args[1]} ({timeZones[1].Name}).";
+                        }
+                        else
+                        {
+                            message = $"{args[0]} ({timeZones[0].Name}) is **in sync with** {args[1]} ({timeZones[1].Name}).";
+                        }
 
-						await Context.Channel.SendMessageAsync(message);
+                        await Context.Channel.SendMessageAsync(message);
 					}
 					return;
 				case "user":

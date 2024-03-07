@@ -116,9 +116,12 @@ namespace Dexter.Commands
 					break;
 				case Enums.ActionType.Remove:
 					Event = await ValidateCommunityEventByID(Params);
-					if (Event == null) return;
+					if (Event == null)
+                    {
+                        return;
+                    }
 
-					if (!(User.Id == Event.ProposerID || User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) == PermissionLevel.Administrator))
+                    if (!(User.Id == Event.ProposerID || User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) == PermissionLevel.Administrator))
 					{
 						await BuildEmbed(EmojiEnum.Annoyed)
 							.WithTitle("Missing permissions!")
@@ -140,9 +143,12 @@ namespace Dexter.Commands
 					}
 					EventParam = Params.Split(" ")[0];
 					Event = await ValidateCommunityEventByID(EventParam);
-					if (Event == null) return;
+					if (Event == null)
+                    {
+                        return;
+                    }
 
-					if (!(User.Id == Event.ProposerID || User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) == PermissionLevel.Administrator))
+                    if (!(User.Id == Event.ProposerID || User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) == PermissionLevel.Administrator))
 					{
 						await BuildEmbed(EmojiEnum.Annoyed)
 							.WithTitle("Missing permissions!")
@@ -156,9 +162,12 @@ namespace Dexter.Commands
 				case Enums.ActionType.Decline:
 					EventParam = Params.Split(" ")[0];
 					Event = await ValidateCommunityEventByID(EventParam);
-					if (Event == null) return;
+					if (Event == null)
+                    {
+                        return;
+                    }
 
-					if (User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) < PermissionLevel.Moderator)
+                    if (User.GetPermissionLevel(DiscordShardedClient, BotConfiguration) < PermissionLevel.Moderator)
 					{
 						await BuildEmbed(EmojiEnum.Annoyed)
 							.WithTitle("Oop! Don't go there~")
@@ -179,8 +188,12 @@ namespace Dexter.Commands
 					{
 						case "ID":
 							Events.Add(await ValidateCommunityEventByID(SearchString));
-							if (Events[0] == null) return;
-							break;
+							if (Events[0] == null)
+                            {
+                                return;
+                            }
+
+                            break;
 						case "USER":
 							IUser TargetUser;
 							TargetUser = Context.Message.MentionedUsers.FirstOrDefault();
@@ -189,13 +202,21 @@ namespace Dexter.Commands
 								TargetUser = DiscordShardedClient.GetUser(TargetID);
 							}
 
-							if (TargetUser != null) Events.AddRange(GetEvents(TargetUser));
-							break;
+							if (TargetUser != null)
+                            {
+                                Events.AddRange(GetEvents(TargetUser));
+                            }
+
+                            break;
 						case "DESC":
 						case "DESCRIPTION":
 							Events.Add(await ValidateCommunityEventByDescription(SearchString));
-							if (Events[0] == null) return;
-							break;
+							if (Events[0] == null)
+                            {
+                                return;
+                            }
+
+                            break;
 						default:
 							await BuildEmbed(EmojiEnum.Annoyed)
 								.WithTitle("Parameter Parse Error!")

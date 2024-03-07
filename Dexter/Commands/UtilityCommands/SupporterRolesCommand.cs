@@ -100,22 +100,32 @@ namespace Dexter.Commands
 			if (colorChangePerms < 1 || colorname == "none")
 			{
 				IEnumerable<IRole> removed = await TryRemoveRolesAndGet(user, colorRoleIDs);
-				if (removed is null) return;
+				if (removed is null)
+                {
+                    return;
+                }
 
-				if (colorChangePerms < 1)
-					await Context.Channel.SendMessageAsync("You don't have the necessary roles to change your color role to the selected one!");
-				else
+                if (colorChangePerms < 1)
+                {
+                    await Context.Channel.SendMessageAsync("You don't have the necessary roles to change your color role to the selected one!");
+                }
+                else
 				{
 					if (removed.Any())
 					{
 						List<string> roleNames = [];
 						foreach (IRole role in removed)
-							roleNames.Add(role.Name);
-						await Context.Channel.SendMessageAsync($"Removed color roles! [{string.Join(", ", roleNames)}]");
+                        {
+                            roleNames.Add(role.Name);
+                        }
+
+                        await Context.Channel.SendMessageAsync($"Removed color roles! [{string.Join(", ", roleNames)}]");
 					}
 					else
-						await Context.Channel.SendMessageAsync($"No roles found to remove!");
-				}
+                    {
+                        await Context.Channel.SendMessageAsync($"No roles found to remove!");
+                    }
+                }
 				return;
 			}
 
@@ -128,12 +138,11 @@ namespace Dexter.Commands
 				return;
 			}
 
-			if (UtilityConfiguration.LockedColors.ContainsKey(toAdd.Id)
-				&& !user.RoleIds.Contains(UtilityConfiguration.LockedColors[toAdd.Id]))
+			if (UtilityConfiguration.LockedColors.TryGetValue(toAdd.Id, out ulong value) && !user.RoleIds.Contains(value))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Locked Role!")
-					.WithDescription($"In order to unlock this role, you must first get <@&{UtilityConfiguration.LockedColors[toAdd.Id]}>.")
+					.WithDescription($"In order to unlock this role, you must first get <@&{value}>.")
 					.SendEmbed(Context.Channel);
 				return;
 			}
@@ -148,8 +157,12 @@ namespace Dexter.Commands
 				return;
 			}
 
-			if (!await TryRemoveRoles(user, colorRoleIDs)) return;
-			try
+			if (!await TryRemoveRoles(user, colorRoleIDs))
+            {
+                return;
+            }
+
+            try
 			{
 				await user.AddRoleAsync(toAdd, new RequestOptions { RetryMode = RetryMode.AlwaysRetry });
 			}
@@ -179,8 +192,12 @@ namespace Dexter.Commands
 
 		public static int GetColorRoleTier(ulong roleId, UtilityConfiguration config)
 		{
-			if (config.ColorTiers.ContainsKey(roleId)) return config.ColorTiers[roleId];
-			return config.LockedColors.ContainsKey(roleId) ? 2 : 3;
+			if (config.ColorTiers.TryGetValue(roleId, out int value))
+            {
+                return value;
+            }
+
+            return config.LockedColors.ContainsKey(roleId) ? 2 : 3;
 		}
 
 		private async Task<bool> TryRemoveRoles(IGuildUser user, Dictionary<ulong, IRole> colorRoleIDs)
@@ -191,18 +208,21 @@ namespace Dexter.Commands
 		private async Task<IEnumerable<IRole>> TryRemoveRolesAndGet(IGuildUser user, Dictionary<ulong, IRole> colorRoleIDs)
 		{
 			List<IRole> toRemove = [];
-			ulong[] userRoles = user.RoleIds.ToArray();
+			ulong[] userRoles = [.. user.RoleIds];
 			foreach (ulong roleID in userRoles)
 			{
-				if (colorRoleIDs.ContainsKey(roleID))
+				if (colorRoleIDs.TryGetValue(roleID, out IRole value))
 				{
-					toRemove.Add(colorRoleIDs[roleID]);
+					toRemove.Add(value);
 				}
 			}
 
-			if (!toRemove.Any()) return Array.Empty<IRole>();
+			if (!toRemove.Any())
+            {
+                return Array.Empty<IRole>();
+            }
 
-			try
+            try
 			{
 				await user.RemoveRolesAsync(toRemove);
 				return toRemove;
@@ -245,7 +265,7 @@ namespace Dexter.Commands
 
 		private async Task ReloadColorList(bool verbose = false)
 		{
-			List<SocketRole> roles = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).Roles.ToList();
+			List<SocketRole> roles = [.. DiscordShardedClient.GetGuild(BotConfiguration.GuildID).Roles];
 			roles.Sort((ra, rb) => rb.Position.CompareTo(ra.Position));
 			List<IRole> colorRoles = [];
 
@@ -323,11 +343,14 @@ namespace Dexter.Commands
 			string filepath = Path.Join(imageChacheDir, $"ColorsList.jpg");
 			picture.Save(filepath);
 
-			if (verbose) await Context.Channel.SendMessageAsync($"Successfully reloaded colors!");
-		}
+			if (verbose)
+            {
+                await Context.Channel.SendMessageAsync($"Successfully reloaded colors!");
+            }
+        }
 
-		private readonly static float[] alphatransform = new float[] { 0, 0, 0, 1, 0 };
-		private readonly static float[] lineartransform = new float[] { 0, 0, 0, 0, 1 };
+		private readonly static float[] alphatransform = [0, 0, 0, 1, 0];
+		private readonly static float[] lineartransform = [0, 0, 0, 0, 1];
 
 		/// <summary>
 		/// Returns a color transformation matrix with the given RGB values.
@@ -339,13 +362,13 @@ namespace Dexter.Commands
 
 		public static ColorMatrix BasicTransform(float r, float g, float b)
 		{
-			return new ColorMatrix(new float[][] {
-				new float[] {r, 0, 0, 0, 0},
-				new float[] {0, g, 0, 0, 0},
-				new float[] {0, 0, b, 0, 0},
+			return new ColorMatrix([
+				[r, 0, 0, 0, 0],
+				[0, g, 0, 0, 0],
+				[0, 0, b, 0, 0],
 				alphatransform,
 				lineartransform
-				});
+				]);
 		}
 
 		private string ToRoleName(IRole role)
@@ -367,14 +390,24 @@ namespace Dexter.Commands
 
 		public static int GetRoleChangePerms(IGuildUser user, UtilityConfiguration config)
 		{
-			if (user is null) return 0;
+			if (user is null)
+            {
+                return 0;
+            }
 
-			int value = 0;
+            int value = 0;
 			foreach (KeyValuePair<ulong, int> role in config.ColorChangeRoles)
 			{
-				if (value >= role.Value) continue;
-				if (user.RoleIds.Contains(role.Key)) value = role.Value;
-			}
+				if (value >= role.Value)
+                {
+                    continue;
+                }
+
+                if (user.RoleIds.Contains(role.Key))
+                {
+                    value = role.Value;
+                }
+            }
 			return value;
 		}
 

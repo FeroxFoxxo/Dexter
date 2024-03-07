@@ -55,20 +55,28 @@ namespace Dexter.Events
 		public async Task MNGMessageUpdated(Cacheable<IMessage, ulong> OldMessage, SocketMessage NewMessage, ISocketMessageChannel SocketMessageChannel)
 		{
 			if (SocketMessageChannel.Id != MNGConfiguration.MeetNGreetChannel)
-				return;
+            {
+                return;
+            }
 
-			IMessage CachedMessage = await OldMessage.GetOrDownloadAsync();
+            IMessage CachedMessage = await OldMessage.GetOrDownloadAsync();
 
 			if (CachedMessage == null)
-				return;
+            {
+                return;
+            }
 
-			if (CachedMessage.Author.IsBot)
-				return;
+            if (CachedMessage.Author.IsBot)
+            {
+                return;
+            }
 
-			if (CachedMessage.Content == NewMessage.Content)
-				return;
+            if (CachedMessage.Content == NewMessage.Content)
+            {
+                return;
+            }
 
-			await BuildEmbed(EmojiEnum.Unknown)
+            await BuildEmbed(EmojiEnum.Unknown)
 				.WithAuthor(CachedMessage.Author)
 				.WithDescription($"**Message edited in <#{SocketMessageChannel.Id}>** [Jump to message](https://discordapp.com/channels/{ (NewMessage.Channel as SocketGuildChannel).Guild.Id }/{ NewMessage.Channel.Id }/{ NewMessage.Id })")
 				.AddField("Before", CachedMessage.Content.Length > 1000 ? string.Concat(CachedMessage.Content.AsSpan(0, 1000), "...") : CachedMessage.Content)
@@ -88,17 +96,23 @@ namespace Dexter.Events
 		public async Task MNGMessageDeleted(Cacheable<IMessage, ulong> DeletedMessage, Cacheable<IMessageChannel, ulong> Channel)
 		{
 			if (Channel.Id != MNGConfiguration.MeetNGreetChannel)
-				return;
+            {
+                return;
+            }
 
-			IMessage CachedMessage = await DeletedMessage.GetOrDownloadAsync();
+            IMessage CachedMessage = await DeletedMessage.GetOrDownloadAsync();
 
 			if (CachedMessage == null)
-				return;
+            {
+                return;
+            }
 
-			if (CachedMessage.Author.IsBot)
-				return;
+            if (CachedMessage.Author.IsBot)
+            {
+                return;
+            }
 
-			await BuildEmbed(EmojiEnum.Unknown)
+            await BuildEmbed(EmojiEnum.Unknown)
 				.WithAuthor(CachedMessage.Author)
 				.WithDescription($"**Message sent by <@{CachedMessage.Author.Id}> deleted in in <#{Channel.Id}>**\n{(CachedMessage.Content.Length > 1900 ? string.Concat(CachedMessage.Content.AsSpan(0, 1900), "...") : CachedMessage.Content)}")
 				.WithFooter($"Author: {CachedMessage.Author.Id} | Message ID: {CachedMessage.Id}")

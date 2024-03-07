@@ -43,8 +43,11 @@ namespace Dexter.Abstractions
 			BotConfiguration = botConfiguration;
 			EmptyData = emptyData;
 
-			if (string.IsNullOrWhiteSpace(game.Data)) game.Data = emptyData;
-		}
+			if (string.IsNullOrWhiteSpace(game.Data))
+            {
+                game.Data = emptyData;
+            }
+        }
 
 		/// <summary>
 		/// The Build Embed method is a generic method that simply calls upon the EMBED BUILDER extension method.

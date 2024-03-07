@@ -90,11 +90,18 @@ namespace Dexter.Databases.UserProfiles
 
 		public bool BlockUser(ulong user)
 		{
-			if (LinkType != LinkType.Blocked) return false;
-			if (Sender == user) { Settings.BlockMode |= Direction.Sender; return true; }
+			if (LinkType != LinkType.Blocked)
+            {
+                return false;
+            }
+
+            if (Sender == user) { Settings.BlockMode |= Direction.Sender; return true; }
 			else if (Sendee == user) { Settings.BlockMode |= Direction.Sendee; return true; }
-			else return false;
-		}
+			else
+            {
+                return false;
+            }
+        }
 
 		/// <summary>
 		/// Checks whether a given user is set to receive birthday notifications based on this link
@@ -118,11 +125,18 @@ namespace Dexter.Databases.UserProfiles
 
 		public bool SetBorkdayNotified(ulong user)
 		{
-			if (LinkType != LinkType.Friend) return false;
-			if (Sender == user) { Settings.BorkdayMode |= Direction.Sender; return true; }
+			if (LinkType != LinkType.Friend)
+            {
+                return false;
+            }
+
+            if (Sender == user) { Settings.BorkdayMode |= Direction.Sender; return true; }
 			else if (Sendee == user) { Settings.BorkdayMode |= Direction.Sendee; return true; }
-			else return false;
-		}
+			else
+            {
+                return false;
+            }
+        }
 
 		/// <summary>
 		/// Sets a user up not to receive birthday notifications.
@@ -133,11 +147,18 @@ namespace Dexter.Databases.UserProfiles
 
 		public bool ClearBorkdayNotified(ulong user)
 		{
-			if (LinkType != LinkType.Friend) return false;
-			if (Sender == user) { Settings.BorkdayMode &= ~Direction.Sender; return true; }
+			if (LinkType != LinkType.Friend)
+            {
+                return false;
+            }
+
+            if (Sender == user) { Settings.BorkdayMode &= ~Direction.Sender; return true; }
 			else if (Sendee == user) { Settings.BorkdayMode &= ~Direction.Sendee; return true; }
-			else return false;
-		}
+			else
+            {
+                return false;
+            }
+        }
 
 	}
 
@@ -203,8 +224,12 @@ namespace Dexter.Databases.UserProfiles
 
 		public bool SetBorkdayMode(UserLink link, ulong user, bool value)
 		{
-			if (link.LinkType != LinkType.Friend) return false;
-			if (link.Sender == user)
+			if (link.LinkType != LinkType.Friend)
+            {
+                return false;
+            }
+
+            if (link.Sender == user)
 			{
 				if (value) { BorkdayMode |= Direction.Sender; return true; }
 				else { BorkdayMode &= ~Direction.Sender; return true; }
@@ -214,8 +239,11 @@ namespace Dexter.Databases.UserProfiles
 				if (value) { BorkdayMode |= Direction.Sendee; return true; }
 				else { BorkdayMode &= ~Direction.Sendee; return true; }
 			}
-			else return false;
-		}
+			else
+            {
+                return false;
+            }
+        }
 
 	}
 

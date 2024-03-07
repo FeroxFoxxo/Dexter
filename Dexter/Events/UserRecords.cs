@@ -41,8 +41,10 @@ namespace Dexter.Events
 				NameRecord Record = ProfilesDB.Names.AsQueryable().Where(n => n.Name == After.Username && n.UserID == After.Id && n.Type == NameType.Username).FirstOrDefault();
 
 				if (Record != null)
-					Record.SetTime = DateTimeOffset.Now.ToUnixTimeSeconds();
-				else
+                {
+                    Record.SetTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+                }
+                else
 				{
 					ProfilesDB.Names.Add(new()
 					{
@@ -75,8 +77,10 @@ namespace Dexter.Events
 				NameRecord Record = ProfilesDB.Names.AsQueryable().Where(n => n.Name == After.Username && n.UserID == After.Id && n.Type == NameType.Nickname).FirstOrDefault();
 
 				if (Record != null)
-					Record.SetTime = DateTimeOffset.Now.ToUnixTimeSeconds();
-				else
+                {
+                    Record.SetTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+                }
+                else
 				{
 					ProfilesDB.Names.Add(new()
 					{
@@ -175,7 +179,7 @@ namespace Dexter.Events
 
 			using var ProfilesDB = scope.ServiceProvider.GetRequiredService<ProfilesDB>();
 
-			return ProfilesDB.Names.AsQueryable().Where(n => n.Type == NameType && n.UserID == User.Id).ToArray();
+			return [.. ProfilesDB.Names.AsQueryable().Where(n => n.Type == NameType && n.UserID == User.Id)];
 		}
 
 		/// <summary>
@@ -192,9 +196,12 @@ namespace Dexter.Events
 
 			UserProfile Profile = ProfilesDB.GetOrCreateProfile(User.Id);
 
-			if (Profile.DateJoined != default) return;
+			if (Profile.DateJoined != default)
+            {
+                return;
+            }
 
-			Profile.DateJoined = DateTimeOffset.Now.ToUnixTimeSeconds();
+            Profile.DateJoined = DateTimeOffset.Now.ToUnixTimeSeconds();
 
 			await ProfilesDB.EnsureSaved();
 		}
@@ -214,9 +221,12 @@ namespace Dexter.Events
 
 			UserProfile Profile = ProfilesDB.GetOrCreateProfile(User.Id);
 
-			if (Profile.DateJoined != default) return DateTimeOffset.FromUnixTimeSeconds(Profile.DateJoined);
+			if (Profile.DateJoined != default)
+            {
+                return DateTimeOffset.FromUnixTimeSeconds(Profile.DateJoined);
+            }
 
-			Profile.DateJoined = User.JoinedAt?.ToUnixTimeSeconds() ?? default;
+            Profile.DateJoined = User.JoinedAt?.ToUnixTimeSeconds() ?? default;
 
 			await ProfilesDB.EnsureSaved();
 			return Profile.DateJoined == default ? default : DateTimeOffset.FromUnixTimeSeconds(Profile.DateJoined);

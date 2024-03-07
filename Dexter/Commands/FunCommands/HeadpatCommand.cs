@@ -40,10 +40,11 @@ namespace Dexter.Commands
 			if (User == null)
 			{
 				if (Context.Message.MentionedUsers.Count > 0)
-					User = Context.Message.MentionedUsers.FirstOrDefault();
+                {
+                    User = Context.Message.MentionedUsers.FirstOrDefault();
+                }
 
-				if (User == null)
-                    User = Context.Guild.GetUser(Context.User.Id);
+                User ??= Context.Guild.GetUser(Context.User.Id);
             }
             else if (User is IGuildUser gUser)
             {
@@ -68,14 +69,18 @@ namespace Dexter.Commands
             string NameOfUser = Regex.Replace(User.Username, "[^a-zA-Z]", "", RegexOptions.Compiled);
 
 			if (NameOfUser.Length < 2)
-				NameOfUser = "Unknown";
+            {
+                NameOfUser = "Unknown";
+            }
 
-			string ImageCacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
+            string ImageCacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
 
 			if (!Directory.Exists(ImageCacheDir))
-				Directory.CreateDirectory(ImageCacheDir);
+            {
+                Directory.CreateDirectory(ImageCacheDir);
+            }
 
-			string FilePath = Path.Join(ImageCacheDir, $"{NameOfUser}.gif");
+            string FilePath = Path.Join(ImageCacheDir, $"{NameOfUser}.gif");
 
 			using (AnimatedGifCreator Gif = AnimatedGif.AnimatedGif.Create(FilePath, 80))
 			{
@@ -110,16 +115,20 @@ namespace Dexter.Commands
 				GuildEmote PrevEmote = Guild.Emotes.Where(Emote => Emote.Name == NameOfUser).FirstOrDefault();
 
 				if (PrevEmote != null)
-					await Guild.DeleteEmoteAsync(PrevEmote);
+                {
+                    await Guild.DeleteEmoteAsync(PrevEmote);
+                }
 
-				GuildEmote Emote = await Guild.CreateEmoteAsync(NameOfUser, EmoteImage);
+                GuildEmote Emote = await Guild.CreateEmoteAsync(NameOfUser, EmoteImage);
 
 				DiscordWebhookClient Webhook = await CreateOrGetWebhook(Context.Channel, FunConfiguration.HeadpatWebhookName);
 
 				ulong? threadId = null;
 
 				if (Context.Channel is IThreadChannel threadChannel)
-					threadId = Context.Channel.Id;
+                {
+                    threadId = Context.Channel.Id;
+                }
 
                 await Webhook.SendMessageAsync(
 					Emote.ToString(),

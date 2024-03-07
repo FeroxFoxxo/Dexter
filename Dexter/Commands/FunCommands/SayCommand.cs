@@ -26,7 +26,7 @@ namespace Dexter.Commands
 		public async Task SayCommand([Remainder] string Message)
 		{
 			await Context.Message.DeleteAsync();
-			await Context.Channel.SendMessageAsync(Message.SanitizeMentions);
+			await Context.Channel.SendMessageAsync(Message.SanitizeMentions());
 		}
 
 	}

@@ -58,9 +58,11 @@ namespace Dexter.Events
 			using var EventTimersDB = scope.ServiceProvider.GetRequiredService<EventTimersDB>();
 
 			if (EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.CallbackClass.Equals(GetType().Name)).FirstOrDefault() == null)
-				await CreateEventTimer(ProfileCallback, [], ProfilingConfiguration.SecTillProfiling, TimerType.Interval);
+            {
+                await CreateEventTimer(ProfileCallback, [], ProfilingConfiguration.SecTillProfiling, TimerType.Interval);
+            }
 
-			await EventTimersDB.SaveChangesAsync();
+            await EventTimersDB.SaveChangesAsync();
 		}
 
 		/// <summary>
@@ -91,24 +93,30 @@ namespace Dexter.Events
 		public FileStream GetRandomPFP()
 		{
 			if (string.IsNullOrEmpty(ProfilingConfiguration.PFPDirectory))
-				return null;
+            {
+                return null;
+            }
 
-			FileInfo[] Files = GetProfilePictures();
+            FileInfo[] Files = GetProfilePictures();
 
 			if (Files.Length <= 0)
-				return null;
-
-			else if (Files.Length == 1)
-				return Files[0].OpenRead();
-
-			else
+            {
+                return null;
+            }
+            else if (Files.Length == 1)
+            {
+                return Files[0].OpenRead();
+            }
+            else
 			{
 				FileInfo ProfilePicture = Files[Random.Next(0, Files.Length - 2)];
 
 				if (ProfilePicture.Name == CurrentPFP)
-					ProfilePicture = Files[^1];
+                {
+                    ProfilePicture = Files[^1];
+                }
 
-				CurrentPFP = ProfilePicture.Name;
+                CurrentPFP = ProfilePicture.Name;
 
 				return ProfilePicture.OpenRead();
 			}

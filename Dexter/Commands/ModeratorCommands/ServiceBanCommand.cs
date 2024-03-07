@@ -57,8 +57,11 @@ namespace Dexter.Commands
 
 					for (int i = 0; i < Success.Length; i++)
 					{
-						if (!Success[i]) Errored.Add(RestrictionsArray[i]);
-					}
+						if (!Success[i])
+                        {
+                            Errored.Add(RestrictionsArray[i]);
+                        }
+                    }
 
 					userRestriction = RestrictionsDB.UserRestrictions.Find(User.Id);
 
@@ -96,9 +99,14 @@ namespace Dexter.Commands
 					Apply = ParseRestriction(RestrictionsArray, out Success);
 
 					for (int i = 0; i < Success.Length; i++)
-						if (!Success[i]) Errored.Add(RestrictionsArray[i]);
+                    {
+                        if (!Success[i])
+                        {
+                            Errored.Add(RestrictionsArray[i]);
+                        }
+                    }
 
-					userRestriction = RestrictionsDB.UserRestrictions.Find(User.Id);
+                    userRestriction = RestrictionsDB.UserRestrictions.Find(User.Id);
 
 					if (userRestriction == null || (userRestriction.RestrictionFlags & Apply) == Restriction.None)
 					{

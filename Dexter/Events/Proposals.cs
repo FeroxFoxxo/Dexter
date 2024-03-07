@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dexter.Abstractions;
 using Dexter.Configurations;
-using Dexter.Databases.AdminConfirmations;
 using Dexter.Databases.EventTimers;
 using Dexter.Databases.Proposals;
 using Dexter.Databases.UserRestrictions;
@@ -72,12 +71,14 @@ namespace Dexter.Events
 			Proposal Proposal = ProposalDB.GetProposalByNameOrID(Tracker);
 
 			if (Proposal == null)
-				await BuildEmbed(EmojiEnum.Annoyed)
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Proposal does not exist!")
 					.WithDescription($"Cound not fetch the proposal from tracker / message ID / staff message ID `{Tracker}`.\n" +
 						$"Are you sure it exists?")
 					.SendEmbed(MessageChannel);
-			else
+            }
+            else
 			{
 				Proposal.Reason = Reason;
 
@@ -104,16 +105,22 @@ namespace Dexter.Events
 		public async Task ReactionAdded(Cacheable<IUserMessage, ulong> CachedMessage, Cacheable<IMessageChannel, ulong> MessageChannel, SocketReaction Reaction)
 		{
 			if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
-				return;
+            {
+                return;
+            }
 
-			IUserMessage Message = await CachedMessage.GetOrDownloadAsync();
+            IUserMessage Message = await CachedMessage.GetOrDownloadAsync();
 
 			if (Message == null)
-				throw new Exception("Message does not exist in cache and could not be downloaded! Aborting...");
+            {
+                throw new Exception("Message does not exist in cache and could not be downloaded! Aborting...");
+            }
 
-			if (await CheckAsync(Message, Reaction))
-				await Message.RemoveReactionAsync(Reaction.Emote, Reaction.User.Value);
-		}
+            if (await CheckAsync(Message, Reaction))
+            {
+                await Message.RemoveReactionAsync(Reaction.Emote, Reaction.User.Value);
+            }
+        }
 
 		/// <summary>
 		/// The ReactionRemoved method checks to see if reaction was removed in the suggestion channel and, if so, it runs CheckAsync.
@@ -126,14 +133,18 @@ namespace Dexter.Events
 		public async Task ReactionRemoved(Cacheable<IUserMessage, ulong> CachedMessage, Cacheable<IMessageChannel, ulong> MessageChannel, SocketReaction Reaction)
 		{
 			if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
-				return;
+            {
+                return;
+            }
 
-			IUserMessage Message = await CachedMessage.GetOrDownloadAsync();
+            IUserMessage Message = await CachedMessage.GetOrDownloadAsync();
 
 			if (Message == null)
-				throw new Exception("Message does not exist in cache and could not be downloaded! Aborting...");
+            {
+                throw new Exception("Message does not exist in cache and could not be downloaded! Aborting...");
+            }
 
-			await CheckAsync(Message, Reaction);
+            await CheckAsync(Message, Reaction);
 		}
 
 		/// <summary>
@@ -146,9 +157,11 @@ namespace Dexter.Events
 		{
 			// Check to see if the message has been sent in the suggestion channel and is not a bot, least we return.
 			if (ReceivedMessage.Channel.Id != ProposalConfiguration.SuggestionsChannel || ReceivedMessage.Author.IsBot)
-				return Task.CompletedTask;
+            {
+                return Task.CompletedTask;
+            }
 
-			_ = Task.Run(async () => await CreateSuggestion(ReceivedMessage));
+            _ = Task.Run(async () => await CreateSuggestion(ReceivedMessage));
 
 			return Task.CompletedTask;
 		}
@@ -204,9 +217,11 @@ namespace Dexter.Events
 			string Content = ReceivedMessage.Content;
 
 			if (ProposalConfiguration.CommandRemovals.Contains(Content.Split(' ')[0].ToLower()))
-				Content = Content[(Content.IndexOf(" ") + 1)..];
+            {
+                Content = Content[(Content.IndexOf(" ") + 1)..];
+            }
 
-			string Token = CreateToken();
+            string Token = CreateToken();
 
 			// Creates a new Proposal object with the related fields.
 			Proposal Proposal = new()
@@ -397,10 +412,14 @@ namespace Dexter.Events
 				string selected = result.Value;
 
 				if (selected == options[0])
-					await UpdateProposal(proposal, ProposalStatus.Approved);
-				else if (selected == options[1])
-					await UpdateProposal(proposal, ProposalStatus.Declined);
-			});
+                {
+                    await UpdateProposal(proposal, ProposalStatus.Approved);
+                }
+                else if (selected == options[1])
+                {
+                    await UpdateProposal(proposal, ProposalStatus.Declined);
+                }
+            });
 		}
 
 		/// <summary>
@@ -422,13 +441,17 @@ namespace Dexter.Events
 
 			// Check if the proposal is not null.
 			if (Proposal == null)
-				throw new Exception("Proposal does not exist in database! Aborting...");
+            {
+                throw new Exception("Proposal does not exist in database! Aborting...");
+            }
 
-			if (Proposal.ProposalStatus != ProposalStatus.Suggested)
-				return true;
+            if (Proposal.ProposalStatus != ProposalStatus.Suggested)
+            {
+                return true;
+            }
 
-			// Check the current amount of upvotes the message has.
-			ReactionMetadata Upvotes = UserMessage.Reactions[
+            // Check the current amount of upvotes the message has.
+            ReactionMetadata Upvotes = UserMessage.Reactions[
 				await DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild)
 				.GetEmoteAsync(ProposalConfiguration.Emoji["Upvote"])
 			];
@@ -441,8 +464,10 @@ namespace Dexter.Events
 
 			// Run through the emote that has been applied to the suggestions channel to see if the ID of the emote matches one of our designated suggestion emoji. 
 			if (Reaction.Emote is Emote Emote)
-				foreach (KeyValuePair<string, ulong> Emotes in ProposalConfiguration.Emoji)
-					if (Emotes.Value == Emote.Id)
+            {
+                foreach (KeyValuePair<string, ulong> Emotes in ProposalConfiguration.Emoji)
+                {
+                    if (Emotes.Value == Emote.Id)
 					{
 						switch (Emotes.Key)
 						{
@@ -450,8 +475,10 @@ namespace Dexter.Events
 							case "Downvote":
 								// If an upvote or downvote has been applied by the suggestor, remove it.
 								if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator)
-									return true;
-								else
+                                {
+                                    return true;
+                                }
+                                else
 								{
 									// Check if the suggestion has enough upvotes to trigger the suggestion to pass,
 									// or if the suggestion has enough downvotes to force it to deny itself.
@@ -470,9 +497,11 @@ namespace Dexter.Events
 
 											// Check if the suggestion is not null.
 											if (Suggestion == null)
-												throw new Exception("Suggestion does not exist in database! Aborting...");
+                                            {
+                                                throw new Exception("Suggestion does not exist in database! Aborting...");
+                                            }
 
-											Suggestion.TimerToken = await CreateEventTimer(
+                                            Suggestion.TimerToken = await CreateEventTimer(
 												DeclineStaffSuggestion,
 												new() { { "Suggestion", Proposal.Tracker } },
 												ProposalConfiguration.IdleDeclineTime,
@@ -522,9 +551,11 @@ namespace Dexter.Events
 									$"Please make sure that the reaction {Emotes.Key} is assigned the correct value in {GetType().Name}.");
 						}
 					}
+                }
+            }
 
-			// Remove the emoji if it is not one that affects the suggestion.
-			return true;
+            // Remove the emoji if it is not one that affects the suggestion.
+            return true;
 		}
 
 		/// <summary>
@@ -565,9 +596,11 @@ namespace Dexter.Events
 			];
 
 			if (Math.Abs(Upvotes.ReactionCount - Downvotes.ReactionCount) > ProposalConfiguration.StaffVotingThreshold)
-				return;
+            {
+                return;
+            }
 
-			Proposal.Reason = "The staff team was too divided on this suggestion to make a confident judgement at this time.";
+            Proposal.Reason = "The staff team was too divided on this suggestion to make a confident judgement at this time.";
 
 			Suggestion.TimerToken = string.Empty;
 
@@ -586,12 +619,16 @@ namespace Dexter.Events
 		public SuggestionVotes CheckVotes(ReactionMetadata Upvotes, ReactionMetadata Downvotes)
 		{
 			if (Upvotes.ReactionCount - Downvotes.ReactionCount >= ProposalConfiguration.ReactionPass)
-				return SuggestionVotes.Pass;
+            {
+                return SuggestionVotes.Pass;
+            }
 
-			if (Downvotes.ReactionCount - Upvotes.ReactionCount >= ProposalConfiguration.ReactionPass)
-				return SuggestionVotes.Fail;
+            if (Downvotes.ReactionCount - Upvotes.ReactionCount >= ProposalConfiguration.ReactionPass)
+            {
+                return SuggestionVotes.Fail;
+            }
 
-			return SuggestionVotes.Remain;
+            return SuggestionVotes.Remain;
 		}
 
 		/// <summary>
@@ -616,9 +653,11 @@ namespace Dexter.Events
 					Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
 
 					if (!string.IsNullOrEmpty(Suggestion.TimerToken))
-						await TimerService.RemoveTimer(Suggestion.TimerToken);
+                    {
+                        await TimerService.RemoveTimer(Suggestion.TimerToken);
+                    }
 
-					await UpdateSpecificProposal(Proposal, ProposalConfiguration.SuggestionsChannel, Proposal.MessageID);
+                    await UpdateSpecificProposal(Proposal, ProposalConfiguration.SuggestionsChannel, Proposal.MessageID);
 					await UpdateSpecificProposal(Proposal, ProposalConfiguration.StaffSuggestionsChannel, Suggestion.StaffMessageID);
 					break;
 				case ProposalType.AdminConfirmation:
@@ -634,10 +673,17 @@ namespace Dexter.Events
 					{
 						AdminConfirmation Confirmation = ProposalDB.AdminConfirmations.Find(Proposal.Tracker);
 
-						if (Confirmation.DenyCallbackClass == null || Confirmation.DenyCallbackMethod == null || Confirmation.DenyCallbackParameters == null) break;
-						if (Confirmation.DenyCallbackClass.Length == 0 || Confirmation.DenyCallbackMethod.Length == 0 || Confirmation.DenyCallbackParameters.Length == 0) break;
+						if (Confirmation.DenyCallbackClass == null || Confirmation.DenyCallbackMethod == null || Confirmation.DenyCallbackParameters == null)
+                        {
+                            break;
+                        }
 
-						InvokeStringifiedMethod(Confirmation.DenyCallbackClass, Confirmation.DenyCallbackMethod, Confirmation.DenyCallbackParameters);
+                        if (Confirmation.DenyCallbackClass.Length == 0 || Confirmation.DenyCallbackMethod.Length == 0 || Confirmation.DenyCallbackParameters.Length == 0)
+                        {
+                            break;
+                        }
+
+                        InvokeStringifiedMethod(Confirmation.DenyCallbackClass, Confirmation.DenyCallbackMethod, Confirmation.DenyCallbackParameters);
 					}
 
 					break;
@@ -654,9 +700,11 @@ namespace Dexter.Events
 			Type refClass = Assembly.GetExecutingAssembly().GetTypes().Where(T => T.Name.Equals(Type)).FirstOrDefault();
 
 			if (refClass.GetMethod(Method) == null)
-				throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
+            {
+                throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
+            }
 
-			refClass.GetMethod(Method).Invoke(ActivatorUtilities.CreateInstance(ServiceProvider, refClass).SetClassParameters(scope, ServiceProvider), new object[1] { Parameters });
+            refClass.GetMethod(Method).Invoke(ActivatorUtilities.CreateInstance(ServiceProvider, refClass).SetClassParameters(scope, ServiceProvider), [Parameters]);
 		}
 
 		/// <summary>
@@ -674,9 +722,11 @@ namespace Dexter.Events
 			using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
 			if (Channel == 0 || MessageID == 0)
-				return;
+            {
+                return;
+            }
 
-			SocketChannel SocketChannel = DiscordShardedClient.GetChannel(Channel);
+            SocketChannel SocketChannel = DiscordShardedClient.GetChannel(Channel);
 
 			if (SocketChannel is SocketTextChannel TextChannel)
 			{
@@ -697,19 +747,29 @@ namespace Dexter.Events
 						RestMessage Message = await TextChannel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
 
 						if (Proposal.MessageID == MessageID)
-							Proposal.MessageID = Message.Id;
-						else if (Proposal.ProposalType == ProposalType.Suggestion)
-							if (ProposalDB.Suggestions.Find(Proposal.Tracker).StaffMessageID == MessageID)
-								Proposal.MessageID = Message.Id;
-					}
+                        {
+                            Proposal.MessageID = Message.Id;
+                        }
+                        else if (Proposal.ProposalType == ProposalType.Suggestion)
+                        {
+                            if (ProposalDB.Suggestions.Find(Proposal.Tracker).StaffMessageID == MessageID)
+                            {
+                                Proposal.MessageID = Message.Id;
+                            }
+                        }
+                    }
 				}
 				else
-					throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? ProposalType: {Proposal.ProposalType}");
-			}
+                {
+                    throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? ProposalType: {Proposal.ProposalType}");
+                }
+            }
 			else
-				throw new Exception($"Eek! The given channel of {SocketChannel} turned out *not* to be an instance of SocketTextChannel, rather {SocketChannel.GetType().Name}!");
+            {
+                throw new Exception($"Eek! The given channel of {SocketChannel} turned out *not* to be an instance of SocketTextChannel, rather {SocketChannel.GetType().Name}!");
+            }
 
-			await ProposalDB.SaveChangesAsync();
+            await ProposalDB.SaveChangesAsync();
 		}
 
 		/// <summary>
@@ -727,15 +787,21 @@ namespace Dexter.Events
 			char[] TokenArray = new char[BotConfiguration.TrackerLength];
 
 			for (int i = 0; i < TokenArray.Length; i++)
-				TokenArray[i] = BotConfiguration.RandomCharacters[Random.Next(BotConfiguration.RandomCharacters.Length)];
+            {
+                TokenArray[i] = BotConfiguration.RandomCharacters[Random.Next(BotConfiguration.RandomCharacters.Length)];
+            }
 
-			string Token = new(TokenArray);
+            string Token = new(TokenArray);
 
 			if (ProposalDB.Suggestions.Find(Token) == null)
-				return Token;
-			else
-				return CreateToken();
-		}
+            {
+                return Token;
+            }
+            else
+            {
+                return CreateToken();
+            }
+        }
 
 		/// <summary>
 		/// The BuildProposal method takes a Proposal in as its input and generates an embed from it.

@@ -54,9 +54,11 @@ namespace Dexter.Commands
 			string ProxyURL = string.Empty;
 
 			if (Attachment != null)
-				ProxyURL = await Attachment.ProxyUrl.GetProxiedImage(Tracker, DiscordShardedClient, ProposalService.ProposalConfiguration);
+            {
+                ProxyURL = await Attachment.ProxyUrl.GetProxiedImage(Tracker, DiscordShardedClient, ProposalService.ProposalConfiguration);
+            }
 
-			IUserMessage UsrMessage = await (DiscordShardedClient.GetChannel(ModerationConfiguration.ModMailChannelID) as ITextChannel).SendMessageAsync(
+            IUserMessage UsrMessage = await (DiscordShardedClient.GetChannel(ModerationConfiguration.ModMailChannelID) as ITextChannel).SendMessageAsync(
 				embed: BuildEmbed(EmojiEnum.Unknown)
 					.WithTitle($"Anonymous Modmail #{ModMailDB.ModMail.Count() + 1}")
 					.WithDescription(Message)
@@ -98,15 +100,21 @@ namespace Dexter.Commands
 			char[] TokenArray = new char[BotConfiguration.TrackerLength];
 
 			for (int i = 0; i < TokenArray.Length; i++)
-				TokenArray[i] = BotConfiguration.RandomCharacters[Random.Next(BotConfiguration.RandomCharacters.Length)];
+            {
+                TokenArray[i] = BotConfiguration.RandomCharacters[Random.Next(BotConfiguration.RandomCharacters.Length)];
+            }
 
-			string Token = new(TokenArray);
+            string Token = new(TokenArray);
 
 			if (ModMailDB.ModMail.Find(Token) == null)
-				return Token;
-			else
-				return CreateToken();
-		}
+            {
+                return Token;
+            }
+            else
+            {
+                return CreateToken();
+            }
+        }
 
 	}
 

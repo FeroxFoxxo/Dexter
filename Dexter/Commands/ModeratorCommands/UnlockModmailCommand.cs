@@ -77,7 +77,7 @@ namespace Dexter.Commands
 
 			ModMail ModMail = ModMailDB.ModMail.Find(Token);
 
-			IUser User = DiscordShardedClient.GetUser(ModMail.UserID);
+			SocketUser User = DiscordShardedClient.GetUser(ModMail.UserID);
 
 			ITextChannel TextChannel = DiscordShardedClient.GetChannel(ModerationConfiguration.ModMailChannelID) as ITextChannel;
 
@@ -88,18 +88,23 @@ namespace Dexter.Commands
 			EmbedBuilder Embed = ModmailMessage.Embeds.First().ToEmbedBuilder();
 
 			if (User != null)
-				Embed.WithTitle($"{User.Username}'s Modmail");
-			else
-				Embed.WithTitle($"{ModMail.UserID}'s Modmail");
+            {
+                Embed.WithTitle($"{User.Username}'s Modmail");
+            }
+            else
+            {
+                Embed.WithTitle($"{ModMail.UserID}'s Modmail");
+            }
 
-			Embed.AddField("Unlock Reason:", Reason);
+            Embed.AddField("Unlock Reason:", Reason);
 
 			IMessage Message = await TextChannel.SendMessageAsync(embed: Embed.Build());
 
 			ModMail.MessageID = Message.Id;
 
 			if (User != null)
-				await BuildEmbed(EmojiEnum.Annoyed)
+            {
+                await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Modmail Unlocked")
 					.WithDescription(
 					$"Hi, a moderator has unlocked your modmail message for `{ModMail.Tracker}`. " +
@@ -108,8 +113,9 @@ namespace Dexter.Commands
 					$"- {DiscordShardedClient.GetGuild(BotConfiguration.GuildID).Name} Staff Team")
 					.AddField("Reason: ", Reason)
 				.SendEmbed(await User.CreateDMChannelAsync());
+            }
 
-			await ModMailDB.SaveChangesAsync();
+            await ModMailDB.SaveChangesAsync();
 		}
 
 	}

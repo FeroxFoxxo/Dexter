@@ -20,31 +20,35 @@ namespace Dexter.Commands
 		public static async Task TimeoutUser(IGuildUser user, TimeSpan duration, bool overrideLonger = false)
 		{
 			if (overrideLonger || !user.TimedOutUntil.HasValue)
-				await user.ModifyAsync(prop =>
+            {
+                await user.ModifyAsync(prop =>
 				{
 					prop.TimedOutUntil = DateTimeOffset.Now + duration;
 				});
-			else
-				await user.ModifyAsync(prop =>
+            }
+            else
+            {
+                await user.ModifyAsync(prop =>
 				{
 					DateTimeOffset final = DateTimeOffset.Now + duration;
 					DateTimeOffset? current = prop.TimedOutUntil.GetValueOrDefault();
 					prop.TimedOutUntil = (current is null || final > current) ? final : current;
 				});
-			/*
-			await user.AddRolesAsync(new IRole[2] {
-				user.Guild.GetRole(MuzzleConfiguration.MuzzleRoleID),
-				user.Guild.GetRole(MuzzleConfiguration.ReactionMutedRoleID)
-			});
+            }
+            /*
+await user.AddRolesAsync(new IRole[2] {
+    user.Guild.GetRole(MuzzleConfiguration.MuzzleRoleID),
+    user.Guild.GetRole(MuzzleConfiguration.ReactionMutedRoleID)
+});
 
-			await CreateEventTimer(
-				UnmuzzleCallback,
-				new() { { "User", user.Id.ToString() } },
-				(int) duration.TotalSeconds,
-				TimerType.Expire
-			);
-			*/
-		}
+await CreateEventTimer(
+    UnmuzzleCallback,
+    new() { { "User", user.Id.ToString() } },
+    (int) duration.TotalSeconds,
+    TimerType.Expire
+);
+*/
+        }
 
 		/// <summary>
 		/// Attempts to unmuzzle a target user.
@@ -62,9 +66,11 @@ namespace Dexter.Commands
 			IGuildUser User = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(UserID);
 
 			if (User == null)
-				return;
+            {
+                return;
+            }
 
-			await Unmuzzle(User);
+            await Unmuzzle(User);
 		}
 
 		/// <summary>

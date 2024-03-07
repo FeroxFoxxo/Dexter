@@ -105,12 +105,18 @@ namespace Dexter.Commands
 					feedback.Add($"{tfb} - {afb}");
 				}
 				else if (tsuccess)
-					feedback.Add($"ERROR: Invalid activity expression - **{afb}**");
-				else if (asuccess)
-					feedback.Add($"ERROR: Invalid time expression - **{tfb}**");
-				else
-					feedback.Add($"ERROR: Invalid time and activity expressions - **{tfb}** and **{afb}**");
-			}
+                {
+                    feedback.Add($"ERROR: Invalid activity expression - **{afb}**");
+                }
+                else if (asuccess)
+                {
+                    feedback.Add($"ERROR: Invalid time expression - **{tfb}**");
+                }
+                else
+                {
+                    feedback.Add($"ERROR: Invalid time and activity expressions - **{tfb}** and **{afb}**");
+                }
+            }
 
 			await BuildEmbed(success ? EmojiEnum.Love : EmojiEnum.Annoyed)
 				.WithTitle(success ? "GreetFur activity modifications" : "ERROR:")
@@ -133,9 +139,12 @@ namespace Dexter.Commands
 			activity = new();
 			for (int i = 0; i < input.Length; i++)
 			{
-				if (activity.messageCount > 0) break;
+				if (activity.messageCount > 0)
+                {
+                    break;
+                }
 
-				switch(input[i])
+                switch (input[i])
 				{
 
 					case 'e':
@@ -164,10 +173,22 @@ namespace Dexter.Commands
 			}
 
 			List<string> flagsExpr = [];
-			if (activity.flags.HasFlag(ActivityFlags.Exempt)) flagsExpr.Add("Exempt");
-			if (activity.flags.HasFlag(ActivityFlags.MutedUser)) flagsExpr.Add("Mute");
-			if (activity.force) flagsExpr.Add("Force");
-			feedback = $"{activity.messageCount} messages"
+			if (activity.flags.HasFlag(ActivityFlags.Exempt))
+            {
+                flagsExpr.Add("Exempt");
+            }
+
+            if (activity.flags.HasFlag(ActivityFlags.MutedUser))
+            {
+                flagsExpr.Add("Mute");
+            }
+
+            if (activity.force)
+            {
+                flagsExpr.Add("Force");
+            }
+
+            feedback = $"{activity.messageCount} messages"
 				+ (flagsExpr.Count > 0 ? $" with flags: {flagsExpr.Enumerate()}." : ".");
 
 			return true;
@@ -204,18 +225,12 @@ namespace Dexter.Commands
 			GreetFurDB.SaveChanges();
 		}
 
-		internal class GreetFurTimePeriod
-		{
-			public int start;
-			public int end;
+		internal class GreetFurTimePeriod(int start, int end)
+        {
+			public int start = start;
+			public int end = end;
 
-			public GreetFurTimePeriod(int start, int end)
-			{
-				this.start = start;
-				this.end = end;
-			}
-
-			public static bool TryParse(string input, out GreetFurTimePeriod result, out string feedback, GreetFurConfiguration config)
+            public static bool TryParse(string input, out GreetFurTimePeriod result, out string feedback, GreetFurConfiguration config)
 			{
 				result = null;
 

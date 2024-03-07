@@ -27,10 +27,19 @@
 			}
 			set
 			{
-				if (value > max) this.value = max;
-				else if (value < min) this.value = min;
-				else this.value = value;
-			}
+				if (value > max)
+                {
+                    this.value = max;
+                }
+                else if (value < min)
+                {
+                    this.value = min;
+                }
+                else
+                {
+                    this.value = value;
+                }
+            }
 		}
 
 		/// <summary>

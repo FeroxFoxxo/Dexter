@@ -94,17 +94,27 @@ namespace Dexter.Databases.GreetFur
 		{
 			string state;
 			if (IsYes(greetFurConfiguration))
-				state = "Y";
-			else if (IsExempt)
-				return "Exempt";
-			else if (Date == currentDay)
-				state = "?";
-			else if (Date < currentDay)
-				state = "N";
-			else
-				return "";
+            {
+                state = "Y";
+            }
+            else if (IsExempt)
+            {
+                return "Exempt";
+            }
+            else if (Date == currentDay)
+            {
+                state = "?";
+            }
+            else if (Date < currentDay)
+            {
+                state = "N";
+            }
+            else
+            {
+                return "";
+            }
 
-			return string.Format("{0} ({1}{2})",
+            return string.Format("{0} ({1}{2})",
 				state,
 				MutedUser ? "M" : "",
 				MessageCount);
@@ -129,10 +139,14 @@ namespace Dexter.Databases.GreetFur
 		public string ToString(bool shortened)
 		{
 		if (shortened)
-			return $"{UserId}-{Date}; {(MutedUser ? "M" : "")}{MessageCount}";
-		else
-			return $"{RecordId}: {UserId} day {Date}; {MessageCount} messages {(MutedUser ? "with" : "without")} mute.";
-		}
+            {
+                return $"{UserId}-{Date}; {(MutedUser ? "M" : "")}{MessageCount}";
+            }
+            else
+            {
+                return $"{RecordId}: {UserId} day {Date}; {MessageCount} messages {(MutedUser ? "with" : "without")} mute.";
+            }
+        }
 
 		/// <summary>
 		/// Checks whether the required activity quota has been achieved by the user in this record object.

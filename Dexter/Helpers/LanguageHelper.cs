@@ -86,11 +86,11 @@ namespace Dexter.Helpers
 				{
 					resolveArticle = compareString == "a" ? ArticleType.Lowercase : ArticleType.Uppercase;
 				}
-				else if (compareString.ToLower() == "plural")
+				else if (compareString.Equals("plural", StringComparison.CurrentCultureIgnoreCase))
 				{
 					resolvePlural = PluralType.Plural;
 				}
-				else if (compareString.ToLower() == "\'s")
+				else if (compareString.Equals("\'s", StringComparison.CurrentCultureIgnoreCase))
 				{
 					resolvePossessive = PossessiveType.Possessive;
 				}
@@ -102,9 +102,11 @@ namespace Dexter.Helpers
 						int index = term.CheckReplace(compareString, config);
 
 						if (index == (int)config.ErrorCodeInvalidArgument)
-							throw new IndexOutOfRangeException($"There was an error parsing the number in term call \"{compareString}\" within \"{predicate}\". Please contact the developer team.");
+                        {
+                            throw new IndexOutOfRangeException($"There was an error parsing the number in term call \"{compareString}\" within \"{predicate}\". Please contact the developer team.");
+                        }
 
-						if (index >= 0)
+                        if (index >= 0)
 						{
 							string newTerm = term.GetOrGenerateCached(index, random, config);
 
@@ -150,9 +152,11 @@ namespace Dexter.Helpers
 		private static int CheckReplace(this TermClass term, string str, LanguageConfiguration config)
 		{
 			if (!str.StartsWith(term.Identifier))
-				return -1;
+            {
+                return -1;
+            }
 
-			if (int.TryParse(str[term.Identifier.Length..], out int index))
+            if (int.TryParse(str[term.Identifier.Length..], out int index))
 			{
 				return index >= 0 ? index : (int)config.ErrorCodeInvalidArgument;
 			}
@@ -164,36 +168,31 @@ namespace Dexter.Helpers
 		/// Holds a list of terms related by a common Identifier and provides a way to generate random terms.
 		/// </summary>
 
-		internal class TermClass
-		{
+		internal class TermClass(string identifier, string[] bank)
+        {
 
-			public readonly string Identifier;
-			private readonly string[] Bank;
-			private readonly List<string> Cache;
+			public readonly string Identifier = identifier;
+			private readonly string[] Bank = bank;
+			private readonly List<string> Cache = [];
 
-			public TermClass(string identifier, string[] bank)
-			{
-				Identifier = identifier;
-				Bank = bank;
-				Cache = [];
-			}
+            /// <summary>
+            /// Gets a cached term located at <paramref name="index"/>, if Cache doesn't have those many elements, it generates elements up to <paramref name="index"/>.
+            /// </summary>
+            /// <remarks>The TermClass will attempt to generate new terms that aren't in its cache. To disable this, set <paramref name="maxRetries"/> to 0.</remarks>
+            /// <param name="index">The index to get from the cache of terms stored in this TermClass.</param>
+            /// <param name="random">A random number generator.</param>
+            /// <param name="config">The LanguageConfiguration instance to run this process with.</param>
+            /// <param name="maxRetries">The maximum amount of attempts to generate a novel term from the bank.</param>
+            /// <returns>The term at position <paramref name="index"/> within the Cache.</returns>
 
-			/// <summary>
-			/// Gets a cached term located at <paramref name="index"/>, if Cache doesn't have those many elements, it generates elements up to <paramref name="index"/>.
-			/// </summary>
-			/// <remarks>The TermClass will attempt to generate new terms that aren't in its cache. To disable this, set <paramref name="maxRetries"/> to 0.</remarks>
-			/// <param name="index">The index to get from the cache of terms stored in this TermClass.</param>
-			/// <param name="random">A random number generator.</param>
-			/// <param name="config">The LanguageConfiguration instance to run this process with.</param>
-			/// <param name="maxRetries">The maximum amount of attempts to generate a novel term from the bank.</param>
-			/// <returns>The term at position <paramref name="index"/> within the Cache.</returns>
-
-			public string GetOrGenerateCached(int index, Random random, LanguageConfiguration config, int maxRetries = -1)
+            public string GetOrGenerateCached(int index, Random random, LanguageConfiguration config, int maxRetries = -1)
 			{
 				if (maxRetries < 0)
-					maxRetries = (int)config.TermRepetitionAversionFactor;
+                {
+                    maxRetries = (int)config.TermRepetitionAversionFactor;
+                }
 
-				while (Cache.Count <= index)
+                while (Cache.Count <= index)
 				{
 					Cache.Add(Bank[random.Next(Bank.Length)]);
 
@@ -249,8 +248,9 @@ namespace Dexter.Helpers
 
 		public static string ToUnit(this long v, Dictionary<long, string> units = null)
 		{
-			if (units is null) units = BasicUnits;
-			foreach (KeyValuePair<long, string> kvp in units)
+			units ??= BasicUnits;
+
+            foreach (KeyValuePair<long, string> kvp in units)
 			{
 				if (v >= kvp.Key)
 				{
@@ -290,9 +290,9 @@ namespace Dexter.Helpers
 		{
 			string lowerSingular = singular.ToLower();
 
-			if (config.IrregularPlurals.ContainsKey(lowerSingular))
+			if (config.IrregularPlurals.TryGetValue(lowerSingular, out string value))
 			{
-				return config.IrregularPlurals[lowerSingular].MatchCase(singular);
+				return value.MatchCase(singular);
 			}
 			else if (lowerSingular.EndsWith("on"))
 			{
@@ -329,11 +329,11 @@ namespace Dexter.Helpers
 			{
 				return singular[..^2] + "ves";
 			}
-			else if (lowerSingular.EndsWith("f"))
+			else if (lowerSingular.EndsWith('f'))
 			{
 				return singular[..^1] + "ves";
 			}
-			else if (lowerSingular.EndsWith("y"))
+			else if (lowerSingular.EndsWith('y'))
 			{
 				return singular[^2].IsVowel() ? singular + "s" : singular[^1] + "ies";
 			}
@@ -356,8 +356,12 @@ namespace Dexter.Helpers
 		{
 			if (s.Length > maxLength)
 			{
-				if (maxLength < 3) return "...";
-				return s[..(maxLength - 3)] + "...";
+				if (maxLength < 3)
+                {
+                    return "...";
+                }
+
+                return s[..(maxLength - 3)] + "...";
 			}
 
 			return s;
@@ -383,8 +387,11 @@ namespace Dexter.Helpers
 			int counter = 0;
 			foreach (char c in s)
 			{
-				if (ignoreChars.Contains(c)) b.Append(c);
-				else
+				if (ignoreChars.Contains(c))
+                {
+                    b.Append(c);
+                }
+                else
 				{
 					if (++counter > maxLength - 3)
 					{
@@ -409,8 +416,11 @@ namespace Dexter.Helpers
 			int result = 0;
 			foreach (char c in s)
 			{
-				if (!ignoreChars.Contains(c)) result++;
-			}
+				if (!ignoreChars.Contains(c))
+                {
+                    result++;
+                }
+            }
 			return result;
 		}
 
@@ -426,8 +436,11 @@ namespace Dexter.Helpers
 			int result = 0;
 			for (int i = 0; i < b.Length; i++)
 			{
-				if (!ignoreChars.Contains(b[i])) result++;
-			}
+				if (!ignoreChars.Contains(b[i]))
+                {
+                    result++;
+                }
+            }
 			return result;
 		}
 
@@ -483,9 +496,11 @@ namespace Dexter.Helpers
 		public static char MatchCase(this char input, char @case)
 		{
 			if (char.IsUpper(@case))
-				return char.ToUpper(input);
+            {
+                return char.ToUpper(input);
+            }
 
-			return char.ToLower(input);
+            return char.ToLower(input);
 		}
 
 		/// <summary>
@@ -497,12 +512,16 @@ namespace Dexter.Helpers
 		public static string Ordinal(this int num)
 		{
 			if (num < 0)
-				num = -num;
+            {
+                num = -num;
+            }
 
-			if (num % 100 / 10 == 1)
-				return num + "th";
+            if (num % 100 / 10 == 1)
+            {
+                return num + "th";
+            }
 
-			return (num % 10) switch
+            return (num % 10) switch
 			{
 				1 => num + "st",
 				2 => num + "nd",
@@ -555,12 +574,22 @@ namespace Dexter.Helpers
 
 			remainder = value - largeValue - (float)smallValue / baseN;
 
-			if (largeValue != 0) result.Add($"{largeValue} {largeUnit[largeValue == 1 ? 0 : 1]}");
-			if (smallValue != 0) result.Add($"{smallValue} {smallUnit[smallValue == 1 ? 0 : 1]}");
+			if (largeValue != 0)
+            {
+                result.Add($"{largeValue} {largeUnit[largeValue == 1 ? 0 : 1]}");
+            }
 
-			if (result.Count == 0) return $"0 {largeUnit[1]}";
+            if (smallValue != 0)
+            {
+                result.Add($"{smallValue} {smallUnit[smallValue == 1 ? 0 : 1]}");
+            }
 
-			return string.Join(" and ", result);
+            if (result.Count == 0)
+            {
+                return $"0 {largeUnit[1]}";
+            }
+
+            return string.Join(" and ", result);
 		}
 
 		/// <summary>
@@ -627,7 +656,7 @@ namespace Dexter.Helpers
 				}
 			}
 
-			return matches.ToArray();
+			return [.. matches];
 		}
 
 		private static string[] CheckForLinks(this string input, IEnumerable<int> openers, IEnumerable<int> closers)
@@ -649,7 +678,7 @@ namespace Dexter.Helpers
 				}
 			}
 
-			return Result.ToArray();
+			return [.. Result];
 		}
 
 		/// <summary>
@@ -803,9 +832,17 @@ namespace Dexter.Helpers
 						error = $"Failed to parse {MDY[2]} into a valid year!";
 						return false;
 					}
-					if (year < 100) year += 2000; //YY parsing
-					if (year > 10000) year -= 10000; //Human Era Parsing
-					if (year < 100 || year > 3000)
+					if (year < 100)
+                    {
+                        year += 2000; //YY parsing
+                    }
+
+                    if (year > 10000)
+                    {
+                        year -= 10000; //Human Era Parsing
+                    }
+
+                    if (year < 100 || year > 3000)
 					{
 						error = $"Year {year} is outside the range of valid accepted years (must be between 100 and 3000)";
 						return false;
@@ -872,14 +909,23 @@ namespace Dexter.Helpers
 					hour = int.Parse(hmsf[0]);
 					minute = int.Parse(hmsf[1]);
 
-					if (hmsf.Length > 2) second = float.Parse(hmsf[2]);
-				}
+					if (hmsf.Length > 2)
+                    {
+                        second = float.Parse(hmsf[2]);
+                    }
+                }
 			}
 
-			if (TMD == TimeMeridianDiscriminator.AM && hour == 12) hour = 0;
-			else if (TMD == TimeMeridianDiscriminator.PM && hour != 12) hour += 12;
+			if (TMD == TimeMeridianDiscriminator.AM && hour == 12)
+            {
+                hour = 0;
+            }
+            else if (TMD == TimeMeridianDiscriminator.PM && hour != 12)
+            {
+                hour += 12;
+            }
 
-			try
+            try
 			{
 				time = new DateTimeOffset(new DateTime(year, month, day, hour, minute, (int)second, (int)(second % 1 * 1000)), timeZoneOffset);
 			}
@@ -909,13 +955,13 @@ namespace Dexter.Helpers
 
 		public static int ParseMonth(this string input, CultureInfo cultureInfo = null)
 		{
-			if (cultureInfo == null) cultureInfo = CultureInfo.InvariantCulture;
+			cultureInfo ??= CultureInfo.InvariantCulture;
 
-			input = input.ToLower();
+            input = input.ToLower();
 
 			for (int i = 0; i < cultureInfo.DateTimeFormat.MonthNames.Length; i++)
 			{
-				if (input == cultureInfo.DateTimeFormat.MonthNames[i].ToLower() || input == cultureInfo.DateTimeFormat.AbbreviatedMonthNames[i].ToLower())
+				if (input.Equals(cultureInfo.DateTimeFormat.MonthNames[i], StringComparison.CurrentCultureIgnoreCase) || input.Equals(cultureInfo.DateTimeFormat.AbbreviatedMonthNames[i], StringComparison.CurrentCultureIgnoreCase))
 				{
 					return i + 1;
 				}
@@ -935,9 +981,15 @@ namespace Dexter.Helpers
 		{
 			int m = ParseMonth(input, cultureInfo);
 
-			if (m < 0) return Month.None;
-			else return (Month)m;
-		}
+			if (m < 0)
+            {
+                return Month.None;
+            }
+            else
+            {
+                return (Month)m;
+            }
+        }
 
 		/// <summary>
 		/// Attempts to obtain a <see cref="Weekday"/> from a string representation of it.
@@ -950,7 +1002,7 @@ namespace Dexter.Helpers
 		public static bool TryParseWeekday(this string input, out Weekday weekday, out string feedback)
 		{
 
-			HashSet<string> days = CultureInfo.InvariantCulture.DateTimeFormat.DayNames.ToHashSet();
+			HashSet<string> days = [.. CultureInfo.InvariantCulture.DateTimeFormat.DayNames];
 			input = input.ToLower();
 			weekday = Weekday.None;
 
@@ -1089,9 +1141,9 @@ namespace Dexter.Helpers
 
 		public static bool TryParseTimeZone(this string input, LanguageConfiguration languageConfiguration, out TimeZoneData timeZone)
 		{
-			if (languageConfiguration.TimeZones.ContainsKey(input))
+			if (languageConfiguration.TimeZones.TryGetValue(input, out TimeZoneData value))
 			{
-				timeZone = languageConfiguration.TimeZones[input];
+				timeZone = value;
 				return true;
 			}
 			else if (languageConfiguration.TimeZones.ContainsKey(input.ToUpper()))
@@ -1134,8 +1186,12 @@ namespace Dexter.Helpers
 			foreach (KeyValuePair<TimeUnit, string> unit in regExps)
 			{
 				string parsable = Regex.Match(input, $@"[0-9.]+\s*({unit.Value})(([0-9]+)|\s|$)", RegexOptions.IgnoreCase).Value;
-				if (string.IsNullOrEmpty(parsable)) continue;
-				for (int i = 0; i < parsable.Length; i++)
+				if (string.IsNullOrEmpty(parsable))
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < parsable.Length; i++)
 				{
 					if (!char.IsDigit(parsable[i]))
 					{
@@ -1243,30 +1299,54 @@ namespace Dexter.Helpers
 				{
 					if (i < input.Length)
 					{
-						if (input[i] == k.Key[i]) weight += 10;
-						else if (char.ToUpper(input[i]) == char.ToUpper(k.Key[i])) weight += 9;
-					}
-					if (input.Contains(k.Key[i])) weight += 3;
-				}
+						if (input[i] == k.Key[i])
+                        {
+                            weight += 10;
+                        }
+                        else if (char.ToUpper(input[i]) == char.ToUpper(k.Key[i]))
+                        {
+                            weight += 9;
+                        }
+                    }
+					if (input.Contains(k.Key[i]))
+                    {
+                        weight += 3;
+                    }
+                }
 
 				if (input.Length >= 2 && input[^2] == 'S')
 				{
-					if (k.Key.Length >= 2 && k.Key[^2] == 'D') weight += 8;
-					else if (k.Key.Length + 1 == input.Length) weight += 4;
-				}
+					if (k.Key.Length >= 2 && k.Key[^2] == 'D')
+                    {
+                        weight += 8;
+                    }
+                    else if (k.Key.Length + 1 == input.Length)
+                    {
+                        weight += 4;
+                    }
+                }
 
 				if (k.Key.Length >= 2 && k.Key[^2] == 'S')
 				{
-					if (input.Length >= 2 && input[^2] == 'D') weight += 8;
-					else if (input.Length + 1 == k.Key.Length) weight += 4;
-				}
+					if (input.Length >= 2 && input[^2] == 'D')
+                    {
+                        weight += 8;
+                    }
+                    else if (input.Length + 1 == k.Key.Length)
+                    {
+                        weight += 4;
+                    }
+                }
 
-				if (input.ToUpper() == k.Key.ToUpper()) weight += 100;
+				if (input.Equals(k.Key, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    weight += 100;
+                }
 
-				searchWeight.Add(k.Key, weight);
+                searchWeight.Add(k.Key, weight);
 			}
 
-			List<KeyValuePair<string, int>> weightedList = searchWeight.ToList();
+			List<KeyValuePair<string, int>> weightedList = [.. searchWeight];
 			weightedList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
 
 			string[] sortedResults = new string[weightedList.Count];
@@ -1294,17 +1374,26 @@ namespace Dexter.Helpers
 			{
 				int weight = (int)Math.Abs(k.Value.TimeOffset.Subtract(offset).TotalMinutes);
 
-				if (weight == 0) exactMatches++;
+				if (weight == 0)
+                {
+                    exactMatches++;
+                }
 
-				searchWeight.Add(k.Key, weight);
+                searchWeight.Add(k.Key, weight);
 			}
 
-			List<KeyValuePair<string, int>> weightedList = searchWeight.ToList();
+			List<KeyValuePair<string, int>> weightedList = [.. searchWeight];
 			weightedList.Sort((pair1, pair2) =>
 			{
-				if (pair1.Value.CompareTo(pair2.Value) != 0) return pair1.Value.CompareTo(pair2.Value);
-				else return pair1.Key.CompareTo(pair2.Key);
-			});
+				if (pair1.Value.CompareTo(pair2.Value) != 0)
+                {
+                    return pair1.Value.CompareTo(pair2.Value);
+                }
+                else
+                {
+                    return pair1.Key.CompareTo(pair2.Key);
+                }
+            });
 
 			string[] sortedResults = new string[weightedList.Count];
 			for (int i = 0; i < weightedList.Count; i++)
@@ -1336,16 +1425,23 @@ namespace Dexter.Helpers
 				for (int j = 0; j <= bimax; j++)
 				{
 					if (i == 0 || j == 0)
-						LCSuffix[i, j] = 0;
-					else if (a[i - 1] == b[j - 1])
+                    {
+                        LCSuffix[i, j] = 0;
+                    }
+                    else if (a[i - 1] == b[j - 1])
 					{
 						LCSuffix[i, j] = LCSuffix[i - 1, j - 1] + 1;
 
-						if (LCSuffix[i, j] > result) result = LCSuffix[i, j];
-					}
+						if (LCSuffix[i, j] > result)
+                        {
+                            result = LCSuffix[i, j];
+                        }
+                    }
 					else
-						LCSuffix[i, j] = 0;
-				}
+                    {
+                        LCSuffix[i, j] = 0;
+                    }
+                }
 			}
 
 			return result;
@@ -1378,19 +1474,23 @@ namespace Dexter.Helpers
 			Dictionary<char, PairwiseCounter> counts = [];
 			for (int i = 0; i < a.Length; i++)
 			{
-				if (!counts.ContainsKey(a[i]))
+				if (!counts.TryGetValue(a[i], out PairwiseCounter value))
 				{
-					counts.Add(a[i], new PairwiseCounter());
+                    value = new PairwiseCounter();
+                    counts.Add(a[i], value);
 				}
-				counts[a[i]].count1++;
+
+                value.count1++;
 			}
 			for (int j = 0; j < b.Length; j++)
 			{
-				if (!counts.ContainsKey(b[j]))
+				if (!counts.TryGetValue(b[j], out PairwiseCounter value))
 				{
-					counts.Add(b[j], new PairwiseCounter());
+                    value = new PairwiseCounter();
+                    counts.Add(b[j], value);
 				}
-				counts[b[j]].count2++;
+
+                value.count2++;
 			}
 			double pCounts = 0;
 			foreach (PairwiseCounter c in counts.Values)
@@ -1403,38 +1503,34 @@ namespace Dexter.Helpers
 			for (int i = 0; i < Math.Min(a.Length, b.Length); i++)
 			{
 				if (a[i] == b[i])
-					posCount++;
-			}
+                {
+                    posCount++;
+                }
+            }
 			double pPos = posCount / n;
 
 			return pLength * LengthWeight + pMaxSubstr * MaxSubstringWeight + pPos * PositionalCorrelationWeight + pCounts * CountCorrelationWeight;
 		}
 
-		internal class PairwiseCounter
-		{
-			public int count1 = 0;
-			public int count2 = 0;
+		internal class PairwiseCounter(int count1 = 0, int count2 = 0)
+        {
+			public int count1 = count1;
+			public int count2 = count2;
 			public double GetCorrelationStrength()
 			{
 				return Math.Min(count1, count2) / (double)Math.Max(count1, count2);
 			}
+        }
 
-			public PairwiseCounter(int count1 = 0, int count2 = 0)
-			{
-				this.count1 = count1;
-				this.count2 = count2;
-			}
-		}
+        /// <summary>
+        /// Creates a standard expression of a specific time, both absolute and relative to present.
+        /// </summary>
+        /// <param name="time">The DateTimeOffset object to parse.</param>
+        /// <param name="config">The Configuration file holding the StandardTimeZone variable, only required if <paramref name="standardizeTime"/> is <see langword="true"/>.</param>
+        /// <param name="standardizeTime">Whether to standardize the time to <paramref name="config"/><c>.StandardTimeZone</c>.</param>
+        /// <returns>A stringified expression of <paramref name="time"/>.</returns>
 
-		/// <summary>
-		/// Creates a standard expression of a specific time, both absolute and relative to present.
-		/// </summary>
-		/// <param name="time">The DateTimeOffset object to parse.</param>
-		/// <param name="config">The Configuration file holding the StandardTimeZone variable, only required if <paramref name="standardizeTime"/> is <see langword="true"/>.</param>
-		/// <param name="standardizeTime">Whether to standardize the time to <paramref name="config"/><c>.StandardTimeZone</c>.</param>
-		/// <returns>A stringified expression of <paramref name="time"/>.</returns>
-
-		public static string HumanizeExtended(this DateTimeOffset time, BotConfiguration config = null, bool standardizeTime = false)
+        public static string HumanizeExtended(this DateTimeOffset time, BotConfiguration config = null, bool standardizeTime = false)
 		{
 			if (config != null && standardizeTime)
 			{
@@ -1483,9 +1579,12 @@ namespace Dexter.Helpers
 		{
 			expr = expr.ToLower();
 			string m = Regex.Match(expr, @"[0-9a-f]{6}").Value;
-			if (string.IsNullOrEmpty(m)) return System.Drawing.Color.Empty;
+			if (string.IsNullOrEmpty(m))
+            {
+                return System.Drawing.Color.Empty;
+            }
 
-			uint hex = uint.Parse(m, NumberStyles.HexNumber);
+            uint hex = uint.Parse(m, NumberStyles.HexNumber);
 			return System.Drawing.Color.FromArgb(unchecked((int)(hex + 0xff000000)));
 		}
     }
@@ -1573,11 +1672,11 @@ namespace Dexter.Helpers
 
 			int sign = 1;
 
-			int signPos = str.IndexOf("+");
+			int signPos = str.IndexOf('+');
 			if (signPos < 0)
 			{
 				sign = -1;
-				signPos = str.IndexOf("-");
+				signPos = str.IndexOf('-');
 			}
 
 			string TZString = signPos < 0 ? str : str[..signPos];
@@ -1600,8 +1699,12 @@ namespace Dexter.Helpers
 				string[] mods = str[(signPos + 1)..].Split(":");
 				result.Name += str[signPos] + str[(signPos + 1)..];
 				result.Offset += int.Parse(mods[0]) * sign;
-				if (mods.Length > 1) result.Offset += int.Parse(mods[1]) / 60f;
-				success = true;
+				if (mods.Length > 1)
+                {
+                    result.Offset += int.Parse(mods[1]) / 60f;
+                }
+
+                success = true;
 			}
 
 			return success;

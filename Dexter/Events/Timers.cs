@@ -92,7 +92,7 @@ namespace Dexter.Events
 				await UserCredential.RefreshTokenAsync(CancellationToken.None);
 			}
 
-			EventTimer[] expiredTimers = EventTimersDB.EventTimers.AsQueryable().Where(Timer => currentTime > Timer.ExpirationTime).ToArray();
+			EventTimer[] expiredTimers = [.. EventTimersDB.EventTimers.AsQueryable().Where(Timer => currentTime > Timer.ExpirationTime)];
 			foreach (EventTimer timer in expiredTimers)
 			{
 				switch (timer.TimerType)
@@ -102,10 +102,15 @@ namespace Dexter.Events
 						break;
 					case TimerType.Interval:
 						if (currentTime - timer.ExpirationTime > timer.ExpirationLength)
-							timer.ExpirationTime = currentTime + timer.ExpirationLength;
-						else
-							timer.ExpirationTime += timer.ExpirationLength;
-						break;
+                        {
+                            timer.ExpirationTime = currentTime + timer.ExpirationLength;
+                        }
+                        else
+                        {
+                            timer.ExpirationTime += timer.ExpirationLength;
+                        }
+
+                        break;
 				}
 
 				Dictionary<string, string> parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(timer.CallbackParameters);
@@ -114,12 +119,14 @@ namespace Dexter.Events
 				if (refClass != null)
 				{
 					if (refClass.GetMethod(timer.CallbackMethod) == null)
-						Logger.LogError($"The callback method specified ({timer.CallbackMethod}) for the admin confirmation is null! This could very well be due to the method being private.");
+                    {
+                        Logger.LogError($"The callback method specified ({timer.CallbackMethod}) for the admin confirmation is null! This could very well be due to the method being private.");
+                    }
 
-					try
+                    try
 					{
 						await (Task)refClass.GetMethod(timer.CallbackMethod)
-							.Invoke(ActivatorUtilities.CreateInstance(ServiceProvider, refClass).SetClassParameters(scope, ServiceProvider), new object[1] { parameters });
+							.Invoke(ActivatorUtilities.CreateInstance(ServiceProvider, refClass).SetClassParameters(scope, ServiceProvider), [parameters]);
 					}
 					catch (Exception e)
 					{
@@ -130,8 +137,10 @@ namespace Dexter.Events
 					}
 				}
 				else if (timer.TimerType == TimerType.Interval)
-					EventTimersDB.EventTimers.Remove(timer);
-			}
+                {
+                    EventTimersDB.EventTimers.Remove(timer);
+                }
+            }
 
 			await EventTimersDB.SaveChangesAsync();
 		}
@@ -186,17 +195,21 @@ namespace Dexter.Events
 			char[] TokenArray = new char[BotConfiguration.TrackerLength];
 
 			for (int i = 0; i < TokenArray.Length; i++)
-				TokenArray[i] = BotConfiguration.RandomCharacters[Random.Next(BotConfiguration.RandomCharacters.Length)];
+            {
+                TokenArray[i] = BotConfiguration.RandomCharacters[Random.Next(BotConfiguration.RandomCharacters.Length)];
+            }
 
-			string Token = new(TokenArray);
+            string Token = new(TokenArray);
 
 			if (EventTimersDB.EventTimers.AsQueryable().Where(Timer => Timer.Token == Token).FirstOrDefault() == null)
 			{
 				return Token;
 			}
 			else
-				return CreateToken();
-		}
+            {
+                return CreateToken();
+            }
+        }
 
 		/// <summary>
 		/// Checks whether a timer exists in the database from a given <paramref name="TimerTracker"/> Token.
@@ -213,10 +226,14 @@ namespace Dexter.Events
 			EventTimer Timer = EventTimersDB.EventTimers.Find(TimerTracker);
 
 			if (Timer == null)
-				return false;
-			else
-				return true;
-		}
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
 
 		/// <summary>
 		/// Removes a timer from the EventTimer database by its <paramref name="TimerTracker"/> token.
@@ -233,9 +250,11 @@ namespace Dexter.Events
 			EventTimer Timer = EventTimersDB.EventTimers.Find(TimerTracker);
 
 			if (Timer != null)
-				EventTimersDB.EventTimers.Remove(Timer);
+            {
+                EventTimersDB.EventTimers.Remove(Timer);
+            }
 
-			await EventTimersDB.SaveChangesAsync();
+            await EventTimersDB.SaveChangesAsync();
 		}
 
 	}

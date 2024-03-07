@@ -48,7 +48,7 @@ namespace Dexter.Commands
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle($"Relay already exists!")
-					.WithDescription($"The relay to the channel {Channel} already exists with the message of {(FindRelay.Message.Length > 300 ? $"{FindRelay.Message.Substring(0, 300)}..." : FindRelay.Message)} at an interval of {FindRelay.MessageInterval}.")
+					.WithDescription($"The relay to the channel {Channel} already exists with the message of {(FindRelay.Message.Length > 300 ? $"{FindRelay.Message[..300]}..." : FindRelay.Message)} at an interval of {FindRelay.MessageInterval}.")
 					.SendEmbed(Context.Channel);
 				return;
 			}
@@ -63,7 +63,7 @@ namespace Dexter.Commands
 				$"{Context.User.GetUserInformation()} has suggested that `{Message}` should be added to the channel {Channel} with an interval of {MessageInterval} messages.");
 
 			await BuildEmbed(EmojiEnum.Love)
-				.WithTitle($"The relay to `#{Channel}` with the message `{(Message.Length > 100 ? $"{Message.Substring(0, 100)}..." : Message)}` for every {MessageInterval} messages has been suggested!")
+				.WithTitle($"The relay to `#{Channel}` with the message `{(Message.Length > 100 ? $"{Message[..100]}..." : Message)}` for every {MessageInterval} messages has been suggested!")
 				.WithDescription($"Once it has passed admin approval, it will run on this channel.")
 				.SendEmbed(Context.Channel);
 		}

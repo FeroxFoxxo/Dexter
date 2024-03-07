@@ -30,27 +30,47 @@ namespace Dexter.Extensions
 			IGuildUser gUser;
 
 			if (user is IGuildUser ngUser)
-				gUser = ngUser;
-			else
-				gUser = client.GetGuild(config.GuildID).GetUser(user.Id);
+            {
+                gUser = ngUser;
+            }
+            else
+            {
+                gUser = client.GetGuild(config.GuildID).GetUser(user.Id);
+            }
 
-			if (gUser == null)
-				return PermissionLevel.Default;
-			else if (gUser.RoleIds.Contains(config.AdministratorRoleID))
-				return PermissionLevel.Administrator;
-			else if (gUser.RoleIds.Contains(config.DeveloperRoleID))
-				return PermissionLevel.Developer;
-			else if (gUser.RoleIds.Contains(config.ModeratorRoleID))
-				return PermissionLevel.Moderator;
-			else if (gUser.RoleIds.Contains(config.GreetFurRoleID))
-				return PermissionLevel.GreetFur;
-			else if (gUser.RoleIds.Contains(config.UnifursalRoleID))
-				return PermissionLevel.Unifursal;
-			else if (gUser.RoleIds.Contains(config.DJRoleID))
-				return PermissionLevel.DJ;
-			else
-				return PermissionLevel.Default;
-		}
+            if (gUser == null)
+            {
+                return PermissionLevel.Default;
+            }
+            else if (gUser.RoleIds.Contains(config.AdministratorRoleID))
+            {
+                return PermissionLevel.Administrator;
+            }
+            else if (gUser.RoleIds.Contains(config.DeveloperRoleID))
+            {
+                return PermissionLevel.Developer;
+            }
+            else if (gUser.RoleIds.Contains(config.ModeratorRoleID))
+            {
+                return PermissionLevel.Moderator;
+            }
+            else if (gUser.RoleIds.Contains(config.GreetFurRoleID))
+            {
+                return PermissionLevel.GreetFur;
+            }
+            else if (gUser.RoleIds.Contains(config.UnifursalRoleID))
+            {
+                return PermissionLevel.Unifursal;
+            }
+            else if (gUser.RoleIds.Contains(config.DJRoleID))
+            {
+                return PermissionLevel.DJ;
+            }
+            else
+            {
+                return PermissionLevel.Default;
+            }
+        }
 
 		/// <summary>
 		/// Obtains the tier of the topmost patreon role the user has.
@@ -66,8 +86,11 @@ namespace Dexter.Extensions
 
 			for (int i = config.PatreonRoleIDs.Length - 1; i >= 0; i--)
 			{
-				if (guser.RoleIds.Contains(config.PatreonRoleIDs[i])) return i + 1;
-			}
+				if (guser.RoleIds.Contains(config.PatreonRoleIDs[i]))
+                {
+                    return i + 1;
+                }
+            }
 
 			return 0;
 		}
@@ -99,14 +122,18 @@ namespace Dexter.Extensions
 		public static async Task<bool> SafeJoinAsync(this LavaNode LavaNode, SocketUser user, ISocketMessageChannel channel)
 		{
 			if (user is not SocketGuildUser guildUser || channel is not ITextChannel textChannel)
-				return false;
+            {
+                return false;
+            }
 
-			var voiceChannel = ((IVoiceState)guildUser).VoiceChannel;
+            var voiceChannel = ((IVoiceState)guildUser).VoiceChannel;
 
 			if (voiceChannel == null)
-				return false;
+            {
+                return false;
+            }
 
-			if (!LavaNode.HasPlayer(guildUser.Guild))
+            if (!LavaNode.HasPlayer(guildUser.Guild))
 			{
 				try
 				{

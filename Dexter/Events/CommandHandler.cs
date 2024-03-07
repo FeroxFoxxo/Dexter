@@ -79,16 +79,20 @@ namespace Dexter.Events
 		{
 			// We do not check the message if it is not an instance of a user message.
 			if (socketMessage is not SocketUserMessage message)
-				return;
+            {
+                return;
+            }
 
-			int argumentPosition = 0;
+            int argumentPosition = 0;
 
 			// We do not parse the message if it does not have the prefix or it is from a bot.
 			if (!message.HasStringPrefix(BotConfiguration.Prefix, ref argumentPosition) || message.Author.IsBot || BotConfiguration.DisallowedChannels.Contains(message.Channel.Id))
-				return;
+            {
+                return;
+            }
 
-			// Finally, if all prerequesites have returned correctly, we run and parse the command with an instance of our socket command context and our services.
-			await CommandService.ExecuteAsync(new ShardedCommandContext(DiscordShardedClient, message), argumentPosition, ServiceProvider.CreateScope().ServiceProvider);
+            // Finally, if all prerequesites have returned correctly, we run and parse the command with an instance of our socket command context and our services.
+            await CommandService.ExecuteAsync(new ShardedCommandContext(DiscordShardedClient, message), argumentPosition, ServiceProvider.CreateScope().ServiceProvider);
 		}
 
 		/// <summary>
@@ -102,9 +106,11 @@ namespace Dexter.Events
 		public async Task SendCommandError(Optional<CommandInfo> commandInfo, ICommandContext commandContext, IResult result)
 		{
 			if (result.IsSuccess)
-				return;
+            {
+                return;
+            }
 
-			try
+            try
 			{
 				EmbedBuilder message = null;
 
@@ -114,9 +120,11 @@ namespace Dexter.Events
 					// Unmet Precondition specifies that the error is a result as one of the preconditions specified by an attribute has returned FromError.
 					case CommandError.UnmetPrecondition:
 						if (result.ErrorReason.Length <= 0)
-							return;
+                        {
+                            return;
+                        }
 
-						message = BuildEmbed(EmojiEnum.Annoyed)
+                        message = BuildEmbed(EmojiEnum.Annoyed)
 							.WithTitle("Halt! Don't go there-")
 							.WithDescription(result.ErrorReason);
 
@@ -161,7 +169,9 @@ namespace Dexter.Events
                                             var user = await commandContext.Guild.GetUserAsync(id);
 
                                             if (user is not null)
+                                            {
                                                 userMentions.Add(user.Mention);
+                                            }
 
                                             var funCommand = ServiceProvider.GetRequiredService<FunConfiguration>();
 
@@ -189,18 +199,24 @@ namespace Dexter.Events
 									await commandContext.Channel.SendMessageAsync(reply);
 								}
 								else
-									message = BuildEmbed(EmojiEnum.Annoyed)
+                                {
+                                    message = BuildEmbed(EmojiEnum.Annoyed)
 										.WithTitle("Misconfigured command!")
 										.WithDescription($"`{customCommand.CommandName}` has not been configured! Please contact a moderator about this. <3");
-							}
+                                }
+                            }
 							else
 							{
 								if (commandContext.Message.Content.Length <= 1)
-									return;
-								else if (commandContext.Message.Content.Count(Character => Character == '~') > 1 ||
+                                {
+                                    return;
+                                }
+                                else if (commandContext.Message.Content.Count(Character => Character == '~') > 1 ||
 										ProposalConfiguration.CommandRemovals.Contains(commandContext.Message.Content.Split(' ')[0]))
-									return;
-								else
+                                {
+                                    return;
+                                }
+                                else
 								{
 									message = BuildEmbed(EmojiEnum.Annoyed)
 											.WithTitle("Unknown Command.")
@@ -238,25 +254,31 @@ namespace Dexter.Events
 
 						// Once logged, we check to see if the error is an Executeresult error as these execution results have more data about the issue that has gone wrong.
 						if (result is ExecuteResult executeResult)
-							commandErrorEmbed = BuildEmbed(EmojiEnum.Annoyed)
+                        {
+                            commandErrorEmbed = BuildEmbed(EmojiEnum.Annoyed)
 								.WithTitle(executeResult.Exception.GetType().Name.Prettify())
 								.WithDescription(executeResult.Exception.Message);
-						else
-							commandErrorEmbed = BuildEmbed(EmojiEnum.Annoyed)
+                        }
+                        else
+                        {
+                            commandErrorEmbed = BuildEmbed(EmojiEnum.Annoyed)
 								.WithTitle(result.Error.GetType().Name.Prettify())
 								.WithDescription(result.ErrorReason);
+                        }
 
-						// Finally, we send the error into the channel with a ping to the developers to take notice of.
-						await commandContext.Channel.SendMessageAsync($"Unknown error!{(BotConfiguration.PingDevelopers ? $" I'll tell the developers.\n<@&{BotConfiguration.DeveloperRoleID}>" : string.Empty)}", embed: commandErrorEmbed.Build());
+                        // Finally, we send the error into the channel with a ping to the developers to take notice of.
+                        await commandContext.Channel.SendMessageAsync($"Unknown error!{(BotConfiguration.PingDevelopers ? $" I'll tell the developers.\n<@&{BotConfiguration.DeveloperRoleID}>" : string.Empty)}", embed: commandErrorEmbed.Build());
 						break;
 				}
 
 				_ = Task.Run(async () =>
 				{
 					if (message == null)
-						return;
+                    {
+                        return;
+                    }
 
-					IMessage sent = await commandContext.Channel.SendMessageAsync(
+                    IMessage sent = await commandContext.Channel.SendMessageAsync(
 						embed: message.Build()
 					);
 

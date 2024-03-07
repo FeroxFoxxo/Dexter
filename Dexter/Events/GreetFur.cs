@@ -61,15 +61,21 @@ namespace Dexter.Events
 		private async Task HandleMessage(SocketMessage msg)
 		{
 			if (msg.Author is not IGuildUser user)
-				return;
+            {
+                return;
+            }
 
-			if (user.GetPermissionLevel(DiscordShardedClient, BotConfiguration) < PermissionLevel.GreetFur)
-				return;
+            if (user.GetPermissionLevel(DiscordShardedClient, BotConfiguration) < PermissionLevel.GreetFur)
+            {
+                return;
+            }
 
-			if (user.IsBot)
-				return;
+            if (user.IsBot)
+            {
+                return;
+            }
 
-			using var scope = ServiceProvider.CreateScope();
+            using var scope = ServiceProvider.CreateScope();
 
 			using var GreetFurDB = scope.ServiceProvider.GetRequiredService<GreetFurDB>();
 
@@ -139,7 +145,7 @@ namespace Dexter.Events
 			DateTimeOffset firstDTO = DateTimeOffset.FromUnixTimeSeconds((long)firstDay * 60 * 60 * 24);
 			string firstDayName = firstDTO.ToString("MMM dd yyyy");
 			string dateRangeName = $"{GreetFurConfiguration.FortnightSpreadsheet}!{GreetFurConfiguration.Cells["FirstDay"]}";
-			ValueRange firstDayCell = new() {Range = dateRangeName, Values = new string[][] { new string[] { firstDayName } } };
+			ValueRange firstDayCell = new() {Range = dateRangeName, Values = new string[][] { [firstDayName] } };
 			UpdateRequest req = sheet.Spreadsheets.Values.Update(firstDayCell, GreetFurConfiguration.SpreadSheetID, dateRangeName);
 			req.ValueInputOption = UpdateRequest.ValueInputOptionEnum.USERENTERED;
 			await req.ExecuteAsync();
@@ -157,16 +163,21 @@ namespace Dexter.Events
 
 					IUser u = DiscordShardedClient.GetUser(gfid);
 					if (u is not null)
-						newRow[GreetFurConfiguration.Information["Users"]] = $"{u.Username}";
+                    {
+                        newRow[GreetFurConfiguration.Information["Users"]] = $"{u.Username}";
+                    }
 
-					for (int d = 0; d < TRACKING_LENGTH; d++)
+                    for (int d = 0; d < TRACKING_LENGTH; d++)
 					{
 						bool isReadable = firstDataIndex + d < toUpdate.Values[i].Count;
 
 						string ogText = "";
 						if (isReadable)
-							ogText = toUpdate.Values[i][firstDataIndex + d] as string;
-						bool isExempt = ogText == "Exempt";
+                        {
+                            ogText = toUpdate.Values[i][firstDataIndex + d] as string;
+                        }
+
+                        bool isExempt = ogText == "Exempt";
 						
 						if (options.HasFlag(GreetFurOptions.ReadExemptions))
 						{
@@ -188,10 +199,14 @@ namespace Dexter.Events
 						}
 
 						if (options.HasFlag(GreetFurOptions.Safe) && !string.IsNullOrEmpty(ogText))
-							newRow[firstDataIndex + d] = ogText;
-						else 
-							newRow[firstDataIndex + d] = DayFormat(records[d], GreetFurDB, localDay);
-					}
+                        {
+                            newRow[firstDataIndex + d] = ogText;
+                        }
+                        else
+                        {
+                            newRow[firstDataIndex + d] = DayFormat(records[d], GreetFurDB, localDay);
+                        }
+                    }
 					toUpdate.Values[i] = newRow;
 				} 
 				else
@@ -217,19 +232,26 @@ namespace Dexter.Events
 				{
 					if (data.Values[i].Count <= GreetFurConfiguration.Information["ManagerList"]
 						|| string.IsNullOrEmpty(data.Values[i][GreetFurConfiguration.Information["ManagerList"]]?.ToString()))
-						break;
-					else
-						managerToggle = !managerToggle;
-				}
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        managerToggle = !managerToggle;
+                    }
+                }
 
-				HashSet<ulong> activityIDs = ids.ToHashSet();
+				HashSet<ulong> activityIDs = [.. ids];
 
 				int rowNumber = data.Values.Count;
 				foreach(KeyValuePair<ulong, List<GreetFurRecord>> kvp in newActivity)
 				{
-					if (activityIDs.Contains(kvp.Key)) continue;
+					if (activityIDs.Contains(kvp.Key))
+                    {
+                        continue;
+                    }
 
-					GreetFurRecord[] withGaps = new GreetFurRecord[TRACKING_LENGTH];
+                    GreetFurRecord[] withGaps = new GreetFurRecord[TRACKING_LENGTH];
 					int inData = 0;
 					for (int i = 0; i < TRACKING_LENGTH; i++)
 					{
@@ -271,7 +293,7 @@ namespace Dexter.Events
 				BatchGetRequest batchreq = sheet.Spreadsheets.Values.BatchGet(GreetFurConfiguration.SpreadSheetID);
 				batchreq.Ranges = new Google.Apis.Util.Repeatable<string>(new string[] { tbpNamesA1, tbpIDsA1, tbpWeeksA1 });
 				BatchGetValuesResponse batchresp = await batchreq.ExecuteAsync();
-				ValueRange[] ranges = batchresp.ValueRanges.ToArray();
+				ValueRange[] ranges = [.. batchresp.ValueRanges];
 
 				List<ulong> foundIDs = [];
 				for (int i = 0; i < ranges[1].Values.Count; i++)
@@ -298,9 +320,11 @@ namespace Dexter.Events
 							}
 						}
 						if (w < ranges[2].Values[i].Count && int.TryParse(ranges[2].Values[i][w].ToString(), out int n))
-							yesPerWeek[w] = Math.Max(yesPerWeek[w], n);
+                        {
+                            yesPerWeek[w] = Math.Max(yesPerWeek[w], n);
+                        }
 
-						transformed[w] = yesPerWeek[w];
+                        transformed[w] = yesPerWeek[w];
 					}
 					ranges[2].Values[i] = transformed;
 				}
@@ -311,34 +335,42 @@ namespace Dexter.Events
 
 				if (options.HasFlag(GreetFurOptions.AddNewRows))
 				{
-					HashSet<ulong> tbpFoundIDs = foundIDs.ToHashSet();
+					HashSet<ulong> tbpFoundIDs = [.. foundIDs];
 
-					if (newActivity is null)
-						newActivity = GetAllRecentActivity(firstDay, TRACKING_LENGTH);
+					newActivity ??= GetAllRecentActivity(firstDay, TRACKING_LENGTH);
 
-					ValueRange range = new();
+                    ValueRange range = new();
 					List<string[]> newRows = [];
 					int row = ranges[1].Values.Count; 
 
 					foreach (ulong id in newActivity.Keys)
 					{
-						if (tbpFoundIDs.Contains(id)) continue;
+						if (tbpFoundIDs.Contains(id))
+                        {
+                            continue;
+                        }
 
-						Dictionary<int, int> activity = [];
+                        Dictionary<int, int> activity = [];
 						foreach(GreetFurRecord record in newActivity[id])
 						{
 							if (record.IsYes(GreetFurConfiguration))
 							{
 								int recordW = (record.Date - GreetFurConfiguration.FirstTrackingDay) / WEEK_LENGTH + 1;
-								if (activity.ContainsKey(recordW)) 
-									activity[recordW]++;
-								else 
-									activity.Add(recordW, 1);
-							}
+								if (activity.TryGetValue(recordW, out int value))
+                                {
+                                    activity[recordW] = ++value;
+                                }
+                                else
+                                {
+                                    activity.Add(recordW, 1);
+                                }
+                            }
 						}
 						if (activity.Count > 0)
-							newRows.Add(await TBPRowFromRecords(id, activity, ++row));
-					}
+                        {
+                            newRows.Add(await TBPRowFromRecords(id, activity, ++row));
+                        }
+                    }
 
 					range.Values = newRows.ToArray();
 					AppendRequest appendRequest = sheet.Spreadsheets.Values.Append(range, GreetFurConfiguration.SpreadSheetID, GreetFurConfiguration.TheBigPictureSpreadsheet);
@@ -363,15 +395,15 @@ namespace Dexter.Events
 
 			using var GreetFurDB = scope.ServiceProvider.GetRequiredService<GreetFurDB>();
 
-			List<GreetFurRecord> allEntries = GreetFurDB.Records.AsQueryable().Where(r => r.Date >= day && r.Date < day + length).ToList();
+			List<GreetFurRecord> allEntries = [.. GreetFurDB.Records.AsQueryable().Where(r => r.Date >= day && r.Date < day + length)];
 
 			Dictionary<ulong, List<GreetFurRecord>> result = [];
 
 			foreach (GreetFurRecord r in allEntries)
 			{
-				if (result.ContainsKey(r.UserId))
+				if (result.TryGetValue(r.UserId, out List<GreetFurRecord> value))
 				{
-					result[r.UserId].Add(r);
+                    value.Add(r);
 				}
 				else
 				{
@@ -480,9 +512,11 @@ namespace Dexter.Events
 		private string DayFormat(GreetFurRecord r, GreetFurDB GreetFurDB, int day = -1)
 		{
 			if (r is null)
-				return "";
+            {
+                return "";
+            }
 
-			if (day < 0)
+            if (day < 0)
 			{
 				day = GreetFurDB.GetDayForUser(r.UserId);
 			}

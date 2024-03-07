@@ -36,10 +36,9 @@ namespace Dexter.Commands
 
 		public async Task ProfileCommand([Optional] IUser user)
 		{
-			if (user == null)
-				user = Context.User;
+			user ??= Context.User;
 
-			IGuildUser guildUser = await DiscordShardedClient.Rest.GetGuildUserAsync(Context.Guild.Id, user.Id, new RequestOptions() { RetryMode = RetryMode.AlwaysRetry });
+            IGuildUser guildUser = await DiscordShardedClient.Rest.GetGuildUserAsync(Context.Guild.Id, user.Id, new RequestOptions() { RetryMode = RetryMode.AlwaysRetry });
 			if (guildUser is null)
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)
@@ -113,7 +112,7 @@ namespace Dexter.Commands
 
 		private static string[] GetLastNameRecords(NameRecord[] FullArray, int MaxCount)
 		{
-			List<NameRecord> List = FullArray.ToList();
+			List<NameRecord> List = [.. FullArray];
 			List.Sort((a, b) => b.SetTime.CompareTo(a.SetTime));
 
 			string[] Result = new string[Math.Min(List.Count, MaxCount)];
@@ -158,13 +157,12 @@ namespace Dexter.Commands
 
 		private async Task RunNamesCommands(IUser user, NameType nameType)
 		{
-			if (user == null)
-				user = Context.User;
+			user ??= Context.User;
 
-			List<NameRecord> names = UserRecordsService.GetNameRecords(user, nameType).ToList();
+            List<NameRecord> names = [.. UserRecordsService.GetNameRecords(user, nameType)];
 			names.Sort((a, b) => b.SetTime.CompareTo(a.SetTime));
 
-			EmbedBuilder[] menu = BuildNicknameEmbeds(names.ToArray(), $"{nameType} Record for User {user.Username}");
+			EmbedBuilder[] menu = BuildNicknameEmbeds([.. names], $"{nameType} Record for User {user.Username}");
 
 			if (menu.Length == 1)
 			{

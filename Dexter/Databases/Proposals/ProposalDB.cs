@@ -1,16 +1,15 @@
 ﻿using System.Linq;
 using Dexter.Abstractions;
-using Dexter.Databases.AdminConfirmations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dexter.Databases.Proposals
 {
 
-	/// <summary>
-	/// The SuggestionDB contains a set of proposals that require confirmation stages.
-	/// </summary>
+    /// <summary>
+    /// The SuggestionDB contains a set of proposals that require confirmation stages.
+    /// </summary>
 
-	public class ProposalDB : Database
+    public class ProposalDB : Database
 	{
 
 		/// <summary>
@@ -42,20 +41,26 @@ namespace Dexter.Databases.Proposals
 			Proposal tryTracked = Proposals.Find(tracker);
 
 			if (tryTracked != null)
-				return tryTracked;
+            {
+                return tryTracked;
+            }
 
-			if (ulong.TryParse(tracker, out ulong trackerAsULONG))
+            if (ulong.TryParse(tracker, out ulong trackerAsULONG))
 			{
 				Proposal tryMessageID = Proposals.AsQueryable().Where(Proposal => Proposal.MessageID == trackerAsULONG).FirstOrDefault();
 
 				if (tryMessageID != null)
-					return tryMessageID;
+                {
+                    return tryMessageID;
+                }
 
-				Suggestion suggestion = Suggestions.AsQueryable().Where(Suggestion => Suggestion.StaffMessageID == trackerAsULONG).FirstOrDefault();
+                Suggestion suggestion = Suggestions.AsQueryable().Where(Suggestion => Suggestion.StaffMessageID == trackerAsULONG).FirstOrDefault();
 
 				if (suggestion != null)
-					return Proposals.Find(suggestion.Tracker);
-			}
+                {
+                    return Proposals.Find(suggestion.Tracker);
+                }
+            }
 
 			return null;
 		}

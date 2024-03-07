@@ -93,9 +93,13 @@ namespace Dexter.Commands
                             string[] segments;
                             char separator;
                             if (value.Contains('|'))
+                            {
                                 separator = '|';
+                            }
                             else
+                            {
                                 separator = ' ';
+                            }
 
                             segments = value.Split(separator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
@@ -232,7 +236,7 @@ namespace Dexter.Commands
                             break;
                         case "borkday":
                         case "birthday":
-                            if (value.ToLower() == "none")
+                            if (value.Equals("none", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 profile.Borkday = default;
                                 
@@ -278,7 +282,7 @@ namespace Dexter.Commands
                                 .SendEmbed(Context.Channel);
                             break;
                         case "birthyear":
-                            if (value.ToLower() == "none")
+                            if (value.Equals("none", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 profile.BirthYear = default;
 
@@ -414,10 +418,7 @@ namespace Dexter.Commands
                 case "configuration":
                     if (string.IsNullOrEmpty(parameters))
                     {
-                        if (profile.Settings is null)
-                        {
-                            profile.Settings = new();
-                        }
+                        profile.Settings ??= new();
 
                         await BuildEmbed(EmojiEnum.Sign)
                             .WithTitle("Profile Settings")
@@ -606,10 +607,24 @@ namespace Dexter.Commands
                     case ProfilePreferences.PrivacyMode.Friends:
                         await ProfilesDB.Links.AsAsyncEnumerable().ForEachAsync(l =>
                         {
-                            if (allowed) return;
-                            if (l.LinkType != LinkType.Friend) return;
-                            if (l.Sender == Context.User.Id && l.Sendee == user.Id) allowed = true;
-                            else if (l.Sender == user.Id && l.Sendee == Context.User.Id) allowed = true;
+                            if (allowed)
+                            {
+                                return;
+                            }
+
+                            if (l.LinkType != LinkType.Friend)
+                            {
+                                return;
+                            }
+
+                            if (l.Sender == Context.User.Id && l.Sendee == user.Id)
+                            {
+                                allowed = true;
+                            }
+                            else if (l.Sender == user.Id && l.Sendee == Context.User.Id)
+                            {
+                                allowed = true;
+                            }
                         });
                         break;
                     case ProfilePreferences.PrivacyMode.Public:
@@ -941,8 +956,16 @@ namespace Dexter.Commands
                     bool blockedSender = link.Sendee == Context.User.Id && link.Settings.BlockMode.HasFlag(Databases.UserProfiles.Direction.Sender);
                     if (blockedSendee || blockedSender)
                     {
-                        if (blockedSendee) link.Settings.BlockMode &= ~Databases.UserProfiles.Direction.Sendee;
-                        if (blockedSender) link.Settings.BlockMode &= ~Databases.UserProfiles.Direction.Sender;
+                        if (blockedSendee)
+                        {
+                            link.Settings.BlockMode &= ~Databases.UserProfiles.Direction.Sendee;
+                        }
+
+                        if (blockedSender)
+                        {
+                            link.Settings.BlockMode &= ~Databases.UserProfiles.Direction.Sender;
+                        }
+
                         bool isUserBlocked = link.Settings.BlockMode != Databases.UserProfiles.Direction.None;
 
                         await BuildEmbed(isUserBlocked ? EmojiEnum.Sign : EmojiEnum.Love)
@@ -1251,7 +1274,10 @@ namespace Dexter.Commands
             }
 
             IGuildUser user = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(id);
-            if (user is null) return;
+            if (user is null)
+            {
+                return;
+            }
 
             UserProfile profile = ProfilesDB.GetOrCreateProfile(id);
 
@@ -1321,7 +1347,10 @@ namespace Dexter.Commands
             IGuild guild = DiscordShardedClient.GetGuild(BotConfiguration.GuildID);
             IGuildUser user = await guild?.GetUserAsync(userID);
 
-            if (user is null) return;
+            if (user is null)
+            {
+                return;
+            }
 
             await user.RemoveRoleAsync(guild.GetRole(roleID));
         }
@@ -1348,7 +1377,10 @@ namespace Dexter.Commands
                 if (user is null)
                 {
                     user = DiscordShardedClient.GetUser(userID);
-                    if (user is null) continue;
+                    if (user is null)
+                    {
+                        continue;
+                    }
                 }
 
                 if (inPage >= CommunityConfiguration.MaxUsersPerEmbed)
@@ -1370,7 +1402,7 @@ namespace Dexter.Commands
                 );
             }
 
-            return embeds.ToArray();
+            return [.. embeds];
         }
 
         private static string DefaultDisplay(IUser user)

@@ -17,23 +17,15 @@ namespace Dexter.Workers
     /// an appropriate error to the channel, pinging the developers if the error is unknown.
     /// </summary>
 
-    public class DiscordWorker
-	{
+    public class DiscordWorker(DiscordShardedClient client, IServiceProvider services, CommandService cmdService, ILogger<DiscordWorker> logger)
+    {
 
-		private readonly DiscordShardedClient client;
-		private readonly IServiceProvider services;
-		private readonly CommandService cmdService;
-		private readonly ILogger<DiscordWorker> logger;
+		private readonly DiscordShardedClient client = client;
+		private readonly IServiceProvider services = services;
+		private readonly CommandService cmdService = cmdService;
+		private readonly ILogger<DiscordWorker> logger = logger;
 
-		public DiscordWorker (DiscordShardedClient client, IServiceProvider services, CommandService cmdService, ILogger<DiscordWorker> logger)
-		{
-			this.client = client;
-			this.services = services;
-			this.cmdService = cmdService;
-			this.logger = logger;
-		}
-
-		public async Task StartAsync()
+        public async Task StartAsync()
 		{
 			using (var moduleScope = services.CreateScope())
 			{

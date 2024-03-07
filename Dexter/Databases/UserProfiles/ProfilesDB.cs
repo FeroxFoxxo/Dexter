@@ -75,12 +75,18 @@ namespace Dexter.Databases.UserProfiles
         {
 
             UserLink link = Links.AsQueryable().Where(l => l.Sender == sender && l.Sendee == sendee).FirstOrDefault();
-            if (link is not null) return link;
+            if (link is not null)
+            {
+                return link;
+            }
 
             if (anyOrder)
             {
                 link = Links.AsQueryable().Where(l => l.Sender == sendee && l.Sendee == sender).FirstOrDefault();
-                if (link is not null) return link;
+                if (link is not null)
+                {
+                    return link;
+                }
             }
 
             link = new UserLink()
@@ -109,12 +115,18 @@ namespace Dexter.Databases.UserProfiles
         public UserLink GetLink(ulong sender, ulong sendee, bool anyOrder = true, bool strictLinkType = false, LinkType linkType = LinkType.Friend)
         {
             UserLink link = Links.AsQueryable().Where(l => l.Sender == sender && l.Sendee == sendee && (!strictLinkType || l.LinkType == linkType)).FirstOrDefault();
-            if (link is not null) return link;
+            if (link is not null)
+            {
+                return link;
+            }
 
             if (anyOrder)
             {
                 link = Links.AsQueryable().Where(l => l.Sender == sendee && l.Sendee == sender && (!strictLinkType || l.LinkType == linkType)).FirstOrDefault();
-                if (link is not null) return link;
+                if (link is not null)
+                {
+                    return link;
+                }
             }
 
             return link;
@@ -147,16 +159,24 @@ namespace Dexter.Databases.UserProfiles
             List<ulong> links = [];
             await Links.AsAsyncEnumerable().ForEachAsync(l =>
             {
-                if (l.LinkType != linkType) return;
+                if (l.LinkType != linkType)
+                {
+                    return;
+                }
+
                 if (l.Sender == user)
                 {
                     if (filter(l))
+                    {
                         links.Add(l.Sendee);
+                    }
                 }
                 else if (!mustBeSender && l.Sendee == user)
                 {
                     if (filter(l))
+                    {
                         links.Add(l.Sender);
+                    }
                 }
             });
 
@@ -195,7 +215,10 @@ namespace Dexter.Databases.UserProfiles
                 link = Links.AsQueryable().Where(l => l.Sender == sendee && l.Sendee == sender && l.LinkType == linkType).FirstOrDefault();
             }
 
-            if (link is null) return false;
+            if (link is null)
+            {
+                return false;
+            }
 
             Links.Remove(link);
             SaveChanges();

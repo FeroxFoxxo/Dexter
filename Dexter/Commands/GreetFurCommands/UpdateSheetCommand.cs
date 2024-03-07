@@ -63,8 +63,11 @@ namespace Dexter.Commands
 							}
 						}
 						else
-							errors.Add("Missing numeric parameter for \"week\".");
-						break;
+                        {
+                            errors.Add("Missing numeric parameter for \"week\".");
+                        }
+
+                        break;
 					case "-s":
 					case "--safe":
 						opt |= GreetFurOptions.Safe;

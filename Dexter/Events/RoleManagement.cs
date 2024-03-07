@@ -36,9 +36,12 @@ namespace Dexter.Events
 
 		private async Task CheckUserColorRoles(Cacheable<SocketGuildUser, ulong> before, SocketGuildUser after)
 		{
-			if (before.Value.Roles.Count == after.Roles.Count) return;
+			if (before.Value.Roles.Count == after.Roles.Count)
+            {
+                return;
+            }
 
-			int tierAfter = UtilityCommands.GetRoleChangePerms(after, UtilityConfiguration);
+            int tierAfter = UtilityCommands.GetRoleChangePerms(after, UtilityConfiguration);
 
 			List<SocketRole> toRemove = [];
 
@@ -53,9 +56,11 @@ namespace Dexter.Events
 			}
 
 			if (toRemove.Count > 0)
-				await after.RemoveRolesAsync(toRemove);
+            {
+                await after.RemoveRolesAsync(toRemove);
+            }
 
-			ServiceCollection serviceCollection = new();
+            ServiceCollection serviceCollection = new();
 
 			HelpAbstraction helpAbstraction = new()
 			{
@@ -79,20 +84,25 @@ namespace Dexter.Events
 				foreach (CommandInfo commandInfo in module.Commands)
 				{
 					if (string.IsNullOrWhiteSpace(commandInfo.Summary))
-						continue;
+                    {
+                        continue;
+                    }
 
-					PreconditionResult oldRole = await commandInfo.CheckPreconditionsAsync(ccBefore, serviceCollection.BuildServiceProvider());
+                    PreconditionResult oldRole = await commandInfo.CheckPreconditionsAsync(ccBefore, serviceCollection.BuildServiceProvider());
 
 					PreconditionResult newRole = await commandInfo.CheckPreconditionsAsync(ccAfter, serviceCollection.BuildServiceProvider());
 
-					string command = $"**{BotConfiguration.Prefix}{string.Join("/", commandInfo.Aliases.ToArray())}:** {commandInfo.Summary}\n\n";
+					string command = $"**{BotConfiguration.Prefix}{string.Join("/", [.. commandInfo.Aliases])}:** {commandInfo.Summary}\n\n";
 
 					if (oldRole.IsSuccess && !newRole.IsSuccess)
-						removed.Add(command);
-
-					else if (!oldRole.IsSuccess && newRole.IsSuccess)
-						added.Add(command);
-				}
+                    {
+                        removed.Add(command);
+                    }
+                    else if (!oldRole.IsSuccess && newRole.IsSuccess)
+                    {
+                        added.Add(command);
+                    }
+                }
 			}
 
 			List<EmbedBuilder> menu = [];
@@ -100,15 +110,19 @@ namespace Dexter.Events
 			EmbedBuilder currentBuilder = null;
 
 			if (added.Count > 0)
-				currentBuilder = BuildEmbed(EmojiEnum.Love)
+            {
+                currentBuilder = BuildEmbed(EmojiEnum.Love)
 					.WithTitle("Dexter Commands Added!")
 					.WithDescription("Here's the commands you're now able to use!");
-			else if (removed.Count > 0)
-				currentBuilder = BuildEmbed(EmojiEnum.Annoyed)
+            }
+            else if (removed.Count > 0)
+            {
+                currentBuilder = BuildEmbed(EmojiEnum.Annoyed)
 					.WithTitle("Dexter Commands Removed.")
 					.WithDescription("Here's the commands you've had your access revoked from.");
+            }
 
-			if (currentBuilder != null)
+            if (currentBuilder != null)
 			{
 				if (added.Count > 0)
 				{
@@ -172,41 +186,32 @@ namespace Dexter.Events
 				{
 					var dm = await after.CreateDMChannelAsync();
 
-					_ = CreateReactionMenu(menu.ToArray(), dm);
+					_ = CreateReactionMenu([.. menu], dm);
 				} 
 				catch (Exception) { }
 			}
 		}
 	}
 
-	public class FCC : ICommandContext
+    /// <summary>
+    ///	 Initializes a new <see cref="CommandContext" /> class with the provided client and message.
+    /// </summary>
+    public class FCC(IDiscordClient client, IGuild guild, IMessageChannel channel, IUser user, IUserMessage message) : ICommandContext
 	{
-		/// <inheritdoc/>
-		public IDiscordClient Client { get; }
+        /// <inheritdoc/>
+        public IDiscordClient Client { get; } = client;
 
-		/// <inheritdoc/>
-		public IGuild Guild { get; }
+        /// <inheritdoc/>
+        public IGuild Guild { get; } = guild;
 
-		/// <inheritdoc/>
-		public IMessageChannel Channel { get; }
+        /// <inheritdoc/>
+        public IMessageChannel Channel { get; } = channel;
 
-		/// <inheritdoc/>
-		public IUser User { get; }
+        /// <inheritdoc/>
+        public IUser User { get; } = user;
 
-		/// <inheritdoc/>
-		public IUserMessage Message { get; }
-
-		/// <summary>
-		///	 Initializes a new <see cref="CommandContext" /> class with the provided client and message.
-		/// </summary>
-		public FCC(IDiscordClient client, IGuild guild, IMessageChannel channel, IUser user, IUserMessage message)
-		{
-			Client = client;
-			Guild = guild;
-			Channel = channel;
-			User = user;
-			Message = message;
-		}
-	}
+        /// <inheritdoc/>
+        public IUserMessage Message { get; } = message;
+    }
 
 }

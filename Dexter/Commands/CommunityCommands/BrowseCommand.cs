@@ -48,7 +48,7 @@ namespace Dexter.Commands
 
 					if (string.IsNullOrEmpty(filters))
 					{
-						games = GamesDB.Games.ToArray();
+						games = [.. GamesDB.Games];
 					}
 					else
 					{
@@ -61,8 +61,8 @@ namespace Dexter.Commands
 								.SendEmbed(Context.Channel);
 							return;
 						}
-						games = GamesDB.Games.AsQueryable().Where(g =>
-							g.Type == GameTypeConversion.GameNames[type.ToLower()]).ToArray();
+						games = [.. GamesDB.Games.AsQueryable().Where(g =>
+							g.Type == GameTypeConversion.GameNames[type.ToLower()])];
 					}
 
 					embeds = BuildGamesEmbeds(games);
@@ -72,25 +72,25 @@ namespace Dexter.Commands
 
 					if (string.IsNullOrEmpty(filters))
 					{
-						events = CommunityEventsDB.Events.AsQueryable().Where(e =>
-							e.Status == EventStatus.Approved).ToArray();
+						events = [.. CommunityEventsDB.Events.AsQueryable().Where(e =>
+							e.Status == EventStatus.Approved)];
 					}
 					else
 					{
 						switch (filters.ToLower())
 						{
 							case "official":
-								events = CommunityEventsDB.Events.AsQueryable().Where(e =>
+								events = [.. CommunityEventsDB.Events.AsQueryable().Where(e =>
 									e.EventType == EventType.Official
-									&& e.Status == EventStatus.Approved).ToArray();
+									&& e.Status == EventStatus.Approved)];
 								break;
 							case "community":
 							case "userhosted":
 							case "user hosted":
 							case "user-hosted":
-								events = CommunityEventsDB.Events.AsQueryable().Where(e =>
+								events = [.. CommunityEventsDB.Events.AsQueryable().Where(e =>
 									e.EventType == EventType.UserHosted
-									&& e.Status == EventStatus.Approved).ToArray();
+									&& e.Status == EventStatus.Approved)];
 								break;
 							default:
 								await BuildEmbed(EmojiEnum.Annoyed)
@@ -134,8 +134,10 @@ namespace Dexter.Commands
 			}
 
 			if (embeds is not null && embeds.Length > 0)
-				await DisplayEmbeds(type, embeds);
-		}
+            {
+                await DisplayEmbeds(type, embeds);
+            }
+        }
 
 		private async Task<EmbedBuilder[]> SearchTopics(TopicType type, string filters)
 		{
@@ -151,8 +153,10 @@ namespace Dexter.Commands
 			foreach (FunTopic t in FunTopicsDB.Topics)
 			{
 				if (type == t.TopicType)
-					topics.Add(new WeightedObject<FunTopic>(t, LanguageHelper.GetCorrelationIndex(t.Topic.ToLower(), filters.ToLower())));
-			}
+                {
+                    topics.Add(new WeightedObject<FunTopic>(t, LanguageHelper.GetCorrelationIndex(t.Topic.ToLower(), filters.ToLower())));
+                }
+            }
 			WeightedObject<FunTopic>.SortByWeightInPlace(topics, true);
 			return BuildTopicsEmbeds(topics, filters);
 		}
@@ -180,8 +184,12 @@ namespace Dexter.Commands
 
 		private EmbedBuilder[] BuildGamesEmbeds(GameInstance[] Games)
 		{
-			if (Games.Length == 0) return Array.Empty<EmbedBuilder>();
-			EmbedBuilder[] Embeds = new EmbedBuilder[(Games.Length - 1) / GamesPerEmbed + 1];
+			if (Games.Length == 0)
+            {
+                return [];
+            }
+
+            EmbedBuilder[] Embeds = new EmbedBuilder[(Games.Length - 1) / GamesPerEmbed + 1];
 
 			for (int i = 0; i < Embeds.Length; i++)
 			{
@@ -216,26 +224,40 @@ namespace Dexter.Commands
 		{
 			IGuildUser Master = DiscordShardedClient.GetGuild(BotConfiguration.GuildID).GetUser(Game.Master);
 			string MasterName;
-			if (Master is null) MasterName = "Unknown";
-			else MasterName = Master.Nickname ?? Master.Username;
+			if (Master is null)
+            {
+                MasterName = "Unknown";
+            }
+            else
+            {
+                MasterName = Master.Nickname ?? Master.Username;
+            }
 
-			Player[] Players = GamesDB.GetPlayersFromInstance(Game.GameID);
+            Player[] Players = GamesDB.GetPlayersFromInstance(Game.GameID);
 
 			return $"`{Game.GameID:D2}`|{GameTypeConversion.GameEmoji[Game.Type]}|`{ToLength(15, Game.Title)}`|`{ToLength(15, MasterName)}`|`{Players.Length:D2}`|{(Game.Password.Length > 0 ? "ðŸ”‘" : "")}";
 		}
 
 		private static string ToLength(int Length, string S)
 		{
-			if (S.Length < Length) return S.PadRight(Length);
-			return S.TruncateTo(Length);
+			if (S.Length < Length)
+            {
+                return S.PadRight(Length);
+            }
+
+            return S.TruncateTo(Length);
 		}
 
 		const int EventsPerEmbed = 5;
 
 		private EmbedBuilder[] BuildEventsEmbeds(CommunityEvent[] Events)
 		{
-			if (Events.Length == 0) return Array.Empty<EmbedBuilder>();
-			EmbedBuilder[] Embeds = new EmbedBuilder[(Events.Length - 1) / EventsPerEmbed + 1];
+			if (Events.Length == 0)
+            {
+                return [];
+            }
+
+            EmbedBuilder[] Embeds = new EmbedBuilder[(Events.Length - 1) / EventsPerEmbed + 1];
 			int counter = 0;
 
 			for (int i = 0; i < Embeds.Length; i++)
@@ -273,8 +295,12 @@ namespace Dexter.Commands
 
 				for (int i = initial; i < initial + CommunityConfiguration.BrowseTopicsPerPage; i++)
 				{
-					if (i >= topics.Count) break;
-					FunTopic t = topics[i].Obj;
+					if (i >= topics.Count)
+                    {
+                        break;
+                    }
+
+                    FunTopic t = topics[i].Obj;
 					IUser topicProvider = DiscordShardedClient.GetUser(t.ProposerID);
 					string userStr = topicProvider is null ? "Unknown" : topicProvider.Username;
 					embed.AddField($"{t.TopicType} #{t.TopicID} by {userStr} ({Math.Round(topics[i].Weight * 10000) / 100}%)", t.Topic.TruncateTo(maxDescLength));

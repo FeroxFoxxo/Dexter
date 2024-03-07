@@ -38,7 +38,7 @@ namespace Dexter.Commands
 				return;
 			}
 
-			if (InputDate.ToLower() == "examples")
+			if (InputDate.Equals("examples", StringComparison.CurrentCultureIgnoreCase))
 			{
 				await BuildEmbed(EmojiEnum.Sign)
 					.WithTitle("Date Format Examples")

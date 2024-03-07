@@ -167,9 +167,11 @@ namespace Dexter.Commands
 			List<string> AddedAlias = [];
 
 			if (!string.IsNullOrEmpty(Command.Alias))
-				JsonConvert.DeserializeObject<List<string>>(Command.Alias);
+            {
+                JsonConvert.DeserializeObject<List<string>>(Command.Alias);
+            }
 
-			AddedAlias.Add(Alias);
+            AddedAlias.Add(Alias);
 
 			Command.Alias = JsonConvert.SerializeObject(AddedAlias);
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+using Dexter.Attributes;
 using Dexter.Configurations;
 using Dexter.Enums;
 using Dexter.Events;
@@ -15,11 +15,11 @@ using Victoria.Player;
 namespace Dexter.Extensions
 {
 
-	/// <summary>
-	/// The EmbedBuilder Extensions class offers a variety of different extensions that can be applied to an embed to modify or send it.
-	/// </summary>
+    /// <summary>
+    /// The EmbedBuilder Extensions class offers a variety of different extensions that can be applied to an embed to modify or send it.
+    /// </summary>
 
-	public static class EmbedExtensions
+    public static class EmbedExtensions
 	{
 
 		/// <summary>
@@ -107,8 +107,10 @@ namespace Dexter.Extensions
 		{
 
 			if (user == null)
-				embedBuilder.AddField("Failed", "I cannot notify this fluff as they have left the server!");
-			else
+            {
+                embedBuilder.AddField("Failed", "I cannot notify this fluff as they have left the server!");
+            }
+            else
 			{
 				try
 				{
@@ -166,9 +168,11 @@ namespace Dexter.Extensions
 		public static EmbedBuilder AddField(this EmbedBuilder embedBuilder, bool condition, string name, object value, bool inLine = false)
 		{
 			if (condition)
-				embedBuilder.AddField(name, value, inLine);
+            {
+                embedBuilder.AddField(name, value, inLine);
+            }
 
-			return embedBuilder;
+            return embedBuilder;
 		}
 
 		/// <summary>
@@ -184,16 +188,22 @@ namespace Dexter.Extensions
 			string commandDescription = string.Empty;
 
 			if (commandInfo.Parameters.Count > 0)
-				commandDescription = $"Parameters: {string.Join(", ", commandInfo.Parameters.Select(p => p.Name))}";
+            {
+                commandDescription = $"Parameters: {string.Join(", ", commandInfo.Parameters.Select(p => p.Name))}";
+            }
 
-			Attribute extendedSummary = commandInfo.Attributes.Where(Attribute => Attribute is ExtendedSummaryAttribute).FirstOrDefault();
+            Attribute extendedSummary = commandInfo.Attributes.Where(Attribute => Attribute is ExtendedSummaryAttribute).FirstOrDefault();
 
 			if (extendedSummary is not null)
-				commandDescription += $"\nSummary: {(extendedSummary as ExtendedSummaryAttribute).ExtendedSummary}";
-			else if (!string.IsNullOrEmpty(commandInfo.Summary))
-				commandDescription += $"\nSummary: {commandInfo.Summary}";
+            {
+                commandDescription += $"\nSummary: {(extendedSummary as ExtendedSummaryAttribute).ExtendedSummary}";
+            }
+            else if (!string.IsNullOrEmpty(commandInfo.Summary))
+            {
+                commandDescription += $"\nSummary: {commandInfo.Summary}";
+            }
 
-			embedBuilder.AddField(string.Join(", ", commandInfo.Aliases.Select(Name => $"{botConfiguration.Prefix}{Name}")), commandDescription);
+            embedBuilder.AddField(string.Join(", ", commandInfo.Aliases.Select(Name => $"{botConfiguration.Prefix}{Name}")), commandDescription);
 
 			return embedBuilder;
 		}

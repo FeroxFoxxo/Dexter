@@ -64,17 +64,23 @@ namespace Dexter.Abstractions
 		public async Task<DiscordWebhookClient> CreateOrGetWebhook(ulong channelID, string webhookName)
 		{
 			if (channelID <= 0)
-				return null;
+            {
+                return null;
+            }
 
-			SocketChannel channel = DiscordShardedClient.GetChannel(channelID);
+            SocketChannel channel = DiscordShardedClient.GetChannel(channelID);
 
 			if (channel is SocketTextChannel textChannel)
 			{
 				foreach (RestWebhook restWebhook in await textChannel.GetWebhooksAsync())
-					if (restWebhook.Name.Equals(webhookName))
-						return new DiscordWebhookClient(restWebhook.Id, restWebhook.Token);
+                {
+                    if (restWebhook.Name.Equals(webhookName))
+                    {
+                        return new DiscordWebhookClient(restWebhook.Id, restWebhook.Token);
+                    }
+                }
 
-				RestWebhook webhook = await textChannel.CreateWebhookAsync(webhookName, ProfileService.GetRandomPFP());
+                RestWebhook webhook = await textChannel.CreateWebhookAsync(webhookName, ProfileService.GetRandomPFP());
 
 				return new DiscordWebhookClient(webhook.Id, webhook.Token);
 			}
@@ -143,9 +149,11 @@ namespace Dexter.Abstractions
 				PageBuilder[] pageBuilderMenu = new PageBuilder[embeds.Length];
 
 				for (int i = 0; i < embeds.Length; i++)
-					pageBuilderMenu[i] = PageBuilder.FromEmbedBuilder(embeds[i]);
+                {
+                    pageBuilderMenu[i] = PageBuilder.FromEmbedBuilder(embeds[i]);
+                }
 
-				Paginator paginator = new StaticPaginatorBuilder()
+                Paginator paginator = new StaticPaginatorBuilder()
 					.WithPages(pageBuilderMenu)
 					.WithDefaultEmotes()
 					.WithFooter(PaginatorFooter.PageNumber)
@@ -156,8 +164,10 @@ namespace Dexter.Abstractions
 				await Interactive.SendPaginatorAsync(paginator, channel, TimeSpan.FromMinutes(10));
 			}
 			else
-				await embeds.FirstOrDefault().SendEmbed(channel);
-		}
+            {
+                await embeds.FirstOrDefault().SendEmbed(channel);
+            }
+        }
 
 	}
 

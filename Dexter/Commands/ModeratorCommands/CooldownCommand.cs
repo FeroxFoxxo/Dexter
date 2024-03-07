@@ -36,7 +36,8 @@ namespace Dexter.Commands
 					Cooldown IssueCooldown = CooldownDB.Cooldowns.Find($"{User.Id}{TextChannel.Id}");
 
 					if (IssueCooldown != null)
-						if (IssueCooldown.TimeOfCooldown + CommissionCooldownConfiguration.ChannelCooldowns[TextChannel.Id]["CooldownTime"] < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                    {
+                        if (IssueCooldown.TimeOfCooldown + CommissionCooldownConfiguration.ChannelCooldowns[TextChannel.Id]["CooldownTime"] < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
 						{
 							CooldownDB.Cooldowns.Remove(IssueCooldown);
 						}
@@ -53,8 +54,9 @@ namespace Dexter.Commands
 
 							return;
 						}
+                    }
 
-					Cooldown NewCooldown = new()
+                    Cooldown NewCooldown = new()
 					{
 						Token = $"{User.Id}{TextChannel.Id}",
 						TimeOfCooldown = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),

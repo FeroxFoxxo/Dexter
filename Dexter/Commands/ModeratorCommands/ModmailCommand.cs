@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Dexter.Databases.Mail;
 using Dexter.Enums;
 using Dexter.Extensions;
+using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 
@@ -24,6 +25,8 @@ namespace Dexter.Commands
 
 		public async Task SendModMail([Remainder] string Message)
 		{
+			Message = Message.SanitizeMentions();
+
 			if (RestrictionsDB.IsUserRestricted(Context.User, Databases.UserRestrictions.Restriction.Modmail))
 			{
 				await BuildEmbed(EmojiEnum.Annoyed)

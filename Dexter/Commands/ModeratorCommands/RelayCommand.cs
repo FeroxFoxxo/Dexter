@@ -5,6 +5,7 @@ using Dexter.Attributes.Methods;
 using Dexter.Databases.Relays;
 using Dexter.Enums;
 using Dexter.Extensions;
+using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 
@@ -30,6 +31,8 @@ namespace Dexter.Commands
 
 		public async Task AddRelay(int MessageInterval, ITextChannel Channel, [Remainder] string Message)
 		{
+			Message = Message.SanitizeMentions();
+
 			Relay FindRelay = RelayDB.Relays.AsQueryable().Where(Relay => Relay.ChannelID.Equals(Channel.Id)).FirstOrDefault();
 
 			if (Message.Length > 1500)

@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
+using Dexter.Extensions;
+using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 using Genbox.WolframAlpha;
@@ -23,6 +25,8 @@ namespace Dexter.Commands
 
 		public async Task WolframCommand([Remainder] string Question)
 		{
+            Question = Question.SanitizeMentions();
+
 			string Response = await ServiceProvider.GetRequiredService<WolframAlphaClient>().SpokenResultAsync(Question);
 
 			Response = Response.Replace("Wolfram Alpha", Context.Client.CurrentUser.Username);
@@ -33,7 +37,7 @@ namespace Dexter.Commands
 			if (Response == "DexterBot did not understand your input" || Response == "No spoken result available")
 				await Context.Message.AddReactionAsync(new Emoji("❓"));
 			else
-				await Context.Channel.SendMessageAsync(Response);
+				await Context.Channel.SendMessageAsync(Response.SanitizeMentions());
 		}
 
 	}

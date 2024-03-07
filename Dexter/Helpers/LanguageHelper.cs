@@ -14,7 +14,7 @@ namespace Dexter.Helpers
 	/// Holds a variety of tools to deal with organic string management/manipulation.
 	/// </summary>
 
-	public static class LanguageHelper
+	public static partial class LanguageHelper
 	{
 
 		private enum ArticleType
@@ -1444,25 +1444,34 @@ namespace Dexter.Helpers
 			return $"{time:ddd dd MMM yyy 'at' hh:mm tt 'UTC'zzz} ({time.Humanize()})";
 		}
 
-		/// <summary>
-		/// Disables all here, everyone, and role mentions from a given message string, keeping the message mostly identical.
-		/// </summary>
-		/// <param name="input">The base string to sanitize.</param>
-		/// <returns>A modified string where all instances of mass mentions have a zero-width space inserted after the @ symbol to disable them.</returns>
+        /// <summary>
+        /// Disables all here, everyone, and role mentions from a given message string, keeping the message mostly identical.
+        /// </summary>
+        /// <param name="input">The base string to sanitize.</param>
+        /// <returns>A modified string where all instances of mass mentions have a zero-width space inserted after the @ symbol to disable them.</returns>
 
-		public static string SanitizeMentions(this string input)
+        public static string SanitizeMentions(this string input)
 		{
-			input = Regex.Replace(input, @"@here", $"@{ZWSP}here", RegexOptions.IgnoreCase);
-			input = Regex.Replace(input, @"@everyone", $"@{ZWSP}everyone", RegexOptions.IgnoreCase);
-			input = Regex.Replace(input, @"<@&", $"<@{ZWSP}&");
+			input = HereMention().Replace(input, $"@{ZWSP}here");
+			input = EveryoneMention().Replace(input, $"@{ZWSP}everyone");
+			input = RoleMention().Replace(input, $"<@{ZWSP}&");
 			return input;
 		}
 
-		/// <summary>
-		/// A zero-width space character.
-		/// </summary>
+        [GeneratedRegex(@"@everyone", RegexOptions.IgnoreCase, "en-NZ")]
+        private static partial Regex EveryoneMention();
 
-		public const char ZWSP = '​';
+        [GeneratedRegex(@"@here", RegexOptions.IgnoreCase, "en-NZ")]
+        private static partial Regex HereMention();
+
+        [GeneratedRegex(@"<@&")]
+        private static partial Regex RoleMention();
+
+        /// <summary>
+        /// A zero-width space character.
+        /// </summary>
+
+        public const char ZWSP = '​';
 
 		/// <summary>
 		/// Translates a hex-code expression (or a superexpression thereof) into a Graphics color object.
@@ -1479,7 +1488,7 @@ namespace Dexter.Helpers
 			uint hex = uint.Parse(m, NumberStyles.HexNumber);
 			return System.Drawing.Color.FromArgb(unchecked((int)(hex + 0xff000000)));
 		}
-	}
+    }
 
 	/// <summary>
 	/// Represents a time zone for comparison as an offset to UTC.

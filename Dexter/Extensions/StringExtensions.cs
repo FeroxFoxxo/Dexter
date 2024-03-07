@@ -178,7 +178,6 @@ namespace Dexter.Extensions
 		{
 			return BitConverter.ToInt32(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(hashingString.ToString())));
 		}
-
-	}
+    }
 
 }

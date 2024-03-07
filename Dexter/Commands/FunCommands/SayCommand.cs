@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Dexter.Attributes.Methods;
+using Dexter.Helpers;
 using Discord;
 using Discord.Commands;
 
@@ -25,7 +26,7 @@ namespace Dexter.Commands
 		public async Task SayCommand([Remainder] string Message)
 		{
 			await Context.Message.DeleteAsync();
-			await Context.Channel.SendMessageAsync(Message);
+			await Context.Channel.SendMessageAsync(Message.SanitizeMentions);
 		}
 
 	}

@@ -1,7 +1,7 @@
-using System;
-using System.Collections.Generic;
 using Dexter.Configurations;
 using Dexter.Helpers;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
@@ -757,10 +757,12 @@ namespace Dexter.Databases.UserProfiles
         /// The binary flags that describe the user's preferences.
         /// </summary>
 
-        public ProfilePrefFlags Flags { 
-            get {
+        public ProfilePrefFlags Flags
+        {
+            get
+            {
                 ProfilePrefFlags flags = ProfilePrefFlags.None;
-                switch(Privacy)
+                switch (Privacy)
                 {
                     case PrivacyMode.Public:
                         flags |= ProfilePrefFlags.PublicVisible | ProfilePrefFlags.FriendsVisible;
@@ -785,8 +787,9 @@ namespace Dexter.Databases.UserProfiles
                 }
 
                 return flags;
-            } 
-            set {
+            }
+            set
+            {
                 if (value.HasFlag(ProfilePrefFlags.PublicVisible))
                 {
                     Privacy = PrivacyMode.Public;
@@ -803,7 +806,7 @@ namespace Dexter.Databases.UserProfiles
                 GiveBorkdayRole = value.HasFlag(ProfilePrefFlags.GiveBorkdayRole);
                 BlockRequests = value.HasFlag(ProfilePrefFlags.BlockRequests);
                 AgeVerified = value.HasFlag(ProfilePrefFlags.AgeVerified);
-            } 
+            }
         }
 
         /// <summary>

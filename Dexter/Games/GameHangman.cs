@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Games;
+using Dexter.Enums;
 using Dexter.Extensions;
+using Dexter.Helpers;
 using Discord;
 using Discord.WebSocket;
+using System;
+using System.Collections.Generic;
 using System.Text;
-using Dexter.Abstractions;
-using Dexter.Enums;
-using Dexter.Helpers;
+using System.Threading.Tasks;
 
 namespace Dexter.Games
 {
@@ -24,46 +24,46 @@ namespace Dexter.Games
     /// <param name="botConfiguration">An instance of the bot's configuraiton.</param>
 
     public class GameHangman(GameInstance game, BotConfiguration botConfiguration) : GameTemplate(game, botConfiguration, "Default, _______, 6, 6, ")
-	{
-		private string Term
-		{
-			get
-			{
-				return Game.Data.Split(", ")[0].Replace(GameInstance.CommaRepresentation, ",");
-			}
-			set
-			{
-				string processedValue = value.Replace(",", GameInstance.CommaRepresentation);
-				string[] newValue = Game.Data.Split(", ");
-				newValue[0] = processedValue;
-				Game.Data = string.Join(", ", newValue);
-			}
-		}
+    {
+        private string Term
+        {
+            get
+            {
+                return Game.Data.Split(", ")[0].Replace(GameInstance.CommaRepresentation, ",");
+            }
+            set
+            {
+                string processedValue = value.Replace(",", GameInstance.CommaRepresentation);
+                string[] newValue = Game.Data.Split(", ");
+                newValue[0] = processedValue;
+                Game.Data = string.Join(", ", newValue);
+            }
+        }
 
-		private string Guess
-		{
-			get
-			{
-				return Game.Data.Split(", ")[1].Replace(GameInstance.CommaRepresentation, ",");
-			}
-			set
-			{
-				string processedValue = value.Replace(",", GameInstance.CommaRepresentation);
-				string[] newValue = Game.Data.Split(", ");
-				newValue[1] = processedValue;
-				Game.Data = string.Join(", ", newValue);
-			}
-		}
+        private string Guess
+        {
+            get
+            {
+                return Game.Data.Split(", ")[1].Replace(GameInstance.CommaRepresentation, ",");
+            }
+            set
+            {
+                string processedValue = value.Replace(",", GameInstance.CommaRepresentation);
+                string[] newValue = Game.Data.Split(", ");
+                newValue[1] = processedValue;
+                Game.Data = string.Join(", ", newValue);
+            }
+        }
 
-		private int Lives
-		{
-			get
-			{
-				return int.Parse(Game.Data.Split(", ")[2]);
-			}
-			set
-			{
-				if (value < 0)
+        private int Lives
+        {
+            get
+            {
+                return int.Parse(Game.Data.Split(", ")[2]);
+            }
+            set
+            {
+                if (value < 0)
                 {
                     return;
                 }
@@ -74,527 +74,527 @@ namespace Dexter.Games
                 }
 
                 string processedValue = value.ToString();
-				string[] newValue = Game.Data.Split(", ");
-				newValue[2] = processedValue;
-				Game.Data = string.Join(", ", newValue);
-			}
-		}
+                string[] newValue = Game.Data.Split(", ");
+                newValue[2] = processedValue;
+                Game.Data = string.Join(", ", newValue);
+            }
+        }
 
-		private int MaxLives
-		{
-			get
-			{
-				return int.Parse(Game.Data.Split(", ")[3]);
-			}
-			set
-			{
-				if (value < 1)
+        private int MaxLives
+        {
+            get
+            {
+                return int.Parse(Game.Data.Split(", ")[3]);
+            }
+            set
+            {
+                if (value < 1)
                 {
                     return;
                 }
 
                 string processedValue = value.ToString();
-				string[] newValue = Game.Data.Split(", ");
-				newValue[3] = processedValue;
-				Game.Data = string.Join(", ", newValue);
-				if (Lives > value)
+                string[] newValue = Game.Data.Split(", ");
+                newValue[3] = processedValue;
+                Game.Data = string.Join(", ", newValue);
+                if (Lives > value)
                 {
                     Lives = value;
                 }
             }
-		}
+        }
 
-		private string LettersMissed
-		{
-			get
-			{
-				string s = Game.Data.Split(", ")[4];
-				if (s == "-")
+        private string LettersMissed
+        {
+            get
+            {
+                string s = Game.Data.Split(", ")[4];
+                if (s == "-")
                 {
                     return "";
                 }
 
                 return s;
-			}
-			set
-			{
-				string[] NewValue = Game.Data.Split(", ");
-				NewValue[4] = value.Length == 0 ? "-" : value;
-				Game.Data = string.Join(", ", NewValue);
-			}
-		}
+            }
+            set
+            {
+                string[] NewValue = Game.Data.Split(", ");
+                NewValue[4] = value.Length == 0 ? "-" : value;
+                Game.Data = string.Join(", ", NewValue);
+            }
+        }
 
-		/// <summary>
-		/// Represents the general status and data of a Hangman Game.
-		/// </summary>
-		/// <param name="Client">SocketClient used to parse UserIDs.</param>
-		/// <returns>An Embed detailing the various aspects of the game in its current instance.</returns>
+        /// <summary>
+        /// Represents the general status and data of a Hangman Game.
+        /// </summary>
+        /// <param name="Client">SocketClient used to parse UserIDs.</param>
+        /// <returns>An Embed detailing the various aspects of the game in its current instance.</returns>
 
-		public override EmbedBuilder GetStatus(DiscordShardedClient Client)
-		{
-			return BuildEmbed(EmojiEnum.Unknown)
-				.WithColor(Color.Blue)
-				.WithTitle($"{Game.Title} (Game {Game.GameID})")
-				.WithDescription($"{Game.Description}\n**Term**: {DiscordifyGuess()}")
-				.AddField("Lives", LivesExpression(), true)
-				.AddField("Wrong Guesses", MistakesExpression(), true)
-				.AddField("Available Guesses", MissingLettersExpression(), true)
-				.AddField("Master", Client.GetUser(Game.Master)?.GetUserInformation() ?? "<N/A>")
-				.AddField(Game.Banned.Length > 0, "Banned Players", Game.BannedMentions.TruncateTo(500));
-		}
+        public override EmbedBuilder GetStatus(DiscordShardedClient Client)
+        {
+            return BuildEmbed(EmojiEnum.Unknown)
+                .WithColor(Color.Blue)
+                .WithTitle($"{Game.Title} (Game {Game.GameID})")
+                .WithDescription($"{Game.Description}\n**Term**: {DiscordifyGuess()}")
+                .AddField("Lives", LivesExpression(), true)
+                .AddField("Wrong Guesses", MistakesExpression(), true)
+                .AddField("Available Guesses", MissingLettersExpression(), true)
+                .AddField("Master", Client.GetUser(Game.Master)?.GetUserInformation() ?? "<N/A>")
+                .AddField(Game.Banned.Length > 0, "Banned Players", Game.BannedMentions.TruncateTo(500));
+        }
 
-		private void RegisterMistake(char c)
-		{
-			Lives--;
-			LettersMissed += c;
-		}
+        private void RegisterMistake(char c)
+        {
+            Lives--;
+            LettersMissed += c;
+        }
 
-		private string DiscordifyGuess()
-		{
-			char[] treated = Guess.Replace(" ", "/")
-				.ToCharArray();
-			return string.Join(" ", treated).Replace("_", "\\_");
-		}
+        private string DiscordifyGuess()
+        {
+            char[] treated = Guess.Replace(" ", "/")
+                .ToCharArray();
+            return string.Join(" ", treated).Replace("_", "\\_");
+        }
 
-		private static string ObscureTerm(string term)
-		{
-			char[] chars = term.ToCharArray();
-			for (int i = 0; i < chars.Length; i++)
-			{
-				if (char.IsLetter(chars[i]))
+        private static string ObscureTerm(string term)
+        {
+            char[] chars = term.ToCharArray();
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (char.IsLetter(chars[i]))
                 {
                     chars[i] = '_';
                 }
             }
-			return string.Join("", chars);
-		}
+            return string.Join("", chars);
+        }
 
-		private string LivesExpression()
-		{
-			char[] expression = new char[MaxLives];
-			for (int i = 0; i < MaxLives; i++)
-			{
-				expression[i] = i < Lives ? '♥' : '☠';
-			}
-			return string.Join("", expression);
-		}
+        private string LivesExpression()
+        {
+            char[] expression = new char[MaxLives];
+            for (int i = 0; i < MaxLives; i++)
+            {
+                expression[i] = i < Lives ? '♥' : '☠';
+            }
+            return string.Join("", expression);
+        }
 
-		private string MistakesExpression()
-		{
-			string missed = string.Join(", ", LettersMissed);
-			if (missed.Length == 0)
+        private string MistakesExpression()
+        {
+            string missed = string.Join(", ", LettersMissed);
+            if (missed.Length == 0)
             {
                 return "-";
             }
 
             return missed.ToString();
-		}
+        }
 
-		private string MissingLettersExpression()
-		{
-			HashSet<char> missing = [.. ScorePerLetter.Keys];
+        private string MissingLettersExpression()
+        {
+            HashSet<char> missing = [.. ScorePerLetter.Keys];
 
-			foreach (char c in LettersMissed.ToCharArray())
-			{
-				if (missing.Contains(c))
+            foreach (char c in LettersMissed.ToCharArray())
+            {
+                if (missing.Contains(c))
                 {
                     missing.Remove(c);
                 }
             }
-			foreach (char c in Guess.ToUpper().ToCharArray())
-			{
-				if (missing.Contains(c))
+            foreach (char c in Guess.ToUpper().ToCharArray())
+            {
+                if (missing.Contains(c))
                 {
                     missing.Remove(c);
                 }
             }
 
-			return string.Join("", missing);
-		}
+            return string.Join("", missing);
+        }
 
-		/// <summary>
-		/// Resets the game state to its initial default value.
-		/// </summary>
-		/// <param name="FunConfiguration">Settings related to the fun module, which contain the default lives parameter.</param>
-		/// <param name="GamesDB">The database containing player information, set to <see langword="null"/> to avoid resetting scores.</param>
+        /// <summary>
+        /// Resets the game state to its initial default value.
+        /// </summary>
+        /// <param name="FunConfiguration">Settings related to the fun module, which contain the default lives parameter.</param>
+        /// <param name="GamesDB">The database containing player information, set to <see langword="null"/> to avoid resetting scores.</param>
 
-		public override void Reset(FunConfiguration FunConfiguration, GamesDB GamesDB)
-		{
-			Game.Data = EmptyData;
-			Game.LastUserInteracted = Game.Master;
-			Lives = MaxLives = FunConfiguration.HangmanDefaultLives;
-			if (GamesDB is null)
+        public override void Reset(FunConfiguration FunConfiguration, GamesDB GamesDB)
+        {
+            Game.Data = EmptyData;
+            Game.LastUserInteracted = Game.Master;
+            Lives = MaxLives = FunConfiguration.HangmanDefaultLives;
+            if (GamesDB is null)
             {
                 return;
             }
 
             Player[] Players = GamesDB.GetPlayersFromInstance(Game.GameID);
-			foreach (Player p in Players)
-			{
-				p.Score = 0;
-				p.Lives = 0;
-			}
-		}
+            foreach (Player p in Players)
+            {
+                p.Score = 0;
+                p.Lives = 0;
+            }
+        }
 
-		const int MAX_LIVES_ALLOWED = 20;
+        const int MAX_LIVES_ALLOWED = 20;
 
-		/// <summary>
-		/// Sets a local <paramref name="field"/> to a given <paramref name="value"/>.
-		/// </summary>
-		/// <remarks>Valid <paramref name="field"/> values are: TERM, LIVES, MAXLIVES, and MISTAKES.</remarks>
-		/// <param name="field">The name of the field to modify.</param>
-		/// <param name="value">The value to set the field to.</param>
-		/// <param name="funConfiguration">The Fun Configuration settings file, which holds relevant data such as default lives.</param>
-		/// <param name="feedback">In case this operation wasn't possible, its reason, or useful feedback even if the operation was successful.</param>
-		/// <returns><see langword="true"/> if the operation was successful, otherwise <see langword="false"/>.</returns>
+        /// <summary>
+        /// Sets a local <paramref name="field"/> to a given <paramref name="value"/>.
+        /// </summary>
+        /// <remarks>Valid <paramref name="field"/> values are: TERM, LIVES, MAXLIVES, and MISTAKES.</remarks>
+        /// <param name="field">The name of the field to modify.</param>
+        /// <param name="value">The value to set the field to.</param>
+        /// <param name="funConfiguration">The Fun Configuration settings file, which holds relevant data such as default lives.</param>
+        /// <param name="feedback">In case this operation wasn't possible, its reason, or useful feedback even if the operation was successful.</param>
+        /// <returns><see langword="true"/> if the operation was successful, otherwise <see langword="false"/>.</returns>
 
-		public override bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback)
-		{
-			feedback = "";
-			int n;
+        public override bool Set(string field, string value, FunConfiguration funConfiguration, out string feedback)
+        {
+            feedback = "";
+            int n;
 
-			switch (field.ToLower())
-			{
-				case "word":
-				case "term":
-					if (value.Contains('_'))
-					{
-						feedback = "The term cannot contain underscores!";
-						return false;
-					}
-					else if (value.Contains('@'))
-					{
-						feedback = "The term cannot contain the at symbol (@)!";
-						return false;
-					}
-					else if (value.Length > 256)
-					{
-						feedback = "The term is too long!";
-						return false;
-					}
-					Reset(funConfiguration, null);
-					Term = value;
-					Guess = ObscureTerm(value);
-					feedback = $"Success! Term = {value}, Guess = \"{DiscordifyGuess()}\"";
-					return true;
-				case "lives":
-					if (!int.TryParse(value, out n))
-					{
-						feedback = $"Unable to parse {value} into an integer value.";
-						return false;
-					}
-					if (n > MAX_LIVES_ALLOWED)
-					{
-						feedback = $"Too many lives! Please keep it below {MAX_LIVES_ALLOWED}";
-						return false;
-					}
-					Lives = n;
-					feedback = $"Lives set to {Lives}/{MaxLives}";
-					return true;
-				case "maxlives":
-					if (!int.TryParse(value, out n))
-					{
-						feedback = $"Unable to parse {value} into an integer value.";
-						return false;
-					}
-					if (n > MAX_LIVES_ALLOWED)
-					{
-						feedback = $"Too many lives! Please keep it below {MAX_LIVES_ALLOWED}";
-						return false;
-					}
-					MaxLives = n;
-					feedback = $"Lives set to {Lives}/{MaxLives}";
-					return true;
-				case "missed":
-				case "mistakes":
-					if (value.Equals("none", StringComparison.CurrentCultureIgnoreCase))
-					{
-						LettersMissed = "";
-						feedback = "Reset mistakes.";
-						return true;
-					}
+            switch (field.ToLower())
+            {
+                case "word":
+                case "term":
+                    if (value.Contains('_'))
+                    {
+                        feedback = "The term cannot contain underscores!";
+                        return false;
+                    }
+                    else if (value.Contains('@'))
+                    {
+                        feedback = "The term cannot contain the at symbol (@)!";
+                        return false;
+                    }
+                    else if (value.Length > 256)
+                    {
+                        feedback = "The term is too long!";
+                        return false;
+                    }
+                    Reset(funConfiguration, null);
+                    Term = value;
+                    Guess = ObscureTerm(value);
+                    feedback = $"Success! Term = {value}, Guess = \"{DiscordifyGuess()}\"";
+                    return true;
+                case "lives":
+                    if (!int.TryParse(value, out n))
+                    {
+                        feedback = $"Unable to parse {value} into an integer value.";
+                        return false;
+                    }
+                    if (n > MAX_LIVES_ALLOWED)
+                    {
+                        feedback = $"Too many lives! Please keep it below {MAX_LIVES_ALLOWED}";
+                        return false;
+                    }
+                    Lives = n;
+                    feedback = $"Lives set to {Lives}/{MaxLives}";
+                    return true;
+                case "maxlives":
+                    if (!int.TryParse(value, out n))
+                    {
+                        feedback = $"Unable to parse {value} into an integer value.";
+                        return false;
+                    }
+                    if (n > MAX_LIVES_ALLOWED)
+                    {
+                        feedback = $"Too many lives! Please keep it below {MAX_LIVES_ALLOWED}";
+                        return false;
+                    }
+                    MaxLives = n;
+                    feedback = $"Lives set to {Lives}/{MaxLives}";
+                    return true;
+                case "missed":
+                case "mistakes":
+                    if (value.Equals("none", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        LettersMissed = "";
+                        feedback = "Reset mistakes.";
+                        return true;
+                    }
 
-					HashSet<char> missed = [];
-					foreach (char c in value.ToCharArray())
-					{
-						if (!char.IsLetter(c))
+                    HashSet<char> missed = [];
+                    foreach (char c in value.ToCharArray())
+                    {
+                        if (!char.IsLetter(c))
                         {
                             missed.Add(char.ToUpper('c'));
                         }
                     }
-					LettersMissed = string.Join("", missed);
-					feedback = $"Missed letters set to {{{string.Join(", ", missed)}}}.";
-					return true;
-				default:
-					feedback = $"The given field ({field}) was not found, game-specific fields are `term`, `lives`, `maxlives`, and `mistakes`";
-					return false;
-			}
-		}
+                    LettersMissed = string.Join("", missed);
+                    feedback = $"Missed letters set to {{{string.Join(", ", missed)}}}.";
+                    return true;
+                default:
+                    feedback = $"The given field ({field}) was not found, game-specific fields are `term`, `lives`, `maxlives`, and `mistakes`";
+                    return false;
+            }
+        }
 
-		/// <summary>
-		/// Gives general information about the game and how to play it.
-		/// </summary>
-		/// <param name="funConfiguration"></param>
-		/// <returns></returns>
+        /// <summary>
+        /// Gives general information about the game and how to play it.
+        /// </summary>
+        /// <param name="funConfiguration"></param>
+        /// <returns></returns>
 
-		public override EmbedBuilder Info(FunConfiguration funConfiguration)
-		{
-			return BuildEmbed(EmojiEnum.Unknown)
-				.WithColor(Color.Magenta)
-				.WithTitle("How To Play: Hangman")
-				.WithDescription("**Step 1**: Set a TERM! The master can choose a term in DMs with the `game SET TERM [Term]` command.\n" +
-					"**Step 2**: Any player can say `guess` at any moment to see the current status of the guess.\n" +
-					"**Step 3**: Start guessing letters! type `guess [letter]` to guess a letter (you can't guess twice in a row!).\n" +
-					"Feeling brave? Guess the whole term with `guess [term]`, it doesn't cost lives, but it does cost a turn.\n" +
-					"If you'd like to forego your turn, type `pass`. To check misguessed letters, type `mistakes`.\n" +
-					"Keep guessing until you run out of lives or you complete the word! (Type `lives` to see how many lives you have left)");
-		}
+        public override EmbedBuilder Info(FunConfiguration funConfiguration)
+        {
+            return BuildEmbed(EmojiEnum.Unknown)
+                .WithColor(Color.Magenta)
+                .WithTitle("How To Play: Hangman")
+                .WithDescription("**Step 1**: Set a TERM! The master can choose a term in DMs with the `game SET TERM [Term]` command.\n" +
+                    "**Step 2**: Any player can say `guess` at any moment to see the current status of the guess.\n" +
+                    "**Step 3**: Start guessing letters! type `guess [letter]` to guess a letter (you can't guess twice in a row!).\n" +
+                    "Feeling brave? Guess the whole term with `guess [term]`, it doesn't cost lives, but it does cost a turn.\n" +
+                    "If you'd like to forego your turn, type `pass`. To check misguessed letters, type `mistakes`.\n" +
+                    "Keep guessing until you run out of lives or you complete the word! (Type `lives` to see how many lives you have left)");
+        }
 
-		private int GuessChar(char c)
-		{
-			c = char.ToUpper(c);
-			StringBuilder newGuess = new(Guess.Length);
+        private int GuessChar(char c)
+        {
+            c = char.ToUpper(c);
+            StringBuilder newGuess = new(Guess.Length);
 
-			int result = 0;
-			for (int i = 0; i < Math.Min(Term.Length, Guess.Length); i++)
-			{
-				if (c == char.ToUpper(Term[i]))
-				{
-					result++;
-					newGuess.Append(Term[i]);
-				}
-				else
-				{
-					newGuess.Append(Guess[i]);
-				}
-			}
+            int result = 0;
+            for (int i = 0; i < Math.Min(Term.Length, Guess.Length); i++)
+            {
+                if (c == char.ToUpper(Term[i]))
+                {
+                    result++;
+                    newGuess.Append(Term[i]);
+                }
+                else
+                {
+                    newGuess.Append(Guess[i]);
+                }
+            }
 
-			if (result == 0)
-			{
-				RegisterMistake(c);
-			}
+            if (result == 0)
+            {
+                RegisterMistake(c);
+            }
 
-			Guess = newGuess.ToString();
-			return result;
-		}
+            Guess = newGuess.ToString();
+            return result;
+        }
 
-		/// <summary>
-		/// Handles a message sent by a player in the appropriate channel.
-		/// </summary>
-		/// <param name="message">The message context from which the author and content can be obtained.</param>
-		/// <param name="gamesDB">The games database in case any player data has to be modified.</param>
-		/// <param name="client">The Discord client used to parse users.</param>
-		/// <param name="funConfiguration">The configuration file containing relevant game information.</param>
-		/// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
+        /// <summary>
+        /// Handles a message sent by a player in the appropriate channel.
+        /// </summary>
+        /// <param name="message">The message context from which the author and content can be obtained.</param>
+        /// <param name="gamesDB">The games database in case any player data has to be modified.</param>
+        /// <param name="client">The Discord client used to parse users.</param>
+        /// <param name="funConfiguration">The configuration file containing relevant game information.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until the method completes successfully.</returns>
 
-		public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordShardedClient client, FunConfiguration funConfiguration)
-		{
-			if (message.Channel is IDMChannel)
+        public override async Task HandleMessage(IMessage message, GamesDB gamesDB, DiscordShardedClient client, FunConfiguration funConfiguration)
+        {
+            if (message.Channel is IDMChannel)
             {
                 return;
             }
 
             Player player = gamesDB.GetOrCreatePlayer(message.Author.Id);
 
-			string msg = message.Content.Replace("@", "@-");
-			if (msg.Equals("pass", StringComparison.CurrentCultureIgnoreCase))
-			{
-				if (Game.LastUserInteracted == message.Author.Id)
-				{
-					await message.Channel.SendMessageAsync($"It's not your turn, {message.Author.Mention}!");
-					return;
-				}
+            string msg = message.Content.Replace("@", "@-");
+            if (msg.Equals("pass", StringComparison.CurrentCultureIgnoreCase))
+            {
+                if (Game.LastUserInteracted == message.Author.Id)
+                {
+                    await message.Channel.SendMessageAsync($"It's not your turn, {message.Author.Mention}!");
+                    return;
+                }
 
-				Game.LastUserInteracted = message.Author.Id;
-				await message.Channel.SendMessageAsync($"{message.Author.Mention} passed their turn!");
-				await message.DeleteAsync();
-				return;
-			}
+                Game.LastUserInteracted = message.Author.Id;
+                await message.Channel.SendMessageAsync($"{message.Author.Mention} passed their turn!");
+                await message.DeleteAsync();
+                return;
+            }
 
-			if (msg.Equals("mistakes", StringComparison.CurrentCultureIgnoreCase))
-			{
-				await message.Channel.SendMessageAsync($"Mistakes: {MistakesExpression()}");
-				return;
-			}
-			if (msg.Equals("lives", StringComparison.CurrentCultureIgnoreCase))
-			{
-				await message.Channel.SendMessageAsync($"Lives: {LivesExpression()}");
-				return;
-			}
+            if (msg.Equals("mistakes", StringComparison.CurrentCultureIgnoreCase))
+            {
+                await message.Channel.SendMessageAsync($"Mistakes: {MistakesExpression()}");
+                return;
+            }
+            if (msg.Equals("lives", StringComparison.CurrentCultureIgnoreCase))
+            {
+                await message.Channel.SendMessageAsync($"Lives: {LivesExpression()}");
+                return;
+            }
 
-			if (msg.ToLower().StartsWith("guess"))
-			{
-				string[] args = msg.Split(" ");
-				if (args.Length == 1)
-				{
-					await message.Channel.SendMessageAsync(DiscordifyGuess());
-					return;
-				}
-				if (message.Author.Id == Game.Master)
-				{
-					await message.Channel.SendMessageAsync("The game master isn't allowed to guess their own word.");
-					return;
-				}
-				if (Game.LastUserInteracted == message.Author.Id)
-				{
-					await message.Channel.SendMessageAsync("You've already guessed! Let someone else play, if it's only you, have the master pass their turn.");
-					return;
-				}
-				if (!Guess.Contains('_'))
-				{
-					await message.Channel.SendMessageAsync($"The term was already guessed! You're late to the party. Waiting for the Game Master to change it.");
-					return;
-				}
-				if (Lives < 1)
-				{
-					await message.Channel.SendMessageAsync($"You're out of lives! Choose a new term before continuing.");
-					return;
-				}
-				string newGuess = string.Join(' ', args[1..]);
-				if (newGuess.Length == 1)
-				{
-					char c = newGuess[0];
-					if (!char.IsLetter(c))
-					{
-						await message.Channel.SendMessageAsync($"Character {c} isn't a valid letter!");
-						return;
-					}
-					if (LettersMissed.Contains(char.ToUpper(c)) || Guess.ToUpper().Contains(char.ToUpper(c)))
-					{
-						await message.Channel.SendMessageAsync($"The letter {c} has already been guessed!");
-						return;
-					}
+            if (msg.ToLower().StartsWith("guess"))
+            {
+                string[] args = msg.Split(" ");
+                if (args.Length == 1)
+                {
+                    await message.Channel.SendMessageAsync(DiscordifyGuess());
+                    return;
+                }
+                if (message.Author.Id == Game.Master)
+                {
+                    await message.Channel.SendMessageAsync("The game master isn't allowed to guess their own word.");
+                    return;
+                }
+                if (Game.LastUserInteracted == message.Author.Id)
+                {
+                    await message.Channel.SendMessageAsync("You've already guessed! Let someone else play, if it's only you, have the master pass their turn.");
+                    return;
+                }
+                if (!Guess.Contains('_'))
+                {
+                    await message.Channel.SendMessageAsync($"The term was already guessed! You're late to the party. Waiting for the Game Master to change it.");
+                    return;
+                }
+                if (Lives < 1)
+                {
+                    await message.Channel.SendMessageAsync($"You're out of lives! Choose a new term before continuing.");
+                    return;
+                }
+                string newGuess = string.Join(' ', args[1..]);
+                if (newGuess.Length == 1)
+                {
+                    char c = newGuess[0];
+                    if (!char.IsLetter(c))
+                    {
+                        await message.Channel.SendMessageAsync($"Character {c} isn't a valid letter!");
+                        return;
+                    }
+                    if (LettersMissed.Contains(char.ToUpper(c)) || Guess.ToUpper().Contains(char.ToUpper(c)))
+                    {
+                        await message.Channel.SendMessageAsync($"The letter {c} has already been guessed!");
+                        return;
+                    }
 
-					Game.LastUserInteracted = message.Author.Id;
-					int count = GuessChar(c);
-					if (count > 0)
-					{
-						string scoreExpression = "";
-						if (ScorePerLetter.ContainsKey(char.ToUpper(c)))
-						{
-							int score = count * ScorePerLetter[char.ToUpper(c)];
-							scoreExpression = $" (+{score}P)";
-							player.Score += score;
-						}
+                    Game.LastUserInteracted = message.Author.Id;
+                    int count = GuessChar(c);
+                    if (count > 0)
+                    {
+                        string scoreExpression = "";
+                        if (ScorePerLetter.ContainsKey(char.ToUpper(c)))
+                        {
+                            int score = count * ScorePerLetter[char.ToUpper(c)];
+                            scoreExpression = $" (+{score}P)";
+                            player.Score += score;
+                        }
 
-						await message.Channel.SendMessageAsync($"{message.Author.Mention} guessed letter {char.ToUpper(c)}! **The term has {count} {char.ToUpper(c)}{(count > 1 ? "s" : "")}{scoreExpression}!**" +
-							$"\n{DiscordifyGuess()}");
-						await message.DeleteAsync();
+                        await message.Channel.SendMessageAsync($"{message.Author.Mention} guessed letter {char.ToUpper(c)}! **The term has {count} {char.ToUpper(c)}{(count > 1 ? "s" : "")}{scoreExpression}!**" +
+                            $"\n{DiscordifyGuess()}");
+                        await message.DeleteAsync();
 
-						if (!Guess.Contains('_'))
-						{
-							await BuildEmbed(EmojiEnum.Unknown)
-								.WithColor(Color.Green)
-								.WithTitle("Victory!")
-								.WithDescription($"The term was {Term}! \nThe master can now choose a new term or offer their position to another player with the `game set master [Player]` command.")
-								.SendEmbed(message.Channel);
-							return;
-						}
-					}
-					else
-					{
-						await message.Channel.SendMessageAsync($"{message.Author.Mention} guessed letter {char.ToUpper(c)}!\n" +
-							$"Whoops! Wrong guess. {LivesExpression()}");
-						await message.DeleteAsync();
-						if (Lives == 0)
-						{
-							await BuildEmbed(EmojiEnum.Unknown)
-								.WithColor(Color.Red)
-								.WithTitle("Defeat!")
-								.WithDescription($"The term was {Term}! \nThe master can now choose a new term or offer their position to another player with the `game set master [Player]` command.")
-								.SendEmbed(message.Channel);
-						}
-					}
-					return;
-				}
-				if (newGuess.Length > 1)
-				{
-					Game.LastUserInteracted = message.Author.Id;
-					if (!ConsiderEqual(newGuess, Term))
-					{
-						await message.Channel.SendMessageAsync($"{message.Author.Mention} guessed the term to be \"{newGuess}\"!\n" +
-							$"It seems as though that isn't the word, though!");
-						return;
-					}
+                        if (!Guess.Contains('_'))
+                        {
+                            await BuildEmbed(EmojiEnum.Unknown)
+                                .WithColor(Color.Green)
+                                .WithTitle("Victory!")
+                                .WithDescription($"The term was {Term}! \nThe master can now choose a new term or offer their position to another player with the `game set master [Player]` command.")
+                                .SendEmbed(message.Channel);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        await message.Channel.SendMessageAsync($"{message.Author.Mention} guessed letter {char.ToUpper(c)}!\n" +
+                            $"Whoops! Wrong guess. {LivesExpression()}");
+                        await message.DeleteAsync();
+                        if (Lives == 0)
+                        {
+                            await BuildEmbed(EmojiEnum.Unknown)
+                                .WithColor(Color.Red)
+                                .WithTitle("Defeat!")
+                                .WithDescription($"The term was {Term}! \nThe master can now choose a new term or offer their position to another player with the `game set master [Player]` command.")
+                                .SendEmbed(message.Channel);
+                        }
+                    }
+                    return;
+                }
+                if (newGuess.Length > 1)
+                {
+                    Game.LastUserInteracted = message.Author.Id;
+                    if (!ConsiderEqual(newGuess, Term))
+                    {
+                        await message.Channel.SendMessageAsync($"{message.Author.Mention} guessed the term to be \"{newGuess}\"!\n" +
+                            $"It seems as though that isn't the word, though!");
+                        return;
+                    }
 
-					int score = ValueDifference(Guess, Term);
-					player.Score += score;
-					Guess = Term;
-					await BuildEmbed(EmojiEnum.Unknown)
-						.WithColor(Color.Green)
-						.WithTitle($"Correct! (+{score} Point{(score > 1 ? "s" : "")})")
-						.WithDescription($"The term was {Term}! \nThe master can now choose a new term or offer their position to another player with the `game set master [Player]` command.\n")
-						.SendEmbed(message.Channel);
-					return;
-				}
-			}
-		}
+                    int score = ValueDifference(Guess, Term);
+                    player.Score += score;
+                    Guess = Term;
+                    await BuildEmbed(EmojiEnum.Unknown)
+                        .WithColor(Color.Green)
+                        .WithTitle($"Correct! (+{score} Point{(score > 1 ? "s" : "")})")
+                        .WithDescription($"The term was {Term}! \nThe master can now choose a new term or offer their position to another player with the `game set master [Player]` command.\n")
+                        .SendEmbed(message.Channel);
+                    return;
+                }
+            }
+        }
 
-		private static int ValueDifference(string current, string target)
-		{
-			int result = 0;
+        private static int ValueDifference(string current, string target)
+        {
+            int result = 0;
 
-			for (int i = 0; i < Math.Min(current.Length, target.Length); i++)
-			{
-				if (current[i] == '_' && ScorePerLetter.ContainsKey(char.ToUpper(target[i])))
-				{
-					result += ScorePerLetter[char.ToUpper(target[i])];
-				}
-			}
+            for (int i = 0; i < Math.Min(current.Length, target.Length); i++)
+            {
+                if (current[i] == '_' && ScorePerLetter.ContainsKey(char.ToUpper(target[i])))
+                {
+                    result += ScorePerLetter[char.ToUpper(target[i])];
+                }
+            }
 
-			return result;
-		}
+            return result;
+        }
 
-		private static bool ConsiderEqual(string a, string b)
-		{
-			a = a.ToLower();
-			b = b.ToLower();
-			StringBuilder aStr = new();
-			StringBuilder bStr = new();
-			foreach (char c in a.ToCharArray())
-			{
-				if (char.IsLetter(c))
+        private static bool ConsiderEqual(string a, string b)
+        {
+            a = a.ToLower();
+            b = b.ToLower();
+            StringBuilder aStr = new();
+            StringBuilder bStr = new();
+            foreach (char c in a.ToCharArray())
+            {
+                if (char.IsLetter(c))
                 {
                     aStr.Append(c);
                 }
             }
-			foreach (char c in b.ToCharArray())
-			{
-				if (char.IsLetter(c))
+            foreach (char c in b.ToCharArray())
+            {
+                if (char.IsLetter(c))
                 {
                     bStr.Append(c);
                 }
             }
-			return aStr.ToString() == bStr.ToString();
-		}
+            return aStr.ToString() == bStr.ToString();
+        }
 
-		private static readonly Dictionary<char, int> ScorePerLetter = new() {
-			{'A', 1},
-			{'B', 3},
-			{'C', 3},
-			{'D', 2},
-			{'E', 1},
-			{'F', 4},
-			{'G', 2},
-			{'H', 4},
-			{'I', 1},
-			{'J', 8},
-			{'K', 5},
-			{'L', 1},
-			{'M', 3},
-			{'N', 1},
-			{'O', 1},
-			{'P', 3},
-			{'Q', 10},
-			{'R', 1},
-			{'S', 1},
-			{'T', 1},
-			{'U', 1},
-			{'V', 4},
-			{'W', 4},
-			{'X', 8},
-			{'Y', 4},
-			{'Z', 10}
-		};
+        private static readonly Dictionary<char, int> ScorePerLetter = new() {
+            {'A', 1},
+            {'B', 3},
+            {'C', 3},
+            {'D', 2},
+            {'E', 1},
+            {'F', 4},
+            {'G', 2},
+            {'H', 4},
+            {'I', 1},
+            {'J', 8},
+            {'K', 5},
+            {'L', 1},
+            {'M', 3},
+            {'N', 1},
+            {'O', 1},
+            {'P', 3},
+            {'Q', 10},
+            {'R', 1},
+            {'S', 1},
+            {'T', 1},
+            {'U', 1},
+            {'V', 4},
+            {'W', 4},
+            {'X', 8},
+            {'Y', 4},
+            {'Z', 10}
+        };
     }
 }

@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Dexter.Attributes.Methods;
+using Dexter.Attributes;
 using Dexter.Databases.UserProfiles;
 using Dexter.Enums;
 using Dexter.Extensions;
@@ -11,8 +7,12 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Humanizer;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Dexter.Commands
 {
@@ -239,11 +239,11 @@ namespace Dexter.Commands
                             if (value.Equals("none", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 profile.Borkday = default;
-                                
+
                                 ProfilePreferences tempPrefs = profile.Settings;
                                 tempPrefs.AgeVerified = false;
                                 profile.Settings = tempPrefs;
-                                
+
                                 await TryRemoveBirthdayTimer(profile);
                                 await BuildEmbed(EmojiEnum.Sign)
                                     .WithTitle("Removed local birthday records.")

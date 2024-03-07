@@ -1,60 +1,60 @@
-﻿using System.Threading.Tasks;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Databases.Relays;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
 
 namespace Dexter.Events
 {
 
-	/// <summary>
-	/// The RelayService sends messages to a channel with a specified message delay as a notification.
-	/// </summary>
-	
-	public class Relays : Event
-	{
+    /// <summary>
+    /// The RelayService sends messages to a channel with a specified message delay as a notification.
+    /// </summary>
 
-		/// <summary>
-		/// The Initialize method hooks up the message recieved event to the relay method.
-		/// </summary>
-		
-		public override void InitializeEvents()
-		{
-			DiscordShardedClient.MessageReceived += CheckRelay;
-		}
+    public class Relays : Event
+    {
 
-		/// <summary>
-		/// The CheckRelay event runs on a message sent and counts the messages,
-		/// sending the notification if the message count has reached the send variable.
-		/// </summary>
-		/// <param name="SocketMessage"></param>
-		/// <returns></returns>
+        /// <summary>
+        /// The Initialize method hooks up the message recieved event to the relay method.
+        /// </summary>
 
-		public async Task CheckRelay(SocketMessage SocketMessage)
-		{
-			using var scope = ServiceProvider.CreateScope();
+        public override void InitializeEvents()
+        {
+            DiscordShardedClient.MessageReceived += CheckRelay;
+        }
 
-			using var RelayDB = scope.ServiceProvider.GetRequiredService<RelayDB>();
+        /// <summary>
+        /// The CheckRelay event runs on a message sent and counts the messages,
+        /// sending the notification if the message count has reached the send variable.
+        /// </summary>
+        /// <param name="SocketMessage"></param>
+        /// <returns></returns>
 
-			Relay Relay = RelayDB.Relays.Find(SocketMessage.Channel.Id);
+        public async Task CheckRelay(SocketMessage SocketMessage)
+        {
+            using var scope = ServiceProvider.CreateScope();
 
-			if (Relay == null)
+            using var RelayDB = scope.ServiceProvider.GetRequiredService<RelayDB>();
+
+            Relay Relay = RelayDB.Relays.Find(SocketMessage.Channel.Id);
+
+            if (Relay == null)
             {
                 return;
             }
 
             if (Relay.CurrentMessageCount > Relay.MessageInterval)
-			{
-				Relay.CurrentMessageCount = 0;
+            {
+                Relay.CurrentMessageCount = 0;
 
-				await SocketMessage.Channel.SendMessageAsync(Relay.Message);
-			}
+                await SocketMessage.Channel.SendMessageAsync(Relay.Message);
+            }
 
-			Relay.CurrentMessageCount += 1;
+            Relay.CurrentMessageCount += 1;
 
-			await RelayDB.SaveChangesAsync();
-		}
+            await RelayDB.SaveChangesAsync();
+        }
 
-	}
+    }
 
 }

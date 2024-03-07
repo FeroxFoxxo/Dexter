@@ -1,13 +1,13 @@
 ﻿namespace Dexter.Enums
 {
-	public enum LoopType
-	{
+    public enum LoopType
+    {
 
-		Single,
+        Single,
 
-		All,
+        All,
 
-		Off
+        Off
 
-	}
+    }
 }

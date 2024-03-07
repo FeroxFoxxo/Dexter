@@ -3,156 +3,156 @@
 namespace Dexter.Configurations
 {
 
-	/// <summary>
-	/// The BotConfiguration specifies global traits that the whole bot encompasses and requires.
-	/// </summary>
+    /// <summary>
+    /// The BotConfiguration specifies global traits that the whole bot encompasses and requires.
+    /// </summary>
 
-	public class BotConfiguration : JSONConfig
-	{
+    public class BotConfiguration : JSONConfig
+    {
 
-		/// <summary>
-		/// The PREFIX is the character that the bot uses to identify the message is a command input from a user.
-		/// </summary>
+        /// <summary>
+        /// The PREFIX is the character that the bot uses to identify the message is a command input from a user.
+        /// </summary>
 
-		public string Prefix { get; set; }
+        public string Prefix { get; set; }
 
-		/// <summary>
-		/// The BOTNAME field is the name of the bot.
-		/// </summary>
+        /// <summary>
+        /// The BOTNAME field is the name of the bot.
+        /// </summary>
 
-		public string? BotName { get; set; }
+        public string? BotName { get; set; }
 
-		/// <summary>
-		/// The MODERATOR ROLE ID is the snowflake ID of the role that the moderators have.
-		/// </summary>
+        /// <summary>
+        /// The MODERATOR ROLE ID is the snowflake ID of the role that the moderators have.
+        /// </summary>
 
-		public ulong ModeratorRoleID { get; set; }
+        public ulong ModeratorRoleID { get; set; }
 
-		/// <summary>
-		/// The ADMINISTRATOR ROLE ID is the snowflake ID of the role that the administrators have.
-		/// </summary>
+        /// <summary>
+        /// The ADMINISTRATOR ROLE ID is the snowflake ID of the role that the administrators have.
+        /// </summary>
 
-		public ulong AdministratorRoleID { get; set; }
+        public ulong AdministratorRoleID { get; set; }
 
-		/// <summary>
-		/// The DEVELOPER ROLE ID is the snowflake ID of the role that the developers have.
-		/// </summary>
+        /// <summary>
+        /// The DEVELOPER ROLE ID is the snowflake ID of the role that the developers have.
+        /// </summary>
 
-		public ulong DeveloperRoleID { get; set; }
+        public ulong DeveloperRoleID { get; set; }
 
-		/// <summary>
-		/// The GREETFUR ROLE ID is the snowflake ID of the role that the greetfurs have.
-		/// </summary>
+        /// <summary>
+        /// The GREETFUR ROLE ID is the snowflake ID of the role that the greetfurs have.
+        /// </summary>
 
-		public ulong GreetFurRoleID { get; set; }
+        public ulong GreetFurRoleID { get; set; }
 
-		/// <summary>
-		/// The DJ ROLE ID is the snowflake ID of the role that the djs have.
-		/// </summary>
+        /// <summary>
+        /// The DJ ROLE ID is the snowflake ID of the role that the djs have.
+        /// </summary>
 
-		public ulong DJRoleID { get; set; }
+        public ulong DJRoleID { get; set; }
 
-		/// <summary>
-		/// The UNIFURSAL ROLE ID is the snowflake ID of the role that the unifusal + members have.
-		/// </summary>
+        /// <summary>
+        /// The UNIFURSAL ROLE ID is the snowflake ID of the role that the unifusal + members have.
+        /// </summary>
 
-		public ulong UnifursalRoleID { get; set; }
+        public ulong UnifursalRoleID { get; set; }
 
-		/// <summary>
-		/// The role IDs of all patreon roles in ascending order.
-		/// </summary>
+        /// <summary>
+        /// The role IDs of all patreon roles in ascending order.
+        /// </summary>
 
-		public ulong[] PatreonRoleIDs { get; set; }
+        public ulong[] PatreonRoleIDs { get; set; }
 
-		/// <summary>
-		/// The GUILD ID is the snowflake ID of the main guild the bot is in.
-		/// </summary>
-		
-		public ulong GuildID { get; set; }
+        /// <summary>
+        /// The GUILD ID is the snowflake ID of the main guild the bot is in.
+        /// </summary>
 
-		/// <summary>
-		/// The MODERATION LOG CHANNEL ID is the snowflake ID of where the bot
-		/// will post updates of his status to, along with confirmation messages.
-		/// </summary>
+        public ulong GuildID { get; set; }
 
-		public ulong ModerationLogChannelID { get; set; }
+        /// <summary>
+        /// The MODERATION LOG CHANNEL ID is the snowflake ID of where the bot
+        /// will post updates of his status to, along with confirmation messages.
+        /// </summary>
 
-		/// <summary>
-		/// The THUMBNAIL URLS contains a list of URLs that the bot uses to attach to the default embeds.
-		/// </summary>
+        public ulong ModerationLogChannelID { get; set; }
 
-		public string[] ThumbnailURLs { get; set; }
+        /// <summary>
+        /// The THUMBNAIL URLS contains a list of URLs that the bot uses to attach to the default embeds.
+        /// </summary>
 
-		/// <summary>
-		/// The BOT CHANNELS contains a list of channel IDs in which commands labeled as only being able
-		/// to be used in bot command channels are able to be used.
-		/// </summary>
+        public string[] ThumbnailURLs { get; set; }
 
-		public ulong[] BotChannels { get; set; }
+        /// <summary>
+        /// The BOT CHANNELS contains a list of channel IDs in which commands labeled as only being able
+        /// to be used in bot command channels are able to be used.
+        /// </summary>
 
-		/// <summary>
-		/// The DISALLOWED CHANNELS contains a list of channel IDs in which commands can not run in.
-		/// </summary>
+        public ulong[] BotChannels { get; set; }
 
-		public ulong[] DisallowedChannels { get; set; }
+        /// <summary>
+        /// The DISALLOWED CHANNELS contains a list of channel IDs in which commands can not run in.
+        /// </summary>
 
-		/// <summary>
-		/// The ENABLE STARTUP ALERT is a boolean which will enable the startup notification
-		/// sent to the moderation logging channel when the bot starts up.
-		/// </summary>
+        public ulong[] DisallowedChannels { get; set; }
 
-		public bool EnableStartupAlert { get; set; }
+        /// <summary>
+        /// The ENABLE STARTUP ALERT is a boolean which will enable the startup notification
+        /// sent to the moderation logging channel when the bot starts up.
+        /// </summary>
 
-		/// <summary>
-		/// The HELP field contains information for the help command.
-		/// </summary>
+        public bool EnableStartupAlert { get; set; }
 
-		public string Help { get; set; }
+        /// <summary>
+        /// The HELP field contains information for the help command.
+        /// </summary>
 
-		/// <summary>
-		/// The RANDOM CHARACTERS field specifies a string of random characters that may be able to make up a token.
-		/// </summary>
+        public string Help { get; set; }
 
-		public string RandomCharacters { get; set; }
+        /// <summary>
+        /// The RANDOM CHARACTERS field specifies a string of random characters that may be able to make up a token.
+        /// </summary>
 
-		/// <summary>
-		/// The TRACKER LENGTH specifies the length of the token assosiated with the tracked item.
-		/// </summary>
+        public string RandomCharacters { get; set; }
 
-		public int TrackerLength { get; set; }
+        /// <summary>
+        /// The TRACKER LENGTH specifies the length of the token assosiated with the tracked item.
+        /// </summary>
 
-		/// <summary>
-		/// Stores the URL to the commits page in the relevant GIT repository.
-		/// </summary>
+        public int TrackerLength { get; set; }
 
-		public string CommitAPICall { get; set; }
+        /// <summary>
+        /// Stores the URL to the commits page in the relevant GIT repository.
+        /// </summary>
 
-		/// <summary>
-		/// Sets the status of the bot to the one provided in the string.
-		/// </summary>
+        public string CommitAPICall { get; set; }
 
-		public string BotStatus { get; set; }
+        /// <summary>
+        /// Sets the status of the bot to the one provided in the string.
+        /// </summary>
 
-		/// <summary>
-		/// Configures whether periodic backups of all databases should be made.
-		/// </summary>
+        public string BotStatus { get; set; }
 
-		public bool EnableDatabaseBackups { get; set; }
+        /// <summary>
+        /// Configures whether periodic backups of all databases should be made.
+        /// </summary>
 
-		/// <summary>
-		/// Sets if the developers should be pinged when the bot runs into an error.
-		/// </summary>
+        public bool EnableDatabaseBackups { get; set; }
 
-		public bool PingDevelopers { get; set; }
+        /// <summary>
+        /// Sets if the developers should be pinged when the bot runs into an error.
+        /// </summary>
 
-		/// <summary>
-		/// The standardized timezone to parse timezone-sensitive DateTimeOffsets to.
-		/// </summary>
+        public bool PingDevelopers { get; set; }
 
-		public short StandardTimeZone { get; set; }
+        /// <summary>
+        /// The standardized timezone to parse timezone-sensitive DateTimeOffsets to.
+        /// </summary>
 
-		public ulong MusicChannelID { get; set; }
+        public short StandardTimeZone { get; set; }
 
-	}
+        public ulong MusicChannelID { get; set; }
+
+    }
 
 }

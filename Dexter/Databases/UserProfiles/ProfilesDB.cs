@@ -1,9 +1,9 @@
+using Dexter.Abstractions;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dexter.Abstractions;
-using Microsoft.EntityFrameworkCore;
 
 namespace Dexter.Databases.UserProfiles
 {

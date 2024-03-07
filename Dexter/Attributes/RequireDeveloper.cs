@@ -1,5 +1,5 @@
-﻿using System;
-using Dexter.Enums;
+﻿using Dexter.Enums;
+using System;
 
 namespace Dexter.Attributes
 {

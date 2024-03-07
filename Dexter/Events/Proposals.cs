@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.EventTimers;
 using Dexter.Databases.Proposals;
@@ -12,12 +8,16 @@ using Dexter.Extensions;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
+using Fergun.Interactive;
+using Fergun.Interactive.Selection;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Reflection;
-using Fergun.Interactive.Selection;
-using Fergun.Interactive;
+using System.Threading.Tasks;
 
 namespace Dexter.Events
 {
@@ -27,91 +27,91 @@ namespace Dexter.Events
     /// </summary>
 
     public class Proposals : Event
-	{
+    {
 
-		/// <summary>
-		/// The ProposalConfiguration, which contains the location of the emoji storage guild, as well as IDs of channels.
-		/// </summary>
+        /// <summary>
+        /// The ProposalConfiguration, which contains the location of the emoji storage guild, as well as IDs of channels.
+        /// </summary>
 
-		public ProposalConfiguration ProposalConfiguration { get; set; }
+        public ProposalConfiguration ProposalConfiguration { get; set; }
 
-		/// <summary>
-		/// The Random instance is used to pick a set number of random characters from the configuration to create a token.
-		/// </summary>
+        /// <summary>
+        /// The Random instance is used to pick a set number of random characters from the configuration to create a token.
+        /// </summary>
 
-		public Random Random { get; set; }
+        public Random Random { get; set; }
 
-		/// <summary>
-		/// The Initialize method hooks the client MessageReceived, ReactionAdded and ReactionRemoved events and sets them to their related delegates.
-		/// </summary>
+        /// <summary>
+        /// The Initialize method hooks the client MessageReceived, ReactionAdded and ReactionRemoved events and sets them to their related delegates.
+        /// </summary>
 
-		public override void InitializeEvents()
-		{
-			DiscordShardedClient.MessageReceived += MessageReceived;
-			DiscordShardedClient.ReactionAdded += ReactionAdded;
-			DiscordShardedClient.ReactionRemoved += ReactionRemoved;
-		}
+        public override void InitializeEvents()
+        {
+            DiscordShardedClient.MessageReceived += MessageReceived;
+            DiscordShardedClient.ReactionAdded += ReactionAdded;
+            DiscordShardedClient.ReactionRemoved += ReactionRemoved;
+        }
 
-		/// <summary>
-		/// The EditSuggestion method is used to approve/decline a proposed subject. To achieve this, it takes in the related fields and applies them to the given context.
-		/// </summary>
-		/// <param name="Tracker">The tracker of the proposal, used to search up the suggestion in the given database.</param>
-		/// <param name="Reason">The optional reason for the proposal having been approved / declined.</param>
-		/// <param name="Approver">The administrator who has approved the given suggestion.</param>
-		/// <param name="MessageChannel">The channel in which the approval command was run.</param>
-		/// <param name="ProposalStatus">The type of proposal status you wish to set the embed to.</param>
-		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+        /// <summary>
+        /// The EditSuggestion method is used to approve/decline a proposed subject. To achieve this, it takes in the related fields and applies them to the given context.
+        /// </summary>
+        /// <param name="Tracker">The tracker of the proposal, used to search up the suggestion in the given database.</param>
+        /// <param name="Reason">The optional reason for the proposal having been approved / declined.</param>
+        /// <param name="Approver">The administrator who has approved the given suggestion.</param>
+        /// <param name="MessageChannel">The channel in which the approval command was run.</param>
+        /// <param name="ProposalStatus">The type of proposal status you wish to set the embed to.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public async Task EditProposal(string Tracker, string Reason, IUser Approver, IMessageChannel MessageChannel, ProposalStatus ProposalStatus)
-		{
-			using var scope = ServiceProvider.CreateScope();
+        public async Task EditProposal(string Tracker, string Reason, IUser Approver, IMessageChannel MessageChannel, ProposalStatus ProposalStatus)
+        {
+            using var scope = ServiceProvider.CreateScope();
 
-			using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
-			Proposal Proposal = ProposalDB.GetProposalByNameOrID(Tracker);
+            Proposal Proposal = ProposalDB.GetProposalByNameOrID(Tracker);
 
-			if (Proposal == null)
+            if (Proposal == null)
             {
                 await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Proposal does not exist!")
-					.WithDescription($"Cound not fetch the proposal from tracker / message ID / staff message ID `{Tracker}`.\n" +
-						$"Are you sure it exists?")
-					.SendEmbed(MessageChannel);
+                    .WithTitle("Proposal does not exist!")
+                    .WithDescription($"Cound not fetch the proposal from tracker / message ID / staff message ID `{Tracker}`.\n" +
+                        $"Are you sure it exists?")
+                    .SendEmbed(MessageChannel);
             }
             else
-			{
-				Proposal.Reason = Reason;
+            {
+                Proposal.Reason = Reason;
 
-				await UpdateProposal(Proposal, ProposalStatus);
+                await UpdateProposal(Proposal, ProposalStatus);
 
-				await BuildEmbed(ProposalStatus == ProposalStatus.Declined ? EmojiEnum.Annoyed : EmojiEnum.Love)
-					.WithTitle($"{Proposal.ProposalType.ToString().Prettify()} {Proposal.ProposalStatus}.")
-					.WithDescription($"The {Proposal.ProposalType.ToString().Prettify().ToLower()} `{Proposal.Tracker}` was successfully {Proposal.ProposalStatus.ToString().ToLower()} by {Approver.Mention}.")
-					.AddField(!string.IsNullOrEmpty(Reason), "Reason", Reason)
-					.SendDMAttachedEmbed(MessageChannel, BotConfiguration, DiscordShardedClient.GetUser(Proposal.Proposer), BuildProposal(Proposal));
-			}
+                await BuildEmbed(ProposalStatus == ProposalStatus.Declined ? EmojiEnum.Annoyed : EmojiEnum.Love)
+                    .WithTitle($"{Proposal.ProposalType.ToString().Prettify()} {Proposal.ProposalStatus}.")
+                    .WithDescription($"The {Proposal.ProposalType.ToString().Prettify().ToLower()} `{Proposal.Tracker}` was successfully {Proposal.ProposalStatus.ToString().ToLower()} by {Approver.Mention}.")
+                    .AddField(!string.IsNullOrEmpty(Reason), "Reason", Reason)
+                    .SendDMAttachedEmbed(MessageChannel, BotConfiguration, DiscordShardedClient.GetUser(Proposal.Proposer), BuildProposal(Proposal));
+            }
 
-			await ProposalDB.SaveChangesAsync();
-		}
+            await ProposalDB.SaveChangesAsync();
+        }
 
-		/// <summary>
-		/// The ReactionAdded method checks to see if reaction is added in the suggestion channel and, if so, it runs CheckAsync.
-		/// </summary>
-		/// <param name="CachedMessage">The cached message the reaction was applied to, used to get the suggestion it relates to.</param>
-		/// <param name="MessageChannel">The channel of which the reaction was added to.</param>
-		/// <param name="Reaction">The reaction of question which was added.</param>
-		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+        /// <summary>
+        /// The ReactionAdded method checks to see if reaction is added in the suggestion channel and, if so, it runs CheckAsync.
+        /// </summary>
+        /// <param name="CachedMessage">The cached message the reaction was applied to, used to get the suggestion it relates to.</param>
+        /// <param name="MessageChannel">The channel of which the reaction was added to.</param>
+        /// <param name="Reaction">The reaction of question which was added.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public async Task ReactionAdded(Cacheable<IUserMessage, ulong> CachedMessage, Cacheable<IMessageChannel, ulong> MessageChannel, SocketReaction Reaction)
-		{
-			if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
+        public async Task ReactionAdded(Cacheable<IUserMessage, ulong> CachedMessage, Cacheable<IMessageChannel, ulong> MessageChannel, SocketReaction Reaction)
+        {
+            if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
             {
                 return;
             }
 
             IUserMessage Message = await CachedMessage.GetOrDownloadAsync();
 
-			if (Message == null)
+            if (Message == null)
             {
                 throw new Exception("Message does not exist in cache and could not be downloaded! Aborting...");
             }
@@ -122,81 +122,66 @@ namespace Dexter.Events
             }
         }
 
-		/// <summary>
-		/// The ReactionRemoved method checks to see if reaction was removed in the suggestion channel and, if so, it runs CheckAsync.
-		/// </summary>
-		/// <param name="CachedMessage">The cached message the reaction was removed from, used to get the suggestion it relates to.</param>
-		/// <param name="MessageChannel">The channel of which the reaction was removed from.</param>
-		/// <param name="Reaction">The reaction of question which was removed.</param>
-		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+        /// <summary>
+        /// The ReactionRemoved method checks to see if reaction was removed in the suggestion channel and, if so, it runs CheckAsync.
+        /// </summary>
+        /// <param name="CachedMessage">The cached message the reaction was removed from, used to get the suggestion it relates to.</param>
+        /// <param name="MessageChannel">The channel of which the reaction was removed from.</param>
+        /// <param name="Reaction">The reaction of question which was removed.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public async Task ReactionRemoved(Cacheable<IUserMessage, ulong> CachedMessage, Cacheable<IMessageChannel, ulong> MessageChannel, SocketReaction Reaction)
-		{
-			if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
+        public async Task ReactionRemoved(Cacheable<IUserMessage, ulong> CachedMessage, Cacheable<IMessageChannel, ulong> MessageChannel, SocketReaction Reaction)
+        {
+            if (MessageChannel.Id != ProposalConfiguration.SuggestionsChannel || Reaction.User.Value.IsBot)
             {
                 return;
             }
 
             IUserMessage Message = await CachedMessage.GetOrDownloadAsync();
 
-			if (Message == null)
+            if (Message == null)
             {
                 throw new Exception("Message does not exist in cache and could not be downloaded! Aborting...");
             }
 
             await CheckAsync(Message, Reaction);
-		}
+        }
 
-		/// <summary>
-		/// The MessageReceived method runs when a message is sent in the suggestions channel, and runs checks to see if the message is a suggestion.
-		/// </summary>
-		/// <param name="ReceivedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
-		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+        /// <summary>
+        /// The MessageReceived method runs when a message is sent in the suggestions channel, and runs checks to see if the message is a suggestion.
+        /// </summary>
+        /// <param name="ReceivedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public Task MessageReceived(SocketMessage ReceivedMessage)
-		{
-			// Check to see if the message has been sent in the suggestion channel and is not a bot, least we return.
-			if (ReceivedMessage.Channel.Id != ProposalConfiguration.SuggestionsChannel || ReceivedMessage.Author.IsBot)
+        public Task MessageReceived(SocketMessage ReceivedMessage)
+        {
+            // Check to see if the message has been sent in the suggestion channel and is not a bot, least we return.
+            if (ReceivedMessage.Channel.Id != ProposalConfiguration.SuggestionsChannel || ReceivedMessage.Author.IsBot)
             {
                 return Task.CompletedTask;
             }
 
             _ = Task.Run(async () => await CreateSuggestion(ReceivedMessage));
 
-			return Task.CompletedTask;
-		}
+            return Task.CompletedTask;
+        }
 
-		/// <summary>
-		/// The CreateSuggestion method converts the message to a proposal and suggestion object.
-		/// This suggestion object is then sent back to the channel once deleted as a formatted embed for use to vote on.
-		/// </summary>
-		/// <param name="ReceivedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
-		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+        /// <summary>
+        /// The CreateSuggestion method converts the message to a proposal and suggestion object.
+        /// This suggestion object is then sent back to the channel once deleted as a formatted embed for use to vote on.
+        /// </summary>
+        /// <param name="ReceivedMessage">A SocketMessage object, which contains details about the message such as its content and attachments.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public async Task CreateSuggestion(SocketMessage ReceivedMessage)
-		{
-			using var scope = ServiceProvider.CreateScope();
+        public async Task CreateSuggestion(SocketMessage ReceivedMessage)
+        {
+            using var scope = ServiceProvider.CreateScope();
 
-			using var RestrictionsDB = scope.ServiceProvider.GetRequiredService<RestrictionsDB>();
-			using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var RestrictionsDB = scope.ServiceProvider.GetRequiredService<RestrictionsDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
-			if (RestrictionsDB.IsUserRestricted(ReceivedMessage.Author, Restriction.Suggestions))
-			{
-				try
-				{
-					await ReceivedMessage.DeleteAsync();
-				} catch (Exception) { }
-
-				await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle("You aren't permitted to make suggestions!")
-					.WithDescription("You have been blacklisted from using this service. If you think this is a mistake, feel free to personally contact an administrator")
-					.SendEmbed(ReceivedMessage.Author, ReceivedMessage.Channel as ITextChannel);
-				return;
-			}
-
-			// Check to see if the embed message length is more than 1750, else will fail the embed from sending due to character limits.
-			if (ReceivedMessage.Content.Length > 1750)
-			{
+            if (RestrictionsDB.IsUserRestricted(ReceivedMessage.Author, Restriction.Suggestions))
+            {
                 try
                 {
                     await ReceivedMessage.DeleteAsync();
@@ -204,86 +189,102 @@ namespace Dexter.Events
                 catch (Exception) { }
 
                 await BuildEmbed(EmojiEnum.Annoyed)
-					.WithTitle("Your suggestion is too big!")
-					.WithDescription("Please try to summarise your suggestion a little! " +
-					"Keep in mind that emoji add a lot of characters to your suggestion - even if it doesn't seem like it - " +
-					"as Discord handles emoji differently to text, so if you're using a lot of emoji try to cut down on those! <3")
-					.SendEmbed(ReceivedMessage.Author, ReceivedMessage.Channel as ITextChannel);
-				return;
-			}
+                    .WithTitle("You aren't permitted to make suggestions!")
+                    .WithDescription("You have been blacklisted from using this service. If you think this is a mistake, feel free to personally contact an administrator")
+                    .SendEmbed(ReceivedMessage.Author, ReceivedMessage.Channel as ITextChannel);
+                return;
+            }
 
-			// Remove content from suggestion from people who do not realise that a command is not needed to run the bot.
+            // Check to see if the embed message length is more than 1750, else will fail the embed from sending due to character limits.
+            if (ReceivedMessage.Content.Length > 1750)
+            {
+                try
+                {
+                    await ReceivedMessage.DeleteAsync();
+                }
+                catch (Exception) { }
 
-			string Content = ReceivedMessage.Content;
+                await BuildEmbed(EmojiEnum.Annoyed)
+                    .WithTitle("Your suggestion is too big!")
+                    .WithDescription("Please try to summarise your suggestion a little! " +
+                    "Keep in mind that emoji add a lot of characters to your suggestion - even if it doesn't seem like it - " +
+                    "as Discord handles emoji differently to text, so if you're using a lot of emoji try to cut down on those! <3")
+                    .SendEmbed(ReceivedMessage.Author, ReceivedMessage.Channel as ITextChannel);
+                return;
+            }
 
-			if (ProposalConfiguration.CommandRemovals.Contains(Content.Split(' ')[0].ToLower()))
+            // Remove content from suggestion from people who do not realise that a command is not needed to run the bot.
+
+            string Content = ReceivedMessage.Content;
+
+            if (ProposalConfiguration.CommandRemovals.Contains(Content.Split(' ')[0].ToLower()))
             {
                 Content = Content[(Content.IndexOf(" ") + 1)..];
             }
 
             string Token = CreateToken();
 
-			// Creates a new Proposal object with the related fields.
-			Proposal Proposal = new()
-			{
-				Tracker = CreateToken(),
-				Content = Content,
-				ProposalStatus = ProposalStatus.Suggested,
-				Proposer = ReceivedMessage.Author.Id,
-				ProposalType = ProposalType.Suggestion,
-				Username = ReceivedMessage.Author.Username,
-				AvatarURL = await ReceivedMessage.Author.GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordShardedClient, ProposalConfiguration)
-			};
+            // Creates a new Proposal object with the related fields.
+            Proposal Proposal = new()
+            {
+                Tracker = CreateToken(),
+                Content = Content,
+                ProposalStatus = ProposalStatus.Suggested,
+                Proposer = ReceivedMessage.Author.Id,
+                ProposalType = ProposalType.Suggestion,
+                Username = ReceivedMessage.Author.Username,
+                AvatarURL = await ReceivedMessage.Author.GetTrueAvatarUrl().GetProxiedImage($"AVATAR{Token}", DiscordShardedClient, ProposalConfiguration)
+            };
 
-			Attachment Attachment = ReceivedMessage.Attachments.FirstOrDefault();
+            Attachment Attachment = ReceivedMessage.Attachments.FirstOrDefault();
 
-			if (Attachment != null)
-			{
-				if (Attachment.Size > 8000000)
-				{
-					await BuildEmbed(EmojiEnum.Annoyed)
-						.WithTitle("Your attachment is too big!")
-						.WithDescription("Please keep attachments under 8MB due to Discord's size limitations and our caching of data! <3")
-						.SendEmbed(ReceivedMessage.Author, ReceivedMessage.Channel as ITextChannel);
+            if (Attachment != null)
+            {
+                if (Attachment.Size > 8000000)
+                {
+                    await BuildEmbed(EmojiEnum.Annoyed)
+                        .WithTitle("Your attachment is too big!")
+                        .WithDescription("Please keep attachments under 8MB due to Discord's size limitations and our caching of data! <3")
+                        .SendEmbed(ReceivedMessage.Author, ReceivedMessage.Channel as ITextChannel);
 
                     try
                     {
                         await ReceivedMessage.DeleteAsync();
                     }
                     catch (Exception) { }
-                    
-					return;
-				}
 
-				Proposal.ProxyURL = await Attachment.ProxyUrl.GetProxiedImage($"{Proposal.Tracker}", DiscordShardedClient, ProposalConfiguration);
-			}
+                    return;
+                }
 
-			RestUserMessage Embed = await ReceivedMessage.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
+                Proposal.ProxyURL = await Attachment.ProxyUrl.GetProxiedImage($"{Proposal.Tracker}", DiscordShardedClient, ProposalConfiguration);
+            }
 
-			// Set the message ID in the suggestion object to the ID of the embed.
-			Proposal.MessageID = Embed.Id;
+            RestUserMessage Embed = await ReceivedMessage.Channel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
 
-			string TimerToken = await CreateEventTimer(
-				DeclineSuggestion,
-				new() { { "Suggestion", Proposal.Tracker } },
-				ProposalConfiguration.IdleDeclineTime,
-				TimerType.Expire
-			);
+            // Set the message ID in the suggestion object to the ID of the embed.
+            Proposal.MessageID = Embed.Id;
 
-			// Creates a new Suggestion object with the related fields.
-			Suggestion Suggested = new()
-			{
-				Tracker = Proposal.Tracker,
-				TimerToken = TimerToken
-			};
+            string TimerToken = await CreateEventTimer(
+                DeclineSuggestion,
+                new() { { "Suggestion", Proposal.Tracker } },
+                ProposalConfiguration.IdleDeclineTime,
+                TimerType.Expire
+            );
 
-			// Add the suggestion and proposal objects to the database.
-			ProposalDB.Proposals.Add(Proposal);
-			ProposalDB.Suggestions.Add(Suggested);
+            // Creates a new Suggestion object with the related fields.
+            Suggestion Suggested = new()
+            {
+                Tracker = Proposal.Tracker,
+                TimerToken = TimerToken
+            };
 
-			await ProposalDB.SaveChangesAsync();
+            // Add the suggestion and proposal objects to the database.
+            ProposalDB.Proposals.Add(Proposal);
+            ProposalDB.Suggestions.Add(Suggested);
 
-			await RestrictionsDB.SaveChangesAsync();
+            await ProposalDB.SaveChangesAsync();
+
+            await RestrictionsDB.SaveChangesAsync();
 
             // Add the related emoji specified in the ProposalConfiguration to the suggestion.
             SocketGuild Guild = DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild);
@@ -301,117 +302,117 @@ namespace Dexter.Events
                 await ReceivedMessage.DeleteAsync();
             }
             catch (Exception) { }
-		}
+        }
 
-		/// <summary>
-		/// Declines a targeted suggestion with further information provided by the Parameters argument.
-		/// </summary>
-		/// <param name="Parameters">
-		/// A string-string Dictionary with a definition for "Suggestion".
-		/// This item must be parsable to an expression of type <c>string</c>, which must be a token associated to a Proposal and a Suggestion.
-		/// </param>
-		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+        /// <summary>
+        /// Declines a targeted suggestion with further information provided by the Parameters argument.
+        /// </summary>
+        /// <param name="Parameters">
+        /// A string-string Dictionary with a definition for "Suggestion".
+        /// This item must be parsable to an expression of type <c>string</c>, which must be a token associated to a Proposal and a Suggestion.
+        /// </param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public async Task DeclineSuggestion(Dictionary<string, string> Parameters)
-		{
-			using var scope = ServiceProvider.CreateScope();
+        public async Task DeclineSuggestion(Dictionary<string, string> Parameters)
+        {
+            using var scope = ServiceProvider.CreateScope();
 
-			using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
-			string Token = Parameters["Suggestion"];
+            string Token = Parameters["Suggestion"];
 
-			Proposal Proposal = ProposalDB.Proposals.Find(Token);
+            Proposal Proposal = ProposalDB.Proposals.Find(Token);
 
-			Proposal.Reason = "Suggestion did not have enough support from the community to progress.";
+            Proposal.Reason = "Suggestion did not have enough support from the community to progress.";
 
-			Suggestion Suggestion = ProposalDB.Suggestions.Find(Token);
+            Suggestion Suggestion = ProposalDB.Suggestions.Find(Token);
 
-			Suggestion.TimerToken = string.Empty;
+            Suggestion.TimerToken = string.Empty;
 
-			await UpdateProposal(Proposal, ProposalStatus.Declined);
+            await UpdateProposal(Proposal, ProposalStatus.Declined);
 
-			await ProposalDB.SaveChangesAsync();
-		}
+            await ProposalDB.SaveChangesAsync();
+        }
 
-		/// <summary>
-		/// The SendAdminConfirmation method runs when a function is needed for admin confirmation to run.
-		/// </summary>
-		/// <param name="JSON">The JSON is the parameters that will be called back to the method containing a dictionary.</param>
-		/// <param name="Type">The type is the class the method will call back to when it has been approved.</param>
-		/// <param name="Method">The method is the method of which will be called once this command has been run.</param>
-		/// <param name="Author">The author is the snowflake ID of the user who has suggested the proposal.</param>
-		/// <param name="ProposedMessage">The proposed message is the content of the approval confirmation message.</param>
-		/// <param name="DenyJSON">The JSON string containing optional parameters for the <paramref name="DenyMethod"/>.</param>
-		/// <param name="DenyMethod">The system name for the method to be run if the confirmation is declined.</param>
-		/// <param name="DenyType">The type/class of <paramref name="DenyMethod"/>.</param>
-		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully. The task holds the string token attached to the proposal.</returns>
+        /// <summary>
+        /// The SendAdminConfirmation method runs when a function is needed for admin confirmation to run.
+        /// </summary>
+        /// <param name="JSON">The JSON is the parameters that will be called back to the method containing a dictionary.</param>
+        /// <param name="Type">The type is the class the method will call back to when it has been approved.</param>
+        /// <param name="Method">The method is the method of which will be called once this command has been run.</param>
+        /// <param name="Author">The author is the snowflake ID of the user who has suggested the proposal.</param>
+        /// <param name="ProposedMessage">The proposed message is the content of the approval confirmation message.</param>
+        /// <param name="DenyJSON">The JSON string containing optional parameters for the <paramref name="DenyMethod"/>.</param>
+        /// <param name="DenyMethod">The system name for the method to be run if the confirmation is declined.</param>
+        /// <param name="DenyType">The type/class of <paramref name="DenyMethod"/>.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully. The task holds the string token attached to the proposal.</returns>
 
-		public async Task SendAdminConfirmation(string JSON, string Type, string Method, ulong Author, string ProposedMessage, string DenyJSON = null, string DenyType = null, string DenyMethod = null)
-		{
-			var stc = DiscordShardedClient.GetChannel(ProposalConfiguration.AdminApprovalChannel) as SocketTextChannel;
+        public async Task SendAdminConfirmation(string JSON, string Type, string Method, ulong Author, string ProposedMessage, string DenyJSON = null, string DenyType = null, string DenyMethod = null)
+        {
+            var stc = DiscordShardedClient.GetChannel(ProposalConfiguration.AdminApprovalChannel) as SocketTextChannel;
 
-			Proposal proposal;
-			IUserMessage embed;
+            Proposal proposal;
+            IUserMessage embed;
 
-			using (var scope = ServiceProvider.CreateScope())
-			{
-				using var proposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using (var scope = ServiceProvider.CreateScope())
+            {
+                using var proposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
-				string token = CreateToken();
+                string token = CreateToken();
 
-				// Creates a new Proposal object with the related fields.
-				proposal = new()
-				{
-					Tracker = token,
-					Content = ProposedMessage,
-					ProposalStatus = ProposalStatus.Suggested,
-					ProposalType = ProposalType.AdminConfirmation,
-					Proposer = Author,
-					AvatarURL = await DiscordShardedClient.GetUser(Author).GetTrueAvatarUrl().GetProxiedImage($"AVATAR{token}", DiscordShardedClient, ProposalConfiguration)
-				};
+                // Creates a new Proposal object with the related fields.
+                proposal = new()
+                {
+                    Tracker = token,
+                    Content = ProposedMessage,
+                    ProposalStatus = ProposalStatus.Suggested,
+                    ProposalType = ProposalType.AdminConfirmation,
+                    Proposer = Author,
+                    AvatarURL = await DiscordShardedClient.GetUser(Author).GetTrueAvatarUrl().GetProxiedImage($"AVATAR{token}", DiscordShardedClient, ProposalConfiguration)
+                };
 
-				// Creates a new AdminConfirmation object with the related fields.
-				AdminConfirmation confirmation = new()
-				{
-					Tracker = proposal.Tracker,
-					CallbackClass = Type,
-					CallbackMethod = Method,
-					CallbackParameters = JSON,
-					DenyCallbackClass = DenyType,
-					DenyCallbackMethod = DenyMethod,
-					DenyCallbackParameters = DenyJSON
-				};
+                // Creates a new AdminConfirmation object with the related fields.
+                AdminConfirmation confirmation = new()
+                {
+                    Tracker = proposal.Tracker,
+                    CallbackClass = Type,
+                    CallbackMethod = Method,
+                    CallbackParameters = JSON,
+                    DenyCallbackClass = DenyType,
+                    DenyCallbackMethod = DenyMethod,
+                    DenyCallbackParameters = DenyJSON
+                };
 
-				// Add the confirmation and proposal objects to the database.
-				proposalDB.Proposals.Add(proposal);
-				proposalDB.AdminConfirmations.Add(confirmation);
+                // Add the confirmation and proposal objects to the database.
+                proposalDB.Proposals.Add(proposal);
+                proposalDB.AdminConfirmations.Add(confirmation);
 
-				embed = await stc.SendMessageAsync(embed: BuildProposal(proposal).Build());
+                embed = await stc.SendMessageAsync(embed: BuildProposal(proposal).Build());
 
-				proposal.MessageID = embed.Id;
+                proposal.MessageID = embed.Id;
 
-				await proposalDB.SaveChangesAsync();
-			}
+                await proposalDB.SaveChangesAsync();
+            }
 
-			var options = new[] { "✔️ Approve", "❌ Deny" };
+            var options = new[] { "✔️ Approve", "❌ Deny" };
 
-			var embedNew = PageBuilder.FromEmbedBuilder(BuildProposal(proposal));
-			var selection = new SelectionBuilder<string>()
-				.WithOptions(options)
-				.WithInputType(InputType.Buttons)
-				.WithSelectionPage(embedNew)
-				.WithActionOnCancellation(ActionOnStop.DeleteInput)
-				.WithActionOnTimeout(ActionOnStop.DeleteInput)
-				.WithActionOnSuccess(ActionOnStop.DeleteInput)
-				.Build();
+            var embedNew = PageBuilder.FromEmbedBuilder(BuildProposal(proposal));
+            var selection = new SelectionBuilder<string>()
+                .WithOptions(options)
+                .WithInputType(InputType.Buttons)
+                .WithSelectionPage(embedNew)
+                .WithActionOnCancellation(ActionOnStop.DeleteInput)
+                .WithActionOnTimeout(ActionOnStop.DeleteInput)
+                .WithActionOnSuccess(ActionOnStop.DeleteInput)
+                .Build();
 
-			_ = Task.Run(async () =>
-			{
-				var result = await Interactive.SendSelectionAsync(selection, embed, TimeSpan.FromHours(12));
+            _ = Task.Run(async () =>
+            {
+                var result = await Interactive.SendSelectionAsync(selection, embed, TimeSpan.FromHours(12));
 
-				string selected = result.Value;
+                string selected = result.Value;
 
-				if (selected == options[0])
+                if (selected == options[0])
                 {
                     await UpdateProposal(proposal, ProposalStatus.Approved);
                 }
@@ -420,27 +421,27 @@ namespace Dexter.Events
                     await UpdateProposal(proposal, ProposalStatus.Declined);
                 }
             });
-		}
+        }
 
-		/// <summary>
-		/// The Check Async method checks to see whether or not a suggestion is passing or has been denied in the suggestions channel.
-		/// It also handles the removing of the embed through the trash can emoji.
-		/// </summary>
-		/// <param name="UserMessage">The message that has had the emoji applied or removed from it.</param>
-		/// <param name="Reaction">The reaction that was applied.</param>
-		/// <returns>A boolean value of whether or not you should remove the emoji from after the method has run.</returns>
+        /// <summary>
+        /// The Check Async method checks to see whether or not a suggestion is passing or has been denied in the suggestions channel.
+        /// It also handles the removing of the embed through the trash can emoji.
+        /// </summary>
+        /// <param name="UserMessage">The message that has had the emoji applied or removed from it.</param>
+        /// <param name="Reaction">The reaction that was applied.</param>
+        /// <returns>A boolean value of whether or not you should remove the emoji from after the method has run.</returns>
 
-		public async Task<bool> CheckAsync(IUserMessage UserMessage, SocketReaction Reaction)
-		{
-			using var scope = ServiceProvider.CreateScope();
+        public async Task<bool> CheckAsync(IUserMessage UserMessage, SocketReaction Reaction)
+        {
+            using var scope = ServiceProvider.CreateScope();
 
-			using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
-			// Get the suggestion from the database which has a message ID which matches the one of which we're looking for.
-			Proposal Proposal = ProposalDB.Proposals.AsQueryable().Where(Suggestion => Suggestion.MessageID == UserMessage.Id).FirstOrDefault();
+            // Get the suggestion from the database which has a message ID which matches the one of which we're looking for.
+            Proposal Proposal = ProposalDB.Proposals.AsQueryable().Where(Suggestion => Suggestion.MessageID == UserMessage.Id).FirstOrDefault();
 
-			// Check if the proposal is not null.
-			if (Proposal == null)
+            // Check if the proposal is not null.
+            if (Proposal == null)
             {
                 throw new Exception("Proposal does not exist in database! Aborting...");
             }
@@ -452,173 +453,173 @@ namespace Dexter.Events
 
             // Check the current amount of upvotes the message has.
             ReactionMetadata Upvotes = UserMessage.Reactions[
-				await DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild)
-				.GetEmoteAsync(ProposalConfiguration.Emoji["Upvote"])
-			];
+                await DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild)
+                .GetEmoteAsync(ProposalConfiguration.Emoji["Upvote"])
+            ];
 
-			// Check the current amount of downvotes the message has.
-			ReactionMetadata Downvotes = UserMessage.Reactions[
-				await DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild)
-				.GetEmoteAsync(ProposalConfiguration.Emoji["Downvote"])
-			];
+            // Check the current amount of downvotes the message has.
+            ReactionMetadata Downvotes = UserMessage.Reactions[
+                await DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild)
+                .GetEmoteAsync(ProposalConfiguration.Emoji["Downvote"])
+            ];
 
-			// Run through the emote that has been applied to the suggestions channel to see if the ID of the emote matches one of our designated suggestion emoji. 
-			if (Reaction.Emote is Emote Emote)
+            // Run through the emote that has been applied to the suggestions channel to see if the ID of the emote matches one of our designated suggestion emoji. 
+            if (Reaction.Emote is Emote Emote)
             {
                 foreach (KeyValuePair<string, ulong> Emotes in ProposalConfiguration.Emoji)
                 {
                     if (Emotes.Value == Emote.Id)
-					{
-						switch (Emotes.Key)
-						{
-							case "Upvote":
-							case "Downvote":
-								// If an upvote or downvote has been applied by the suggestor, remove it.
-								if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator)
+                    {
+                        switch (Emotes.Key)
+                        {
+                            case "Upvote":
+                            case "Downvote":
+                                // If an upvote or downvote has been applied by the suggestor, remove it.
+                                if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator)
                                 {
                                     return true;
                                 }
                                 else
-								{
-									// Check if the suggestion has enough upvotes to trigger the suggestion to pass,
-									// or if the suggestion has enough downvotes to force it to deny itself.
-									switch (CheckVotes(Upvotes, Downvotes))
-									{
-										case SuggestionVotes.Pass:
-											// Set the suggestion to pending if it has passed.
-											await UpdateProposal(Proposal, ProposalStatus.Pending);
+                                {
+                                    // Check if the suggestion has enough upvotes to trigger the suggestion to pass,
+                                    // or if the suggestion has enough downvotes to force it to deny itself.
+                                    switch (CheckVotes(Upvotes, Downvotes))
+                                    {
+                                        case SuggestionVotes.Pass:
+                                            // Set the suggestion to pending if it has passed.
+                                            await UpdateProposal(Proposal, ProposalStatus.Pending);
 
-											// Create a new embed in the staff suggestions channel of the current suggestion.
-											RestUserMessage StaffSuggestion = await (UserMessage.Channel as SocketGuildChannel).Guild
-												.GetTextChannel(ProposalConfiguration.StaffSuggestionsChannel)
-												.SendMessageAsync(embed: BuildProposal(Proposal).Build());
+                                            // Create a new embed in the staff suggestions channel of the current suggestion.
+                                            RestUserMessage StaffSuggestion = await (UserMessage.Channel as SocketGuildChannel).Guild
+                                                .GetTextChannel(ProposalConfiguration.StaffSuggestionsChannel)
+                                                .SendMessageAsync(embed: BuildProposal(Proposal).Build());
 
-											Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
+                                            Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
 
-											// Check if the suggestion is not null.
-											if (Suggestion == null)
+                                            // Check if the suggestion is not null.
+                                            if (Suggestion == null)
                                             {
                                                 throw new Exception("Suggestion does not exist in database! Aborting...");
                                             }
 
                                             Suggestion.TimerToken = await CreateEventTimer(
-												DeclineStaffSuggestion,
-												new() { { "Suggestion", Proposal.Tracker } },
-												ProposalConfiguration.IdleDeclineTime,
-												TimerType.Expire
-											);
+                                                DeclineStaffSuggestion,
+                                                new() { { "Suggestion", Proposal.Tracker } },
+                                                ProposalConfiguration.IdleDeclineTime,
+                                                TimerType.Expire
+                                            );
 
-											// Set the staff message ID in the suggestions database to the new suggestion.
-											Suggestion.StaffMessageID = StaffSuggestion.Id;
+                                            // Set the staff message ID in the suggestions database to the new suggestion.
+                                            Suggestion.StaffMessageID = StaffSuggestion.Id;
 
-											// Get the staff suggestions channel and add the related emoji to the message.
-											SocketGuild EmojiCacheGuild = DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild);
+                                            // Get the staff suggestions channel and add the related emoji to the message.
+                                            SocketGuild EmojiCacheGuild = DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild);
 
-											foreach (string Emoji in ProposalConfiguration.StaffSuggestionEmoji)
-											{
-												GuildEmote EmoteStaff = await EmojiCacheGuild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
-												await StaffSuggestion.AddReactionAsync(EmoteStaff);
-											}
+                                            foreach (string Emoji in ProposalConfiguration.StaffSuggestionEmoji)
+                                            {
+                                                GuildEmote EmoteStaff = await EmojiCacheGuild.GetEmoteAsync(ProposalConfiguration.Emoji[Emoji]);
+                                                await StaffSuggestion.AddReactionAsync(EmoteStaff);
+                                            }
 
-											break;
-										case SuggestionVotes.Fail:
-											// If the suggestion has been declined by the community, set the reason of the suggestion to be
-											// "Declined by the community." and update the suggestion to a status of having been declined.
-											Proposal.Reason = "Declined by the community.";
-											await UpdateProposal(Proposal, ProposalStatus.Declined);
-											break;
-										case SuggestionVotes.Remain:
-											break;
-									}
+                                            break;
+                                        case SuggestionVotes.Fail:
+                                            // If the suggestion has been declined by the community, set the reason of the suggestion to be
+                                            // "Declined by the community." and update the suggestion to a status of having been declined.
+                                            Proposal.Reason = "Declined by the community.";
+                                            await UpdateProposal(Proposal, ProposalStatus.Declined);
+                                            break;
+                                        case SuggestionVotes.Remain:
+                                            break;
+                                    }
 
-									await ProposalDB.SaveChangesAsync();
-									return false;
-								}
-							case "Bin":
-								// If the suggestion has had the bin icon applied by the user, set the status of the suggestion to "deleted" and delete the message.
-								if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator)
-								{
-									await UpdateProposal(Proposal, ProposalStatus.Deleted);
-									await UserMessage.DeleteAsync();
+                                    await ProposalDB.SaveChangesAsync();
+                                    return false;
+                                }
+                            case "Bin":
+                                // If the suggestion has had the bin icon applied by the user, set the status of the suggestion to "deleted" and delete the message.
+                                if (Proposal.Proposer == Reaction.UserId || (Reaction.User.Value as IGuildUser).GetPermissionLevel(DiscordShardedClient, BotConfiguration) >= PermissionLevel.Moderator)
+                                {
+                                    await UpdateProposal(Proposal, ProposalStatus.Deleted);
+                                    await UserMessage.DeleteAsync();
 
-									await ProposalDB.SaveChangesAsync();
-									return false;
-								}
-								break;
-							default:
-								// If the suggestion emoji does exist in our configuration but is not specified by a name above there has been a mismatch and it will error respectively.
-								throw new Exception("Unknown reaction exists in JSON config but is not assigned the correct name! " +
-									$"Please make sure that the reaction {Emotes.Key} is assigned the correct value in {GetType().Name}.");
-						}
-					}
+                                    await ProposalDB.SaveChangesAsync();
+                                    return false;
+                                }
+                                break;
+                            default:
+                                // If the suggestion emoji does exist in our configuration but is not specified by a name above there has been a mismatch and it will error respectively.
+                                throw new Exception("Unknown reaction exists in JSON config but is not assigned the correct name! " +
+                                    $"Please make sure that the reaction {Emotes.Key} is assigned the correct value in {GetType().Name}.");
+                        }
+                    }
                 }
             }
 
             // Remove the emoji if it is not one that affects the suggestion.
             return true;
-		}
+        }
 
-		/// <summary>
-		/// Declines a proposal in the staff review stage if staff votes are too evenly divided between upvotes and downvotes.
-		/// </summary>
-		/// <remarks>This decision is based on <c>ProposalConfuguration.StaffVotingThreshold</c>.</remarks>
-		/// <param name="Parameters">
-		/// A string-string Dictionary with a definition for "Suggestion".
-		/// This item must be parsable to an expression of type <c>string</c>, which must be a token associated to a Proposal and a Suggestion.
-		/// </param>
-		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+        /// <summary>
+        /// Declines a proposal in the staff review stage if staff votes are too evenly divided between upvotes and downvotes.
+        /// </summary>
+        /// <remarks>This decision is based on <c>ProposalConfuguration.StaffVotingThreshold</c>.</remarks>
+        /// <param name="Parameters">
+        /// A string-string Dictionary with a definition for "Suggestion".
+        /// This item must be parsable to an expression of type <c>string</c>, which must be a token associated to a Proposal and a Suggestion.
+        /// </param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public async Task DeclineStaffSuggestion(Dictionary<string, string> Parameters)
-		{
-			using var scope = ServiceProvider.CreateScope();
+        public async Task DeclineStaffSuggestion(Dictionary<string, string> Parameters)
+        {
+            using var scope = ServiceProvider.CreateScope();
 
-			using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
-			string Token = Parameters["Suggestion"];
+            string Token = Parameters["Suggestion"];
 
-			Proposal Proposal = ProposalDB.Proposals.Find(Token);
+            Proposal Proposal = ProposalDB.Proposals.Find(Token);
 
-			Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
+            Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
 
-			IMessage StaffMessage = await (DiscordShardedClient.GetChannel(ProposalConfiguration.StaffSuggestionsChannel) as ITextChannel)
-				.GetMessageAsync(Suggestion.StaffMessageID);
+            IMessage StaffMessage = await (DiscordShardedClient.GetChannel(ProposalConfiguration.StaffSuggestionsChannel) as ITextChannel)
+                .GetMessageAsync(Suggestion.StaffMessageID);
 
-			// Check the current amount of upvotes the message has.
-			ReactionMetadata Upvotes = StaffMessage.Reactions[
-				await DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild)
-				.GetEmoteAsync(ProposalConfiguration.Emoji["Upvote"])
-			];
+            // Check the current amount of upvotes the message has.
+            ReactionMetadata Upvotes = StaffMessage.Reactions[
+                await DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild)
+                .GetEmoteAsync(ProposalConfiguration.Emoji["Upvote"])
+            ];
 
-			// Check the current amount of downvotes the message has.
-			ReactionMetadata Downvotes = StaffMessage.Reactions[
-				await DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild)
-				.GetEmoteAsync(ProposalConfiguration.Emoji["Downvote"])
-			];
+            // Check the current amount of downvotes the message has.
+            ReactionMetadata Downvotes = StaffMessage.Reactions[
+                await DiscordShardedClient.GetGuild(ProposalConfiguration.StorageGuild)
+                .GetEmoteAsync(ProposalConfiguration.Emoji["Downvote"])
+            ];
 
-			if (Math.Abs(Upvotes.ReactionCount - Downvotes.ReactionCount) > ProposalConfiguration.StaffVotingThreshold)
+            if (Math.Abs(Upvotes.ReactionCount - Downvotes.ReactionCount) > ProposalConfiguration.StaffVotingThreshold)
             {
                 return;
             }
 
             Proposal.Reason = "The staff team was too divided on this suggestion to make a confident judgement at this time.";
 
-			Suggestion.TimerToken = string.Empty;
+            Suggestion.TimerToken = string.Empty;
 
-			await UpdateProposal(Proposal, ProposalStatus.Declined);
+            await UpdateProposal(Proposal, ProposalStatus.Declined);
 
-			await ProposalDB.SaveChangesAsync();
-		}
+            await ProposalDB.SaveChangesAsync();
+        }
 
-		/// <summary>
-		/// The CheckVotes method checks to see if the difference in reactions triggers a change in the suggestion.
-		/// </summary>
-		/// <param name="Upvotes">The metadata containing the amount of upvotes the suggestion has.</param>
-		/// <param name="Downvotes">The metadata containing the amount of downvotes the suggestion has.</param>
-		/// <returns>The current status of the suggestion - whether it is now to be passed, denied or whether it remains.</returns>
+        /// <summary>
+        /// The CheckVotes method checks to see if the difference in reactions triggers a change in the suggestion.
+        /// </summary>
+        /// <param name="Upvotes">The metadata containing the amount of upvotes the suggestion has.</param>
+        /// <param name="Downvotes">The metadata containing the amount of downvotes the suggestion has.</param>
+        /// <returns>The current status of the suggestion - whether it is now to be passed, denied or whether it remains.</returns>
 
-		public SuggestionVotes CheckVotes(ReactionMetadata Upvotes, ReactionMetadata Downvotes)
-		{
-			if (Upvotes.ReactionCount - Downvotes.ReactionCount >= ProposalConfiguration.ReactionPass)
+        public SuggestionVotes CheckVotes(ReactionMetadata Upvotes, ReactionMetadata Downvotes)
+        {
+            if (Upvotes.ReactionCount - Downvotes.ReactionCount >= ProposalConfiguration.ReactionPass)
             {
                 return SuggestionVotes.Pass;
             }
@@ -629,51 +630,51 @@ namespace Dexter.Events
             }
 
             return SuggestionVotes.Remain;
-		}
+        }
 
-		/// <summary>
-		/// The Update Suggestion method updates a suggestion to a status set through the SuggestionStatus enum argument,
-		/// and then subsequencely updates the related message and staff suggestion messages.
-		/// </summary>
-		/// <param name="Proposal">The proposal object which has had the status applied to it.</param>
-		/// <param name="ProposalStatus">The status of which you wish to apply to the proposal.</param>
-		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+        /// <summary>
+        /// The Update Suggestion method updates a suggestion to a status set through the SuggestionStatus enum argument,
+        /// and then subsequencely updates the related message and staff suggestion messages.
+        /// </summary>
+        /// <param name="Proposal">The proposal object which has had the status applied to it.</param>
+        /// <param name="ProposalStatus">The status of which you wish to apply to the proposal.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public async Task UpdateProposal(Proposal Proposal, ProposalStatus ProposalStatus)
-		{
-			using var scope = ServiceProvider.CreateScope();
+        public async Task UpdateProposal(Proposal Proposal, ProposalStatus ProposalStatus)
+        {
+            using var scope = ServiceProvider.CreateScope();
 
-			using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
-			Proposal.ProposalStatus = ProposalStatus;
+            Proposal.ProposalStatus = ProposalStatus;
 
-			switch (Proposal.ProposalType)
-			{
-				case ProposalType.Suggestion:
-					Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
+            switch (Proposal.ProposalType)
+            {
+                case ProposalType.Suggestion:
+                    Suggestion Suggestion = ProposalDB.Suggestions.Find(Proposal.Tracker);
 
-					if (!string.IsNullOrEmpty(Suggestion.TimerToken))
+                    if (!string.IsNullOrEmpty(Suggestion.TimerToken))
                     {
                         await TimerService.RemoveTimer(Suggestion.TimerToken);
                     }
 
                     await UpdateSpecificProposal(Proposal, ProposalConfiguration.SuggestionsChannel, Proposal.MessageID);
-					await UpdateSpecificProposal(Proposal, ProposalConfiguration.StaffSuggestionsChannel, Suggestion.StaffMessageID);
-					break;
-				case ProposalType.AdminConfirmation:
-					await UpdateSpecificProposal(Proposal, ProposalConfiguration.AdminApprovalChannel, Proposal.MessageID);
+                    await UpdateSpecificProposal(Proposal, ProposalConfiguration.StaffSuggestionsChannel, Suggestion.StaffMessageID);
+                    break;
+                case ProposalType.AdminConfirmation:
+                    await UpdateSpecificProposal(Proposal, ProposalConfiguration.AdminApprovalChannel, Proposal.MessageID);
 
-					if (ProposalStatus == ProposalStatus.Approved)
-					{
-						AdminConfirmation Confirmation = ProposalDB.AdminConfirmations.Find(Proposal.Tracker);
+                    if (ProposalStatus == ProposalStatus.Approved)
+                    {
+                        AdminConfirmation Confirmation = ProposalDB.AdminConfirmations.Find(Proposal.Tracker);
 
-						InvokeStringifiedMethod(Confirmation.CallbackClass, Confirmation.CallbackMethod, Confirmation.CallbackParameters);
-					}
-					else if (ProposalStatus == ProposalStatus.Declined)
-					{
-						AdminConfirmation Confirmation = ProposalDB.AdminConfirmations.Find(Proposal.Tracker);
+                        InvokeStringifiedMethod(Confirmation.CallbackClass, Confirmation.CallbackMethod, Confirmation.CallbackParameters);
+                    }
+                    else if (ProposalStatus == ProposalStatus.Declined)
+                    {
+                        AdminConfirmation Confirmation = ProposalDB.AdminConfirmations.Find(Proposal.Tracker);
 
-						if (Confirmation.DenyCallbackClass == null || Confirmation.DenyCallbackMethod == null || Confirmation.DenyCallbackParameters == null)
+                        if (Confirmation.DenyCallbackClass == null || Confirmation.DenyCallbackMethod == null || Confirmation.DenyCallbackParameters == null)
                         {
                             break;
                         }
@@ -684,69 +685,69 @@ namespace Dexter.Events
                         }
 
                         InvokeStringifiedMethod(Confirmation.DenyCallbackClass, Confirmation.DenyCallbackMethod, Confirmation.DenyCallbackParameters);
-					}
+                    }
 
-					break;
-			}
+                    break;
+            }
 
-			await ProposalDB.SaveChangesAsync();
-		}
+            await ProposalDB.SaveChangesAsync();
+        }
 
-		private void InvokeStringifiedMethod(string Type, string Method, string Params)
-		{
-			using var scope = ServiceProvider.CreateScope();
+        private void InvokeStringifiedMethod(string Type, string Method, string Params)
+        {
+            using var scope = ServiceProvider.CreateScope();
 
-			Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Params);
-			Type refClass = Assembly.GetExecutingAssembly().GetTypes().Where(T => T.Name.Equals(Type)).FirstOrDefault();
+            Dictionary<string, string> Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(Params);
+            Type refClass = Assembly.GetExecutingAssembly().GetTypes().Where(T => T.Name.Equals(Type)).FirstOrDefault();
 
-			if (refClass.GetMethod(Method) == null)
+            if (refClass.GetMethod(Method) == null)
             {
                 throw new NoNullAllowedException("The callback method specified for the admin confirmation is null! This could very well be due to the method being private.");
             }
 
             refClass.GetMethod(Method).Invoke(ActivatorUtilities.CreateInstance(ServiceProvider, refClass).SetClassParameters(scope, ServiceProvider), [Parameters]);
-		}
+        }
 
-		/// <summary>
-		/// The Update Specific Proposal method updates a message with the current built embed of the suggestion object.
-		/// </summary>
-		/// <param name="Proposal">The proposal you wish to set the embed of the message to.</param>
-		/// <param name="Channel">The channel in which the message is located.</param>
-		/// <param name="MessageID">The ID of the message you wish to change the embed of to update it properly.</param>
-		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+        /// <summary>
+        /// The Update Specific Proposal method updates a message with the current built embed of the suggestion object.
+        /// </summary>
+        /// <param name="Proposal">The proposal you wish to set the embed of the message to.</param>
+        /// <param name="Channel">The channel in which the message is located.</param>
+        /// <param name="MessageID">The ID of the message you wish to change the embed of to update it properly.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public async Task UpdateSpecificProposal(Proposal Proposal, ulong Channel, ulong MessageID)
-		{
-			using var scope = ServiceProvider.CreateScope();
+        public async Task UpdateSpecificProposal(Proposal Proposal, ulong Channel, ulong MessageID)
+        {
+            using var scope = ServiceProvider.CreateScope();
 
-			using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
-			if (Channel == 0 || MessageID == 0)
+            if (Channel == 0 || MessageID == 0)
             {
                 return;
             }
 
             SocketChannel SocketChannel = DiscordShardedClient.GetChannel(Channel);
 
-			if (SocketChannel is SocketTextChannel TextChannel)
-			{
-				IMessage ProposalMessage = await TextChannel.GetMessageAsync(MessageID);
+            if (SocketChannel is SocketTextChannel TextChannel)
+            {
+                IMessage ProposalMessage = await TextChannel.GetMessageAsync(MessageID);
 
-				if (ProposalMessage is IUserMessage ProposalMSG)
-				{
-					await ProposalMessage.RemoveAllReactionsAsync();
+                if (ProposalMessage is IUserMessage ProposalMSG)
+                {
+                    await ProposalMessage.RemoveAllReactionsAsync();
 
-					try
-					{
-						await ProposalMSG.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildProposal(Proposal).Build());
-					}
-					catch (InvalidOperationException)
-					{
-						await ProposalMSG.DeleteAsync();
+                    try
+                    {
+                        await ProposalMSG.ModifyAsync(SuggestionMSG => SuggestionMSG.Embed = BuildProposal(Proposal).Build());
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        await ProposalMSG.DeleteAsync();
 
-						RestMessage Message = await TextChannel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
+                        RestMessage Message = await TextChannel.SendMessageAsync(embed: BuildProposal(Proposal).Build());
 
-						if (Proposal.MessageID == MessageID)
+                        if (Proposal.MessageID == MessageID)
                         {
                             Proposal.MessageID = Message.Id;
                         }
@@ -758,42 +759,42 @@ namespace Dexter.Events
                             }
                         }
                     }
-				}
-				else
+                }
+                else
                 {
                     throw new Exception($"Woa, this is strange! The message required isn't a socket user message! Are you sure this message exists? ProposalType: {Proposal.ProposalType}");
                 }
             }
-			else
+            else
             {
                 throw new Exception($"Eek! The given channel of {SocketChannel} turned out *not* to be an instance of SocketTextChannel, rather {SocketChannel.GetType().Name}!");
             }
 
             await ProposalDB.SaveChangesAsync();
-		}
+        }
 
-		/// <summary>
-		/// The Create Token method creates a random token, the length of which is supplied in the proposal
-		/// configuration class, that is not in the ProposalDB already.
-		/// </summary>
-		/// <returns>A randomly generated token in the form of a string that is not in the proposal database already.</returns>
+        /// <summary>
+        /// The Create Token method creates a random token, the length of which is supplied in the proposal
+        /// configuration class, that is not in the ProposalDB already.
+        /// </summary>
+        /// <returns>A randomly generated token in the form of a string that is not in the proposal database already.</returns>
 
-		public string CreateToken()
-		{
-			using var scope = ServiceProvider.CreateScope();
+        public string CreateToken()
+        {
+            using var scope = ServiceProvider.CreateScope();
 
-			using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
+            using var ProposalDB = scope.ServiceProvider.GetRequiredService<ProposalDB>();
 
-			char[] TokenArray = new char[BotConfiguration.TrackerLength];
+            char[] TokenArray = new char[BotConfiguration.TrackerLength];
 
-			for (int i = 0; i < TokenArray.Length; i++)
+            for (int i = 0; i < TokenArray.Length; i++)
             {
                 TokenArray[i] = BotConfiguration.RandomCharacters[Random.Next(BotConfiguration.RandomCharacters.Length)];
             }
 
             string Token = new(TokenArray);
 
-			if (ProposalDB.Suggestions.Find(Token) == null)
+            if (ProposalDB.Suggestions.Find(Token) == null)
             {
                 return Token;
             }
@@ -803,40 +804,40 @@ namespace Dexter.Events
             }
         }
 
-		/// <summary>
-		/// The BuildProposal method takes a Proposal in as its input and generates an embed from it.
-		/// It sets the color based on the proposal status, the title to the status, and fills the rest in
-		/// with the related proposal fields.
-		/// </summary>
-		/// <param name="Proposal">The proposal of which you wish to generate the embed from.</param>
-		/// <returns>An automatically generated embed based on the input proposal's fields.</returns>
+        /// <summary>
+        /// The BuildProposal method takes a Proposal in as its input and generates an embed from it.
+        /// It sets the color based on the proposal status, the title to the status, and fills the rest in
+        /// with the related proposal fields.
+        /// </summary>
+        /// <param name="Proposal">The proposal of which you wish to generate the embed from.</param>
+        /// <returns>An automatically generated embed based on the input proposal's fields.</returns>
 
-		public EmbedBuilder BuildProposal(Proposal Proposal)
-		{
-			Color Color = Proposal.ProposalStatus switch
-			{
-				ProposalStatus.Suggested => Color.Blue,
-				ProposalStatus.Pending => Color.Orange,
-				ProposalStatus.Approved => Color.Green,
-				ProposalStatus.Declined => Color.Red,
-				ProposalStatus.Deleted => Color.Magenta,
-				_ => Color.Teal
-			};
+        public EmbedBuilder BuildProposal(Proposal Proposal)
+        {
+            Color Color = Proposal.ProposalStatus switch
+            {
+                ProposalStatus.Suggested => Color.Blue,
+                ProposalStatus.Pending => Color.Orange,
+                ProposalStatus.Approved => Color.Green,
+                ProposalStatus.Declined => Color.Red,
+                ProposalStatus.Deleted => Color.Magenta,
+                _ => Color.Teal
+            };
 
-			IUser User = DiscordShardedClient.GetUser(Proposal.Proposer);
+            IUser User = DiscordShardedClient.GetUser(Proposal.Proposer);
 
-			return BuildEmbed(EmojiEnum.Unknown)
-				.WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
-				.WithColor(Color)
-				.WithThumbnailUrl(Proposal.AvatarURL)
-				.WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
-				.WithDescription(Proposal.Content)
-				.WithImageUrl(Proposal.ProxyURL)
-				.AddField(!string.IsNullOrEmpty(Proposal.Reason), "Reason:", Proposal.Reason)
-				.WithAuthor(string.IsNullOrEmpty(Proposal.Username) ? User == null ? "Unknown" : User.Username : Proposal.Username, Proposal.AvatarURL)
-				.WithFooter(Proposal.Tracker);
-		}
+            return BuildEmbed(EmojiEnum.Unknown)
+                .WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
+                .WithColor(Color)
+                .WithThumbnailUrl(Proposal.AvatarURL)
+                .WithTitle(Proposal.ProposalStatus.ToString().ToUpper())
+                .WithDescription(Proposal.Content)
+                .WithImageUrl(Proposal.ProxyURL)
+                .AddField(!string.IsNullOrEmpty(Proposal.Reason), "Reason:", Proposal.Reason)
+                .WithAuthor(string.IsNullOrEmpty(Proposal.Username) ? User == null ? "Unknown" : User.Username : Proposal.Username, Proposal.AvatarURL)
+                .WithFooter(Proposal.Tracker);
+        }
 
-	}
+    }
 
 }

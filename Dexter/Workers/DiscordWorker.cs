@@ -1,11 +1,11 @@
-﻿using System;
-using System.Reflection;
-using System.Threading.Tasks;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Dexter.Workers
 {
@@ -20,37 +20,37 @@ namespace Dexter.Workers
     public class DiscordWorker(DiscordShardedClient client, IServiceProvider services, CommandService cmdService, ILogger<DiscordWorker> logger)
     {
 
-		private readonly DiscordShardedClient client = client;
-		private readonly IServiceProvider services = services;
-		private readonly CommandService cmdService = cmdService;
-		private readonly ILogger<DiscordWorker> logger = logger;
+        private readonly DiscordShardedClient client = client;
+        private readonly IServiceProvider services = services;
+        private readonly CommandService cmdService = cmdService;
+        private readonly ILogger<DiscordWorker> logger = logger;
 
         public async Task StartAsync()
-		{
-			using (var moduleScope = services.CreateScope())
-			{
-				await cmdService.AddModulesAsync(Assembly.GetExecutingAssembly(), moduleScope.ServiceProvider);
-			}
+        {
+            using (var moduleScope = services.CreateScope())
+            {
+                await cmdService.AddModulesAsync(Assembly.GetExecutingAssembly(), moduleScope.ServiceProvider);
+            }
 
-			await client.LoginAsync(TokenType.Bot, Startup.Token);
+            await client.LoginAsync(TokenType.Bot, Startup.Token);
 
-			await client.StartAsync();
-		}
+            await client.StartAsync();
+        }
 
-		public async Task StopAsync()
-		{
-			await client.StopAsync();
+        public async Task StopAsync()
+        {
+            await client.StopAsync();
 
-			try
-			{
-				client.Dispose();
-			}
-			catch (Exception ex)
-			{
-				logger.Log(LogLevel.Error, ex, "Failed to dispose discord.");
-			}
-		}
+            try
+            {
+                client.Dispose();
+            }
+            catch (Exception ex)
+            {
+                logger.Log(LogLevel.Error, ex, "Failed to dispose discord.");
+            }
+        }
 
-	}
+    }
 
 }

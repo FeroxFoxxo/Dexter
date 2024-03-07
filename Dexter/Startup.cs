@@ -35,42 +35,42 @@ namespace Dexter
     /// </summary>
 
     public static class Startup
-	{
+    {
 
-		private static string p_Token, p_DBUser, p_DBPassword, p_Version;
+        private static string p_Token, p_DBUser, p_DBPassword, p_Version;
 
-		public static string Version { get => p_Version; }
-		public static string Token { get => p_Token; }
-		public static string DBUser { get => p_DBUser; }
-		public static string DBPassword { get => p_DBPassword; }
+        public static string Version { get => p_Version; }
+        public static string Token { get => p_Token; }
+        public static string DBUser { get => p_DBUser; }
+        public static string DBPassword { get => p_DBPassword; }
 
-		/// <summary>
-		/// The Main method is the entrance to the program. Arguments can be added to this method and supplied
-		/// through the command line of the application when it starts. It is an asynchronous task.
-		/// </summary>
-		/// <param name="token">[OPTIONAL] The token of the bot. Defaults to the one specified in the BotCommands if not set.</param>
-		/// <param name="version">[OPTIONAL] The version of the bot specified by the release pipeline.</param>
-		/// <param name="directory">[OPTIONAL] The directory you wish the databases and configurations to be in. By default this is the build directory.</param>
-		/// <param name="spotifyID">[OPTIONAL] Spotify CLIENT_ID from developer.spotify.com/dashboard.</param>
-		/// <param name="spotifySecret">[OPTIONAL] Spotify CLIENT_SECRET from developer.spotify.com/dashboard.</param>
-		/// <param name="dbUser">[OPTIONAL] DBUSER for the MySQL database username.</param>
-		/// <param name="dbPassword">[OPTIONAL] DBPASSWORD for the MySQL database password.</param>
-		/// <param name="wolframAPI">[OPTIONAL] WOLFRAM ALPHA API KEY.</param>
-		/// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
+        /// <summary>
+        /// The Main method is the entrance to the program. Arguments can be added to this method and supplied
+        /// through the command line of the application when it starts. It is an asynchronous task.
+        /// </summary>
+        /// <param name="token">[OPTIONAL] The token of the bot. Defaults to the one specified in the BotCommands if not set.</param>
+        /// <param name="version">[OPTIONAL] The version of the bot specified by the release pipeline.</param>
+        /// <param name="directory">[OPTIONAL] The directory you wish the databases and configurations to be in. By default this is the build directory.</param>
+        /// <param name="spotifyID">[OPTIONAL] Spotify CLIENT_ID from developer.spotify.com/dashboard.</param>
+        /// <param name="spotifySecret">[OPTIONAL] Spotify CLIENT_SECRET from developer.spotify.com/dashboard.</param>
+        /// <param name="dbUser">[OPTIONAL] DBUSER for the MySQL database username.</param>
+        /// <param name="dbPassword">[OPTIONAL] DBPASSWORD for the MySQL database password.</param>
+        /// <param name="wolframAPI">[OPTIONAL] WOLFRAM ALPHA API KEY.</param>
+        /// <returns>A <c>Task</c> object, which can be awaited until this method completes successfully.</returns>
 
-		public static async Task Main(string token, string version, string directory, string spotifyID, string spotifySecret, string dbUser, string dbPassword, string wolframAPI)
-		{
-			p_Version = version;
-			p_Token = token;
+        public static async Task Main(string token, string version, string directory, string spotifyID, string spotifySecret, string dbUser, string dbPassword, string wolframAPI)
+        {
+            p_Version = version;
+            p_Token = token;
 
-			p_DBUser = dbUser;
-			p_DBPassword = dbPassword;
+            p_DBUser = dbUser;
+            p_DBPassword = dbPassword;
 
-			var services = new ServiceCollection();
+            var services = new ServiceCollection();
 
-			// Sets the current, active directory to the working directory specified in the azure cloud.
+            // Sets the current, active directory to the working directory specified in the azure cloud.
 
-			if (!string.IsNullOrEmpty(directory))
+            if (!string.IsNullOrEmpty(directory))
             {
                 Directory.SetCurrentDirectory(directory);
             }
@@ -81,7 +81,7 @@ namespace Dexter
 
             string databaseDirectory = Path.Join(Directory.GetCurrentDirectory(), "Databases");
 
-			if (!Directory.Exists(databaseDirectory))
+            if (!Directory.Exists(databaseDirectory))
             {
                 Directory.CreateDirectory(databaseDirectory);
             }
@@ -90,28 +90,28 @@ namespace Dexter
 
             Console.ForegroundColor = ConsoleColor.Cyan;
 
-			var botInfo = await GetNameAndShardsOfBot(token);
+            var botInfo = await GetNameAndShardsOfBot(token);
 
-			var name = botInfo.Key;
-			var shards = botInfo.Value;
+            var name = botInfo.Key;
+            var shards = botInfo.Value;
 
-			await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(name));
+            await Console.Out.WriteLineAsync(FiggleFonts.Standard.Render(name));
 
-			Console.Title = $"{name} v{version} (Discord.Net v{DiscordConfig.Version})";
+            Console.Title = $"{name} v{version} (Discord.Net v{DiscordConfig.Version})";
 
-			// Create basic logger for init.
+            // Create basic logger for init.
 
-			var logger = new LoggerConfiguration()
-				.WriteTo.Console()
-				.CreateLogger();
+            var logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateLogger();
 
-			// Init Spotify API.
+            // Init Spotify API.
 
-			if (!string.IsNullOrEmpty(spotifyID) && !string.IsNullOrEmpty(spotifySecret))
-			{
-				services.AddSingleton(new ClientCredentialsRequest(spotifyID, spotifySecret));
-			}
-			else
+            if (!string.IsNullOrEmpty(spotifyID) && !string.IsNullOrEmpty(spotifySecret))
+            {
+                services.AddSingleton(new ClientCredentialsRequest(spotifyID, spotifySecret));
+            }
+            else
             {
                 services.AddSingleton(new ClientCredentialsRequest("UNKNOWN", "UNKNOWN"));
             }
@@ -126,190 +126,191 @@ namespace Dexter
             // Init Google API.
 
             if (!File.Exists("Credentials.json"))
-			{
-				logger.Error(
-					$"Credential file 'Credentials.json' does not exist!"
-				);
-			}
-			else
-			{
-				// Open the FileStream to the related file.
-				using FileStream stream = new("Credentials.json", FileMode.Open, FileAccess.Read);
+            {
+                logger.Error(
+                    $"Credential file 'Credentials.json' does not exist!"
+                );
+            }
+            else
+            {
+                // Open the FileStream to the related file.
+                using FileStream stream = new("Credentials.json", FileMode.Open, FileAccess.Read);
 
-				// The file token.json stores the user's access and refresh tokens, and is created
-				// automatically when the authorization flow completes for the first time.
+                // The file token.json stores the user's access and refresh tokens, and is created
+                // automatically when the authorization flow completes for the first time.
 
-				services.AddSingleton(
-					await GoogleWebAuthorizationBroker.AuthorizeAsync(
-						GoogleClientSecrets.FromStream(stream).Secrets,
-						new[] { SheetsService.Scope.Spreadsheets, YouTubeService.Scope.YoutubeReadonly },
-						"admin",
-						CancellationToken.None,
-						new FileDataStore("token", true),
-						new PromptCodeReceiver()
-					)
-				);
-			}
+                services.AddSingleton(
+                    await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                        GoogleClientSecrets.FromStream(stream).Secrets,
+                        new[] { SheetsService.Scope.Spreadsheets, YouTubeService.Scope.YoutubeReadonly },
+                        "admin",
+                        CancellationToken.None,
+                        new FileDataStore("token", true),
+                        new PromptCodeReceiver()
+                    )
+                );
+            }
 
-			// Initialize our dependencies for the bot.
+            // Initialize our dependencies for the bot.
 
-			services.AddSingleton(
-				new CommandService(
-					new CommandServiceConfig()
-					{
-						CaseSensitiveCommands = false,
-						LogLevel = LogSeverity.Debug,
-						DefaultRunMode = RunMode.Async
-					}
-				)
-			);
+            services.AddSingleton(
+                new CommandService(
+                    new CommandServiceConfig()
+                    {
+                        CaseSensitiveCommands = false,
+                        LogLevel = LogSeverity.Debug,
+                        DefaultRunMode = RunMode.Async
+                    }
+                )
+            );
 
-			services.AddSingleton(
-				new DiscordShardedClient(
-					new DiscordSocketConfig
-					{
-						AlwaysDownloadUsers = true,
-						MessageCacheSize = 100,
-						TotalShards = shards,
-						LogLevel = LogSeverity.Debug,
-						GatewayIntents = GatewayIntents.All
-					}
-				)
-			);
+            services.AddSingleton(
+                new DiscordShardedClient(
+                    new DiscordSocketConfig
+                    {
+                        AlwaysDownloadUsers = true,
+                        MessageCacheSize = 100,
+                        TotalShards = shards,
+                        LogLevel = LogSeverity.Debug,
+                        GatewayIntents = GatewayIntents.All
+                    }
+                )
+            );
 
-			services.AddLavaNode(x =>
-				 {
-					 x.Port = 2333;
-					 x.SelfDeaf = true;
-				 });
+            services.AddLavaNode(x =>
+                 {
+                     x.Port = 2333;
+                     x.SelfDeaf = true;
+                 });
 
-			services.AddSingleton<Random>();
+            services.AddSingleton<Random>();
 
-			services.AddSingleton(provider =>
-			{
-				var client = provider.GetRequiredService<DiscordShardedClient>();
-				return new InteractiveService(client, TimeSpan.FromMinutes(5));
-			});
+            services.AddSingleton(provider =>
+            {
+                var client = provider.GetRequiredService<DiscordShardedClient>();
+                return new InteractiveService(client, TimeSpan.FromMinutes(5));
+            });
 
-			// Add hosted events to the application, which will run until it is closed.
+            // Add hosted events to the application, which will run until it is closed.
 
-			services.AddSingleton<DiscordWorker>();
+            services.AddSingleton<DiscordWorker>();
 
-			bool hasErrored = false;
+            bool hasErrored = false;
 
-			// Finds all JSON configurations and initializes them from their respective files.
-			// If a JSON file is not created, a new one is initialized in its place.
+            // Finds all JSON configurations and initializes them from their respective files.
+            // If a JSON file is not created, a new one is initialized in its place.
 
-			GetJSONConfigs().ForEach(async Type =>
-					{
-						if (!File.Exists($"Configurations/{Type.Name}.json"))
-						{
-							File.WriteAllText(
-								$"Configurations/{Type.Name}.json",
-								JsonSerializer.Serialize(
-									Activator.CreateInstance(Type),
-									new JsonSerializerOptions() { WriteIndented = true }
-								)
-							);
+            GetJSONConfigs().ForEach(async Type =>
+                    {
+                        if (!File.Exists($"Configurations/{Type.Name}.json"))
+                        {
+                            File.WriteAllText(
+                                $"Configurations/{Type.Name}.json",
+                                JsonSerializer.Serialize(
+                                    Activator.CreateInstance(Type),
+                                    new JsonSerializerOptions() { WriteIndented = true }
+                                )
+                            );
 
-							services.AddSingleton(Type);
+                            services.AddSingleton(Type);
 
-							logger.Error(
-								$" This application does not have a configuration file for {Type.Name}! " +
-								$"A mock JSON class has been created in its place...",
-								LogSeverity.Warning
-							);
-						}
-						else
-						{
-							try
-							{
-								object JSON = JsonSerializer.Deserialize(
-									File.ReadAllText($"Configurations/{Type.Name}.json"),
-									Type,
-									new JsonSerializerOptions() { WriteIndented = true }
-								);
+                            logger.Error(
+                                $" This application does not have a configuration file for {Type.Name}! " +
+                                $"A mock JSON class has been created in its place...",
+                                LogSeverity.Warning
+                            );
+                        }
+                        else
+                        {
+                            try
+                            {
+                                object JSON = JsonSerializer.Deserialize(
+                                    File.ReadAllText($"Configurations/{Type.Name}.json"),
+                                    Type,
+                                    new JsonSerializerOptions() { WriteIndented = true }
+                                );
 
-								services.AddSingleton(
-									Type,
-									JSON
-								);
-							}
-							catch (JsonException Exception)
-							{
-								logger.Error(
-									$" Unable to initialize {Type.Name}! Ran into: {Exception.InnerException}.",
-									LogSeverity.Error
-								);
+                                services.AddSingleton(
+                                    Type,
+                                    JSON
+                                );
+                            }
+                            catch (JsonException Exception)
+                            {
+                                logger.Error(
+                                    $" Unable to initialize {Type.Name}! Ran into: {Exception.InnerException}.",
+                                    LogSeverity.Error
+                                );
 
-								hasErrored = true;
-							}
-						}
-					});
+                                hasErrored = true;
+                            }
+                        }
+                    });
 
-			if (hasErrored)
+            if (hasErrored)
             {
                 return;
             }
 
             GetDatabases().ForEach(t => services.AddScoped(t));
 
-			GetEvents().ForEach(t => services.AddSingleton(t));
+            GetEvents().ForEach(t => services.AddSingleton(t));
 
-			services.AddOptions();
-			services.AddLogging(configure => configure.AddConsole());
+            services.AddOptions();
+            services.AddLogging(configure => configure.AddConsole());
 
-			var serviceProvider = services.BuildServiceProvider();
+            var serviceProvider = services.BuildServiceProvider();
 
-			using (var scope = serviceProvider.CreateScope()) {
+            using (var scope = serviceProvider.CreateScope())
+            {
 
-				// Makes sure all entity databases exist and are created if they do not.
-				GetDatabases().ForEach(
-					DBType =>
-					{
-						Database entityDatabase = (Database)scope.ServiceProvider.GetRequiredService(DBType);
+                // Makes sure all entity databases exist and are created if they do not.
+                GetDatabases().ForEach(
+                    DBType =>
+                    {
+                        Database entityDatabase = (Database)scope.ServiceProvider.GetRequiredService(DBType);
 
-						entityDatabase.Database.EnsureCreated();
-					}
-				);
-				GetEvents().ForEach(
-					type => serviceProvider.GetRequiredService(type).SetClassParameters(scope, serviceProvider)
-				);
-			}
+                        entityDatabase.Database.EnsureCreated();
+                    }
+                );
+                GetEvents().ForEach(
+                    type => serviceProvider.GetRequiredService(type).SetClassParameters(scope, serviceProvider)
+                );
+            }
 
-			// Connects all the event hooks in initializable modules to their designated delegates.
-			GetEvents().ForEach(
-				type => (serviceProvider.GetService(type) as Event).InitializeEvents()
-			);
+            // Connects all the event hooks in initializable modules to their designated delegates.
+            GetEvents().ForEach(
+                type => (serviceProvider.GetService(type) as Event).InitializeEvents()
+            );
 
-			await serviceProvider.GetRequiredService<DiscordWorker>().StartAsync();
+            await serviceProvider.GetRequiredService<DiscordWorker>().StartAsync();
 
-			Console.Read();
+            Console.Read();
 
-			await serviceProvider.GetRequiredService<DiscordWorker>().StopAsync();
-		}
+            await serviceProvider.GetRequiredService<DiscordWorker>().StopAsync();
+        }
 
-		private static List<Type> GetDatabases() { return GetClassesOfType(typeof(Database)); }
+        private static List<Type> GetDatabases() { return GetClassesOfType(typeof(Database)); }
 
-		private static List<Type> GetJSONConfigs() { return GetClassesOfType(typeof(JSONConfig)); }
+        private static List<Type> GetJSONConfigs() { return GetClassesOfType(typeof(JSONConfig)); }
 
-		private static List<Type> GetEvents() { return GetClassesOfType(typeof(Event)); }
+        private static List<Type> GetEvents() { return GetClassesOfType(typeof(Event)); }
 
-		private static List<Type> GetClassesOfType(Type type)
-		{
-			return Assembly.GetExecutingAssembly().GetTypes()
-				.Where(c => c.IsClass && ((!c.IsAbstract && c.IsSubclassOf(type)) || (!c.IsInterface && c.GetInterfaces().Contains(type))))
-				.ToList();
-		}
+        private static List<Type> GetClassesOfType(Type type)
+        {
+            return Assembly.GetExecutingAssembly().GetTypes()
+                .Where(c => c.IsClass && ((!c.IsAbstract && c.IsSubclassOf(type)) || (!c.IsInterface && c.GetInterfaces().Contains(type))))
+                .ToList();
+        }
 
-		private static async Task<KeyValuePair<string, int>> GetNameAndShardsOfBot(string token)
-		{
-			var restClient = new DiscordRestClient();
-			await restClient.LoginAsync(TokenType.Bot, token);
-			var shards = await restClient.GetRecommendedShardCountAsync();
-			var name = Regex.Replace(restClient.CurrentUser.Username, "[^A-Za-z0-9]", "").Replace("NewBot", "");
+        private static async Task<KeyValuePair<string, int>> GetNameAndShardsOfBot(string token)
+        {
+            var restClient = new DiscordRestClient();
+            await restClient.LoginAsync(TokenType.Bot, token);
+            var shards = await restClient.GetRecommendedShardCountAsync();
+            var name = Regex.Replace(restClient.CurrentUser.Username, "[^A-Za-z0-9]", "").Replace("NewBot", "");
 
-			return new(name, shards);
-		}
-	}
+            return new(name, shards);
+        }
+    }
 }

@@ -1,40 +1,40 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Dexter.Abstractions;
+﻿using Dexter.Abstractions;
 using Dexter.Configurations;
 using Dexter.Databases.Games;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Dexter.Events
 {
 
-	/// <summary>
-	/// This service manages the Dexter Games subsystem and sends events to the appropriate data structures.
-	/// </summary>
+    /// <summary>
+    /// This service manages the Dexter Games subsystem and sends events to the appropriate data structures.
+    /// </summary>
 
-	public class Games : Event
-	{
-		/// <summary>
-		/// The configuration file holding all server-specific and mofidiable values for behaviour.
-		/// </summary>
+    public class Games : Event
+    {
+        /// <summary>
+        /// The configuration file holding all server-specific and mofidiable values for behaviour.
+        /// </summary>
 
-		public FunConfiguration FunConfiguration { get; set; }
+        public FunConfiguration FunConfiguration { get; set; }
 
-		/// <summary>
-		/// This method is run after dependencies are initialized and injected, it manages hooking up the service to all relevant events.
-		/// </summary>
+        /// <summary>
+        /// This method is run after dependencies are initialized and injected, it manages hooking up the service to all relevant events.
+        /// </summary>
 
-		public override void InitializeEvents()
-		{
-			DiscordShardedClient.MessageReceived += HandleMessage;
-		}
+        public override void InitializeEvents()
+        {
+            DiscordShardedClient.MessageReceived += HandleMessage;
+        }
 
-		private async Task HandleMessage(SocketMessage Message)
-		{
-			if (!FunConfiguration.GamesChannels.Contains(Message.Channel.Id) && Message.Channel is not IDMChannel)
+        private async Task HandleMessage(SocketMessage Message)
+        {
+            if (!FunConfiguration.GamesChannels.Contains(Message.Channel.Id) && Message.Channel is not IDMChannel)
             {
                 return;
             }
@@ -46,11 +46,11 @@ namespace Dexter.Events
 
             using var scope = ServiceProvider.CreateScope();
 
-			using var GamesDB = scope.ServiceProvider.GetRequiredService<GamesDB>();
+            using var GamesDB = scope.ServiceProvider.GetRequiredService<GamesDB>();
 
-			Player Player = GamesDB.Players.Find(Message.Author.Id);
+            Player Player = GamesDB.Players.Find(Message.Author.Id);
 
-			if (Player is null)
+            if (Player is null)
             {
                 return;
             }
@@ -62,21 +62,21 @@ namespace Dexter.Events
 
             GameInstance Instance = GamesDB.Games.Find(Player.Playing);
 
-			if (Instance is null)
+            if (Instance is null)
             {
                 return;
             }
 
             GameTemplate Game = Instance.ToGameProper(BotConfiguration);
 
-			if (Game is null)
+            if (Game is null)
             {
                 return;
             }
 
             await Game.HandleMessage(Message, GamesDB, DiscordShardedClient, FunConfiguration);
 
-			await GamesDB.SaveChangesAsync();
-		}
-	}
+            await GamesDB.SaveChangesAsync();
+        }
+    }
 }

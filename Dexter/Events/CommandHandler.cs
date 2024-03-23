@@ -161,7 +161,7 @@ namespace Dexter.Events
 
                                     List<string> userMentions = [];
 
-                                    foreach (ulong id in commandContext.Message.MentionedUserIds ?? Array.Empty<ulong>())
+                                    foreach (ulong id in commandContext.Message.MentionedUserIds ?? [])
                                     {
                                         if (commandContext.Guild != null)
                                         {
@@ -191,7 +191,7 @@ namespace Dexter.Events
                                         }
                                     }
 
-                                    reply = userMentions.Any()
+                                    reply = userMentions.Count != 0
                                         ? reply.Replace("USER", LanguageHelper.Enumerate(userMentions))
                                         : reply.Replace("USER", commandContext?.User?.Mention ?? "{Unknown}");
 

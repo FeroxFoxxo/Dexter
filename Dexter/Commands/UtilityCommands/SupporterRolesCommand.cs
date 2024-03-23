@@ -40,6 +40,7 @@ namespace Dexter.Commands
         public async Task SupporterRolesCommand([Remainder] string colorname)
         {
             colorname = colorname.ToLower();
+
             if (colorname == "list")
             {
                 await PrintColorOptions();
@@ -56,12 +57,12 @@ namespace Dexter.Commands
                 string[] preprocessedColors = colorname["display".Length..].Split(',', StringSplitOptions.TrimEntries);
                 List<System.Drawing.Color> colors = ProcessColorNames(preprocessedColors, out List<string> errors);
 
-                if (errors.Any())
+                if (errors.Count != 0)
                 {
                     await Context.Channel.SendMessageAsync(string.Join("\n", errors));
                 }
 
-                if (colors.Any())
+                if (colors.Count != 0)
                 {
                     await DisplayColors(colors);
                 }
@@ -217,9 +218,9 @@ namespace Dexter.Commands
                 }
             }
 
-            if (!toRemove.Any())
+            if (toRemove.Count == 0)
             {
-                return Array.Empty<IRole>();
+                return [];
             }
 
             try
@@ -239,10 +240,10 @@ namespace Dexter.Commands
             string imageChacheDir = Path.Combine(Directory.GetCurrentDirectory(), "ImageCache");
             string filepath = Path.Join(imageChacheDir, $"ColorsList.jpg");
 
-            if (!File.Exists(filepath))
-            {
-                await ReloadColorList();
-            }
+            if (File.Exists(filepath))
+                File.Delete(filepath);
+
+            await ReloadColorList();
 
             await Context.Channel.SendFileAsync(filepath);
         }
@@ -277,7 +278,7 @@ namespace Dexter.Commands
                 }
             }
 
-            if (verbose && !colorRoles.Any())
+            if (verbose && colorRoles.Count == 0)
             {
                 await Context.Channel.SendMessageAsync($"No roles found with the prefix: \"{UtilityConfiguration.ColorRolePrefix}\".");
                 return;
@@ -289,12 +290,7 @@ namespace Dexter.Commands
             int rowcount = (colorRoles.Count - 1) / colcount + 1;
             int height = rowcount * rowheight;
 
-            string fontPath = Path.Join(Directory.GetCurrentDirectory(), "Images", "OtherMedia", "Fonts", "Whitney", "whitneymedium.otf");
-
-            PrivateFontCollection privateFontCollection = new();
-            privateFontCollection.AddFontFile(fontPath);
-            FontFamily fontfamily = privateFontCollection.Families.First();
-            Font font = new(fontfamily, UtilityConfiguration.ColorListFontSize, FontStyle.Regular, GraphicsUnit.Pixel);
+            Font font = new(FontFamily.GenericSansSerif, UtilityConfiguration.ColorListFontSize, FontStyle.Regular, GraphicsUnit.Pixel);
 
             Bitmap picture = new(colwidth * colcount, height);
             using (Graphics g = Graphics.FromImage(picture))

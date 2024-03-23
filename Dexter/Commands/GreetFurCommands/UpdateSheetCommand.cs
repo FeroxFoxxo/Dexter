@@ -87,7 +87,7 @@ namespace Dexter.Commands
                 i++;
             }
 
-            if (errors.Any())
+            if (errors.Count != 0)
             {
                 await msg.ModifyAsync(m =>
                 {

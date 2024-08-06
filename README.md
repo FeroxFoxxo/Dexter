@@ -24,6 +24,7 @@
          <a href="https://github.com/FeroxFoxxo/Dexter/blob/master/LICENSE">License</a> •
          <a href="https://github.com/FeroxFoxxo/Dexter/wiki">Documentation</a>
       </p>
+      <h2>If you're on this page, you might be looking for <a href="https://github.com/FeroxFoxxo/DexterMASZ">DexterMASZ</a> - our new and updated bot!</h2>
       <h2>Built With</h2>
       <p>
         <ul>
